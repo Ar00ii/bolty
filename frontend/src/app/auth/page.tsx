@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 import { connectPhantom, isPhantomInstalled } from '@/lib/wallet/solana';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
+// ── SVG Logos ────────────────────────────────────────────────
 function GitHubLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -64,51 +64,144 @@ function PhantomLogo({ className }: { className?: string }) {
   );
 }
 
+// ── Install prompt ────────────────────────────────────────────
+function InstallPrompt({
+  name,
+  url,
+  description,
+  icon,
+}: {
+  name: string;
+  url: string;
+  description: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-full flex items-center gap-3 px-4 py-3.5
+                 bg-zinc-900/40 border border-dashed border-zinc-700 rounded-xl
+                 transition-all duration-200 hover:border-zinc-500 hover:bg-zinc-800/60 group"
+    >
+      <div className="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700">
+        {icon}
+      </div>
+      <div className="flex-1 text-left">
+        <div className="font-semibold text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">
+          Install {name}
+        </div>
+        <div className="text-xs text-zinc-500">{description}</div>
+      </div>
+      <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+      </svg>
+    </a>
+  );
+}
+
+// ── Provider button ───────────────────────────────────────────
+function ProviderButton({
+  onClick,
+  disabled,
+  loading,
+  icon,
+  name,
+  description,
+  iconBg,
+  iconBorder,
+  spinColor,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  loading: boolean;
+  icon: React.ReactNode;
+  name: string;
+  description: string;
+  iconBg: string;
+  iconBorder: string;
+  spinColor: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full flex items-center gap-3 px-4 py-3.5
+                 bg-zinc-900/60 border border-zinc-800 rounded-xl
+                 transition-all duration-200 cursor-pointer
+                 hover:bg-zinc-800/80 hover:border-zinc-700
+                 disabled:opacity-50 disabled:cursor-not-allowed group"
+    >
+      <div className={`flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors duration-200 ${iconBg} ${iconBorder}`}>
+        {icon}
+      </div>
+      <div className="flex-1 text-left">
+        <div className="font-semibold text-sm text-white">{name}</div>
+        <div className="text-xs text-zinc-400">{description}</div>
+      </div>
+      {loading ? (
+        <div className={`w-4 h-4 rounded-full border-2 border-opacity-30 border-t-opacity-100 animate-spin flex-shrink-0 ${spinColor}`} />
+      ) : (
+        <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
+// ── Main Page ─────────────────────────────────────────────────
 export default function AuthPage() {
-  const { isAuthenticated, refresh } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
+
+  const [loading, setLoading] = useState<'metamask' | 'phantom' | 'github' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  if (isAuthenticated) {
-    router.push('/');
-    return null;
-  }
+  // Client-side wallet detection (avoid SSR mismatch)
+  const [metamaskInstalled, setMetamaskInstalled] = useState(false);
+  const [phantomInstalled, setPhantomInstalled] = useState(false);
+
+  useEffect(() => {
+    setMetamaskInstalled(isMetaMaskInstalled());
+    setPhantomInstalled(isPhantomInstalled());
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push('/');
+    }
+  }, [isAuthenticated, authLoading, router]);
 
   const handleMetaMask = async () => {
-    if (!isMetaMaskInstalled()) {
-      setError('MetaMask not found. Please install the MetaMask browser extension.');
-      return;
-    }
     setLoading('metamask');
     setError('');
+    setSuccess('');
     try {
       await connectMetaMask();
       await refresh();
-      setSuccess('Connected with MetaMask successfully.');
-      setTimeout(() => router.push('/'), 1000);
+      setSuccess('Connected with MetaMask.');
+      router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'MetaMask connection failed');
+      setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
     } finally {
       setLoading(null);
     }
   };
 
   const handlePhantom = async () => {
-    if (!isPhantomInstalled()) {
-      setError('Phantom wallet not found. Please install the Phantom browser extension.');
-      return;
-    }
     setLoading('phantom');
     setError('');
+    setSuccess('');
     try {
       await connectPhantom();
       await refresh();
-      setSuccess('Connected with Phantom successfully.');
-      setTimeout(() => router.push('/'), 1000);
+      setSuccess('Connected with Phantom.');
+      router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Phantom connection failed');
+      setError(err instanceof Error ? err.message : 'Phantom connection failed.');
     } finally {
       setLoading(null);
     }
@@ -116,12 +209,24 @@ export default function AuthPage() {
 
   const handleGitHub = () => {
     setLoading('github');
+    setError('');
     window.location.href = `${API_URL}/auth/github`;
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+      </div>
+    );
+  }
+
+  const anyLoading = loading !== null;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-sm">
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-monad-500/10 border border-monad-500/20 mb-4">
@@ -129,106 +234,100 @@ export default function AuthPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
-            Connect to Bolty
-          </h1>
-          <p className="text-sm text-slate-400">
-            Sign in with your wallet or GitHub account
-          </p>
+          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Connect to Bolty</h1>
+          <p className="text-sm text-zinc-400">Sign in with your wallet or GitHub account</p>
         </div>
 
         {/* Error */}
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
-            <p className="text-red-400 text-sm">
-              {error}
-            </p>
+          <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+            <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <p className="text-red-400 text-sm leading-relaxed">{error}</p>
           </div>
         )}
 
         {/* Success */}
         {success && (
-          <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
+          <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
+            <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             <p className="text-green-400 text-sm">{success}</p>
           </div>
         )}
 
-        {/* Auth buttons */}
+        {/* Auth Options */}
         <div className="space-y-3">
+
           {/* MetaMask */}
-          <button
-            onClick={handleMetaMask}
-            disabled={loading !== null}
-            className="auth-provider-btn group"
-          >
-            <div className="auth-provider-icon bg-orange-500/10 border-orange-500/20 group-hover:bg-orange-500/20">
-              <MetaMaskLogo className="w-5 h-5" />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="font-semibold text-sm text-white">MetaMask</div>
-              <div className="text-xs text-slate-400">Ethereum wallet</div>
-            </div>
-            {loading === 'metamask' ? (
-              <div className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />
-            ) : (
-              <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            )}
-          </button>
+          {metamaskInstalled ? (
+            <ProviderButton
+              onClick={handleMetaMask}
+              disabled={anyLoading}
+              loading={loading === 'metamask'}
+              icon={<MetaMaskLogo className="w-5 h-5" />}
+              name="MetaMask"
+              description="Ethereum wallet"
+              iconBg="bg-orange-500/10"
+              iconBorder="border-orange-500/20 group-hover:bg-orange-500/20"
+              spinColor="border-orange-400/30 border-t-orange-400"
+            />
+          ) : (
+            <InstallPrompt
+              name="MetaMask"
+              url="https://metamask.io/download/"
+              description="Required to connect an Ethereum wallet"
+              icon={<MetaMaskLogo className="w-5 h-5" />}
+            />
+          )}
 
           {/* Phantom */}
-          <button
-            onClick={handlePhantom}
-            disabled={loading !== null}
-            className="auth-provider-btn group"
-          >
-            <div className="auth-provider-icon bg-purple-500/10 border-purple-500/20 group-hover:bg-purple-500/20">
-              <PhantomLogo className="w-5 h-5" />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="font-semibold text-sm text-white">Phantom</div>
-              <div className="text-xs text-slate-400">Solana wallet</div>
-            </div>
-            {loading === 'phantom' ? (
-              <div className="w-4 h-4 rounded-full border-2 border-purple-400/30 border-t-purple-400 animate-spin" />
-            ) : (
-              <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            )}
-          </button>
+          {phantomInstalled ? (
+            <ProviderButton
+              onClick={handlePhantom}
+              disabled={anyLoading}
+              loading={loading === 'phantom'}
+              icon={<PhantomLogo className="w-5 h-5" />}
+              name="Phantom"
+              description="Solana wallet"
+              iconBg="bg-purple-500/10"
+              iconBorder="border-purple-500/20 group-hover:bg-purple-500/20"
+              spinColor="border-purple-400/30 border-t-purple-400"
+            />
+          ) : (
+            <InstallPrompt
+              name="Phantom"
+              url="https://phantom.app/download"
+              description="Required to connect a Solana wallet"
+              icon={<PhantomLogo className="w-5 h-5" />}
+            />
+          )}
 
-          <div className="flex items-center gap-3 my-4">
-            <div className="flex-1 h-px bg-slate-700/60" />
-            <span className="text-slate-500 text-xs">or continue with</span>
-            <div className="flex-1 h-px bg-slate-700/60" />
+          {/* Divider */}
+          <div className="flex items-center gap-3 py-1">
+            <div className="flex-1 h-px bg-zinc-800" />
+            <span className="text-zinc-500 text-xs">or continue with</span>
+            <div className="flex-1 h-px bg-zinc-800" />
           </div>
 
           {/* GitHub */}
-          <button
+          <ProviderButton
             onClick={handleGitHub}
-            disabled={loading !== null}
-            className="auth-provider-btn group"
-          >
-            <div className="auth-provider-icon bg-slate-700/40 border-slate-600/30 group-hover:bg-slate-700/60">
-              <GitHubLogo className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 text-left">
-              <div className="font-semibold text-sm text-white">GitHub</div>
-              <div className="text-xs text-slate-400">Sign in and showcase repos</div>
-            </div>
-            {loading === 'github' ? (
-              <div className="w-4 h-4 rounded-full border-2 border-slate-400/30 border-t-slate-400 animate-spin" />
-            ) : (
-              <svg className="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            )}
-          </button>
+            disabled={anyLoading}
+            loading={loading === 'github'}
+            icon={<GitHubLogo className="w-5 h-5 text-white" />}
+            name="GitHub"
+            description="Sign in and showcase your repos"
+            iconBg="bg-zinc-700/40"
+            iconBorder="border-zinc-600/30 group-hover:bg-zinc-700/60"
+            spinColor="border-zinc-400/30 border-t-zinc-400"
+          />
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-6 leading-relaxed">
+        {/* Footer note */}
+        <p className="text-center text-xs text-zinc-500 mt-6 leading-relaxed">
           Authentication uses cryptographic signatures.
           <br />
           No passwords stored. Replay-attack protected.
