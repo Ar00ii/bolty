@@ -15,7 +15,6 @@ import { UsersModule } from './modules/users/users.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 
 @Module({
   imports: [
@@ -26,7 +25,7 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
       cache: true,
     }),
 
-    // ── Rate Limiting (Redis-backed) ─────────────────────────────────────
+    // ── Rate Limiting (in-memory) ────────────────────────────────────────
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -38,9 +37,6 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
             limit: config.get<number>('RATE_LIMIT_MAX_REQUESTS', 100),
           },
         ],
-        storage: new ThrottlerStorageRedisService(
-          config.get<string>('REDIS_URL', 'redis://localhost:6379'),
-        ),
       }),
     }),
 

@@ -1,61 +1,77 @@
-import { Injectable, OnModuleDestroy, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Injectable, Logger } from '@nestjs/common';
+
+interface CacheEntry {
+  value: string;
+  expiresAt: number | null;
+}
 
 @Injectable()
-export class RedisService implements OnModuleDestroy {
+export class RedisService {
   private readonly logger = new Logger(RedisService.name);
-  private readonly client: Redis;
+  private readonly store = new Map<string, CacheEntry>();
 
-  constructor(private readonly config: ConfigService) {
-    this.client = new Redis(this.config.get<string>('REDIS_URL', 'redis://localhost:6379'), {
-      maxRetriesPerRequest: 3,
-      lazyConnect: false,
-      enableReadyCheck: true,
-    });
-
-    this.client.on('connect', () => this.logger.log('Redis connected'));
-    this.client.on('error', (err) => this.logger.error('Redis error', err));
-  }
-
-  async onModuleDestroy() {
-    await this.client.quit();
-  }
-
-  getClient(): Redis {
-    return this.client;
+  constructor() {
+    // Cleanup expired entries every 60 seconds
+    setInterval(() => this.cleanup(), 60000);
+    this.logger.log('In-memory cache initialized (no Redis required)');
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
-    if (ttlSeconds) {
-      await this.client.setex(key, ttlSeconds, value);
-    } else {
-      await this.client.set(key, value);
-    }
+    this.store.set(key, {
+      value,
+      expiresAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : null,
+    });
   }
 
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    const entry = this.store.get(key);
+    if (!entry) return null;
+    if (entry.expiresAt && Date.now() > entry.expiresAt) {
+      this.store.delete(key);
+      return null;
+    }
+    return entry.value;
   }
 
   async del(key: string): Promise<void> {
-    await this.client.del(key);
+    this.store.delete(key);
   }
 
   async exists(key: string): Promise<boolean> {
-    const result = await this.client.exists(key);
-    return result === 1;
+    return (await this.get(key)) !== null;
   }
 
   async incr(key: string): Promise<number> {
-    return this.client.incr(key);
+    const current = await this.get(key);
+    const value = current ? parseInt(current, 10) + 1 : 1;
+    const entry = this.store.get(key);
+    this.store.set(key, {
+      value: String(value),
+      expiresAt: entry?.expiresAt ?? null,
+    });
+    return value;
   }
 
   async expire(key: string, seconds: number): Promise<void> {
-    await this.client.expire(key, seconds);
+    const entry = this.store.get(key);
+    if (entry) {
+      this.store.set(key, { ...entry, expiresAt: Date.now() + seconds * 1000 });
+    }
   }
 
   async ttl(key: string): Promise<number> {
-    return this.client.ttl(key);
+    const entry = this.store.get(key);
+    if (!entry || !entry.expiresAt) return -1;
+    const remaining = Math.ceil((entry.expiresAt - Date.now()) / 1000);
+    return remaining > 0 ? remaining : -2;
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.store.entries()) {
+      if (entry.expiresAt && now > entry.expiresAt) {
+        this.store.delete(key);
+      }
+    }
   }
 }

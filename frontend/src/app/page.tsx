@@ -15,7 +15,7 @@ interface PriceData {
 const BOOT_LINES = [
   'Initializing Bolty Terminal v1.0.0...',
   'Loading security modules... [OK]',
-  'Connecting to Monad network... [OK]',
+  'Connecting to Solana network... [OK]',
   'Loading AI subsystem... [OK]',
   'WebSocket server ready... [OK]',
   'System operational. Welcome to Bolty.',
@@ -62,7 +62,7 @@ const FEATURES = [
     borderColor: 'border-monad-500/20',
     hoverBorder: 'hover:border-monad-400/50',
     title: 'AI Assistant',
-    desc: 'Powered by Google Gemini. Ask anything about Monad, DeFi, and crypto markets.',
+    desc: 'Powered by Google Gemini. Ask anything about Solana, DeFi, and crypto markets.',
     href: '/ai',
   },
   {
@@ -72,7 +72,7 @@ const FEATURES = [
     borderColor: 'border-blue-500/20',
     hoverBorder: 'hover:border-blue-400/50',
     title: 'Global Chat',
-    desc: 'Real-time WebSocket chat with the Bolty and Monad community.',
+    desc: 'Real-time WebSocket chat with the Bolty community.',
     href: '/chat',
   },
   {
@@ -82,7 +82,7 @@ const FEATURES = [
     borderColor: 'border-green-500/20',
     hoverBorder: 'hover:border-green-400/50',
     title: 'Live Chart',
-    desc: 'Real-time Bolty price chart and market data on Monad.',
+    desc: 'Real-time Bolty price chart and market data on Solana.',
     href: '/chart',
   },
   {
@@ -92,7 +92,7 @@ const FEATURES = [
     borderColor: 'border-amber-500/20',
     hoverBorder: 'hover:border-amber-400/50',
     title: 'Repo Showcase',
-    desc: 'Share and discover GitHub repositories built on Monad. Vote for the best.',
+    desc: 'Share and discover GitHub repositories. Vote for the best.',
     href: '/repos',
   },
 ];
@@ -133,7 +133,7 @@ export default function HomePage() {
         <div className="relative">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-monad-500/10 border border-monad-500/20 text-monad-400 text-xs font-mono mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-            Built on Monad
+            Built on Solana
           </div>
 
           <h1 className="text-6xl sm:text-7xl font-mono font-black mb-4 tracking-tight">
@@ -141,7 +141,7 @@ export default function HomePage() {
           </h1>
 
           <p className="text-slate-400 text-lg font-mono mb-2">
-            {'// The memecoin platform for the Monad ecosystem'}
+            {'// The memecoin platform on Solana'}
           </p>
 
           {price && (

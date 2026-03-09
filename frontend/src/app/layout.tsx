@@ -4,12 +4,12 @@ import { Navbar } from '@/components/layout/Navbar';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 
 export const metadata: Metadata = {
-  title: 'Bolty | The Monad Ecosystem Platform',
-  description: 'The memecoin platform built for the Monad ecosystem. Trade, chat, and build.',
-  keywords: ['bolty', 'monad', 'memecoin', 'web3', 'ethereum', 'crypto', 'defi'],
+  title: 'Bolty | The Solana Memecoin Platform',
+  description: 'The memecoin platform on Solana. Trade, chat, and build.',
+  keywords: ['bolty', 'solana', 'memecoin', 'web3', 'crypto', 'defi'],
   openGraph: {
-    title: 'Bolty | The Monad Ecosystem Platform',
-    description: 'The memecoin platform built for the Monad ecosystem.',
+    title: 'Bolty | The Solana Memecoin Platform',
+    description: 'The memecoin platform on Solana.',
     type: 'website',
   },
   robots: 'index, follow',
@@ -34,7 +34,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="border-t border-zinc-800/60 py-4 px-6 text-center text-zinc-500 text-xs">
-              <span className="text-monad-400 font-semibold">Bolty</span> — Built for the Monad ecosystem
+              <span className="text-monad-400 font-semibold">Bolty</span> — The Solana memecoin platform
             </footer>
           </div>
         </AuthProvider>
