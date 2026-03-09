@@ -5,6 +5,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
@@ -13,11 +15,53 @@ import axios from 'axios';
 @Injectable()
 export class ReposService {
   private readonly logger = new Logger(ReposService.name);
+  private readonly genAI: GoogleGenerativeAI;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.genAI = new GoogleGenerativeAI(this.config.get<string>('GEMINI_API_KEY') || '');
+  }
+
+  /** AI security scan for repo name + description */
+  private async scanRepoContent(
+    name: string,
+    description: string,
+    topics: string[],
+  ): Promise<{ safe: boolean; reason: string }> {
+    try {
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const prompt = `You are a security moderator for a developer platform.
+
+REJECT (safe=false) if name/description suggests:
+- Malware, spyware, ransomware, keylogger, RAT
+- Credential/password stealers, phishing kits
+- DDoS or network attack tools
+- Crypto wallet drainers or private key stealers
+- Clearly illegal services or hacking tools targeting production systems
+
+ACCEPT (safe=true) for: legitimate open-source projects, developer tools, bots, trading scripts, automation utilities, security research.
+
+Name: ${name}
+Description: ${description.slice(0, 500)}
+Topics: ${topics.slice(0, 10).join(', ')}
+
+Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
+
+      const result = await model.generateContent(prompt);
+      const text = result.response.text().trim();
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) {
+        const parsed = JSON.parse(match[0]);
+        return { safe: Boolean(parsed.safe), reason: String(parsed.reason || '') };
+      }
+    } catch (err) {
+      this.logger.error('Repo content scan failed', err);
+    }
+    return { safe: true, reason: 'Scan unavailable — logged for manual review' };
+  }
 
   // ── GitHub API fetch (server-side, no SSRF) ───────────────────────────────
 
@@ -76,6 +120,17 @@ export class ReposService {
     // Validate URLs
     if (!isSafeUrl(githubRepoData.html_url) || !isSafeUrl(githubRepoData.clone_url)) {
       throw new BadRequestException('Invalid repository URLs');
+    }
+
+    // AI content security scan
+    const scan = await this.scanRepoContent(
+      githubRepoData.name,
+      githubRepoData.description || '',
+      githubRepoData.topics || [],
+    );
+    if (!scan.safe) {
+      this.logger.warn(`Repo ${githubRepoData.name} rejected by AI scanner: ${scan.reason}`);
+      throw new ForbiddenException(`Repository rejected by security scanner: ${scan.reason}`);
     }
 
     return this.prisma.repository.upsert({

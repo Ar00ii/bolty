@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
+import { MatrixRain } from '@/components/ui/MatrixRain';
 
 export const metadata: Metadata = {
   title: 'Bolty | The Solana Memecoin Platform',
@@ -28,7 +29,8 @@ export default function RootLayout({
       </head>
       <body className="bg-terminal-bg text-terminal-text min-h-screen grid-bg">
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
+          <MatrixRain />
+          <div className="flex flex-col min-h-screen relative z-10">
             <Navbar />
             <main className="flex-1 pt-16">
               {children}

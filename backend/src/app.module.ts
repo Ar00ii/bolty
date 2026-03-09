@@ -11,6 +11,8 @@ import { AiModule } from './modules/ai/ai.module';
 import { ReposModule } from './modules/repos/repos.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { UsersModule } from './modules/users/users.module';
+import { DmModule } from './modules/dm/dm.module';
+import { MarketModule } from './modules/market/market.module';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -51,6 +53,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     ReposModule,
     ChartModule,
     UsersModule,
+    DmModule,
+    MarketModule,
   ],
   providers: [
     // Global rate limiting guard

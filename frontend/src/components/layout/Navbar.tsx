@@ -10,8 +10,10 @@ const NAV_LINKS = [
   { href: '/', label: 'home' },
   { href: '/chart', label: 'chart' },
   { href: '/chat', label: 'chat' },
+  { href: '/dm', label: 'dm' },
   { href: '/ai', label: 'AI' },
   { href: '/repos', label: 'repos' },
+  { href: '/market', label: 'market' },
 ];
 
 export function Navbar() {
@@ -28,7 +30,7 @@ export function Navbar() {
             <span className="text-monad-400 font-mono font-bold text-xl group-hover:text-monad-300 transition-colors">
               [BOLTY]
             </span>
-            <span className="text-terminal-muted text-xs hidden sm:block">v1.0.0</span>
+            <span className="text-terminal-muted text-xs hidden sm:block font-mono">[alpha]</span>
             <span className="status-online ml-1" />
           </Link>
 

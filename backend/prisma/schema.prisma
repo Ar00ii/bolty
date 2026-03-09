@@ -44,12 +44,15 @@ model User {
   banReason     String?
 
   // Relations
-  messages      ChatMessage[]
-  repositories  Repository[]
-  votes         Vote[]
-  reports       Report[]
-  aiSessions    AiSession[]
-  auditLogs     AuditLog[]
+  messages       ChatMessage[]
+  repositories   Repository[]
+  votes          Vote[]
+  reports        Report[]
+  aiSessions     AiSession[]
+  auditLogs      AuditLog[]
+  sentDMs        DirectMessage[]  @relation("SentDMs")
+  receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
+  marketListings MarketListing[]  @relation("MarketSeller")
 
   @@map("users")
 }
@@ -105,7 +108,8 @@ model Repository {
   featured      Boolean   @default(false)
   downloadCount Int       @default(0)
 
-  votes         Vote[]
+  votes          Vote[]
+  marketListings MarketListing[]
 
   @@map("repositories")
 }
@@ -204,6 +208,62 @@ model AuditLog {
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
+}
+
+// ─── Direct Messages ─────────────────────────────────────────────────────────
+
+model DirectMessage {
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  content    String   @db.Text
+  isRead     Boolean  @default(false)
+
+  senderId   String
+  sender     User     @relation("SentDMs", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User     @relation("ReceivedDMs", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, createdAt])
+  @@map("direct_messages")
+}
+
+// ─── Market ───────────────────────────────────────────────────────────────────
+
+model MarketListing {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  title        String
+  description  String        @db.Text
+  type         ListingType
+  price        Float         @default(0)
+  currency     String        @default("SOL")
+  tags         String[]
+  repositoryId String?
+  repository   Repository?   @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+  sellerId     String
+  seller       User          @relation("MarketSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  status       ListingStatus @default(PENDING_REVIEW)
+  scanPassed   Boolean       @default(false)
+  scanNote     String?
+
+  @@map("market_listings")
+}
+
+enum ListingType {
+  REPO
+  BOT
+  SCRIPT
+  OTHER
+}
+
+enum ListingStatus {
+  PENDING_REVIEW
+  ACTIVE
+  SOLD
+  REMOVED
 }
 
 // ─── Price Cache ──────────────────────────────────────────────────────────────

@@ -169,12 +169,12 @@ export default function AiPage() {
           {!activeSession ? (
             <TerminalCard className="flex-1 flex items-center justify-center">
               <div className="text-center">
-                <div className="text-neon-400 text-4xl mb-4">🤖</div>
-                <h2 className="text-neon-400 font-mono font-bold text-xl mb-2">
+                <div className="text-monad-400 font-mono text-2xl mb-4 tracking-widest">[SYS]</div>
+                <h2 className="text-monad-400 font-mono font-bold text-xl mb-2 tracking-widest">
                   BOLTY_AI TERMINAL
                 </h2>
-                <p className="text-terminal-muted text-sm mb-6">
-                  Powered by Google Gemini
+                <p className="text-terminal-muted text-xs font-mono mb-6">
+                  // neural_network :: online
                 </p>
                 <button onClick={createSession} className="btn-neon-solid px-6 py-2">
                   start_session
