@@ -64,6 +64,139 @@ function PhantomLogo({ className }: { className?: string }) {
   );
 }
 
+// ── Computer Animation ────────────────────────────────────────
+function ComputerAnimation() {
+  const [typedLines, setTypedLines] = useState<string[]>([]);
+  const [currentLine, setCurrentLine] = useState('');
+  const [lineIndex, setLineIndex] = useState(0);
+  const [charIndex, setCharIndex] = useState(0);
+  const [showCursor, setShowCursor] = useState(true);
+
+  const codeLines = [
+    '> connecting to bolty...',
+    '> auth.verify(wallet)',
+    '✓ signature valid',
+    '> loading repos...',
+    '✓ 3 repos found',
+    '> publishing "my-bot"',
+    '✓ listed at $4.99',
+    '> welcome to bolty!',
+  ];
+
+  useEffect(() => {
+    if (lineIndex >= codeLines.length) {
+      // Reset after full cycle
+      const timeout = setTimeout(() => {
+        setTypedLines([]);
+        setCurrentLine('');
+        setLineIndex(0);
+        setCharIndex(0);
+      }, 2500);
+      return () => clearTimeout(timeout);
+    }
+
+    if (charIndex < codeLines[lineIndex].length) {
+      const timeout = setTimeout(() => {
+        setCurrentLine((prev) => prev + codeLines[lineIndex][charIndex]);
+        setCharIndex((prev) => prev + 1);
+      }, 45);
+      return () => clearTimeout(timeout);
+    } else {
+      const timeout = setTimeout(() => {
+        setTypedLines((prev) => [...prev, currentLine]);
+        setCurrentLine('');
+        setCharIndex(0);
+        setLineIndex((prev) => prev + 1);
+      }, 400);
+      return () => clearTimeout(timeout);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineIndex, charIndex]);
+
+  // Cursor blink
+  useEffect(() => {
+    const interval = setInterval(() => setShowCursor((v) => !v), 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative flex flex-col items-center justify-center h-full select-none">
+      {/* Glow backdrop */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-72 h-72 rounded-full bg-monad-500/10 blur-3xl" />
+      </div>
+
+      {/* Monitor body */}
+      <div className="relative z-10">
+        {/* Screen */}
+        <div className="w-72 h-48 rounded-xl bg-zinc-950 border-2 border-zinc-700 overflow-hidden shadow-2xl shadow-black/60">
+          {/* Browser chrome */}
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-zinc-900 border-b border-zinc-800">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+            <div className="flex-1 mx-2 h-5 bg-zinc-800 rounded text-xs text-zinc-500 flex items-center px-2 font-mono overflow-hidden">
+              <span className="text-monad-400 mr-1">🔒</span>
+              bolty.app
+            </div>
+          </div>
+          {/* Terminal content */}
+          <div className="p-3 font-mono text-xs space-y-0.5 overflow-hidden h-full">
+            {typedLines.map((line, i) => (
+              <div
+                key={i}
+                className={
+                  line.startsWith('✓')
+                    ? 'text-green-400'
+                    : line.startsWith('>')
+                    ? 'text-monad-400'
+                    : 'text-zinc-400'
+                }
+              >
+                {line}
+              </div>
+            ))}
+            {lineIndex < codeLines.length && (
+              <div className={
+                currentLine.startsWith('✓')
+                  ? 'text-green-400'
+                  : currentLine.startsWith('>')
+                  ? 'text-monad-400'
+                  : 'text-zinc-300'
+              }>
+                {currentLine}
+                <span className={`inline-block w-1.5 h-3.5 bg-monad-400 ml-0.5 align-middle transition-opacity ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Monitor neck */}
+        <div className="mx-auto w-8 h-5 bg-zinc-700 rounded-b" />
+        {/* Monitor stand */}
+        <div className="mx-auto w-24 h-2.5 bg-zinc-700 rounded-lg" />
+      </div>
+
+      {/* Feature pills below */}
+      <div className="relative z-10 mt-8 flex flex-col gap-2 w-full max-w-xs">
+        {[
+          { icon: '🔒', text: 'Publish private repos with a price' },
+          { icon: '⚡', text: 'Wallet-based authentication' },
+          { icon: '🤖', text: 'AI-powered security scanning' },
+        ].map((item) => (
+          <div
+            key={item.text}
+            className="flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2"
+          >
+            <span className="text-base">{item.icon}</span>
+            <span className="text-xs text-zinc-400">{item.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Install prompt ────────────────────────────────────────────
 function InstallPrompt({
   name,
@@ -160,7 +293,6 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Client-side wallet detection (avoid SSR mismatch)
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
   const [phantomInstalled, setPhantomInstalled] = useState(false);
 
@@ -224,11 +356,11 @@ export default function AuthPage() {
   const anyLoading = loading !== null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-sm">
-
+    <div className="min-h-screen flex">
+      {/* ── Left: Auth Form ─────────────────────────────────── */}
+      <div className="flex flex-col justify-center px-8 py-16 w-full max-w-md mx-auto lg:mx-0 lg:w-1/2">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-monad-500/10 border border-monad-500/20 mb-4">
             <svg className="w-7 h-7 text-monad-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
@@ -260,7 +392,6 @@ export default function AuthPage() {
 
         {/* Auth Options */}
         <div className="space-y-3">
-
           {/* MetaMask */}
           {metamaskInstalled ? (
             <ProviderButton
@@ -327,11 +458,23 @@ export default function AuthPage() {
         </div>
 
         {/* Footer note */}
-        <p className="text-center text-xs text-zinc-500 mt-6 leading-relaxed">
+        <p className="text-xs text-zinc-500 mt-6 leading-relaxed">
           Authentication uses cryptographic signatures.
           <br />
           No passwords stored. Replay-attack protected.
         </p>
+      </div>
+
+      {/* ── Right: Computer Animation (hidden on mobile) ─────── */}
+      <div className="hidden lg:flex flex-1 items-center justify-center relative overflow-hidden border-l border-zinc-800/60">
+        {/* Matrix-like background dots */}
+        <div className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `radial-gradient(circle, #7c3aed22 1px, transparent 1px)`,
+            backgroundSize: '28px 28px',
+          }}
+        />
+        <ComputerAnimation />
       </div>
     </div>
   );

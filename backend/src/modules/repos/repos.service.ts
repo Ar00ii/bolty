@@ -66,11 +66,18 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
   // ── GitHub API fetch (server-side, no SSRF) ───────────────────────────────
 
   async fetchGitHubRepos(githubLogin: string, accessToken?: string): Promise<unknown[]> {
-    const cacheKey = `gh_repos:${githubLogin}`;
+    const cacheKey = `gh_repos:${githubLogin}:${accessToken ? 'auth' : 'public'}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached) as unknown[];
 
-    const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=30&sort=updated&type=public`;
+    let url: string;
+
+    if (accessToken) {
+      // Authenticated: fetch all repos including private ones
+      url = `https://api.github.com/user/repos?per_page=100&sort=updated&type=all`;
+    } else {
+      url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=30&sort=updated&type=public`;
+    }
 
     // Validate URL to prevent SSRF
     if (!isSafeUrl(url)) {
@@ -110,16 +117,29 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       html_url: string;
       clone_url: string;
       topics?: string[];
-      private: boolean;
+      private?: boolean;
+      isLocked?: boolean;
+      lockedPriceUsd?: number;
     },
   ) {
-    if (githubRepoData.private) {
-      throw new ForbiddenException('Cannot publish private repositories');
+    const isPrivate = githubRepoData.private === true;
+    const isLocked = githubRepoData.isLocked === true;
+
+    // Private repos must be locked with a price
+    if (isPrivate && !isLocked) {
+      throw new BadRequestException('Private repositories must be published as locked with a price');
+    }
+    if (isLocked && (!githubRepoData.lockedPriceUsd || githubRepoData.lockedPriceUsd <= 0)) {
+      throw new BadRequestException('Locked repositories must have a price greater than 0');
     }
 
-    // Validate URLs
-    if (!isSafeUrl(githubRepoData.html_url) || !isSafeUrl(githubRepoData.clone_url)) {
-      throw new BadRequestException('Invalid repository URLs');
+    // Validate URLs — only for public (non-private) repos since private clone URLs need auth
+    if (!isPrivate) {
+      if (!isSafeUrl(githubRepoData.html_url) || !isSafeUrl(githubRepoData.clone_url)) {
+        throw new BadRequestException('Invalid repository URLs');
+      }
+    } else if (!isSafeUrl(githubRepoData.html_url)) {
+      throw new BadRequestException('Invalid repository URL');
     }
 
     // AI content security scan
@@ -146,13 +166,17 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         githubUrl: githubRepoData.html_url,
         cloneUrl: githubRepoData.clone_url,
         topics: githubRepoData.topics || [],
-        isPrivate: githubRepoData.private,
+        isPrivate,
+        isLocked,
+        lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
         userId,
       },
       update: {
         stars: githubRepoData.stargazers_count,
         forks: githubRepoData.forks_count,
         description: githubRepoData.description?.slice(0, 1000),
+        isLocked,
+        lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
       },
     });
   }

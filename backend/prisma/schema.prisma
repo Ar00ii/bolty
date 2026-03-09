@@ -108,6 +108,10 @@ model Repository {
   featured      Boolean   @default(false)
   downloadCount Int       @default(0)
 
+  // Locked repo / monetization
+  isLocked      Boolean   @default(false)
+  lockedPriceUsd Float?
+
   votes          Vote[]
   marketListings MarketListing[]
 

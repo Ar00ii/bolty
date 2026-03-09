@@ -10,8 +10,17 @@ import {
   Req,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { IsString, IsIn, IsOptional, IsNumber, Min, Max, IsNotEmpty } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+import {
+  IsString,
+  IsIn,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  Min,
+  Max,
+  IsNotEmpty,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
@@ -20,6 +29,7 @@ import { Request } from 'express';
 
 class PublishRepoDto {
   @IsNumber()
+  @Type(() => Number)
   id: number;
 
   @IsString()
@@ -39,9 +49,11 @@ class PublishRepoDto {
   language?: string;
 
   @IsNumber()
+  @Type(() => Number)
   stargazers_count: number;
 
   @IsNumber()
+  @Type(() => Number)
   forks_count: number;
 
   @IsString()
@@ -52,8 +64,22 @@ class PublishRepoDto {
   @IsNotEmpty()
   clone_url: string;
 
+  @IsOptional()
   topics?: string[];
-  private: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  private?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
+  isLocked?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0.01)
+  @Type(() => Number)
+  lockedPriceUsd?: number;
 }
 
 class VoteDto {

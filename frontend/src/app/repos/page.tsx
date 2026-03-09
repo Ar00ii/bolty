@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
@@ -20,6 +19,9 @@ interface Repository {
   upvotes: number;
   downvotes: number;
   score: number;
+  isPrivate: boolean;
+  isLocked: boolean;
+  lockedPriceUsd: number | null;
   user: { username: string | null; avatarUrl: string | null };
 }
 
@@ -57,6 +59,11 @@ export default function ReposPage() {
   const [error, setError] = useState('');
   const [publishing, setPublishing] = useState<number | null>(null);
 
+  // Lock publish modal state
+  const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
+  const [lockPrice, setLockPrice] = useState('');
+  const [lockType, setLockType] = useState<'public' | 'locked'>('public');
+
   const fetchRepos = useCallback(async () => {
     setLoading(true);
     try {
@@ -83,14 +90,36 @@ export default function ReposPage() {
       const data = await api.get<GitHubRepo[]>('/repos/github');
       setGhRepos(Array.isArray(data) ? data : []);
     } catch {
-      setError('Failed to fetch GitHub repos. Make sure you\'re logged in with GitHub.');
+      setError("Failed to fetch GitHub repos. Make sure you're logged in with GitHub.");
     }
   };
 
-  const publishRepo = async (repo: GitHubRepo) => {
+  const openLockModal = (repo: GitHubRepo) => {
+    setLockModal({ repo });
+    setLockType('public');
+    setLockPrice('');
+  };
+
+  const publishRepo = async (repo: GitHubRepo, isLocked: boolean, lockedPriceUsd?: number) => {
     setPublishing(repo.id);
+    setLockModal(null);
     try {
-      await api.post('/repos/publish', repo);
+      // Send only the fields the DTO expects — extra GitHub fields cause 400 with forbidNonWhitelisted
+      await api.post('/repos/publish', {
+        id: repo.id,
+        name: repo.name,
+        full_name: repo.full_name,
+        description: repo.description,
+        language: repo.language,
+        stargazers_count: repo.stargazers_count,
+        forks_count: repo.forks_count,
+        html_url: repo.html_url,
+        clone_url: repo.clone_url,
+        topics: repo.topics,
+        private: repo.private,
+        isLocked,
+        lockedPriceUsd: isLocked ? lockedPriceUsd : undefined,
+      });
       await fetchRepos();
       setError('');
     } catch (err) {
@@ -98,6 +127,16 @@ export default function ReposPage() {
     } finally {
       setPublishing(null);
     }
+  };
+
+  const confirmPublish = () => {
+    if (!lockModal) return;
+    const price = lockType === 'locked' ? parseFloat(lockPrice) : undefined;
+    if (lockType === 'locked' && (!price || price <= 0)) {
+      setError('Enter a valid price in USD');
+      return;
+    }
+    publishRepo(lockModal.repo, lockType === 'locked', price);
   };
 
   const vote = async (repoId: string, value: 'UP' | 'DOWN') => {
@@ -110,7 +149,11 @@ export default function ReposPage() {
     }
   };
 
-  const download = async (repoId: string, githubUrl: string) => {
+  const download = async (repoId: string, githubUrl: string, isLocked: boolean) => {
+    if (isLocked) {
+      setError('This repository is locked. Purchase access to download.');
+      return;
+    }
     try {
       const { downloadUrl } = await api.post<{ downloadUrl: string }>(
         `/repos/${repoId}/download`,
@@ -127,7 +170,7 @@ export default function ReposPage() {
       <div className="mb-8">
         <h1 className="text-neon-400 font-mono font-black text-3xl mb-2">REPO_SHOWCASE</h1>
         <p className="text-terminal-muted text-sm font-mono">
-          {'// Community repositories. Discover, vote, download.'}
+          {'// Community repositories. Public & locked. Discover, vote, download.'}
         </p>
       </div>
 
@@ -177,7 +220,9 @@ export default function ReposPage() {
       {showPublish && (
         <TerminalCard title="publish_repository" className="mb-6">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-neon-400 text-sm font-mono">Your GitHub Repos</span>
+            <span className="text-neon-400 text-sm font-mono">
+              Your GitHub Repos <span className="text-terminal-muted text-xs">(public & private)</span>
+            </span>
             <button
               onClick={() => setShowPublish(false)}
               className="text-terminal-muted hover:text-terminal-text text-xs"
@@ -192,13 +237,18 @@ export default function ReposPage() {
                 className="flex items-center justify-between p-2 border border-terminal-border rounded hover:border-neon-400/30 transition-colors"
               >
                 <div className="min-w-0 flex-1">
-                  <div className="text-terminal-text text-xs font-mono truncate">{repo.name}</div>
+                  <div className="flex items-center gap-1">
+                    {repo.private && (
+                      <span className="text-yellow-400 text-xs">🔒</span>
+                    )}
+                    <div className="text-terminal-text text-xs font-mono truncate">{repo.name}</div>
+                  </div>
                   {repo.language && (
                     <span className="terminal-badge">{repo.language}</span>
                   )}
                 </div>
                 <button
-                  onClick={() => publishRepo(repo)}
+                  onClick={() => openLockModal(repo)}
                   disabled={publishing === repo.id}
                   className="btn-neon text-xs py-1 px-2 ml-2 shrink-0 disabled:opacity-50"
                 >
@@ -208,11 +258,90 @@ export default function ReposPage() {
             ))}
             {ghRepos.length === 0 && (
               <p className="text-terminal-muted text-xs col-span-2 text-center py-4">
-                No public repos found
+                No repos found. Make sure you logged in with GitHub.
               </p>
             )}
           </div>
         </TerminalCard>
+      )}
+
+      {/* Lock / Price Modal */}
+      {lockModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="w-full max-w-sm bg-zinc-900 border border-neon-400/30 rounded-xl p-6">
+            <h3 className="text-neon-400 font-mono font-bold mb-1">Publish Options</h3>
+            <p className="text-terminal-muted text-xs font-mono mb-5">
+              {lockModal.repo.name} {lockModal.repo.private && '· private repo'}
+            </p>
+
+            <div className="space-y-3 mb-5">
+              <button
+                onClick={() => setLockType('public')}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                  lockType === 'public'
+                    ? 'border-neon-400/50 bg-neon-400/5 text-neon-400'
+                    : 'border-terminal-border text-terminal-muted hover:border-zinc-600'
+                }`}
+              >
+                <span className="text-lg">🌐</span>
+                <div className="text-left">
+                  <div className="text-sm font-mono font-semibold">Public — Free</div>
+                  <div className="text-xs opacity-70">Anyone can see and download</div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setLockType('locked')}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border transition-colors ${
+                  lockType === 'locked'
+                    ? 'border-yellow-400/50 bg-yellow-400/5 text-yellow-400'
+                    : 'border-terminal-border text-terminal-muted hover:border-zinc-600'
+                }`}
+              >
+                <span className="text-lg">🔒</span>
+                <div className="text-left">
+                  <div className="text-sm font-mono font-semibold">Locked — Paid Access</div>
+                  <div className="text-xs opacity-70">Users pay to unlock download</div>
+                </div>
+              </button>
+            </div>
+
+            {lockType === 'locked' && (
+              <div className="mb-5">
+                <label className="text-terminal-muted text-xs font-mono block mb-1">
+                  Price (USD)
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-terminal-muted font-mono">$</span>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="9.99"
+                    value={lockPrice}
+                    onChange={(e) => setLockPrice(e.target.value)}
+                    className="terminal-input flex-1"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setLockModal(null)}
+                className="flex-1 px-4 py-2 text-xs font-mono text-terminal-muted border border-terminal-border rounded hover:border-zinc-600 transition-colors"
+              >
+                cancel
+              </button>
+              <button
+                onClick={confirmPublish}
+                className="flex-1 btn-neon text-xs py-2"
+              >
+                confirm publish
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {error && (
@@ -230,21 +359,39 @@ export default function ReposPage() {
             <TerminalCard key={repo.id} className="flex flex-col">
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-2">
-                  <a
-                    href={repo.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-neon-400 font-mono font-semibold text-sm hover:text-neon-300 transition-colors truncate"
-                  >
-                    {repo.name}
-                  </a>
+                  <div className="flex items-center gap-1 min-w-0">
+                    {repo.isLocked && (
+                      <span className="text-yellow-400 shrink-0" title={`$${repo.lockedPriceUsd} to unlock`}>🔒</span>
+                    )}
+                    <a
+                      href={repo.isLocked ? '#' : repo.githubUrl}
+                      target={repo.isLocked ? undefined : '_blank'}
+                      rel="noopener noreferrer"
+                      className={`font-mono font-semibold text-sm transition-colors truncate ${
+                        repo.isLocked
+                          ? 'text-yellow-400 hover:text-yellow-300 cursor-default'
+                          : 'text-neon-400 hover:text-neon-300'
+                      }`}
+                    >
+                      {repo.name}
+                    </a>
+                  </div>
                   {repo.language && (
                     <span className="terminal-badge ml-2 shrink-0">{repo.language}</span>
                   )}
                 </div>
+
+                {repo.isLocked && repo.lockedPriceUsd && (
+                  <div className="inline-flex items-center gap-1 text-xs font-mono text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded px-2 py-0.5 mb-2">
+                    <span>$</span>
+                    <span>{repo.lockedPriceUsd.toFixed(2)}</span>
+                    <span className="text-yellow-400/60">USD to unlock</span>
+                  </div>
+                )}
+
                 {repo.description && (
                   <p className="text-terminal-muted text-xs leading-relaxed mb-3 line-clamp-2">
-                    {repo.description}
+                    {repo.isLocked ? '████ ███████ ██████ ██████ ████' : repo.description}
                   </p>
                 )}
                 <div className="flex items-center gap-3 text-terminal-muted text-xs font-mono mb-3">
@@ -252,7 +399,7 @@ export default function ReposPage() {
                   <span>⑂ {repo.forks}</span>
                   <span>↓ {repo.downloadCount}</span>
                 </div>
-                {repo.topics.length > 0 && (
+                {!repo.isLocked && repo.topics.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-3">
                     {repo.topics.slice(0, 3).map((t) => (
                       <span key={t} className="terminal-badge">{t}</span>
@@ -281,12 +428,21 @@ export default function ReposPage() {
                     ▼ {repo.downvotes}
                   </button>
                 </div>
-                <button
-                  onClick={() => download(repo.id, repo.githubUrl)}
-                  className="btn-neon text-xs py-1 px-3"
-                >
-                  download
-                </button>
+                {repo.isLocked ? (
+                  <button
+                    className="text-xs py-1 px-3 font-mono bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 rounded hover:bg-yellow-400/20 transition-colors"
+                    onClick={() => setError('Payment integration coming soon! Price: $' + repo.lockedPriceUsd)}
+                  >
+                    🔒 unlock ${repo.lockedPriceUsd}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => download(repo.id, repo.githubUrl, repo.isLocked)}
+                    className="btn-neon text-xs py-1 px-3"
+                  >
+                    download
+                  </button>
+                )}
               </div>
             </TerminalCard>
           ))}
