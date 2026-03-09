@@ -4,6 +4,7 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
@@ -189,7 +190,7 @@ export class AuthService {
         userId: params.userId,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
-        metadata: params.metadata,
+        metadata: params.metadata as Prisma.InputJsonValue,
       },
     });
   }

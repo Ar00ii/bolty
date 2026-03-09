@@ -26,7 +26,7 @@ describe('Auth (e2e)', () => {
         .post('/api/v1/auth/nonce/ethereum')
         .send({ address: '0x742d35Cc6634C0532925a3b8D4C9a3ec7eC55f81' })
         .expect(201)
-        .expect((res) => {
+        .expect((res: any) => {
           expect(res.body.nonce).toBeDefined();
           expect(res.body.message).toContain('Bolty');
         });
@@ -44,7 +44,7 @@ describe('Auth (e2e)', () => {
         .post('/api/v1/auth/nonce/solana')
         .send({ address: '9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM' })
         .expect(201)
-        .expect((res) => {
+        .expect((res: any) => {
           expect(res.body.nonce).toBeDefined();
         });
     });
@@ -78,7 +78,7 @@ describe('Auth (e2e)', () => {
       );
 
       const results = await Promise.all(requests);
-      const rateLimited = results.some((r) => r.status === 429);
+      const rateLimited = results.some((r: any) => r.status === 429);
       expect(rateLimited).toBe(true);
     });
   });

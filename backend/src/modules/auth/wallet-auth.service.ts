@@ -148,8 +148,11 @@ export class WalletAuthService {
   private async findOrCreateWalletUser(address: string, chain: 'ethereum' | 'solana') {
     const field = chain === 'ethereum' ? 'walletAddress' : 'solanaAddress';
 
+    const whereClause =
+      chain === 'ethereum' ? { walletAddress: address } : { solanaAddress: address };
+
     let user = await this.prisma.user.findUnique({
-      where: { [field]: address },
+      where: whereClause,
     });
 
     if (!user) {
