@@ -25,7 +25,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-neon-400 font-mono font-bold text-xl group-hover:text-neon-300 transition-colors">
+            <span className="text-monad-400 font-mono font-bold text-xl group-hover:text-monad-300 transition-colors">
               [BOLTY]
             </span>
             <span className="text-terminal-muted text-xs hidden sm:block">v1.0.0</span>
@@ -41,7 +41,7 @@ export function Navbar() {
                 className={clsx(
                   'px-3 py-1.5 rounded text-sm font-mono transition-all duration-200',
                   pathname === link.href
-                    ? 'text-neon-400 bg-neon-400/10 border border-neon-400/30'
+                    ? 'text-monad-400 bg-monad-400/10 border border-monad-400/30'
                     : 'text-terminal-muted hover:text-terminal-text hover:bg-terminal-card',
                 )}
               >
@@ -55,7 +55,7 @@ export function Navbar() {
             {isAuthenticated ? (
               <>
                 <span className="text-terminal-muted text-xs hidden sm:block">
-                  <span className="text-neon-400">@</span>
+                  <span className="text-monad-400">@</span>
                   {user?.username || user?.githubLogin || 'user'}
                 </span>
                 <button
@@ -73,7 +73,7 @@ export function Navbar() {
 
             {/* Mobile toggle */}
             <button
-              className="md:hidden text-terminal-muted hover:text-neon-400 transition-colors p-1"
+              className="md:hidden text-terminal-muted hover:text-monad-400 transition-colors p-1"
               onClick={() => setMobileOpen(!mobileOpen)}
             >
               <div className="w-5 h-0.5 bg-current mb-1" />
@@ -94,7 +94,7 @@ export function Navbar() {
                 className={clsx(
                   'block px-4 py-2 text-sm font-mono transition-colors',
                   pathname === link.href
-                    ? 'text-neon-400'
+                    ? 'text-monad-400'
                     : 'text-terminal-muted hover:text-terminal-text',
                 )}
               >

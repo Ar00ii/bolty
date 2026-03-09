@@ -4,15 +4,14 @@ import { Navbar } from '@/components/layout/Navbar';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 
 export const metadata: Metadata = {
-  title: 'Bolty | Web3 Terminal Platform',
-  description: 'The memecoin platform with terminal aesthetics. Trade, chat, and build.',
-  keywords: ['bolty', 'memecoin', 'web3', 'solana', 'crypto', 'terminal'],
+  title: 'Bolty | The Monad Ecosystem Platform',
+  description: 'The memecoin platform built for the Monad ecosystem. Trade, chat, and build.',
+  keywords: ['bolty', 'monad', 'memecoin', 'web3', 'ethereum', 'crypto', 'defi'],
   openGraph: {
-    title: 'Bolty | Web3 Terminal Platform',
-    description: 'The memecoin platform with terminal aesthetics.',
+    title: 'Bolty | The Monad Ecosystem Platform',
+    description: 'The memecoin platform built for the Monad ecosystem.',
     type: 'website',
   },
-  // Security: prevent indexing of private pages
   robots: 'index, follow',
 };
 
@@ -34,9 +33,8 @@ export default function RootLayout({
             <main className="flex-1 pt-16">
               {children}
             </main>
-            <footer className="border-t border-terminal-border py-4 px-6 text-center text-terminal-muted text-xs">
-              <span className="text-neon-400">Bolty</span> Terminal v1.0.0 — Built with{' '}
-              <span className="text-neon-400">♥</span> and strong security
+            <footer className="border-t border-zinc-800/60 py-4 px-6 text-center text-zinc-500 text-xs">
+              <span className="text-monad-400 font-semibold">Bolty</span> — Built for the Monad ecosystem
             </footer>
           </div>
         </AuthProvider>
