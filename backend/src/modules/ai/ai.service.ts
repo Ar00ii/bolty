@@ -90,7 +90,7 @@ export class AiService {
 
     // ── Call Gemini ───────────────────────────────────────────────────────
     const model = this.genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: SYSTEM_PROMPT,
       safetySettings: [
         {
@@ -156,7 +156,7 @@ export class AiService {
       res.write('data: [DONE]\n\n');
       res.end();
     } catch (err) {
-      this.logger.error('Gemini API error', err);
+      this.logger.error(`Gemini API error: ${err?.message || err}`);
       res.write(`data: ${JSON.stringify({ error: 'AI service temporarily unavailable' })}\n\n`);
       res.end();
     }
