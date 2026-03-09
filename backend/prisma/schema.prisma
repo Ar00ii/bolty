@@ -1,0 +1,222 @@
+// Bolty Platform - Prisma Schema
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Identity
+  username      String?   @unique
+  avatarUrl     String?
+  bio           String?   @db.Text
+
+  // GitHub OAuth
+  githubId      String?   @unique
+  githubLogin   String?
+  githubToken   String?   // encrypted
+
+  // Wallet addresses
+  walletAddress String?   @unique  // Ethereum (MetaMask)
+  solanaAddress String?   @unique  // Solana (Phantom)
+  walletNonce   String?            // current nonce for wallet auth
+  nonceExpiry   DateTime?          // nonce expiration
+
+  // Sessions
+  refreshToken  String?
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+
+  // Roles & Status
+  role          UserRole  @default(USER)
+  isBanned      Boolean   @default(false)
+  banReason     String?
+
+  // Relations
+  messages      ChatMessage[]
+  repositories  Repository[]
+  votes         Vote[]
+  reports       Report[]
+  aiSessions    AiSession[]
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+// ─── Chat ────────────────────────────────────────────────────────────────────
+
+model ChatMessage {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  content     String    @db.Text  // sanitized
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  isDeleted   Boolean   @default(false)
+  deletedAt   DateTime?
+  deleteReason String?
+
+  reports     Report[]
+
+  @@map("chat_messages")
+}
+
+// ─── Repositories ────────────────────────────────────────────────────────────
+
+model Repository {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // GitHub data
+  githubRepoId  String    @unique
+  name          String
+  fullName      String
+  description   String?   @db.Text
+  language      String?
+  stars         Int       @default(0)
+  forks         Int       @default(0)
+  githubUrl     String
+  cloneUrl      String
+  topics        String[]
+  isPrivate     Boolean   @default(false)
+
+  // Platform data
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  featured      Boolean   @default(false)
+  downloadCount Int       @default(0)
+
+  votes         Vote[]
+
+  @@map("repositories")
+}
+
+// ─── Votes ───────────────────────────────────────────────────────────────────
+
+model Vote {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  value        VoteValue
+
+  @@unique([userId, repositoryId])
+  @@map("votes")
+}
+
+enum VoteValue {
+  UP
+  DOWN
+}
+
+// ─── Reports ─────────────────────────────────────────────────────────────────
+
+model Report {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  reason      String    @db.Text
+  status      ReportStatus @default(PENDING)
+
+  reporterId  String
+  reporter    User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  messageId   String?
+  message     ChatMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@map("reports")
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+// ─── AI Sessions ─────────────────────────────────────────────────────────────
+
+model AiSession {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  messages    AiMessage[]
+
+  @@map("ai_sessions")
+}
+
+model AiMessage {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  role        AiRole
+  content     String    @db.Text
+  sessionId   String
+  session     AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("ai_messages")
+}
+
+enum AiRole {
+  USER
+  ASSISTANT
+}
+
+// ─── Audit Logs ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  action      String
+  resource    String
+  resourceId  String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+// ─── Price Cache ──────────────────────────────────────────────────────────────
+
+model PriceSnapshot {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+
+  price       Float
+  volume24h   Float?
+  marketCap   Float?
+  change24h   Float?
+  source      String
+
+  @@map("price_snapshots")
+}
