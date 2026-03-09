@@ -1,4 +1,12 @@
 /** @type {import('next').NextConfig} */
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+const wsUrl  = process.env.NEXT_PUBLIC_WS_URL  || 'http://localhost:3001';
+
+// Extract origin (protocol + host) from URL for CSP
+const apiOrigin = new URL(apiUrl).origin;
+const wsOrigin  = new URL(wsUrl).origin;
+const wsOriginWs = wsOrigin.replace(/^http/, 'ws');
+
 const nextConfig = {
   reactStrictMode: true,
 
@@ -28,11 +36,12 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires these
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https: wss:",
+              // Allow backend API (http or https) + WebSocket connections
+              `connect-src 'self' ${apiOrigin} ${wsOrigin} ${wsOriginWs} https: wss:`,
               "frame-ancestors 'none'",
             ].join('; '),
           },
