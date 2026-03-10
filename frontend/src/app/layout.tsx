@@ -5,12 +5,12 @@ import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { MatrixRain } from '@/components/ui/MatrixRain';
 
 export const metadata: Metadata = {
-  title: 'Bolty | The Solana Memecoin Platform',
-  description: 'The memecoin platform on Solana. Trade, chat, and build.',
-  keywords: ['bolty', 'solana', 'memecoin', 'web3', 'crypto', 'defi'],
+  title: 'Bolty | The Ethereum Memecoin Platform',
+  description: 'The memecoin platform on Ethereum. Trade, publish repos, chat, and earn.',
+  keywords: ['bolty', 'ethereum', 'memecoin', 'web3', 'crypto', 'defi', 'metamask', 'erc20'],
   openGraph: {
-    title: 'Bolty | The Solana Memecoin Platform',
-    description: 'The memecoin platform on Solana.',
+    title: 'Bolty | The Ethereum Memecoin Platform',
+    description: 'The memecoin platform on Ethereum.',
     type: 'website',
   },
   robots: 'index, follow',
@@ -36,7 +36,7 @@ export default function RootLayout({
               {children}
             </main>
             <footer className="border-t border-zinc-800/60 py-4 px-6 text-center text-zinc-500 text-xs">
-              <span className="text-monad-400 font-semibold">Bolty</span> — The Solana memecoin platform
+              <span className="text-monad-400 font-semibold">Bolty</span> — The Ethereum memecoin platform
             </footer>
           </div>
         </AuthProvider>

@@ -149,11 +149,7 @@ export default function ReposPage() {
     }
   };
 
-  const download = async (repoId: string, githubUrl: string, isLocked: boolean) => {
-    if (isLocked) {
-      setError('This repository is locked. Purchase access to download.');
-      return;
-    }
+  const download = async (repoId: string, githubUrl: string) => {
     try {
       const { downloadUrl } = await api.post<{ downloadUrl: string }>(
         `/repos/${repoId}/download`,
@@ -162,6 +158,89 @@ export default function ReposPage() {
       window.open(downloadUrl, '_blank', 'noopener,noreferrer');
     } catch {
       window.open(githubUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const payAndUnlock = async (repo: Repository) => {
+    if (!repo.lockedPriceUsd) return;
+
+    // Fetch seller wallet from repo details
+    let sellerWallet: string | null = null;
+    try {
+      const details = await api.get<{ user: { walletAddress: string } }>(`/repos/${repo.id}`);
+      sellerWallet = details.user?.walletAddress;
+    } catch {
+      setError('Could not fetch seller wallet');
+      return;
+    }
+
+    if (!sellerWallet) {
+      setError('Seller has no Ethereum wallet linked');
+      return;
+    }
+
+    const tokenContract = process.env.NEXT_PUBLIC_TOKEN_CONTRACT || '';
+    const tokenSymbol = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || 'ETH';
+    const tokenPriceUsd = parseFloat(process.env.NEXT_PUBLIC_TOKEN_PRICE_USD || '0');
+
+    try {
+      const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      if (!ethereum) { setError('MetaMask not found'); return; }
+
+      let txHash: string;
+
+      if (tokenContract && tokenPriceUsd > 0) {
+        // ERC-20 token payment
+        const tokenAmount = BigInt(Math.ceil(repo.lockedPriceUsd / tokenPriceUsd));
+        const decimals = parseInt(process.env.NEXT_PUBLIC_TOKEN_DECIMALS || '18');
+        const amount = tokenAmount * BigInt(10 ** decimals);
+        // transfer(address,uint256) selector
+        const data =
+          '0xa9059cbb' +
+          sellerWallet.slice(2).padStart(64, '0') +
+          amount.toString(16).padStart(64, '0');
+
+        txHash = (await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{ from: undefined, to: tokenContract, data }],
+        })) as string;
+      } else {
+        // ETH payment — get current ETH price from our API
+        let ethPrice = 2000; // fallback
+        try {
+          const priceData = await api.get<{ price: number }>('/chart/price');
+          if (priceData.price) ethPrice = priceData.price;
+        } catch { /* use fallback */ }
+
+        const ethAmount = repo.lockedPriceUsd / ethPrice;
+        const weiHex = '0x' + Math.ceil(ethAmount * 1e18).toString(16);
+
+        txHash = (await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{ to: sellerWallet, value: weiHex }],
+        })) as string;
+      }
+
+      setError('');
+      // Verify and record purchase on backend
+      const result = await api.post<{ success: boolean; downloadUrl: string }>(
+        `/repos/${repo.id}/purchase`,
+        { txHash },
+      );
+      if (result.success && result.downloadUrl) {
+        window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+        await fetchRepos();
+      }
+      alert(`Payment sent! ${tokenSymbol} transaction: ${txHash.slice(0, 12)}...`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('rejected') || msg.includes('denied')) {
+        setError('Payment cancelled');
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Payment failed: ' + msg.slice(0, 80));
+      }
     }
   };
 
@@ -431,13 +510,13 @@ export default function ReposPage() {
                 {repo.isLocked ? (
                   <button
                     className="text-xs py-1 px-3 font-mono bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 rounded hover:bg-yellow-400/20 transition-colors"
-                    onClick={() => setError('Payment integration coming soon! Price: $' + repo.lockedPriceUsd)}
+                    onClick={() => payAndUnlock(repo)}
                   >
-                    🔒 unlock ${repo.lockedPriceUsd}
+                    🔒 pay ${repo.lockedPriceUsd}
                   </button>
                 ) : (
                   <button
-                    onClick={() => download(repo.id, repo.githubUrl, repo.isLocked)}
+                    onClick={() => download(repo.id, repo.githubUrl)}
                     className="btn-neon text-xs py-1 px-3"
                   >
                     download

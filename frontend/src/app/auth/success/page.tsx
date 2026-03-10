@@ -6,13 +6,24 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function AuthSuccessPage() {
   const router = useRouter();
-  const { refresh } = useAuth();
+  const { refresh, user, isLoading } = useAuth();
 
   useEffect(() => {
     refresh().then(() => {
-      router.push('/');
+      // handled by the second useEffect once user is loaded
     });
-  }, [refresh, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) { router.push('/auth'); return; }
+    if (!user.profileSetup) {
+      router.push('/profile/setup');
+    } else {
+      router.push('/');
+    }
+  }, [user, isLoading, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

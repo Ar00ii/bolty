@@ -8,6 +8,8 @@ import {
   Query,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -80,6 +82,12 @@ class PublishRepoDto {
   @Min(0.01)
   @Type(() => Number)
   lockedPriceUsd?: number;
+}
+
+class PurchaseRepoDto {
+  @IsString()
+  @IsNotEmpty()
+  txHash: string;
 }
 
 class VoteDto {
@@ -173,6 +181,27 @@ export class ReposController {
     @CurrentUser('id') userId: string,
   ) {
     return this.reposService.removeVote(userId, repoId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 3600000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @Post(':id/purchase')
+  purchaseRepo(
+    @Param('id') repoId: string,
+    @Body() dto: PurchaseRepoDto,
+    @CurrentUser('id') buyerId: string,
+  ) {
+    return this.reposService.purchaseRepository(buyerId, repoId, dto.txHash);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/purchased')
+  checkPurchased(
+    @Param('id') repoId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.reposService.checkPurchased(userId, repoId);
   }
 
   @Public()

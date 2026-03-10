@@ -4,9 +4,11 @@ import {
   ForbiddenException,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
@@ -311,12 +313,103 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     const repo = await this.prisma.repository.findUnique({
       where: { id },
       include: {
-        user: { select: { username: true, avatarUrl: true, githubLogin: true } },
+        user: { select: { username: true, displayName: true, avatarUrl: true, walletAddress: true } },
         votes: userId ? { where: { userId } } : false,
         _count: { select: { votes: true } },
       },
     });
     if (!repo) throw new NotFoundException('Repository not found');
     return repo;
+  }
+
+  // ── Purchase (locked repos) ────────────────────────────────────────────────
+
+  async purchaseRepository(buyerId: string, repoId: string, txHash: string) {
+    const repo = await this.prisma.repository.findUnique({
+      where: { id: repoId },
+      include: { user: { select: { id: true, walletAddress: true } } },
+    });
+
+    if (!repo) throw new NotFoundException('Repository not found');
+    if (!repo.isLocked) throw new BadRequestException('Repository is not locked');
+    if (repo.userId === buyerId) throw new ForbiddenException('Cannot purchase your own repository');
+
+    // Check if already purchased
+    const existing = await this.prisma.repoPurchase.findFirst({
+      where: { buyerId, repositoryId: repoId, verified: true },
+    });
+    if (existing) throw new ConflictException('Already purchased');
+
+    const sellerWallet = repo.user.walletAddress;
+    if (!sellerWallet) {
+      throw new BadRequestException('Seller has no wallet address configured');
+    }
+
+    // ── On-chain verification ──────────────────────────────────────────────
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const tokenContract = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
+
+    let verified = false;
+    let amountWei = '0';
+
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const receipt = await provider.getTransactionReceipt(txHash);
+
+      if (!receipt || receipt.status !== 1) {
+        throw new BadRequestException('Transaction failed or not found');
+      }
+
+      if (tokenContract) {
+        // ERC-20 token payment — check Transfer event
+        const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+        const transferLog = receipt.logs.find(
+          (log) =>
+            log.address.toLowerCase() === tokenContract.toLowerCase() &&
+            log.topics[0] === TRANSFER_TOPIC &&
+            log.topics[2] &&
+            '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
+        );
+        if (!transferLog) throw new BadRequestException('No valid token transfer found');
+        amountWei = BigInt(transferLog.data).toString();
+        verified = true;
+      } else {
+        // ETH payment — check direct transfer
+        const tx = await provider.getTransaction(txHash);
+        if (!tx) throw new BadRequestException('Transaction not found');
+        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
+          throw new BadRequestException('Transaction recipient does not match seller');
+        }
+        amountWei = tx.value.toString();
+        verified = true;
+      }
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      this.logger.error(`Purchase verification error: ${err instanceof Error ? err.message : err}`);
+      throw new BadRequestException('Could not verify transaction on-chain');
+    }
+
+    const purchase = await this.prisma.repoPurchase.create({
+      data: {
+        txHash,
+        buyerId,
+        repositoryId: repoId,
+        amountWei,
+        verified,
+      },
+    });
+
+    return {
+      success: true,
+      purchaseId: purchase.id,
+      downloadUrl: repo.githubUrl + '/archive/refs/heads/main.zip',
+    };
+  }
+
+  async checkPurchased(userId: string, repoId: string) {
+    const purchase = await this.prisma.repoPurchase.findFirst({
+      where: { buyerId: userId, repositoryId: repoId, verified: true },
+    });
+    return { purchased: !!purchase };
   }
 }

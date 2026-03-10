@@ -21,6 +21,8 @@ export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-terminal-bg/95 backdrop-blur-sm border-b border-terminal-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -56,10 +58,27 @@ export function Navbar() {
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <>
-                <span className="text-terminal-muted text-xs hidden sm:block">
-                  <span className="text-monad-400">@</span>
-                  {user?.username || user?.githubLogin || 'user'}
-                </span>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 group"
+                >
+                  {user?.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.avatarUrl}
+                      alt={displayLabel}
+                      className="w-6 h-6 rounded-full border border-zinc-700 group-hover:border-monad-400/50 transition-colors"
+                    />
+                  ) : (
+                    <div className="w-6 h-6 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold">
+                      {displayLabel[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-terminal-muted text-xs hidden sm:block group-hover:text-monad-400 transition-colors">
+                    <span className="text-monad-400">@</span>
+                    {displayLabel}
+                  </span>
+                </Link>
                 <button
                   onClick={logout}
                   className="btn-neon text-xs py-1.5 px-3"
@@ -103,6 +122,15 @@ export function Navbar() {
                 {`> ${link.label}`}
               </Link>
             ))}
+            {isAuthenticated && (
+              <Link
+                href="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-2 text-sm font-mono text-terminal-muted hover:text-terminal-text"
+              >
+                {`> profile`}
+              </Link>
+            )}
           </div>
         )}
       </div>

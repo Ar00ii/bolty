@@ -3,14 +3,18 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api/client';
 
-interface User {
+export interface User {
   id: string;
   username: string | null;
+  displayName: string | null;
   avatarUrl: string | null;
   githubLogin: string | null;
   walletAddress: string | null;
-  solanaAddress: string | null;
   role: string;
+  profileSetup: boolean;
+  twitterUrl: string | null;
+  linkedinUrl: string | null;
+  websiteUrl: string | null;
 }
 
 interface AuthContextType {

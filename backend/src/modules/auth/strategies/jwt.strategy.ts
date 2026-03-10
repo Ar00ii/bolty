@@ -30,12 +30,17 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       select: {
         id: true,
         username: true,
+        displayName: true,
+        avatarUrl: true,
+        bio: true,
         role: true,
         isBanned: true,
         githubLogin: true,
         walletAddress: true,
-        solanaAddress: true,
-        avatarUrl: true,
+        profileSetup: true,
+        twitterUrl: true,
+        linkedinUrl: true,
+        websiteUrl: true,
       },
     });
 

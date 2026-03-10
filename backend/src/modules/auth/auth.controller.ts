@@ -21,7 +21,7 @@ import { WalletAuthService } from './wallet-auth.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { GetNonceDto, VerifyEthereumDto, VerifySolanaDto } from './dto/wallet-auth.dto';
+import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -100,43 +100,6 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const tokens = await this.walletAuthService.verifyEthereum(
-      dto.address,
-      dto.signature,
-      dto.nonce,
-      req.ip,
-    );
-
-    res.cookie('access_token', tokens.accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: 15 * 60 * 1000,
-    });
-    res.cookie('refresh_token', tokens.refreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    return res.json({ success: true });
-  }
-
-  // ── Phantom ───────────────────────────────────────────────────────────────
-
-  @Public()
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
-  @Post('nonce/solana')
-  async getSolanaNonce(@Body() dto: GetNonceDto) {
-    return this.walletAuthService.getSolanaNonce(dto.address);
-  }
-
-  @Public()
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('verify/solana')
-  async verifySolana(
-    @Body() dto: VerifySolanaDto,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    const tokens = await this.walletAuthService.verifySolana(
       dto.address,
       dto.signature,
       dto.nonce,

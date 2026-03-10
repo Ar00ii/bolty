@@ -38,6 +38,13 @@ model User {
   lastLoginAt   DateTime?
   lastLoginIp   String?
 
+  // Profile
+  displayName   String?
+  twitterUrl    String?
+  linkedinUrl   String?
+  websiteUrl    String?
+  profileSetup  Boolean   @default(false)
+
   // Roles & Status
   role          UserRole  @default(USER)
   isBanned      Boolean   @default(false)
@@ -53,6 +60,7 @@ model User {
   sentDMs        DirectMessage[]  @relation("SentDMs")
   receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
   marketListings MarketListing[]  @relation("MarketSeller")
+  purchasesMade  RepoPurchase[]   @relation("Buyer")
 
   @@map("users")
 }
@@ -114,8 +122,29 @@ model Repository {
 
   votes          Vote[]
   marketListings MarketListing[]
+  purchases      RepoPurchase[]
 
   @@map("repositories")
+}
+
+// ─── Repo Purchases (locked repo payments) ───────────────────────────────────
+
+model RepoPurchase {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+
+  txHash       String     @unique          // Ethereum tx hash
+  verified     Boolean    @default(false)
+  amountWei    String     @default("0")    // stored as string to avoid precision loss
+
+  buyerId      String
+  buyer        User       @relation("Buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  @@index([buyerId, repositoryId])
+  @@map("repo_purchases")
 }
 
 // ─── Votes ───────────────────────────────────────────────────────────────────
