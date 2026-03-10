@@ -22,6 +22,10 @@ model User {
   avatarUrl     String?
   bio           String?   @db.Text
 
+  // Email / Password auth
+  email         String?   @unique
+  passwordHash  String?
+
   // GitHub OAuth
   githubId      String?   @unique
   githubLogin   String?
@@ -281,6 +285,7 @@ model MarketListing {
   status       ListingStatus @default(PENDING_REVIEW)
   scanPassed   Boolean       @default(false)
   scanNote     String?
+  agentUrl     String?       // URL for AI agents (OpenAI, Claude, custom endpoint)
 
   @@map("market_listings")
 }
@@ -289,6 +294,7 @@ enum ListingType {
   REPO
   BOT
   SCRIPT
+  AI_AGENT
   OTHER
 }
 

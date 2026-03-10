@@ -12,11 +12,12 @@ import { sanitizeText } from '../../common/sanitize/sanitize.util';
 interface CreateListingDto {
   title: string;
   description: string;
-  type: 'REPO' | 'BOT' | 'SCRIPT' | 'OTHER';
+  type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
   price: number;
   currency?: string;
   tags?: string[];
   repositoryId?: string;
+  agentUrl?: string;
 }
 
 @Injectable()
@@ -97,6 +98,7 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
         tags: (dto.tags || []).map((t) => sanitizeText(t.slice(0, 50))).slice(0, 10),
         sellerId,
         repositoryId: dto.repositoryId || null,
+        agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
         status: scan.safe ? 'ACTIVE' : 'PENDING_REVIEW',
         scanPassed: scan.safe,
         scanNote: scan.reason,

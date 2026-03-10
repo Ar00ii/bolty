@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   Logger,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
@@ -128,6 +129,84 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
+  }
+
+  // ── Email / Password Auth ─────────────────────────────────────────────────
+
+  async registerWithEmail(data: {
+    email: string;
+    username: string;
+    password: string;
+  }): Promise<AuthTokens> {
+    const email = data.email.toLowerCase().trim();
+    const username = data.username.toLowerCase().trim();
+
+    const existingEmail = await this.prisma.user.findUnique({ where: { email } });
+    if (existingEmail) throw new ConflictException('Email already in use');
+
+    const existingUsername = await this.prisma.user.findUnique({ where: { username } });
+    if (existingUsername) throw new ConflictException('Username already taken');
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
+
+    const user = await this.prisma.user.create({
+      data: { email, username, passwordHash, displayName: username },
+    });
+
+    this.logger.log(`New email user registered: ${username}`);
+    return this.generateTokens(user.id);
+  }
+
+  async loginWithEmail(data: { email: string; password: string }): Promise<AuthTokens> {
+    const email = data.email.toLowerCase().trim();
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const valid = await bcrypt.compare(data.password, user.passwordHash);
+    if (!valid) throw new UnauthorizedException('Invalid credentials');
+
+    if (user.isBanned) throw new UnauthorizedException('Account is banned');
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    return this.generateTokens(user.id);
+  }
+
+  // ── GitHub Linking ────────────────────────────────────────────────────────
+
+  async linkGitHubToUser(
+    userId: string,
+    githubProfile: { id: string; login: string; avatar_url: string },
+  ): Promise<void> {
+    const existing = await this.prisma.user.findUnique({
+      where: { githubId: githubProfile.id },
+    });
+    if (existing && existing.id !== userId) {
+      throw new ConflictException('This GitHub account is already linked to another user');
+    }
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        githubId: githubProfile.id,
+        githubLogin: githubProfile.login,
+        avatarUrl: githubProfile.avatar_url,
+      },
+    });
+    this.logger.log(`GitHub linked for user ${userId}: @${githubProfile.login}`);
+  }
+
+  async unlinkGitHub(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { githubId: null, githubLogin: null, githubToken: null },
+    });
+    this.logger.log(`GitHub unlinked for user ${userId}`);
   }
 
   // ── GitHub OAuth ──────────────────────────────────────────────────────────

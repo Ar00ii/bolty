@@ -10,21 +10,23 @@ interface MarketListing {
   createdAt: string;
   title: string;
   description: string;
-  type: 'REPO' | 'BOT' | 'SCRIPT' | 'OTHER';
+  type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
   price: number;
   currency: string;
   tags: string[];
   status: string;
+  agentUrl?: string | null;
   seller: { id: string; username: string | null; avatarUrl: string | null };
   repository: { id: string; name: string; githubUrl: string; language: string | null } | null;
 }
 
-const TYPES = ['ALL', 'REPO', 'BOT', 'SCRIPT', 'OTHER'];
+const TYPES = ['ALL', 'REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'];
 
 const TYPE_LABELS: Record<string, string> = {
   ALL: 'all',
   REPO: 'repo',
   BOT: 'bot',
+  AI_AGENT: 'ai agent',
   SCRIPT: 'script',
   OTHER: 'other',
 };
@@ -32,6 +34,7 @@ const TYPE_LABELS: Record<string, string> = {
 const TYPE_COLORS: Record<string, string> = {
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   BOT: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+  AI_AGENT: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
   SCRIPT: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
@@ -50,10 +53,11 @@ export default function MarketPage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    type: 'REPO' as 'REPO' | 'BOT' | 'SCRIPT' | 'OTHER',
+    type: 'REPO' as 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER',
     price: '',
     currency: 'SOL',
     tags: '',
+    agentUrl: '',
   });
 
   const fetchListings = useCallback(async () => {
@@ -90,9 +94,10 @@ export default function MarketPage() {
         price: parseFloat(form.price) || 0,
         currency: form.currency,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
+        agentUrl: form.agentUrl.trim() || undefined,
       });
       setShowCreate(false);
-      setForm({ title: '', description: '', type: 'REPO', price: '', currency: 'SOL', tags: '' });
+      setForm({ title: '', description: '', type: 'REPO', price: '', currency: 'SOL', tags: '', agentUrl: '' });
       await fetchListings();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to create listing');
@@ -182,8 +187,8 @@ export default function MarketPage() {
                 onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}
                 className="terminal-input w-full"
               >
-                {['REPO', 'BOT', 'SCRIPT', 'OTHER'].map((t) => (
-                  <option key={t} value={t}>{t.toLowerCase()}</option>
+                {['REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'].map((t) => (
+                  <option key={t} value={t}>{TYPE_LABELS[t] || t.toLowerCase()}</option>
                 ))}
               </select>
             </div>
@@ -213,6 +218,20 @@ export default function MarketPage() {
                 </select>
               </div>
             </div>
+            {(form.type === 'AI_AGENT' || form.type === 'BOT') && (
+              <div className="md:col-span-2">
+                <label className="text-terminal-muted text-xs font-mono block mb-1">
+                  agent url <span className="text-zinc-600">(OpenAI, Claude, endpoint...)</span>
+                </label>
+                <input
+                  type="url"
+                  value={form.agentUrl}
+                  onChange={(e) => setForm({ ...form, agentUrl: e.target.value })}
+                  placeholder="https://api.openai.com/... o URL de tu agente"
+                  className="terminal-input w-full"
+                />
+              </div>
+            )}
             <div className="md:col-span-2">
               <label className="text-terminal-muted text-xs font-mono block mb-1">tags (comma separated)</label>
               <input
@@ -292,6 +311,17 @@ export default function MarketPage() {
                   >
                     <span>[gh]</span>
                     <span className="truncate">{listing.repository.name}</span>
+                  </a>
+                )}
+                {listing.agentUrl && (
+                  <a
+                    href={listing.agentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-mono text-emerald-400/70 hover:text-emerald-400 transition-colors flex items-center gap-1 mb-3"
+                  >
+                    <span>[agent]</span>
+                    <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
                   </a>
                 )}
 

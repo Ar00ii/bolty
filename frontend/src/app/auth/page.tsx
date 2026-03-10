@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { api, ApiError } from '@/lib/api/client';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
@@ -29,22 +30,6 @@ function MetaMaskLogo({ className }: { className?: string }) {
       <path d="M20.2886 26.7031L24.7359 28.8721L24.1279 23.7012L20.2886 26.7031Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M24.7359 28.872L20.2886 26.703L20.6358 29.609L20.5997 30.8429L24.7359 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M10.2595 28.872L14.406 30.8429L14.3806 29.609L14.7173 26.703L10.2595 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M14.4806 21.8586L10.7754 20.7979L13.3776 19.6279L14.4806 21.8586Z" fill="#233447" stroke="#233447" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M20.5249 21.8586L21.6279 19.6279L24.2407 20.7979L20.5249 21.8586Z" fill="#233447" stroke="#233447" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.2594 28.872L10.9098 23.5335L6.77619 23.6507L10.2594 28.872Z" fill="#CC6228" stroke="#CC6228" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M24.0957 23.5335L24.7354 28.872L28.2293 23.6507L24.0957 23.5335Z" fill="#CC6228" stroke="#CC6228" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M27.2268 17.8088L19.8452 18.1377L20.5248 21.8586L21.6278 19.6279L24.2406 20.7979L27.2268 17.8088Z" fill="#CC6228" stroke="#CC6228" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.7753 20.7979L13.3775 19.6279L14.4805 21.8586L15.1601 18.1377L7.77905 17.8088L10.7753 20.7979Z" fill="#CC6228" stroke="#CC6228" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M7.77905 17.8088L10.878 23.7012L10.7753 20.7979L7.77905 17.8088Z" fill="#E27525" stroke="#E27525" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M24.2406 20.7979L24.1279 23.7012L27.2268 17.8088L24.2406 20.7979Z" fill="#E27525" stroke="#E27525" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M15.1601 18.1377L14.4805 21.8586L15.3353 26.2966L15.5265 20.6341L15.1601 18.1377Z" fill="#E27525" stroke="#E27525" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M19.8452 18.1377L19.4894 20.6235L19.6699 26.2966L20.5248 21.8586L19.8452 18.1377Z" fill="#E27525" stroke="#E27525" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M20.5248 21.8586L19.6699 26.2966L20.2886 26.703L24.1279 23.7012L24.2406 20.7979L20.5248 21.8586Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.7754 20.7979L10.878 23.7012L14.7173 26.703L15.3353 26.2966L14.4806 21.8586L10.7754 20.7979Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M20.5997 30.8429L20.6358 29.609L20.3099 29.3262H14.6954L14.3806 29.609L14.406 30.8429L10.2595 28.872L11.6945 30.053L14.6528 32.0957H20.353L23.3219 30.053L24.7461 28.872L20.5997 30.8429Z" fill="#C0AC9D" stroke="#C0AC9D" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M20.2886 26.703L19.6699 26.2966H15.3353L14.7173 26.703L14.3806 29.609L14.6954 29.3262H20.3099L20.6358 29.609L20.2886 26.703Z" fill="#161616" stroke="#161616" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M33.5168 11.3069L34.6024 6.09326L32.9582 1L20.2886 10.3714L25.1418 14.6491L32.0264 16.6918L33.5807 14.8989L32.9263 14.4265L33.9479 13.4977L33.1461 12.8971L34.1677 12.119L33.5168 11.3069Z" fill="#763E1A" stroke="#763E1A" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M0.403687 6.09326L1.48936 11.3069L0.827637 12.119L1.84924 12.8971L1.04747 13.4977L2.06907 14.4265L1.41465 14.8989L2.95762 16.6918L9.84219 14.6491L14.6954 10.3714L2.04861 1L0.403687 6.09326Z" fill="#763E1A" stroke="#763E1A" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M32.0264 16.6918L25.1418 14.6491L27.2268 17.8088L24.1279 23.7012L28.2294 23.6507H34.3516L32.0264 16.6918Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M9.86407 14.6491L2.9795 16.6918L0.664612 23.6507H6.77627L10.878 23.7012L7.77908 17.8088L9.86407 14.6491Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M19.8452 18.1377L20.2886 10.3714L22.2666 4.99099H12.7396L14.6954 10.3714L15.1601 18.1377L15.3246 20.6449L15.3353 26.2966H19.6699L19.6806 20.6449L19.8452 18.1377Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
@@ -52,223 +37,102 @@ function MetaMaskLogo({ className }: { className?: string }) {
   );
 }
 
-// ── Computer Animation ────────────────────────────────────────
-function ComputerAnimation() {
-  const [typedLines, setTypedLines] = useState<string[]>([]);
-  const [currentLine, setCurrentLine] = useState('');
-  const [lineIndex, setLineIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
+// ── Floating numbers background ───────────────────────────────
+interface FloatingNum {
+  id: number;
+  value: string;
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+}
 
-  const codeLines = [
-    '> connecting to bolty...',
-    '> auth.verify(wallet)',
-    '✓ signature valid',
-    '> loading repos...',
-    '✓ 3 repos found',
-    '> publishing "my-bot"',
-    '✓ listed at $4.99',
-    '> welcome to bolty!',
-  ];
+function FloatingNumbers({ hovered }: { hovered: boolean }) {
+  const [nums, setNums] = useState<FloatingNum[]>([]);
 
   useEffect(() => {
-    if (lineIndex >= codeLines.length) {
-      // Reset after full cycle
-      const timeout = setTimeout(() => {
-        setTypedLines([]);
-        setCurrentLine('');
-        setLineIndex(0);
-        setCharIndex(0);
-      }, 2500);
-      return () => clearTimeout(timeout);
-    }
-
-    if (charIndex < codeLines[lineIndex].length) {
-      const timeout = setTimeout(() => {
-        setCurrentLine((prev) => prev + codeLines[lineIndex][charIndex]);
-        setCharIndex((prev) => prev + 1);
-      }, 45);
-      return () => clearTimeout(timeout);
-    } else {
-      const timeout = setTimeout(() => {
-        setTypedLines((prev) => [...prev, currentLine]);
-        setCurrentLine('');
-        setCharIndex(0);
-        setLineIndex((prev) => prev + 1);
-      }, 400);
-      return () => clearTimeout(timeout);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineIndex, charIndex]);
-
-  // Cursor blink
-  useEffect(() => {
-    const interval = setInterval(() => setShowCursor((v) => !v), 500);
-    return () => clearInterval(interval);
+    const chars = '0123456789ABCDEFabcdef01';
+    const generated: FloatingNum[] = Array.from({ length: 36 }, (_, i) => ({
+      id: i,
+      value: chars[Math.floor(Math.random() * chars.length)],
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 10 + Math.floor(Math.random() * 16),
+      duration: 10 + Math.random() * 16,
+      delay: Math.random() * 12,
+    }));
+    setNums(generated);
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center justify-center h-full select-none">
-      {/* Glow backdrop */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-72 h-72 rounded-full bg-monad-500/10 blur-3xl" />
-      </div>
-
-      {/* Monitor body */}
-      <div className="relative z-10">
-        {/* Screen */}
-        <div className="w-72 h-48 rounded-xl bg-zinc-950 border-2 border-zinc-700 overflow-hidden shadow-2xl shadow-black/60">
-          {/* Browser chrome */}
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-zinc-900 border-b border-zinc-800">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-            <div className="flex-1 mx-2 h-5 bg-zinc-800 rounded text-xs text-zinc-500 flex items-center px-2 font-mono overflow-hidden">
-              <span className="text-monad-400 mr-1">🔒</span>
-              bolty.app
-            </div>
-          </div>
-          {/* Terminal content */}
-          <div className="p-3 font-mono text-xs space-y-0.5 overflow-hidden h-full">
-            {typedLines.map((line, i) => (
-              <div
-                key={i}
-                className={
-                  line.startsWith('✓')
-                    ? 'text-green-400'
-                    : line.startsWith('>')
-                    ? 'text-monad-400'
-                    : 'text-zinc-400'
-                }
-              >
-                {line}
-              </div>
-            ))}
-            {lineIndex < codeLines.length && (
-              <div className={
-                currentLine.startsWith('✓')
-                  ? 'text-green-400'
-                  : currentLine.startsWith('>')
-                  ? 'text-monad-400'
-                  : 'text-zinc-300'
-              }>
-                {currentLine}
-                <span className={`inline-block w-1.5 h-3.5 bg-monad-400 ml-0.5 align-middle transition-opacity ${showCursor ? 'opacity-100' : 'opacity-0'}`} />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Monitor neck */}
-        <div className="mx-auto w-8 h-5 bg-zinc-700 rounded-b" />
-        {/* Monitor stand */}
-        <div className="mx-auto w-24 h-2.5 bg-zinc-700 rounded-lg" />
-      </div>
-
-      {/* Feature pills below */}
-      <div className="relative z-10 mt-8 flex flex-col gap-2 w-full max-w-xs">
-        {[
-          { icon: '🔒', text: 'Publish private repos with a price' },
-          { icon: '⚡', text: 'Wallet-based authentication' },
-          { icon: '🤖', text: 'AI-powered security scanning' },
-        ].map((item) => (
-          <div
-            key={item.text}
-            className="flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 rounded-lg px-3 py-2"
-          >
-            <span className="text-base">{item.icon}</span>
-            <span className="text-xs text-zinc-400">{item.text}</span>
-          </div>
-        ))}
-      </div>
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+      {nums.map((n) => (
+        <span
+          key={n.id}
+          className="absolute font-mono font-bold text-monad-400 transition-opacity duration-700"
+          style={{
+            left: `${n.x}%`,
+            top: `${n.y}%`,
+            fontSize: `${n.size}px`,
+            opacity: hovered ? 0.11 : 0.035,
+            animation: `floatUp ${n.duration}s ${n.delay}s infinite linear`,
+          }}
+        >
+          {n.value}
+        </span>
+      ))}
+      <style>{`
+        @keyframes floatUp {
+          0%   { transform: translateY(0px) rotate(0deg); }
+          50%  { transform: translateY(-18px) rotate(3deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+      `}</style>
     </div>
   );
 }
 
-// ── Install prompt ────────────────────────────────────────────
-function InstallPrompt({
-  name,
-  url,
-  description,
-  icon,
-}: {
-  name: string;
-  url: string;
-  description: string;
-  icon: React.ReactNode;
-}) {
+// ── Trust badge ───────────────────────────────────────────────
+function TrustBadge({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="w-full flex items-center gap-3 px-4 py-3.5
-                 bg-zinc-900/40 border border-dashed border-zinc-700 rounded-xl
-                 transition-all duration-200 hover:border-zinc-500 hover:bg-zinc-800/60 group"
-    >
-      <div className="flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg bg-zinc-800 border border-zinc-700">
-        {icon}
-      </div>
-      <div className="flex-1 text-left">
-        <div className="font-semibold text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">
-          Install {name}
-        </div>
-        <div className="text-xs text-zinc-500">{description}</div>
-      </div>
-      <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-      </svg>
-    </a>
+    <div className="flex items-center gap-2 text-zinc-500 text-xs">
+      <span className="text-monad-400/60">{icon}</span>
+      <span>{text}</span>
+    </div>
   );
 }
 
-// ── Provider button ───────────────────────────────────────────
-function ProviderButton({
-  onClick,
-  disabled,
-  loading,
-  icon,
-  name,
-  description,
-  iconBg,
-  iconBorder,
-  spinColor,
+// ── Input field ───────────────────────────────────────────────
+function Field({
+  label,
+  type,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
 }: {
-  onClick: () => void;
-  disabled: boolean;
-  loading: boolean;
-  icon: React.ReactNode;
-  name: string;
-  description: string;
-  iconBg: string;
-  iconBorder: string;
-  spinColor: string;
+  label: string;
+  type: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  autoComplete?: string;
 }) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className="w-full flex items-center gap-3 px-4 py-3.5
-                 bg-zinc-900/60 border border-zinc-800 rounded-xl
-                 transition-all duration-200 cursor-pointer
-                 hover:bg-zinc-800/80 hover:border-zinc-700
-                 disabled:opacity-50 disabled:cursor-not-allowed group"
-    >
-      <div className={`flex-shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-colors duration-200 ${iconBg} ${iconBorder}`}>
-        {icon}
-      </div>
-      <div className="flex-1 text-left">
-        <div className="font-semibold text-sm text-white">{name}</div>
-        <div className="text-xs text-zinc-400">{description}</div>
-      </div>
-      {loading ? (
-        <div className={`w-4 h-4 rounded-full border-2 border-opacity-30 border-t-opacity-100 animate-spin flex-shrink-0 ${spinColor}`} />
-      ) : (
-        <svg className="w-4 h-4 text-zinc-500 group-hover:text-white transition-colors flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      )}
-    </button>
+    <div>
+      <label className="block text-xs text-zinc-400 mb-1.5">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm
+                   outline-none focus:border-monad-500/60 focus:bg-zinc-900 transition-all
+                   placeholder:text-zinc-600"
+      />
+    </div>
   );
 }
 
@@ -277,42 +141,83 @@ export default function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
-  const [loading, setLoading] = useState<'metamask' | 'github' | null>(null);
+  const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [hovered, setHovered] = useState(false);
+
+  // Login state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+
+  // Register state
+  const [regEmail, setRegEmail] = useState('');
+  const [regUsername, setRegUsername] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirm, setRegConfirm] = useState('');
+
+  const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
 
+  useEffect(() => { setMetamaskInstalled(isMetaMaskInstalled()); }, []);
   useEffect(() => {
-    setMetamaskInstalled(isMetaMaskInstalled());
-  }, []);
-
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      router.push('/');
-    }
+    if (!authLoading && isAuthenticated) router.push('/');
   }, [isAuthenticated, authLoading, router]);
 
-  const handleMetaMask = async () => {
-    setLoading('metamask');
-    setError('');
-    setSuccess('');
+  const clearMessages = () => { setError(''); setSuccess(''); };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    if (!loginEmail || !loginPassword) { setError('Complete todos los campos'); return; }
+    setLoading('email');
     try {
-      await connectMetaMask();
+      await api.post('/auth/login/email', { email: loginEmail, password: loginPassword });
       await refresh();
-      setSuccess('Connected with MetaMask.');
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
+      setError(err instanceof ApiError ? err.message : 'Error al iniciar sesión');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    if (!regEmail || !regUsername || !regPassword) { setError('Complete todos los campos'); return; }
+    if (regPassword !== regConfirm) { setError('Las contraseñas no coinciden'); return; }
+    if (regPassword.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
+    setLoading('email');
+    try {
+      await api.post('/auth/register', { email: regEmail, username: regUsername, password: regPassword });
+      await refresh();
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Error al registrarse');
     } finally {
       setLoading(null);
     }
   };
 
   const handleGitHub = () => {
+    clearMessages();
     setLoading('github');
-    setError('');
     window.location.href = `${API_URL}/auth/github`;
+  };
+
+  const handleMetaMask = async () => {
+    clearMessages();
+    setLoading('metamask');
+    try {
+      await connectMetaMask();
+      await refresh();
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
+    } finally {
+      setLoading(null);
+    }
   };
 
   if (authLoading) {
@@ -326,103 +231,239 @@ export default function AuthPage() {
   const anyLoading = loading !== null;
 
   return (
-    <div className="min-h-screen flex">
-      {/* ── Left: Auth Form ─────────────────────────────────── */}
-      <div className="flex flex-col justify-center px-8 py-16 w-full max-w-md mx-auto lg:mx-0 lg:w-1/2">
-        {/* Header */}
-        <div className="mb-8">
+    <div
+      className="min-h-screen flex items-center justify-center relative px-4 py-12"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Floating numbers background */}
+      <FloatingNumbers hovered={hovered} />
+
+      {/* Radial gradient center glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Card */}
+      <div className="relative z-10 w-full max-w-md">
+
+        {/* Logo + brand */}
+        <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-monad-500/10 border border-monad-500/20 mb-4">
             <svg className="w-7 h-7 text-monad-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight mb-1">Connect to Bolty</h1>
-          <p className="text-sm text-zinc-400">Sign in with your wallet or GitHub account</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Bolty</h1>
+          <p className="text-sm text-zinc-500 mt-1">La plataforma de agentes e IA para developers</p>
         </div>
 
-        {/* Error */}
-        {error && (
-          <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
-            <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-            </svg>
-            <p className="text-red-400 text-sm leading-relaxed">{error}</p>
-          </div>
-        )}
+        {/* Main card */}
+        <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-sm shadow-2xl shadow-black/40">
 
-        {/* Success */}
-        {success && (
-          <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
-            <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-green-400 text-sm">{success}</p>
+          {/* Tabs */}
+          <div className="flex bg-zinc-900/60 rounded-xl p-1 mb-6 border border-zinc-800/60">
+            {(['login', 'register'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => { setTab(t); clearMessages(); }}
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  tab === t
+                    ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30 shadow-sm'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {t === 'login' ? 'Iniciar sesión' : 'Registrarse'}
+              </button>
+            ))}
           </div>
-        )}
 
-        {/* Auth Options */}
-        <div className="space-y-3">
-          {/* MetaMask */}
-          {metamaskInstalled ? (
-            <ProviderButton
-              onClick={handleMetaMask}
-              disabled={anyLoading}
-              loading={loading === 'metamask'}
-              icon={<MetaMaskLogo className="w-5 h-5" />}
-              name="MetaMask"
-              description="Ethereum wallet"
-              iconBg="bg-orange-500/10"
-              iconBorder="border-orange-500/20 group-hover:bg-orange-500/20"
-              spinColor="border-orange-400/30 border-t-orange-400"
-            />
+          {/* Error / success */}
+          {error && (
+            <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+              <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374L10.052 3.378c.866-1.5 3.032-1.5 3.898 0L21.303 16.126zM12 15.75h.008v.008H12v-.008z" />
+              </svg>
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+          {success && (
+            <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
+              <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-green-400 text-sm">{success}</p>
+            </div>
+          )}
+
+          {/* Email form */}
+          {tab === 'login' ? (
+            <form onSubmit={handleLogin} className="space-y-4">
+              <Field
+                label="Correo electrónico"
+                type="email"
+                value={loginEmail}
+                onChange={setLoginEmail}
+                placeholder="tu@email.com"
+                autoComplete="email"
+              />
+              <Field
+                label="Contraseña"
+                type="password"
+                value={loginPassword}
+                onChange={setLoginPassword}
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+              <button
+                type="submit"
+                disabled={anyLoading}
+                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
+                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+              >
+                {loading === 'email' ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Entrando...
+                  </span>
+                ) : 'Iniciar sesión'}
+              </button>
+            </form>
           ) : (
-            <InstallPrompt
-              name="MetaMask"
-              url="https://metamask.io/download/"
-              description="Required to connect an Ethereum wallet"
-              icon={<MetaMaskLogo className="w-5 h-5" />}
-            />
+            <form onSubmit={handleRegister} className="space-y-4">
+              <Field
+                label="Correo electrónico"
+                type="email"
+                value={regEmail}
+                onChange={setRegEmail}
+                placeholder="tu@email.com"
+                autoComplete="email"
+              />
+              <Field
+                label="Usuario"
+                type="text"
+                value={regUsername}
+                onChange={(v) => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                placeholder="miusuario"
+                autoComplete="username"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Field
+                  label="Contraseña"
+                  type="password"
+                  value={regPassword}
+                  onChange={setRegPassword}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                />
+                <Field
+                  label="Confirmar"
+                  type="password"
+                  value={regConfirm}
+                  onChange={setRegConfirm}
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={anyLoading}
+                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
+                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
+              >
+                {loading === 'email' ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Creando cuenta...
+                  </span>
+                ) : 'Crear cuenta'}
+              </button>
+            </form>
           )}
 
           {/* Divider */}
-          <div className="flex items-center gap-3 py-1">
+          <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-zinc-500 text-xs">or continue with</span>
+            <span className="text-zinc-600 text-xs">o continúa con</span>
             <div className="flex-1 h-px bg-zinc-800" />
           </div>
 
-          {/* GitHub */}
-          <ProviderButton
-            onClick={handleGitHub}
-            disabled={anyLoading}
-            loading={loading === 'github'}
-            icon={<GitHubLogo className="w-5 h-5 text-white" />}
-            name="GitHub"
-            description="Sign in and showcase your repos"
-            iconBg="bg-zinc-700/40"
-            iconBorder="border-zinc-600/30 group-hover:bg-zinc-700/60"
-            spinColor="border-zinc-400/30 border-t-zinc-400"
-          />
+          {/* Social buttons */}
+          <div className="space-y-2.5">
+            {/* GitHub */}
+            <button
+              onClick={handleGitHub}
+              disabled={anyLoading}
+              className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
+                         hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150
+                         disabled:opacity-50 disabled:cursor-not-allowed group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+                <GitHubLogo className="w-4 h-4 text-white" />
+              </div>
+              <span className="flex-1 text-left text-sm text-white font-medium">GitHub</span>
+              {loading === 'github'
+                ? <span className="w-4 h-4 rounded-full border-2 border-zinc-400/30 border-t-zinc-400 animate-spin" />
+                : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+              }
+            </button>
+
+            {/* MetaMask */}
+            {metamaskInstalled ? (
+              <button
+                onClick={handleMetaMask}
+                disabled={anyLoading}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
+                           hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150
+                           disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                  <MetaMaskLogo className="w-4 h-4" />
+                </div>
+                <span className="flex-1 text-left text-sm text-white font-medium">MetaMask</span>
+                {loading === 'metamask'
+                  ? <span className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />
+                  : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                }
+              </button>
+            ) : (
+              <a
+                href="https://metamask.io/download/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-xl
+                           hover:border-zinc-700 transition-all duration-150 group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+                  <MetaMaskLogo className="w-4 h-4" />
+                </div>
+                <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors">Instalar MetaMask</span>
+                <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            )}
+          </div>
         </div>
 
-        {/* Footer note */}
-        <p className="text-xs text-zinc-500 mt-6 leading-relaxed">
-          Authentication uses cryptographic signatures.
-          <br />
-          No passwords stored. Replay-attack protected.
-        </p>
-      </div>
-
-      {/* ── Right: Computer Animation (hidden on mobile) ─────── */}
-      <div className="hidden lg:flex flex-1 items-center justify-center relative overflow-hidden border-l border-zinc-800/60">
-        {/* Matrix-like background dots */}
-        <div className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `radial-gradient(circle, #7c3aed22 1px, transparent 1px)`,
-            backgroundSize: '28px 28px',
-          }}
-        />
-        <ComputerAnimation />
+        {/* Trust signals */}
+        <div className="mt-5 flex items-center justify-center gap-6 flex-wrap">
+          <TrustBadge
+            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+            text="Sin datos de terceros"
+          />
+          <TrustBadge
+            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>}
+            text="Contraseñas cifradas"
+          />
+          <TrustBadge
+            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>}
+            text="GitHub vinculable desde perfil"
+          />
+        </div>
       </div>
     </div>
   );

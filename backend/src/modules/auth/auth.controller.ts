@@ -2,13 +2,13 @@ import {
   Controller,
   Post,
   Get,
+  Delete,
   Body,
   Req,
   Res,
   UseGuards,
   HttpCode,
   HttpStatus,
-  Param,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
+import { RegisterEmailDto, LoginEmailDto } from './dto/email-auth.dto';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -38,6 +39,53 @@ export class AuthController {
     private readonly config: ConfigService,
   ) {}
 
+  // ── Email / Password Auth ─────────────────────────────────────────────────
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.CREATED)
+  @Post('register')
+  async register(@Body() dto: RegisterEmailDto, @Res() res: Response) {
+    const tokens = await this.authService.registerWithEmail({
+      email: dto.email,
+      username: dto.username,
+      password: dto.password,
+    });
+
+    res.cookie('access_token', tokens.accessToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(HttpStatus.CREATED).json({ success: true });
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('login/email')
+  async loginEmail(@Body() dto: LoginEmailDto, @Res() res: Response) {
+    const tokens = await this.authService.loginWithEmail({
+      email: dto.email,
+      password: dto.password,
+    });
+
+    res.cookie('access_token', tokens.accessToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ success: true });
+  }
+
   // ── GitHub OAuth ──────────────────────────────────────────────────────────
 
   @Public()
@@ -51,9 +99,31 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(
-    @Req() req: Request & { user: { id: string; login: string; avatar_url: string; bio?: string; accessToken: string } },
+    @Req() req: Request & { user: { id: string; login: string; avatar_url: string; bio?: string; accessToken: string }; cookies: Record<string, string> },
     @Res() res: Response,
   ) {
+    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:3000');
+
+    // If user is already authenticated → link GitHub to existing account
+    const existingToken = (req as unknown as { cookies: Record<string, string> }).cookies?.['access_token'];
+    if (existingToken) {
+      try {
+        const payload = await this.authService.validateToken(existingToken);
+        await this.authService.linkGitHubToUser(payload.sub, {
+          id: req.user.id,
+          login: req.user.login,
+          avatar_url: req.user.avatar_url,
+        });
+        res.cookie('gh_token', req.user.accessToken, {
+          ...COOKIE_OPTIONS,
+          maxAge: 60 * 60 * 1000,
+        });
+        return res.redirect(`${frontendUrl}/profile?linked=github`);
+      } catch {
+        // Token invalid or linking failed — fall through to normal login
+      }
+    }
+
     const tokens = await this.authService.handleGitHubCallback({
       id: req.user.id,
       login: req.user.login,
@@ -61,24 +131,30 @@ export class AuthController {
       bio: req.user.bio,
     });
 
-    // Set HttpOnly cookies
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    // Store GitHub access token in session for repo fetching
     res.cookie('gh_token', req.user.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
     });
 
-    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:3000');
-    res.redirect(`${frontendUrl}/auth/success`);
+    return res.redirect(`${frontendUrl}/auth/success`);
+  }
+
+  // ── GitHub Linking (authenticated) ───────────────────────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete('link/github')
+  async unlinkGitHub(@CurrentUser('id') userId: string) {
+    await this.authService.unlinkGitHub(userId);
+    return { success: true };
   }
 
   // ── MetaMask ──────────────────────────────────────────────────────────────
