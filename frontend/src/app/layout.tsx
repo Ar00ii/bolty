@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Navbar } from '@/components/layout/Navbar';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
-import { MatrixRain } from '@/components/ui/MatrixRain';
+import { ClientShell } from '@/components/layout/ClientShell';
 
 export const metadata: Metadata = {
   title: 'Bolty | The Ethereum Memecoin Platform',
@@ -29,16 +28,9 @@ export default function RootLayout({
       </head>
       <body className="bg-terminal-bg text-terminal-text min-h-screen grid-bg">
         <AuthProvider>
-          <MatrixRain />
-          <div className="flex flex-col min-h-screen relative z-10">
-            <Navbar />
-            <main className="flex-1 pt-16">
-              {children}
-            </main>
-            <footer className="border-t border-zinc-800/60 py-4 px-6 text-center text-zinc-500 text-xs">
-              <span className="text-monad-400 font-semibold">Bolty</span> — The Ethereum memecoin platform
-            </footer>
-          </div>
+          <ClientShell>
+            {children}
+          </ClientShell>
         </AuthProvider>
       </body>
     </html>

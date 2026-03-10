@@ -227,7 +227,7 @@ export default function MarketPage() {
                   type="url"
                   value={form.agentUrl}
                   onChange={(e) => setForm({ ...form, agentUrl: e.target.value })}
-                  placeholder="https://api.openai.com/... o URL de tu agente"
+                  placeholder="https://api.openai.com/... or your agent endpoint"
                   className="terminal-input w-full"
                 />
               </div>

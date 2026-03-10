@@ -9,7 +9,7 @@ const GREEN = '#28c840';
 const DIM_PURPLE = 'rgba(131,110,249,0.4)';
 const DIM_GREEN = 'rgba(40,200,64,0.3)';
 
-export function MatrixRain() {
+export function MatrixRain({ opacity = 0.12 }: { opacity?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dropsRef = useRef<number[]>([]);
   const frameRef = useRef<number | null>(null);
@@ -81,7 +81,7 @@ export function MatrixRain() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0"
-      style={{ opacity: 0.12 }}
+      style={{ opacity, transition: 'opacity 0.6s ease' }}
       aria-hidden="true"
     />
   );
