@@ -41,6 +41,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         twitterUrl: true,
         linkedinUrl: true,
         websiteUrl: true,
+        email: true,
+        twoFactorEnabled: true,
       },
     });
 

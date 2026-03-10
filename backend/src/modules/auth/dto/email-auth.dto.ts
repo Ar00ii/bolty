@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
 
 export class RegisterEmailDto {
   @IsEmail()
@@ -22,4 +22,40 @@ export class LoginEmailDto {
 
   @IsString()
   password: string;
+}
+
+export class Verify2FADto {
+  @IsString()
+  tempToken: string;
+
+  @IsString()
+  @MinLength(6)
+  @MaxLength(6)
+  code: string;
+}
+
+export class RequestEmailChangeDto {
+  @IsEmail()
+  newEmail: string;
+
+  @IsString()
+  password: string;
+}
+
+export class ConfirmEmailChangeDto {
+  @IsString()
+  @MinLength(6)
+  @MaxLength(6)
+  code: string;
+}
+
+export class DeleteAccountDto {
+  @IsString()
+  password: string;
+}
+
+export class Toggle2FADto {
+  @IsString()
+  @IsOptional()
+  password?: string;
 }

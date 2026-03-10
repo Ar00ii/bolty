@@ -154,10 +154,15 @@ export default function AuthPage() {
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
 
-  const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | null>(null);
+  const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | '2fa' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
+
+  // 2FA step
+  const [twoFactorPending, setTwoFactorPending] = useState(false);
+  const [tempToken, setTempToken] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
   useEffect(() => { setMetamaskInstalled(isMetaMaskInstalled()); }, []);
   useEffect(() => {
@@ -165,6 +170,7 @@ export default function AuthPage() {
   }, [isAuthenticated, authLoading, router]);
 
   const clearMessages = () => { setError(''); setSuccess(''); };
+  const resetTwoFactor = () => { setTwoFactorPending(false); setTempToken(''); setTwoFactorCode(''); };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,11 +178,33 @@ export default function AuthPage() {
     if (!loginEmail || !loginPassword) { setError('Please fill in all fields'); return; }
     setLoading('email');
     try {
-      await api.post('/auth/login/email', { email: loginEmail, password: loginPassword });
+      const result = await api.post<{ twoFactorRequired?: boolean; tempToken?: string }>('/auth/login/email', { email: loginEmail, password: loginPassword });
+      if (result.twoFactorRequired && result.tempToken) {
+        setTempToken(result.tempToken);
+        setTwoFactorPending(true);
+        setSuccess('Check your email for the 6-digit verification code.');
+        return;
+      }
       await refresh();
       router.push('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handle2FAVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    if (twoFactorCode.length !== 6) { setError('Enter the 6-digit code from your email'); return; }
+    setLoading('2fa');
+    try {
+      await api.post('/auth/2fa/verify', { tempToken, code: twoFactorCode });
+      await refresh();
+      router.push('/');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally {
       setLoading(null);
     }
@@ -265,11 +293,11 @@ export default function AuthPage() {
         <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-sm shadow-2xl shadow-black/40">
 
           {/* Tabs */}
-          <div className="flex bg-zinc-900/60 rounded-xl p-1 mb-6 border border-zinc-800/60">
+          {!twoFactorPending && <div className="flex bg-zinc-900/60 rounded-xl p-1 mb-6 border border-zinc-800/60">
             {(['login', 'register'] as const).map((t) => (
               <button
                 key={t}
-                onClick={() => { setTab(t); clearMessages(); }}
+                onClick={() => { setTab(t); clearMessages(); resetTwoFactor(); }}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   tab === t
                     ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30 shadow-sm'
@@ -279,7 +307,7 @@ export default function AuthPage() {
                 {t === 'login' ? 'Sign in' : 'Sign up'}
               </button>
             ))}
-          </div>
+          </div>}
 
           {/* Error / success */}
           {error && (
@@ -299,8 +327,57 @@ export default function AuthPage() {
             </div>
           )}
 
+          {/* 2FA step */}
+          {twoFactorPending && (
+            <form onSubmit={handle2FAVerify} className="space-y-4">
+              <div className="text-center pb-2">
+                <div className="w-12 h-12 rounded-full bg-monad-500/10 border border-monad-500/20 flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-6 h-6 text-monad-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                  </svg>
+                </div>
+                <p className="text-sm text-zinc-300 font-medium">Two-Factor Verification</p>
+                <p className="text-xs text-zinc-500 mt-1">Enter the 6-digit code we sent to your email</p>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1.5">Verification Code</label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={twoFactorCode}
+                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  autoComplete="one-time-code"
+                  className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-4 py-3 text-white text-center text-xl font-mono tracking-[0.5em]
+                             outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loading === '2fa' || twoFactorCode.length !== 6}
+                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
+                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading === '2fa' ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                    Verifying...
+                  </span>
+                ) : 'Verify & Sign in'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { resetTwoFactor(); clearMessages(); }}
+                className="w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors py-1"
+              >
+                ← Back to login
+              </button>
+            </form>
+          )}
+
           {/* Email form */}
-          {tab === 'login' ? (
+          {!twoFactorPending && tab === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <Field
                 label="Email"
@@ -332,7 +409,9 @@ export default function AuthPage() {
                 ) : 'Sign in'}
               </button>
             </form>
-          ) : (
+          )}
+
+          {!twoFactorPending && tab === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
               <Field
                 label="Email"
@@ -384,8 +463,8 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-5">
+          {/* Divider + Social buttons — hidden during 2FA step */}
+          {!twoFactorPending && <><div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-zinc-800" />
             <span className="text-zinc-600 text-xs">or continue with</span>
             <div className="flex-1 h-px bg-zinc-800" />
@@ -446,7 +525,7 @@ export default function AuthPage() {
                 </svg>
               </a>
             )}
-          </div>
+          </div></> }
         </div>
 
         {/* Trust signals */}

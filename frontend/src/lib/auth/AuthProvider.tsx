@@ -15,6 +15,8 @@ export interface User {
   twitterUrl: string | null;
   linkedinUrl: string | null;
   websiteUrl: string | null;
+  email: string | null;
+  twoFactorEnabled: boolean;
 }
 
 interface AuthContextType {

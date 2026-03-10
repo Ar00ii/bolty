@@ -31,6 +31,27 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [unlinkingGitHub, setUnlinkingGitHub] = useState(false);
 
+  // Security section
+  const [secMsg, setSecMsg] = useState('');
+  const [secErr, setSecErr] = useState('');
+
+  // 2FA
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [toggling2FA, setToggling2FA] = useState(false);
+  const [disable2FAPassword, setDisable2FAPassword] = useState('');
+
+  // Change email
+  const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'otp'>('idle');
+  const [newEmail, setNewEmail] = useState('');
+  const [emailPassword, setEmailPassword] = useState('');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+
+  // Delete account
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm'>('idle');
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     if (isLoading) return;
     if (!user) { router.push('/auth'); return; }
@@ -39,6 +60,7 @@ export default function ProfilePage() {
     setTwitterUrl(user.twitterUrl || '');
     setLinkedinUrl(user.linkedinUrl || '');
     setWebsiteUrl(user.websiteUrl || '');
+    setTwoFAEnabled(!!user.twoFactorEnabled);
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -82,6 +104,73 @@ export default function ProfilePage() {
       setError(err instanceof ApiError ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handle2FAToggle = async () => {
+    setSecErr(''); setSecMsg('');
+    setToggling2FA(true);
+    try {
+      if (twoFAEnabled) {
+        await api.post('/auth/2fa/disable', { password: disable2FAPassword });
+        setTwoFAEnabled(false);
+        setDisable2FAPassword('');
+        setSecMsg('Two-factor authentication disabled.');
+      } else {
+        await api.post('/auth/2fa/enable', {});
+        setTwoFAEnabled(true);
+        setSecMsg('Two-factor authentication enabled. A code will be sent to your email on next login.');
+      }
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA settings');
+    } finally {
+      setToggling2FA(false);
+    }
+  };
+
+  const handleRequestEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecErr(''); setSecMsg('');
+    setEmailLoading(true);
+    try {
+      await api.post('/auth/email/change-request', { newEmail, password: emailPassword });
+      setEmailStep('otp');
+      setSecMsg(`Verification code sent to ${newEmail}. Enter it below.`);
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to request email change');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleConfirmEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecErr(''); setSecMsg('');
+    setEmailLoading(true);
+    try {
+      await api.post('/auth/email/confirm', { code: emailOtp });
+      await refresh();
+      setEmailStep('idle');
+      setNewEmail(''); setEmailPassword(''); setEmailOtp('');
+      setSecMsg('Email address updated successfully.');
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecErr('');
+    setDeleting(true);
+    try {
+      await api.delete('/auth/account', { password: deletePassword });
+      router.push('/');
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to delete account');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -340,6 +429,194 @@ export default function ProfilePage() {
             </div>
             <span className="text-xs text-zinc-600 border border-zinc-800 px-3 py-1.5 rounded-lg">Coming soon</span>
           </div>
+        </div>
+      </div>
+
+      {/* ── Security ── */}
+      <div className="mt-8 border-t border-zinc-800 pt-6">
+        <h2 className="text-sm font-semibold text-white mb-1">Security</h2>
+        <p className="text-xs text-zinc-500 mb-4">Manage your account security settings.</p>
+
+        {secMsg && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
+            <p className="text-green-400 text-sm">{secMsg}</p>
+          </div>
+        )}
+        {secErr && (
+          <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+            <p className="text-red-400 text-sm">{secErr}</p>
+          </div>
+        )}
+
+        <div className="space-y-4">
+
+          {/* ── 2FA Toggle ── */}
+          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-white">Two-Factor Authentication</div>
+                <div className="text-xs text-zinc-500 mt-0.5">
+                  {twoFAEnabled ? 'Enabled — a code will be emailed to you on login' : 'Disabled — enable for extra login security'}
+                </div>
+              </div>
+              <button
+                onClick={() => { if (!twoFAEnabled) handle2FAToggle(); else setToggling2FA((v) => !v); }}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+                  twoFAEnabled
+                    ? 'text-red-400 border-red-400/30 hover:border-red-400/60'
+                    : 'text-monad-400 border-monad-400/30 hover:border-monad-400/60'
+                }`}
+              >
+                {twoFAEnabled ? 'Disable' : 'Enable'}
+              </button>
+            </div>
+
+            {/* Disable form — password required */}
+            {twoFAEnabled && toggling2FA && (
+              <div className="mt-3 pt-3 border-t border-zinc-800">
+                <p className="text-xs text-zinc-400 mb-2">Enter your password to disable 2FA:</p>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={disable2FAPassword}
+                    onChange={(e) => setDisable2FAPassword(e.target.value)}
+                    placeholder="Current password"
+                    className="flex-1 bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
+                  />
+                  <button
+                    onClick={handle2FAToggle}
+                    disabled={!disable2FAPassword}
+                    className="text-xs text-red-400 border border-red-400/30 px-3 py-2 rounded-xl hover:border-red-400/60 transition-colors disabled:opacity-40"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setToggling2FA(false)}
+                    className="text-xs text-zinc-500 px-2 py-2"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ── Change Email ── */}
+          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <div className="text-sm font-medium text-white">Email Address</div>
+                <div className="text-xs text-zinc-500 mt-0.5 font-mono">
+                  {user?.email || 'No email set'}
+                </div>
+              </div>
+              {emailStep === 'idle' && (
+                <button
+                  onClick={() => setEmailStep('form')}
+                  className="text-xs text-monad-400 border border-monad-400/30 hover:border-monad-400/60 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Change
+                </button>
+              )}
+            </div>
+
+            {emailStep === 'form' && (
+              <form onSubmit={handleRequestEmailChange} className="space-y-3">
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="New email address"
+                  required
+                  className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
+                />
+                <input
+                  type="password"
+                  value={emailPassword}
+                  onChange={(e) => setEmailPassword(e.target.value)}
+                  placeholder="Current password"
+                  className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={emailLoading || !newEmail}
+                    className="flex-1 py-2 rounded-xl bg-monad-500 hover:bg-monad-400 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {emailLoading ? 'Sending...' : 'Send verification code'}
+                  </button>
+                  <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
+                </div>
+              </form>
+            )}
+
+            {emailStep === 'otp' && (
+              <form onSubmit={handleConfirmEmailChange} className="space-y-3">
+                <p className="text-xs text-zinc-400">Enter the 6-digit code sent to <span className="text-white font-mono">{newEmail}</span>:</p>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={emailOtp}
+                  onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-center text-xl font-mono tracking-[0.5em] outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={emailLoading || emailOtp.length !== 6}
+                    className="flex-1 py-2 rounded-xl bg-monad-500 hover:bg-monad-400 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {emailLoading ? 'Verifying...' : 'Confirm change'}
+                  </button>
+                  <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
+                </div>
+              </form>
+            )}
+          </div>
+
+          {/* ── Delete Account ── */}
+          <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-red-400">Delete Account</div>
+                <div className="text-xs text-zinc-500 mt-0.5">Permanently remove your account and all data</div>
+              </div>
+              {deleteStep === 'idle' && (
+                <button
+                  onClick={() => setDeleteStep('confirm')}
+                  className="text-xs text-red-400 border border-red-400/30 hover:border-red-400/60 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+
+            {deleteStep === 'confirm' && (
+              <form onSubmit={handleDeleteAccount} className="mt-3 pt-3 border-t border-red-500/20 space-y-3">
+                <p className="text-xs text-red-300">This action is irreversible. Enter your password to confirm:</p>
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="Current password"
+                  className="w-full bg-zinc-900/70 border border-red-500/30 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-red-500/60 transition-all placeholder:text-zinc-600"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={deleting || !deletePassword}
+                    className="flex-1 py-2 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {deleting ? 'Deleting...' : 'Permanently delete my account'}
+                  </button>
+                  <button type="button" onClick={() => { setDeleteStep('idle'); setDeletePassword(''); setSecErr(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
+                </div>
+              </form>
+            )}
+          </div>
+
         </div>
       </div>
     </div>

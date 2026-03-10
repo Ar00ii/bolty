@@ -22,7 +22,15 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
-import { RegisterEmailDto, LoginEmailDto } from './dto/email-auth.dto';
+import {
+  RegisterEmailDto,
+  LoginEmailDto,
+  Verify2FADto,
+  RequestEmailChangeDto,
+  ConfirmEmailChangeDto,
+  DeleteAccountDto,
+  Toggle2FADto,
+} from './dto/email-auth.dto';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
@@ -69,10 +77,33 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login/email')
   async loginEmail(@Body() dto: LoginEmailDto, @Res() res: Response) {
-    const tokens = await this.authService.loginWithEmail({
+    const result = await this.authService.loginWithEmail({
       email: dto.email,
       password: dto.password,
     });
+
+    if ('twoFactorRequired' in result) {
+      return res.json({ twoFactorRequired: true, tempToken: result.tempToken });
+    }
+
+    res.cookie('access_token', result.accessToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 15 * 60 * 1000,
+    });
+    res.cookie('refresh_token', result.refreshToken, {
+      ...COOKIE_OPTIONS,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({ success: true });
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('2fa/verify')
+  async verify2FA(@Body() dto: Verify2FADto, @Res() res: Response) {
+    const tokens = await this.authService.verifyLogin2FA(dto.tempToken, dto.code);
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
@@ -83,6 +114,60 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    return res.json({ success: true });
+  }
+
+  // ── 2FA Management ────────────────────────────────────────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('2fa/enable')
+  async enable2FA(@CurrentUser('id') userId: string) {
+    await this.authService.enable2FA(userId);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('2fa/disable')
+  async disable2FA(@CurrentUser('id') userId: string, @Body() dto: Toggle2FADto) {
+    await this.authService.disable2FA(userId, dto.password || '');
+    return { success: true };
+  }
+
+  // ── Email Change ──────────────────────────────────────────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('email/change-request')
+  async requestEmailChange(@CurrentUser('id') userId: string, @Body() dto: RequestEmailChangeDto) {
+    await this.authService.requestEmailChange(userId, dto.newEmail, dto.password);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('email/confirm')
+  async confirmEmailChange(@CurrentUser('id') userId: string, @Body() dto: ConfirmEmailChangeDto) {
+    await this.authService.confirmEmailChange(userId, dto.code);
+    return { success: true };
+  }
+
+  // ── Delete Account ────────────────────────────────────────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete('account')
+  async deleteAccount(
+    @CurrentUser('id') userId: string,
+    @Body() dto: DeleteAccountDto,
+    @Res() res: Response,
+  ) {
+    await this.authService.deleteAccount(userId, dto.password);
+    res.clearCookie('access_token', COOKIE_OPTIONS);
+    res.clearCookie('refresh_token', COOKIE_OPTIONS);
+    res.clearCookie('gh_token', COOKIE_OPTIONS);
     return res.json({ success: true });
   }
 
