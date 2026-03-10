@@ -62,7 +62,7 @@ export default function ProfilePage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) { setError('El usuario es obligatorio'); return; }
+    if (!username.trim()) { setError('Username is required'); return; }
     setSaving(true);
     setError('');
     setSaved(false);
@@ -79,20 +79,20 @@ export default function ProfilePage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Error al guardar');
+      setError(err instanceof ApiError ? err.message : 'Failed to save');
     } finally {
       setSaving(false);
     }
   };
 
   const handleUnlinkGitHub = async () => {
-    if (!confirm('¿Desvincular tu cuenta de GitHub?')) return;
+    if (!confirm('Unlink your GitHub account?')) return;
     setUnlinkingGitHub(true);
     try {
       await api.delete('/auth/link/github');
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Error al desvincular GitHub');
+      setError(err instanceof ApiError ? err.message : 'Failed to unlink GitHub');
     } finally {
       setUnlinkingGitHub(false);
     }
@@ -116,8 +116,8 @@ export default function ProfilePage() {
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="mb-8 flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Mi Perfil</h1>
-          <p className="text-sm text-zinc-400">Gestiona tu identidad pública</p>
+          <h1 className="text-2xl font-bold text-white mb-1">My Profile</h1>
+          <p className="text-sm text-zinc-400">Manage your public identity</p>
         </div>
         {profileUrl && (
           <Link
@@ -125,7 +125,7 @@ export default function ProfilePage() {
             target="_blank"
             className="text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-400/30 px-3 py-1.5 rounded-lg transition-colors"
           >
-            ver perfil público ↗
+            view public profile ↗
           </Link>
         )}
       </div>
@@ -183,7 +183,7 @@ export default function ProfilePage() {
       )}
       {saved && (
         <div className="bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
-          <p className="text-green-400 text-sm">Perfil guardado correctamente.</p>
+          <p className="text-green-400 text-sm">Profile saved successfully.</p>
         </div>
       )}
 
@@ -191,7 +191,7 @@ export default function ProfilePage() {
       <form onSubmit={handleSave} className="space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Usuario *</label>
+            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Username *</label>
             <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-monad-500/50 transition-colors">
               <span className="text-monad-400 font-mono text-sm">@</span>
               <input
@@ -206,7 +206,7 @@ export default function ProfilePage() {
           </div>
 
           <div>
-            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Nombre visible</label>
+            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Display Name</label>
             <input
               type="text"
               value={displayName}
@@ -230,7 +230,7 @@ export default function ProfilePage() {
 
         {/* Social links */}
         <div className="border-t border-zinc-800 pt-4">
-          <p className="text-xs text-zinc-500 font-mono mb-3">Redes sociales</p>
+          <p className="text-xs text-zinc-500 font-mono mb-3">Social Links</p>
           <div className="space-y-3">
             {[
               {
@@ -242,7 +242,7 @@ export default function ProfilePage() {
                 ),
                 value: twitterUrl,
                 setter: setTwitterUrl,
-                placeholder: 'https://x.com/tuhandle',
+                placeholder: 'https://x.com/yourhandle',
               },
               {
                 key: 'linkedin',
@@ -253,7 +253,7 @@ export default function ProfilePage() {
                 ),
                 value: linkedinUrl,
                 setter: setLinkedinUrl,
-                placeholder: 'https://linkedin.com/in/tuperfil',
+                placeholder: 'https://linkedin.com/in/yourprofile',
               },
               {
                 key: 'website',
@@ -264,7 +264,7 @@ export default function ProfilePage() {
                 ),
                 value: websiteUrl,
                 setter: setWebsiteUrl,
-                placeholder: 'https://tuweb.com',
+                placeholder: 'https://yourwebsite.com',
               },
             ].map((item) => (
               <div key={item.key} className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-zinc-600 transition-colors">
@@ -286,14 +286,14 @@ export default function ProfilePage() {
           disabled={saving}
           className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm transition-colors disabled:opacity-50"
         >
-          {saving ? 'Guardando...' : 'Guardar perfil'}
+          {saving ? 'Saving...' : 'Save Profile'}
         </button>
       </form>
 
       {/* ── Connected Accounts ── */}
       <div className="mt-8 border-t border-zinc-800 pt-6">
-        <h2 className="text-sm font-semibold text-white mb-1">Cuentas vinculadas</h2>
-        <p className="text-xs text-zinc-500 mb-4">Vincula servicios externos para ampliar tus funcionalidades en Bolty.</p>
+        <h2 className="text-sm font-semibold text-white mb-1">Connected Accounts</h2>
+        <p className="text-xs text-zinc-500 mb-4">Link external services to expand your Bolty features.</p>
 
         <div className="space-y-3">
           {/* GitHub */}
@@ -306,7 +306,7 @@ export default function ProfilePage() {
               {user?.githubLogin ? (
                 <div className="text-xs text-zinc-400 font-mono mt-0.5">@{user.githubLogin}</div>
               ) : (
-                <div className="text-xs text-zinc-600 mt-0.5">No vinculado</div>
+                <div className="text-xs text-zinc-600 mt-0.5">Not linked</div>
               )}
             </div>
             {user?.githubLogin ? (
@@ -315,14 +315,14 @@ export default function ProfilePage() {
                 disabled={unlinkingGitHub}
                 className="text-xs text-zinc-500 hover:text-red-400 border border-zinc-700 hover:border-red-400/40 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
               >
-                {unlinkingGitHub ? 'Desvinculando...' : 'Desvincular'}
+                {unlinkingGitHub ? 'Unlinking...' : 'Unlink'}
               </button>
             ) : (
               <button
                 onClick={handleLinkGitHub}
                 className="text-xs text-monad-400 hover:text-monad-300 border border-monad-400/30 hover:border-monad-400/60 px-3 py-1.5 rounded-lg transition-colors"
               >
-                Vincular
+                Link
               </button>
             )}
           </div>
@@ -336,9 +336,9 @@ export default function ProfilePage() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-zinc-400">LinkedIn</div>
-              <div className="text-xs text-zinc-600 mt-0.5">Añade tu URL en redes sociales arriba</div>
+              <div className="text-xs text-zinc-600 mt-0.5">Add your URL in the Social Links section above</div>
             </div>
-            <span className="text-xs text-zinc-600 border border-zinc-800 px-3 py-1.5 rounded-lg">Próximamente</span>
+            <span className="text-xs text-zinc-600 border border-zinc-800 px-3 py-1.5 rounded-lg">Coming soon</span>
           </div>
         </div>
       </div>

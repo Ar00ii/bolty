@@ -169,14 +169,14 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
-    if (!loginEmail || !loginPassword) { setError('Complete todos los campos'); return; }
+    if (!loginEmail || !loginPassword) { setError('Please fill in all fields'); return; }
     setLoading('email');
     try {
       await api.post('/auth/login/email', { email: loginEmail, password: loginPassword });
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Error al iniciar sesión');
+      setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
     } finally {
       setLoading(null);
     }
@@ -185,16 +185,16 @@ export default function AuthPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
-    if (!regEmail || !regUsername || !regPassword) { setError('Complete todos los campos'); return; }
-    if (regPassword !== regConfirm) { setError('Las contraseñas no coinciden'); return; }
-    if (regPassword.length < 8) { setError('La contraseña debe tener al menos 8 caracteres'); return; }
+    if (!regEmail || !regUsername || !regPassword) { setError('Please fill in all fields'); return; }
+    if (regPassword !== regConfirm) { setError('Passwords do not match'); return; }
+    if (regPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
     setLoading('email');
     try {
       await api.post('/auth/register', { email: regEmail, username: regUsername, password: regPassword });
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Error al registrarse');
+      setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
     } finally {
       setLoading(null);
     }
@@ -258,7 +258,7 @@ export default function AuthPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Bolty</h1>
-          <p className="text-sm text-zinc-500 mt-1">La plataforma de agentes e IA para developers</p>
+          <p className="text-sm text-zinc-500 mt-1">The AI agent platform for developers</p>
         </div>
 
         {/* Main card */}
@@ -276,7 +276,7 @@ export default function AuthPage() {
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                {t === 'login' ? 'Iniciar sesión' : 'Registrarse'}
+                {t === 'login' ? 'Sign in' : 'Sign up'}
               </button>
             ))}
           </div>
@@ -303,15 +303,15 @@ export default function AuthPage() {
           {tab === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <Field
-                label="Correo electrónico"
+                label="Email"
                 type="email"
                 value={loginEmail}
                 onChange={setLoginEmail}
-                placeholder="tu@email.com"
+                placeholder="you@email.com"
                 autoComplete="email"
               />
               <Field
-                label="Contraseña"
+                label="Password"
                 type="password"
                 value={loginPassword}
                 onChange={setLoginPassword}
@@ -327,32 +327,32 @@ export default function AuthPage() {
                 {loading === 'email' ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Entrando...
+                    Signing in...
                   </span>
-                ) : 'Iniciar sesión'}
+                ) : 'Sign in'}
               </button>
             </form>
           ) : (
             <form onSubmit={handleRegister} className="space-y-4">
               <Field
-                label="Correo electrónico"
+                label="Email"
                 type="email"
                 value={regEmail}
                 onChange={setRegEmail}
-                placeholder="tu@email.com"
+                placeholder="you@email.com"
                 autoComplete="email"
               />
               <Field
-                label="Usuario"
+                label="Username"
                 type="text"
                 value={regUsername}
                 onChange={(v) => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                placeholder="miusuario"
+                placeholder="myusername"
                 autoComplete="username"
               />
               <div className="grid grid-cols-2 gap-3">
                 <Field
-                  label="Contraseña"
+                  label="Password"
                   type="password"
                   value={regPassword}
                   onChange={setRegPassword}
@@ -360,7 +360,7 @@ export default function AuthPage() {
                   autoComplete="new-password"
                 />
                 <Field
-                  label="Confirmar"
+                  label="Confirm"
                   type="password"
                   value={regConfirm}
                   onChange={setRegConfirm}
@@ -377,9 +377,9 @@ export default function AuthPage() {
                 {loading === 'email' ? (
                   <span className="flex items-center justify-center gap-2">
                     <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Creando cuenta...
+                    Creating account...
                   </span>
-                ) : 'Crear cuenta'}
+                ) : 'Create account'}
               </button>
             </form>
           )}
@@ -387,7 +387,7 @@ export default function AuthPage() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-zinc-600 text-xs">o continúa con</span>
+            <span className="text-zinc-600 text-xs">or continue with</span>
             <div className="flex-1 h-px bg-zinc-800" />
           </div>
 
@@ -440,7 +440,7 @@ export default function AuthPage() {
                 <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
                   <MetaMaskLogo className="w-4 h-4" />
                 </div>
-                <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors">Instalar MetaMask</span>
+                <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors">Install MetaMask</span>
                 <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
@@ -453,15 +453,15 @@ export default function AuthPage() {
         <div className="mt-5 flex items-center justify-center gap-6 flex-wrap">
           <TrustBadge
             icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
-            text="Sin datos de terceros"
+            text="No third-party data"
           />
           <TrustBadge
             icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>}
-            text="Contraseñas cifradas"
+            text="Encrypted passwords"
           />
           <TrustBadge
             icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>}
-            text="GitHub vinculable desde perfil"
+            text="Link GitHub from your profile"
           />
         </div>
       </div>
