@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
-import { connectPhantom, isPhantomInstalled } from '@/lib/wallet/solana';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -49,17 +48,6 @@ function MetaMaskLogo({ className }: { className?: string }) {
       <path d="M32.0264 16.6918L25.1418 14.6491L27.2268 17.8088L24.1279 23.7012L28.2294 23.6507H34.3516L32.0264 16.6918Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M9.86407 14.6491L2.9795 16.6918L0.664612 23.6507H6.77627L10.878 23.7012L7.77908 17.8088L9.86407 14.6491Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M19.8452 18.1377L20.2886 10.3714L22.2666 4.99099H12.7396L14.6954 10.3714L15.1601 18.1377L15.3246 20.6449L15.3353 26.2966H19.6699L19.6806 20.6449L19.8452 18.1377Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-
-function PhantomLogo({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 128 128" fill="none" aria-hidden="true">
-      <rect width="128" height="128" rx="24" fill="#AB9FF2"/>
-      <path fillRule="evenodd" clipRule="evenodd" d="M63.9507 28.0293C45.1979 28.0293 30.0811 42.4653 30.0811 60.3635V80.8016C30.0811 91.4085 38.7207 100 49.3879 100H78.7135C89.3807 100 98.0202 91.4085 98.0202 80.8016V60.3635C98.0202 42.4653 82.9034 28.0293 63.9507 28.0293ZM55.0528 71.9787C55.0528 76.5697 51.3028 80.2948 46.6801 80.2948C42.0574 80.2948 38.3073 76.5697 38.3073 71.9787V66.0682C38.3073 61.4773 42.0574 57.7521 46.6801 57.7521C51.3028 57.7521 55.0528 61.4773 55.0528 66.0682V71.9787ZM81.0787 71.9787C81.0787 76.5697 77.3287 80.2948 72.7059 80.2948C68.0832 80.2948 64.3332 76.5697 64.3332 71.9787V66.0682C64.3332 61.4773 68.0832 57.7521 72.7059 57.7521C77.3287 57.7521 81.0787 61.4773 81.0787 66.0682V71.9787Z" fill="white"/>
-      <path fillRule="evenodd" clipRule="evenodd" d="M94.8673 55.3405H98.0473C101.124 55.3405 103.617 57.8341 103.617 60.9118V75.1427C103.617 78.2204 101.124 80.7139 98.0473 80.7139H94.8673V55.3405ZM29.3834 55.3405H32.5634V80.7139H29.3834C26.3067 80.7139 23.813 78.2204 23.813 75.1427V60.9118C23.813 57.8341 26.3067 55.3405 29.3834 55.3405Z" fill="white"/>
-      <path fillRule="evenodd" clipRule="evenodd" d="M64.0214 99.1071C60.1274 99.1071 56.3748 98.2618 52.9934 96.7327C52.1173 96.3335 51.144 97.0417 51.2879 97.9949C51.6437 100.333 52.1958 102.627 52.9354 104.848C56.5084 105.64 60.2181 106.053 64.0214 106.053C68.0636 106.053 71.9911 105.597 75.7567 104.73C76.4932 102.538 77.0393 100.274 77.3864 97.9677C77.5249 97.0127 76.5507 96.3108 75.6769 96.7136C72.2363 98.2548 68.2273 99.1071 64.0214 99.1071Z" fill="white"/>
     </svg>
   );
 }
@@ -289,16 +277,14 @@ export default function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
-  const [loading, setLoading] = useState<'metamask' | 'phantom' | 'github' | null>(null);
+  const [loading, setLoading] = useState<'metamask' | 'github' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
-  const [phantomInstalled, setPhantomInstalled] = useState(false);
 
   useEffect(() => {
     setMetamaskInstalled(isMetaMaskInstalled());
-    setPhantomInstalled(isPhantomInstalled());
   }, []);
 
   useEffect(() => {
@@ -318,22 +304,6 @@ export default function AuthPage() {
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
-    } finally {
-      setLoading(null);
-    }
-  };
-
-  const handlePhantom = async () => {
-    setLoading('phantom');
-    setError('');
-    setSuccess('');
-    try {
-      await connectPhantom();
-      await refresh();
-      setSuccess('Connected with Phantom.');
-      router.push('/');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Phantom connection failed.');
     } finally {
       setLoading(null);
     }
@@ -411,28 +381,6 @@ export default function AuthPage() {
               url="https://metamask.io/download/"
               description="Required to connect an Ethereum wallet"
               icon={<MetaMaskLogo className="w-5 h-5" />}
-            />
-          )}
-
-          {/* Phantom */}
-          {phantomInstalled ? (
-            <ProviderButton
-              onClick={handlePhantom}
-              disabled={anyLoading}
-              loading={loading === 'phantom'}
-              icon={<PhantomLogo className="w-5 h-5" />}
-              name="Phantom"
-              description="Solana wallet"
-              iconBg="bg-purple-500/10"
-              iconBorder="border-purple-500/20 group-hover:bg-purple-500/20"
-              spinColor="border-purple-400/30 border-t-purple-400"
-            />
-          ) : (
-            <InstallPrompt
-              name="Phantom"
-              url="https://phantom.app/download"
-              description="Required to connect a Solana wallet"
-              icon={<PhantomLogo className="w-5 h-5" />}
             />
           )}
 
