@@ -1,12 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+
+interface Friend {
+  id: string;
+  friend: { id: string; username: string | null; displayName: string | null; avatarUrl: string | null };
+  since: string;
+}
+
+interface FriendRequest {
+  id: string;
+  from: { id: string; username: string | null; displayName: string | null; avatarUrl: string | null };
+  createdAt: string;
+}
 
 function GitHubLogo({ className }: { className?: string }) {
   return (
@@ -53,6 +65,12 @@ export default function ProfilePage() {
   const [requestingDelete, setRequestingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Friends
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+  const [friendActionId, setFriendActionId] = useState<string | null>(null);
+
   useEffect(() => {
     if (isLoading) return;
     if (!user) { router.push('/auth'); return; }
@@ -70,6 +88,26 @@ export default function ProfilePage() {
       .then((data) => { if (data.bio) setBio(data.bio); })
       .catch(() => {});
   }, [user]);
+
+  const loadFriends = useCallback(async () => {
+    setFriendsLoading(true);
+    try {
+      const [friendsData, requestsData] = await Promise.all([
+        api.get<Friend[]>('/social/friends'),
+        api.get<FriendRequest[]>('/social/friends/requests'),
+      ]);
+      setFriends(friendsData);
+      setFriendRequests(requestsData);
+    } catch {
+      // silent
+    } finally {
+      setFriendsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user) loadFriends();
+  }, [user, loadFriends]);
 
   // Handle ?linked=github param
   useEffect(() => {
@@ -204,6 +242,30 @@ export default function ProfilePage() {
 
   const handleLinkGitHub = () => {
     window.location.href = `${API_URL}/auth/github`;
+  };
+
+  const handleRespondToRequest = async (requestId: string, accept: boolean) => {
+    setFriendActionId(requestId);
+    try {
+      await api.post(`/social/friends/respond/${requestId}`, { accept });
+      await loadFriends();
+    } catch {
+      // silent
+    } finally {
+      setFriendActionId(null);
+    }
+  };
+
+  const handleUnfriend = async (targetId: string) => {
+    setFriendActionId(targetId);
+    try {
+      await api.delete(`/social/friends/${targetId}`);
+      await loadFriends();
+    } catch {
+      // silent
+    } finally {
+      setFriendActionId(null);
+    }
   };
 
   if (isLoading) {
@@ -445,6 +507,118 @@ export default function ProfilePage() {
             <span className="text-xs text-zinc-600 border border-zinc-800 px-3 py-1.5 rounded-lg">Coming soon</span>
           </div>
         </div>
+      </div>
+
+      {/* ── Friends & Connections ── */}
+      <div className="mt-8 border-t border-zinc-800 pt-6">
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-sm font-semibold text-white">Friends</h2>
+          <span className="text-xs text-zinc-600 font-mono">{friends.length} friend{friends.length !== 1 ? 's' : ''}</span>
+        </div>
+        <p className="text-xs text-zinc-500 mb-4">Manage your friend connections.</p>
+
+        {friendsLoading ? (
+          <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
+            <div className="w-3 h-3 rounded-full border border-zinc-700 border-t-monad-400 animate-spin" />
+            Loading...
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Incoming requests */}
+            {friendRequests.length > 0 && (
+              <div>
+                <p className="text-xs text-amber-400 font-mono mb-2">
+                  {friendRequests.length} pending request{friendRequests.length !== 1 ? 's' : ''}
+                </p>
+                <div className="space-y-2">
+                  {friendRequests.map((req) => (
+                    <div key={req.id} className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
+                      {req.from.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={req.from.avatarUrl} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold flex-shrink-0">
+                          {(req.from.displayName || req.from.username || '?')[0].toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <Link href={`/u/${req.from.username}`} className="text-sm font-medium text-white hover:text-monad-300 transition-colors">
+                          {req.from.displayName || req.from.username}
+                        </Link>
+                        {req.from.username && (
+                          <div className="text-xs text-zinc-500 font-mono">@{req.from.username}</div>
+                        )}
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={() => handleRespondToRequest(req.id, true)}
+                          disabled={friendActionId === req.id}
+                          className="text-xs text-green-400 border border-green-400/30 hover:border-green-400/60 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleRespondToRequest(req.id, false)}
+                          disabled={friendActionId === req.id}
+                          className="text-xs text-zinc-500 border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Friends list */}
+            {friends.length === 0 && friendRequests.length === 0 ? (
+              <div className="text-center py-8 text-zinc-600 text-xs font-mono border border-zinc-800/50 rounded-xl">
+                No friends yet. Visit a user&apos;s profile to send a friend request.
+              </div>
+            ) : friends.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {friends.map((f) => (
+                  <div key={f.id} className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-3 py-2.5 group hover:border-zinc-700 transition-colors">
+                    {f.friend.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={f.friend.avatarUrl} alt="" className="w-8 h-8 rounded-full flex-shrink-0" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold flex-shrink-0">
+                        {(f.friend.displayName || f.friend.username || '?')[0].toUpperCase()}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <Link href={`/u/${f.friend.username}`} className="text-xs font-medium text-white hover:text-monad-300 transition-colors truncate block">
+                        {f.friend.displayName || f.friend.username}
+                      </Link>
+                      {f.friend.username && (
+                        <div className="text-xs text-zinc-600 font-mono">@{f.friend.username}</div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link
+                        href={`/dm?peer=${f.friend.id}`}
+                        className="text-xs text-monad-400 border border-monad-400/30 hover:border-monad-400/60 px-2 py-1 rounded-lg transition-colors"
+                        title="Send message"
+                      >
+                        DM
+                      </Link>
+                      <button
+                        onClick={() => handleUnfriend(f.friend.id)}
+                        disabled={friendActionId === f.friend.id}
+                        className="text-xs text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-400/30 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
+                        title="Unfriend"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
 
       {/* ── Security ── */}
