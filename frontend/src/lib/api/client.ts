@@ -88,6 +88,33 @@ class ApiClient {
     return this.request<T>('DELETE', path, body, options);
   }
 
+  async upload<T>(path: string, formData: FormData): Promise<T> {
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseUrl}${path}`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+        // No Content-Type — browser sets multipart/form-data with boundary
+      });
+    } catch (err) {
+      if (err instanceof TypeError) {
+        throw new ApiError('Cannot connect to server.', 0);
+      }
+      throw err;
+    }
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+      const raw = (error as { message?: unknown }).message;
+      let msg: string;
+      if (Array.isArray(raw)) msg = String(raw[0] || 'Upload failed');
+      else if (typeof raw === 'string' && raw) msg = raw;
+      else msg = 'Upload failed';
+      throw new ApiError(msg, response.status);
+    }
+    return response.json() as Promise<T>;
+  }
+
   async stream(
     path: string,
     body: unknown,

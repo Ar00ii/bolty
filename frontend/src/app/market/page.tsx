@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
@@ -16,8 +16,19 @@ interface MarketListing {
   tags: string[];
   status: string;
   agentUrl?: string | null;
+  fileKey?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  fileMimeType?: string | null;
   seller: { id: string; username: string | null; avatarUrl: string | null };
   repository: { id: string; name: string; githubUrl: string; language: string | null } | null;
+}
+
+interface UploadedFileMeta {
+  fileKey: string;
+  fileName: string;
+  fileSize: number;
+  fileMimeType: string;
 }
 
 const TYPES = ['ALL', 'REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'];
@@ -39,6 +50,16 @@ const TYPE_COLORS: Record<string, string> = {
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
 
+const ACCEPTS_FILE = new Set(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER']);
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+
 export default function MarketPage() {
   const { isAuthenticated, user } = useAuth();
   const [listings, setListings] = useState<MarketListing[]>([]);
@@ -48,6 +69,9 @@ export default function MarketPage() {
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Create form state
   const [form, setForm] = useState({
@@ -79,6 +103,33 @@ export default function MarketPage() {
     fetchListings();
   }, [fetchListings]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File too large — max 10 MB');
+      return;
+    }
+    setUploading(true);
+    setError('');
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const result = await api.upload<UploadedFileMeta>('/market/upload', fd);
+      setUploadedFile(result);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setForm({ title: '', description: '', type: 'REPO', price: '', currency: 'SOL', tags: '', agentUrl: '' });
+    setUploadedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const createListing = async () => {
     if (!form.title.trim() || !form.description.trim()) {
       setError('Title and description are required');
@@ -95,9 +146,15 @@ export default function MarketPage() {
         currency: form.currency,
         tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
         agentUrl: form.agentUrl.trim() || undefined,
+        ...(uploadedFile ? {
+          fileKey: uploadedFile.fileKey,
+          fileName: uploadedFile.fileName,
+          fileSize: uploadedFile.fileSize,
+          fileMimeType: uploadedFile.fileMimeType,
+        } : {}),
       });
       setShowCreate(false);
-      setForm({ title: '', description: '', type: 'REPO', price: '', currency: 'SOL', tags: '', agentUrl: '' });
+      resetForm();
       await fetchListings();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to create listing');
@@ -184,7 +241,14 @@ export default function MarketPage() {
               <label className="text-terminal-muted text-xs font-mono block mb-1">type</label>
               <select
                 value={form.type}
-                onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}
+                onChange={(e) => {
+                  const newType = e.target.value as typeof form.type;
+                  setForm({ ...form, type: newType });
+                  if (!ACCEPTS_FILE.has(newType)) {
+                    setUploadedFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }
+                }}
                 className="terminal-input w-full"
               >
                 {['REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'].map((t) => (
@@ -218,10 +282,64 @@ export default function MarketPage() {
                 </select>
               </div>
             </div>
+
+            {/* File upload — shown for agent/bot/script/other types */}
+            {ACCEPTS_FILE.has(form.type) && (
+              <div className="md:col-span-2">
+                <label className="text-terminal-muted text-xs font-mono block mb-1">
+                  upload file{' '}
+                  <span className="text-zinc-600">
+                    (.py .js .ts .zip .json .yaml .sh .txt — max 10 MB)
+                  </span>
+                </label>
+                {uploadedFile ? (
+                  <div className="flex items-center gap-3 p-3 rounded border border-emerald-400/30 bg-emerald-400/5">
+                    <span className="text-emerald-400 text-xs font-mono">✓</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-terminal-text text-xs font-mono truncate">{uploadedFile.fileName}</p>
+                      <p className="text-terminal-muted text-xs font-mono">{formatBytes(uploadedFile.fileSize)}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setUploadedFile(null);
+                        if (fileInputRef.current) fileInputRef.current.value = '';
+                      }}
+                      className="text-zinc-500 hover:text-red-400 text-xs font-mono transition-colors"
+                    >
+                      [remove]
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border border-dashed border-terminal-border hover:border-monad-400/50 rounded p-4 text-center cursor-pointer transition-colors group"
+                  >
+                    {uploading ? (
+                      <p className="text-monad-400 text-xs font-mono animate-pulse">uploading...</p>
+                    ) : (
+                      <>
+                        <p className="text-terminal-muted text-xs font-mono group-hover:text-terminal-text transition-colors">
+                          click to upload your agent / script / bot file
+                        </p>
+                        <p className="text-zinc-600 text-xs font-mono mt-1">no GitHub required</p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".py,.js,.ts,.mjs,.cjs,.zip,.json,.yaml,.yml,.sh,.txt,.md,.toml,.csv"
+                  className="hidden"
+                />
+              </div>
+            )}
+
             {(form.type === 'AI_AGENT' || form.type === 'BOT') && (
               <div className="md:col-span-2">
                 <label className="text-terminal-muted text-xs font-mono block mb-1">
-                  agent url <span className="text-zinc-600">(OpenAI, Claude, endpoint...)</span>
+                  agent url <span className="text-zinc-600">(optional — OpenAI, Claude, endpoint...)</span>
                 </label>
                 <input
                   type="url"
@@ -250,14 +368,14 @@ export default function MarketPage() {
             </p>
             <div className="flex gap-2">
               <button
-                onClick={() => setShowCreate(false)}
+                onClick={() => { setShowCreate(false); resetForm(); }}
                 className="text-terminal-muted text-xs font-mono hover:text-terminal-text"
               >
                 [cancel]
               </button>
               <button
                 onClick={createListing}
-                disabled={submitting}
+                disabled={submitting || uploading}
                 className="btn-neon-solid text-xs py-1.5 px-4 disabled:opacity-50"
               >
                 {submitting ? 'scanning...' : 'submit'}
@@ -324,6 +442,18 @@ export default function MarketPage() {
                     <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
                   </a>
                 )}
+                {listing.fileKey && listing.fileName && (
+                  <a
+                    href={`${API_URL}/market/files/${listing.fileKey}`}
+                    className="text-xs font-mono text-yellow-400/70 hover:text-yellow-400 transition-colors flex items-center gap-1 mb-3"
+                  >
+                    <span>[file]</span>
+                    <span className="truncate">{listing.fileName}</span>
+                    {listing.fileSize && (
+                      <span className="text-zinc-600 shrink-0">({formatBytes(listing.fileSize)})</span>
+                    )}
+                  </a>
+                )}
 
                 <div className="text-terminal-muted text-xs flex items-center gap-1">
                   <span className="text-monad-400">@</span>
@@ -347,7 +477,6 @@ export default function MarketPage() {
                       window.location.href = '/auth';
                       return;
                     }
-                    // Contact seller via DM
                     window.location.href = `/dm?peer=${listing.seller.id}`;
                   }}
                   className="btn-neon text-xs py-1 px-3"

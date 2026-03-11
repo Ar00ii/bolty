@@ -18,6 +18,10 @@ interface CreateListingDto {
   tags?: string[];
   repositoryId?: string;
   agentUrl?: string;
+  fileKey?: string;
+  fileName?: string;
+  fileSize?: number;
+  fileMimeType?: string;
 }
 
 @Injectable()
@@ -99,6 +103,10 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
         sellerId,
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
+        fileKey: dto.fileKey || null,
+        fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
+        fileSize: dto.fileSize || null,
+        fileMimeType: dto.fileMimeType ? dto.fileMimeType.slice(0, 100) : null,
         status: scan.safe ? 'ACTIVE' : 'PENDING_REVIEW',
         scanPassed: scan.safe,
         scanNote: scan.reason,
@@ -149,6 +157,13 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
     return listing;
+  }
+
+  async getListingByFileKey(fileKey: string) {
+    return this.prisma.marketListing.findUnique({
+      where: { fileKey },
+      select: { fileName: true, fileMimeType: true },
+    });
   }
 
   async deleteListing(id: string, userId: string) {

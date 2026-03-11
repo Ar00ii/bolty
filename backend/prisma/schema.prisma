@@ -289,6 +289,10 @@ model MarketListing {
   scanPassed   Boolean       @default(false)
   scanNote     String?
   agentUrl     String?       // URL for AI agents (OpenAI, Claude, custom endpoint)
+  fileKey      String?       @unique  // stored filename on disk (UUID, no extension)
+  fileName     String?       // original filename shown to users
+  fileSize     Int?          // bytes
+  fileMimeType String?       // MIME type
 
   @@map("market_listings")
 }
