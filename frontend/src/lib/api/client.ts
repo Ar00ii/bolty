@@ -52,8 +52,15 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      const raw = (error as { message?: string | string[] }).message;
-      const msg = Array.isArray(raw) ? raw[0] : (raw || 'Request failed');
+      const raw = (error as { message?: unknown }).message;
+      let msg: string;
+      if (Array.isArray(raw)) {
+        msg = String(raw[0] || 'Request failed');
+      } else if (typeof raw === 'string' && raw) {
+        msg = raw;
+      } else {
+        msg = 'Request failed';
+      }
       throw new ApiError(msg, response.status);
     }
 

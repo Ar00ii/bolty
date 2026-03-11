@@ -39,9 +39,9 @@ export function FloatingAIChat() {
 
   const ensureSession = async (): Promise<string> => {
     if (sessionId) return sessionId;
-    const data = await api.post<{ id: string }>('/ai/sessions', {});
-    setSessionId(data.id);
-    return data.id;
+    const data = await api.post<{ sessionId: string }>('/ai/sessions', {});
+    setSessionId(data.sessionId);
+    return data.sessionId;
   };
 
   const sendMessage = async () => {
@@ -57,8 +57,8 @@ export function FloatingAIChat() {
     try {
       const sid = await ensureSession();
       await api.stream(
-        `/ai/sessions/${sid}/messages/stream`,
-        { content },
+        `/ai/sessions/${sid}/chat`,
+        { message: content },
         (chunk) => {
           assistantContent += chunk;
           setMessages(prev => {
