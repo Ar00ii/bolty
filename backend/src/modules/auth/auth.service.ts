@@ -157,6 +157,12 @@ export class AuthService {
     });
 
     this.logger.log(`New email user registered: ${username}`);
+
+    // Send welcome email (fire and forget — don't block registration)
+    this.emailService.sendWelcomeEmail(email, username).catch((err: Error) =>
+      this.logger.warn(`Welcome email failed for ${username}: ${err.message}`),
+    );
+
     return this.generateTokens(user.id);
   }
 
@@ -280,14 +286,27 @@ export class AuthService {
 
   // ── Delete Account ────────────────────────────────────────────────────────
 
-  async deleteAccount(userId: string, password: string): Promise<void> {
+  async requestDeleteAccount(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.email) throw new BadRequestException('No email address on this account — contact support');
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await this.redis.set(`delete_account:${userId}`, code, 600); // 10 min
+    await this.emailService.sendDeleteAccountCode(user.email, code);
+    this.logger.log(`Delete account code sent for user ${userId}`);
+  }
+
+  async deleteAccount(userId: string, code: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
 
-    if (user.passwordHash) {
-      const valid = await bcrypt.compare(password, user.passwordHash);
-      if (!valid) throw new UnauthorizedException('Invalid password');
+    // Verify OTP
+    const stored = await this.redis.get(`delete_account:${userId}`);
+    if (!stored || stored !== code) {
+      throw new UnauthorizedException('Invalid or expired verification code');
     }
+    await this.redis.del(`delete_account:${userId}`);
 
     await this.revokeAllTokens(userId);
     await this.prisma.user.delete({ where: { id: userId } });

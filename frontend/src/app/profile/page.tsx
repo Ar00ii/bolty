@@ -48,8 +48,9 @@ export default function ProfilePage() {
   const [emailLoading, setEmailLoading] = useState(false);
 
   // Delete account
-  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm'>('idle');
-  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteStep, setDeleteStep] = useState<'idle' | 'confirm' | 'otp'>('idle');
+  const [deleteOtp, setDeleteOtp] = useState('');
+  const [requestingDelete, setRequestingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -160,15 +161,29 @@ export default function ProfilePage() {
     }
   };
 
+  const handleRequestDeleteAccount = async () => {
+    setSecErr(''); setSecMsg('');
+    setRequestingDelete(true);
+    try {
+      await api.post('/auth/account/delete-request', {});
+      setDeleteStep('otp');
+      setSecMsg('A confirmation code has been sent to your email.');
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code');
+    } finally {
+      setRequestingDelete(false);
+    }
+  };
+
   const handleDeleteAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setSecErr('');
     setDeleting(true);
     try {
-      await api.delete('/auth/account', { password: deletePassword });
+      await api.delete('/auth/account', { code: deleteOtp });
       router.push('/');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to delete account');
+      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code');
     } finally {
       setDeleting(false);
     }
@@ -594,24 +609,44 @@ export default function ProfilePage() {
             </div>
 
             {deleteStep === 'confirm' && (
+              <div className="mt-3 pt-3 border-t border-red-500/20 space-y-3">
+                <p className="text-xs text-red-300 leading-relaxed">
+                  <strong>This action is irreversible.</strong> All your data, listings, and repositories will be permanently deleted. We will send a confirmation code to your email address to verify this request.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleRequestDeleteAccount}
+                    disabled={requestingDelete}
+                    className="flex-1 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-sm font-semibold transition-colors disabled:opacity-50"
+                  >
+                    {requestingDelete ? 'Sending code...' : 'Send confirmation code to my email'}
+                  </button>
+                  <button type="button" onClick={() => { setDeleteStep('idle'); setSecErr(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {deleteStep === 'otp' && (
               <form onSubmit={handleDeleteAccount} className="mt-3 pt-3 border-t border-red-500/20 space-y-3">
-                <p className="text-xs text-red-300">This action is irreversible. Enter your password to confirm:</p>
+                <p className="text-xs text-zinc-400">Enter the 6-digit code sent to <span className="text-white font-mono">{user?.email}</span>:</p>
                 <input
-                  type="password"
-                  value={deletePassword}
-                  onChange={(e) => setDeletePassword(e.target.value)}
-                  placeholder="Current password"
-                  className="w-full bg-zinc-900/70 border border-red-500/30 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-red-500/60 transition-all placeholder:text-zinc-600"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={deleteOtp}
+                  onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-zinc-900/70 border border-red-500/30 rounded-xl px-3 py-2 text-white text-center text-xl font-mono tracking-[0.5em] outline-none focus:border-red-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
                 />
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    disabled={deleting || !deletePassword}
+                    disabled={deleting || deleteOtp.length !== 6}
                     className="flex-1 py-2 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                   >
                     {deleting ? 'Deleting...' : 'Permanently delete my account'}
                   </button>
-                  <button type="button" onClick={() => { setDeleteStep('idle'); setDeletePassword(''); setSecErr(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
+                  <button type="button" onClick={() => { setDeleteStep('idle'); setDeleteOtp(''); setSecErr(''); }} className="text-xs text-zinc-500 px-3">Cancel</button>
                 </div>
               </form>
             )}

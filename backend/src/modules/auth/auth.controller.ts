@@ -157,6 +157,15 @@ export class AuthController {
   // ── Delete Account ────────────────────────────────────────────────────────
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('account/delete-request')
+  async requestDeleteAccount(@CurrentUser('id') userId: string) {
+    await this.authService.requestDeleteAccount(userId);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Delete('account')
   async deleteAccount(
@@ -164,7 +173,7 @@ export class AuthController {
     @Body() dto: DeleteAccountDto,
     @Res() res: Response,
   ) {
-    await this.authService.deleteAccount(userId, dto.password);
+    await this.authService.deleteAccount(userId, dto.code);
     res.clearCookie('access_token', COOKIE_OPTIONS);
     res.clearCookie('refresh_token', COOKIE_OPTIONS);
     res.clearCookie('gh_token', COOKIE_OPTIONS);

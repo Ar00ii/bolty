@@ -1,18 +1,24 @@
 import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
 
+// At least 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]).{8,}$/;
+const PASSWORD_MESSAGE =
+  'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character';
+
 export class RegisterEmailDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Enter a valid email address' })
   email: string;
 
   @IsString()
-  @MinLength(3)
-  @MaxLength(30)
+  @MinLength(3, { message: 'Username must be at least 3 characters' })
+  @MaxLength(30, { message: 'Username must be 30 characters or fewer' })
   @Matches(/^[a-z0-9_-]+$/, { message: 'Username can only contain lowercase letters, numbers, _ and -' })
   username: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
   @MaxLength(100)
+  @Matches(PASSWORD_REGEX, { message: PASSWORD_MESSAGE })
   password: string;
 }
 
@@ -35,7 +41,7 @@ export class Verify2FADto {
 }
 
 export class RequestEmailChangeDto {
-  @IsEmail()
+  @IsEmail({}, { message: 'Enter a valid email address' })
   newEmail: string;
 
   @IsString()
@@ -51,7 +57,9 @@ export class ConfirmEmailChangeDto {
 
 export class DeleteAccountDto {
   @IsString()
-  password: string;
+  @MinLength(6)
+  @MaxLength(6)
+  code: string;
 }
 
 export class Toggle2FADto {
