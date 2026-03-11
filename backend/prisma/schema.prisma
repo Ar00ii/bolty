@@ -64,8 +64,9 @@ model User {
   auditLogs      AuditLog[]
   sentDMs        DirectMessage[]  @relation("SentDMs")
   receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
-  marketListings MarketListing[]  @relation("MarketSeller")
-  purchasesMade  RepoPurchase[]   @relation("Buyer")
+  marketListings      MarketListing[]      @relation("MarketSeller")
+  purchasesMade       RepoPurchase[]       @relation("Buyer")
+  buyerNegotiations   AgentNegotiation[]   @relation("NegotiationBuyer")
   sentFriendRequests     Friendship[]  @relation("FriendSent")
   receivedFriendRequests Friendship[]  @relation("FriendReceived")
 
@@ -289,10 +290,12 @@ model MarketListing {
   scanPassed   Boolean       @default(false)
   scanNote     String?
   agentUrl     String?       // URL for AI agents (OpenAI, Claude, custom endpoint)
-  fileKey      String?       @unique  // stored filename on disk (UUID, no extension)
-  fileName     String?       // original filename shown to users
-  fileSize     Int?          // bytes
-  fileMimeType String?       // MIME type
+  fileKey       String?       @unique  // stored filename on disk (UUID, no extension)
+  fileName      String?       // original filename shown to users
+  fileSize      Int?          // bytes
+  fileMimeType  String?       // MIME type
+  agentEndpoint String?       // Webhook URL — seller's bot receives negotiation messages here
+  negotiations  AgentNegotiation[]
 
   @@map("market_listings")
 }
@@ -310,6 +313,42 @@ enum ListingStatus {
   ACTIVE
   SOLD
   REMOVED
+}
+
+// ─── Agent Negotiations ───────────────────────────────────────────────────────
+
+model AgentNegotiation {
+  id          String             @id @default(cuid())
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  listingId   String
+  listing     MarketListing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId     String
+  buyer       User               @relation("NegotiationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  status      NegotiationStatus  @default(ACTIVE)
+  agreedPrice Float?
+  messages    NegotiationMessage[]
+
+  @@map("agent_negotiations")
+}
+
+model NegotiationMessage {
+  id            String           @id @default(cuid())
+  createdAt     DateTime         @default(now())
+  negotiationId String
+  negotiation   AgentNegotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+  fromRole      String           // 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent'
+  content       String           @db.Text
+  proposedPrice Float?
+
+  @@map("negotiation_messages")
+}
+
+enum NegotiationStatus {
+  ACTIVE
+  AGREED
+  REJECTED
+  EXPIRED
 }
 
 // ─── Price Cache ──────────────────────────────────────────────────────────────

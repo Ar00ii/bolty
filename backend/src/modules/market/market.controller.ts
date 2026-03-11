@@ -21,8 +21,10 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { MarketService } from './market.service';
+import { NegotiationService } from './negotiation.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 
 interface CreateListingBody {
   title: string;
@@ -33,40 +35,37 @@ interface CreateListingBody {
   tags?: string[];
   repositoryId?: string;
   agentUrl?: string;
+  agentEndpoint?: string;
   fileKey?: string;
   fileName?: string;
   fileSize?: number;
   fileMimeType?: string;
 }
 
+interface SendMessageBody {
+  content: string;
+  proposedPrice?: number;
+}
+
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 
 const ALLOWED_MIMETYPES = new Set([
-  'text/plain',
-  'text/x-python',
-  'text/javascript',
-  'application/javascript',
-  'text/typescript',
-  'application/json',
-  'application/zip',
-  'application/x-zip-compressed',
-  'application/x-zip',
-  'text/x-yaml',
-  'application/x-yaml',
-  'text/yaml',
-  'text/x-sh',
-  'text/x-shellscript',
-  'application/x-sh',
-  'application/x-python',
-  'text/markdown',
-  'text/csv',
-  'application/toml',
-  'text/x-toml',
+  'text/plain', 'text/x-python', 'text/javascript', 'application/javascript',
+  'text/typescript', 'application/json', 'application/zip',
+  'application/x-zip-compressed', 'application/x-zip', 'text/x-yaml',
+  'application/x-yaml', 'text/yaml', 'text/x-sh', 'text/x-shellscript',
+  'application/x-sh', 'application/x-python', 'text/markdown', 'text/csv',
+  'application/toml', 'text/x-toml',
 ]);
 
 @Controller('market')
 export class MarketController {
-  constructor(private readonly marketService: MarketService) {}
+  constructor(
+    private readonly marketService: MarketService,
+    private readonly negotiationService: NegotiationService,
+  ) {}
+
+  // ── Listings ───────────────────────────────────────────────────────────────
 
   @Public()
   @Get()
@@ -78,27 +77,32 @@ export class MarketController {
     return this.marketService.getListings({ type, search, page: page ? Number(page) : 1 });
   }
 
-  // Must be before :id to avoid route clash
+  // Must be defined before :id to avoid route clash
   @Public()
   @Get('files/:key')
-  async serveFile(
-    @Param('key') key: string,
-    @Res() res: Response,
-  ) {
-    // Only allow UUID-shaped keys — prevents path traversal
+  async serveFile(@Param('key') key: string, @Res() res: Response) {
     if (!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/.test(key)) {
       throw new NotFoundException();
     }
     const filePath = path.join(UPLOADS_DIR, key);
     if (!fs.existsSync(filePath)) throw new NotFoundException('File not found');
-
     const meta = await this.marketService.getListingByFileKey(key);
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`,
-    );
+    res.setHeader('Content-Disposition', `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`);
     res.setHeader('Content-Type', meta?.fileMimeType || 'application/octet-stream');
     res.sendFile(filePath);
+  }
+
+  @Get('negotiations')
+  getMyNegotiations(@CurrentUser('id') userId: string) {
+    return this.negotiationService.getMyNegotiations(userId);
+  }
+
+  @Get('negotiations/:id')
+  getNegotiation(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.negotiationService.getNegotiation(id, userId);
   }
 
   @Public()
@@ -106,6 +110,8 @@ export class MarketController {
   getListing(@Param('id') id: string) {
     return this.marketService.getListing(id);
   }
+
+  // ── Create / delete listings ───────────────────────────────────────────────
 
   @Post('upload')
   @UseInterceptors(
@@ -115,11 +121,9 @@ export class MarketController {
           fs.mkdirSync(UPLOADS_DIR, { recursive: true });
           cb(null, UPLOADS_DIR);
         },
-        filename: (req, file, cb) => {
-          cb(null, crypto.randomUUID());
-        },
+        filename: (req, file, cb) => cb(null, crypto.randomUUID()),
       }),
-      limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
+      limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
         if (ALLOWED_MIMETYPES.has(file.mimetype) || file.mimetype.startsWith('text/')) {
           cb(null, true);
@@ -134,29 +138,53 @@ export class MarketController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file received');
-    return {
-      fileKey: file.filename,
-      fileName: file.originalname,
-      fileSize: file.size,
-      fileMimeType: file.mimetype,
-    };
+    return { fileKey: file.filename, fileName: file.originalname, fileSize: file.size, fileMimeType: file.mimetype };
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createListing(
-    @CurrentUser('id') userId: string,
-    @Body() body: CreateListingBody,
-  ) {
+  createListing(@CurrentUser('id') userId: string, @Body() body: CreateListingBody) {
+    // Validate agentEndpoint if provided
+    if (body.agentEndpoint && !isSafeUrl(body.agentEndpoint)) {
+      throw new BadRequestException('Invalid or unsafe agent endpoint URL');
+    }
     return this.marketService.createListing(userId, body);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteListing(
+  async deleteListing(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    await this.marketService.deleteListing(id, userId);
+  }
+
+  // ── Negotiations ───────────────────────────────────────────────────────────
+
+  @Post(':listingId/negotiate')
+  startNegotiation(
+    @Param('listingId') listingId: string,
+    @CurrentUser('id') buyerId: string,
+  ) {
+    return this.negotiationService.startNegotiation(buyerId, listingId);
+  }
+
+  @Post('negotiations/:id/message')
+  sendMessage(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
+    @Body() body: SendMessageBody,
   ) {
-    await this.marketService.deleteListing(id, userId);
+    if (!body.content?.trim()) throw new BadRequestException('Message content required');
+    return this.negotiationService.sendMessage(id, userId, body.content, body.proposedPrice);
+  }
+
+  @Post('negotiations/:id/accept')
+  acceptDeal(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.acceptDeal(id, userId);
+  }
+
+  @Post('negotiations/:id/reject')
+  @HttpCode(HttpStatus.OK)
+  rejectDeal(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.rejectDeal(id, userId);
   }
 }

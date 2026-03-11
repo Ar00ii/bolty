@@ -18,6 +18,7 @@ interface CreateListingDto {
   tags?: string[];
   repositoryId?: string;
   agentUrl?: string;
+  agentEndpoint?: string;
   fileKey?: string;
   fileName?: string;
   fileSize?: number;
@@ -103,6 +104,7 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
         sellerId,
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
+        agentEndpoint: dto.agentEndpoint ? dto.agentEndpoint.trim().slice(0, 500) : null,
         fileKey: dto.fileKey || null,
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
         fileSize: dto.fileSize || null,
