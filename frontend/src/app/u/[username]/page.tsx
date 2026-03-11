@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api/client';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface PublicRepo {
   id: string;
@@ -37,6 +38,8 @@ interface PublicProfile {
   _count: { repositories: number };
 }
 
+type FriendStatus = 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self';
+
 export default function PublicProfilePage() {
   const params = useParams();
   const username = params.username as string;
@@ -44,14 +47,52 @@ export default function PublicProfilePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { user: currentUser, isAuthenticated } = useAuth();
+  const [friendStatus, setFriendStatus] = useState<FriendStatus>('none');
+  const [friendRequestId, setFriendRequestId] = useState<string | undefined>();
+  const [friendLoading, setFriendLoading] = useState(false);
+  const [friendMsg, setFriendMsg] = useState('');
 
   useEffect(() => {
     if (!username) return;
     api.get<PublicProfile>(`/users/${username}`)
-      .then(setProfile)
+      .then(p => {
+        setProfile(p);
+        if (isAuthenticated && currentUser) {
+          if (currentUser.id === p.id) {
+            setFriendStatus('self');
+          } else {
+            api.get<{ status: FriendStatus; requestId?: string }>(`/social/friends/status/${p.id}`)
+              .then(s => { setFriendStatus(s.status); setFriendRequestId(s.requestId); })
+              .catch(() => {});
+          }
+        }
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [username]);
+
+  const handleFriendAction = async () => {
+    if (!isAuthenticated || friendStatus === 'self') return;
+    setFriendLoading(true);
+    setFriendMsg('');
+    try {
+      if (friendStatus === 'none') {
+        await api.post('/social/friends/request', { username: profile?.username });
+        setFriendStatus('pending_sent');
+        setFriendMsg('Friend request sent');
+      } else if (friendStatus === 'pending_received' && friendRequestId) {
+        await api.post(`/social/friends/respond/${friendRequestId}`, { accept: true });
+        setFriendStatus('friends');
+        setFriendMsg('Now friends');
+      } else if (friendStatus === 'friends' && profile) {
+        await api.delete(`/social/friends/${profile.id}`);
+        setFriendStatus('none');
+      }
+    } catch (err) {
+      setFriendMsg(err instanceof ApiError ? err.message : 'Action failed');
+    } finally { setFriendLoading(false); }
+  };
 
   if (loading) {
     return (
@@ -103,9 +144,33 @@ export default function PublicProfilePage() {
               <h1 className="text-2xl font-bold text-white">{displayName}</h1>
               <p className="text-zinc-500 font-mono text-sm">@{profile.username}</p>
             </div>
-            {profile.role === 'ADMIN' && (
-              <span className="text-xs font-mono bg-monad-500/10 text-monad-400 border border-monad-500/20 px-2 py-0.5 rounded">admin</span>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              {profile.role === 'ADMIN' && (
+                <span className="text-xs font-mono bg-monad-500/10 text-monad-400 border border-monad-500/20 px-2 py-0.5 rounded">admin</span>
+              )}
+              {isAuthenticated && friendStatus !== 'self' && (
+                <button
+                  onClick={handleFriendAction}
+                  disabled={friendLoading || friendStatus === 'pending_sent'}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
+                    friendStatus === 'friends'
+                      ? 'border-zinc-700 text-zinc-400 hover:border-red-500/50 hover:text-red-400'
+                      : friendStatus === 'pending_received'
+                        ? 'border-green-500/40 text-green-400 hover:bg-green-500/10'
+                        : friendStatus === 'pending_sent'
+                          ? 'border-zinc-700 text-zinc-500 cursor-default'
+                          : 'border-monad-500/40 text-monad-400 hover:bg-monad-500/10'
+                  }`}
+                >
+                  {friendLoading ? '...'
+                    : friendStatus === 'friends' ? 'Friends'
+                    : friendStatus === 'pending_received' ? 'Accept request'
+                    : friendStatus === 'pending_sent' ? 'Pending'
+                    : 'Add friend'}
+                </button>
+              )}
+              {friendMsg && <span className="text-xs text-green-400">{friendMsg}</span>}
+            </div>
           </div>
 
           {profile.bio && (

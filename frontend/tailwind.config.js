@@ -50,6 +50,11 @@ module.exports = {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
+        'spin-slow': 'spin 8s linear infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.4s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+        'pulse-neon': 'pulseNeon 2s ease-in-out infinite',
         'cursor-blink': 'blink 1s step-end infinite',
         'fade-in': 'fadeIn 0.4s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',

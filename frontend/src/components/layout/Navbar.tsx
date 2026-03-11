@@ -4,64 +4,100 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useTheme } from '@/lib/theme/ThemeContext';
 import { clsx } from 'clsx';
 
 const NAV_LINKS = [
-  { href: '/', label: 'home' },
-  { href: '/chart', label: 'chart' },
-  { href: '/chat', label: 'chat' },
-  { href: '/dm', label: 'dm' },
-  { href: '/ai', label: 'AI' },
-  { href: '/repos', label: 'repos' },
-  { href: '/market', label: 'market' },
+  { href: '/chat',   label: 'Community' },
+  { href: '/dm',     label: 'Messages' },
+  { href: '/repos',  label: 'Repos' },
+  { href: '/market', label: 'Market' },
 ];
+
+function SunIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="5" />
+      <path strokeLinecap="round" strokeLinejoin="round"
+        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </svg>
+  );
+}
+function MoonIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round"
+        d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+    </svg>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-terminal-bg/95 backdrop-blur-sm border-b border-terminal-border">
+    <nav
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
+      style={{
+        background: 'rgba(var(--bg-rgb, 9,9,11), 0.85)',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-monad-400 font-mono font-bold text-xl group-hover:text-monad-300 transition-colors">
-              [BOLTY]
+          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-monad-500/15 border border-monad-500/25 flex items-center justify-center transition-all group-hover:bg-monad-500/25">
+              <svg className="w-4 h-4 text-monad-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+            </div>
+            <span className="text-white font-bold text-base tracking-tight group-hover:text-monad-300 transition-colors">
+              Bolty
             </span>
-            <span className="text-terminal-muted text-xs hidden sm:block font-mono">[alpha]</span>
-            <span className="status-online ml-1" />
+            <span className="hidden sm:flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-md bg-monad-500/10 text-monad-400 font-medium">
+              alpha
+            </span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 className={clsx(
-                  'px-3 py-1.5 rounded text-sm font-mono transition-all duration-200',
-                  pathname === link.href
-                    ? 'text-monad-400 bg-monad-400/10 border border-monad-400/30'
-                    : 'text-terminal-muted hover:text-terminal-text hover:bg-terminal-card',
+                  'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
+                  pathname === link.href || pathname.startsWith(link.href + '/')
+                    ? 'text-white bg-white/8 border border-white/10'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
                 )}
               >
-                {pathname === link.href ? `[${link.label}]` : link.label}
+                {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Auth */}
-          <div className="flex items-center gap-3">
+          {/* Right side */}
+          <div className="flex items-center gap-2">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all duration-150"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
+
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2 group"
-                >
+                <Link href="/profile" className="flex items-center gap-2 group px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all">
                   {user?.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -74,62 +110,73 @@ export function Navbar() {
                       {displayLabel[0]?.toUpperCase()}
                     </div>
                   )}
-                  <span className="text-terminal-muted text-xs hidden sm:block group-hover:text-monad-400 transition-colors">
-                    <span className="text-monad-400">@</span>
+                  <span className="text-zinc-400 text-sm hidden sm:block group-hover:text-zinc-200 transition-colors">
                     {displayLabel}
                   </span>
                 </Link>
                 <button
                   onClick={logout}
-                  className="btn-neon text-xs py-1.5 px-3"
+                  className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all"
                 >
-                  logout
+                  Sign out
                 </button>
               </>
             ) : (
-              <Link href="/auth" className="btn-neon-solid text-xs py-1.5 px-4 rounded">
-                connect
+              <Link
+                href="/auth"
+                className="btn-primary text-sm px-4 py-2 rounded-lg"
+              >
+                Get started
               </Link>
             )}
 
-            {/* Mobile toggle */}
+            {/* Mobile hamburger */}
             <button
-              className="md:hidden text-terminal-muted hover:text-monad-400 transition-colors p-1"
+              className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-1.5 text-zinc-400 hover:text-zinc-200 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Open menu"
             >
-              <div className="w-5 h-0.5 bg-current mb-1" />
-              <div className="w-5 h-0.5 bg-current mb-1" />
-              <div className="w-5 h-0.5 bg-current" />
+              <span className={clsx('block w-4 h-0.5 bg-current transition-all', mobileOpen && 'rotate-45 translate-y-2')} />
+              <span className={clsx('block w-4 h-0.5 bg-current transition-all', mobileOpen && 'opacity-0')} />
+              <span className={clsx('block w-4 h-0.5 bg-current transition-all', mobileOpen && '-rotate-45 -translate-y-2')} />
             </button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-terminal-border py-2">
+          <div className="md:hidden py-3 border-t" style={{ borderColor: 'var(--border)' }}>
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={clsx(
-                  'block px-4 py-2 text-sm font-mono transition-colors',
+                  'flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-0.5',
                   pathname === link.href
-                    ? 'text-monad-400'
-                    : 'text-terminal-muted hover:text-terminal-text',
+                    ? 'text-white bg-white/8'
+                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
                 )}
               >
-                {`> ${link.label}`}
+                {link.label}
               </Link>
             ))}
             {isAuthenticated && (
-              <Link
-                href="/profile"
-                onClick={() => setMobileOpen(false)}
-                className="block px-4 py-2 text-sm font-mono text-terminal-muted hover:text-terminal-text"
-              >
-                {`> profile`}
-              </Link>
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-zinc-100 hover:bg-white/5 transition-colors mb-0.5"
+                >
+                  Profile
+                </Link>
+                <button
+                  onClick={() => { logout(); setMobileOpen(false); }}
+                  className="flex items-center px-3 py-2.5 rounded-lg text-sm text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-colors w-full text-left"
+                >
+                  Sign out
+                </button>
+              </>
             )}
           </div>
         )}

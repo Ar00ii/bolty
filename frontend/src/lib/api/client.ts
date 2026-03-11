@@ -52,10 +52,9 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      throw new ApiError(
-        (error as { message?: string }).message || 'Request failed',
-        response.status,
-      );
+      const raw = (error as { message?: string | string[] }).message;
+      const msg = Array.isArray(raw) ? raw[0] : (raw || 'Request failed');
+      throw new ApiError(msg, response.status);
     }
 
     const contentType = response.headers.get('content-type');

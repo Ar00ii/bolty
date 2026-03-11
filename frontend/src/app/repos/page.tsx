@@ -247,7 +247,7 @@ export default function ReposPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-neon-400 font-mono font-black text-3xl mb-2">REPO_SHOWCASE</h1>
+        <h1 className="text-2xl font-bold mb-2" style={{color:"var(--text)"}}>Repository Showcase</h1>
         <p className="text-terminal-muted text-sm font-mono">
           {'// Community repositories. Public & locked. Discover, vote, download.'}
         </p>
@@ -318,7 +318,7 @@ export default function ReposPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1">
                     {repo.private && (
-                      <span className="text-yellow-400 text-xs">🔒</span>
+                      <svg className="w-3 h-3 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                     )}
                     <div className="text-terminal-text text-xs font-mono truncate">{repo.name}</div>
                   </div>
@@ -362,7 +362,7 @@ export default function ReposPage() {
                     : 'border-terminal-border text-terminal-muted hover:border-zinc-600'
                 }`}
               >
-                <span className="text-lg">🌐</span>
+                <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
                 <div className="text-left">
                   <div className="text-sm font-mono font-semibold">Public — Free</div>
                   <div className="text-xs opacity-70">Anyone can see and download</div>
@@ -377,7 +377,7 @@ export default function ReposPage() {
                     : 'border-terminal-border text-terminal-muted hover:border-zinc-600'
                 }`}
               >
-                <span className="text-lg">🔒</span>
+                <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                 <div className="text-left">
                   <div className="text-sm font-mono font-semibold">Locked — Paid Access</div>
                   <div className="text-xs opacity-70">Users pay to unlock download</div>
@@ -440,7 +440,7 @@ export default function ReposPage() {
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-1 min-w-0">
                     {repo.isLocked && (
-                      <span className="text-yellow-400 shrink-0" title={`$${repo.lockedPriceUsd} to unlock`}>🔒</span>
+                      <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                     )}
                     <a
                       href={repo.isLocked ? '#' : repo.githubUrl}
@@ -512,7 +512,7 @@ export default function ReposPage() {
                     className="text-xs py-1 px-3 font-mono bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 rounded hover:bg-yellow-400/20 transition-colors"
                     onClick={() => payAndUnlock(repo)}
                   >
-                    🔒 pay ${repo.lockedPriceUsd}
+                    Unlock — ${repo.lockedPriceUsd} USD
                   </button>
                 ) : (
                   <button

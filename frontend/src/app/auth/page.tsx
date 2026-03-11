@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
@@ -8,7 +8,7 @@ import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-// ── SVG Logos ────────────────────────────────────────────────
+// ── Logos ─────────────────────────────────────────────────────────────────────
 function GitHubLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -30,125 +30,57 @@ function MetaMaskLogo({ className }: { className?: string }) {
       <path d="M20.2886 26.7031L24.7359 28.8721L24.1279 23.7012L20.2886 26.7031Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M24.7359 28.872L20.2886 26.703L20.6358 29.609L20.5997 30.8429L24.7359 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
       <path d="M10.2595 28.872L14.406 30.8429L14.3806 29.609L14.7173 26.703L10.2595 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M32.0264 16.6918L25.1418 14.6491L27.2268 17.8088L24.1279 23.7012L28.2294 23.6507H34.3516L32.0264 16.6918Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M9.86407 14.6491L2.9795 16.6918L0.664612 23.6507H6.77627L10.878 23.7012L7.77908 17.8088L9.86407 14.6491Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M19.8452 18.1377L20.2886 10.3714L22.2666 4.99099H12.7396L14.6954 10.3714L15.1601 18.1377L15.3246 20.6449L15.3353 26.2966H19.6699L19.6806 20.6449L19.8452 18.1377Z" fill="#F5841F" stroke="#F5841F" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 
-// ── Floating numbers background ───────────────────────────────
-interface FloatingNum {
-  id: number;
-  value: string;
-  x: number;
-  y: number;
-  size: number;
-  duration: number;
-  delay: number;
-}
-
-function FloatingNumbers({ hovered }: { hovered: boolean }) {
-  const [nums, setNums] = useState<FloatingNum[]>([]);
-
-  useEffect(() => {
-    const chars = '0123456789ABCDEFabcdef01';
-    const generated: FloatingNum[] = Array.from({ length: 36 }, (_, i) => ({
-      id: i,
-      value: chars[Math.floor(Math.random() * chars.length)],
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 10 + Math.floor(Math.random() * 16),
-      duration: 10 + Math.random() * 16,
-      delay: Math.random() * 12,
-    }));
-    setNums(generated);
-  }, []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
-      {nums.map((n) => (
-        <span
-          key={n.id}
-          className="absolute font-mono font-bold text-monad-400 transition-opacity duration-700"
-          style={{
-            left: `${n.x}%`,
-            top: `${n.y}%`,
-            fontSize: `${n.size}px`,
-            opacity: hovered ? 0.11 : 0.035,
-            animation: `floatUp ${n.duration}s ${n.delay}s infinite linear`,
-          }}
-        >
-          {n.value}
-        </span>
-      ))}
-      <style>{`
-        @keyframes floatUp {
-          0%   { transform: translateY(0px) rotate(0deg); }
-          50%  { transform: translateY(-18px) rotate(3deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-// ── Trust badge ───────────────────────────────────────────────
-function TrustBadge({ icon, text }: { icon: React.ReactNode; text: string }) {
-  return (
-    <div className="flex items-center gap-2 text-zinc-500 text-xs">
-      <span className="text-monad-400/60">{icon}</span>
-      <span>{text}</span>
-    </div>
-  );
-}
-
-// ── Password strength ─────────────────────────────────────────
-const pwdChecks = [
+// ── Password strength ─────────────────────────────────────────────────────────
+const PWD_CHECKS = [
   { label: 'At least 8 characters', test: (p: string) => p.length >= 8 },
   { label: 'Uppercase letter (A–Z)', test: (p: string) => /[A-Z]/.test(p) },
   { label: 'Lowercase letter (a–z)', test: (p: string) => /[a-z]/.test(p) },
   { label: 'Number (0–9)', test: (p: string) => /\d/.test(p) },
-  { label: 'Special character (!@#$…)', test: (p: string) => /[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]/.test(p) },
+  { label: 'Special character', test: (p: string) => /[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]/.test(p) },
 ];
 
 function passwordStrength(p: string): 0 | 1 | 2 | 3 {
-  const passed = pwdChecks.filter(c => c.test(p)).length;
-  if (p.length === 0) return 0;
+  const passed = PWD_CHECKS.filter(c => c.test(p)).length;
+  if (!p) return 0;
   if (passed <= 2) return 1;
   if (passed <= 3) return 2;
   return 3;
 }
 
-const strengthMeta = {
-  0: { label: '', color: 'bg-zinc-800' },
+const STR_META = {
+  0: { label: '', color: '' },
   1: { label: 'Weak', color: 'bg-red-500' },
   2: { label: 'Fair', color: 'bg-yellow-500' },
   3: { label: 'Strong', color: 'bg-green-500' },
 } as const;
 
-function PasswordStrengthMeter({ password, show }: { password: string; show: boolean }) {
-  if (!show || !password) return null;
-  const strength = passwordStrength(password);
-  const meta = strengthMeta[strength];
+function PasswordStrengthMeter({ password }: { password: string }) {
+  if (!password) return null;
+  const str = passwordStrength(password);
+  const meta = STR_META[str];
   return (
     <div className="mt-2 space-y-2">
-      {/* Bar */}
-      <div className="flex gap-1">
-        {[1, 2, 3].map((n) => (
-          <div key={n} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${n <= strength ? meta.color : 'bg-zinc-800'}`} />
+      <div className="flex gap-1 items-center">
+        {[1, 2, 3].map(n => (
+          <div key={n} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${n <= str ? meta.color : 'bg-zinc-800'}`} />
         ))}
-        {meta.label && <span className={`text-xs font-medium ml-1 ${strength === 1 ? 'text-red-400' : strength === 2 ? 'text-yellow-400' : 'text-green-400'}`}>{meta.label}</span>}
+        {meta.label && (
+          <span className={`text-xs ml-1 font-medium ${str === 1 ? 'text-red-400' : str === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
+            {meta.label}
+          </span>
+        )}
       </div>
-      {/* Requirements */}
-      <div className="grid grid-cols-1 gap-0.5">
-        {pwdChecks.map((c) => (
+      <div className="space-y-0.5">
+        {PWD_CHECKS.map(c => (
           <div key={c.label} className="flex items-center gap-1.5">
-            {c.test(password) ? (
-              <svg className="w-3 h-3 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-            ) : (
-              <div className="w-3 h-3 rounded-full border border-zinc-700 flex-shrink-0" />
-            )}
+            {c.test(password)
+              ? <svg className="w-3 h-3 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+              : <div className="w-3 h-3 rounded-full border border-zinc-700 flex-shrink-0" />
+            }
             <span className={`text-xs ${c.test(password) ? 'text-zinc-400' : 'text-zinc-600'}`}>{c.label}</span>
           </div>
         ))}
@@ -157,57 +89,36 @@ function PasswordStrengthMeter({ password, show }: { password: string; show: boo
   );
 }
 
-// ── Input field ───────────────────────────────────────────────
-function Field({
-  label,
-  type,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-  showToggle,
-}: {
-  label: string;
-  type: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  autoComplete?: string;
-  showToggle?: boolean;
+// ── Field ─────────────────────────────────────────────────────────────────────
+function Field({ label, type, value, onChange, placeholder, autoComplete, showToggle }: {
+  label: string; type: string; value: string;
+  onChange: (v: string) => void; placeholder?: string;
+  autoComplete?: string; showToggle?: boolean;
 }) {
   const [visible, setVisible] = React.useState(false);
   const inputType = showToggle ? (visible ? 'text' : 'password') : type;
   return (
     <div>
-      <label className="block text-xs text-zinc-400 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
       <div className="relative">
         <input
-          type={inputType}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          className={`w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm
-                     outline-none focus:border-monad-500/60 focus:bg-zinc-900 transition-all
-                     placeholder:text-zinc-600 ${showToggle ? 'pr-11' : ''}`}
+          type={inputType} value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder} autoComplete={autoComplete}
+          className={`w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all
+            bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-600
+            focus:border-monad-500/60 focus:bg-zinc-900 focus:ring-1 focus:ring-monad-500/20
+            ${showToggle ? 'pr-11' : ''}`}
         />
         {showToggle && (
-          <button
-            type="button"
-            onClick={() => setVisible(v => !v)}
+          <button type="button" onClick={() => setVisible(v => !v)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors p-1"
             tabIndex={-1}
-            aria-label={visible ? 'Hide password' : 'Show password'}
           >
-            {visible ? (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
-              </svg>
-            ) : (
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            )}
+            {visible
+              ? <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+              : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            }
           </button>
         )}
       </div>
@@ -215,19 +126,66 @@ function Field({
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────
+// ── Animated logo for right panel ─────────────────────────────────────────────
+function BrandPanel() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center px-12">
+      {/* Animated ring logo */}
+      <div className="relative w-40 h-40 mb-10">
+        <div className="absolute inset-0 rounded-full"
+          style={{
+            background: 'conic-gradient(from 0deg, #836EF9, #a78bfa, transparent, #836EF9)',
+            animation: 'spin 6s linear infinite',
+          }}
+        />
+        <div className="absolute inset-1 rounded-full bg-zinc-950 flex items-center justify-center">
+          <span className="text-6xl font-black hero-gradient font-mono">B</span>
+        </div>
+        {/* Outer glow ring */}
+        <div className="absolute -inset-3 rounded-full opacity-20"
+          style={{ background: 'conic-gradient(from 180deg, #836EF9, transparent, #836EF9)', animation: 'spin 10s linear infinite reverse' }} />
+      </div>
+
+      <h2 className="text-3xl font-black tracking-tight text-white mb-4">
+        Bolty
+      </h2>
+      <p className="text-zinc-400 text-base leading-relaxed max-w-sm mb-10">
+        The developer platform for publishing AI agents, monetizing code, and connecting with a global community.
+      </p>
+
+      <div className="space-y-3 w-full max-w-xs">
+        {[
+          { icon: '▸', text: 'Publish repos and AI agents' },
+          { icon: '▸', text: 'Earn ETH from locked content' },
+          { icon: '▸', text: 'Chat with developers globally' },
+          { icon: '▸', text: 'Built-in Gemini AI assistant' },
+        ].map(item => (
+          <div key={item.text} className="flex items-center gap-3 text-sm text-zinc-400">
+            <span className="text-monad-400 text-xs">{item.icon}</span>
+            {item.text}
+          </div>
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
   const [tab, setTab] = useState<'login' | 'register'>('login');
-  const [hovered, setHovered] = useState(false);
 
-  // Login state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
-
-  // Register state
   const [regEmail, setRegEmail] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
@@ -238,7 +196,6 @@ export default function AuthPage() {
   const [success, setSuccess] = useState('');
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
 
-  // 2FA step
   const [twoFactorPending, setTwoFactorPending] = useState(false);
   const [tempToken, setTempToken] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -250,6 +207,7 @@ export default function AuthPage() {
 
   const clearMessages = () => { setError(''); setSuccess(''); };
   const resetTwoFactor = () => { setTwoFactorPending(false); setTempToken(''); setTwoFactorCode(''); };
+  const anyLoading = loading !== null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,7 +215,9 @@ export default function AuthPage() {
     if (!loginEmail || !loginPassword) { setError('Please fill in all fields'); return; }
     setLoading('email');
     try {
-      const result = await api.post<{ twoFactorRequired?: boolean; tempToken?: string }>('/auth/login/email', { email: loginEmail, password: loginPassword });
+      const result = await api.post<{ twoFactorRequired?: boolean; tempToken?: string }>(
+        '/auth/login/email', { email: loginEmail, password: loginPassword }
+      );
       if (result.twoFactorRequired && result.tempToken) {
         setTempToken(result.tempToken);
         setTwoFactorPending(true);
@@ -267,10 +227,8 @@ export default function AuthPage() {
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed. Please try again.');
-    } finally {
-      setLoading(null);
-    }
+      setError(err instanceof ApiError ? err.message : 'Login failed. Check your credentials and try again.');
+    } finally { setLoading(null); }
   };
 
   const handle2FAVerify = async (e: React.FormEvent) => {
@@ -284,9 +242,7 @@ export default function AuthPage() {
       router.push('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Invalid or expired code.');
-    } finally {
-      setLoading(null);
-    }
+    } finally { setLoading(null); }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -294,7 +250,10 @@ export default function AuthPage() {
     clearMessages();
     if (!regEmail || !regUsername || !regPassword) { setError('Please fill in all fields'); return; }
     if (regPassword !== regConfirm) { setError('Passwords do not match'); return; }
-    if (regPassword.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (passwordStrength(regPassword) < 3) {
+      setError('Password is too weak. Meet all requirements below.');
+      return;
+    }
     setLoading('email');
     try {
       await api.post('/auth/register', { email: regEmail, username: regUsername, password: regPassword });
@@ -302,95 +261,72 @@ export default function AuthPage() {
       router.push('/');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
-    } finally {
-      setLoading(null);
-    }
+    } finally { setLoading(null); }
   };
 
   const handleGitHub = () => {
-    clearMessages();
-    setLoading('github');
+    clearMessages(); setLoading('github');
     window.location.href = `${API_URL}/auth/github`;
   };
 
   const handleMetaMask = async () => {
-    clearMessages();
-    setLoading('metamask');
+    clearMessages(); setLoading('metamask');
     try {
       await connectMetaMask();
       await refresh();
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
-    } finally {
-      setLoading(null);
-    }
+    } finally { setLoading(null); }
   };
 
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
       </div>
     );
   }
 
-  const anyLoading = loading !== null;
-
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative px-4 py-12"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Floating numbers background */}
-      <FloatingNumbers hovered={hovered} />
+    <div className="min-h-screen flex">
 
-      {/* Radial gradient center glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(124,58,237,0.06) 0%, transparent 70%)',
-        }}
-      />
+      {/* ── Left side — Form ────────────────────────────────── */}
+      <div className="w-full lg:w-[55%] flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
 
-      {/* Card */}
-      <div className="relative z-10 w-full max-w-md">
-
-        {/* Logo + brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-monad-500/10 border border-monad-500/20 mb-4">
-            <svg className="w-7 h-7 text-monad-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
+          {/* Mobile logo */}
+          <div className="flex items-center gap-2 mb-8 lg:hidden">
+            <div className="w-8 h-8 rounded-xl bg-monad-500/15 border border-monad-500/25 flex items-center justify-center">
+              <span className="text-monad-400 font-black text-sm">B</span>
+            </div>
+            <span className="font-bold text-lg text-white">Bolty</span>
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Bolty</h1>
-          <p className="text-sm text-zinc-500 mt-1">The AI agent platform for developers</p>
-        </div>
 
-        {/* Main card */}
-        <div className="bg-zinc-950/80 border border-zinc-800/80 rounded-2xl p-6 backdrop-blur-sm shadow-2xl shadow-black/40">
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
+              {twoFactorPending ? 'Two-factor verification' : tab === 'login' ? 'Sign in to Bolty' : 'Create your account'}
+            </h1>
+            <p className="text-sm text-zinc-500">
+              {twoFactorPending
+                ? 'Enter the code we sent to your email'
+                : tab === 'login'
+                  ? "Don't have an account? "
+                  : 'Already have an account? '}
+              {!twoFactorPending && (
+                <button
+                  onClick={() => { setTab(tab === 'login' ? 'register' : 'login'); clearMessages(); }}
+                  className="text-monad-400 hover:text-monad-300 font-medium transition-colors"
+                >
+                  {tab === 'login' ? 'Sign up' : 'Sign in'}
+                </button>
+              )}
+            </p>
+          </div>
 
-          {/* Tabs */}
-          {!twoFactorPending && <div className="flex bg-zinc-900/60 rounded-xl p-1 mb-6 border border-zinc-800/60">
-            {(['login', 'register'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => { setTab(t); clearMessages(); resetTwoFactor(); }}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  tab === t
-                    ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30 shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {t === 'login' ? 'Sign in' : 'Sign up'}
-              </button>
-            ))}
-          </div>}
-
-          {/* Error / success */}
+          {/* Error / success messages */}
           {error && (
-            <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
+            <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-5">
               <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9.303 3.376c.866 1.5-.217 3.374-1.948 3.374H4.645c-1.73 0-2.813-1.874-1.948-3.374L10.052 3.378c.866-1.5 3.032-1.5 3.898 0L21.303 16.126zM12 15.75h.008v.008H12v-.008z" />
               </svg>
@@ -398,7 +334,7 @@ export default function AuthPage() {
             </div>
           )}
           {success && (
-            <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-4">
+            <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3 mb-5">
               <svg className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -406,226 +342,153 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* 2FA step */}
+          {/* ── 2FA step ── */}
           {twoFactorPending && (
             <form onSubmit={handle2FAVerify} className="space-y-4">
-              <div className="text-center pb-2">
-                <div className="w-12 h-12 rounded-full bg-monad-500/10 border border-monad-500/20 flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-6 h-6 text-monad-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                </div>
-                <p className="text-sm text-zinc-300 font-medium">Two-Factor Verification</p>
-                <p className="text-xs text-zinc-500 mt-1">Enter the 6-digit code we sent to your email</p>
-              </div>
               <div>
-                <label className="block text-xs text-zinc-400 mb-1.5">Verification Code</label>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Verification code</label>
                 <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
+                  type="text" inputMode="numeric" maxLength={6}
                   value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  autoComplete="one-time-code"
-                  className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-4 py-3 text-white text-center text-xl font-mono tracking-[0.5em]
-                             outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
+                  onChange={e => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000" autoComplete="one-time-code"
+                  className="w-full rounded-xl px-4 py-3 bg-zinc-900/70 border border-zinc-800 text-white
+                             text-center text-2xl font-mono tracking-[0.5em] outline-none
+                             focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loading === '2fa' || twoFactorCode.length !== 6}
-                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
-                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading === '2fa' ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Verifying...
-                  </span>
-                ) : 'Verify & Sign in'}
+              <button type="submit" disabled={loading === '2fa' || twoFactorCode.length !== 6}
+                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                {loading === '2fa'
+                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Verifying...</span>
+                  : 'Verify and sign in'}
               </button>
-              <button
-                type="button"
-                onClick={() => { resetTwoFactor(); clearMessages(); }}
-                className="w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors py-1"
-              >
-                ← Back to login
+              <button type="button" onClick={() => { resetTwoFactor(); clearMessages(); }}
+                className="w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors py-1">
+                Back to sign in
               </button>
             </form>
           )}
 
-          {/* Email form */}
+          {/* ── Login form ── */}
           {!twoFactorPending && tab === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
-              <Field
-                label="Email"
-                type="email"
-                value={loginEmail}
-                onChange={setLoginEmail}
-                placeholder="you@email.com"
-                autoComplete="email"
-              />
-              <Field
-                label="Password"
-                type="password"
-                value={loginPassword}
-                onChange={setLoginPassword}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                showToggle
-              />
-              <button
-                type="submit"
-                disabled={anyLoading}
-                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
-                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-              >
-                {loading === 'email' ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Signing in...
-                  </span>
-                ) : 'Sign in'}
+              <Field label="Email" type="email" value={loginEmail} onChange={setLoginEmail}
+                placeholder="you@email.com" autoComplete="email" />
+              <Field label="Password" type="password" value={loginPassword} onChange={setLoginPassword}
+                placeholder="Your password" autoComplete="current-password" showToggle />
+              <button type="submit" disabled={anyLoading}
+                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
+                {loading === 'email'
+                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Signing in...</span>
+                  : 'Sign in'}
               </button>
             </form>
           )}
 
+          {/* ── Register form ── */}
           {!twoFactorPending && tab === 'register' && (
             <form onSubmit={handleRegister} className="space-y-4">
-              <Field
-                label="Email"
-                type="email"
-                value={regEmail}
-                onChange={setRegEmail}
-                placeholder="you@email.com"
-                autoComplete="email"
-              />
-              <Field
-                label="Username"
-                type="text"
-                value={regUsername}
-                onChange={(v) => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                placeholder="myusername"
-                autoComplete="username"
-              />
+              <Field label="Email" type="email" value={regEmail} onChange={setRegEmail}
+                placeholder="you@email.com" autoComplete="email" />
+              <Field label="Username" type="text" value={regUsername}
+                onChange={v => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                placeholder="your_username" autoComplete="username" />
               <div>
-                <Field
-                  label="Password"
-                  type="password"
-                  value={regPassword}
-                  onChange={setRegPassword}
-                  placeholder="Create a strong password"
-                  autoComplete="new-password"
-                  showToggle
-                />
-                <PasswordStrengthMeter password={regPassword} show={regPassword.length > 0} />
+                <Field label="Password" type="password" value={regPassword} onChange={setRegPassword}
+                  placeholder="Create a strong password" autoComplete="new-password" showToggle />
+                <PasswordStrengthMeter password={regPassword} />
               </div>
-              <Field
-                label="Confirm Password"
-                type="password"
-                value={regConfirm}
-                onChange={setRegConfirm}
-                placeholder="Repeat your password"
-                autoComplete="new-password"
-                showToggle
-              />
-              <button
-                type="submit"
-                disabled={anyLoading}
-                className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm
-                           transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-1"
-              >
-                {loading === 'email' ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Creating account...
-                  </span>
-                ) : 'Create account'}
+              <Field label="Confirm password" type="password" value={regConfirm} onChange={setRegConfirm}
+                placeholder="Repeat your password" autoComplete="new-password" showToggle />
+              <button type="submit" disabled={anyLoading}
+                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
+                {loading === 'email'
+                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creating account...</span>
+                  : 'Create account'}
               </button>
             </form>
           )}
 
-          {/* Divider + Social buttons — hidden during 2FA step */}
-          {!twoFactorPending && <><div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-zinc-800" />
-            <span className="text-zinc-600 text-xs">or continue with</span>
-            <div className="flex-1 h-px bg-zinc-800" />
-          </div>
-
-          {/* Social buttons */}
-          <div className="space-y-2.5">
-            {/* GitHub */}
-            <button
-              onClick={handleGitHub}
-              disabled={anyLoading}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
-                         hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150
-                         disabled:opacity-50 disabled:cursor-not-allowed group"
-            >
-              <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                <GitHubLogo className="w-4 h-4 text-white" />
+          {/* ── Divider + OAuth ── */}
+          {!twoFactorPending && (
+            <>
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-zinc-800" />
+                <span className="text-zinc-600 text-xs">or continue with</span>
+                <div className="flex-1 h-px bg-zinc-800" />
               </div>
-              <span className="flex-1 text-left text-sm text-white font-medium">GitHub</span>
-              {loading === 'github'
-                ? <span className="w-4 h-4 rounded-full border-2 border-zinc-400/30 border-t-zinc-400 animate-spin" />
-                : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-              }
-            </button>
 
-            {/* MetaMask */}
-            {metamaskInstalled ? (
-              <button
-                onClick={handleMetaMask}
-                disabled={anyLoading}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
-                           hover:bg-zinc-800/70 hover:border-zinc-700 transition-all duration-150
-                           disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                  <MetaMaskLogo className="w-4 h-4" />
-                </div>
-                <span className="flex-1 text-left text-sm text-white font-medium">MetaMask</span>
-                {loading === 'metamask'
-                  ? <span className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />
-                  : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                }
-              </button>
-            ) : (
-              <a
-                href="https://metamask.io/download/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-xl
-                           hover:border-zinc-700 transition-all duration-150 group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                  <MetaMaskLogo className="w-4 h-4" />
-                </div>
-                <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400 transition-colors">Install MetaMask</span>
-                <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            )}
-          </div></> }
-        </div>
+              <div className="space-y-2.5">
+                <button onClick={handleGitHub} disabled={anyLoading}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
+                             hover:bg-zinc-800/70 hover:border-zinc-700 transition-all disabled:opacity-50 group">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+                    <GitHubLogo className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="flex-1 text-left text-sm text-white font-medium">GitHub</span>
+                  {loading === 'github'
+                    ? <span className="w-4 h-4 rounded-full border-2 border-zinc-400/30 border-t-zinc-400 animate-spin" />
+                    : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                  }
+                </button>
 
-        {/* Trust signals */}
-        <div className="mt-5 flex items-center justify-center gap-6 flex-wrap">
-          <TrustBadge
-            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
-            text="No third-party data"
-          />
-          <TrustBadge
-            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>}
-            text="Encrypted passwords"
-          />
-          <TrustBadge
-            icon={<svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" /></svg>}
-            text="Link GitHub from your profile"
-          />
+                {metamaskInstalled ? (
+                  <button onClick={handleMetaMask} disabled={anyLoading}
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
+                               hover:bg-zinc-800/70 hover:border-zinc-700 transition-all disabled:opacity-50 group">
+                    <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
+                      <MetaMaskLogo className="w-4 h-4" />
+                    </div>
+                    <span className="flex-1 text-left text-sm text-white font-medium">MetaMask</span>
+                    {loading === 'metamask'
+                      ? <span className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />
+                      : <svg className="w-4 h-4 text-zinc-600 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                    }
+                  </button>
+                ) : (
+                  <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"
+                    className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-xl hover:border-zinc-700 transition-all group">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
+                      <MetaMaskLogo className="w-4 h-4" />
+                    </div>
+                    <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400">Install MetaMask</span>
+                    <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                )}
+              </div>
+
+              {/* Trust */}
+              <div className="mt-6 flex flex-wrap gap-4 text-xs text-zinc-600">
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  End-to-end encrypted
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
+                  OWASP compliant
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                  2FA supported
+                </span>
+              </div>
+            </>
+          )}
         </div>
+      </div>
+
+      {/* ── Right side — Brand panel ─────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center"
+        style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, var(--bg-elevated) 100%)', borderLeft: '1px solid var(--border)' }}>
+        {/* Background rings */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-8"
+          style={{ border: '1px solid rgba(131,110,249,0.1)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-5"
+          style={{ border: '1px solid rgba(131,110,249,0.08)' }} />
+        <BrandPanel />
       </div>
     </div>
   );

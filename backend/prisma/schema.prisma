@@ -66,6 +66,8 @@ model User {
   receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
   marketListings MarketListing[]  @relation("MarketSeller")
   purchasesMade  RepoPurchase[]   @relation("Buyer")
+  sentFriendRequests     Friendship[]  @relation("FriendSent")
+  receivedFriendRequests Friendship[]  @relation("FriendReceived")
 
   @@map("users")
 }
@@ -319,4 +321,30 @@ model PriceSnapshot {
   source      String
 
   @@map("price_snapshots")
+}
+
+// ─── Friendships ──────────────────────────────────────────────────────────────
+
+model Friendship {
+  id         String           @id @default(cuid())
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  senderId   String
+  sender     User             @relation("FriendSent",     fields: [senderId],   references: [id], onDelete: Cascade)
+
+  receiverId String
+  receiver   User             @relation("FriendReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  status     FriendshipStatus @default(PENDING)
+
+  @@unique([senderId, receiverId])
+  @@index([receiverId])
+  @@map("friendships")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }

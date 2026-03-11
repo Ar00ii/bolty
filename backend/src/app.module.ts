@@ -13,6 +13,7 @@ import { ChartModule } from './modules/chart/chart.module';
 import { UsersModule } from './modules/users/users.module';
 import { DmModule } from './modules/dm/dm.module';
 import { MarketModule } from './modules/market/market.module';
+import { SocialModule } from './modules/social/social.module';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -50,6 +51,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     AuthModule,
     ChatModule,
     AiModule,
+    SocialModule,
     ReposModule,
     ChartModule,
     UsersModule,

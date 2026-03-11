@@ -2,36 +2,35 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ClientShell } from '@/components/layout/ClientShell';
+import { ThemeProvider } from '@/lib/theme/ThemeContext';
 
 export const metadata: Metadata = {
-  title: 'Bolty | The Ethereum Memecoin Platform',
-  description: 'The memecoin platform on Ethereum. Trade, publish repos, chat, and earn.',
-  keywords: ['bolty', 'ethereum', 'memecoin', 'web3', 'crypto', 'defi', 'metamask', 'erc20'],
+  title: 'Bolty | AI Developer Platform',
+  description: 'The developer platform for AI agents, code marketplaces, and community collaboration.',
+  keywords: ['bolty', 'ai agents', 'developer platform', 'code marketplace', 'ethereum', 'web3'],
   openGraph: {
-    title: 'Bolty | The Ethereum Memecoin Platform',
-    description: 'The memecoin platform on Ethereum.',
+    title: 'Bolty | AI Developer Platform',
+    description: 'The developer platform for AI agents, code marketplaces, and community collaboration.',
     type: 'website',
   },
   robots: 'index, follow',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" data-theme="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="bg-terminal-bg text-terminal-text min-h-screen grid-bg">
-        <AuthProvider>
-          <ClientShell>
-            {children}
-          </ClientShell>
-        </AuthProvider>
+      <body className="min-h-screen grid-bg">
+        <ThemeProvider>
+          <AuthProvider>
+            <ClientShell>
+              {children}
+            </ClientShell>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
