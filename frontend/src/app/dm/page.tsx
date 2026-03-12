@@ -111,14 +111,37 @@ export default function DmPage() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
-  const startNewDm = () => {
-    const id = newRecipient.trim();
-    if (!id) return;
-    setActivePeer({ id, username: id, avatarUrl: null });
+  const startNewDm = async () => {
+    const input = newRecipient.trim().replace(/^@/, '');
+    if (!input) return;
+
+    // If it looks like a UUID use it directly, otherwise resolve username → id
+    const isUuid = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(input);
+    let peerId = input;
+    let peerUsername: string | null = input;
+    let peerAvatar: string | null = null;
+
+    if (!isUuid) {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+        const resp = await fetch(`${API_URL}/users/${encodeURIComponent(input)}`, { credentials: 'include' });
+        if (!resp.ok) { setError('User not found'); setTimeout(() => setError(''), 4000); return; }
+        const data = await resp.json();
+        peerId = data.id;
+        peerUsername = data.username ?? input;
+        peerAvatar = data.avatarUrl ?? null;
+      } catch {
+        setError('Could not resolve user');
+        setTimeout(() => setError(''), 4000);
+        return;
+      }
+    }
+
+    setActivePeer({ id: peerId, username: peerUsername, avatarUrl: peerAvatar });
     setMessages([]);
     setNewRecipient('');
     setShowNewDm(false);
-    socketRef.current?.emit('openConversation', { peerId: id });
+    socketRef.current?.emit('openConversation', { peerId });
   };
 
   const formatTime = (d: string) =>
