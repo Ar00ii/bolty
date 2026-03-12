@@ -23,11 +23,29 @@ export class RegisterEmailDto {
 }
 
 export class LoginEmailDto {
-  @IsEmail()
-  email: string;
+  @IsString()
+  @MinLength(1, { message: 'Email or username is required' })
+  identifier: string;
 
   @IsString()
   password: string;
+}
+
+export class ForgotPasswordDto {
+  @IsString()
+  @MinLength(1, { message: 'Email or username is required' })
+  identifier: string;
+}
+
+export class ResetPasswordDto {
+  @IsString()
+  token: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @MaxLength(100)
+  @Matches(PASSWORD_REGEX, { message: PASSWORD_MESSAGE })
+  newPassword: string;
 }
 
 export class Verify2FADto {

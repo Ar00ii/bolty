@@ -228,6 +228,39 @@ export class EmailService {
     await this.send(to, subject, html, text);
   }
 
+  // ── Password reset ───────────────────────────────────────────────────────
+
+  async sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
+    const subject = 'Reset your Bolty password';
+    const html = shell(subject, 'Reset your Bolty password', body(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Password Reset</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        We received a request to reset your Bolty password.
+        Click the button below to set a new one. The link expires in <strong style="color:#18181b;">15 minutes</strong>.
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+        <tr>
+          <td align="center">
+            <a href="${resetUrl}" style="display:inline-block;background:#836EF9;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:14px 32px;">
+              Reset password &rarr;
+            </a>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 16px;color:#a1a1aa;font-size:13px;line-height:1.6;">
+        Or copy and paste this URL into your browser:<br/>
+        <a href="${resetUrl}" style="color:#836EF9;word-break:break-all;">${resetUrl}</a>
+      </p>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#92400e;">
+          <strong>Didn't request a password reset?</strong> You can safely ignore this email — your password won't change.
+        </p>
+      </div>
+    `));
+    const text = `Reset your Bolty password\n\nClick the link below (expires in 15 minutes):\n${resetUrl}\n\nIf you didn't request this, ignore this email.`;
+    await this.send(to, subject, html, text);
+  }
+
   // ── Delete account ───────────────────────────────────────────────────────
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {

@@ -30,6 +30,8 @@ import {
   ConfirmEmailChangeDto,
   DeleteAccountDto,
   Toggle2FADto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
 } from './dto/email-auth.dto';
 
 const COOKIE_OPTIONS = {
@@ -78,7 +80,7 @@ export class AuthController {
   @Post('login/email')
   async loginEmail(@Body() dto: LoginEmailDto, @Res() res: Response) {
     const result = await this.authService.loginWithEmail({
-      email: dto.email,
+      identifier: dto.identifier,
       password: dto.password,
     });
 
@@ -115,6 +117,27 @@ export class AuthController {
     });
 
     return res.json({ success: true });
+  }
+
+  // ── Password Reset ────────────────────────────────────────────────────────
+
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('password/forgot')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.requestPasswordReset(dto.identifier);
+    // Always return success to avoid account enumeration
+    return { success: true };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('password/reset')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto.token, dto.newPassword);
+    return { success: true };
   }
 
   // ── 2FA Management ────────────────────────────────────────────────────────

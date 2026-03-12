@@ -181,10 +181,13 @@ export class AuthService {
   }
 
   async loginWithEmail(
-    data: { email: string; password: string },
+    data: { identifier: string; password: string },
   ): Promise<AuthTokens | { twoFactorRequired: true; tempToken: string }> {
-    const email = data.email.toLowerCase().trim();
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const identifier = data.identifier.toLowerCase().trim();
+    const isEmail = identifier.includes('@');
+    const user = await (isEmail
+      ? this.prisma.user.findUnique({ where: { email: identifier } })
+      : this.prisma.user.findUnique({ where: { username: identifier } }));
 
     if (!user || !user.passwordHash) {
       throw new UnauthorizedException('Invalid credentials');
@@ -338,6 +341,46 @@ export class AuthService {
     await this.revokeAllTokens(userId);
     await this.prisma.user.delete({ where: { id: userId } });
     this.logger.warn(`Account deleted: ${userId}`);
+  }
+
+  // ── Password Reset ────────────────────────────────────────────────────────
+
+  async requestPasswordReset(identifier: string): Promise<void> {
+    const id = identifier.toLowerCase().trim();
+    const isEmail = id.includes('@');
+    const user = await (isEmail
+      ? this.prisma.user.findUnique({ where: { email: id } })
+      : this.prisma.user.findUnique({ where: { username: id } }));
+
+    // Always return silently — don't reveal whether the account exists
+    if (!user?.email || !user.passwordHash) return;
+
+    const token = uuidv4();
+    await this.redis.set(`pwd_reset:${token}`, user.id, 15 * 60); // 15 min
+
+    const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const resetUrl = `${frontendUrl}/auth/reset-password?token=${token}`;
+
+    this.emailService.sendPasswordResetEmail(user.email, resetUrl).catch((err: Error) =>
+      this.logger.warn(`Password reset email failed for ${user.email}: ${err.message}`),
+    );
+    this.logger.log(`Password reset requested for user ${user.id}`);
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const userId = await this.redis.get(`pwd_reset:${token}`);
+    if (!userId) throw new BadRequestException('Invalid or expired reset token');
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await this.redis.del(`pwd_reset:${token}`);
+
+    // Revoke all existing sessions so old tokens are invalidated
+    await this.revokeAllTokens(userId);
+    this.logger.log(`Password reset completed for user ${userId}`);
   }
 
   // ── GitHub Linking ────────────────────────────────────────────────────────

@@ -182,16 +182,18 @@ export default function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
-  const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>('login');
 
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
 
-  const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | '2fa' | null>(null);
+  const [forgotIdentifier, setForgotIdentifier] = useState('');
+
+  const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | '2fa' | 'forgot' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
@@ -212,11 +214,11 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
-    if (!loginEmail || !loginPassword) { setError('Please fill in all fields'); return; }
+    if (!loginIdentifier || !loginPassword) { setError('Please fill in all fields'); return; }
     setLoading('email');
     try {
       const result = await api.post<{ twoFactorRequired?: boolean; tempToken?: string }>(
-        '/auth/login/email', { email: loginEmail, password: loginPassword }
+        '/auth/login/email', { identifier: loginIdentifier, password: loginPassword }
       );
       if (result.twoFactorRequired && result.tempToken) {
         setTempToken(result.tempToken);
@@ -264,6 +266,19 @@ export default function AuthPage() {
     } finally { setLoading(null); }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    if (!forgotIdentifier) { setError('Please enter your email or username'); return; }
+    setLoading('forgot');
+    try {
+      await api.post('/auth/password/forgot', { identifier: forgotIdentifier });
+      setTab('reset-sent');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+    } finally { setLoading(null); }
+  };
+
   const handleGitHub = () => {
     clearMessages(); setLoading('github');
     window.location.href = `${API_URL}/auth/github`;
@@ -305,22 +320,26 @@ export default function AuthPage() {
 
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
-              {twoFactorPending ? 'Two-factor verification' : tab === 'login' ? 'Sign in to Bolty' : 'Create your account'}
+              {twoFactorPending
+                ? 'Two-factor verification'
+                : tab === 'login'
+                  ? 'Sign in to Bolty'
+                  : tab === 'register'
+                    ? 'Create your account'
+                    : tab === 'forgot'
+                      ? 'Reset your password'
+                      : 'Check your email'}
             </h1>
             <p className="text-sm text-zinc-500">
               {twoFactorPending
                 ? 'Enter the code we sent to your email'
                 : tab === 'login'
-                  ? "Don't have an account? "
-                  : 'Already have an account? '}
-              {!twoFactorPending && (
-                <button
-                  onClick={() => { setTab(tab === 'login' ? 'register' : 'login'); clearMessages(); }}
-                  className="text-monad-400 hover:text-monad-300 font-medium transition-colors"
-                >
-                  {tab === 'login' ? 'Sign up' : 'Sign in'}
-                </button>
-              )}
+                  ? <>{"Don't have an account? "}<button onClick={() => { setTab('register'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign up</button></>
+                  : tab === 'register'
+                    ? <>{'Already have an account? '}<button onClick={() => { setTab('login'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button></>
+                    : tab === 'forgot'
+                      ? <>{'Remember it? '}<button onClick={() => { setTab('login'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button></>
+                      : 'We sent a password reset link to your inbox.'}
             </p>
           </div>
 
@@ -373,10 +392,18 @@ export default function AuthPage() {
           {/* ── Login form ── */}
           {!twoFactorPending && tab === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
-              <Field label="Email" type="email" value={loginEmail} onChange={setLoginEmail}
-                placeholder="you@email.com" autoComplete="email" />
-              <Field label="Password" type="password" value={loginPassword} onChange={setLoginPassword}
-                placeholder="Your password" autoComplete="current-password" showToggle />
+              <Field label="Email or username" type="text" value={loginIdentifier} onChange={setLoginIdentifier}
+                placeholder="you@email.com or your_username" autoComplete="username" />
+              <div>
+                <Field label="Password" type="password" value={loginPassword} onChange={setLoginPassword}
+                  placeholder="Your password" autoComplete="current-password" showToggle />
+                <div className="mt-1.5 text-right">
+                  <button type="button" onClick={() => { setTab('forgot'); clearMessages(); }}
+                    className="text-xs text-zinc-500 hover:text-monad-400 transition-colors">
+                    Forgot your password?
+                  </button>
+                </div>
+              </div>
               <button type="submit" disabled={anyLoading}
                 className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
                 {loading === 'email'
@@ -384,6 +411,39 @@ export default function AuthPage() {
                   : 'Sign in'}
               </button>
             </form>
+          )}
+
+          {/* ── Forgot password form ── */}
+          {!twoFactorPending && tab === 'forgot' && (
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <Field label="Email or username" type="text" value={forgotIdentifier} onChange={setForgotIdentifier}
+                placeholder="you@email.com or your_username" autoComplete="username" />
+              <button type="submit" disabled={loading === 'forgot'}
+                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                {loading === 'forgot'
+                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Sending...</span>
+                  : 'Send reset link'}
+              </button>
+            </form>
+          )}
+
+          {/* ── Reset sent confirmation ── */}
+          {!twoFactorPending && tab === 'reset-sent' && (
+            <div className="space-y-4">
+              <div className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-4">
+                <svg className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <div>
+                  <p className="text-green-400 text-sm font-medium">Reset link sent</p>
+                  <p className="text-zinc-400 text-xs mt-0.5">If an account with that email exists, you'll receive a link within a few minutes. Check your spam folder too.</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => { setTab('login'); clearMessages(); setForgotIdentifier(''); }}
+                className="w-full py-3 rounded-xl btn-primary">
+                Back to sign in
+              </button>
+            </div>
           )}
 
           {/* ── Register form ── */}
