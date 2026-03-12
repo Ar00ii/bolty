@@ -39,17 +39,17 @@ class UpdateProfileDto {
   bio?: string;
 
   @IsOptional()
-  @IsUrl({}, { message: 'Invalid Twitter URL' })
+  @IsUrl({ require_protocol: false }, { message: 'Invalid Twitter URL' })
   @MaxLength(200)
   twitterUrl?: string;
 
   @IsOptional()
-  @IsUrl({}, { message: 'Invalid LinkedIn URL' })
+  @IsUrl({ require_protocol: false }, { message: 'Invalid LinkedIn URL' })
   @MaxLength(200)
   linkedinUrl?: string;
 
   @IsOptional()
-  @IsUrl({}, { message: 'Invalid website URL' })
+  @IsUrl({ require_protocol: false }, { message: 'Invalid website URL' })
   @MaxLength(200)
   websiteUrl?: string;
 }
