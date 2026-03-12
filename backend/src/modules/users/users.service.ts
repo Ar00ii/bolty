@@ -30,6 +30,9 @@ export class UsersService {
         twitterUrl: true,
         linkedinUrl: true,
         websiteUrl: true,
+        userTag: true,
+        email: true,
+        twoFactorEnabled: true,
         createdAt: true,
         _count: {
           select: { repositories: true, votes: true },
@@ -38,6 +41,31 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  /** Search users by username (partial) or userTag exact (pass "#1234") */
+  async search(query: string) {
+    const q = query.trim().slice(0, 50);
+    if (!q) return [];
+
+    // "#1234" → exact tag match
+    if (q.startsWith('#')) {
+      const tag = q.slice(1);
+      return this.prisma.user.findMany({
+        where: { userTag: tag },
+        select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true },
+        take: 10,
+      });
+    }
+
+    // Otherwise search by username contains (strip leading @)
+    const term = q.replace(/^@/, '');
+    return this.prisma.user.findMany({
+      where: { username: { contains: term, mode: 'insensitive' } },
+      select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true },
+      take: 10,
+      orderBy: { username: 'asc' },
+    });
   }
 
   async updateProfile(userId: string, data: UpdateProfileData) {

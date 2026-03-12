@@ -50,6 +50,9 @@ model User {
   websiteUrl    String?
   profileSetup  Boolean   @default(false)
 
+  // Short numeric tag for finding friends (e.g. #4821)
+  userTag       String?   @unique
+
   // Roles & Status
   role          UserRole  @default(USER)
   isBanned      Boolean   @default(false)

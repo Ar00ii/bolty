@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Param,
+  Query,
   Body,
   UseGuards,
   ConflictException,
@@ -79,6 +80,12 @@ export class UsersController {
       }
       throw err;
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('search')
+  searchUsers(@Query('q') q: string) {
+    return this.usersService.search(q || '');
   }
 
   @Public()

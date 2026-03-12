@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
 import * as nacl from 'tweetnacl';
 import * as bs58 from 'bs58';
@@ -139,7 +139,48 @@ export class WalletAuthService {
     return this.authService.generateTokens(user.id);
   }
 
+  // ── Link wallet to existing account ──────────────────────────────────────
+
+  async linkWalletToUser(userId: string, address: string, signature: string, nonce: string): Promise<void> {
+    const normalized = address.toLowerCase();
+    if (!ethers.isAddress(address)) throw new UnauthorizedException('Invalid Ethereum address');
+
+    const nonceValid = await this.authService.verifyAndConsumeNonce(normalized, nonce);
+    if (!nonceValid) throw new UnauthorizedException('Invalid or expired nonce');
+
+    const message = this.buildSignMessage(normalized, nonce, 'ethereum');
+    let recovered: string;
+    try {
+      recovered = ethers.verifyMessage(message, signature);
+    } catch {
+      throw new UnauthorizedException('Invalid signature');
+    }
+    if (recovered.toLowerCase() !== normalized) throw new UnauthorizedException('Signature verification failed');
+
+    // Ensure wallet isn't already linked to another account
+    const existing = await this.prisma.user.findUnique({ where: { walletAddress: normalized } });
+    if (existing && existing.id !== userId) {
+      throw new ConflictException('This wallet is already linked to another account');
+    }
+
+    await this.prisma.user.update({ where: { id: userId }, data: { walletAddress: normalized } });
+    this.logger.log(`Wallet linked: ${normalized.slice(0, 8)}... → user ${userId}`);
+  }
+
+  async unlinkWallet(userId: string): Promise<void> {
+    await this.prisma.user.update({ where: { id: userId }, data: { walletAddress: null } });
+  }
+
   // ── Helper Methods ────────────────────────────────────────────────────────
+
+  private async generateUserTag(): Promise<string> {
+    for (let i = 0; i < 20; i++) {
+      const tag = String(Math.floor(1000 + Math.random() * 9000));
+      const existing = await this.prisma.user.findUnique({ where: { userTag: tag } });
+      if (!existing) return tag;
+    }
+    return String(Math.floor(10000 + Math.random() * 90000));
+  }
 
   private buildSignMessage(address: string, nonce: string, chain: string): string {
     return `Welcome to Bolty!\n\nPlease sign this message to authenticate.\n\nChain: ${chain}\nAddress: ${address}\nNonce: ${nonce}\n\nThis request will not trigger any blockchain transaction.`;
@@ -156,11 +197,13 @@ export class WalletAuthService {
     });
 
     if (!user) {
+      const userTag = await this.generateUserTag();
       user = await this.prisma.user.create({
         data: {
           [field]: address,
           username: `${chain === 'ethereum' ? 'eth' : 'sol'}_${address.slice(0, 6)}`,
           lastLoginAt: new Date(),
+          userTag,
         },
       });
       this.logger.log(`New ${chain} wallet user: ${address.slice(0, 8)}...`);

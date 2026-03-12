@@ -251,6 +251,36 @@ export class AuthController {
     return { success: true };
   }
 
+  // ── Wallet Linking (authenticated user links MetaMask) ────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('link/wallet/nonce')
+  async getWalletLinkNonce(@Body() dto: GetNonceDto) {
+    return this.walletAuthService.getNonce(dto.address);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('link/wallet')
+  async linkWallet(
+    @CurrentUser('id') userId: string,
+    @Body() dto: VerifyEthereumDto,
+  ) {
+    await this.walletAuthService.linkWalletToUser(userId, dto.address, dto.signature, dto.nonce);
+    return { success: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete('link/wallet')
+  async unlinkWallet(@CurrentUser('id') userId: string) {
+    await this.walletAuthService.unlinkWallet(userId);
+    return { success: true };
+  }
+
   // ── MetaMask ──────────────────────────────────────────────────────────────
 
   @Public()

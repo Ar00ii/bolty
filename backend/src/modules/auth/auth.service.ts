@@ -134,6 +134,19 @@ export class AuthService {
     }
   }
 
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  /** Generate a unique 4-digit user tag (#1000–#9999) */
+  private async generateUserTag(): Promise<string> {
+    for (let i = 0; i < 20; i++) {
+      const tag = String(Math.floor(1000 + Math.random() * 9000));
+      const existing = await this.prisma.user.findUnique({ where: { userTag: tag } });
+      if (!existing) return tag;
+    }
+    // Fallback to 5 digits if pool is full
+    return String(Math.floor(10000 + Math.random() * 90000));
+  }
+
   // ── Email / Password Auth ─────────────────────────────────────────────────
 
   async registerWithEmail(data: {
@@ -151,9 +164,10 @@ export class AuthService {
     if (existingUsername) throw new ConflictException('Username already taken');
 
     const passwordHash = await bcrypt.hash(data.password, 12);
+    const userTag = await this.generateUserTag();
 
     const user = await this.prisma.user.create({
-      data: { email, username, passwordHash, displayName: username },
+      data: { email, username, passwordHash, displayName: username, userTag },
     });
 
     this.logger.log(`New email user registered: ${username}`);
@@ -370,6 +384,7 @@ export class AuthService {
     });
 
     if (!user) {
+      const userTag = await this.generateUserTag();
       user = await this.prisma.user.create({
         data: {
           githubId: githubProfile.id,
@@ -377,6 +392,7 @@ export class AuthService {
           username: githubProfile.login,
           avatarUrl: githubProfile.avatar_url,
           bio: githubProfile.bio,
+          userTag,
         },
       });
       this.logger.log(`New GitHub user created: ${githubProfile.login}`);
