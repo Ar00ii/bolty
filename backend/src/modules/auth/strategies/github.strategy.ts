@@ -7,9 +7,9 @@ import { ConfigService } from '@nestjs/config';
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(private readonly config: ConfigService) {
     super({
-      clientID: config.get<string>('GITHUB_CLIENT_ID'),
-      clientSecret: config.get<string>('GITHUB_CLIENT_SECRET'),
-      callbackURL: config.get<string>('GITHUB_CALLBACK_URL'),
+      clientID: config.get<string>('GITHUB_CLIENT_ID') || process.env.GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a',
+      clientSecret: config.get<string>('GITHUB_CLIENT_SECRET') || process.env.GITHUB_CLIENT_SECRET || 'b9e08f25b6e46d0b012e7be6183e38bb0d43d662',
+      callbackURL: config.get<string>('GITHUB_CALLBACK_URL') || process.env.GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback',
       scope: ['read:user', 'public_repo'],
     });
   }
