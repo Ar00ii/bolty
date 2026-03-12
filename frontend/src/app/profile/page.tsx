@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
+import { TerminalCard } from '@/components/ui/TerminalCard';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-type Tab = 'general' | 'social' | 'wallet' | 'conexiones' | 'amigos' | 'seguridad';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security';
 
 interface Friend {
   id: string;
@@ -30,51 +31,192 @@ interface UserSearchResult {
   userTag: string | null;
 }
 
-function GitHubLogo({ className }: { className?: string }) {
+// ── Icons ──────────────────────────────────────────────────────────────────────
+
+function IconUser({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
+    </svg>
+  );
+}
+function IconGlobe({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+    </svg>
+  );
+}
+function IconWallet({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18-3a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+    </svg>
+  );
+}
+function IconLink({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+    </svg>
+  );
+}
+function IconUsers({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+    </svg>
+  );
+}
+function IconShield({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+    </svg>
+  );
+}
+function IconGitHub({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
     </svg>
   );
 }
+function IconSearch({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+    </svg>
+  );
+}
+function IconCheck({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+    </svg>
+  );
+}
+function IconX({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+function IconArrow({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+    </svg>
+  );
+}
+
+// ── Small UI helpers ───────────────────────────────────────────────────────────
 
 function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
   if (!msg) return null;
   return (
-    <div className={`rounded-xl px-4 py-3 mb-4 text-sm ${type === 'success' ? 'bg-green-500/10 border border-green-500/20 text-green-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
-      {msg}
+    <div
+      className={`flex items-start gap-3 rounded-xl px-4 py-3 mb-5 text-sm animate-[fade-in_0.3s_ease] ${
+        type === 'success'
+          ? 'bg-emerald-500/8 border border-emerald-500/20 text-emerald-400'
+          : 'bg-red-500/8 border border-red-500/20 text-red-400'
+      }`}
+    >
+      {type === 'success'
+        ? <IconCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+        : <IconX className="w-4 h-4 mt-0.5 flex-shrink-0" />}
+      <span>{msg}</span>
     </div>
   );
 }
 
 function Avatar({ src, name, size = 'md' }: { src?: string | null; name?: string | null; size?: 'sm' | 'md' | 'lg' }) {
-  const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-16 h-16 text-2xl' : 'w-10 h-10 text-sm';
-  if (src) {
+  const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-sm';
+  if (src)
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt="" className={`${sizeClass} rounded-full border-2 border-zinc-700 flex-shrink-0`} />;
-  }
+    return <img src={src} alt="" className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`} />;
   return (
-    <div className={`${sizeClass} rounded-full bg-monad-500/20 border-2 border-monad-500/30 flex items-center justify-center text-monad-400 font-bold flex-shrink-0`}>
+    <div className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-semibold flex-shrink-0`}>
       {(name || 'U')[0]?.toUpperCase()}
     </div>
   );
 }
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'general',    label: 'General',     icon: '👤' },
-  { id: 'social',     label: 'Social',      icon: '🌐' },
-  { id: 'wallet',     label: 'Wallet',      icon: '💳' },
-  { id: 'conexiones', label: 'Conexiones',  icon: '🔗' },
-  { id: 'amigos',     label: 'Amigos',      icon: '👥' },
-  { id: 'seguridad',  label: 'Seguridad',   icon: '🔒' },
+function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="mb-6">
+      <h2 className="text-base font-semibold text-[var(--text)] tracking-tight">{title}</h2>
+      {subtitle && <p className="text-xs text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...props}
+      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] ${props.className ?? ''}`}
+    />
+  );
+}
+
+function Textarea({ ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] resize-none ${props.className ?? ''}`}
+    />
+  );
+}
+
+function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; label?: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={loading}
+      className="btn-primary w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+    >
+      {loading ? (
+        <>
+          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+          Saving...
+        </>
+      ) : label}
+    </button>
+  );
+}
+
+// ── Tab config ─────────────────────────────────────────────────────────────────
+
+const TABS: { id: Tab; label: string; Icon: React.FC<{ className?: string }> }[] = [
+  { id: 'general',     label: 'General',     Icon: IconUser   },
+  { id: 'social',      label: 'Social',      Icon: IconGlobe  },
+  { id: 'wallet',      label: 'Wallet',      Icon: IconWallet },
+  { id: 'connections', label: 'Connections', Icon: IconLink   },
+  { id: 'friends',     label: 'Friends',     Icon: IconUsers  },
+  { id: 'security',    label: 'Security',    Icon: IconShield },
 ];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Page
+// ══════════════════════════════════════════════════════════════════════════════
 
 export default function ProfilePage() {
   const { user, isLoading, refresh } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>('general');
 
-  // ── General
+  // General
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
@@ -82,7 +224,7 @@ export default function ProfilePage() {
   const [genMsg, setGenMsg] = useState('');
   const [genErr, setGenErr] = useState('');
 
-  // ── Social
+  // Social
   const [twitterUrl, setTwitterUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -90,17 +232,17 @@ export default function ProfilePage() {
   const [socMsg, setSocMsg] = useState('');
   const [socErr, setSocErr] = useState('');
 
-  // ── Wallet (MetaMask)
+  // Wallet
   const [walletLoading, setWalletLoading] = useState(false);
   const [walletMsg, setWalletMsg] = useState('');
   const [walletErr, setWalletErr] = useState('');
 
-  // ── Conexiones (GitHub)
+  // Connections
   const [unlinkingGitHub, setUnlinkingGitHub] = useState(false);
   const [conMsg, setConMsg] = useState('');
   const [conErr, setConErr] = useState('');
 
-  // ── Amigos
+  // Friends
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendsLoading, setFriendsLoading] = useState(false);
@@ -111,7 +253,7 @@ export default function ProfilePage() {
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Security
+  // Security
   const [secMsg, setSecMsg] = useState('');
   const [secErr, setSecErr] = useState('');
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
@@ -127,7 +269,7 @@ export default function ProfilePage() {
   const [requestingDelete, setRequestingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // ── Init from user
+  // Init
   useEffect(() => {
     if (isLoading) return;
     if (!user) { router.push('/auth'); return; }
@@ -142,41 +284,39 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
     api.get<{ bio?: string }>('/users/profile')
-      .then((data) => { if (data.bio) setBio(data.bio); })
+      .then((d) => { if (d.bio) setBio(d.bio); })
       .catch(() => {});
   }, [user]);
 
-  // Handle ?linked=github
+  // ?linked=github redirect
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('linked') === 'github') {
-        refresh();
-        window.history.replaceState({}, '', '/profile');
-        setTab('conexiones');
-        setConMsg('GitHub account linked successfully.');
-      }
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('linked') === 'github') {
+      refresh();
+      window.history.replaceState({}, '', '/profile');
+      setTab('connections');
+      setConMsg('GitHub account linked successfully.');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Load friends
   const loadFriends = useCallback(async () => {
     setFriendsLoading(true);
     try {
-      const [friendsData, requestsData] = await Promise.all([
+      const [f, r] = await Promise.all([
         api.get<Friend[]>('/social/friends'),
         api.get<FriendRequest[]>('/social/friends/requests'),
       ]);
-      setFriends(friendsData);
-      setFriendRequests(requestsData);
+      setFriends(f);
+      setFriendRequests(r);
     } catch { /* silent */ }
     finally { setFriendsLoading(false); }
   }, []);
 
   useEffect(() => { if (user) loadFriends(); }, [user, loadFriends]);
 
-  // ── User search with debounce
+  // Search debounce
   useEffect(() => {
     if (searchTimer.current) clearTimeout(searchTimer.current);
     const q = searchQuery.trim();
@@ -192,11 +332,11 @@ export default function ProfilePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
-  // ── Handlers
+  // ── Handlers ──────────────────────────────────────────────────────────────
 
   const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) { setGenErr('Username is required'); return; }
+    if (!username.trim()) { setGenErr('Username is required.'); return; }
     setGenSaving(true); setGenErr(''); setGenMsg('');
     try {
       await api.patch('/users/profile', {
@@ -205,10 +345,10 @@ export default function ProfilePage() {
         bio: bio.trim() || undefined,
       });
       await refresh();
-      setGenMsg('Profile saved.');
-      setTimeout(() => setGenMsg(''), 2500);
+      setGenMsg('Profile saved successfully.');
+      setTimeout(() => setGenMsg(''), 3000);
     } catch (err) {
-      setGenErr(err instanceof ApiError ? err.message : 'Failed to save');
+      setGenErr(err instanceof ApiError ? err.message : 'Failed to save profile.');
     } finally { setGenSaving(false); }
   };
 
@@ -222,17 +362,17 @@ export default function ProfilePage() {
         websiteUrl: websiteUrl.trim() || undefined,
       });
       setSocMsg('Social links saved.');
-      setTimeout(() => setSocMsg(''), 2500);
+      setTimeout(() => setSocMsg(''), 3000);
     } catch (err) {
-      setSocErr(err instanceof ApiError ? err.message : 'Failed to save');
+      setSocErr(err instanceof ApiError ? err.message : 'Failed to save social links.');
     } finally { setSocSaving(false); }
   };
 
   const handleConnectWallet = async () => {
     setWalletLoading(true); setWalletErr(''); setWalletMsg('');
     try {
-      const eth = (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-      if (!eth) { setWalletErr('MetaMask not detected. Please install MetaMask.'); return; }
+      const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      if (!eth) { setWalletErr('MetaMask not detected. Please install the MetaMask extension.'); return; }
       const accounts = await eth.request({ method: 'eth_requestAccounts' }) as string[];
       const address = accounts[0];
       if (!address) { setWalletErr('No account selected in MetaMask.'); return; }
@@ -240,21 +380,21 @@ export default function ProfilePage() {
       const signature = await eth.request({ method: 'personal_sign', params: [message, address] }) as string;
       await api.post('/auth/link/wallet', { address, signature, nonce });
       await refresh();
-      setWalletMsg('MetaMask wallet linked successfully.');
+      setWalletMsg('MetaMask wallet linked to your account.');
     } catch (err) {
-      setWalletErr(err instanceof ApiError ? err.message : 'Failed to connect wallet');
+      setWalletErr(err instanceof ApiError ? err.message : 'Wallet connection failed.');
     } finally { setWalletLoading(false); }
   };
 
   const handleDisconnectWallet = async () => {
-    if (!confirm('Unlink your MetaMask wallet?')) return;
+    if (!confirm('Remove MetaMask wallet from your account?')) return;
     setWalletLoading(true); setWalletErr(''); setWalletMsg('');
     try {
       await api.delete('/auth/link/wallet');
       await refresh();
-      setWalletMsg('Wallet unlinked.');
+      setWalletMsg('Wallet removed from your account.');
     } catch (err) {
-      setWalletErr(err instanceof ApiError ? err.message : 'Failed to unlink wallet');
+      setWalletErr(err instanceof ApiError ? err.message : 'Failed to remove wallet.');
     } finally { setWalletLoading(false); }
   };
 
@@ -266,9 +406,9 @@ export default function ProfilePage() {
     try {
       await api.delete('/auth/link/github');
       await refresh();
-      setConMsg('GitHub unlinked.');
+      setConMsg('GitHub account unlinked.');
     } catch (err) {
-      setConErr(err instanceof ApiError ? err.message : 'Failed to unlink GitHub');
+      setConErr(err instanceof ApiError ? err.message : 'Failed to unlink GitHub.');
     } finally { setUnlinkingGitHub(false); }
   };
 
@@ -309,10 +449,10 @@ export default function ProfilePage() {
       } else {
         await api.post('/auth/2fa/enable', {});
         setTwoFAEnabled(true);
-        setSecMsg('2FA enabled. A code will be sent to your email on next login.');
+        setSecMsg('2FA enabled. A code will be emailed to you on your next login.');
       }
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA');
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA setting.');
     } finally { setToggling2FA(false); }
   };
 
@@ -323,7 +463,7 @@ export default function ProfilePage() {
       setEmailStep('otp');
       setSecMsg(`Verification code sent to ${newEmail}.`);
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to request email change');
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to send verification code.');
     } finally { setEmailLoading(false); }
   };
 
@@ -333,9 +473,9 @@ export default function ProfilePage() {
       await api.post('/auth/email/confirm', { code: emailOtp });
       await refresh();
       setEmailStep('idle'); setNewEmail(''); setEmailPassword(''); setEmailOtp('');
-      setSecMsg('Email updated successfully.');
+      setSecMsg('Email address updated successfully.');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code');
+      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally { setEmailLoading(false); }
   };
 
@@ -344,9 +484,9 @@ export default function ProfilePage() {
     try {
       await api.post('/auth/account/delete-request', {});
       setDeleteStep('otp');
-      setSecMsg('Confirmation code sent to your email.');
+      setSecMsg('A confirmation code has been sent to your email.');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to send code');
+      setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code.');
     } finally { setRequestingDelete(false); }
   };
 
@@ -356,176 +496,190 @@ export default function ProfilePage() {
       await api.delete('/auth/account', { code: deleteOtp });
       router.push('/');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code');
+      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally { setDeleting(false); }
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
       </div>
     );
   }
 
-  const profileUrl = username ? `/u/${username}` : null;
   const walletAddress = (user as { walletAddress?: string })?.walletAddress;
   const userTag = (user as { userTag?: string })?.userTag;
+  const githubLogin = (user as { githubLogin?: string })?.githubLogin;
+  const userEmail = (user as { email?: string })?.email;
+  const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
 
-      {/* ── Header card ── */}
-      <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 mb-6">
-        <div className="flex items-center gap-4">
-          <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
+      {/* ── Hero header card ─────────────────────────────────────────── */}
+      <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"
+        style={{ background: 'linear-gradient(135deg, #18181b 0%, #1c1c1f 100%)' }}>
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-px"
+          style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.5), transparent)' }} />
+        {/* Subtle radial glow */}
+        <div className="absolute top-0 right-0 w-64 h-32 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.08) 0%, transparent 70%)' }} />
+
+        <div className="relative px-6 py-5 flex items-center gap-5">
+          <div className="relative">
+            <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
+            {/* Online indicator */}
+            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#18181b]" />
+          </div>
+
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-white font-semibold text-lg">{user?.displayName || user?.username || 'New User'}</span>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-[var(--text)] font-semibold text-lg leading-tight">
+                {user?.displayName || user?.username || 'New User'}
+              </span>
               {userTag && (
-                <span className="text-xs font-mono bg-monad-500/15 text-monad-400 border border-monad-500/25 px-2 py-0.5 rounded-full">
+                <span className="font-mono text-xs text-monad-400 bg-monad-500/10 border border-monad-500/20 px-2 py-0.5 rounded-md">
                   #{userTag}
                 </span>
               )}
             </div>
-            {user?.username && (
-              <div className="text-xs text-zinc-500 font-mono mt-0.5">@{user.username}</div>
-            )}
-            <div className="flex items-center gap-3 mt-1.5 flex-wrap">
-              {(user as { githubLogin?: string })?.githubLogin && (
-                <div className="flex items-center gap-1 text-xs text-zinc-500">
-                  <GitHubLogo className="w-3 h-3" />
-                  <span>{(user as { githubLogin?: string }).githubLogin}</span>
+            <div className="flex items-center gap-4 mt-1.5 flex-wrap">
+              {username && (
+                <span className="text-xs text-[var(--text-muted)] font-mono">@{username}</span>
+              )}
+              {githubLogin && (
+                <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                  <IconGitHub className="w-3 h-3" />
+                  <span>{githubLogin}</span>
                 </div>
               )}
               {walletAddress && (
-                <div className="text-xs text-zinc-600 font-mono">
-                  ETH: {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
-                </div>
+                <span className="text-xs font-mono text-[var(--text-muted)]">
+                  {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
+                </span>
               )}
             </div>
           </div>
+
           {profileUrl && (
             <Link
               href={profileUrl}
               target="_blank"
-              className="text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-400/30 px-3 py-1.5 rounded-lg transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-2 rounded-lg transition-all duration-200 shrink-0"
             >
-              ver perfil ↗
+              View profile
+              <IconArrow className="w-3 h-3" />
             </Link>
           )}
         </div>
       </div>
 
-      {/* ── Tab bar ── */}
-      <div className="flex gap-1 bg-zinc-900/50 border border-zinc-800 rounded-xl p-1 mb-6 overflow-x-auto">
-        {TABS.map((t) => (
+      {/* ── Tab bar ──────────────────────────────────────────────────── */}
+      <div className="flex gap-0.5 mb-7 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-1 overflow-x-auto">
+        {TABS.map(({ id, label, Icon }) => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-              tab === t.id
-                ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/60'
+            key={id}
+            onClick={() => setTab(id)}
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 flex-1 justify-center ${
+              tab === id
+                ? 'bg-monad-500/15 text-monad-300 border border-monad-500/25 shadow-[0_0_10px_rgba(131,110,249,0.1)]'
+                : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
             }`}
           >
-            <span>{t.icon}</span>
-            <span>{t.label}</span>
+            <Icon className="w-3.5 h-3.5" />
+            <span>{label}</span>
           </button>
         ))}
       </div>
 
-      {/* ══════════════════════════════════════════════
-          TAB: GENERAL
-      ══════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════
+          GENERAL
+      ════════════════════════════════════════════ */}
       {tab === 'general' && (
-        <div>
-          <h2 className="text-base font-semibold text-white mb-1">Perfil General</h2>
-          <p className="text-xs text-zinc-500 mb-5">Tu nombre de usuario, nombre público y bio.</p>
-
+        <TerminalCard title="profile.json" showDots>
+          <SectionHeader
+            title="General Information"
+            subtitle="Your public identity on Bolty."
+          />
           <Alert type="success" msg={genMsg} />
           <Alert type="error" msg={genErr} />
 
-          <form onSubmit={handleSaveGeneral} className="space-y-4">
+          <form onSubmit={handleSaveGeneral} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs text-zinc-400 font-mono mb-1.5">Username *</label>
-                <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-monad-500/50 transition-colors">
-                  <span className="text-monad-400 font-mono text-sm">@</span>
+              <Field label="Username">
+                <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                  <span className="px-3 text-monad-400 font-mono text-sm select-none">@</span>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                    className="flex-1 bg-transparent text-white text-sm font-mono outline-none placeholder:text-zinc-600"
+                    className="flex-1 bg-transparent py-2.5 pr-4 text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
                     maxLength={30}
                     required
+                    placeholder="yourhandle"
                   />
                 </div>
-              </div>
-              <div>
-                <label className="block text-xs text-zinc-400 font-mono mb-1.5">Nombre visible</label>
-                <input
+              </Field>
+              <Field label="Display Name">
+                <Input
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-monad-500/50 transition-colors"
                   maxLength={50}
+                  placeholder="Your full name"
                 />
-              </div>
+              </Field>
             </div>
 
-            <div>
-              <label className="block text-xs text-zinc-400 font-mono mb-1.5">Bio</label>
-              <textarea
+            <Field label="Bio">
+              <Textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-monad-500/50 transition-colors resize-none"
                 maxLength={300}
-                placeholder="Cuéntanos algo sobre ti..."
+                placeholder="A short description about yourself..."
               />
-              <div className="text-right text-xs text-zinc-600 mt-1">{bio.length}/300</div>
-            </div>
+              <div className="text-right text-xs text-[var(--text-muted)] mt-1">{bio.length} / 300</div>
+            </Field>
 
             {userTag && (
-              <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center justify-between bg-monad-500/5 border border-monad-500/15 rounded-xl px-4 py-3">
                 <div>
-                  <div className="text-xs text-zinc-500 font-mono mb-0.5">Tu ID de usuario</div>
-                  <div className="text-sm font-mono text-monad-400">#{userTag}</div>
+                  <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">User ID</div>
+                  <div className="font-mono text-monad-400 font-semibold">#{userTag}</div>
                 </div>
-                <div className="text-xs text-zinc-600">Los demás pueden buscarte con este ID</div>
+                <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
+                  Others can find you<br />by searching #{userTag}
+                </div>
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={genSaving}
-              className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm transition-colors disabled:opacity-50"
-            >
-              {genSaving ? 'Guardando...' : 'Guardar perfil'}
-            </button>
+            <SaveButton loading={genSaving} />
           </form>
-        </div>
+        </TerminalCard>
       )}
 
-      {/* ══════════════════════════════════════════════
-          TAB: SOCIAL
-      ══════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════
+          SOCIAL
+      ════════════════════════════════════════════ */}
       {tab === 'social' && (
-        <div>
-          <h2 className="text-base font-semibold text-white mb-1">Redes Sociales</h2>
-          <p className="text-xs text-zinc-500 mb-5">Tus enlaces de redes sociales y sitio web.</p>
-
+        <TerminalCard title="social-links.json" showDots>
+          <SectionHeader
+            title="Social Links"
+            subtitle="Connect your online presence to your Bolty profile."
+          />
           <Alert type="success" msg={socMsg} />
           <Alert type="error" msg={socErr} />
 
-          <form onSubmit={handleSaveSocial} className="space-y-3">
+          <form onSubmit={handleSaveSocial} className="space-y-4">
             {([
               {
                 key: 'twitter',
                 label: 'X / Twitter',
                 icon: (
-                  <svg className="w-4 h-4 text-zinc-400" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[var(--text-muted)]" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 ),
@@ -547,246 +701,245 @@ export default function ProfilePage() {
               },
               {
                 key: 'website',
-                label: 'Sitio web',
-                icon: (
-                  <svg className="w-4 h-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                ),
+                label: 'Website',
+                icon: <IconGlobe className="w-4 h-4 text-[var(--text-muted)]" />,
                 value: websiteUrl,
                 setter: setWebsiteUrl,
                 placeholder: 'https://yourwebsite.com',
               },
             ] as Array<{ key: string; label: string; icon: React.ReactNode; value: string; setter: (v: string) => void; placeholder: string }>).map((item) => (
-              <div key={item.key}>
-                <label className="block text-xs text-zinc-400 font-mono mb-1.5">{item.label}</label>
-                <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-zinc-600 transition-colors">
+              <Field key={item.key} label={item.label}>
+                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                   {item.icon}
                   <input
                     type="url"
                     value={item.value}
                     onChange={(e) => item.setter(e.target.value)}
                     placeholder={item.placeholder}
-                    className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-600"
+                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                   />
                   {item.value && (
-                    <button
-                      type="button"
-                      onClick={() => item.setter('')}
-                      className="text-zinc-600 hover:text-zinc-400 text-xs"
-                    >✕</button>
+                    <button type="button" onClick={() => item.setter('')}
+                      className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+                      <IconX className="w-3.5 h-3.5" />
+                    </button>
                   )}
                 </div>
-              </div>
+              </Field>
             ))}
 
-            <button
-              type="submit"
-              disabled={socSaving}
-              className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-semibold text-sm transition-colors disabled:opacity-50 mt-2"
-            >
-              {socSaving ? 'Guardando...' : 'Guardar redes sociales'}
-            </button>
+            <div className="pt-1">
+              <SaveButton loading={socSaving} label="Save social links" />
+            </div>
           </form>
-        </div>
+        </TerminalCard>
       )}
 
-      {/* ══════════════════════════════════════════════
-          TAB: WALLET
-      ══════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════
+          WALLET
+      ════════════════════════════════════════════ */}
       {tab === 'wallet' && (
-        <div>
-          <h2 className="text-base font-semibold text-white mb-1">Wallet de Pagos</h2>
-          <p className="text-xs text-zinc-500 mb-5">
-            Vincula tu MetaMask para realizar y recibir pagos en el marketplace.
-            Tu cuenta Bolty se crea con GitHub o email — la wallet es opcional y solo para pagos.
-          </p>
+        <div className="space-y-4">
+          {/* Info card */}
+          <div className="relative rounded-2xl border border-[var(--border)] overflow-hidden px-5 py-4"
+            style={{ background: 'linear-gradient(135deg, rgba(251,146,60,0.05) 0%, rgba(24,24,27,1) 60%)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(251,146,60,0.3), transparent)' }} />
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <IconWallet className="w-4.5 h-4.5 text-orange-400 w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-sm font-medium text-[var(--text)] mb-0.5">Payment Wallet</div>
+                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                  Your Bolty account uses GitHub or email for authentication. Link MetaMask separately to buy and sell on the marketplace. Linking only requires a message signature — <span className="text-[var(--text)]">no blockchain transaction is made</span>.
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <Alert type="success" msg={walletMsg} />
-          <Alert type="error" msg={walletErr} />
+          <TerminalCard title="metamask.connect" showDots>
+            <Alert type="success" msg={walletMsg} />
+            <Alert type="error" msg={walletErr} />
 
-          <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-5">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21.315 14.485C20.44 18.121 16.992 20.8 13 20.8c-4.418 0-8-3.582-8-8s3.582-8 8-8c2.133 0 4.068.833 5.498 2.188L16.5 9H21V4.5l-1.641 1.641C17.634 4.31 15.399 3.2 13 3.2 7.808 3.2 3.6 7.408 3.6 12.6S7.808 22 13 22c4.836 0 8.878-3.395 9.75-7.877l-1.435.362z"/>
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(251,146,60,0.05))', border: '1px solid rgba(251,146,60,0.2)' }}>
+                <svg className="w-6 h-6 text-orange-400" viewBox="0 0 318 239" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M298.9 0L176.6 89.3l22.4-52.7L298.9 0z" fill="#E2761B"/>
+                  <path d="M18.9 0l121.2 90.1-21.3-53.5L18.9 0z" fill="#E4761B"/>
+                  <path d="M255.8 172.7l-32.5 49.7 69.6 19.1 20-67.8-57.1-1zm-207.5 1 19.9 67.8 69.5-19.1-32.4-49.7-57 1z" fill="#E4761B"/>
+                  <path d="M134.5 102.9l-19.4 29.3 69.1 3.1-2.3-74.2-47.4 41.8zm48.8 0 48-42.6-2.6 74.9 69-3.1-19.3-29.2-95.1 0z" fill="#E4761B"/>
+                  <path d="M138.2 222.4l41.6-20.3-35.9-28-5.7 48.3zm0 0" fill="#D7C1B3"/>
+                  <path d="M180 222.4l-35.8-20.3 5.5 48.3 30.3-28z" fill="#C0AD9E"/>
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-white">MetaMask</div>
+                <div className="text-sm font-semibold text-[var(--text)]">MetaMask</div>
                 {walletAddress ? (
-                  <div className="text-xs text-zinc-400 font-mono mt-0.5">
-                    {walletAddress.slice(0, 10)}…{walletAddress.slice(-8)}
-                  </div>
+                  <div className="text-xs font-mono text-[var(--text-muted)] mt-0.5 truncate">{walletAddress}</div>
                 ) : (
-                  <div className="text-xs text-zinc-500 mt-0.5">No vinculada</div>
+                  <div className="text-xs text-[var(--text-muted)] mt-0.5">Not connected</div>
                 )}
               </div>
-              {walletAddress ? (
-                <span className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 px-2 py-1 rounded-lg">Conectada</span>
-              ) : (
-                <span className="text-xs text-zinc-600 bg-zinc-800/60 border border-zinc-700 px-2 py-1 rounded-lg">Sin vincular</span>
-              )}
+              {walletAddress
+                ? <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono shrink-0">Connected</span>
+                : <span className="security-badge shrink-0">Disconnected</span>
+              }
             </div>
 
             {walletAddress ? (
               <div className="space-y-3">
-                <div className="bg-zinc-800/40 rounded-xl p-3">
-                  <div className="text-xs text-zinc-500 mb-1">Dirección completa</div>
-                  <div className="text-xs font-mono text-zinc-300 break-all">{walletAddress}</div>
+                <div className="bg-[var(--bg-elevated)] rounded-xl p-3 border border-[var(--border)]">
+                  <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-1">Full address</div>
+                  <div className="text-xs font-mono text-[var(--text)] break-all">{walletAddress}</div>
                 </div>
                 <button
                   onClick={handleDisconnectWallet}
                   disabled={walletLoading}
-                  className="w-full py-2.5 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium transition-colors disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/8 hover:border-red-500/40 text-sm font-medium transition-all duration-200 disabled:opacity-50"
                 >
-                  {walletLoading ? 'Desvinculando...' : 'Desvincular MetaMask'}
+                  {walletLoading ? 'Removing...' : 'Remove wallet'}
                 </button>
               </div>
             ) : (
-              <div className="space-y-3">
-                <p className="text-xs text-zinc-500 leading-relaxed">
-                  Al vincular tu wallet, se te pedirá firmar un mensaje para verificar que eres el propietario.
-                  Esta acción <strong className="text-zinc-300">no genera ninguna transacción</strong> en la blockchain.
-                </p>
-                <button
-                  onClick={handleConnectWallet}
-                  disabled={walletLoading}
-                  className="w-full py-3 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/30 text-orange-300 text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {walletLoading ? (
-                    <>
-                      <div className="w-4 h-4 rounded-full border-2 border-orange-500/40 border-t-orange-400 animate-spin" />
-                      Conectando...
-                    </>
-                  ) : (
-                    'Conectar MetaMask'
-                  )}
-                </button>
-              </div>
+              <button
+                onClick={handleConnectWallet}
+                disabled={walletLoading}
+                className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2.5"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(251,146,60,0.18), rgba(251,146,60,0.08))',
+                  border: '1px solid rgba(251,146,60,0.25)',
+                  color: '#fb923c',
+                  boxShadow: walletLoading ? 'none' : '0 4px 15px rgba(251,146,60,0.1)',
+                }}
+              >
+                {walletLoading ? (
+                  <><div className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" /> Connecting...</>
+                ) : 'Connect MetaMask'}
+              </button>
             )}
-          </div>
+          </TerminalCard>
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════
-          TAB: CONEXIONES
-      ══════════════════════════════════════════════ */}
-      {tab === 'conexiones' && (
-        <div>
-          <h2 className="text-base font-semibold text-white mb-1">Cuentas Conectadas</h2>
-          <p className="text-xs text-zinc-500 mb-5">Vincula servicios externos para ampliar tus funciones en Bolty.</p>
-
+      {/* ════════════════════════════════════════════
+          CONNECTIONS
+      ════════════════════════════════════════════ */}
+      {tab === 'connections' && (
+        <TerminalCard title="linked-accounts.json" showDots>
+          <SectionHeader
+            title="Connected Accounts"
+            subtitle="Link external services to unlock more Bolty features."
+          />
           <Alert type="success" msg={conMsg} />
           <Alert type="error" msg={conErr} />
 
           <div className="space-y-3">
             {/* GitHub */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                  <GitHubLogo className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-white">GitHub</div>
-                  {(user as { githubLogin?: string })?.githubLogin ? (
-                    <div className="text-xs text-zinc-400 font-mono mt-0.5">@{(user as { githubLogin?: string }).githubLogin}</div>
-                  ) : (
-                    <div className="text-xs text-zinc-500 mt-0.5">
-                      Necesario para importar repositorios y crear listings de código.
-                    </div>
-                  )}
-                </div>
-                {(user as { githubLogin?: string })?.githubLogin ? (
-                  <button
-                    onClick={handleUnlinkGitHub}
-                    disabled={unlinkingGitHub}
-                    className="text-xs text-zinc-500 hover:text-red-400 border border-zinc-700 hover:border-red-400/40 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {unlinkingGitHub ? 'Desvinculando...' : 'Desvincular'}
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleLinkGitHub}
-                    className="text-xs text-monad-400 hover:text-monad-300 border border-monad-400/30 hover:border-monad-400/60 px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    Vincular
-                  </button>
-                )}
+            <div className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}>
+              <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
+                <IconGitHub className="w-5 h-5 text-[var(--text)]" />
               </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text)]">GitHub</span>
+                  {githubLogin && <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">Linked</span>}
+                </div>
+                {githubLogin
+                  ? <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">@{githubLogin}</div>
+                  : <div className="text-xs text-[var(--text-muted)] mt-0.5">Required to import repositories and publish repo listings.</div>
+                }
+              </div>
+              {githubLogin ? (
+                <button
+                  onClick={handleUnlinkGitHub}
+                  disabled={unlinkingGitHub}
+                  className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/30 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
+                >
+                  {unlinkingGitHub ? 'Unlinking...' : 'Unlink'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleLinkGitHub}
+                  className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
+                >
+                  Link
+                </button>
+              )}
             </div>
 
-            {/* Solana — future */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 opacity-50">
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.396 8.404a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zm0 7.193a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zM4.25 11.719a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453a.42.42 0 00-.297-.124H4.25z"/>
-                  </svg>
+            {/* Phantom - coming soon */}
+            <div className="flex items-center gap-4 rounded-xl p-4 border border-[var(--border)] bg-[var(--bg-elevated)] opacity-40 pointer-events-none select-none">
+              <div className="w-11 h-11 rounded-xl bg-purple-500/8 border border-purple-500/15 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.396 8.404a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zm0 7.193a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zM4.25 11.719a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453a.42.42 0 00-.297-.124H4.25z"/>
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-[var(--text)]">Phantom</span>
+                  <span className="security-badge">Soon</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-zinc-400">Phantom (Solana)</div>
-                  <div className="text-xs text-zinc-600 mt-0.5">Próximamente</div>
-                </div>
-                <span className="text-xs text-zinc-600 border border-zinc-800 px-3 py-1.5 rounded-lg">Coming soon</span>
+                <div className="text-xs text-[var(--text-muted)] mt-0.5">Solana wallet support coming soon.</div>
               </div>
             </div>
           </div>
-        </div>
+        </TerminalCard>
       )}
 
-      {/* ══════════════════════════════════════════════
-          TAB: AMIGOS
-      ══════════════════════════════════════════════ */}
-      {tab === 'amigos' && (
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-base font-semibold text-white">Amigos</h2>
-            <span className="text-xs text-zinc-600 font-mono">{friends.length} amigo{friends.length !== 1 ? 's' : ''}</span>
-          </div>
-          <p className="text-xs text-zinc-500 mb-5">Busca personas por @username o por su ID de usuario (#1234).</p>
-
+      {/* ════════════════════════════════════════════
+          FRIENDS
+      ════════════════════════════════════════════ */}
+      {tab === 'friends' && (
+        <div className="space-y-4">
           {/* Search */}
-          <div className="mb-6">
-            <div className="flex items-center gap-3 bg-zinc-900/60 border border-zinc-700 rounded-xl px-4 py-3 focus-within:border-monad-500/50 transition-colors">
-              <svg className="w-4 h-4 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1016.65 16.65z" />
-              </svg>
+          <TerminalCard title="user-search" showDots>
+            <SectionHeader
+              title="Find People"
+              subtitle="Search by @username or exact user ID — for example #1234."
+            />
+            <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+              <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar por @username o #1234..."
-                className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-600 font-mono"
+                placeholder="@username or #1234"
+                className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-mono"
               />
-              {searching && <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-600 border-t-monad-400 animate-spin flex-shrink-0" />}
-              {searchQuery && !searching && (
-                <button onClick={() => { setSearchQuery(''); setSearchResults([]); }} className="text-zinc-600 hover:text-zinc-400 text-xs">✕</button>
-              )}
+              {searching
+                ? <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin flex-shrink-0" />
+                : searchQuery && (
+                  <button onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                    className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors">
+                    <IconX className="w-4 h-4" />
+                  </button>
+                )
+              }
             </div>
 
-            {/* Search results */}
             {searchResults.length > 0 && (
-              <div className="mt-2 border border-zinc-800 rounded-xl overflow-hidden">
+              <div className="mt-3 rounded-xl border border-[var(--border)] overflow-hidden">
                 {searchResults.map((u, i) => (
                   <div
                     key={u.id}
-                    className={`flex items-center gap-3 px-4 py-3 hover:bg-zinc-800/40 transition-colors ${i > 0 ? 'border-t border-zinc-800/60' : ''}`}
+                    className={`flex items-center gap-3 px-4 py-3 hover:bg-white/3 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}
                   >
                     <Avatar src={u.avatarUrl} name={u.displayName || u.username} size="sm" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-white truncate">{u.displayName || u.username}</div>
-                      <div className="text-xs text-zinc-500 font-mono">
+                      <div className="text-sm font-medium text-[var(--text)] truncate">{u.displayName || u.username}</div>
+                      <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                         {u.username && <span>@{u.username}</span>}
-                        {u.userTag && <span className="ml-2 text-monad-400">#{u.userTag}</span>}
+                        {u.userTag && <span className="text-monad-400/70">#{u.userTag}</span>}
                       </div>
                     </div>
                     <button
                       onClick={() => handleSendFriendRequest(u.id)}
                       disabled={sendingTo === u.id}
-                      className="text-xs text-monad-400 border border-monad-400/30 hover:border-monad-400/60 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+                      className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
                     >
-                      {sendingTo === u.id ? '...' : '+ Añadir'}
+                      {sendingTo === u.id ? '...' : '+ Add'}
                     </button>
                   </div>
                 ))}
@@ -794,317 +947,304 @@ export default function ProfilePage() {
             )}
 
             {searchQuery.trim() && !searching && searchResults.length === 0 && (
-              <div className="mt-2 text-center py-6 text-zinc-600 text-xs font-mono border border-zinc-800/50 rounded-xl">
-                No se encontraron usuarios para &quot;{searchQuery}&quot;
+              <div className="mt-3 text-center py-6 text-xs text-[var(--text-muted)] font-mono border border-[var(--border)] rounded-xl">
+                No users found for &quot;{searchQuery}&quot;
               </div>
             )}
-          </div>
+          </TerminalCard>
 
-          {/* Pending requests */}
-          {friendsLoading ? (
-            <div className="flex items-center gap-2 text-xs text-zinc-500 py-4">
-              <div className="w-3 h-3 rounded-full border border-zinc-700 border-t-monad-400 animate-spin" />
-              Cargando...
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {friendRequests.length > 0 && (
-                <div>
-                  <div className="text-xs text-amber-400 font-mono mb-2 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                    {friendRequests.length} solicitud{friendRequests.length !== 1 ? 'es' : ''} pendiente{friendRequests.length !== 1 ? 's' : ''}
-                  </div>
-                  <div className="space-y-2">
-                    {friendRequests.map((req) => (
-                      <div key={req.id} className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl px-4 py-3">
-                        <Avatar src={req.from.avatarUrl} name={req.from.displayName || req.from.username} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/u/${req.from.username}`} className="text-sm font-medium text-white hover:text-monad-300 transition-colors">
-                            {req.from.displayName || req.from.username}
-                          </Link>
-                          <div className="text-xs text-zinc-500 font-mono">
-                            {req.from.username && <span>@{req.from.username}</span>}
-                            {req.from.userTag && <span className="ml-2 text-monad-400/70">#{req.from.userTag}</span>}
+          {/* Requests + list */}
+          <TerminalCard title={`friends (${friends.length})`} showDots>
+            {friendsLoading ? (
+              <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
+                <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
+                Loading...
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {/* Pending requests */}
+                {friendRequests.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">
+                        {friendRequests.length} pending request{friendRequests.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {friendRequests.map((req) => (
+                        <div key={req.id}
+                          className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/15 rounded-xl px-4 py-3">
+                          <Avatar src={req.from.avatarUrl} name={req.from.displayName || req.from.username} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <Link href={`/u/${req.from.username}`}
+                              className="text-sm font-medium text-[var(--text)] hover:text-monad-300 transition-colors">
+                              {req.from.displayName || req.from.username}
+                            </Link>
+                            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+                              {req.from.username && <span>@{req.from.username}</span>}
+                              {req.from.userTag && <span className="text-monad-400/60">#{req.from.userTag}</span>}
+                            </div>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => handleRespondToRequest(req.id, true)}
+                              disabled={friendActionId === req.id}
+                              className="text-xs text-emerald-400 border border-emerald-500/25 hover:border-emerald-400/50 hover:bg-emerald-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => handleRespondToRequest(req.id, false)}
+                              disabled={friendActionId === req.id}
+                              className="text-xs text-[var(--text-muted)] border border-[var(--border)] hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
+                            >
+                              Decline
+                            </button>
                           </div>
                         </div>
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            onClick={() => handleRespondToRequest(req.id, true)}
-                            disabled={friendActionId === req.id}
-                            className="text-xs text-green-400 border border-green-400/30 hover:border-green-400/60 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            Aceptar
-                          </button>
-                          <button
-                            onClick={() => handleRespondToRequest(req.id, false)}
-                            disabled={friendActionId === req.id}
-                            className="text-xs text-zinc-500 border border-zinc-700 hover:border-zinc-600 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                          >
-                            Rechazar
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Friends list */}
-              {friends.length === 0 && friendRequests.length === 0 ? (
-                <div className="text-center py-10 text-zinc-600 text-xs font-mono border border-zinc-800/50 rounded-xl">
-                  Aún no tienes amigos. Usa el buscador de arriba para encontrar personas.
-                </div>
-              ) : friends.length > 0 ? (
-                <div>
-                  <div className="text-xs text-zinc-500 font-mono mb-2">Tus amigos</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {friends.map((f) => (
-                      <div key={f.id} className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-3 py-2.5 group hover:border-zinc-700 transition-colors">
-                        <Avatar src={f.friend.avatarUrl} name={f.friend.displayName || f.friend.username} size="sm" />
-                        <div className="flex-1 min-w-0">
-                          <Link href={`/u/${f.friend.username}`} className="text-xs font-medium text-white hover:text-monad-300 transition-colors truncate block">
-                            {f.friend.displayName || f.friend.username}
-                          </Link>
-                          <div className="text-xs text-zinc-600 font-mono flex items-center gap-1.5">
-                            {f.friend.username && <span>@{f.friend.username}</span>}
-                            {f.friend.userTag && <span className="text-monad-400/60">#{f.friend.userTag}</span>}
+                {/* Friends list */}
+                {friends.length === 0 && friendRequests.length === 0 ? (
+                  <div className="text-center py-10">
+                    <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
+                    <p className="text-xs text-[var(--text-muted)] font-mono">No connections yet. Use the search above to find people.</p>
+                  </div>
+                ) : friends.length > 0 ? (
+                  <div>
+                    {friendRequests.length > 0 && <div className="border-t border-[var(--border)] pt-4" />}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {friends.map((f) => (
+                        <div key={f.id}
+                          className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/25 transition-all duration-200">
+                          <Avatar src={f.friend.avatarUrl} name={f.friend.displayName || f.friend.username} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <Link href={`/u/${f.friend.username}`}
+                              className="text-xs font-medium text-[var(--text)] hover:text-monad-300 transition-colors truncate block">
+                              {f.friend.displayName || f.friend.username}
+                            </Link>
+                            <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
+                              {f.friend.username && <span>@{f.friend.username}</span>}
+                              {f.friend.userTag && <span className="text-monad-400/50">#{f.friend.userTag}</span>}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Link href={`/dm?peer=${f.friend.id}`}
+                              className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-2 py-1 rounded-lg transition-all duration-200"
+                              title="Direct message">
+                              DM
+                            </Link>
+                            <button
+                              onClick={() => handleUnfriend(f.friend.id)}
+                              disabled={friendActionId === f.friend.id}
+                              className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/25 px-2 py-1 rounded-lg transition-all duration-200 disabled:opacity-50"
+                              title="Remove friend">
+                              <IconX className="w-3 h-3" />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link
-                            href={`/dm?peer=${f.friend.id}`}
-                            className="text-xs text-monad-400 border border-monad-400/30 hover:border-monad-400/60 px-2 py-1 rounded-lg transition-colors"
-                            title="Enviar mensaje"
-                          >
-                            DM
-                          </Link>
-                          <button
-                            onClick={() => handleUnfriend(f.friend.id)}
-                            disabled={friendActionId === f.friend.id}
-                            className="text-xs text-zinc-600 hover:text-red-400 border border-zinc-800 hover:border-red-400/30 px-2 py-1 rounded-lg transition-colors disabled:opacity-50"
-                            title="Eliminar amigo"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : null}
-            </div>
-          )}
+                ) : null}
+              </div>
+            )}
+          </TerminalCard>
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════
-          TAB: SEGURIDAD
-      ══════════════════════════════════════════════ */}
-      {tab === 'seguridad' && (
-        <div>
-          <h2 className="text-base font-semibold text-white mb-1">Seguridad</h2>
-          <p className="text-xs text-zinc-500 mb-5">Gestiona la seguridad de tu cuenta.</p>
-
+      {/* ════════════════════════════════════════════
+          SECURITY
+      ════════════════════════════════════════════ */}
+      {tab === 'security' && (
+        <div className="space-y-4">
           <Alert type="success" msg={secMsg} />
           <Alert type="error" msg={secErr} />
 
-          <div className="space-y-4">
-
-            {/* 2FA */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-medium text-white">Autenticación de dos factores</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">
-                    {twoFAEnabled
-                      ? 'Activado — se te enviará un código por email al iniciar sesión'
-                      : 'Desactivado — actívalo para mayor seguridad'}
-                  </div>
-                </div>
-                <button
-                  onClick={() => { if (!twoFAEnabled) handle2FAToggle(); else setToggling2FA((v) => !v); }}
-                  className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
-                    twoFAEnabled
-                      ? 'text-red-400 border-red-400/30 hover:border-red-400/60'
-                      : 'text-monad-400 border-monad-400/30 hover:border-monad-400/60'
-                  }`}
-                >
-                  {twoFAEnabled ? 'Desactivar' : 'Activar'}
-                </button>
+          {/* 2FA */}
+          <TerminalCard title="two-factor-auth" showDots>
+            <div className="flex items-start gap-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}>
+                <IconShield className={`w-5 h-5 ${twoFAEnabled ? 'text-emerald-400' : 'text-[var(--text-muted)]'}`} />
               </div>
-              {twoFAEnabled && toggling2FA && (
-                <div className="mt-3 pt-3 border-t border-zinc-800">
-                  <p className="text-xs text-zinc-400 mb-2">Introduce tu contraseña para desactivar el 2FA:</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="password"
-                      value={disable2FAPassword}
-                      onChange={(e) => setDisable2FAPassword(e.target.value)}
-                      placeholder="Contraseña actual"
-                      className="flex-1 bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
-                    />
-                    <button
-                      onClick={handle2FAToggle}
-                      disabled={!disable2FAPassword}
-                      className="text-xs text-red-400 border border-red-400/30 px-3 py-2 rounded-xl hover:border-red-400/60 transition-colors disabled:opacity-40"
-                    >
-                      Confirmar
-                    </button>
-                    <button onClick={() => setToggling2FA(false)} className="text-xs text-zinc-500 px-2 py-2">
-                      Cancelar
-                    </button>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium text-[var(--text)]">Two-Factor Authentication</div>
+                    <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                      {twoFAEnabled
+                        ? 'Active — a code will be emailed to you at every login.'
+                        : 'Disabled — enable for additional login security.'}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Change email */}
-            <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <div className="text-sm font-medium text-white">Correo electrónico</div>
-                  <div className="text-xs text-zinc-500 mt-0.5 font-mono">
-                    {(user as { email?: string })?.email || 'No configurado'}
-                  </div>
-                </div>
-                {emailStep === 'idle' && (
                   <button
-                    onClick={() => setEmailStep('form')}
-                    className="text-xs text-monad-400 border border-monad-400/30 hover:border-monad-400/60 px-3 py-1.5 rounded-lg transition-colors"
+                    onClick={() => { if (!twoFAEnabled) handle2FAToggle(); else setToggling2FA((v) => !v); }}
+                    className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 shrink-0 ${
+                      twoFAEnabled
+                        ? 'text-red-400 border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8'
+                        : 'text-monad-400 border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8'
+                    }`}
                   >
-                    Cambiar
+                    {twoFAEnabled ? 'Disable' : 'Enable'}
                   </button>
+                </div>
+
+                {twoFAEnabled && toggling2FA && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                    <p className="text-xs text-[var(--text-muted)] mb-3">Enter your password to disable 2FA:</p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="password"
+                        value={disable2FAPassword}
+                        onChange={(e) => setDisable2FAPassword(e.target.value)}
+                        placeholder="Current password"
+                        className="flex-1"
+                      />
+                      <button
+                        onClick={handle2FAToggle}
+                        disabled={!disable2FAPassword}
+                        className="text-xs text-red-400 border border-red-500/25 hover:bg-red-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={() => setToggling2FA(false)}
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
+            </div>
+          </TerminalCard>
 
-              {emailStep === 'form' && (
-                <form onSubmit={handleRequestEmailChange} className="space-y-3">
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="Nuevo email"
-                    required
-                    className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
-                  />
-                  <input
-                    type="password"
-                    value={emailPassword}
-                    onChange={(e) => setEmailPassword(e.target.value)}
-                    placeholder="Contraseña actual"
-                    className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-600"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={emailLoading || !newEmail}
-                      className="flex-1 py-2 rounded-xl bg-monad-500 hover:bg-monad-400 text-white text-sm font-semibold transition-colors disabled:opacity-50"
-                    >
-                      {emailLoading ? 'Enviando...' : 'Enviar código de verificación'}
-                    </button>
-                    <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }} className="text-xs text-zinc-500 px-3">
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
-              )}
-
-              {emailStep === 'otp' && (
-                <form onSubmit={handleConfirmEmailChange} className="space-y-3">
-                  <p className="text-xs text-zinc-400">Introduce el código enviado a <span className="text-white font-mono">{newEmail}</span>:</p>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={emailOtp}
-                    onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="000000"
-                    className="w-full bg-zinc-900/70 border border-zinc-800 rounded-xl px-3 py-2 text-white text-center text-xl font-mono tracking-[0.5em] outline-none focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
-                  />
-                  <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={emailLoading || emailOtp.length !== 6}
-                      className="flex-1 py-2 rounded-xl bg-monad-500 hover:bg-monad-400 text-white text-sm font-semibold transition-colors disabled:opacity-50"
-                    >
-                      {emailLoading ? 'Verificando...' : 'Confirmar cambio'}
-                    </button>
-                    <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }} className="text-xs text-zinc-500 px-3">
-                      Cancelar
-                    </button>
-                  </div>
-                </form>
+          {/* Email */}
+          <TerminalCard title="email-address" showDots>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <div className="text-sm font-medium text-[var(--text)]">Email Address</div>
+                <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{userEmail || 'Not set'}</div>
+              </div>
+              {emailStep === 'idle' && (
+                <button
+                  onClick={() => setEmailStep('form')}
+                  className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200"
+                >
+                  Change
+                </button>
               )}
             </div>
 
-            {/* Delete account */}
-            <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+            {emailStep === 'form' && (
+              <form onSubmit={handleRequestEmailChange} className="mt-4 pt-4 border-t border-[var(--border)] space-y-3">
+                <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="New email address" required />
+                <Input type="password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} placeholder="Current password" />
+                <div className="flex gap-2">
+                  <button type="submit" disabled={emailLoading || !newEmail}
+                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                    {emailLoading ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Sending...</> : 'Send verification code'}
+                  </button>
+                  <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }}
+                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors">Cancel</button>
+                </div>
+              </form>
+            )}
+
+            {emailStep === 'otp' && (
+              <form onSubmit={handleConfirmEmailChange} className="mt-4 pt-4 border-t border-[var(--border)] space-y-3">
+                <p className="text-xs text-[var(--text-muted)]">
+                  Enter the 6-digit code sent to <span className="text-[var(--text)] font-mono">{newEmail}</span>:
+                </p>
+                <input
+                  type="text" inputMode="numeric" maxLength={6}
+                  value={emailOtp}
+                  onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
+                />
+                <div className="flex gap-2">
+                  <button type="submit" disabled={emailLoading || emailOtp.length !== 6}
+                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                    {emailLoading ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Verifying...</> : 'Confirm change'}
+                  </button>
+                  <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }}
+                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors">Cancel</button>
+                </div>
+              </form>
+            )}
+          </TerminalCard>
+
+          {/* Delete account — danger zone */}
+          <div className="relative rounded-2xl border border-red-500/20 overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, var(--bg-card) 60%)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(90deg, transparent, rgba(239,68,68,0.3), transparent)' }} />
+            <div className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-red-400">Eliminar cuenta</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">Elimina permanentemente tu cuenta y todos tus datos</div>
+                  <div className="text-sm font-medium text-red-400">Delete Account</div>
+                  <div className="text-xs text-[var(--text-muted)] mt-0.5">Permanently remove your account and all associated data.</div>
                 </div>
                 {deleteStep === 'idle' && (
                   <button
                     onClick={() => setDeleteStep('confirm')}
-                    className="text-xs text-red-400 border border-red-400/30 hover:border-red-400/60 px-3 py-1.5 rounded-lg transition-colors"
+                    className="text-xs text-red-400 border border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
                   >
-                    Eliminar
+                    Delete
                   </button>
                 )}
               </div>
 
               {deleteStep === 'confirm' && (
-                <div className="mt-3 pt-3 border-t border-red-500/20 space-y-3">
-                  <p className="text-xs text-red-300 leading-relaxed">
-                    <strong>Esta acción es irreversible.</strong> Todos tus datos, listings y repositorios serán eliminados permanentemente. Te enviaremos un código de confirmación a tu email.
+                <div className="mt-4 pt-4 border-t border-red-500/15 space-y-3">
+                  <p className="text-xs text-red-300/80 leading-relaxed">
+                    <strong className="text-red-300">This action is permanent and irreversible.</strong> All repositories, listings, messages, and account data will be deleted. We will send a confirmation code to verify this request.
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleRequestDeleteAccount}
                       disabled={requestingDelete}
-                      className="flex-1 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 text-sm font-semibold transition-colors disabled:opacity-50"
+                      className="flex-1 py-2.5 rounded-xl border border-red-500/25 text-red-400 hover:bg-red-500/10 hover:border-red-400/40 text-sm font-medium transition-all duration-200 disabled:opacity-50"
                     >
-                      {requestingDelete ? 'Enviando código...' : 'Enviar código de confirmación'}
+                      {requestingDelete ? 'Sending code...' : 'Send confirmation code'}
                     </button>
-                    <button type="button" onClick={() => { setDeleteStep('idle'); setSecErr(''); }} className="text-xs text-zinc-500 px-3">
-                      Cancelar
-                    </button>
+                    <button type="button" onClick={() => { setDeleteStep('idle'); setSecErr(''); }}
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors">Cancel</button>
                   </div>
                 </div>
               )}
 
               {deleteStep === 'otp' && (
-                <form onSubmit={handleDeleteAccount} className="mt-3 pt-3 border-t border-red-500/20 space-y-3">
-                  <p className="text-xs text-zinc-400">
-                    Introduce el código enviado a <span className="text-white font-mono">{(user as { email?: string })?.email}</span>:
+                <form onSubmit={handleDeleteAccount} className="mt-4 pt-4 border-t border-red-500/15 space-y-3">
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Enter the 6-digit code sent to <span className="text-[var(--text)] font-mono">{userEmail}</span>:
                   </p>
                   <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
+                    type="text" inputMode="numeric" maxLength={6}
                     value={deleteOtp}
                     onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
-                    className="w-full bg-zinc-900/70 border border-red-500/30 rounded-xl px-3 py-2 text-white text-center text-xl font-mono tracking-[0.5em] outline-none focus:border-red-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
+                    className="w-full bg-[var(--bg-elevated)] border border-red-500/20 rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
                   />
                   <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      disabled={deleting || deleteOtp.length !== 6}
-                      className="flex-1 py-2 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-colors disabled:opacity-50"
-                    >
-                      {deleting ? 'Eliminando...' : 'Eliminar mi cuenta permanentemente'}
+                    <button type="submit" disabled={deleting || deleteOtp.length !== 6}
+                      className="flex-1 py-2.5 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50">
+                      {deleting ? 'Deleting...' : 'Permanently delete my account'}
                     </button>
-                    <button type="button" onClick={() => { setDeleteStep('idle'); setDeleteOtp(''); setSecErr(''); }} className="text-xs text-zinc-500 px-3">
-                      Cancelar
-                    </button>
+                    <button type="button" onClick={() => { setDeleteStep('idle'); setDeleteOtp(''); setSecErr(''); }}
+                      className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors">Cancel</button>
                   </div>
                 </form>
               )}
             </div>
-
           </div>
+
         </div>
       )}
 
