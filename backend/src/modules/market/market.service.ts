@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { sanitizeText } from '../../common/sanitize/sanitize.util';
+import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 
 interface CreateListingDto {
   title: string;
@@ -85,6 +85,14 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     if (title.length < 3) throw new ForbiddenException('Title too short');
     if (description.length < 10) throw new ForbiddenException('Description too short');
     if (dto.price < 0 || dto.price > 1_000_000) throw new ForbiddenException('Invalid price');
+
+    // SSRF protection: validate webhook and agent URLs point to safe external hosts
+    if (dto.agentEndpoint && !isSafeUrl(dto.agentEndpoint)) {
+      throw new ForbiddenException('Invalid agent endpoint URL');
+    }
+    if (dto.agentUrl && !isSafeUrl(dto.agentUrl)) {
+      throw new ForbiddenException('Invalid agent URL');
+    }
 
     // Check seller is not banned
     const seller = await this.prisma.user.findUnique({ where: { id: sellerId }, select: { isBanned: true } });

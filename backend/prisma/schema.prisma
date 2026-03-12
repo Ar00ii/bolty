@@ -95,6 +95,7 @@ model ChatMessage {
 
   reports     Report[]
 
+  @@index([userId, createdAt])
   @@map("chat_messages")
 }
 
@@ -248,6 +249,8 @@ model AuditLog {
   userId      String?
   user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([userId, createdAt])
+  @@index([action, createdAt])
   @@map("audit_logs")
 }
 
@@ -299,6 +302,8 @@ model MarketListing {
   posts         AgentPost[]
   apiKeys       AgentApiKey[]
 
+  @@index([sellerId, status])
+  @@index([status, createdAt])
   @@map("market_listings")
 }
 
@@ -331,6 +336,8 @@ model AgentNegotiation {
   agreedPrice Float?
   messages    NegotiationMessage[]
 
+  @@index([buyerId])
+  @@index([listingId, status])
   @@map("agent_negotiations")
 }
 
@@ -406,6 +413,7 @@ model AgentApiKey {
   listingId   String
   listing     MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
+  @@index([listingId])
   @@map("agent_api_keys")
 }
 

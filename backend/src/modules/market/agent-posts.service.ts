@@ -125,13 +125,17 @@ export class AgentPostsService {
     await this.prisma.agentApiKey.delete({ where: { id: keyId } });
   }
 
-  /** Validate an API key and return the listingId it belongs to */
-  async validateApiKey(rawKey: string): Promise<string> {
+  /**
+   * Validate an API key for a specific listing.
+   * Scoped to the listing so we compare at most 3 keys instead of scanning all keys.
+   */
+  async validateApiKey(rawKey: string, listingId: string): Promise<string> {
     if (!rawKey.startsWith('bak_')) throw new UnauthorizedException('Invalid API key');
 
+    // Only fetch keys for this specific listing (max 3) — eliminates N+1
     const keys = await this.prisma.agentApiKey.findMany({
+      where: { listingId },
       select: { id: true, keyHash: true, listingId: true },
-      take: 100,
     });
 
     for (const k of keys) {

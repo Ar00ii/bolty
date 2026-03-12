@@ -79,19 +79,31 @@ export class DmService {
 
   /** Returns list of users the current user has exchanged DMs with, latest first */
   async getContacts(userId: string) {
-    const raw = await this.prisma.directMessage.findMany({
-      where: { OR: [{ senderId: userId }, { receiverId: userId }] },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        senderId: true,
-        receiverId: true,
-        content: true,
-        createdAt: true,
-        isRead: true,
-        sender: { select: { id: true, username: true, avatarUrl: true } },
-        receiver: { select: { id: true, username: true, avatarUrl: true } },
-      },
-    });
+    // Fetch most-recent message per peer and all unread counts in two queries (no N+1)
+    const [raw, unreadGroups] = await Promise.all([
+      this.prisma.directMessage.findMany({
+        where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          senderId: true,
+          receiverId: true,
+          content: true,
+          createdAt: true,
+          sender: { select: { id: true, username: true, avatarUrl: true } },
+          receiver: { select: { id: true, username: true, avatarUrl: true } },
+        },
+      }),
+      this.prisma.directMessage.groupBy({
+        by: ['senderId'],
+        where: { receiverId: userId, isRead: false },
+        _count: { id: true },
+      }),
+    ]);
+
+    // Build unread count lookup: senderId → count
+    const unreadMap = new Map<string, number>(
+      unreadGroups.map((g) => [g.senderId, g._count.id]),
+    );
 
     // Deduplicate to one entry per peer
     const seen = new Set<string>();
@@ -107,15 +119,11 @@ export class DmService {
       if (seen.has(peer.id)) continue;
       seen.add(peer.id);
 
-      const unread = await this.prisma.directMessage.count({
-        where: { senderId: peer.id, receiverId: userId, isRead: false },
-      });
-
       contacts.push({
         user: peer,
         lastMessage: msg.content.slice(0, 60),
         lastAt: msg.createdAt,
-        unread,
+        unread: unreadMap.get(peer.id) ?? 0,
       });
     }
 

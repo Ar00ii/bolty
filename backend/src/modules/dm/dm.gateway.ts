@@ -18,6 +18,31 @@ interface AuthenticatedSocket extends Socket {
   username: string;
 }
 
+/** Simple sliding-window rate limiter: max messages per window (ms) per user */
+class WsRateLimiter {
+  private readonly counts = new Map<string, { count: number; resetAt: number }>();
+
+  constructor(
+    private readonly maxMessages: number,
+    private readonly windowMs: number,
+  ) {}
+
+  isAllowed(userId: string): boolean {
+    const now = Date.now();
+    const entry = this.counts.get(userId);
+
+    if (!entry || now >= entry.resetAt) {
+      this.counts.set(userId, { count: 1, resetAt: now + this.windowMs });
+      return true;
+    }
+
+    if (entry.count >= this.maxMessages) return false;
+
+    entry.count++;
+    return true;
+  }
+}
+
 @WebSocketGateway({
   namespace: '/dm',
   cors: {
@@ -34,6 +59,9 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   /** Maps userId -> Set of socketIds (one user can have multiple tabs) */
   private userSockets = new Map<string, Set<string>>();
+
+  /** 20 messages per 10 seconds per user */
+  private readonly rateLimiter = new WsRateLimiter(20, 10_000);
 
   constructor(
     private readonly dmService: DmService,
@@ -106,6 +134,10 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { receiverId: string; content: string },
   ) {
     if (!client.userId) throw new WsException('Unauthorized');
+    if (!this.rateLimiter.isAllowed(client.userId)) {
+      client.emit('error', { message: 'Rate limit exceeded. Slow down.' });
+      return;
+    }
     try {
       const message = await this.dmService.sendMessage(
         client.userId,

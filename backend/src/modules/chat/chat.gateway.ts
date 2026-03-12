@@ -18,6 +18,31 @@ interface AuthenticatedSocket extends Socket {
   username: string;
 }
 
+/** Simple sliding-window rate limiter: max messages per window (ms) per user */
+class WsRateLimiter {
+  private readonly counts = new Map<string, { count: number; resetAt: number }>();
+
+  constructor(
+    private readonly maxMessages: number,
+    private readonly windowMs: number,
+  ) {}
+
+  isAllowed(userId: string): boolean {
+    const now = Date.now();
+    const entry = this.counts.get(userId);
+
+    if (!entry || now >= entry.resetAt) {
+      this.counts.set(userId, { count: 1, resetAt: now + this.windowMs });
+      return true;
+    }
+
+    if (entry.count >= this.maxMessages) return false;
+
+    entry.count++;
+    return true;
+  }
+}
+
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
@@ -32,6 +57,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private readonly logger = new Logger(ChatGateway.name);
   private connectedUsers = new Map<string, { userId: string; username: string }>();
+
+  /** 10 messages per 10 seconds per user (public chat is stricter than DMs) */
+  private readonly rateLimiter = new WsRateLimiter(10, 10_000);
 
   constructor(
     private readonly chatService: ChatService,
@@ -88,6 +116,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.userId) {
       throw new WsException('Unauthorized');
+    }
+
+    if (!this.rateLimiter.isAllowed(client.userId)) {
+      client.emit('error', { message: 'Rate limit exceeded. Slow down.' });
+      return;
     }
 
     try {

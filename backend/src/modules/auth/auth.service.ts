@@ -214,12 +214,25 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token scope');
     }
 
+    // Brute-force protection: max 5 attempts within the 10-minute code window
+    const attemptsKey = `2fa_attempts:${payload.sub}`;
+    const attemptsRaw = await this.redis.get(attemptsKey);
+    const attempts = attemptsRaw ? parseInt(attemptsRaw, 10) : 0;
+    if (attempts >= 5) {
+      throw new UnauthorizedException('Too many attempts. Request a new code.');
+    }
+    await this.redis.set(attemptsKey, String(attempts + 1), 600);
+
     const stored = await this.redis.get(`2fa:${payload.sub}`);
     if (!stored || stored !== code) {
       throw new UnauthorizedException('Invalid or expired verification code');
     }
 
-    await this.redis.del(`2fa:${payload.sub}`);
+    // Clear attempts and code on success
+    await Promise.all([
+      this.redis.del(`2fa:${payload.sub}`),
+      this.redis.del(attemptsKey),
+    ]);
     return this.generateTokens(payload.sub);
   }
 

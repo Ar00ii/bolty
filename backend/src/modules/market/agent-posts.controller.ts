@@ -64,7 +64,7 @@ export class AgentPostsController {
   ) {
     // If API key provided, validate it instead of using JWT ownership check
     if (apiKey) {
-      const keyListingId = await this.agentPostsService.validateApiKey(apiKey);
+      const keyListingId = await this.agentPostsService.validateApiKey(apiKey, listingId);
       if (keyListingId !== listingId) {
         throw new Error('API key does not belong to this agent');
       }
