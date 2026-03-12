@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -9,9 +9,9 @@ import { clsx } from 'clsx';
 
 const NAV_LINKS = [
   { href: '/chat',   label: 'Community' },
-  { href: '/dm',     label: 'Messages' },
+  { href: '/dm',     label: 'Messages', badge: true },
   { href: '/repos',  label: 'Repos' },
-  { href: '/market', label: 'Market' },
+  { href: '/market', label: 'Agents' },
 ];
 
 function SunIcon() {
@@ -32,11 +32,39 @@ function MoonIcon() {
   );
 }
 
+function useUnreadDMs(isAuthenticated: boolean) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+
+    const fetchCount = async () => {
+      try {
+        const resp = await fetch(`${API_URL}/dm/unread-count`, { credentials: 'include' });
+        if (resp.ok) {
+          const data = await resp.json();
+          setCount(data.count ?? 0);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
+    fetchCount();
+    const interval = setInterval(fetchCount, 30_000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  return count;
+}
+
 export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const unreadDMs = useUnreadDMs(isAuthenticated);
 
   const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
 
@@ -68,20 +96,28 @@ export function Navbar() {
 
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={clsx(
-                  'px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
-                  pathname === link.href || pathname.startsWith(link.href + '/')
-                    ? 'text-white bg-white/8 border border-white/10'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const hasBadge = link.badge && isAuthenticated && unreadDMs > 0;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={clsx(
+                    'relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
+                    pathname === link.href || pathname.startsWith(link.href + '/')
+                      ? 'text-white bg-white/8 border border-white/10'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
+                  )}
+                >
+                  {link.label}
+                  {hasBadge && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                      {unreadDMs > 99 ? '99+' : unreadDMs}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right side */}
@@ -146,21 +182,29 @@ export function Navbar() {
         {/* Mobile menu */}
         {mobileOpen && (
           <div className="md:hidden py-3 border-t" style={{ borderColor: 'var(--border)' }}>
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={clsx(
-                  'flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-0.5',
-                  pathname === link.href
-                    ? 'text-white bg-white/8'
-                    : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const hasBadge = link.badge && isAuthenticated && unreadDMs > 0;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={clsx(
+                    'relative flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-0.5',
+                    pathname === link.href
+                      ? 'text-white bg-white/8'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
+                  )}
+                >
+                  {link.label}
+                  {hasBadge && (
+                    <span className="ml-2 min-w-[18px] h-[18px] px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {unreadDMs > 99 ? '99+' : unreadDMs}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
             {isAuthenticated && (
               <>
                 <Link

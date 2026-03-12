@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -162,9 +163,13 @@ export default function ChatPage() {
                 <div className={`max-w-[75%] ${msg.userId === user?.id ? 'items-end' : 'items-start'} flex flex-col`}>
                   <div className="flex items-center gap-2 mb-0.5">
                     {msg.userId !== user?.id && (
-                      <span className="text-neon-400 text-xs font-mono">
-                        {msg.username || 'anonymous'}
-                      </span>
+                      msg.username ? (
+                        <Link href={`/u/${msg.username}`} className="text-neon-400 text-xs font-mono hover:underline">
+                          {msg.username}
+                        </Link>
+                      ) : (
+                        <span className="text-neon-400 text-xs font-mono">anonymous</span>
+                      )
                     )}
                     <span className="text-terminal-muted text-xs">{formatTime(msg.createdAt)}</span>
                   </div>

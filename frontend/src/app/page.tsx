@@ -93,10 +93,10 @@ const FEATURES = [
     bg: 'bg-amber-500/10',
     border: 'border-amber-500/20',
     hoverBorder: 'hover:border-amber-400/50',
-    title: 'Marketplace',
-    desc: 'Buy and sell AI agents, bots, scripts, and tools. Browse listings from developers around the world, all in one place.',
+    title: 'AI Agents',
+    desc: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.',
     href: '/market',
-    tag: 'Bots, agents, scripts',
+    tag: 'Agents, bots, automation',
   },
   {
     Icon: UsersIcon,

@@ -53,8 +53,8 @@ interface UploadedFileMeta {
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
-const TYPES = ['ALL', 'REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'];
-const TYPE_LABELS: Record<string, string> = { ALL: 'all', REPO: 'repo', BOT: 'bot', AI_AGENT: 'ai agent', SCRIPT: 'script', OTHER: 'other' };
+const TYPES = ['ALL', 'AI_AGENT', 'BOT', 'SCRIPT', 'REPO', 'OTHER'];
+const TYPE_LABELS: Record<string, string> = { ALL: 'all', AI_AGENT: 'ai agent', BOT: 'bot', SCRIPT: 'script', REPO: 'repo', OTHER: 'other' };
 const TYPE_COLORS: Record<string, string> = {
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   BOT: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
@@ -311,7 +311,7 @@ export default function MarketPage() {
   const { isAuthenticated, user } = useAuth();
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [type, setType] = useState('ALL');
+  const [type, setType] = useState('AI_AGENT');
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -324,7 +324,7 @@ export default function MarketPage() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    type: 'REPO' as MarketListing['type'],
+    type: 'AI_AGENT' as MarketListing['type'],
     price: '',
     currency: 'SOL',
     tags: '',
@@ -412,9 +412,12 @@ export default function MarketPage() {
 
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-monad-400 font-mono font-black text-3xl mb-2 tracking-wider">MARKET</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-2xl">🤖</span>
+          <h1 className="text-monad-400 font-mono font-black text-3xl tracking-wider">AGENTS</h1>
+        </div>
         <p className="text-terminal-muted text-sm font-mono">
-          {'// Trade AI agents, bots, and scripts. Upload directly — no GitHub needed. Agents negotiate autonomously.'}
+          {'// Publish and discover AI agents. Upload your agent directly — no GitHub needed. Agents negotiate autonomously.'}
         </p>
       </div>
 
@@ -445,7 +448,7 @@ export default function MarketPage() {
           </div>
           {isAuthenticated && (
             <button onClick={() => setShowCreate(!showCreate)} className="btn-neon text-xs py-1.5 px-4">
-              + list item
+              + publish agent
             </button>
           )}
         </div>
@@ -453,7 +456,7 @@ export default function MarketPage() {
 
       {/* Create listing form */}
       {showCreate && (
-        <TerminalCard title="new_listing" className="mb-6">
+        <TerminalCard title="publish_agent" className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="md:col-span-2">
               <label className="text-terminal-muted text-xs font-mono block mb-1">title *</label>
@@ -475,7 +478,7 @@ export default function MarketPage() {
                   if (!ACCEPTS_FILE.has(t)) { setUploadedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }
                 }}
                 className="terminal-input w-full">
-                {['REPO', 'BOT', 'AI_AGENT', 'SCRIPT', 'OTHER'].map((t) => (
+                {['AI_AGENT', 'BOT', 'SCRIPT', 'REPO', 'OTHER'].map((t) => (
                   <option key={t} value={t}>{TYPE_LABELS[t] || t.toLowerCase()}</option>
                 ))}
               </select>
@@ -590,7 +593,7 @@ export default function MarketPage() {
 
       {/* Listings grid */}
       {loading ? (
-        <div className="text-monad-400 font-mono animate-pulse text-center py-16">Loading market...</div>
+        <div className="text-monad-400 font-mono animate-pulse text-center py-16">Loading agents...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {listings.map((listing) => (
@@ -669,7 +672,7 @@ export default function MarketPage() {
 
           {listings.length === 0 && !loading && (
             <div className="col-span-3 text-center py-16 text-terminal-muted font-mono text-sm">
-              {'// No listings found. Be the first to list something!'}
+              {'// No agents found. Be the first to publish yours!'}
             </div>
           )}
         </div>

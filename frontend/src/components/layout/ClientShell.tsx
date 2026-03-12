@@ -42,7 +42,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         <span className="mx-3 opacity-30">|</span>
         <Link href="/chat" className="hover:text-monad-400 transition-colors">Community</Link>
         <span className="mx-2 opacity-30">·</span>
-        <Link href="/market" className="hover:text-monad-400 transition-colors">Market</Link>
+        <Link href="/market" className="hover:text-monad-400 transition-colors">Agents</Link>
         <span className="mx-2 opacity-30">·</span>
         <Link href="/repos" className="hover:text-monad-400 transition-colors">Repos</Link>
       </footer>

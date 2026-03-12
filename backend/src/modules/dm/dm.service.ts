@@ -71,6 +71,12 @@ export class DmService {
     return messages;
   }
 
+  async getTotalUnread(userId: string): Promise<number> {
+    return this.prisma.directMessage.count({
+      where: { receiverId: userId, isRead: false },
+    });
+  }
+
   /** Returns list of users the current user has exchanged DMs with, latest first */
   async getContacts(userId: string) {
     const raw = await this.prisma.directMessage.findMany({

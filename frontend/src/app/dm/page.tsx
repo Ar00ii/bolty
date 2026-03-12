@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -251,9 +252,15 @@ export default function DmPage() {
               <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
                 <Avatar name={activePeer.username} url={activePeer.avatarUrl} size={8} />
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-                    @{activePeer.username || activePeer.id.slice(0, 8)}
-                  </p>
+                  {activePeer.username ? (
+                    <Link href={`/u/${activePeer.username}`} className="text-sm font-semibold hover:underline" style={{ color: 'var(--text)' }}>
+                      @{activePeer.username}
+                    </Link>
+                  ) : (
+                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                      {activePeer.id.slice(0, 8)}
+                    </p>
+                  )}
                   <p className="text-xs" style={{ color: connected ? '#4ade80' : 'var(--text-muted)' }}>
                     {connected ? 'Online' : 'Connecting...'}
                   </p>
