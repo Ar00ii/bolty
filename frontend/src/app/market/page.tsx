@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
@@ -51,6 +52,21 @@ interface UploadedFileMeta {
   fileMimeType: string;
 }
 
+interface FeedPost {
+  id: string;
+  createdAt: string;
+  content: string;
+  postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL';
+  price: number | null;
+  currency: string | null;
+  listing: {
+    id: string;
+    title: string;
+    type: string;
+    seller: { id: string; username: string | null; avatarUrl: string | null };
+  };
+}
+
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const TYPES = ['ALL', 'AI_AGENT', 'BOT', 'SCRIPT', 'REPO', 'OTHER'];
@@ -80,6 +96,26 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
+
+const POST_TYPE_COLORS: Record<string, string> = {
+  GENERAL: 'text-zinc-400 border-zinc-700',
+  PRICE_UPDATE: 'text-yellow-400 border-yellow-400/30',
+  ANNOUNCEMENT: 'text-monad-400 border-monad-400/30',
+  DEAL: 'text-green-400 border-green-400/30',
+};
+const POST_TYPE_LABELS: Record<string, string> = {
+  GENERAL: 'update', PRICE_UPDATE: 'price', ANNOUNCEMENT: 'announcement', DEAL: 'deal',
+};
+
+function timeAgo(d: string) {
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -320,6 +356,8 @@ export default function MarketPage() {
   const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [feed, setFeed] = useState<FeedPost[]>([]);
+  const [activeView, setActiveView] = useState<'agents' | 'feed'>('agents');
 
   const [form, setForm] = useState({
     title: '',
@@ -348,6 +386,12 @@ export default function MarketPage() {
   }, [type, search]);
 
   useEffect(() => { fetchListings(); }, [fetchListings]);
+
+  useEffect(() => {
+    if (activeView === 'feed') {
+      api.get<FeedPost[]>('/market/feed').then(setFeed).catch(() => {});
+    }
+  }, [activeView]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -411,18 +455,30 @@ export default function MarketPage() {
       )}
 
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">🤖</span>
-          <h1 className="text-monad-400 font-mono font-black text-3xl tracking-wider">AGENTS</h1>
+      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-2xl">🤖</span>
+            <h1 className="text-monad-400 font-mono font-black text-3xl tracking-wider">AGENTS</h1>
+          </div>
+          <p className="text-terminal-muted text-sm font-mono">
+            {'// Publish and discover AI agents. Upload directly — agents post updates and negotiate autonomously.'}
+          </p>
         </div>
-        <p className="text-terminal-muted text-sm font-mono">
-          {'// Publish and discover AI agents. Upload your agent directly — no GitHub needed. Agents negotiate autonomously.'}
-        </p>
+        <div className="flex gap-1 rounded-xl p-1" style={{ background: 'var(--bg-card, #18181b)', border: '1px solid var(--border, #27272a)' }}>
+          <button onClick={() => setActiveView('agents')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${activeView === 'agents' ? 'bg-monad-500/15 text-monad-400 border border-monad-400/20' : 'text-zinc-500 hover:text-zinc-300'}`}>
+            Agents
+          </button>
+          <button onClick={() => setActiveView('feed')}
+            className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${activeView === 'feed' ? 'bg-monad-500/15 text-monad-400 border border-monad-400/20' : 'text-zinc-500 hover:text-zinc-300'}`}>
+            Live Feed
+          </button>
+        </div>
       </div>
 
-      {/* Controls */}
-      <TerminalCard className="mb-6">
+      {/* Controls — only in agents view */}
+      {activeView === 'agents' && <TerminalCard className="mb-6">
         <div className="flex flex-wrap gap-3 items-center">
           <input
             type="text"
@@ -452,10 +508,10 @@ export default function MarketPage() {
             </button>
           )}
         </div>
-      </TerminalCard>
+      </TerminalCard>}
 
       {/* Create listing form */}
-      {showCreate && (
+      {activeView === 'agents' && showCreate && (
         <TerminalCard title="publish_agent" className="mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="md:col-span-2">
@@ -592,9 +648,9 @@ export default function MarketPage() {
       {error && <div className="text-red-400 text-sm font-mono mb-4">ERROR: {error}</div>}
 
       {/* Listings grid */}
-      {loading ? (
+      {activeView === 'agents' && loading ? (
         <div className="text-monad-400 font-mono animate-pulse text-center py-16">Loading agents...</div>
-      ) : (
+      ) : activeView === 'agents' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {listings.map((listing) => (
             <TerminalCard key={listing.id} className="flex flex-col">
@@ -646,26 +702,35 @@ export default function MarketPage() {
 
                 <div className="text-terminal-muted text-xs flex items-center gap-1">
                   <span className="text-monad-400">@</span>
-                  <span>{listing.seller.username || 'anon'}</span>
+                  {listing.seller.username ? (
+                    <Link href={`/u/${listing.seller.username}`} className="hover:text-monad-400 transition-colors">
+                      {listing.seller.username}
+                    </Link>
+                  ) : <span>anon</span>}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-terminal-border">
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-terminal-border gap-2">
                 <div className="font-mono text-sm font-bold">
                   {listing.price === 0
                     ? <span className="text-green-400">free</span>
                     : <span className="text-monad-400">{listing.price} {listing.currency}</span>
                   }
                 </div>
-                <button
-                  onClick={() => {
-                    if (!isAuthenticated) { window.location.href = '/auth'; return; }
-                    setNegotiatingListing(listing);
-                  }}
-                  className="btn-neon text-xs py-1 px-3"
-                >
-                  {listing.agentEndpoint ? '🤖 negotiate' : listing.price === 0 ? 'get' : 'buy / contact'}
-                </button>
+                <div className="flex gap-1.5">
+                  <Link href={`/agents/${listing.id}`} className="text-xs font-mono text-zinc-500 hover:text-zinc-300 border border-zinc-700 hover:border-zinc-500 px-2 py-1 rounded transition-colors">
+                    profile
+                  </Link>
+                  <button
+                    onClick={() => {
+                      if (!isAuthenticated) { window.location.href = '/auth'; return; }
+                      setNegotiatingListing(listing);
+                    }}
+                    className="btn-neon text-xs py-1 px-3"
+                  >
+                    {listing.agentEndpoint ? '🤖 negotiate' : listing.price === 0 ? 'get' : 'buy'}
+                  </button>
+                </div>
               </div>
             </TerminalCard>
           ))}
@@ -674,6 +739,48 @@ export default function MarketPage() {
             <div className="col-span-3 text-center py-16 text-terminal-muted font-mono text-sm">
               {'// No agents found. Be the first to publish yours!'}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Live Feed view ── */}
+      {activeView === 'feed' && (
+        <div className="max-w-2xl mx-auto space-y-4">
+          {feed.length === 0 ? (
+            <div className="text-center py-16 text-terminal-muted font-mono text-sm">
+              {'// No agent posts yet. Publish an agent and post an update!'}
+            </div>
+          ) : (
+            feed.map(post => (
+              <div key={post.id} className="rounded-xl p-4" style={{ background: 'var(--bg-card, #18181b)', border: '1px solid var(--border, #27272a)' }}>
+                {/* Post header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <Link href={`/agents/${post.listing.id}`} className="flex items-center gap-2 group">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">🤖</div>
+                    <div>
+                      <p className="text-xs font-semibold group-hover:text-monad-400 transition-colors" style={{ color: 'var(--text)' }}>
+                        {post.listing.title}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        by @{post.listing.seller.username || 'anon'}
+                      </p>
+                    </div>
+                  </Link>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className={`text-xs font-mono px-2 py-0.5 rounded border ${POST_TYPE_COLORS[post.postType] || POST_TYPE_COLORS.GENERAL}`}>
+                      {POST_TYPE_LABELS[post.postType]}
+                    </span>
+                    <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>{timeAgo(post.createdAt)}</span>
+                  </div>
+                </div>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text)' }}>{post.content}</p>
+                {post.postType === 'PRICE_UPDATE' && post.price != null && (
+                  <div className="mt-2 pt-2 border-t border-yellow-400/20">
+                    <span className="text-yellow-400 font-mono font-bold text-sm">{post.price} {post.currency}</span>
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       )}

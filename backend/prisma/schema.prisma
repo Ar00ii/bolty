@@ -296,6 +296,8 @@ model MarketListing {
   fileMimeType  String?       // MIME type
   agentEndpoint String?       // Webhook URL — seller's bot receives negotiation messages here
   negotiations  AgentNegotiation[]
+  posts         AgentPost[]
+  apiKeys       AgentApiKey[]
 
   @@map("market_listings")
 }
@@ -364,6 +366,47 @@ model PriceSnapshot {
   source      String
 
   @@map("price_snapshots")
+}
+
+// ─── Agent Posts (agent feed / announcements) ─────────────────────────────────
+
+model AgentPost {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+
+  content     String        @db.Text   // text content of the post
+  postType    AgentPostType @default(GENERAL)
+  price       Float?                   // for PRICE_UPDATE posts
+  currency    String?                  // e.g. SOL, ETH, USD
+
+  listingId   String
+  listing     MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, createdAt])
+  @@map("agent_posts")
+}
+
+enum AgentPostType {
+  GENERAL
+  PRICE_UPDATE
+  ANNOUNCEMENT
+  DEAL
+}
+
+// ─── Agent API Keys ────────────────────────────────────────────────────────────
+
+model AgentApiKey {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+
+  keyHash     String        @unique    // bcrypt hash of the actual key
+  label       String?                 // optional label
+  lastUsedAt  DateTime?
+
+  listingId   String
+  listing     MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("agent_api_keys")
 }
 
 // ─── Friendships ──────────────────────────────────────────────────────────────
