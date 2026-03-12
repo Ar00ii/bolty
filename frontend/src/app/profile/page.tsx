@@ -595,10 +595,10 @@ export default function ProfilePage() {
       </div>
 
       {/* ════════════════════════════════════════════
-          GENERAL
+          GENERAL  — monad purple tint
       ════════════════════════════════════════════ */}
       {tab === 'general' && (
-        <TerminalCard title="profile.json" showDots>
+        <TerminalCard title="profile.json" showDots className="[background:linear-gradient(160deg,rgba(131,110,249,0.06)_0%,var(--bg-card)_40%)]">
           <SectionHeader
             title="General Information"
             subtitle="Your public identity on Bolty."
@@ -662,10 +662,10 @@ export default function ProfilePage() {
       )}
 
       {/* ════════════════════════════════════════════
-          SOCIAL
+          SOCIAL  — blue tint
       ════════════════════════════════════════════ */}
       {tab === 'social' && (
-        <TerminalCard title="social-links.json" showDots>
+        <TerminalCard title="social-links.json" showDots className="[background:linear-gradient(160deg,rgba(59,130,246,0.07)_0%,var(--bg-card)_45%)]">
           <SectionHeader
             title="Social Links"
             subtitle="Connect your online presence to your Bolty profile."
@@ -758,7 +758,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <TerminalCard title="metamask.connect" showDots>
+          <TerminalCard title="metamask.connect" showDots className="[background:linear-gradient(160deg,rgba(251,146,60,0.08)_0%,var(--bg-card)_50%)]">
             <Alert type="success" msg={walletMsg} />
             <Alert type="error" msg={walletErr} />
 
@@ -827,7 +827,7 @@ export default function ProfilePage() {
           CONNECTIONS
       ════════════════════════════════════════════ */}
       {tab === 'connections' && (
-        <TerminalCard title="linked-accounts.json" showDots>
+        <TerminalCard title="linked-accounts.json" showDots className="[background:linear-gradient(160deg,rgba(40,200,64,0.05)_0%,var(--bg-card)_45%)]">
           <SectionHeader
             title="Connected Accounts"
             subtitle="Link external services to unlock more Bolty features."
@@ -894,7 +894,7 @@ export default function ProfilePage() {
       {tab === 'friends' && (
         <div className="space-y-4">
           {/* Search */}
-          <TerminalCard title="user-search" showDots>
+          <TerminalCard title="user-search" showDots className="[background:linear-gradient(160deg,rgba(251,191,36,0.06)_0%,var(--bg-card)_45%)]">
             <SectionHeader
               title="Find People"
               subtitle="Search by @username or exact user ID — for example #1234."
@@ -954,7 +954,7 @@ export default function ProfilePage() {
           </TerminalCard>
 
           {/* Requests + list */}
-          <TerminalCard title={`friends (${friends.length})`} showDots>
+          <TerminalCard title={`friends (${friends.length})`} showDots className="[background:linear-gradient(160deg,rgba(251,191,36,0.04)_0%,var(--bg-card)_45%)]">
             {friendsLoading ? (
               <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
                 <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
@@ -1066,7 +1066,7 @@ export default function ProfilePage() {
           <Alert type="error" msg={secErr} />
 
           {/* 2FA */}
-          <TerminalCard title="two-factor-auth" showDots>
+          <TerminalCard title="two-factor-auth" showDots className="[background:linear-gradient(160deg,rgba(16,185,129,0.06)_0%,var(--bg-card)_45%)]">
             <div className="flex items-start gap-4">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}>
                 <IconShield className={`w-5 h-5 ${twoFAEnabled ? 'text-emerald-400' : 'text-[var(--text-muted)]'}`} />
@@ -1125,7 +1125,7 @@ export default function ProfilePage() {
           </TerminalCard>
 
           {/* Email */}
-          <TerminalCard title="email-address" showDots>
+          <TerminalCard title="email-address" showDots className="[background:linear-gradient(160deg,rgba(59,130,246,0.06)_0%,var(--bg-card)_45%)]">
             <div className="flex items-center justify-between mb-1">
               <div>
                 <div className="text-sm font-medium text-[var(--text)]">Email Address</div>
