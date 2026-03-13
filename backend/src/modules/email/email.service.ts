@@ -261,6 +261,27 @@ export class EmailService {
     await this.send(to, subject, html, text);
   }
 
+  // ── Enable 2FA confirmation ───────────────────────────────────────────────
+
+  async send2FAEnableCode(to: string, code: string): Promise<void> {
+    const subject = `${code} — confirm two-factor authentication`;
+    const html = shell(subject, `Confirm 2FA activation: ${code}`, body(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Auth</h1>
+      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
+        You requested to enable two-factor authentication on your Bolty account.
+        Enter this code to confirm. Expires in <strong style="color:#18181b;">10 minutes</strong>.
+      </p>
+      ${otpBlock(code)}
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#166534;">
+          <strong>Didn't request this?</strong> Your account is safe — just ignore this email.
+        </p>
+      </div>
+    `));
+    const text = `Your Bolty 2FA activation code: ${code}\n\nExpires in 10 minutes.`;
+    await this.send(to, subject, html, text);
+  }
+
   // ── Delete account ───────────────────────────────────────────────────────
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {

@@ -99,3 +99,10 @@ export class Toggle2FADto {
   @IsOptional()
   password?: string;
 }
+
+export class Enable2FADto {
+  @IsString()
+  @MinLength(6)
+  @MaxLength(6)
+  code: string;
+}

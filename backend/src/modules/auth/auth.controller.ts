@@ -32,6 +32,7 @@ import {
   Toggle2FADto,
   ForgotPasswordDto,
   ResetPasswordDto,
+  Enable2FADto,
 } from './dto/email-auth.dto';
 
 const COOKIE_OPTIONS = {
@@ -146,9 +147,17 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
+  @Post('2fa/enable/request')
+  async request2FAEnable(@CurrentUser('id') userId: string) {
+    await this.authService.request2FAEnable(userId);
+    return { success: true, message: 'Verification code sent to your email' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('2fa/enable')
-  async enable2FA(@CurrentUser('id') userId: string) {
-    await this.authService.enable2FA(userId);
+  async enable2FA(@CurrentUser('id') userId: string, @Body() dto: Enable2FADto) {
+    await this.authService.enable2FA(userId, dto.code);
     return { success: true };
   }
 

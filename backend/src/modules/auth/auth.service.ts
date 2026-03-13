@@ -257,11 +257,26 @@ export class AuthService {
 
   // ── 2FA Management ────────────────────────────────────────────────────────
 
-  async enable2FA(userId: string): Promise<void> {
+  async request2FAEnable(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    await this.redis.set(`2fa_enable:${userId}`, code, 600); // 10 min
+    await this.emailService.send2FAEnableCode(user.email, code);
+    this.logger.log(`2FA enable code sent for user ${userId}`);
+  }
+
+  async enable2FA(userId: string, code: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
+    if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
+
+    const stored = await this.redis.get(`2fa_enable:${userId}`);
+    if (!stored || stored !== code) throw new UnauthorizedException('Invalid or expired verification code');
+
+    await this.redis.del(`2fa_enable:${userId}`);
     await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
     this.logger.log(`2FA enabled for user ${userId}`);
   }
