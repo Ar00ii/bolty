@@ -97,7 +97,14 @@ export class WalletAuthService {
     // Ensure wallet isn't already linked to another account
     const existing = await this.prisma.user.findUnique({ where: { walletAddress: normalized } });
     if (existing && existing.id !== userId) {
-      throw new ConflictException('This wallet is already linked to another account');
+      // If the existing account is a wallet-only account (no email, no github), transfer it
+      const isWalletOnly = !existing.email && !existing.githubId;
+      if (!isWalletOnly) {
+        throw new ConflictException('This wallet is already linked to another account');
+      }
+      // Unlink wallet from old wallet-only account before linking to current user
+      await this.prisma.user.update({ where: { id: existing.id }, data: { walletAddress: null } });
+      this.logger.log(`Transferred wallet ${normalized.slice(0, 8)}... from wallet-only account ${existing.id} to user ${userId}`);
     }
 
     await this.prisma.user.update({ where: { id: userId }, data: { walletAddress: normalized } });

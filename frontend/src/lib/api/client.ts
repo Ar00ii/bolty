@@ -19,21 +19,20 @@ export class ApiError extends Error {
 
 class ApiClient {
   private baseUrl: string;
+  private isRefreshing = false;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
 
-  private async request<T>(
+  private async doFetch(
     method: string,
     path: string,
     body?: unknown,
     options: RequestOptions = {},
-  ): Promise<T> {
-    let response: Response;
-
+  ): Promise<Response> {
     try {
-      response = await fetch(`${this.baseUrl}${path}`, {
+      return await fetch(`${this.baseUrl}${path}`, {
         method,
         headers: { 'Content-Type': 'application/json', ...options.headers },
         credentials: 'include',
@@ -49,19 +48,51 @@ class ApiClient {
       }
       throw err;
     }
+  }
+
+  private parseError(error: unknown): string {
+    const raw = (error as { message?: unknown }).message;
+    if (Array.isArray(raw)) return String(raw[0] || 'Request failed');
+    if (typeof raw === 'string' && raw) return raw;
+    return 'Request failed';
+  }
+
+  private async tryRefreshToken(): Promise<boolean> {
+    if (this.isRefreshing) return false;
+    this.isRefreshing = true;
+    try {
+      const res = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      });
+      return res.ok;
+    } catch {
+      return false;
+    } finally {
+      this.isRefreshing = false;
+    }
+  }
+
+  private async request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    let response = await this.doFetch(method, path, body, options);
+
+    // Auto-refresh on 401 (except for auth endpoints to avoid loops)
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      const refreshed = await this.tryRefreshToken();
+      if (refreshed) {
+        response = await this.doFetch(method, path, body, options);
+      }
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      const raw = (error as { message?: unknown }).message;
-      let msg: string;
-      if (Array.isArray(raw)) {
-        msg = String(raw[0] || 'Request failed');
-      } else if (typeof raw === 'string' && raw) {
-        msg = raw;
-      } else {
-        msg = 'Request failed';
-      }
-      throw new ApiError(msg, response.status);
+      throw new ApiError(this.parseError(error), response.status);
     }
 
     const contentType = response.headers.get('content-type');
