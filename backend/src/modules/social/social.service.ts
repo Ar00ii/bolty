@@ -6,10 +6,10 @@ import { FriendshipStatus } from '@prisma/client';
 export class SocialService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async sendFriendRequest(senderId: string, receiverUsername: string): Promise<void> {
-    if (!receiverUsername) throw new BadRequestException('Username is required');
+  async sendFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    if (!receiverId) throw new BadRequestException('Target user is required');
 
-    const receiver = await this.prisma.user.findUnique({ where: { username: receiverUsername } });
+    const receiver = await this.prisma.user.findUnique({ where: { id: receiverId } });
     if (!receiver) throw new NotFoundException('User not found');
     if (receiver.id === senderId) throw new BadRequestException('You cannot add yourself');
 

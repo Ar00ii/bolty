@@ -6,7 +6,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { SocialService } from './social.service';
 import { IsString, IsBoolean } from 'class-validator';
 
-class SendRequestDto { @IsString() username: string; }
+class SendRequestDto { @IsString() targetId: string; }
 class RespondDto { @IsBoolean() accept: boolean; }
 
 @Controller('social')
@@ -37,7 +37,7 @@ export class SocialController {
   @Post('friends/request')
   @HttpCode(HttpStatus.OK)
   sendRequest(@CurrentUser('id') userId: string, @Body() dto: SendRequestDto) {
-    return this.socialService.sendFriendRequest(userId, dto.username);
+    return this.socialService.sendFriendRequest(userId, dto.targetId);
   }
 
   @Post('friends/respond/:requestId')
