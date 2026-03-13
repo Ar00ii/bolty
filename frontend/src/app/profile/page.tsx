@@ -259,6 +259,8 @@ export default function ProfilePage() {
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [toggling2FA, setToggling2FA] = useState(false);
   const [disable2FAPassword, setDisable2FAPassword] = useState('');
+  const [enable2FAStep, setEnable2FAStep] = useState<'idle' | 'code'>('idle');
+  const [enable2FACode, setEnable2FACode] = useState('');
   const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'otp'>('idle');
   const [newEmail, setNewEmail] = useState('');
   const [emailPassword, setEmailPassword] = useState('');
@@ -447,12 +449,25 @@ export default function ProfilePage() {
         setTwoFAEnabled(false); setDisable2FAPassword('');
         setSecMsg('Two-factor authentication disabled.');
       } else {
-        await api.post('/auth/2fa/enable', {});
-        setTwoFAEnabled(true);
-        setSecMsg('2FA enabled. A code will be emailed to you on your next login.');
+        await api.post('/auth/2fa/enable/request', {});
+        setEnable2FAStep('code');
+        setSecMsg('Verification code sent to your email.');
       }
     } catch (err) {
       setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA setting.');
+    } finally { setToggling2FA(false); }
+  };
+
+  const handleEnable2FAConfirm = async () => {
+    setSecErr(''); setToggling2FA(true);
+    try {
+      await api.post('/auth/2fa/enable', { code: enable2FACode });
+      setTwoFAEnabled(true);
+      setEnable2FAStep('idle');
+      setEnable2FACode('');
+      setSecMsg('2FA enabled. A code will be emailed to you on your next login.');
+    } catch (err) {
+      setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally { setToggling2FA(false); }
   };
 
@@ -1068,16 +1083,48 @@ export default function ProfilePage() {
                   </div>
                   <button
                     onClick={() => { if (!twoFAEnabled) handle2FAToggle(); else setToggling2FA((v) => !v); }}
+                    disabled={enable2FAStep === 'code'}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 shrink-0 ${
                       twoFAEnabled
                         ? 'text-red-400 border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8'
                         : 'text-monad-400 border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8'
-                    }`}
+                    } disabled:opacity-40`}
                   >
                     {twoFAEnabled ? 'Disable' : 'Enable'}
                   </button>
                 </div>
 
+                {/* Enable 2FA — enter email code */}
+                {!twoFAEnabled && enable2FAStep === 'code' && (
+                  <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                    <p className="text-xs text-[var(--text-muted)] mb-3">Enter the 6-digit code sent to your email:</p>
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        value={enable2FACode}
+                        onChange={(e) => setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="123456"
+                        className="flex-1"
+                        maxLength={6}
+                      />
+                      <button
+                        onClick={handleEnable2FAConfirm}
+                        disabled={enable2FACode.length !== 6 || toggling2FA}
+                        className="text-xs text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
+                      >
+                        Confirm
+                      </button>
+                      <button
+                        onClick={() => { setEnable2FAStep('idle'); setEnable2FACode(''); setSecMsg(''); }}
+                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Disable 2FA — enter password */}
                 {twoFAEnabled && toggling2FA && (
                   <div className="mt-4 pt-4 border-t border-[var(--border)]">
                     <p className="text-xs text-[var(--text-muted)] mb-3">Enter your password to disable 2FA:</p>
