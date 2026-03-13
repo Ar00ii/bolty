@@ -293,7 +293,6 @@ export default function AuthPage() {
         password: regPassword,
         gender: regGender,
         occupation: regOccupation,
-        whatDoYouDo: regWhatDoYouDo,
       });
       await refresh();
       router.push('/');
