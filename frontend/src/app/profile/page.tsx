@@ -515,7 +515,7 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
+    <div className="bg-page-profile max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
 
       {/* ── Hero header card ─────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"
@@ -869,21 +869,6 @@ export default function ProfilePage() {
               )}
             </div>
 
-            {/* Phantom - coming soon */}
-            <div className="flex items-center gap-4 rounded-xl p-4 border border-[var(--border)] bg-[var(--bg-elevated)] opacity-40 pointer-events-none select-none">
-              <div className="w-11 h-11 rounded-xl bg-purple-500/8 border border-purple-500/15 flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.396 8.404a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zm0 7.193a.42.42 0 00-.297-.124H4.25a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453zM4.25 11.719a.21.21 0 00-.148.36l2.454 2.453a.42.42 0 00.297.124h12.847a.21.21 0 00.148-.36l-2.452-2.453a.42.42 0 00-.297-.124H4.25z"/>
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--text)]">Phantom</span>
-                  <span className="security-badge">Soon</span>
-                </div>
-                <div className="text-xs text-[var(--text-muted)] mt-0.5">Solana wallet support coming soon.</div>
-              </div>
-            </div>
           </div>
         </TerminalCard>
       )}

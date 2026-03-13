@@ -43,6 +43,32 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+/* Page-specific backgrounds */
+.bg-page-auth {
+  background: linear-gradient(135deg, #09090b 0%, #1a1025 50%, #09090b 100%);
+}
+.bg-page-community {
+  background: linear-gradient(180deg, #09090b 0%, #0d1117 50%, #09090b 100%);
+}
+.bg-page-repos {
+  background: linear-gradient(135deg, #09090b 0%, #0f1419 50%, #09090b 100%);
+}
+.bg-page-agents {
+  background: linear-gradient(135deg, #09090b 0%, #14101f 50%, #09090b 100%);
+}
+.bg-page-market {
+  background: linear-gradient(180deg, #09090b 0%, #121016 50%, #09090b 100%);
+}
+.bg-page-profile {
+  background: linear-gradient(135deg, #09090b 0%, #10131a 50%, #09090b 100%);
+}
+.bg-page-chat {
+  background: linear-gradient(180deg, #09090b 0%, #0e1015 50%, #09090b 100%);
+}
+.bg-page-ai {
+  background: linear-gradient(135deg, #09090b 0%, #150f1e 50%, #09090b 100%);
+}
+
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }

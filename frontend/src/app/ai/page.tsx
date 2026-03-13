@@ -131,7 +131,7 @@ export default function AiPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
+    <div className="bg-page-ai max-w-7xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
       <div className="flex gap-4 h-full">
         {/* Sidebar */}
         <div className="w-64 hidden md:flex flex-col gap-2">

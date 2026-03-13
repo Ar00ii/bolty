@@ -120,7 +120,7 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
+    <div className="bg-page-chat max-w-5xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
       <div className="flex flex-col h-full gap-3">
         {/* Header */}
         <TerminalCard showDots={false} className="py-3">

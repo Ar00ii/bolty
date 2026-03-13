@@ -1,7 +1,5 @@
 import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
-import * as nacl from 'tweetnacl';
-import * as bs58 from 'bs58';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AuthService } from './auth.service';
 import { AuthTokens } from './auth.service';
@@ -65,7 +63,7 @@ export class WalletAuthService {
     }
 
     // Find or create user
-    const user = await this.findOrCreateWalletUser(normalized, 'ethereum');
+    const user = await this.findOrCreateWalletUser(normalized);
 
     await this.authService.createAuditLog({
       action: 'LOGIN',
@@ -73,67 +71,6 @@ export class WalletAuthService {
       userId: user.id,
       ipAddress,
       metadata: { method: 'metamask', address: normalized.slice(0, 8) + '...' },
-    });
-
-    return this.authService.generateTokens(user.id);
-  }
-
-  // ── Phantom (Solana) Auth ─────────────────────────────────────────────────
-
-  async getSolanaNonce(address: string): Promise<{ nonce: string; message: string }> {
-    // Basic Solana address validation (base58, ~32-44 chars)
-    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
-      throw new UnauthorizedException('Invalid Solana address');
-    }
-
-    const nonce = await this.authService.generateNonce(address);
-    const message = this.buildSignMessage(address, nonce, 'solana');
-
-    return { nonce, message };
-  }
-
-  async verifySolana(
-    address: string,
-    signatureBase58: string,
-    nonce: string,
-    ipAddress?: string,
-  ): Promise<AuthTokens> {
-    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
-      throw new UnauthorizedException('Invalid Solana address');
-    }
-
-    const nonceValid = await this.authService.verifyAndConsumeNonce(address, nonce);
-    if (!nonceValid) {
-      throw new UnauthorizedException('Invalid or expired nonce');
-    }
-
-    const message = this.buildSignMessage(address, nonce, 'solana');
-
-    // Decode signature and public key
-    let signatureBytes: Uint8Array;
-    let publicKeyBytes: Uint8Array;
-    try {
-      signatureBytes = bs58.decode(signatureBase58);
-      publicKeyBytes = bs58.decode(address);
-    } catch {
-      throw new UnauthorizedException('Invalid signature encoding');
-    }
-
-    const messageBytes = new TextEncoder().encode(message);
-
-    const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
-    if (!isValid) {
-      throw new UnauthorizedException('Signature verification failed');
-    }
-
-    const user = await this.findOrCreateWalletUser(address, 'solana');
-
-    await this.authService.createAuditLog({
-      action: 'LOGIN',
-      resource: 'AUTH',
-      userId: user.id,
-      ipAddress,
-      metadata: { method: 'phantom', address: address.slice(0, 8) + '...' },
     });
 
     return this.authService.generateTokens(user.id);
@@ -186,27 +123,22 @@ export class WalletAuthService {
     return `Welcome to Bolty!\n\nPlease sign this message to authenticate.\n\nChain: ${chain}\nAddress: ${address}\nNonce: ${nonce}\n\nThis request will not trigger any blockchain transaction.`;
   }
 
-  private async findOrCreateWalletUser(address: string, chain: 'ethereum' | 'solana') {
-    const field = chain === 'ethereum' ? 'walletAddress' : 'solanaAddress';
-
-    const whereClause =
-      chain === 'ethereum' ? { walletAddress: address } : { solanaAddress: address };
-
+  private async findOrCreateWalletUser(address: string) {
     let user = await this.prisma.user.findUnique({
-      where: whereClause,
+      where: { walletAddress: address },
     });
 
     if (!user) {
       const userTag = await this.generateUserTag();
       user = await this.prisma.user.create({
         data: {
-          [field]: address,
-          username: `${chain === 'ethereum' ? 'eth' : 'sol'}_${address.slice(0, 6)}`,
+          walletAddress: address,
+          username: `eth_${address.slice(0, 6)}`,
           lastLoginAt: new Date(),
           userTag,
         },
       });
-      this.logger.log(`New ${chain} wallet user: ${address.slice(0, 8)}...`);
+      this.logger.log(`New ethereum wallet user: ${address.slice(0, 8)}...`);
     } else {
       user = await this.prisma.user.update({
         where: { id: user.id },

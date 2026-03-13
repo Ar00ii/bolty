@@ -22,18 +22,3 @@ export class VerifyEthereumDto {
   @IsNotEmpty()
   nonce: string;
 }
-
-export class VerifySolanaDto {
-  @IsString()
-  @IsNotEmpty()
-  @Matches(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, { message: 'Invalid Solana address' })
-  address: string;
-
-  @IsString()
-  @IsNotEmpty()
-  signature: string;
-
-  @IsString()
-  @IsNotEmpty()
-  nonce: string;
-}

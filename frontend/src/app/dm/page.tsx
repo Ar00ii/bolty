@@ -157,7 +157,7 @@ export default function DmPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]">
+    <div className="bg-page-chat max-w-6xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]">
       <div className="flex gap-4 h-full">
 
         {/* ── Sidebar ── */}

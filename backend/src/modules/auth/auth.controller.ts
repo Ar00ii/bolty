@@ -60,6 +60,8 @@ export class AuthController {
       email: dto.email,
       username: dto.username,
       password: dto.password,
+      gender: dto.gender,
+      occupation: dto.occupation,
     });
 
     res.cookie('access_token', tokens.accessToken, {

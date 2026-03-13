@@ -8,7 +8,7 @@ import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-// ── Logos ─────────────────────────────────────────────────────────────────────
+// -- Logos --------------------------------------------------------------------
 function GitHubLogo({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -19,27 +19,29 @@ function GitHubLogo({ className }: { className?: string }) {
 
 function MetaMaskLogo({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 35 33" fill="none" aria-hidden="true">
-      <path d="M32.9582 1L19.8241 10.7183L22.2665 4.99099L32.9582 1Z" fill="#E17726" stroke="#E17726" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M2.04858 1L15.0707 10.809L12.7396 4.99098L2.04858 1Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M28.2295 23.5335L24.7348 28.872L32.2023 30.9324L34.3517 23.6507L28.2295 23.5335Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M0.664612 23.6507L2.80256 30.9324L10.2594 28.872L6.77627 23.5335L0.664612 23.6507Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M9.86406 14.6491L7.77908 17.8088L15.1606 18.1377L14.9054 10.2405L9.86406 14.6491Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M25.1418 14.6491L20.0218 10.1513L19.8452 18.1377L27.2268 17.8088L25.1418 14.6491Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.2594 28.8721L14.7173 26.7031L10.878 23.7012L10.2594 28.8721Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M20.2886 26.7031L24.7359 28.8721L24.1279 23.7012L20.2886 26.7031Z" fill="#E27625" stroke="#E27625" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M24.7359 28.872L20.2886 26.703L20.6358 29.609L20.5997 30.8429L24.7359 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
-      <path d="M10.2595 28.872L14.406 30.8429L14.3806 29.609L14.7173 26.703L10.2595 28.872Z" fill="#D5BFB2" stroke="#D5BFB2" strokeWidth="0.25" strokeLinecap="round" strokeLinejoin="round"/>
+    <svg className={className} viewBox="0 0 318.6 318.6" fill="none" aria-hidden="true">
+      <path d="M274.1 35.5l-99.5 73.9L193 65.8z" fill="#E2761B" stroke="#E2761B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M44.4 35.5l98.7 74.6-17.5-44.3zm193.9 171.3l-26.5 40.6 56.7 15.6 16.3-55.3zm-204.4.9L50.1 263l56.7-15.6-26.5-40.6z" fill="#E4761B" stroke="#E4761B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M103.6 138.2l-15.8 23.9 56.3 2.5-2-60.5zm111.3 0l-39-34.8-1.3 61.2 56.2-2.5zM106.8 247.4l33.8-16.5-29.2-22.8zm71.1-16.5l33.9 16.5-4.7-39.3z" fill="#E4761B" stroke="#E4761B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M211.8 247.4l-33.9-16.5 2.7 22.1-.3 9.3zm-105 0l31.5 14.9-.2-9.3 2.5-22.1z" fill="#D7C1B3" stroke="#D7C1B3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M138.8 193.5l-28.2-8.3 19.9-9.1zm40.9 0l8.3-17.4 20 9.1z" fill="#233447" stroke="#233447" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M106.8 247.4l4.8-40.6-31.3.9zM207 206.8l4.8 40.6 26.5-39.7zm23.8-44.7l-56.2 2.5 5.2 28.9 8.3-17.4 20 9.1zm-120.2 23.1l20-9.1 8.2 17.4 5.3-28.9-56.3-2.5z" fill="#CD6116" stroke="#CD6116" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M87.8 162.1l23.6 46-.8-22.9zm120.3 23.1l-1 22.9 23.7-46zm-64-20.6l-5.3 28.9 6.6 34.1 1.5-44.9zm30.5 0l-2.7 18 1.2 45 6.7-34.1z" fill="#E4751F" stroke="#E4751F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M179.8 193.5l-6.7 34.1 4.8 3.3 29.2-22.8 1-22.9zm-69.2-8.3l.8 22.9 29.2 22.8 4.8-3.3-6.6-34.1z" fill="#F6851B" stroke="#F6851B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M180.3 262.3l.3-9.3-2.5-2.2h-37.7l-2.3 2.2.2 9.3-31.5-14.9 11 9 22.3 15.5h38.3l22.4-15.5 11-9z" fill="#C0AD9E" stroke="#C0AD9E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M177.9 230.9l-4.8-3.3h-27.7l-4.8 3.3-2.5 22.1 2.3-2.2h37.7l2.5 2.2z" fill="#161616" stroke="#161616" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M278.3 114.2l8.5-40.8-12.7-37.9-96.2 71.4 37 31.3 52.3 15.3 11.6-13.5-5-3.6 8-7.3-6.2-4.8 8-6.1zM31.8 73.4l8.5 40.8-5.4 4 8 6.1-6.1 4.8 8 7.3-5 3.6 11.5 13.5 52.3-15.3 37-31.3L44.4 35.5z" fill="#763D16" stroke="#763D16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M267.2 153.5l-52.3-15.3 15.9 23.9-23.7 46 31.2-.4h46.5zm-163.6-15.3l-52.3 15.3-17.4 54.2h46.4l31.1.4-23.6-46zm71 26.4l3.3-57.7 15.2-41.1h-67.5l15 41.1 3.5 57.7 1.2 18.2.1 44.8h27.7l.2-44.8z" fill="#F6851B" stroke="#F6851B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
 
-// ── Password strength ─────────────────────────────────────────────────────────
+// -- Password strength --------------------------------------------------------
 const PWD_CHECKS = [
   { label: 'At least 8 characters', test: (p: string) => p.length >= 8 },
-  { label: 'Uppercase letter (A–Z)', test: (p: string) => /[A-Z]/.test(p) },
-  { label: 'Lowercase letter (a–z)', test: (p: string) => /[a-z]/.test(p) },
-  { label: 'Number (0–9)', test: (p: string) => /\d/.test(p) },
+  { label: 'Uppercase letter (A-Z)', test: (p: string) => /[A-Z]/.test(p) },
+  { label: 'Lowercase letter (a-z)', test: (p: string) => /[a-z]/.test(p) },
+  { label: 'Number (0-9)', test: (p: string) => /\d/.test(p) },
   { label: 'Special character', test: (p: string) => /[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]/.test(p) },
 ];
 
@@ -89,7 +91,7 @@ function PasswordStrengthMeter({ password }: { password: string }) {
   );
 }
 
-// ── Field ─────────────────────────────────────────────────────────────────────
+// -- Field --------------------------------------------------------------------
 function Field({ label, type, value, onChange, placeholder, autoComplete, showToggle }: {
   label: string; type: string; value: string;
   onChange: (v: string) => void; placeholder?: string;
@@ -126,7 +128,7 @@ function Field({ label, type, value, onChange, placeholder, autoComplete, showTo
   );
 }
 
-// ── Animated logo for right panel ─────────────────────────────────────────────
+// -- Brand panel --------------------------------------------------------------
 function BrandPanel() {
   return (
     <div className="flex flex-col items-center justify-center text-center px-12">
@@ -155,14 +157,14 @@ function BrandPanel() {
 
       <div className="space-y-3 w-full max-w-xs">
         {[
-          { icon: '▸', text: 'Publish repos and AI agents' },
-          { icon: '▸', text: 'Earn ETH from locked content' },
-          { icon: '▸', text: 'Chat with developers globally' },
-          { icon: '▸', text: 'Built-in Gemini AI assistant' },
-        ].map(item => (
-          <div key={item.text} className="flex items-center gap-3 text-sm text-zinc-400">
-            <span className="text-monad-400 text-xs">{item.icon}</span>
-            {item.text}
+          'Publish repos and AI agents',
+          'Earn ETH from locked content',
+          'Chat with developers globally',
+          'Built-in Gemini AI assistant',
+        ].map(text => (
+          <div key={text} className="flex items-center gap-3 text-sm text-zinc-400">
+            <span className="text-monad-400 text-xs">&#9656;</span>
+            {text}
           </div>
         ))}
       </div>
@@ -177,27 +179,39 @@ function BrandPanel() {
   );
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+// -- Main ---------------------------------------------------------------------
 export default function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
 
   const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>('login');
 
+  // Login state
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+
+  // Register state - step 1
+  const [regStep, setRegStep] = useState<1 | 2>(1);
   const [regEmail, setRegEmail] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
 
+  // Register state - step 2
+  const [regGender, setRegGender] = useState('');
+  const [regOccupation, setRegOccupation] = useState('');
+  const [regWhatDoYouDo, setRegWhatDoYouDo] = useState('');
+
+  // Forgot password
   const [forgotIdentifier, setForgotIdentifier] = useState('');
 
+  // General state
   const [loading, setLoading] = useState<'email' | 'github' | 'metamask' | '2fa' | 'forgot' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [metamaskInstalled, setMetamaskInstalled] = useState(false);
 
+  // 2FA
   const [twoFactorPending, setTwoFactorPending] = useState(false);
   const [tempToken, setTempToken] = useState('');
   const [twoFactorCode, setTwoFactorCode] = useState('');
@@ -210,6 +224,8 @@ export default function AuthPage() {
   const clearMessages = () => { setError(''); setSuccess(''); };
   const resetTwoFactor = () => { setTwoFactorPending(false); setTempToken(''); setTwoFactorCode(''); };
   const anyLoading = loading !== null;
+
+  // -- Handlers ---------------------------------------------------------------
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,7 +245,13 @@ export default function AuthPage() {
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Login failed. Check your credentials and try again.');
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Cannot connect to server');
+      } else {
+        setError('Invalid credentials');
+      }
     } finally { setLoading(null); }
   };
 
@@ -247,7 +269,7 @@ export default function AuthPage() {
     } finally { setLoading(null); }
   };
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegisterStep1 = (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
     if (!regEmail || !regUsername || !regPassword) { setError('Please fill in all fields'); return; }
@@ -256,13 +278,33 @@ export default function AuthPage() {
       setError('Password is too weak. Meet all requirements below.');
       return;
     }
+    setRegStep(2);
+  };
+
+  const handleRegisterStep2 = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    if (!regGender) { setError('Please select your gender'); return; }
     setLoading('email');
     try {
-      await api.post('/auth/register', { email: regEmail, username: regUsername, password: regPassword });
+      await api.post('/auth/register', {
+        email: regEmail,
+        username: regUsername,
+        password: regPassword,
+        gender: regGender,
+        occupation: regOccupation,
+        whatDoYouDo: regWhatDoYouDo,
+      });
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Registration failed. Please try again.');
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Cannot connect to server');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally { setLoading(null); }
   };
 
@@ -275,7 +317,13 @@ export default function AuthPage() {
       await api.post('/auth/password/forgot', { identifier: forgotIdentifier });
       setTab('reset-sent');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Cannot connect to server');
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally { setLoading(null); }
   };
 
@@ -291,9 +339,17 @@ export default function AuthPage() {
       await refresh();
       router.push('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Cannot connect to server');
+      } else {
+        setError(err instanceof Error ? err.message : 'MetaMask connection failed.');
+      }
     } finally { setLoading(null); }
   };
+
+  // -- Loading spinner --------------------------------------------------------
 
   if (authLoading) {
     return (
@@ -303,10 +359,57 @@ export default function AuthPage() {
     );
   }
 
+  // -- Heading helpers --------------------------------------------------------
+
+  const getHeading = () => {
+    if (twoFactorPending) return 'Two-factor verification';
+    if (tab === 'login') return 'Sign in to Bolty';
+    if (tab === 'register') return regStep === 1 ? 'Create your account' : 'Tell us about yourself';
+    if (tab === 'forgot') return 'Reset your password';
+    return 'Check your email';
+  };
+
+  const getSubheading = () => {
+    if (twoFactorPending) return 'Enter the code we sent to your email';
+    if (tab === 'login') {
+      return (
+        <>
+          {"Don't have an account? "}
+          <button onClick={() => { setTab('register'); setRegStep(1); clearMessages(); }}
+            className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign up</button>
+        </>
+      );
+    }
+    if (tab === 'register') {
+      if (regStep === 1) {
+        return (
+          <>
+            {'Already have an account? '}
+            <button onClick={() => { setTab('login'); clearMessages(); }}
+              className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button>
+          </>
+        );
+      }
+      return 'Step 2 of 2 - Optional profile details';
+    }
+    if (tab === 'forgot') {
+      return (
+        <>
+          {'Remember it? '}
+          <button onClick={() => { setTab('login'); clearMessages(); }}
+            className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button>
+        </>
+      );
+    }
+    return 'We sent a password reset link to your inbox.';
+  };
+
+  // -- Render -----------------------------------------------------------------
+
   return (
     <div className="min-h-screen flex">
 
-      {/* ── Left side — Form ────────────────────────────────── */}
+      {/* -- Left side: Form ------------------------------------------------- */}
       <div className="w-full lg:w-[55%] flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
 
@@ -320,26 +423,10 @@ export default function AuthPage() {
 
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
-              {twoFactorPending
-                ? 'Two-factor verification'
-                : tab === 'login'
-                  ? 'Sign in to Bolty'
-                  : tab === 'register'
-                    ? 'Create your account'
-                    : tab === 'forgot'
-                      ? 'Reset your password'
-                      : 'Check your email'}
+              {getHeading()}
             </h1>
             <p className="text-sm text-zinc-500">
-              {twoFactorPending
-                ? 'Enter the code we sent to your email'
-                : tab === 'login'
-                  ? <>{"Don't have an account? "}<button onClick={() => { setTab('register'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign up</button></>
-                  : tab === 'register'
-                    ? <>{'Already have an account? '}<button onClick={() => { setTab('login'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button></>
-                    : tab === 'forgot'
-                      ? <>{'Remember it? '}<button onClick={() => { setTab('login'); clearMessages(); }} className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button></>
-                      : 'We sent a password reset link to your inbox.'}
+              {getSubheading()}
             </p>
           </div>
 
@@ -361,7 +448,7 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* ── 2FA step ── */}
+          {/* -- 2FA step ---------------------------------------------------- */}
           {twoFactorPending && (
             <form onSubmit={handle2FAVerify} className="space-y-4">
               <div>
@@ -389,7 +476,7 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* ── Login form ── */}
+          {/* -- Login form -------------------------------------------------- */}
           {!twoFactorPending && tab === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <Field label="Email or username" type="text" value={loginIdentifier} onChange={setLoginIdentifier}
@@ -413,7 +500,7 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* ── Forgot password form ── */}
+          {/* -- Forgot password form ---------------------------------------- */}
           {!twoFactorPending && tab === 'forgot' && (
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <Field label="Email or username" type="text" value={forgotIdentifier} onChange={setForgotIdentifier}
@@ -427,7 +514,7 @@ export default function AuthPage() {
             </form>
           )}
 
-          {/* ── Reset sent confirmation ── */}
+          {/* -- Reset sent confirmation ------------------------------------- */}
           {!twoFactorPending && tab === 'reset-sent' && (
             <div className="space-y-4">
               <div className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-4">
@@ -436,7 +523,7 @@ export default function AuthPage() {
                 </svg>
                 <div>
                   <p className="text-green-400 text-sm font-medium">Reset link sent</p>
-                  <p className="text-zinc-400 text-xs mt-0.5">If an account with that email exists, you'll receive a link within a few minutes. Check your spam folder too.</p>
+                  <p className="text-zinc-400 text-xs mt-0.5">If an account with that email exists, you will receive a link within a few minutes. Check your spam folder too.</p>
                 </div>
               </div>
               <button type="button" onClick={() => { setTab('login'); clearMessages(); setForgotIdentifier(''); }}
@@ -446,9 +533,9 @@ export default function AuthPage() {
             </div>
           )}
 
-          {/* ── Register form ── */}
-          {!twoFactorPending && tab === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4">
+          {/* -- Register form: Step 1 --------------------------------------- */}
+          {!twoFactorPending && tab === 'register' && regStep === 1 && (
+            <form onSubmit={handleRegisterStep1} className="space-y-4">
               <Field label="Email" type="email" value={regEmail} onChange={setRegEmail}
                 placeholder="you@email.com" autoComplete="email" />
               <Field label="Username" type="text" value={regUsername}
@@ -463,14 +550,52 @@ export default function AuthPage() {
                 placeholder="Repeat your password" autoComplete="new-password" showToggle />
               <button type="submit" disabled={anyLoading}
                 className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
-                {loading === 'email'
-                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creating account...</span>
-                  : 'Create account'}
+                Continue
               </button>
             </form>
           )}
 
-          {/* ── Divider + OAuth ── */}
+          {/* -- Register form: Step 2 --------------------------------------- */}
+          {!twoFactorPending && tab === 'register' && regStep === 2 && (
+            <form onSubmit={handleRegisterStep2} className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Gender</label>
+                <select
+                  value={regGender}
+                  onChange={e => setRegGender(e.target.value)}
+                  className="w-full rounded-xl px-4 py-2.5 text-sm outline-none transition-all
+                    bg-zinc-900/70 border border-zinc-800 text-white
+                    focus:border-monad-500/60 focus:bg-zinc-900 focus:ring-1 focus:ring-monad-500/20
+                    appearance-none cursor-pointer"
+                >
+                  <option value="" disabled>Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="non-binary">Non-binary</option>
+                  <option value="prefer-not-to-say">Prefer not to say</option>
+                </select>
+              </div>
+              <Field label="Occupation" type="text" value={regOccupation} onChange={setRegOccupation}
+                placeholder="Your occupation" />
+              <Field label="What do you do?" type="text" value={regWhatDoYouDo} onChange={setRegWhatDoYouDo}
+                placeholder="e.g. Full-stack developer, Student, Designer..." />
+              <div className="flex gap-3 mt-1">
+                <button type="button" onClick={() => { setRegStep(1); clearMessages(); }}
+                  className="flex-1 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-sm text-zinc-300
+                             hover:bg-zinc-800/70 hover:border-zinc-700 transition-all">
+                  Back
+                </button>
+                <button type="submit" disabled={anyLoading}
+                  className="flex-1 py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
+                  {loading === 'email'
+                    ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Creating account...</span>
+                    : 'Create account'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* -- Divider + OAuth --------------------------------------------- */}
           {!twoFactorPending && (
             <>
               <div className="flex items-center gap-3 my-6">
@@ -498,7 +623,7 @@ export default function AuthPage() {
                     className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/60 border border-zinc-800 rounded-xl
                                hover:bg-zinc-800/70 hover:border-zinc-700 transition-all disabled:opacity-50 group">
                     <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                      <MetaMaskLogo className="w-4 h-4" />
+                      <MetaMaskLogo className="w-5 h-5" />
                     </div>
                     <span className="flex-1 text-left text-sm text-white font-medium">MetaMask</span>
                     {loading === 'metamask'
@@ -510,7 +635,7 @@ export default function AuthPage() {
                   <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer"
                     className="w-full flex items-center gap-3 px-4 py-3 bg-zinc-900/40 border border-dashed border-zinc-800 rounded-xl hover:border-zinc-700 transition-all group">
                     <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0">
-                      <MetaMaskLogo className="w-4 h-4" />
+                      <MetaMaskLogo className="w-5 h-5" />
                     </div>
                     <span className="flex-1 text-left text-sm text-zinc-500 group-hover:text-zinc-400">Install MetaMask</span>
                     <svg className="w-4 h-4 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -540,7 +665,7 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* ── Right side — Brand panel ─────────────────────────── */}
+      {/* -- Right side: Brand panel ----------------------------------------- */}
       <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center"
         style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, var(--bg-elevated) 100%)', borderLeft: '1px solid var(--border)' }}>
         {/* Background rings */}

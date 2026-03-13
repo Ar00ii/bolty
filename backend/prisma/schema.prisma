@@ -21,6 +21,8 @@ model User {
   username      String?   @unique
   avatarUrl     String?
   bio           String?   @db.Text
+  gender        String?
+  occupation    String?
 
   // Email / Password auth
   email            String?   @unique
@@ -34,7 +36,6 @@ model User {
 
   // Wallet addresses
   walletAddress String?   @unique  // Ethereum (MetaMask)
-  solanaAddress String?   @unique  // Solana (Phantom)
   walletNonce   String?            // current nonce for wallet auth
   nonceExpiry   DateTime?          // nonce expiration
 

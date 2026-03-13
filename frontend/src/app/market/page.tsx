@@ -444,7 +444,7 @@ export default function MarketPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="bg-page-market max-w-7xl mx-auto px-4 py-8">
       {/* Negotiation modal */}
       {negotiatingListing && user && (
         <NegotiationModal

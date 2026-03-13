@@ -216,7 +216,7 @@ function AnimatedLogo() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <div className="overflow-x-hidden">
+    <div className="bg-page-community overflow-x-hidden">
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative min-h-[92vh] flex flex-col items-center justify-center text-center px-4 py-24">

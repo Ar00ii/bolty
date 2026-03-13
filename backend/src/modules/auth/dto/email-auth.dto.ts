@@ -20,6 +20,15 @@ export class RegisterEmailDto {
   @MaxLength(100)
   @Matches(PASSWORD_REGEX, { message: PASSWORD_MESSAGE })
   password: string;
+
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  occupation?: string;
 }
 
 export class LoginEmailDto {

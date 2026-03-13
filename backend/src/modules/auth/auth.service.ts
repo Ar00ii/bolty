@@ -153,6 +153,8 @@ export class AuthService {
     email: string;
     username: string;
     password: string;
+    gender?: string;
+    occupation?: string;
   }): Promise<AuthTokens> {
     const email = data.email.toLowerCase().trim();
     const username = data.username.toLowerCase().trim();
@@ -167,7 +169,7 @@ export class AuthService {
     const userTag = await this.generateUserTag();
 
     const user = await this.prisma.user.create({
-      data: { email, username, passwordHash, displayName: username, userTag },
+      data: { email, username, passwordHash, displayName: username, userTag, gender: data.gender, occupation: data.occupation },
     });
 
     this.logger.log(`New email user registered: ${username}`);
