@@ -264,7 +264,12 @@ export class AuthService {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     await this.redis.set(`2fa_enable:${userId}`, code, 600); // 10 min
-    await this.emailService.send2FAEnableCode(user.email, code);
+    try {
+      await this.emailService.send2FAEnableCode(user.email, code);
+    } catch (err) {
+      await this.redis.del(`2fa_enable:${userId}`);
+      throw new BadRequestException('Failed to send verification email. Verify a domain at resend.com/domains to send to any email address.');
+    }
     this.logger.log(`2FA enable code sent for user ${userId}`);
   }
 
