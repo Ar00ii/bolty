@@ -29,6 +29,11 @@ export class RegisterEmailDto {
   @IsOptional()
   @MaxLength(100)
   occupation?: string;
+
+  @IsString()
+  @IsOptional()
+  @MaxLength(100)
+  whatDoYouDo?: string;
 }
 
 export class LoginEmailDto {
