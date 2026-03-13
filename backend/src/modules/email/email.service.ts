@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
-import { Transporter } from 'nodemailer';
+import { Resend } from 'resend';
 
 // ── Shared email shell ─────────────────────────────────────────────────────
 
@@ -77,7 +76,7 @@ function otpBlock(code: string): string {
     </table>`;
 }
 
-function body(content: string): string {
+function bodyWrap(content: string): string {
   return `<div style="padding:36px 40px;">${content}</div>`;
 }
 
@@ -86,39 +85,28 @@ function body(content: string): string {
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: Transporter | null = null;
+  private resend: Resend | null = null;
   private from: string;
   private devMode: boolean;
 
   constructor(private readonly config: ConfigService) {
-    const host    = config.get<string>('SMTP_HOST', '');
-    const port    = config.get<number>('SMTP_PORT', 587);
-    const user    = config.get<string>('SMTP_USER', '');
-    const pass    = config.get<string>('SMTP_PASS', '');
-    this.from     = config.get<string>('EMAIL_FROM', user ? `Bolty <${user}>` : 'Bolty <noreply@bolty.dev>');
+    const apiKey = config.get<string>('RESEND_API_KEY', '');
+    this.from = config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
 
-    if (host && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465,
-        auth: { user, pass },
-      });
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
       this.devMode = false;
-      this.logger.log(`Email transport configured: ${host}:${port} (${user})`);
+      this.logger.log(`Resend email configured (from: ${this.from})`);
     } else {
-      // Dev fallback: print emails to console instead of sending
       this.devMode = true;
       this.logger.warn(
-        'SMTP not configured (SMTP_HOST / SMTP_USER / SMTP_PASS missing). ' +
-        'Emails will be printed to the console. Set these vars to send real emails.',
+        'RESEND_API_KEY not set. Emails will be printed to the console.',
       );
     }
   }
 
   private async send(to: string, subject: string, html: string, text: string): Promise<void> {
-    if (this.devMode || !this.transporter) {
-      // Print to console in dev so you can still see and use codes
+    if (this.devMode || !this.resend) {
       this.logger.log(
         `\n${'─'.repeat(60)}\n` +
         `[EMAIL - DEV MODE]\n` +
@@ -131,14 +119,18 @@ export class EmailService {
     }
 
     try {
-      const info = await this.transporter.sendMail({
+      const { data, error } = await this.resend.emails.send({
         from: this.from,
         to,
         subject,
         html,
         text,
       });
-      this.logger.log(`Email sent to ${to}: "${subject}" [${info.messageId}]`);
+      if (error) {
+        this.logger.error(`Failed to send email to ${to}: ${JSON.stringify(error)}`);
+        throw new Error(error.message);
+      }
+      this.logger.log(`Email sent to ${to}: "${subject}" [${data?.id}]`);
     } catch (err) {
       this.logger.error(`Failed to send email to ${to}: ${(err as Error).message}`);
       throw err;
@@ -149,7 +141,7 @@ export class EmailService {
 
   async sendWelcomeEmail(to: string, username: string): Promise<void> {
     const subject = 'Welcome to Bolty';
-    const html = shell(subject, `Welcome to Bolty, ${username}!`, body(`
+    const html = shell(subject, `Welcome to Bolty, ${username}!`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Welcome to Bolty</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Hi <strong style="color:#18181b;">@${username}</strong>, your account is ready.
@@ -189,7 +181,7 @@ export class EmailService {
 
   async send2FACode(to: string, code: string): Promise<void> {
     const subject = `${code} — your Bolty sign-in code`;
-    const html = shell(subject, `Your Bolty sign-in code is ${code}`, body(`
+    const html = shell(subject, `Your Bolty sign-in code is ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Two-Factor Sign-In</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         Enter this code to complete your Bolty sign-in.
@@ -211,7 +203,7 @@ export class EmailService {
 
   async sendEmailChangeConfirmation(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm your new Bolty email`;
-    const html = shell(subject, `Confirm your email change with code ${code}`, body(`
+    const html = shell(subject, `Confirm your email change with code ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Confirm Email Change</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to change your Bolty email to this address.
@@ -232,7 +224,7 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
     const subject = 'Reset your Bolty password';
-    const html = shell(subject, 'Reset your Bolty password', body(`
+    const html = shell(subject, 'Reset your Bolty password', bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Password Reset</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         We received a request to reset your Bolty password.
@@ -265,7 +257,7 @@ export class EmailService {
 
   async send2FAEnableCode(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm two-factor authentication`;
-    const html = shell(subject, `Confirm 2FA activation: ${code}`, body(`
+    const html = shell(subject, `Confirm 2FA activation: ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Auth</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to enable two-factor authentication on your Bolty account.
@@ -286,7 +278,7 @@ export class EmailService {
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {
     const subject = `${code} — Bolty account deletion confirmation`;
-    const html = shell(subject, `Confirm account deletion: ${code}`, body(`
+    const html = shell(subject, `Confirm account deletion: ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Account Deletion Request</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to permanently delete your Bolty account.
