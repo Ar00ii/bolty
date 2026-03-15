@@ -78,6 +78,20 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       token = userRecord?.githubToken ?? undefined;
     }
 
+    // No token at all — user connected GitHub before but token is gone, needs re-auth
+    if (!token && userId) {
+      this.logger.warn(`No GitHub token for user ${userId} (${githubLogin}) — need re-auth`);
+      return [{
+        _bolty_reauth: true,
+        name: 'Reconecta GitHub para ver todos tus repos',
+        id: -1,
+        full_name: 'reauth',
+        html_url: '',
+        stargazers_count: 0,
+        forks_count: 0,
+      }] as unknown[];
+    }
+
     const cacheKey = `gh_repos:${githubLogin}:${token ? 'auth' : 'public'}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached) as unknown[];
