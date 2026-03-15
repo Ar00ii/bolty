@@ -6,6 +6,7 @@ import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { GeometricBg } from '@/components/ui/GeometricBg';
 import { Spotlight } from '@/components/ui/spotlight';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+import { SplineScene } from '@/components/ui/splite';
 import {
   Sparkles,
   Code2,
@@ -247,8 +248,8 @@ export default function HomePage() {
       <section className="relative h-screen flex items-center bg-black overflow-hidden">
         <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
         <div className="max-w-7xl mx-auto px-8 w-full h-full">
-          <div className="flex items-center h-full">
-            <div className="relative z-10 flex flex-col justify-center max-w-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
+            <div className="relative z-10 flex flex-col justify-center">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
                 Built for developers
               </p>
@@ -264,6 +265,13 @@ export default function HomePage() {
                   Get started <ArrowIcon />
                 </Link>
               </div>
+            </div>
+            {/* Right — 3D robot */}
+            <div className="relative h-full hidden md:block">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full"
+              />
             </div>
           </div>
         </div>
