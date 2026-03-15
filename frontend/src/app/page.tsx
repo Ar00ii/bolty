@@ -173,138 +173,37 @@ export default function HomePage() {
     <div className="bg-page-community overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative min-h-[95vh] flex flex-col items-center justify-center text-center px-4 py-24 overflow-hidden">
-
-        {/* Animated geometric background */}
-        <GeometricBg />
-
-        {/* Large pulsing glow orbs */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(131,110,249,0.12) 0%, transparent 65%)',
-              animation: 'hero-glow-pulse 6s ease-in-out infinite',
-            }} />
-          <div className="absolute top-1/4 left-1/4 w-[300px] h-[300px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(99,91,255,0.08) 0%, transparent 70%)',
-              animation: 'hero-glow-pulse 8s ease-in-out infinite 2s',
-            }} />
-          <div className="absolute bottom-1/4 right-1/4 w-[250px] h-[250px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, rgba(168,85,247,0.07) 0%, transparent 70%)',
-              animation: 'hero-glow-pulse 10s ease-in-out infinite 4s',
-            }} />
-        </div>
-
-        <div className="relative max-w-4xl mx-auto z-10">
-
-          {/* Animated logo */}
-          <div className="flex justify-center mb-8">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-full blur-2xl opacity-50"
-                style={{
-                  background: 'radial-gradient(circle, rgba(131,110,249,0.6) 0%, transparent 70%)',
-                  animation: 'logo-pulse 3s ease-in-out infinite',
-                }} />
-              <div className="relative p-4 rounded-2xl border"
-                style={{
-                  background: 'rgba(131,110,249,0.08)',
-                  borderColor: 'rgba(131,110,249,0.2)',
-                  backdropFilter: 'blur(12px)',
-                }}>
-                <BoltyLogo size={56} color="#836EF9" />
+      <section className="relative min-h-screen flex items-center bg-black overflow-hidden">
+        <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
+        <div className="max-w-7xl mx-auto px-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            {/* Left content */}
+            <div className="relative z-10 flex flex-col justify-center py-24">
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
+                Built for developers
+              </p>
+              <h1 className="text-5xl md:text-7xl font-black bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight mb-6">
+                Publish.<br />Collaborate.<br />Earn.
+              </h1>
+              <p className="text-neutral-400 max-w-md text-base leading-relaxed mb-10">
+                Bolty brings together code, AI agents, and community in one developer-first platform.
+                Share your work and grow your audience.
+              </p>
+              <div>
+                <Link href="/auth" className="btn-primary px-8 py-3.5 rounded-xl inline-flex items-center gap-2">
+                  Get started <ArrowIcon />
+                </Link>
               </div>
             </div>
-          </div>
-
-          {/* Status badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-medium mb-8"
-            style={{ background: 'rgba(131,110,249,0.08)', borderColor: 'rgba(131,110,249,0.2)', color: '#836EF9' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            Now in alpha — Invite your team
-          </div>
-
-          {/* Heading */}
-          <h1 className="text-5xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none mb-6">
-            <span style={{
-              background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 40%, #e879f9 70%, #836EF9 100%)',
-              backgroundSize: '200% 200%',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-              animation: 'gradient-shift 6s ease infinite',
-            }}>
-              The Developer
-            </span>
-            <br />
-            <span style={{ color: 'var(--text)' }}>Platform.</span>
-          </h1>
-
-          <p className="text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            Bolty is where developers publish code, deploy AI agents, discover tools,
-            and collaborate in real time — all in one place.
-          </p>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/auth" className="btn-primary px-8 py-3.5 rounded-xl text-base inline-flex items-center gap-2 group">
-              Get started for free
-              <ArrowIcon />
-            </Link>
-            <Link href="/market" className="btn-secondary px-8 py-3.5 rounded-xl text-base">
-              Browse marketplace
-            </Link>
-          </div>
-
-          {/* Stats row */}
-          <div className="flex flex-wrap justify-center gap-8 mt-14 pt-8" style={{ borderTop: '1px solid var(--border)' }}>
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-sm font-bold text-monad-400 font-mono">{s.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 3D INTERACTIVE ───────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        <Section>
-          <div
-            className="w-full h-[500px] rounded-2xl bg-black/[0.96] relative overflow-hidden border"
-            style={{ borderColor: 'rgba(131,110,249,0.2)' }}
-          >
-            <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />
-            <div className="flex h-full">
-              {/* Left content */}
-              <div className="flex-1 p-8 relative z-10 flex flex-col justify-center">
-                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">
-                  Built for developers
-                </p>
-                <h2 className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight">
-                  Publish.<br />Collaborate.<br />Earn.
-                </h2>
-                <p className="mt-4 text-neutral-400 max-w-sm text-sm leading-relaxed">
-                  Bolty brings together code, AI agents, and community in one developer-first platform. Share your work and grow your audience.
-                </p>
-                <div className="mt-8">
-                  <Link href="/auth" className="btn-primary px-6 py-2.5 rounded-xl inline-flex items-center gap-2 text-sm">
-                    Get started <ArrowIcon />
-                  </Link>
-                </div>
-              </div>
-              {/* Right — 3D scene */}
-              <div className="flex-1 relative hidden md:block">
-                <SplineScene
-                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                  className="w-full h-full"
-                />
-              </div>
+            {/* Right — 3D robot */}
+            <div className="relative h-[600px] hidden md:block">
+              <SplineScene
+                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                className="w-full h-full"
+              />
             </div>
           </div>
-        </Section>
+        </div>
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
