@@ -96,17 +96,23 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     if (token) {
       // Authenticated: paginate all repos (public + private + org)
       let page = 1;
+      let needsReauth = false;
       while (true) {
         const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
         const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
 
-        // Log the scopes the token has so we can debug permission issues
-        const scopes = response.headers?.['x-oauth-scopes'];
+        // Check token scopes on first page
         if (page === 1) {
-          this.logger.log(`GitHub token scopes for ${githubLogin}: ${scopes || 'none'}`);
+          const scopes = (response.headers?.['x-oauth-scopes'] as string) || '';
+          this.logger.log(`GitHub token scopes for ${githubLogin}: [${scopes}]`);
           this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
+          // If token only has public_repo but not repo, private repos won't show
+          if (!scopes.includes('repo')) {
+            this.logger.warn(`Token for ${githubLogin} lacks 'repo' scope — only public repos visible. User needs to re-authorize.`);
+            needsReauth = true;
+          }
         }
 
         const batch = response.data;
@@ -115,6 +121,19 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         allRepos = allRepos.concat(batch);
         if (batch.length < 100) break;
         page++;
+      }
+
+      // If we got repos but token lacks full scope, add a flag
+      if (needsReauth && allRepos.length > 0) {
+        (allRepos as unknown as Array<Record<string, unknown>>).push({
+          _bolty_notice: true,
+          name: '⚠️ Solo repos públicos — reconecta GitHub para ver repos privados',
+          id: -1,
+          full_name: 'notice',
+          html_url: '',
+          stargazers_count: 0,
+          forks_count: 0,
+        });
       }
     } else {
       // No token: use public API (only returns public repos)

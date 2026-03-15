@@ -11,7 +11,13 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       clientSecret: config.get<string>('GITHUB_CLIENT_SECRET') || process.env.GITHUB_CLIENT_SECRET || 'b9e08f25b6e46d0b012e7be6183e38bb0d43d662',
       callbackURL: config.get<string>('GITHUB_CALLBACK_URL') || process.env.GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback',
       scope: ['read:user', 'repo'],
+      customHeaders: {},
     });
+  }
+
+  // Force GitHub to always show the consent screen so the user grants the latest scopes
+  authorizationParams(): Record<string, string> {
+    return { prompt: 'consent' };
   }
 
   async validate(

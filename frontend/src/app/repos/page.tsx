@@ -84,13 +84,20 @@ export default function ReposPage() {
     fetchRepos();
   }, [fetchRepos]);
 
+  const [ghScopeWarning, setGhScopeWarning] = useState(false);
+
   const loadGhRepos = async () => {
     setShowPublish(true);
+    setGhScopeWarning(false);
     try {
       // Clear cache first to always get fresh data from GitHub
       await api.delete('/repos/github/cache').catch(() => {});
       const data = await api.get<GitHubRepo[]>('/repos/github');
-      setGhRepos(Array.isArray(data) ? data : []);
+      const raw = Array.isArray(data) ? data : [];
+      // Check if backend sent a scope warning notice
+      const hasNotice = raw.some((r: Record<string, unknown>) => (r as Record<string, unknown>)._bolty_notice);
+      if (hasNotice) setGhScopeWarning(true);
+      setGhRepos(raw.filter((r: Record<string, unknown>) => !(r as Record<string, unknown>)._bolty_notice) as GitHubRepo[]);
     } catch {
       setError("Failed to fetch GitHub repos. Make sure you're logged in with GitHub.");
     }
@@ -311,6 +318,18 @@ export default function ReposPage() {
               [close]
             </button>
           </div>
+          {ghScopeWarning && (
+            <div className="mb-3 p-2 border border-yellow-500/30 bg-yellow-500/5 rounded text-xs text-yellow-400 font-mono">
+              Solo se muestran repos públicos. Para ver repos privados,{' '}
+              <a
+                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/auth/github`}
+                className="underline hover:text-yellow-300"
+              >
+                reconecta tu cuenta de GitHub
+              </a>
+              .
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
             {ghRepos.map((repo) => (
               <div
