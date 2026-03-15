@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: 'Bolty | AI Developer Platform',
   description: 'The developer platform for AI agents, code marketplaces, and community collaboration.',
   keywords: ['bolty', 'ai agents', 'developer platform', 'code marketplace', 'ethereum', 'web3'],
+  icons: {
+    icon: '/icon',
+    apple: '/apple-icon',
+  },
   openGraph: {
     title: 'Bolty | AI Developer Platform',
     description: 'The developer platform for AI agents, code marketplaces, and community collaboration.',
