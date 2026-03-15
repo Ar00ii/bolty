@@ -451,19 +451,39 @@ export class AuthService {
     });
 
     if (!user) {
-      const userTag = await this.generateUserTag();
-      user = await this.prisma.user.create({
-        data: {
-          githubId: githubProfile.id,
-          githubLogin: githubProfile.login,
-          username: githubProfile.login,
-          avatarUrl: githubProfile.avatar_url,
-          bio: githubProfile.bio,
-          githubToken: githubProfile.accessToken ?? null,
-          userTag,
-        },
+      // Check if a user with this GitHub username already exists (e.g. registered by email)
+      // If so, link GitHub to that existing account instead of creating a duplicate
+      const existingByUsername = await this.prisma.user.findUnique({
+        where: { username: githubProfile.login },
       });
-      this.logger.log(`New GitHub user created: ${githubProfile.login}`);
+
+      if (existingByUsername) {
+        this.logger.log(`Linking GitHub to existing user: ${githubProfile.login}`);
+        user = await this.prisma.user.update({
+          where: { id: existingByUsername.id },
+          data: {
+            githubId: githubProfile.id,
+            githubLogin: githubProfile.login,
+            githubToken: githubProfile.accessToken ?? undefined,
+            avatarUrl: existingByUsername.avatarUrl || githubProfile.avatar_url,
+            lastLoginAt: new Date(),
+          },
+        });
+      } else {
+        const userTag = await this.generateUserTag();
+        user = await this.prisma.user.create({
+          data: {
+            githubId: githubProfile.id,
+            githubLogin: githubProfile.login,
+            username: githubProfile.login,
+            avatarUrl: githubProfile.avatar_url,
+            bio: githubProfile.bio,
+            githubToken: githubProfile.accessToken ?? null,
+            userTag,
+          },
+        });
+        this.logger.log(`New GitHub user created: ${githubProfile.login}`);
+      }
     } else {
       user = await this.prisma.user.update({
         where: { id: user.id },
