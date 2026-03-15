@@ -409,10 +409,18 @@ export default function AuthPage() {
   // -- Render -----------------------------------------------------------------
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex relative overflow-hidden">
+
+      {/* -- Full-page wave background --------------------------------------- */}
+      <Waves
+        strokeColor="rgba(131,110,249,0.75)"
+        backgroundColor="transparent"
+        opacity={0.32}
+        pointerSize={0}
+      />
 
       {/* -- Left side: Form ------------------------------------------------- */}
-      <div className="w-full lg:w-[55%] flex items-center justify-center px-6 py-12">
+      <div className="w-full lg:w-[55%] flex items-center justify-center px-6 py-12 relative z-10">
         <div className="w-full max-w-md">
 
           {/* Mobile logo */}
@@ -668,15 +676,7 @@ export default function AuthPage() {
       </div>
 
       {/* -- Right side: Brand panel ----------------------------------------- */}
-      <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center"
-        style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, var(--bg-elevated) 100%)', borderLeft: '1px solid var(--border)' }}>
-        {/* Wave background - lila, very transparent, behind content */}
-        <Waves
-          strokeColor="rgba(131,110,249,0.6)"
-          backgroundColor="transparent"
-          opacity={0.15}
-          pointerSize={0}
-        />
+      <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center z-10">
         {/* Background rings */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full"
           style={{ border: '1px solid rgba(131,110,249,0.1)' }} />
