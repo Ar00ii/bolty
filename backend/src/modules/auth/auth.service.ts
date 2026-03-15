@@ -409,7 +409,7 @@ export class AuthService {
 
   async linkGitHubToUser(
     userId: string,
-    githubProfile: { id: string; login: string; avatar_url: string },
+    githubProfile: { id: string; login: string; avatar_url: string; accessToken?: string },
   ): Promise<void> {
     const existing = await this.prisma.user.findUnique({
       where: { githubId: githubProfile.id },
@@ -423,6 +423,7 @@ export class AuthService {
         githubId: githubProfile.id,
         githubLogin: githubProfile.login,
         avatarUrl: githubProfile.avatar_url,
+        githubToken: githubProfile.accessToken ?? undefined,
       },
     });
     this.logger.log(`GitHub linked for user ${userId}: @${githubProfile.login}`);

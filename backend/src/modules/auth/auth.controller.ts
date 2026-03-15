@@ -241,10 +241,11 @@ export class AuthController {
           id: req.user.id,
           login: req.user.login,
           avatar_url: req.user.avatar_url,
+          accessToken: req.user.accessToken,
         });
         res.cookie('gh_token', req.user.accessToken, {
           ...COOKIE_OPTIONS,
-          maxAge: 60 * 60 * 1000,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         return res.redirect(`${frontendUrl}/profile?linked=github`);
       } catch {
@@ -270,7 +271,7 @@ export class AuthController {
     });
     res.cookie('gh_token', req.user.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.redirect(`${frontendUrl}/auth/success`);
