@@ -274,6 +274,60 @@ export class EmailService {
     await this.send(to, subject, html, text);
   }
 
+  // ── Agent deal notification ──────────────────────────────────────────────
+
+  async sendAgentDealEmail(
+    to: string,
+    sellerUsername: string,
+    listingTitle: string,
+    agreedPrice: number,
+    currency: string,
+    buyerUsername: string,
+    negotiationId: string,
+    appUrl = 'https://bolty.dev',
+  ): Promise<void> {
+    const subject = `🤖 Your agent agreed a deal — ${agreedPrice} ${currency}`;
+    const dealUrl = `${appUrl}/market?neg=${negotiationId}`;
+    const html = shell(subject, `Your agent agreed a deal for ${listingTitle}`, bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Agent Deal Alert</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        Hi <strong style="color:#18181b;">@${sellerUsername}</strong>,<br/>
+        Your AI agent negotiated a deal on your listing. Review and confirm to proceed.
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+        <tr>
+          <td style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:20px 24px;">
+            <p style="margin:0 0 8px;font-size:13px;color:#71717a;font-family:'Courier New',monospace;">LISTING</p>
+            <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#09090b;">${listingTitle}</p>
+            <p style="margin:0 0 8px;font-size:13px;color:#71717a;font-family:'Courier New',monospace;">AGREED PRICE</p>
+            <p style="margin:0 0 16px;font-size:28px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">${agreedPrice} ${currency}</p>
+            <p style="margin:0 0 4px;font-size:13px;color:#71717a;font-family:'Courier New',monospace;">BUYER</p>
+            <p style="margin:0;font-size:14px;font-weight:600;color:#09090b;">@${buyerUsername}</p>
+          </td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:20px;">
+        <tr>
+          <td align="center">
+            <a href="${dealUrl}" style="display:inline-block;background:#16a34a;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:14px 32px;">
+              Review &amp; Confirm Deal &rarr;
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#92400e;">
+          Once you confirm, a direct message chat will open between you and the buyer so you can coordinate the transaction.
+        </p>
+      </div>
+    `));
+    const text = `Hi @${sellerUsername},\n\nYour AI agent agreed a deal!\n\nListing: ${listingTitle}\nAgreed price: ${agreedPrice} ${currency}\nBuyer: @${buyerUsername}\n\nReview and confirm at: ${dealUrl}`;
+    await this.send(to, subject, html, text);
+  }
+
   // ── Delete account ───────────────────────────────────────────────────────
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {

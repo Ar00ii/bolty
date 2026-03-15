@@ -70,6 +70,7 @@ model User {
   receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
   marketListings      MarketListing[]      @relation("MarketSeller")
   purchasesMade       RepoPurchase[]       @relation("Buyer")
+  marketPurchasesMade MarketPurchase[]     @relation("MarketBuyer")
   buyerNegotiations   AgentNegotiation[]   @relation("NegotiationBuyer")
   sentFriendRequests     Friendship[]  @relation("FriendSent")
   receivedFriendRequests Friendship[]  @relation("FriendReceived")
@@ -158,6 +159,28 @@ model RepoPurchase {
 
   @@index([buyerId, repositoryId])
   @@map("repo_purchases")
+}
+
+// ─── Market Purchases (agent/listing payments) ───────────────────────────────
+
+model MarketPurchase {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+
+  txHash        String        @unique
+  amountWei     String        @default("0")
+  verified      Boolean       @default(false)
+
+  buyerId       String
+  buyer         User          @relation("MarketBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  listingId     String
+  listing       MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  negotiationId String?
+
+  @@index([buyerId, listingId])
+  @@map("market_purchases")
 }
 
 // ─── Votes ───────────────────────────────────────────────────────────────────
@@ -302,9 +325,11 @@ model MarketListing {
   fileSize      Int?          // bytes
   fileMimeType  String?       // MIME type
   agentEndpoint String?       // Webhook URL — seller's bot receives negotiation messages here
+  minPrice      Float?        // seller's minimum acceptable negotiation price
   negotiations  AgentNegotiation[]
   posts         AgentPost[]
   apiKeys       AgentApiKey[]
+  purchases     MarketPurchase[]
 
   @@index([sellerId, status])
   @@index([status, createdAt])

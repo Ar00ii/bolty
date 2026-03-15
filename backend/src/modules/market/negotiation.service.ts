@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { EmailService } from '../email/email.service';
+import { DmService } from '../dm/dm.service';
 import { isSafeUrl, sanitizeAiPrompt } from '../../common/sanitize/sanitize.util';
 
 interface AgentResponse {
@@ -25,6 +27,8 @@ export class NegotiationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly emailService: EmailService,
+    private readonly dmService: DmService,
   ) {
     const key = this.config.get<string>('GEMINI_API_KEY') || '';
     this.genAI = new GoogleGenerativeAI(key);
@@ -35,7 +39,7 @@ export class NegotiationService {
   async startNegotiation(buyerId: string, listingId: string) {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
-      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true, agentEndpoint: true },
+      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true, agentEndpoint: true, minPrice: true },
     });
     if (!listing || listing.status !== 'ACTIVE') throw new NotFoundException('Listing not found');
     if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot negotiate on your own listing');
@@ -44,7 +48,7 @@ export class NegotiationService {
     const existing = await this.prisma.agentNegotiation.findFirst({
       where: { listingId, buyerId, status: 'ACTIVE' },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -54,7 +58,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.create({
       data: { listingId, buyerId },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -66,7 +70,7 @@ export class NegotiationService {
       await this.prisma.negotiationMessage.create({
         data: {
           negotiationId: neg.id,
-          fromRole: neg.listing.agentEndpoint ? 'seller_agent' : 'seller_agent',
+          fromRole: 'seller_agent',
           content: greeting.reply,
           proposedPrice: greeting.proposedPrice ?? null,
         },
@@ -82,7 +86,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -96,7 +100,7 @@ export class NegotiationService {
     return this.prisma.agentNegotiation.findMany({
       where: { OR: [{ buyerId: userId }, { listing: { sellerId: userId } }] },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, type: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, type: true, minPrice: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
@@ -115,7 +119,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -141,7 +145,7 @@ export class NegotiationService {
     const updated = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -153,12 +157,12 @@ export class NegotiationService {
         await this.prisma.negotiationMessage.create({
           data: {
             negotiationId: id,
-            fromRole: updated!.listing.agentEndpoint ? 'seller_agent' : 'seller_agent',
+            fromRole: 'seller_agent',
             content: agentReply.reply,
             proposedPrice: agentReply.proposedPrice ?? null,
           },
         });
-        await this.applyAction(id, agentReply);
+        await this.applyAction(id, agentReply, updated!);
       }
     }
 
@@ -171,21 +175,32 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { sellerId: true, price: true } },
+        listing: { select: { id: true, sellerId: true, price: true, title: true, currency: true } },
+        buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'desc' }, take: 20 },
       },
     });
-    if (!neg || neg.status !== 'ACTIVE') throw new NotFoundException();
+    if (!neg) throw new NotFoundException();
+    // Allow accepting when ACTIVE or already AGREED (seller confirms agent-agreed deal)
+    if (neg.status !== 'ACTIVE' && neg.status !== 'AGREED') throw new BadRequestException('Cannot accept this negotiation');
     if (neg.buyerId !== userId && neg.listing.sellerId !== userId) throw new ForbiddenException();
 
     const lastProposed = neg.messages.find((m) => m.proposedPrice != null);
     const agreedPrice = lastProposed?.proposedPrice ?? neg.listing.price;
 
-    return this.prisma.agentNegotiation.update({
+    const updated = await this.prisma.agentNegotiation.update({
       where: { id },
       data: { status: 'AGREED', agreedPrice },
       include: { messages: { orderBy: { createdAt: 'asc' } } },
     });
+
+    // When the seller confirms/accepts, create an opening DM between buyer and seller
+    const isSeller = userId === neg.listing.sellerId;
+    if (isSeller) {
+      await this.createDealDm(neg.listing.sellerId, neg.buyer.id, neg.listing.title, agreedPrice, neg.listing.currency);
+    }
+
+    return updated;
   }
 
   async rejectDeal(id: string, userId: string) {
@@ -210,7 +225,7 @@ export class NegotiationService {
         event: 'negotiation.start',
         negotiationId: neg.id,
         listingId: neg.listing.id,
-        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency },
+        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency, minPrice: neg.listing.minPrice },
         history: [],
       });
     }
@@ -223,7 +238,7 @@ export class NegotiationService {
         event: 'negotiation.message',
         negotiationId: neg.id,
         listingId: neg.listing.id,
-        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency },
+        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency, minPrice: neg.listing.minPrice },
         message,
         proposedPrice,
         history: neg.messages.map((m: any) => ({
@@ -257,10 +272,13 @@ export class NegotiationService {
     }
   }
 
-  private async geminiGreet(listing: { title: string; price: number; currency: string }): Promise<AgentResponse | null> {
+  private async geminiGreet(listing: { title: string; price: number; currency: string; minPrice?: number | null }): Promise<AgentResponse | null> {
     try {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const prompt = `You are an AI sales agent for "${listing.title}" listed at ${listing.price} ${listing.currency}.
+      const floorNote = listing.minPrice != null
+        ? ` (minimum I can accept: ${listing.minPrice} ${listing.currency})`
+        : '';
+      const prompt = `You are an AI sales agent for "${listing.title}" listed at ${listing.price} ${listing.currency}${floorNote}.
 A potential buyer just opened a negotiation. Greet them, briefly mention the product, and state the asking price. Be friendly and concise (2-3 sentences max).
 Respond with ONLY JSON: {"reply": "your greeting"}`;
       const result = await model.generateContent(prompt);
@@ -286,11 +304,17 @@ Respond with ONLY JSON: {"reply": "your greeting"}`;
         .map((m: any) => `[${m.fromRole}]${m.proposedPrice != null ? ` (offer: ${m.proposedPrice} ${neg.listing.currency})` : ''}: ${m.content}`)
         .join('\n');
 
-      const prompt = `You are an AI sales agent for "${neg.listing.title}" (asking: ${neg.listing.price} ${neg.listing.currency}).
+      const minPrice = neg.listing.minPrice;
+      const floorRule = minPrice != null
+        ? `- NEVER accept below ${minPrice} ${neg.listing.currency} — this is the seller's absolute floor.`
+        : '';
+
+      const prompt = `You are an AI sales agent for "${neg.listing.title}" (asking: ${neg.listing.price} ${neg.listing.currency}${minPrice != null ? `, minimum: ${minPrice} ${neg.listing.currency}` : ''}).
 Negotiate on behalf of the seller. Rules:
-- Accept if offer >= 80% of asking price.
+- Accept if offer >= 80% of asking price (but never below the minimum floor).
 - Counter-offer at midpoint between offer and asking if offer is 40–80%.
-- Reject if offer < 40% of asking price.
+- Reject if offer < 40% of asking price or below the minimum floor.
+${floorRule}
 - Be brief, friendly, and business-like.
 
 History:
@@ -304,10 +328,23 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
       const match = result.response.text().trim().match(/\{[\s\S]*\}/);
       if (match) {
         const parsed = JSON.parse(match[0]);
+        let action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(parsed.action) ? parsed.action : 'counter';
+        let finalPrice: number | undefined = parsed.proposedPrice != null ? Number(parsed.proposedPrice) : undefined;
+
+        // Enforce minimum price floor
+        if (minPrice != null && finalPrice != null && finalPrice < minPrice) {
+          finalPrice = minPrice;
+          action = 'counter';
+        }
+        if (minPrice != null && action === 'accept' && proposedPrice != null && proposedPrice < minPrice) {
+          action = 'counter';
+          finalPrice = minPrice;
+        }
+
         return {
           reply: String(parsed.reply || 'Interesting offer.'),
-          proposedPrice: parsed.proposedPrice != null ? Number(parsed.proposedPrice) : undefined,
-          action: ['accept', 'reject', 'counter'].includes(parsed.action) ? parsed.action : 'counter',
+          proposedPrice: finalPrice,
+          action,
         };
       }
     } catch (err) {
@@ -316,17 +353,57 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
     return null;
   }
 
-  private async applyAction(negId: string, response: AgentResponse) {
+  private async applyAction(negId: string, response: AgentResponse, neg: any) {
     if (response.action === 'accept') {
+      const agreedPrice = response.proposedPrice ?? neg.listing.price;
       await this.prisma.agentNegotiation.update({
         where: { id: negId },
-        data: { status: 'AGREED', agreedPrice: response.proposedPrice ?? undefined },
+        data: { status: 'AGREED', agreedPrice },
       });
+
+      // Notify seller by email that agent agreed a deal
+      try {
+        const seller = await this.prisma.user.findUnique({
+          where: { id: neg.listing.sellerId },
+          select: { email: true, username: true },
+        });
+        const buyer = await this.prisma.user.findUnique({
+          where: { id: neg.buyerId },
+          select: { username: true },
+        });
+        if (seller?.email) {
+          const appUrl = this.config.get<string>('APP_URL') || 'https://bolty.dev';
+          await this.emailService.sendAgentDealEmail(
+            seller.email,
+            seller.username || 'seller',
+            neg.listing.title,
+            agreedPrice,
+            neg.listing.currency,
+            buyer?.username || 'buyer',
+            negId,
+            appUrl,
+          ).catch((err) => this.logger.error('Deal email failed', err));
+        }
+      } catch (err) {
+        this.logger.error('Failed to send deal email', err);
+      }
     } else if (response.action === 'reject') {
       await this.prisma.agentNegotiation.update({
         where: { id: negId },
         data: { status: 'REJECTED' },
       });
+    }
+  }
+
+  // ── Create opening DM between buyer and seller after deal confirmed ────────
+
+  private async createDealDm(sellerId: string, buyerId: string, listingTitle: string, agreedPrice: number, currency: string) {
+    const dmContent = `🤖 Deal confirmed! Your agent agreed on "${listingTitle}" at ${agreedPrice} ${currency}. Use this chat to coordinate the transfer and payment.`;
+    try {
+      // Seller opens the DM to the buyer
+      await this.dmService.sendSystemMessage(sellerId, buyerId, dmContent);
+    } catch (err) {
+      this.logger.error('Failed to create deal DM', err);
     }
   }
 }

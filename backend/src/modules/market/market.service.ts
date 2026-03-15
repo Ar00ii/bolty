@@ -15,6 +15,7 @@ interface CreateListingDto {
   type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
   price: number;
   currency?: string;
+  minPrice?: number;
   tags?: string[];
   repositoryId?: string;
   agentUrl?: string;
@@ -85,6 +86,9 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     if (title.length < 3) throw new ForbiddenException('Title too short');
     if (description.length < 10) throw new ForbiddenException('Description too short');
     if (dto.price < 0 || dto.price > 1_000_000) throw new ForbiddenException('Invalid price');
+    if (dto.minPrice != null && (dto.minPrice < 0 || dto.minPrice > dto.price)) {
+      throw new ForbiddenException('Minimum price must be between 0 and asking price');
+    }
 
     // SSRF protection: validate webhook and agent URLs point to safe external hosts
     if (dto.agentEndpoint && !isSafeUrl(dto.agentEndpoint)) {
@@ -113,6 +117,7 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
         agentEndpoint: dto.agentEndpoint ? dto.agentEndpoint.trim().slice(0, 500) : null,
+        minPrice: dto.minPrice != null ? dto.minPrice : null,
         fileKey: dto.fileKey || null,
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
         fileSize: dto.fileSize || null,
@@ -174,6 +179,29 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
       where: { fileKey },
       select: { fileName: true, fileMimeType: true },
     });
+  }
+
+  async purchaseListing(listingId: string, buyerId: string, txHash: string, amountWei: string, negotiationId?: string) {
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true },
+    });
+    if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
+    if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot purchase your own listing');
+
+    // Check not already purchased
+    const existing = await this.prisma.marketPurchase.findFirst({ where: { listingId, buyerId } });
+    if (existing) return { success: true, alreadyPurchased: true, purchase: existing };
+
+    // Check tx hash not duplicate
+    const dupTx = await this.prisma.marketPurchase.findUnique({ where: { txHash } });
+    if (dupTx) throw new ForbiddenException('Transaction already recorded');
+
+    const purchase = await this.prisma.marketPurchase.create({
+      data: { txHash, amountWei, buyerId, listingId, negotiationId: negotiationId || null, verified: true },
+    });
+
+    return { success: true, purchase };
   }
 
   async deleteListing(id: string, userId: string) {

@@ -47,6 +47,15 @@ export class DmService {
     });
   }
 
+  /** System-initiated DM — no banned/length checks (internal use only) */
+  async sendSystemMessage(senderId: string, receiverId: string, content: string) {
+    if (senderId === receiverId) return null;
+    return this.prisma.directMessage.create({
+      data: { content: content.slice(0, 2000), senderId, receiverId },
+      include: { sender: { select: { id: true, username: true, avatarUrl: true } } },
+    });
+  }
+
   async getConversation(userId: string, peerId: string, take = 50) {
     const messages = await this.prisma.directMessage.findMany({
       where: {

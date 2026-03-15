@@ -32,6 +32,7 @@ interface CreateListingBody {
   type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
   price: number;
   currency?: string;
+  minPrice?: number;
   tags?: string[];
   repositoryId?: string;
   agentUrl?: string;
@@ -40,6 +41,12 @@ interface CreateListingBody {
   fileName?: string;
   fileSize?: number;
   fileMimeType?: string;
+}
+
+interface PurchaseListingBody {
+  txHash: string;
+  amountWei: string;
+  negotiationId?: string;
 }
 
 interface SendMessageBody {
@@ -149,6 +156,17 @@ export class MarketController {
       throw new BadRequestException('Invalid or unsafe agent endpoint URL');
     }
     return this.marketService.createListing(userId, body);
+  }
+
+  @Post(':id/purchase')
+  @HttpCode(HttpStatus.CREATED)
+  purchaseListing(
+    @Param('id') id: string,
+    @CurrentUser('id') buyerId: string,
+    @Body() body: PurchaseListingBody,
+  ) {
+    if (!body.txHash?.trim()) throw new BadRequestException('txHash required');
+    return this.marketService.purchaseListing(id, buyerId, body.txHash, body.amountWei || '0', body.negotiationId);
   }
 
   @Delete(':id')
