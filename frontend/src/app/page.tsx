@@ -4,8 +4,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { GeometricBg } from '@/components/ui/GeometricBg';
-import { SplineScene } from '@/components/ui/splite';
 import { Spotlight } from '@/components/ui/spotlight';
+import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
+import {
+  Sparkles,
+  Code2,
+  Bot,
+  Users,
+  Coins,
+  GitBranch,
+} from 'lucide-react';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -59,6 +67,76 @@ function ArrowIcon() {
     </svg>
   );
 }
+
+// ── Orbital timeline data ─────────────────────────────────────────────────────
+const ORBITAL_DATA = [
+  {
+    id: 1,
+    title: 'AI Assistant',
+    date: 'Live',
+    content: 'Powered by Google Gemini. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.',
+    category: 'AI',
+    icon: Sparkles,
+    relatedIds: [2, 3],
+    status: 'completed' as const,
+    energy: 95,
+  },
+  {
+    id: 2,
+    title: 'Code Repos',
+    date: 'Live',
+    content: 'Publish your GitHub repositories to the Bolty community. Offer free or paid access, get votes, and build your reputation.',
+    category: 'Dev',
+    icon: Code2,
+    relatedIds: [1, 5],
+    status: 'completed' as const,
+    energy: 90,
+  },
+  {
+    id: 3,
+    title: 'AI Agents',
+    date: 'Beta',
+    content: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.',
+    category: 'Agents',
+    icon: Bot,
+    relatedIds: [1, 4],
+    status: 'in-progress' as const,
+    energy: 75,
+  },
+  {
+    id: 4,
+    title: 'Community',
+    date: 'Live',
+    content: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, find collaborators.',
+    category: 'Social',
+    icon: Users,
+    relatedIds: [3, 5],
+    status: 'completed' as const,
+    energy: 85,
+  },
+  {
+    id: 5,
+    title: 'ETH Payments',
+    date: 'Live',
+    content: 'On-chain payments for locked repos and agent listings. Buyers pay directly to your wallet in ETH — no middleman.',
+    category: 'Payments',
+    icon: Coins,
+    relatedIds: [2, 6],
+    status: 'completed' as const,
+    energy: 80,
+  },
+  {
+    id: 6,
+    title: 'GitHub Sync',
+    date: 'Live',
+    content: 'Connect your GitHub account with one click. Sync repositories, track activity, and publish projects directly to the marketplace.',
+    category: 'Integration',
+    icon: GitBranch,
+    relatedIds: [2, 5],
+    status: 'completed' as const,
+    energy: 88,
+  },
+];
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const FEATURES = [
@@ -118,13 +196,6 @@ const STEPS = [
   { n: '03', title: 'Grow and earn',       desc: 'Get upvotes, build reputation, sell locked repos for ETH, and connect with buyers and collaborators.' },
 ];
 
-const STATS = [
-  { value: 'AI',        label: 'Google Gemini assistant' },
-  { value: 'WebSocket', label: 'Real-time messaging' },
-  { value: 'GitHub',    label: 'Native integration' },
-  { value: 'ETH',       label: 'On-chain payments' },
-];
-
 const FAQ = [
   { q: 'Is Bolty free to use?',            a: 'Yes, creating an account and publishing free repositories is completely free. You only pay if you want to purchase a locked repository from another developer.' },
   { q: 'How does the marketplace work?',   a: 'Developers list their bots, scripts, AI agents, and tools. Buyers browse listings and purchase access directly through the platform using ETH payments.' },
@@ -138,19 +209,19 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   return (
     <div
       className="border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer"
-      style={{ borderColor: open ? 'rgba(131,110,249,0.35)' : 'var(--border)', background: 'var(--bg-card)' }}
+      style={{ borderColor: open ? 'rgba(131,110,249,0.35)' : 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}
       onClick={() => setOpen(o => !o)}
     >
       <div className="flex items-center justify-between px-5 py-4">
-        <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>{q}</span>
+        <span className="text-sm font-medium text-zinc-200">{q}</span>
         <svg className={`w-4 h-4 text-monad-400 flex-shrink-0 ml-4 transition-transform duration-200 ${open ? 'rotate-45' : ''}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </div>
       {open && (
-        <div className="px-5 pb-4 text-sm leading-relaxed" style={{ color: 'var(--text-muted)', borderTop: '1px solid var(--border)' }}>
-          <p className="pt-4">{a}</p>
+        <div className="px-5 pb-4 text-sm leading-relaxed" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <p className="pt-4 text-zinc-400">{a}</p>
         </div>
       )}
     </div>
@@ -170,15 +241,14 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <div className="bg-page-community overflow-x-hidden">
+    <div className="bg-black overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative h-screen flex items-center bg-black overflow-hidden">
         <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
         <div className="max-w-7xl mx-auto px-8 w-full h-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
-            {/* Left content */}
-            <div className="relative z-10 flex flex-col justify-center">
+          <div className="flex items-center h-full">
+            <div className="relative z-10 flex flex-col justify-center max-w-2xl">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
                 Built for developers
               </p>
@@ -195,37 +265,35 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            {/* Right — 3D robot */}
-            <div className="relative h-full hidden md:block">
-              <SplineScene
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
-            </div>
           </div>
         </div>
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-4 py-24" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <Section>
-          <div className="text-center mb-14">
+          <div className="text-center mb-10">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
               Everything you need to build
             </h2>
-            <p className="text-base mt-3 max-w-xl mx-auto" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
               From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
             </p>
           </div>
         </Section>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Orbital timeline */}
+        <Section className="reveal-d1">
+          <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
+        </Section>
+
+        {/* Feature cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16">
           {FEATURES.map((f, i) => (
             <Section key={f.href} className={`reveal-d${i + 1}`}>
               <Link href={f.href} className="block h-full">
                 <div className={`feature-card h-full ${f.hoverBorder} group cursor-pointer relative overflow-hidden`}>
-                  {/* Hover glow */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
                     style={{ background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${f.glowColor} 0%, transparent 70%)` }} />
                   <div className={`feature-icon-wrap ${f.bg} border ${f.border} relative z-10`}>
@@ -233,7 +301,7 @@ export default function HomePage() {
                   </div>
                   <div className={`text-xs font-mono ${f.color} mb-2 opacity-70 relative z-10`}>{f.tag}</div>
                   <h3 className={`font-semibold text-sm mb-2 ${f.color} relative z-10`}>{f.title}</h3>
-                  <p className="text-xs leading-relaxed mb-4 relative z-10" style={{ color: 'var(--text-muted)' }}>{f.desc}</p>
+                  <p className="text-xs leading-relaxed mb-4 relative z-10 text-zinc-500">{f.desc}</p>
                   <div className={`text-xs ${f.color} opacity-60 group-hover:opacity-100 transition-opacity flex items-center gap-1 relative z-10`}>
                     <span>Explore</span>
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -248,8 +316,7 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid var(--border)' }}>
-        {/* Subtle background */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none opacity-40">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.06) 0%, transparent 70%)' }} />
@@ -258,7 +325,7 @@ export default function HomePage() {
           <Section>
             <div className="text-center mb-14">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
                 Up and running in minutes
               </h2>
             </div>
@@ -270,13 +337,13 @@ export default function HomePage() {
               <Section key={step.n} className={`reveal-d${i + 1}`}>
                 <div className="text-center">
                   <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5"
-                    style={{ background: 'var(--bg-card)', border: '1px solid rgba(131,110,249,0.2)' }}>
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(131,110,249,0.2)' }}>
                     <div className="absolute inset-0 rounded-2xl opacity-50"
                       style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.1) 0%, transparent 70%)' }} />
                     <span className="text-2xl font-black text-monad-400 font-mono relative z-10">{step.n}</span>
                   </div>
-                  <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text)' }}>{step.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{step.desc}</p>
+                  <h3 className="text-base font-semibold mb-2 text-white">{step.title}</h3>
+                  <p className="text-sm leading-relaxed text-zinc-500">{step.desc}</p>
                 </div>
               </Section>
             ))}
@@ -285,14 +352,14 @@ export default function HomePage() {
       </section>
 
       {/* ── CODE SHOWCASE ────────────────────────────────────────────────── */}
-      <section className="py-24 max-w-7xl mx-auto px-4">
+      <section className="py-24 max-w-7xl mx-auto px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <Section>
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Code marketplace</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5" style={{ color: 'var(--text)' }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
               Monetize your GitHub repositories
             </h2>
-            <p className="text-base leading-relaxed mb-6" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-base leading-relaxed mb-6 text-zinc-400">
               Publish any repository — public or private — with a free or paid price tag.
               Buyers pay in ETH directly to your wallet to unlock full access.
             </p>
@@ -303,7 +370,7 @@ export default function HomePage() {
                 'Automatic on-chain ETH payments',
                 'Community voting and discovery',
               ].map(item => (
-                <li key={item} className="flex items-center gap-3 text-sm" style={{ color: 'var(--text-muted)' }}>
+                <li key={item} className="flex items-center gap-3 text-sm text-zinc-400">
                   <span className="w-1.5 h-1.5 rounded-full bg-monad-400 flex-shrink-0" />
                   {item}
                 </li>
@@ -315,33 +382,30 @@ export default function HomePage() {
           </Section>
 
           <Section className="reveal-d2">
-            {/* Code card with glow */}
             <div className="relative group">
               <div className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"
                 style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.2), rgba(99,91,255,0.1))' }} />
-              <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid var(--border)', background: 'var(--bg-card)' }}>
-                {/* Window header */}
-                <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-elevated)' }}>
+              <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
                     <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
                     <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
                   </div>
-                  <span className="text-xs font-mono ml-2" style={{ color: 'var(--text-muted)' }}>repo_showcase.ts</span>
+                  <span className="text-xs font-mono ml-2 text-zinc-600">repo_showcase.ts</span>
                 </div>
-                {/* Code content */}
                 <div className="p-5 font-mono text-xs space-y-1.5" style={{ lineHeight: '1.8' }}>
-                  <div><span className="text-blue-400">const</span> <span className="text-monad-400">repo</span> <span style={{ color: 'var(--text-muted)' }}>= await</span> <span className="text-green-400">bolty.repos.publish</span><span style={{ color: 'var(--text-muted)' }}>{'({'}</span></div>
-                  <div className="pl-4"><span className="text-amber-400">name</span><span style={{ color: 'var(--text-muted)' }}>:</span> <span className="text-green-400">'my-ai-agent'</span><span style={{ color: 'var(--text-muted)' }}>,</span></div>
-                  <div className="pl-4"><span className="text-amber-400">price</span><span style={{ color: 'var(--text-muted)' }}>:</span> <span className="text-blue-400">0.05</span><span style={{ color: 'var(--text-muted)' }}>, </span><span className="text-zinc-600">// ETH</span></div>
-                  <div className="pl-4"><span className="text-amber-400">access</span><span style={{ color: 'var(--text-muted)' }}>:</span> <span className="text-green-400">'locked'</span><span style={{ color: 'var(--text-muted)' }}>,</span></div>
-                  <div className="pl-4"><span className="text-amber-400">visibility</span><span style={{ color: 'var(--text-muted)' }}>:</span> <span className="text-green-400">'public'</span><span style={{ color: 'var(--text-muted)' }}>,</span></div>
-                  <div><span style={{ color: 'var(--text-muted)' }}>{'}'}</span><span style={{ color: 'var(--text-muted)' }}>);</span></div>
-                  <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                  <div><span className="text-blue-400">const</span> <span className="text-monad-400">repo</span> <span className="text-zinc-500">= await</span> <span className="text-green-400">bolty.repos.publish</span><span className="text-zinc-500">{'({'}</span></div>
+                  <div className="pl-4"><span className="text-amber-400">name</span><span className="text-zinc-500">:</span> <span className="text-green-400">'my-ai-agent'</span><span className="text-zinc-500">,</span></div>
+                  <div className="pl-4"><span className="text-amber-400">price</span><span className="text-zinc-500">:</span> <span className="text-blue-400">0.05</span><span className="text-zinc-500">, </span><span className="text-zinc-700">// ETH</span></div>
+                  <div className="pl-4"><span className="text-amber-400">access</span><span className="text-zinc-500">:</span> <span className="text-green-400">'locked'</span><span className="text-zinc-500">,</span></div>
+                  <div className="pl-4"><span className="text-amber-400">visibility</span><span className="text-zinc-500">:</span> <span className="text-green-400">'public'</span><span className="text-zinc-500">,</span></div>
+                  <div><span className="text-zinc-500">{'}'}</span><span className="text-zinc-500">);</span></div>
+                  <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                     <span className="text-green-400">✓ </span>
                     <span className="text-monad-400">Published</span>
-                    <span style={{ color: 'var(--text-muted)' }}> · </span>
-                    <span style={{ color: 'var(--text-muted)' }}>0x3f8a...buyers can unlock</span>
+                    <span className="text-zinc-500"> · </span>
+                    <span className="text-zinc-500">0x3f8a...buyers can unlock</span>
                   </div>
                 </div>
               </div>
@@ -351,7 +415,7 @@ export default function HomePage() {
       </section>
 
       {/* ── AI SECTION ───────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
@@ -359,10 +423,10 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
           <Section>
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Built-in AI</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5" style={{ color: 'var(--text)' }}>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
               Ask, build, ship — faster
             </h2>
-            <p className="text-base leading-relaxed max-w-2xl mx-auto mb-10" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-base leading-relaxed max-w-2xl mx-auto mb-10 text-zinc-400">
               The Bolty AI assistant, powered by Google Gemini, is always one click away.
               Ask code questions, get architecture advice, or debug issues — without leaving the platform.
             </p>
@@ -373,12 +437,12 @@ export default function HomePage() {
                 { title: 'Debug assistance',  desc: 'Paste an error, get a clear explanation and fix suggestion immediately.' },
               ].map(item => (
                 <div key={item.title} className="rounded-xl p-4 text-left group hover:border-monad-500/30 transition-all duration-200"
-                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                   <div className="w-8 h-8 rounded-lg bg-monad-500/10 border border-monad-500/20 flex items-center justify-center mb-3">
                     <span className="w-2 h-2 rounded-full bg-monad-400" />
                   </div>
-                  <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>{item.title}</h4>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>{item.desc}</p>
+                  <h4 className="text-sm font-semibold mb-1 text-white">{item.title}</h4>
+                  <p className="text-xs leading-relaxed text-zinc-500">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -391,7 +455,7 @@ export default function HomePage() {
         <Section>
           <div className="text-center mb-12">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
-            <h2 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Common questions</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-white">Common questions</h2>
           </div>
           <div className="space-y-3">
             {FAQ.map((item) => <FAQItem key={item.q} {...item} />)}
@@ -400,7 +464,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid var(--border)' }}>
+      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <GeometricBg />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px]"
@@ -411,7 +475,6 @@ export default function HomePage() {
         </div>
         <Section>
           <div className="max-w-3xl mx-auto text-center relative z-10">
-            {/* Big logo */}
             <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-40"
@@ -429,7 +492,7 @@ export default function HomePage() {
                 Start building today.
               </span>
             </h2>
-            <p className="text-lg mb-10" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-lg mb-10 text-zinc-400">
               Join developers who are already publishing code, deploying agents, and growing their audience on Bolty.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -440,7 +503,7 @@ export default function HomePage() {
                 Explore marketplace
               </Link>
             </div>
-            <p className="text-xs mt-6" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mt-6 text-zinc-600">
               No credit card required. Connect with email or GitHub.
             </p>
           </div>

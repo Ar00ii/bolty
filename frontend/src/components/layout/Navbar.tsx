@@ -73,8 +73,8 @@ export function Navbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md"
       style={{
-        background: 'rgba(var(--bg-rgb, 9,9,11), 0.85)',
-        borderBottom: '1px solid var(--border)',
+        background: 'rgba(0,0,0,0.92)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,9 +90,8 @@ export function Navbar() {
             <span className="text-white font-bold text-base tracking-tight group-hover:text-monad-300 transition-colors">
               Bolty
             </span>
-            <span className="hidden sm:flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-md bg-monad-500/10 text-monad-400 font-medium">
-              alpha
-            </span>
+            <span className="hidden sm:block text-xs text-zinc-600 font-mono">—</span>
+            <span className="hidden sm:block text-xs text-zinc-500 font-mono">AI Developer Platform</span>
           </Link>
 
           {/* Desktop nav links */}
