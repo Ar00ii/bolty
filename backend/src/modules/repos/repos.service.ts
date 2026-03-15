@@ -94,26 +94,68 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     let allRepos: unknown[] = [];
 
     if (token) {
-      // Authenticated: paginate all repos (public + private + org)
-      let page = 1;
+      // First: check if token has 'repo' scope by making a lightweight call
       let needsReauth = false;
+      try {
+        const checkResp = await axios.get('https://api.github.com/user', {
+          headers,
+          timeout: 10000,
+        });
+        const scopes = (checkResp.headers?.['x-oauth-scopes'] as string) || '';
+        this.logger.log(`GitHub token scopes for ${githubLogin}: [${scopes}]`);
+
+        if (!scopes.split(',').map((s: string) => s.trim()).includes('repo')) {
+          this.logger.warn(`Token for ${githubLogin} lacks 'repo' scope. Revoking to force re-auth.`);
+          needsReauth = true;
+
+          // Revoke the old token via GitHub API so next OAuth gives fresh scopes
+          const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || 'Ov23liO79MvZtWDEdy2a';
+          const clientSecret = this.config.get<string>('GITHUB_CLIENT_SECRET') || 'b9e08f25b6e46d0b012e7be6183e38bb0d43d662';
+          try {
+            await axios.delete(`https://api.github.com/applications/${clientId}/token`, {
+              auth: { username: clientId, password: clientSecret },
+              data: { access_token: token },
+              headers: { Accept: 'application/vnd.github.v3+json' },
+              timeout: 10000,
+            });
+            this.logger.log(`Revoked old GitHub token for ${githubLogin}`);
+          } catch (revokeErr) {
+            this.logger.warn(`Failed to revoke GitHub token: ${revokeErr}`);
+          }
+
+          // Clear stored token since it's now revoked
+          if (userId) {
+            await this.prisma.user.update({
+              where: { id: userId },
+              data: { githubToken: null },
+            });
+          }
+        }
+      } catch {
+        // Token might be invalid, continue with what we can get
+      }
+
+      if (needsReauth) {
+        // Return empty list with reauth notice — token was revoked
+        return [{
+          _bolty_reauth: true,
+          name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
+          id: -1,
+          full_name: 'reauth',
+          html_url: '',
+          stargazers_count: 0,
+          forks_count: 0,
+        }] as unknown[];
+      }
+
+      // Token has correct scopes — fetch all repos
+      let page = 1;
       while (true) {
         const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
         const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
-
-        // Check token scopes on first page
-        if (page === 1) {
-          const scopes = (response.headers?.['x-oauth-scopes'] as string) || '';
-          this.logger.log(`GitHub token scopes for ${githubLogin}: [${scopes}]`);
-          this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
-          // If token only has public_repo but not repo, private repos won't show
-          if (!scopes.includes('repo')) {
-            this.logger.warn(`Token for ${githubLogin} lacks 'repo' scope — only public repos visible. User needs to re-authorize.`);
-            needsReauth = true;
-          }
-        }
+        this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
 
         const batch = response.data;
         if (!batch || batch.length === 0) break;
@@ -121,19 +163,6 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         allRepos = allRepos.concat(batch);
         if (batch.length < 100) break;
         page++;
-      }
-
-      // If we got repos but token lacks full scope, add a flag
-      if (needsReauth && allRepos.length > 0) {
-        (allRepos as unknown as Array<Record<string, unknown>>).push({
-          _bolty_notice: true,
-          name: '⚠️ Solo repos públicos — reconecta GitHub para ver repos privados',
-          id: -1,
-          full_name: 'notice',
-          html_url: '',
-          stargazers_count: 0,
-          forks_count: 0,
-        });
       }
     } else {
       // No token: use public API (only returns public repos)
