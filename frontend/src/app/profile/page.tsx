@@ -534,7 +534,7 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="bg-page-profile max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
+    <div className="max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
 
       {/* ── Hero header card ─────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"

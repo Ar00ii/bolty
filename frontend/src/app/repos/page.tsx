@@ -270,7 +270,7 @@ export default function ReposPage() {
   };
 
   return (
-    <div className="bg-page-repos max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8">
       <DottedSurface />
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2" style={{color:"var(--text)"}}>Repository Showcase</h1>
