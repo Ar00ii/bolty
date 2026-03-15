@@ -56,11 +56,13 @@ module.exports = {
         'slide-up': 'slideUp 0.3s ease-out',
         'pulse-neon': 'pulseNeon 2s ease-in-out infinite',
         'cursor-blink': 'blink 1s step-end infinite',
-        'fade-in': 'fadeIn 0.4s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'pulse-neon': 'pulseNeon 2s ease-in-out infinite',
+        'spotlight': 'spotlight 2s ease .75s 1 forwards',
       },
       keyframes: {
+        spotlight: {
+          '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
+          '100%': { opacity: '1', transform: 'translate(-50%, -40%) scale(1)' },
+        },
         blink: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },

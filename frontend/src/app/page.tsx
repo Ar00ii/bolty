@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { GeometricBg } from '@/components/ui/GeometricBg';
+import { SplineScene } from '@/components/ui/splite';
+import { Spotlight } from '@/components/ui/spotlight';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -265,6 +267,44 @@ export default function HomePage() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 3D INTERACTIVE ───────────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 py-16">
+        <Section>
+          <div
+            className="w-full h-[500px] rounded-2xl bg-black/[0.96] relative overflow-hidden border"
+            style={{ borderColor: 'rgba(131,110,249,0.2)' }}
+          >
+            <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />
+            <div className="flex h-full">
+              {/* Left content */}
+              <div className="flex-1 p-8 relative z-10 flex flex-col justify-center">
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">
+                  Built for developers
+                </p>
+                <h2 className="text-4xl md:text-5xl font-black bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight">
+                  Publish.<br />Collaborate.<br />Earn.
+                </h2>
+                <p className="mt-4 text-neutral-400 max-w-sm text-sm leading-relaxed">
+                  Bolty brings together code, AI agents, and community in one developer-first platform. Share your work and grow your audience.
+                </p>
+                <div className="mt-8">
+                  <Link href="/auth" className="btn-primary px-6 py-2.5 rounded-xl inline-flex items-center gap-2 text-sm">
+                    Get started <ArrowIcon />
+                  </Link>
+                </div>
+              </div>
+              {/* Right — 3D scene */}
+              <div className="flex-1 relative hidden md:block">
+                <SplineScene
+                  scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+                  className="w-full h-full"
+                />
+              </div>
+            </div>
+          </div>
+        </Section>
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
