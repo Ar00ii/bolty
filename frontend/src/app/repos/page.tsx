@@ -85,10 +85,21 @@ export default function ReposPage() {
   }, [fetchRepos]);
 
   const [ghNeedsReauth, setGhNeedsReauth] = useState(false);
+  const [ghNeedsConnect, setGhNeedsConnect] = useState(false);
+
+  const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`;
 
   const loadGhRepos = async () => {
     setShowPublish(true);
     setGhNeedsReauth(false);
+    setGhNeedsConnect(false);
+
+    // If user hasn't linked GitHub at all, show connect prompt
+    if (!user?.githubLogin) {
+      setGhNeedsConnect(true);
+      return;
+    }
+
     try {
       // Clear cache first to always get fresh data from GitHub
       await api.delete('/repos/github/cache').catch(() => {});
@@ -300,7 +311,7 @@ export default function ReposPage() {
               </button>
             ))}
           </div>
-          {isAuthenticated && user?.githubLogin && (
+          {isAuthenticated && (
             <button onClick={loadGhRepos} className="btn-neon text-xs py-1.5 px-4">
               + publish
             </button>
@@ -322,6 +333,17 @@ export default function ReposPage() {
               [close]
             </button>
           </div>
+          {ghNeedsConnect && (
+            <div className="mb-3 p-3 border border-neon-400/30 bg-neon-400/5 rounded text-sm text-neon-400 font-mono text-center">
+              <p className="mb-3">Conecta tu cuenta de GitHub para publicar repos.</p>
+              <a
+                href={GITHUB_OAUTH_URL}
+                className="inline-block px-4 py-2 bg-neon-400/20 border border-neon-400/40 rounded hover:bg-neon-400/30 transition-colors text-neon-300 text-xs"
+              >
+                Conectar GitHub
+              </a>
+            </div>
+          )}
           {ghNeedsReauth && (
             <div className="mb-3 p-3 border border-yellow-500/30 bg-yellow-500/5 rounded text-sm text-yellow-400 font-mono text-center">
               <p className="mb-2">Tu token de GitHub no tiene acceso a repos privados.</p>
