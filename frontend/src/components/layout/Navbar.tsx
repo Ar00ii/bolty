@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import { clsx } from 'clsx';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 const NAV_LINKS = [
   { href: '/chat',   label: 'Community' },
@@ -81,10 +82,10 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-monad-500/15 border border-monad-500/25 flex items-center justify-center transition-all group-hover:bg-monad-500/25">
-              <svg className="w-4 h-4 text-monad-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-              </svg>
+            <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-110">
+              <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-60 blur-md transition-opacity duration-300"
+                style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)' }} />
+              <BoltyLogo size={28} color="#836EF9" className="relative z-10" />
             </div>
             <span className="text-white font-bold text-base tracking-tight group-hover:text-monad-300 transition-colors">
               Bolty
