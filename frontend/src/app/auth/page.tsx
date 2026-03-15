@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
+import { Waves } from '@/components/ui/wave-background';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -669,10 +670,17 @@ export default function AuthPage() {
       {/* -- Right side: Brand panel ----------------------------------------- */}
       <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center"
         style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, var(--bg-elevated) 100%)', borderLeft: '1px solid var(--border)' }}>
+        {/* Wave background - lila, very transparent, behind content */}
+        <Waves
+          strokeColor="rgba(131,110,249,0.6)"
+          backgroundColor="transparent"
+          opacity={0.15}
+          pointerSize={0}
+        />
         {/* Background rings */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-8"
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full"
           style={{ border: '1px solid rgba(131,110,249,0.1)' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-5"
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
           style={{ border: '1px solid rgba(131,110,249,0.08)' }} />
         <BrandPanel />
       </div>

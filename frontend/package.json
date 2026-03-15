@@ -23,6 +23,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^2.10.3",
+    "simplex-noise": "^4.0.3",
     "socket.io-client": "^4.6.2",
     "tailwind-merge": "^3.5.0",
     "zustand": "^4.5.0"
