@@ -257,6 +257,7 @@ export class AuthController {
       login: req.user.login,
       avatar_url: req.user.avatar_url,
       bio: req.user.bio,
+      accessToken: req.user.accessToken,
     });
 
     res.cookie('access_token', tokens.accessToken, {

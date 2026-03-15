@@ -87,6 +87,8 @@ export default function ReposPage() {
   const loadGhRepos = async () => {
     setShowPublish(true);
     try {
+      // Clear cache first to always get fresh data from GitHub
+      await api.delete('/repos/github/cache').catch(() => {});
       const data = await api.get<GitHubRepo[]>('/repos/github');
       setGhRepos(Array.isArray(data) ? data : []);
     } catch {

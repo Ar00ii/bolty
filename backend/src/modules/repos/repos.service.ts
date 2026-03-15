@@ -67,8 +67,18 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
 
   // ── GitHub API fetch (server-side, no SSRF) ───────────────────────────────
 
-  async fetchGitHubRepos(githubLogin: string, accessToken?: string): Promise<unknown[]> {
-    const cacheKey = `gh_repos:${githubLogin}:${accessToken ? 'auth' : 'public'}`;
+  async fetchGitHubRepos(githubLogin: string, accessToken?: string, userId?: string): Promise<unknown[]> {
+    // If no cookie token, try to get it from the database
+    let token = accessToken;
+    if (!token && userId) {
+      const userRecord = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { githubToken: true },
+      });
+      token = userRecord?.githubToken ?? undefined;
+    }
+
+    const cacheKey = `gh_repos:${githubLogin}:${token ? 'auth' : 'public'}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached) as unknown[];
 
@@ -77,17 +87,17 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       'User-Agent': 'Bolty-Platform/1.0',
     };
 
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     let allRepos: unknown[] = [];
 
-    if (accessToken) {
-      // Authenticated: paginate through all repos including private ones
+    if (token) {
+      // Authenticated: paginate all repos including org repos
       let page = 1;
       while (true) {
-        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
+        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&affiliation=owner,collaborator,organization_member`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
         const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
@@ -95,13 +105,11 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         if (!batch || batch.length === 0) break;
 
         allRepos = allRepos.concat(batch);
-
-        // Stop if this page had fewer than 100 results (last page)
         if (batch.length < 100) break;
         page++;
       }
     } else {
-      // Public: paginate through all public repos
+      // Public: paginate all public repos
       let page = 1;
       while (true) {
         const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=100&page=${page}&sort=updated&type=public`;
@@ -112,7 +120,6 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         if (!batch || batch.length === 0) break;
 
         allRepos = allRepos.concat(batch);
-
         if (batch.length < 100) break;
         page++;
       }
@@ -122,6 +129,13 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     await this.redis.set(cacheKey, JSON.stringify(allRepos), 300);
 
     return allRepos;
+  }
+
+  async clearGitHubReposCache(githubLogin: string): Promise<void> {
+    await Promise.all([
+      this.redis.del(`gh_repos:${githubLogin}:auth`),
+      this.redis.del(`gh_repos:${githubLogin}:public`),
+    ]);
   }
 
   // ── Publish repository to platform ───────────────────────────────────────

@@ -137,14 +137,24 @@ export class ReposController {
   @UseGuards(JwtAuthGuard)
   @Get('github')
   async getMyGitHubRepos(
-    @CurrentUser() user: { githubLogin: string | null },
+    @CurrentUser() user: { id: string; githubLogin: string | null },
     @Req() req: Request,
   ) {
     if (!user.githubLogin) {
       return { error: 'GitHub account not linked' };
     }
     const ghToken = req.cookies?.['gh_token'];
-    return this.reposService.fetchGitHubRepos(user.githubLogin, ghToken);
+    return this.reposService.fetchGitHubRepos(user.githubLogin, ghToken, user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('github/cache')
+  async clearGitHubCache(
+    @CurrentUser() user: { githubLogin: string | null },
+  ) {
+    if (!user.githubLogin) return { ok: true };
+    await this.reposService.clearGitHubReposCache(user.githubLogin);
+    return { ok: true };
   }
 
   @Public()

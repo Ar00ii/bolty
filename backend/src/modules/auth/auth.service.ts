@@ -443,6 +443,7 @@ export class AuthService {
     login: string;
     avatar_url: string;
     bio?: string;
+    accessToken?: string;
   }): Promise<AuthTokens> {
     let user = await this.prisma.user.findUnique({
       where: { githubId: githubProfile.id },
@@ -457,6 +458,7 @@ export class AuthService {
           username: githubProfile.login,
           avatarUrl: githubProfile.avatar_url,
           bio: githubProfile.bio,
+          githubToken: githubProfile.accessToken ?? null,
           userTag,
         },
       });
@@ -467,6 +469,7 @@ export class AuthService {
         data: {
           githubLogin: githubProfile.login,
           avatarUrl: githubProfile.avatar_url,
+          githubToken: githubProfile.accessToken ?? undefined,
           lastLoginAt: new Date(),
         },
       });
