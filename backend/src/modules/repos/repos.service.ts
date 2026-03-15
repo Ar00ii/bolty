@@ -72,20 +72,6 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     const cached = await this.redis.get(cacheKey);
     if (cached) return JSON.parse(cached) as unknown[];
 
-    let url: string;
-
-    if (accessToken) {
-      // Authenticated: fetch all repos including private ones
-      url = `https://api.github.com/user/repos?per_page=100&sort=updated&type=all`;
-    } else {
-      url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=30&sort=updated&type=public`;
-    }
-
-    // Validate URL to prevent SSRF
-    if (!isSafeUrl(url)) {
-      throw new BadRequestException('Invalid GitHub request');
-    }
-
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'Bolty-Platform/1.0',
@@ -95,13 +81,47 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       headers['Authorization'] = `Bearer ${accessToken}`;
     }
 
-    const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
-    const repos = response.data;
+    let allRepos: unknown[] = [];
+
+    if (accessToken) {
+      // Authenticated: paginate through all repos including private ones
+      let page = 1;
+      while (true) {
+        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
+        if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
+
+        const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
+        const batch = response.data;
+        if (!batch || batch.length === 0) break;
+
+        allRepos = allRepos.concat(batch);
+
+        // Stop if this page had fewer than 100 results (last page)
+        if (batch.length < 100) break;
+        page++;
+      }
+    } else {
+      // Public: paginate through all public repos
+      let page = 1;
+      while (true) {
+        const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=100&page=${page}&sort=updated&type=public`;
+        if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
+
+        const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
+        const batch = response.data;
+        if (!batch || batch.length === 0) break;
+
+        allRepos = allRepos.concat(batch);
+
+        if (batch.length < 100) break;
+        page++;
+      }
+    }
 
     // Cache for 5 minutes
-    await this.redis.set(cacheKey, JSON.stringify(repos), 300);
+    await this.redis.set(cacheKey, JSON.stringify(allRepos), 300);
 
-    return repos;
+    return allRepos;
   }
 
   // ── Publish repository to platform ───────────────────────────────────────
