@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { TerminalCard } from '@/components/ui/TerminalCard';
+import { DottedSurface } from '@/components/ui/dotted-surface';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -270,6 +271,7 @@ export default function ReposPage() {
 
   return (
     <div className="bg-page-repos max-w-7xl mx-auto px-4 py-8">
+      <DottedSurface />
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-2" style={{color:"var(--text)"}}>Repository Showcase</h1>
         <p className="text-terminal-muted text-sm font-mono">

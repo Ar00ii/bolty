@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { TerminalCard } from '@/components/ui/TerminalCard';
+import { DottedSurface } from '@/components/ui/dotted-surface';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -445,6 +446,7 @@ export default function MarketPage() {
 
   return (
     <div className="bg-page-market max-w-7xl mx-auto px-4 py-8">
+      <DottedSurface />
       {/* Negotiation modal */}
       {negotiatingListing && user && (
         <NegotiationModal
