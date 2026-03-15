@@ -325,12 +325,12 @@ export default function ReposPage() {
           {ghNeedsReauth && (
             <div className="mb-3 p-3 border border-yellow-500/30 bg-yellow-500/5 rounded text-sm text-yellow-400 font-mono text-center">
               <p className="mb-2">Tu token de GitHub no tiene acceso a repos privados.</p>
-              <p className="mb-3 text-xs text-yellow-500">Se ha revocado el token viejo. Haz clic abajo para reconectar con permisos completos.</p>
+              <p className="mb-3 text-xs text-yellow-500">Haz clic para reconectar con permisos de repos privados.</p>
               <a
-                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1'}/auth/github`}
+                href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
                 className="inline-block px-4 py-2 bg-yellow-500/20 border border-yellow-500/40 rounded hover:bg-yellow-500/30 transition-colors text-yellow-300 text-xs"
               >
-                Reconectar GitHub
+                Reconectar GitHub (con repos privados)
               </a>
             </div>
           )}
