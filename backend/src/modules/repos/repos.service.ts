@@ -94,13 +94,21 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     let allRepos: unknown[] = [];
 
     if (token) {
-      // Authenticated: paginate all repos including org repos
+      // Authenticated: paginate all repos (public + private + org)
       let page = 1;
       while (true) {
-        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&affiliation=owner,collaborator,organization_member`;
+        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
         const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
+
+        // Log the scopes the token has so we can debug permission issues
+        const scopes = response.headers?.['x-oauth-scopes'];
+        if (page === 1) {
+          this.logger.log(`GitHub token scopes for ${githubLogin}: ${scopes || 'none'}`);
+          this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
+        }
+
         const batch = response.data;
         if (!batch || batch.length === 0) break;
 
@@ -109,10 +117,11 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         page++;
       }
     } else {
-      // Public: paginate all public repos
+      // No token: use public API (only returns public repos)
       let page = 1;
+      this.logger.warn(`No GitHub token for ${githubLogin} — falling back to public API`);
       while (true) {
-        const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=100&page=${page}&sort=updated&type=public`;
+        const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=100&page=${page}&sort=updated`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
         const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
