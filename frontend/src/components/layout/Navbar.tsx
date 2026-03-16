@@ -6,15 +6,72 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, X, Menu, UserPlus } from 'lucide-react';
+import { X, Menu, UserPlus, ChevronDown, Users, MessageSquare, GitBranch, Bot, User, Globe, Star, Flame, UserCheck, ShoppingBag, Store, Code2, Package, Cpu, Settings, Wallet } from 'lucide-react';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
-const NAV_LINKS = [
-  { href: '/chat',    label: 'Community' },
-  { href: '/dm',      label: 'Messages', badge: true },
-  { href: '/repos',   label: 'Repos' },
-  { href: '/market',  label: 'Agents' },
-  { href: '/profile', label: 'Profile', authRequired: true },
+interface SubItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+}
+
+interface NavLink {
+  href: string;
+  label: string;
+  badge?: boolean;
+  authRequired?: boolean;
+  sub: SubItem[];
+}
+
+const NAV_LINKS: NavLink[] = [
+  {
+    href: '/chat',
+    label: 'Community',
+    sub: [
+      { href: '/chat',           label: 'Global Chat',  icon: Globe },
+      { href: '/chat?tab=trending', label: 'Trending',  icon: Flame },
+      { href: '/chat?tab=discover', label: 'Discover',  icon: Star },
+    ],
+  },
+  {
+    href: '/dm',
+    label: 'Messages',
+    badge: true,
+    sub: [
+      { href: '/dm?cat=all',     label: 'All',          icon: MessageSquare },
+      { href: '/dm?cat=friends', label: 'Friends',      icon: UserCheck },
+      { href: '/dm?cat=sellers', label: 'Sellers',      icon: ShoppingBag },
+      { href: '/dm?cat=vendors', label: 'Vendors',      icon: Store },
+    ],
+  },
+  {
+    href: '/repos',
+    label: 'Repos',
+    sub: [
+      { href: '/repos',          label: 'Browse All',   icon: Code2 },
+      { href: '/repos?tab=mine', label: 'My Repos',     icon: GitBranch },
+      { href: '/repos?tab=starred', label: 'Starred',   icon: Star },
+    ],
+  },
+  {
+    href: '/market',
+    label: 'Agents',
+    sub: [
+      { href: '/market',         label: 'Marketplace',  icon: Package },
+      { href: '/market?tab=mine',label: 'My Agents',    icon: Cpu },
+      { href: '/market?tab=deploy', label: 'Deploy',    icon: Bot },
+    ],
+  },
+  {
+    href: '/profile',
+    label: 'Profile',
+    authRequired: true,
+    sub: [
+      { href: '/profile',        label: 'My Profile',   icon: User },
+      { href: '/profile?tab=settings', label: 'Settings', icon: Settings },
+      { href: '/profile?tab=wallet',   label: 'Wallet',   icon: Wallet },
+    ],
+  },
 ];
 
 function SunIcon() {
@@ -70,14 +127,13 @@ function useUnreadDMs(isAuthenticated: boolean) {
   return count;
 }
 
-const MotionLink = motion.create(Link);
-
 export function Navbar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const unreadDMs = useUnreadDMs(isAuthenticated);
 
   const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
@@ -91,7 +147,14 @@ export function Navbar() {
   // Close menu on route change
   useEffect(() => {
     setMenuOpen(false);
+    setExpandedItem(null);
   }, [pathname]);
+
+  const toggleExpand = (href: string) => {
+    setExpandedItem(prev => prev === href ? null : href);
+  };
+
+  const visibleLinks = NAV_LINKS.filter(link => !link.authRequired || isAuthenticated);
 
   return (
     <>
@@ -107,7 +170,6 @@ export function Navbar() {
 
             {/* Left: Menu toggle + Logo */}
             <div className="flex items-center gap-4">
-              {/* Menu toggle button */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-200 ${menuOpen ? 'border-monad-400/60 bg-monad-500/15 text-monad-400' : 'border-zinc-700 bg-white/5 text-zinc-300 hover:border-monad-400/50 hover:bg-monad-500/10 hover:text-monad-400'}`}
@@ -116,7 +178,6 @@ export function Navbar() {
                 {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
 
-              {/* Logo */}
               <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
                 <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-110">
                   <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-60 blur-md transition-opacity duration-300"
@@ -133,7 +194,6 @@ export function Navbar() {
 
             {/* Right side */}
             <div className="flex items-center gap-2">
-              {/* Theme toggle */}
               <button
                 onClick={toggleTheme}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all duration-150"
@@ -191,7 +251,7 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Full-screen menu overlay */}
+      {/* Slide-out menu */}
       <AnimatePresence>
         {menuOpen && (
           <>
@@ -205,14 +265,18 @@ export function Navbar() {
               onClick={() => setMenuOpen(false)}
             />
 
-            {/* Menu panel — slides in from top-left */}
+            {/* Menu panel */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-16 left-0 z-50 pt-10 pb-12 px-6 min-h-[calc(100vh-4rem)] w-72"
-              style={{ background: 'rgba(4,4,8,0.97)', borderRight: '1px solid rgba(255,255,255,0.06)' }}
+              className="fixed top-16 left-0 z-50 pb-12 overflow-y-auto w-72"
+              style={{
+                background: 'rgba(4,4,8,0.97)',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                maxHeight: 'calc(100vh - 4rem)',
+              }}
             >
               {/* Close */}
               <button
@@ -222,76 +286,134 @@ export function Navbar() {
                 <X className="w-4 h-4" />
               </button>
 
-              <p className="text-[10px] font-mono text-zinc-700 tracking-widest uppercase mb-8">Navigation</p>
+              <div className="pt-8 px-4">
+                <p className="text-[10px] font-mono text-zinc-700 tracking-widest uppercase mb-6 px-2">Navigation</p>
 
-              <div className="flex flex-col gap-3">
-                {NAV_LINKS.filter(link => !link.authRequired || isAuthenticated).map((link, index) => {
-                  const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
-                  const hasBadge = link.badge && isAuthenticated && unreadDMs > 0;
-                  return (
-                    <motion.div
-                      key={link.href}
-                      initial="initial"
-                      whileHover="hover"
-                      className="flex items-center gap-2 group/nav"
-                      style={{ animationDelay: `${index * 60}ms` }}
-                    >
-                      <motion.div
-                        variants={{
-                          initial: { x: '-100%', opacity: 0 },
-                          hover: { x: 0, opacity: 1 },
-                        }}
-                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                        style={{ color: '#836ef9' }}
-                      >
-                        <ArrowRight strokeWidth={3} className="w-6 h-6" />
-                      </motion.div>
-                      <MotionLink
-                        href={link.href}
-                        variants={{
-                          initial: { x: -24 },
-                          hover: { x: 0, color: '#836ef9' },
-                        }}
-                        transition={{ duration: 0.25, ease: 'easeOut' }}
-                        className="relative text-3xl font-bold no-underline"
-                        style={{ color: isActive ? '#836ef9' : '#71717a' }}
-                      >
-                        {link.label}
-                        {hasBadge && (
-                          <span className="absolute -top-1 -right-5 min-w-[16px] h-4 px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-                            {unreadDMs > 99 ? '99+' : unreadDMs}
-                          </span>
-                        )}
-                      </MotionLink>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                <div className="flex flex-col">
+                  {visibleLinks.map((link) => {
+                    const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+                    const hasBadge = link.badge && isAuthenticated && unreadDMs > 0;
+                    const isExpanded = expandedItem === link.href;
 
-              {isAuthenticated && (
-                <div className="mt-12 pt-6 border-t border-zinc-800/60 space-y-2">
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-3 px-2 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all"
-                  >
-                    {user?.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={user.avatarUrl} alt="" className="w-6 h-6 rounded-full border border-zinc-700" />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold">
-                        {displayLabel[0]?.toUpperCase()}
+                    return (
+                      <div key={link.href}>
+                        {/* Main nav item row */}
+                        <div className="flex items-center group">
+                          {/* Label — navigates */}
+                          <Link
+                            href={link.href}
+                            className="flex-1 flex items-center gap-2 px-2 py-2.5 rounded-lg transition-all duration-150 hover:bg-white/5"
+                          >
+                            <span
+                              className="text-2xl font-bold transition-colors duration-150"
+                              style={{ color: isActive ? '#836ef9' : '#71717a' }}
+                            >
+                              {link.label}
+                            </span>
+                            {hasBadge && (
+                              <span className="min-w-[16px] h-4 px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                                {unreadDMs > 99 ? '99+' : unreadDMs}
+                              </span>
+                            )}
+                          </Link>
+
+                          {/* Expand toggle */}
+                          <button
+                            onClick={() => toggleExpand(link.href)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-monad-400 hover:bg-white/5 transition-all flex-shrink-0"
+                          >
+                            <motion.div
+                              animate={{ rotate: isExpanded ? 180 : 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </motion.div>
+                          </button>
+                        </div>
+
+                        {/* Sub-items */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.22, ease: 'easeInOut' }}
+                              className="overflow-hidden"
+                            >
+                              <div className="ml-3 pl-3 mb-2 flex flex-col gap-0.5" style={{ borderLeft: '1px solid rgba(131,110,249,0.2)' }}>
+                                {link.sub.map((sub) => {
+                                  const SubIcon = sub.icon;
+                                  const subActive = pathname === sub.href;
+                                  return (
+                                    <Link
+                                      key={sub.href}
+                                      href={sub.href}
+                                      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm transition-all duration-150 hover:bg-monad-500/8 group/sub"
+                                      style={{ color: subActive ? '#836ef9' : '#52525b' }}
+                                    >
+                                      <SubIcon
+                                        className="w-3.5 h-3.5 flex-shrink-0 transition-colors group-hover/sub:text-monad-400"
+                                        strokeWidth={1.5}
+                                      />
+                                      <span className="transition-colors group-hover/sub:text-zinc-300">
+                                        {sub.label}
+                                      </span>
+                                    </Link>
+                                  );
+                                })}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                    )}
-                    <span>Profile</span>
-                  </Link>
-                  <button
-                    onClick={() => { logout(); setMenuOpen(false); }}
-                    className="flex items-center px-2 py-2 rounded-lg text-sm text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all w-full text-left"
-                  >
-                    Sign out
-                  </button>
+                    );
+                  })}
                 </div>
-              )}
+
+                {/* Auth section */}
+                {isAuthenticated ? (
+                  <div className="mt-6 pt-6 border-t border-zinc-800/60 space-y-1">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-3 px-2 py-2 rounded-lg text-sm text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all"
+                    >
+                      {user?.avatarUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatarUrl} alt="" className="w-6 h-6 rounded-full border border-zinc-700" />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold">
+                          {displayLabel[0]?.toUpperCase()}
+                        </div>
+                      )}
+                      <span>{displayLabel}</span>
+                    </Link>
+                    <button
+                      onClick={() => { logout(); setMenuOpen(false); }}
+                      className="flex items-center px-2 py-2 rounded-lg text-sm text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all w-full text-left"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-6 pt-6 border-t border-zinc-800/60 space-y-2">
+                    <Link
+                      href="/auth"
+                      className="flex items-center gap-2 w-full btn-primary text-sm px-4 py-2.5 rounded-lg justify-center"
+                    >
+                      <GitHubIcon className="w-4 h-4" />
+                      Sign in with GitHub
+                    </Link>
+                    <Link
+                      href="/auth?tab=register"
+                      className="flex items-center gap-2 w-full text-sm px-4 py-2.5 rounded-lg justify-center border border-zinc-800 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200 transition-all"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Create account
+                    </Link>
+                  </div>
+                )}
+              </div>
             </motion.div>
           </>
         )}
