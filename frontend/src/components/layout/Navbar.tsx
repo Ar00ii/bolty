@@ -6,37 +6,31 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X, Menu, UserPlus,
-  Users, MessageSquare, GitBranch, Bot, User,
-  Globe, Flame, Star, UserCheck, ShoppingBag, Store,
-  Code2, Package, Cpu, Settings, Wallet, ChevronRight,
-  LogOut,
+import { ArrowRight, X, Menu, UserPlus, ChevronRight,
+  Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
+  Code2, GitBranch, Package, Cpu, Bot, User, Settings, Wallet, LogOut,
+  type LucideIcon,
 } from 'lucide-react';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 interface SubItem {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: LucideIcon;
 }
 
-interface NavSection {
+interface NavLink {
   href: string;
   label: string;
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   badge?: boolean;
   authRequired?: boolean;
-  accent: string;
   sub: SubItem[];
 }
 
-const NAV_SECTIONS: NavSection[] = [
+const NAV_LINKS: NavLink[] = [
   {
     href: '/chat',
     label: 'Community',
-    icon: Users,
-    accent: '#836EF9',
     sub: [
       { href: '/chat',              label: 'Global Chat',  icon: Globe },
       { href: '/chat?tab=trending', label: 'Trending',     icon: Flame },
@@ -46,48 +40,42 @@ const NAV_SECTIONS: NavSection[] = [
   {
     href: '/dm',
     label: 'Messages',
-    icon: MessageSquare,
     badge: true,
-    accent: '#22d3ee',
     sub: [
-      { href: '/dm',               label: 'All',          icon: MessageSquare },
-      { href: '/dm?cat=friends',   label: 'Friends',      icon: UserCheck },
-      { href: '/dm?cat=sellers',   label: 'Sellers',      icon: ShoppingBag },
-      { href: '/dm?cat=vendors',   label: 'Vendors',      icon: Store },
+      { href: '/dm',               label: 'All',           icon: MessageSquare },
+      { href: '/dm?cat=friends',   label: 'Friends',       icon: UserCheck },
+      { href: '/dm?cat=sellers',   label: 'Sellers',       icon: ShoppingBag },
+      { href: '/dm?cat=vendors',   label: 'Vendors',       icon: Store },
     ],
   },
   {
     href: '/repos',
     label: 'Repos',
-    icon: GitBranch,
-    accent: '#4ade80',
     sub: [
-      { href: '/repos',              label: 'Browse All',  icon: Code2 },
-      { href: '/repos?tab=mine',     label: 'My Repos',    icon: GitBranch },
-      { href: '/repos?tab=starred',  label: 'Starred',     icon: Star },
+      { href: '/repos',             label: 'Browse All',   icon: Code2 },
+      { href: '/repos?tab=mine',    label: 'My Repos',     icon: GitBranch },
+      { href: '/repos?tab=starred', label: 'Starred',      icon: Star },
     ],
   },
   {
     href: '/market',
     label: 'Agents',
-    icon: Bot,
-    accent: '#f59e0b',
     sub: [
-      { href: '/market',             label: 'Marketplace', icon: Package },
-      { href: '/market?tab=mine',    label: 'My Agents',   icon: Cpu },
-      { href: '/market?tab=deploy',  label: 'Deploy',      icon: Bot },
+      { href: '/market',             label: 'Marketplace',  icon: Package },
+      { href: '/market?tab=mine',    label: 'My Agents',    icon: Cpu },
+      { href: '/market?tab=deploy',  label: 'Deploy',       icon: Bot },
+      { href: '/market?tab=explore', label: 'Explore All',  icon: Globe },
+      { href: '/market?tab=top',     label: 'Top Rated',    icon: Star },
     ],
   },
   {
     href: '/profile',
     label: 'Profile',
-    icon: User,
     authRequired: true,
-    accent: '#f472b6',
     sub: [
-      { href: '/profile',                  label: 'My Profile', icon: User },
-      { href: '/profile?tab=settings',     label: 'Settings',   icon: Settings },
-      { href: '/profile?tab=wallet',       label: 'Wallet',     icon: Wallet },
+      { href: '/profile',              label: 'My Profile',  icon: User },
+      { href: '/profile?tab=settings', label: 'Settings',    icon: Settings },
+      { href: '/profile?tab=wallet',   label: 'Wallet',      icon: Wallet },
     ],
   },
 ];
@@ -115,6 +103,8 @@ function GitHubIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+const MotionLink = motion.create(Link);
 
 function useUnreadDMs(isAuthenticated: boolean) {
   const [count, setCount] = useState(0);
@@ -153,18 +143,26 @@ export function Navbar() {
 
   useEffect(() => { setMenuOpen(false); setExpandedItem(null); }, [pathname]);
 
-  const visibleSections = NAV_SECTIONS.filter(s => !s.authRequired || isAuthenticated);
+  const visibleLinks = NAV_LINKS.filter(link => !link.authRequired || isAuthenticated);
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-black/92 backdrop-blur-md border-b border-white/[0.06]' : ''}`}>
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled ? 'bg-black/92 backdrop-blur-md border-b border-white/[0.06]' : ''
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-200 ${menuOpen ? 'border-monad-400/60 bg-monad-500/15 text-monad-400' : 'border-zinc-700 bg-white/5 text-zinc-300 hover:border-monad-400/50 hover:bg-monad-500/10 hover:text-monad-400'}`}
+                className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-200 ${
+                  menuOpen
+                    ? 'border-monad-400/60 bg-monad-500/15 text-monad-400'
+                    : 'border-zinc-700 bg-white/5 text-zinc-300 hover:border-monad-400/50 hover:bg-monad-500/10 hover:text-monad-400'
+                }`}
                 aria-label="Toggle menu"
               >
                 {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -183,7 +181,11 @@ export function Navbar() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button onClick={toggleTheme} className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all duration-150" aria-label="Toggle theme">
+              <button
+                onClick={toggleTheme}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all duration-150"
+                aria-label="Toggle theme"
+              >
                 {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
               </button>
 
@@ -200,18 +202,26 @@ export function Navbar() {
                     )}
                     <span className="text-zinc-400 text-sm hidden sm:block group-hover:text-zinc-200 transition-colors">{displayLabel}</span>
                   </Link>
-                  <button onClick={logout} className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all">
+                  <button
+                    onClick={logout}
+                    className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all"
+                  >
                     Sign out
                   </button>
                 </>
               ) : (
                 <div className="flex items-center gap-2">
-                  <Link href="/auth?tab=register" className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all">
+                  <Link
+                    href="/auth?tab=register"
+                    className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all"
+                  >
                     <UserPlus className="w-3.5 h-3.5" />
                     Register
                   </Link>
-                  <Link href="/auth" className="flex items-center gap-1.5 btn-primary text-sm px-3 py-2 rounded-lg">
-                    <GitHubIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                  <Link
+                    href="/auth"
+                    className="flex items-center gap-1.5 btn-primary text-sm px-3 py-2 rounded-lg"
+                  >
                     Sign in
                   </Link>
                 </div>
@@ -228,88 +238,79 @@ export function Navbar() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
               onClick={() => setMenuOpen(false)}
             />
 
-            <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed top-0 left-0 z-50 flex flex-col w-72 h-screen overflow-y-auto"
-              style={{ background: 'rgba(6,6,10,0.98)', borderRight: '1px solid rgba(255,255,255,0.07)' }}
+            <motion.div
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -40 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed top-16 left-0 z-50 pb-10 px-6 w-72 overflow-y-auto"
+              style={{
+                background: 'rgba(4,4,8,0.97)',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                maxHeight: 'calc(100vh - 4rem)',
+              }}
             >
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4 flex-shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                <Link href="/" onClick={() => setMenuOpen(false)} className="flex items-center gap-2">
-                  <BoltyLogo size={22} color="#836EF9" />
-                  <span className="text-white font-bold text-sm">Bolty</span>
-                </Link>
-                <button onClick={() => setMenuOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+              {/* Close */}
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
-              {/* Nav sections */}
-              <nav className="flex-1 px-3 py-4 space-y-1">
-                {visibleSections.map((section) => {
-                  const SectionIcon = section.icon;
-                  const isActive = pathname === section.href || pathname.startsWith(section.href + '/');
-                  const isExpanded = expandedItem === section.href;
-                  const hasBadge = section.badge && isAuthenticated && unreadDMs > 0;
+              <p className="text-[10px] font-mono text-zinc-700 tracking-widest uppercase mb-6 pt-8">Navigation</p>
+
+              {/* Nav links — original bold style + expandable sub-items */}
+              <div className="flex flex-col gap-1">
+                {visibleLinks.map((link, index) => {
+                  const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+                  const hasBadge = link.badge && isAuthenticated && unreadDMs > 0;
+                  const isExpanded = expandedItem === link.href;
 
                   return (
-                    <div key={section.href}>
-                      {/* Section header row */}
-                      <div
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group ${
-                          isActive
-                            ? 'bg-white/5'
-                            : 'hover:bg-white/[0.04]'
-                        }`}
-                        onClick={() => setExpandedItem(isExpanded ? null : section.href)}
-                      >
-                        {/* Icon bubble */}
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-150"
-                          style={{
-                            background: isActive || isExpanded
-                              ? `${section.accent}20`
-                              : 'rgba(255,255,255,0.05)',
-                            border: `1px solid ${isActive || isExpanded ? section.accent + '40' : 'rgba(255,255,255,0.08)'}`,
-                          }}
-                        >
-                          <SectionIcon
-                            className="w-4 h-4"
-                            strokeWidth={1.5}
-                            style={{ color: isActive || isExpanded ? section.accent : '#52525b' }}
-                          />
-                        </div>
-
-                        {/* Label */}
-                        <span
-                          className="flex-1 text-sm font-semibold transition-colors"
-                          style={{ color: isActive ? '#e4e4e7' : isExpanded ? '#a1a1aa' : '#71717a' }}
-                        >
-                          {section.label}
-                        </span>
-
-                        {/* Badge */}
-                        {hasBadge && (
-                          <span className="min-w-[18px] h-[18px] px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                            {unreadDMs > 99 ? '99+' : unreadDMs}
-                          </span>
-                        )}
-
-                        {/* Chevron */}
+                    <div key={link.href}>
+                      {/* Main item row */}
+                      <div className="flex items-center gap-1 group/nav">
+                        {/* Arrow indicator */}
                         <motion.div
-                          animate={{ rotate: isExpanded ? 90 : 0 }}
-                          transition={{ duration: 0.18 }}
-                          className="flex-shrink-0"
+                          animate={{ x: isActive || isExpanded ? 0 : -24, opacity: isActive || isExpanded ? 1 : 0 }}
+                          whileHover={{ x: 0, opacity: 1 }}
+                          transition={{ duration: 0.2, ease: 'easeOut' }}
+                          style={{ color: '#836ef9', minWidth: 24 }}
                         >
-                          <ChevronRight className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-500 transition-colors" />
+                          <ArrowRight strokeWidth={3} className="w-5 h-5" />
                         </motion.div>
+
+                        {/* Label — navigates to section */}
+                        <MotionLink
+                          href={link.href}
+                          animate={{ x: isActive || isExpanded ? 0 : -24 }}
+                          whileHover={{ x: 0, color: '#836ef9' }}
+                          transition={{ duration: 0.2, ease: 'easeOut' }}
+                          className="relative flex-1 text-3xl font-bold no-underline leading-tight py-1"
+                          style={{ color: isActive ? '#836ef9' : '#71717a' }}
+                        >
+                          {link.label}
+                          {hasBadge && (
+                            <span className="absolute -top-1 -right-5 min-w-[16px] h-4 px-1 bg-monad-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                              {unreadDMs > 99 ? '99+' : unreadDMs}
+                            </span>
+                          )}
+                        </MotionLink>
+
+                        {/* Expand/collapse toggle */}
+                        <button
+                          onClick={() => setExpandedItem(isExpanded ? null : link.href)}
+                          className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-700 hover:text-monad-400 hover:bg-white/5 transition-all flex-shrink-0"
+                        >
+                          <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.18 }}>
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </motion.div>
+                        </button>
                       </div>
 
                       {/* Sub-items */}
@@ -319,31 +320,27 @@ export function Navbar() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2, ease: 'easeInOut' }}
+                            transition={{ duration: 0.22, ease: 'easeInOut' }}
                             className="overflow-hidden"
                           >
-                            <div className="mt-0.5 mb-1 ml-4 pl-4 space-y-0.5" style={{ borderLeft: `1px solid ${section.accent}25` }}>
-                              {section.sub.map((sub) => {
+                            <div
+                              className="ml-8 mt-1 mb-3 flex flex-col gap-0.5 pl-3"
+                              style={{ borderLeft: '1px solid rgba(131,110,249,0.2)' }}
+                            >
+                              {link.sub.map((sub) => {
                                 const SubIcon = sub.icon;
                                 const subActive = pathname === sub.href;
                                 return (
                                   <Link
                                     key={sub.href}
                                     href={sub.href}
-                                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-all duration-150 group/sub"
-                                    style={{ color: subActive ? section.accent : '#52525b' }}
                                     onClick={() => setMenuOpen(false)}
+                                    className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all duration-150 group/sub"
+                                    style={{ color: subActive ? '#836ef9' : '#52525b' }}
                                   >
-                                    <SubIcon
-                                      className="w-3.5 h-3.5 flex-shrink-0 transition-colors"
-                                      strokeWidth={1.5}
-                                    />
-                                    <span className="font-medium group-hover/sub:text-zinc-300 transition-colors">
-                                      {sub.label}
-                                    </span>
-                                    {subActive && (
-                                      <span className="ml-auto w-1 h-1 rounded-full flex-shrink-0" style={{ background: section.accent }} />
-                                    )}
+                                    <SubIcon className="w-3.5 h-3.5 flex-shrink-0 group-hover/sub:text-monad-400 transition-colors" strokeWidth={1.5} />
+                                    <span className="group-hover/sub:text-zinc-300 transition-colors">{sub.label}</span>
+                                    {subActive && <span className="ml-auto w-1 h-1 rounded-full bg-monad-400 flex-shrink-0" />}
                                   </Link>
                                 );
                               })}
@@ -354,16 +351,16 @@ export function Navbar() {
                     </div>
                   );
                 })}
-              </nav>
+              </div>
 
-              {/* Footer — auth */}
-              <div className="px-3 py-4 flex-shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              {/* Auth footer */}
+              <div className="mt-10 pt-6 border-t border-zinc-800/60">
                 {isAuthenticated ? (
                   <div className="space-y-1">
                     <Link
                       href="/profile"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
+                      className="flex items-center gap-3 px-2 py-2.5 rounded-xl hover:bg-white/5 transition-all group"
                     >
                       {user?.avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -380,21 +377,20 @@ export function Navbar() {
                     </Link>
                     <button
                       onClick={() => { logout(); setMenuOpen(false); }}
-                      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-xs text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all"
+                      className="flex items-center gap-2 px-2 py-2 rounded-lg text-xs text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-all w-full text-left"
                     >
                       <LogOut className="w-3.5 h-3.5" strokeWidth={1.5} />
                       Sign out
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     <Link
                       href="/auth"
                       onClick={() => setMenuOpen(false)}
-                      className="flex items-center justify-center gap-2 w-full btn-primary text-sm px-4 py-2.5 rounded-xl"
+                      className="flex items-center justify-center gap-2 w-full btn-primary text-sm px-4 py-2.5 rounded-xl font-semibold"
                     >
-                      <GitHubIcon className="w-4 h-4" />
-                      Sign in with GitHub
+                      Sign in
                     </Link>
                     <Link
                       href="/auth?tab=register"
@@ -407,7 +403,7 @@ export function Navbar() {
                   </div>
                 )}
               </div>
-            </motion.aside>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
