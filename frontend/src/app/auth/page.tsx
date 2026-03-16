@@ -105,12 +105,11 @@ function Field({ label, type, value, onChange, placeholder, autoComplete, showTo
 function BrandPanel() {
   return (
     <div className="flex flex-col items-center justify-center text-center px-12">
-      {/* New logo with glow */}
-      <div className="relative mb-8" style={{ filter: 'drop-shadow(0 0 32px rgba(131,110,249,0.55))' }}>
-        <BoltyLogo size={120} />
+      {/* Logo */}
+      <div className="relative mb-10" style={{ filter: 'drop-shadow(0 0 48px rgba(131,110,249,0.65))' }}>
+        <BoltyLogo size={220} />
       </div>
 
-      <h2 className="text-3xl font-black tracking-tight text-white mb-4">Bolty</h2>
       <p className="text-zinc-400 text-base leading-relaxed max-w-sm mb-10">
         The developer platform for publishing AI agents, monetizing code, and connecting with a global community.
       </p>
@@ -349,9 +348,8 @@ export default function AuthPage() {
         <div className="w-full max-w-md">
 
           {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <BoltyLogo size={32} />
-            <span className="font-bold text-lg text-white">Bolty</span>
+          <div className="flex items-center mb-8 lg:hidden">
+            <BoltyLogo size={40} />
           </div>
 
           <div className="mb-8">

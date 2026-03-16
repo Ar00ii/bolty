@@ -8,7 +8,7 @@ import { StaggeredMenu } from '@/components/layout/StaggeredMenu';
 import { FloatingAIChat } from '@/components/ui/FloatingAIChat';
 import { Footer } from '@/components/ui/footer-section';
 import { useUnreadDMs } from '@/lib/hooks/useUnreadDMs';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Home } from 'lucide-react';
 
 // Must match StaggeredMenu CSS panel width
 const PANEL_WIDTH = 'clamp(280px, 40vw, 420px)';
@@ -84,19 +84,44 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         }}
       >
         <main className="flex-1 relative">
-          {/* "← Home" back button on inner pages */}
+          {/* Home button on inner pages */}
           {!isHome && (
             <div style={{ position: 'fixed', top: '1.1rem', left: '4.5rem', zIndex: 60 }}>
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-200
-                           px-2.5 py-1.5 rounded-lg border border-zinc-800/60 hover:border-zinc-600
-                           bg-zinc-900/80 backdrop-blur-sm transition-all duration-150"
+                aria-label="Go to home"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 50,
+                  height: 50,
+                  borderRadius: '50%',
+                  background: 'rgba(10,10,16,0.85)',
+                  border: '2px solid rgba(255,255,255,0.13)',
+                  color: '#d4d4d8',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+                  transition: 'all 0.22s ease',
+                  textDecoration: 'none',
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.background = 'rgba(131,110,249,0.18)';
+                  el.style.borderColor = '#836ef9';
+                  el.style.color = '#836ef9';
+                  el.style.boxShadow = '0 0 24px rgba(131,110,249,0.35)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLAnchorElement;
+                  el.style.background = 'rgba(10,10,16,0.85)';
+                  el.style.borderColor = 'rgba(255,255,255,0.13)';
+                  el.style.color = '#d4d4d8';
+                  el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+                }}
               >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-                Home
+                <Home size={20} />
               </Link>
             </div>
           )}
