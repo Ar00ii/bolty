@@ -23,14 +23,8 @@ function shell(title: string, preheader: string, body: string): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding-bottom:28px;">
-              <a href="https://bolty.dev" style="text-decoration:none;">
-                <table cellpadding="0" cellspacing="0" role="presentation">
-                  <tr>
-                    <td style="background:#09090b;border-radius:10px;padding:8px 20px;">
-                      <span style="color:#836EF9;font-size:22px;font-weight:700;letter-spacing:-0.5px;font-family:'Courier New',monospace;">Bolty</span>
-                    </td>
-                  </tr>
-                </table>
+              <a href="https://bolty-neon.vercel.app" style="text-decoration:none;">
+                <img src="https://bolty-neon.vercel.app/bolty-logo.png" alt="Bolty" width="64" height="64" style="display:block;border:0;outline:none;" />
               </a>
             </td>
           </tr>
