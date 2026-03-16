@@ -9,8 +9,9 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, type LucideIcon,
+  UserPlus, Menu, X, type LucideIcon,
 } from 'lucide-react';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
 
@@ -29,7 +30,7 @@ interface NavItem {
   sub: SubItem[];
 }
 
-// ── Data ───────────────────────────────────────────────────────────────────
+// ── Nav data ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: NavItem[] = [
   {
@@ -65,11 +66,11 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Agents',
     href: '/market',
     sub: [
-      { href: '/market',              label: 'Marketplace', icon: Package },
-      { href: '/market?tab=mine',     label: 'My Agents',   icon: Cpu },
-      { href: '/market?tab=deploy',   label: 'Deploy',      icon: Bot },
-      { href: '/market?tab=explore',  label: 'Explore All', icon: Globe },
-      { href: '/market?tab=top',      label: 'Top Rated',   icon: Star },
+      { href: '/market',             label: 'Marketplace', icon: Package },
+      { href: '/market?tab=mine',    label: 'My Agents',   icon: Cpu },
+      { href: '/market?tab=deploy',  label: 'Deploy',      icon: Bot },
+      { href: '/market?tab=explore', label: 'Explore All', icon: Globe },
+      { href: '/market?tab=top',     label: 'Top Rated',   icon: Star },
     ],
   },
 ];
@@ -78,9 +79,9 @@ const PROFILE_ITEM: NavItem = {
   label: 'Profile',
   href: '/profile',
   sub: [
-    { href: '/profile',              label: 'My Profile', icon: UserIcon },
-    { href: '/profile?tab=settings', label: 'Settings',   icon: Settings },
-    { href: '/profile?tab=wallet',   label: 'Wallet',     icon: Wallet },
+    { href: '/profile',               label: 'My Profile', icon: UserIcon },
+    { href: '/profile?tab=settings',  label: 'Settings',   icon: Settings },
+    { href: '/profile?tab=wallet',    label: 'Wallet',     icon: Wallet },
   ],
 };
 
@@ -89,6 +90,7 @@ const PROFILE_ITEM: NavItem = {
 interface StaggeredMenuProps {
   open: boolean;
   onClose: () => void;
+  onToggle: () => void;
   isAuthenticated: boolean;
   user?: User | null;
   logout: () => void;
@@ -100,6 +102,7 @@ interface StaggeredMenuProps {
 export function StaggeredMenu({
   open,
   onClose,
+  onToggle,
   isAuthenticated,
   user,
   logout,
@@ -108,18 +111,15 @@ export function StaggeredMenu({
   const pathname = usePathname();
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
-  const panelRef    = useRef<HTMLElement>(null);
-  const preLayersRef = useRef<HTMLDivElement>(null);
+  const panelRef       = useRef<HTMLElement>(null);
+  const preLayersRef   = useRef<HTMLDivElement>(null);
   const preLayerElsRef = useRef<HTMLElement[]>([]);
-  const openTlRef   = useRef<gsap.core.Timeline | null>(null);
-  const closeTweenRef = useRef<gsap.core.Tween | null>(null);
-  const busyRef     = useRef(false);
+  const openTlRef      = useRef<gsap.core.Timeline | null>(null);
+  const closeTweenRef  = useRef<gsap.core.Tween | null>(null);
+  const busyRef        = useRef(false);
 
   const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
-
-  const visibleItems = isAuthenticated
-    ? [...NAV_ITEMS, PROFILE_ITEM]
-    : NAV_ITEMS;
+  const visibleItems = isAuthenticated ? [...NAV_ITEMS, PROFILE_ITEM] : NAV_ITEMS;
 
   // Close on route change
   useEffect(() => {
@@ -128,49 +128,41 @@ export function StaggeredMenu({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  // Setup initial positions
+  // Initial positions
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const panel = panelRef.current;
-      const preContainer = preLayersRef.current;
+      const pre   = preLayersRef.current;
       if (!panel) return;
-
-      let preLayers: HTMLElement[] = [];
-      if (preContainer) {
-        preLayers = Array.from(preContainer.querySelectorAll<HTMLElement>('.sm-prelayer'));
-      }
-      preLayerElsRef.current = preLayers;
-      gsap.set([panel, ...preLayers], { xPercent: -100 });
+      const layers = pre ? Array.from(pre.querySelectorAll<HTMLElement>('.sm-prelayer')) : [];
+      preLayerElsRef.current = layers;
+      gsap.set([panel, ...layers], { xPercent: -100 });
     });
     return () => ctx.revert();
   }, []);
 
-  // Build & play open timeline
   const playOpen = useCallback(() => {
     if (busyRef.current) return;
     busyRef.current = true;
 
-    const panel = panelRef.current;
+    const panel  = panelRef.current;
     const layers = preLayerElsRef.current;
     if (!panel) { busyRef.current = false; return; }
 
     openTlRef.current?.kill();
     closeTweenRef.current?.kill();
 
-    const itemEls   = Array.from(panel.querySelectorAll<HTMLElement>('.sm-panel-itemLabel'));
-    const numEls    = Array.from(panel.querySelectorAll<HTMLElement>('.sm-panel-list[data-numbering] .sm-panel-item'));
-    const socialTitle = panel.querySelector<HTMLElement>('.sm-socials-title');
-    const socialLinks = Array.from(panel.querySelectorAll<HTMLElement>('.sm-socials-link'));
+    const itemEls      = Array.from(panel.querySelectorAll<HTMLElement>('.sm-panel-itemLabel'));
+    const numEls       = Array.from(panel.querySelectorAll<HTMLElement>('.sm-panel-list[data-numbering] .sm-panel-item'));
+    const socialTitle  = panel.querySelector<HTMLElement>('.sm-socials-title');
+    const socialLinks  = Array.from(panel.querySelectorAll<HTMLElement>('.sm-socials-link'));
 
-    if (itemEls.length)  gsap.set(itemEls,  { yPercent: 140, rotate: 8 });
-    if (numEls.length)   gsap.set(numEls,   { '--sm-num-opacity': 0 });
-    if (socialTitle)     gsap.set(socialTitle, { opacity: 0 });
-    if (socialLinks.length) gsap.set(socialLinks, { y: 20, opacity: 0 });
+    if (itemEls.length)     gsap.set(itemEls,     { yPercent: 140, rotate: 8 });
+    if (numEls.length)      gsap.set(numEls,      { '--sm-num-opacity': 0 });
+    if (socialTitle)        gsap.set(socialTitle,  { opacity: 0 });
+    if (socialLinks.length) gsap.set(socialLinks,  { y: 20, opacity: 0 });
 
-    const tl = gsap.timeline({
-      paused: true,
-      onComplete: () => { busyRef.current = false; },
-    });
+    const tl = gsap.timeline({ paused: true, onComplete: () => { busyRef.current = false; } });
 
     layers.forEach((el, i) => {
       tl.fromTo(el, { xPercent: -100 }, { xPercent: 0, duration: 0.48, ease: 'power4.out' }, i * 0.07);
@@ -180,24 +172,13 @@ export function StaggeredMenu({
     tl.fromTo(panel, { xPercent: -100 }, { xPercent: 0, duration: 0.62, ease: 'power4.out' }, panelStart);
 
     if (itemEls.length) {
-      tl.to(itemEls, {
-        yPercent: 0, rotate: 0, duration: 0.9, ease: 'power4.out',
-        stagger: { each: 0.08, from: 'start' },
-      }, panelStart + 0.12);
+      tl.to(itemEls, { yPercent: 0, rotate: 0, duration: 0.9, ease: 'power4.out', stagger: { each: 0.08 } }, panelStart + 0.12);
     }
     if (numEls.length) {
-      tl.to(numEls, {
-        duration: 0.5, ease: 'power2.out', '--sm-num-opacity': 1,
-        stagger: { each: 0.07, from: 'start' },
-      }, panelStart + 0.18);
+      tl.to(numEls, { duration: 0.5, ease: 'power2.out', '--sm-num-opacity': 1, stagger: { each: 0.07 } }, panelStart + 0.18);
     }
-    if (socialTitle) tl.to(socialTitle, { opacity: 1, duration: 0.4, ease: 'power2.out' }, panelStart + 0.4);
-    if (socialLinks.length) {
-      tl.to(socialLinks, {
-        y: 0, opacity: 1, duration: 0.45, ease: 'power3.out',
-        stagger: { each: 0.07 },
-      }, panelStart + 0.44);
-    }
+    if (socialTitle)        tl.to(socialTitle,  { opacity: 1, duration: 0.4, ease: 'power2.out' }, panelStart + 0.4);
+    if (socialLinks.length) tl.to(socialLinks,  { y: 0, opacity: 1, duration: 0.45, ease: 'power3.out', stagger: { each: 0.07 } }, panelStart + 0.44);
 
     openTlRef.current = tl;
     tl.play(0);
@@ -215,191 +196,227 @@ export function StaggeredMenu({
     });
   }, []);
 
-  // React to open state changes
   useEffect(() => {
     if (open) playOpen();
     else      playClose();
   }, [open, playOpen, playClose]);
 
-  const toggleExpand = (href: string) => {
+  const toggleExpand = (href: string) =>
     setExpandedItem(prev => prev === href ? null : href);
-  };
 
   return (
-    <div
-      className="staggered-menu-wrapper fixed-wrapper"
-      aria-modal={open || undefined}
-      style={{ '--sm-accent': '#836ef9' } as React.CSSProperties}
-      data-position="left"
-      data-open={open || undefined}
-      aria-hidden={!open}
-    >
-      {/* Pre-layers */}
-      <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
-        <div className="sm-prelayer" style={{ background: '#1a1240' }} />
-        <div className="sm-prelayer" style={{ background: '#2d1a6e' }} />
-        <div className="sm-prelayer" style={{ background: '#4c2fcf' }} />
-      </div>
-
-      {/* Main panel */}
-      <aside
-        ref={panelRef}
-        id="bolty-nav-panel"
-        className="staggered-menu-panel"
-        role="navigation"
-        aria-label="Main navigation"
-        aria-hidden={!open}
+    <>
+      {/* ── Always-visible header: logo + toggle ─────────────────────────── */}
+      <header
+        className="staggered-menu-header"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 60,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '1rem 1.5rem',
+          background: 'transparent',
+          pointerEvents: 'none',
+        }}
       >
-        <div className="sm-panel-inner">
-          <p className="sm-panel-title">Navigation</p>
+        {/* Logo */}
+        <Link
+          href="/"
+          style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
+          onClick={() => open && onClose()}
+        >
+          <BoltyLogo size={36} />
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em' }}>
+            Bolty
+          </span>
+        </Link>
 
-          <ul
-            className="sm-panel-list"
-            role="list"
-            data-numbering={true || undefined}
-          >
-            {visibleItems.map((item) => {
-              const isActive   = pathname === item.href || pathname.startsWith(item.href + '/');
-              const isExpanded = expandedItem === item.href;
-              const hasBadge   = item.badge && isAuthenticated && unreadDMs > 0;
+        {/* Toggle button */}
+        <button
+          onClick={onToggle}
+          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-expanded={open}
+          style={{
+            pointerEvents: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            borderRadius: 8,
+            border: `1px solid ${open ? 'rgba(131,110,249,0.6)' : 'rgba(255,255,255,0.12)'}`,
+            background: open ? 'rgba(131,110,249,0.12)' : 'rgba(255,255,255,0.05)',
+            color: open ? '#836ef9' : '#a1a1aa',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {open ? <X size={16} /> : <Menu size={16} />}
+        </button>
+      </header>
 
-              return (
-                <li key={item.href} className="sm-panel-itemWrap">
-                  {/* Main label row */}
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <Link
-                      href={item.href}
-                      className="sm-panel-item"
-                      data-active={isActive || undefined}
-                      data-expanded={isExpanded || undefined}
-                      onClick={() => onClose()}
-                      aria-label={`Go to ${item.label}`}
-                    >
-                      <span className="sm-panel-itemLabel">{item.label}</span>
-                      {hasBadge && (
-                        <span style={{
-                          position: 'absolute', top: '0.2em', right: '1.6em',
-                          minWidth: 16, height: 16, padding: '0 4px',
-                          background: '#836ef9', color: '#fff',
-                          fontSize: 10, fontWeight: 700, borderRadius: 9999,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          letterSpacing: 0,
-                        }}>
-                          {unreadDMs > 99 ? '99+' : unreadDMs}
-                        </span>
-                      )}
-                      <span className="sm-item-chevron" aria-hidden="true">›</span>
-                    </Link>
-                    {/* Expand toggle — separate from the link */}
-                    <button
-                      onClick={(e) => { e.preventDefault(); toggleExpand(item.href); }}
-                      aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
-                      style={{
-                        background: 'transparent', border: 'none', cursor: 'pointer',
-                        color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.15)',
-                        padding: '0.25rem 0.3rem', flexShrink: 0,
-                        fontSize: '0.7rem', lineHeight: 1,
-                        transition: 'color 0.15s ease',
-                        transform: isExpanded ? 'rotate(90deg)' : 'none',
-                        transformOrigin: '50% 50%',
-                      }}
-                    >
-                      ❯
-                    </button>
-                  </div>
+      {/* ── Panel wrapper (fixed, pointer-events: none on root) ──────────── */}
+      <div
+        className="staggered-menu-wrapper fixed-wrapper"
+        style={{ '--sm-accent': '#836ef9' } as React.CSSProperties}
+        data-position="left"
+        data-open={open || undefined}
+        aria-hidden={!open}
+        /* pointer-events: none by default — panel has pointer-events: auto */
+      >
+        {/* Pre-layers */}
+        <div ref={preLayersRef} className="sm-prelayers" aria-hidden="true">
+          <div className="sm-prelayer" style={{ background: '#1a1240' }} />
+          <div className="sm-prelayer" style={{ background: '#2d1a6e' }} />
+          <div className="sm-prelayer" style={{ background: '#4c2fcf' }} />
+        </div>
 
-                  {/* Sub-items */}
-                  {isExpanded && (
-                    <ul className="sm-sub-list" role="list">
-                      {item.sub.map((sub) => {
-                        const SubIcon  = sub.icon;
-                        const subActive = pathname === sub.href;
-                        return (
-                          <li key={sub.href}>
-                            <Link
-                              href={sub.href}
-                              className="sm-sub-link"
-                              data-active={subActive || undefined}
-                              onClick={() => onClose()}
-                            >
-                              <SubIcon style={{ width: 13, height: 13, flexShrink: 0 }} strokeWidth={1.5} />
-                              {sub.label}
-                              {subActive && <span className="sm-sub-dot" />}
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+        {/* Main panel */}
+        <aside
+          ref={panelRef}
+          id="bolty-nav-panel"
+          className="staggered-menu-panel"
+          role="navigation"
+          aria-label="Main navigation"
+          aria-hidden={!open}
+        >
+          <div className="sm-panel-inner">
+            <p className="sm-panel-title">Navigation</p>
 
-          {/* Socials */}
-          <div className="sm-socials" aria-label="Social links">
-            <h3 className="sm-socials-title">Socials</h3>
-            <ul className="sm-socials-list" role="list">
-              {[
-                { label: 'Twitter',  href: 'https://twitter.com/boltynetwork' },
-                { label: 'GitHub',   href: 'https://github.com/boltynetwork' },
-                { label: 'Discord',  href: 'https://discord.gg/bolty' },
-              ].map(s => (
-                <li key={s.label}>
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="sm-socials-link"
-                  >
-                    {s.label}
-                  </a>
-                </li>
-              ))}
+            <ul className="sm-panel-list" role="list" data-numbering={true || undefined}>
+              {visibleItems.map((item) => {
+                const isActive   = pathname === item.href || pathname.startsWith(item.href + '/');
+                const isExpanded = expandedItem === item.href;
+                const hasBadge   = item.badge && isAuthenticated && unreadDMs > 0;
+
+                return (
+                  <li key={item.href} className="sm-panel-itemWrap">
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <Link
+                        href={item.href}
+                        className="sm-panel-item"
+                        data-active={isActive || undefined}
+                        onClick={() => onClose()}
+                        aria-label={`Go to ${item.label}`}
+                      >
+                        <span className="sm-panel-itemLabel">{item.label}</span>
+                        {hasBadge && (
+                          <span style={{
+                            position: 'absolute', top: '0.2em', right: '1.6em',
+                            minWidth: 16, height: 16, padding: '0 4px',
+                            background: '#836ef9', color: '#fff',
+                            fontSize: 10, fontWeight: 700, borderRadius: 9999,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            {unreadDMs > 99 ? '99+' : unreadDMs}
+                          </span>
+                        )}
+                        <span className="sm-item-chevron" aria-hidden="true">›</span>
+                      </Link>
+                      <button
+                        onClick={() => toggleExpand(item.href)}
+                        aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
+                        style={{
+                          background: 'transparent', border: 'none', cursor: 'pointer',
+                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.15)',
+                          padding: '0.25rem 0.3rem', flexShrink: 0, fontSize: '0.7rem',
+                          transition: 'color 0.15s ease, transform 0.18s ease',
+                          transform: isExpanded ? 'rotate(90deg)' : 'none',
+                          transformOrigin: '50% 50%',
+                        }}
+                      >
+                        ❯
+                      </button>
+                    </div>
+
+                    {isExpanded && (
+                      <ul className="sm-sub-list" role="list">
+                        {item.sub.map((sub) => {
+                          const SubIcon   = sub.icon;
+                          const subActive = pathname === sub.href;
+                          return (
+                            <li key={sub.href}>
+                              <Link
+                                href={sub.href}
+                                className="sm-sub-link"
+                                data-active={subActive || undefined}
+                                onClick={() => onClose()}
+                              >
+                                <SubIcon style={{ width: 13, height: 13, flexShrink: 0 }} strokeWidth={1.5} />
+                                {sub.label}
+                                {subActive && <span className="sm-sub-dot" />}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
-          </div>
-        </div>
 
-        {/* Auth footer */}
-        <div className="sm-auth-footer">
-          {isAuthenticated ? (
-            <>
-              <Link href="/profile" className="sm-user-row" onClick={() => onClose()}>
-                {user?.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt="" className="sm-user-avatar" />
-                ) : (
-                  <div className="sm-user-avatar-placeholder">
-                    {displayLabel[0]?.toUpperCase()}
+            {/* Socials */}
+            <div className="sm-socials" aria-label="Social links">
+              <h3 className="sm-socials-title">Socials</h3>
+              <ul className="sm-socials-list" role="list">
+                {[
+                  { label: 'Twitter',  href: 'https://twitter.com/boltynetwork' },
+                  { label: 'GitHub',   href: 'https://github.com/boltynetwork' },
+                  { label: 'Discord',  href: 'https://discord.gg/bolty' },
+                ].map(s => (
+                  <li key={s.label}>
+                    <a href={s.href} target="_blank" rel="noopener noreferrer" className="sm-socials-link">
+                      {s.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Auth footer */}
+          <div className="sm-auth-footer">
+            {isAuthenticated ? (
+              <>
+                <Link href="/profile" className="sm-user-row" onClick={() => onClose()}>
+                  {user?.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={user.avatarUrl} alt="" className="sm-user-avatar" />
+                  ) : (
+                    <div className="sm-user-avatar-placeholder">
+                      {displayLabel[0]?.toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="sm-user-info-name">{displayLabel}</p>
+                    <p className="sm-user-info-sub">View profile</p>
                   </div>
-                )}
-                <div>
-                  <p className="sm-user-info-name">{displayLabel}</p>
-                  <p className="sm-user-info-sub">View profile</p>
-                </div>
-              </Link>
-              <button
-                className="sm-signout-btn"
-                onClick={() => { logout(); onClose(); }}
-              >
-                <LogOut style={{ width: 13, height: 13 }} strokeWidth={1.5} />
-                Sign out
-              </button>
-            </>
-          ) : (
-            <>
-              <Link href="/auth" className="sm-auth-btn-primary" onClick={() => onClose()}>
-                Sign in
-              </Link>
-              <Link href="/auth?tab=register" className="sm-auth-btn-secondary" onClick={() => onClose()}>
-                <UserPlus style={{ width: 14, height: 14 }} strokeWidth={1.5} />
-                Create account
-              </Link>
-            </>
-          )}
-        </div>
-      </aside>
-    </div>
+                </Link>
+                <button className="sm-signout-btn" onClick={() => { logout(); onClose(); }}>
+                  <LogOut style={{ width: 13, height: 13 }} strokeWidth={1.5} />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/auth" className="sm-auth-btn-primary" onClick={() => onClose()}>
+                  Sign in
+                </Link>
+                <Link href="/auth?tab=register" className="sm-auth-btn-secondary" onClick={() => onClose()}>
+                  <UserPlus style={{ width: 14, height: 14 }} strokeWidth={1.5} />
+                  Create account
+                </Link>
+              </>
+            )}
+          </div>
+        </aside>
+      </div>
+    </>
   );
 }
 

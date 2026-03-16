@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { Waves } from '@/components/ui/wave-background';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -104,25 +105,12 @@ function Field({ label, type, value, onChange, placeholder, autoComplete, showTo
 function BrandPanel() {
   return (
     <div className="flex flex-col items-center justify-center text-center px-12">
-      {/* Animated ring logo */}
-      <div className="relative w-40 h-40 mb-10">
-        <div className="absolute inset-0 rounded-full"
-          style={{
-            background: 'conic-gradient(from 0deg, #836EF9, #a78bfa, transparent, #836EF9)',
-            animation: 'spin 6s linear infinite',
-          }}
-        />
-        <div className="absolute inset-1 rounded-full bg-zinc-950 flex items-center justify-center">
-          <span className="text-6xl font-black hero-gradient font-mono">B</span>
-        </div>
-        {/* Outer glow ring */}
-        <div className="absolute -inset-3 rounded-full opacity-20"
-          style={{ background: 'conic-gradient(from 180deg, #836EF9, transparent, #836EF9)', animation: 'spin 10s linear infinite reverse' }} />
+      {/* New logo with glow */}
+      <div className="relative mb-8" style={{ filter: 'drop-shadow(0 0 32px rgba(131,110,249,0.55))' }}>
+        <BoltyLogo size={120} />
       </div>
 
-      <h2 className="text-3xl font-black tracking-tight text-white mb-4">
-        Bolty
-      </h2>
+      <h2 className="text-3xl font-black tracking-tight text-white mb-4">Bolty</h2>
       <p className="text-zinc-400 text-base leading-relaxed max-w-sm mb-10">
         The developer platform for publishing AI agents, monetizing code, and connecting with a global community.
       </p>
@@ -140,13 +128,6 @@ function BrandPanel() {
           </div>
         ))}
       </div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }
@@ -369,9 +350,7 @@ export default function AuthPage() {
 
           {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-xl bg-monad-500/15 border border-monad-500/25 flex items-center justify-center">
-              <span className="text-monad-400 font-black text-sm">B</span>
-            </div>
+            <BoltyLogo size={32} />
             <span className="font-bold text-lg text-white">Bolty</span>
           </div>
 

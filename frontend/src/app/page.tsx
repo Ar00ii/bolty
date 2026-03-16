@@ -484,7 +484,7 @@ export default function HomePage() {
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-40"
                   style={{ background: 'rgba(131,110,249,0.5)', animation: 'logo-pulse 3s ease-in-out infinite' }} />
-                <BoltyLogo size={72} color="#836EF9" className="relative z-10" style={{ filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.5))' } as React.CSSProperties} />
+                <BoltyLogo size={72} className="relative z-10" style={{ filter: 'drop-shadow(0 0 18px rgba(131,110,249,0.6))' } as React.CSSProperties} />
               </div>
             </div>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
