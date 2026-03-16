@@ -2,11 +2,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { GeometricBg } from '@/components/ui/GeometricBg';
 import { Spotlight } from '@/components/ui/spotlight';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
 import { SplineScene } from '@/components/ui/splite';
+import { BackgroundPaths } from '@/components/ui/background-paths';
+import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
+import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import {
   Sparkles,
   Code2,
@@ -14,6 +18,12 @@ import {
   Users,
   Coins,
   GitBranch,
+  UserPlus,
+  Upload,
+  TrendingUp,
+  MessageSquare,
+  Layers,
+  Zap,
 } from 'lucide-react';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
@@ -30,6 +40,28 @@ function useReveal() {
     return () => obs.disconnect();
   }, []);
   return { ref, visible };
+}
+
+// ── Animated container (framer-motion, scroll-triggered) ──────────────────────
+type ViewAnimationProps = {
+  delay?: number;
+  className?: string;
+  children: React.ReactNode;
+};
+function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationProps) {
+  const shouldReduceMotion = useReducedMotion();
+  if (shouldReduceMotion) return <>{children}</>;
+  return (
+    <motion.div
+      initial={{ filter: 'blur(4px)', translateY: -8, opacity: 0 }}
+      whileInView={{ filter: 'blur(0px)', translateY: 0, opacity: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.8 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -58,13 +90,6 @@ function MarketIcon() {
   return (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 2.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
-    </svg>
-  );
-}
-function ArrowIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
     </svg>
   );
 }
@@ -139,62 +164,26 @@ const ORBITAL_DATA = [
   },
 ];
 
-// ── Data ──────────────────────────────────────────────────────────────────────
-const FEATURES = [
-  {
-    Icon: AgentIcon,
-    color: 'text-monad-400',
-    bg: 'bg-monad-500/10',
-    border: 'border-monad-500/20',
-    hoverBorder: 'hover:border-monad-400/50',
-    glowColor: 'rgba(131,110,249,0.15)',
-    title: 'AI Assistant',
-    desc: 'Powered by Google Gemini. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.',
-    href: '#ai',
-    tag: 'Powered by Gemini',
-  },
-  {
-    Icon: CodeIcon,
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/20',
-    hoverBorder: 'hover:border-blue-400/50',
-    glowColor: 'rgba(59,130,246,0.12)',
-    title: 'Code Repos',
-    desc: 'Publish your GitHub repositories to the Bolty community. Offer free or paid access, get votes, and build your reputation.',
-    href: '/repos',
-    tag: 'GitHub integrated',
-  },
-  {
-    Icon: MarketIcon,
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
-    hoverBorder: 'hover:border-amber-400/50',
-    glowColor: 'rgba(251,191,36,0.10)',
-    title: 'AI Agents',
-    desc: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.',
-    href: '/market',
-    tag: 'Agents, bots, automation',
-  },
-  {
-    Icon: UsersIcon,
-    color: 'text-green-400',
-    bg: 'bg-green-500/10',
-    border: 'border-green-500/20',
-    hoverBorder: 'hover:border-green-400/50',
-    glowColor: 'rgba(74,222,128,0.10)',
-    title: 'Community',
-    desc: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, find collaborators.',
-    href: '/chat',
-    tag: 'Real-time WebSocket',
-  },
+// ── Feature cards data ─────────────────────────────────────────────────────────
+const PLATFORM_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; description: string; href: string }> = [
+  { title: 'AI Assistant', icon: AgentIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Powered by Google Gemini. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.', href: '#ai' },
+  { title: 'Code Repos', icon: CodeIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish your GitHub repositories to the Bolty community. Offer free or paid access, get votes, and build your reputation.', href: '/repos' },
+  { title: 'AI Agents', icon: MarketIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.', href: '/market' },
+  { title: 'Community', icon: UsersIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, find collaborators.', href: '/chat' },
 ];
 
-const STEPS = [
-  { n: '01', title: 'Create your account', desc: 'Sign up with email, GitHub, or a Web3 wallet. Your profile is your developer identity on Bolty.' },
-  { n: '02', title: 'Publish your work',   desc: 'Connect GitHub to publish repos. Create market listings for bots, scripts, or AI agents you built.' },
-  { n: '03', title: 'Grow and earn',       desc: 'Get upvotes, build reputation, sell locked repos for ETH, and connect with buyers and collaborators.' },
+// ── Steps data ─────────────────────────────────────────────────────────────────
+const STEPS: Array<{ title: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; description: string }> = [
+  { title: 'Create your account', icon: UserPlus as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Sign up with email, GitHub, or a Web3 wallet. Your profile is your developer identity on Bolty.' },
+  { title: 'Publish your work', icon: Upload as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Connect GitHub to publish repos. Create market listings for bots, scripts, or AI agents you built.' },
+  { title: 'Grow and earn', icon: TrendingUp as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Get upvotes, build reputation, sell locked repos for ETH, and connect with buyers and collaborators.' },
+];
+
+// ── AI features data ────────────────────────────────────────────────────────────
+const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; description: string }> = [
+  { title: 'Code review', icon: MessageSquare as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Get instant feedback on your code quality, bugs, and best practices.' },
+  { title: 'Architecture', icon: Layers as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Design system architecture with an AI that understands modern stacks.' },
+  { title: 'Debug assistance', icon: Zap as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Paste an error, get a clear explanation and fix suggestion immediately.' },
 ];
 
 const FAQ = [
@@ -239,6 +228,29 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
+// ── DashedCard: generic dashed-border + grid-pattern card ─────────────────────
+function DashedCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const squares = genRandomPattern();
+  return (
+    <div className={`relative overflow-hidden border border-dashed border-white/10 p-5 ${className}`}>
+      {/* grid pattern decoration */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
+          <GridPattern
+            width={20}
+            height={20}
+            x="-12"
+            y="4"
+            squares={squares}
+            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay"
+          />
+        </div>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
@@ -261,8 +273,8 @@ export default function HomePage() {
                 Share your work and grow your audience.
               </p>
               <div>
-                <Link href="/auth" className="btn-primary px-8 py-3.5 rounded-xl inline-flex items-center gap-2">
-                  Get started <ArrowIcon />
+                <Link href="/auth">
+                  <InteractiveHoverLinkInner text="Get started" className="text-sm" />
                 </Link>
               </div>
             </div>
@@ -278,84 +290,61 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 py-24" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <Section>
-          <div className="text-center mb-10">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Everything you need to build
-            </h2>
-            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
-              From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
-            </p>
-          </div>
-        </Section>
+      <section className="relative max-w-7xl mx-auto px-4 py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* BackgroundPaths behind this section */}
+        <BackgroundPaths />
+
+        <AnimatedContainer className="text-center mb-10 relative z-10">
+          <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+            Everything you need to build
+          </h2>
+          <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
+            From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
+          </p>
+        </AnimatedContainer>
 
         {/* Orbital timeline */}
-        <Section className="reveal-d1">
+        <AnimatedContainer delay={0.3} className="relative z-10">
           <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
-        </Section>
+        </AnimatedContainer>
 
-        {/* Feature cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-16">
-          {FEATURES.map((f, i) => (
-            <Section key={f.href} className={`reveal-d${i + 1}`}>
-              <Link href={f.href} className="block h-full">
-                <div className={`feature-card h-full ${f.hoverBorder} group cursor-pointer relative overflow-hidden`}>
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"
-                    style={{ background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${f.glowColor} 0%, transparent 70%)` }} />
-                  <div className={`feature-icon-wrap ${f.bg} border ${f.border} relative z-10`}>
-                    <span className={f.color}><f.Icon /></span>
-                  </div>
-                  <div className={`text-xs font-mono ${f.color} mb-2 opacity-70 relative z-10`}>{f.tag}</div>
-                  <h3 className={`font-semibold text-sm mb-2 ${f.color} relative z-10`}>{f.title}</h3>
-                  <p className="text-xs leading-relaxed mb-4 relative z-10 text-zinc-500">{f.desc}</p>
-                  <div className={`text-xs ${f.color} opacity-60 group-hover:opacity-100 transition-opacity flex items-center gap-1 relative z-10`}>
-                    <span>Explore</span>
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </div>
+        {/* Feature cards — dashed grid style */}
+        <AnimatedContainer delay={0.4} className="relative z-10 mt-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-x divide-y divide-dashed border border-dashed border-white/10">
+            {PLATFORM_FEATURES.map((f) => (
+              <Link key={f.href} href={f.href} className="block group">
+                <FeatureCard
+                  feature={f}
+                  className="h-full transition-colors duration-200 hover:bg-monad-500/5"
+                />
               </Link>
-            </Section>
-          ))}
-        </div>
+            ))}
+          </div>
+        </AnimatedContainer>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.06) 0%, transparent 70%)' }} />
-        </div>
         <div className="max-w-5xl mx-auto px-4 relative z-10">
-          <Section>
-            <div className="text-center mb-14">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                Up and running in minutes
-              </h2>
-            </div>
-          </Section>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
-            <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px"
-              style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.3), rgba(131,110,249,0.3), transparent)' }} />
-            {STEPS.map((step, i) => (
-              <Section key={step.n} className={`reveal-d${i + 1}`}>
-                <div className="text-center">
-                  <div className="relative inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(131,110,249,0.2)' }}>
-                    <div className="absolute inset-0 rounded-2xl opacity-50"
-                      style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.1) 0%, transparent 70%)' }} />
-                    <span className="text-2xl font-black text-monad-400 font-mono relative z-10">{step.n}</span>
-                  </div>
-                  <h3 className="text-base font-semibold mb-2 text-white">{step.title}</h3>
-                  <p className="text-sm leading-relaxed text-zinc-500">{step.desc}</p>
-                </div>
-              </Section>
+          <AnimatedContainer className="text-center mb-14">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+              Up and running in minutes
+            </h2>
+            <p className="text-zinc-500 mt-4 text-sm tracking-wide">
+              Everything you need to publish, grow, and earn on Bolty.
+            </p>
+          </AnimatedContainer>
+
+          <AnimatedContainer
+            delay={0.4}
+            className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10"
+          >
+            {STEPS.map((step) => (
+              <FeatureCard key={step.title} feature={step} />
             ))}
-          </div>
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -384,8 +373,8 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
-            <Link href="/repos" className="btn-primary px-6 py-2.5 rounded-xl inline-flex items-center gap-2">
-              Browse repos <ArrowIcon />
+            <Link href="/repos">
+              <InteractiveHoverLinkInner text="Browse repos" className="text-sm" />
             </Link>
           </Section>
 
@@ -393,8 +382,8 @@ export default function HomePage() {
             <div className="relative group">
               <div className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"
                 style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.2), rgba(99,91,255,0.1))' }} />
-              <div className="relative rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
-                <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+              <DashedCard className="rounded-2xl">
+                <div className="flex items-center gap-2 px-4 py-3 mb-2" style={{ borderBottom: '1px dashed rgba(255,255,255,0.08)' }}>
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
                     <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
@@ -409,27 +398,27 @@ export default function HomePage() {
                   <div className="pl-4"><span className="text-amber-400">access</span><span className="text-zinc-500">:</span> <span className="text-green-400">'locked'</span><span className="text-zinc-500">,</span></div>
                   <div className="pl-4"><span className="text-amber-400">visibility</span><span className="text-zinc-500">:</span> <span className="text-green-400">'public'</span><span className="text-zinc-500">,</span></div>
                   <div><span className="text-zinc-500">{'}'}</span><span className="text-zinc-500">);</span></div>
-                  <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="mt-2 pt-2" style={{ borderTop: '1px dashed rgba(255,255,255,0.08)' }}>
                     <span className="text-green-400">✓ </span>
                     <span className="text-monad-400">Published</span>
                     <span className="text-zinc-500"> · </span>
                     <span className="text-zinc-500">0x3f8a...buyers can unlock</span>
                   </div>
                 </div>
-              </div>
+              </DashedCard>
             </div>
           </Section>
         </div>
       </section>
 
       {/* ── AI SECTION ───────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
         </div>
         <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-          <Section>
+          <AnimatedContainer>
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Built-in AI</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
               Ask, build, ship — faster
@@ -438,23 +427,15 @@ export default function HomePage() {
               The Bolty AI assistant, powered by Google Gemini, is always one click away.
               Ask code questions, get architecture advice, or debug issues — without leaving the platform.
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-              {[
-                { title: 'Code review',       desc: 'Get instant feedback on your code quality, bugs, and best practices.' },
-                { title: 'Architecture',      desc: 'Design system architecture with an AI that understands modern stacks.' },
-                { title: 'Debug assistance',  desc: 'Paste an error, get a clear explanation and fix suggestion immediately.' },
-              ].map(item => (
-                <div key={item.title} className="rounded-xl p-4 text-left group hover:border-monad-500/30 transition-all duration-200"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                  <div className="w-8 h-8 rounded-lg bg-monad-500/10 border border-monad-500/20 flex items-center justify-center mb-3">
-                    <span className="w-2 h-2 rounded-full bg-monad-400" />
-                  </div>
-                  <h4 className="text-sm font-semibold mb-1 text-white">{item.title}</h4>
-                  <p className="text-xs leading-relaxed text-zinc-500">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
+          </AnimatedContainer>
+          <AnimatedContainer
+            delay={0.3}
+            className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10 max-w-3xl mx-auto text-left"
+          >
+            {AI_FEATURES.map((item) => (
+              <FeatureCard key={item.title} feature={item} />
+            ))}
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -503,12 +484,12 @@ export default function HomePage() {
             <p className="text-lg mb-10 text-zinc-400">
               Join developers who are already publishing code, deploying agents, and growing their audience on Bolty.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/auth" className="btn-primary px-10 py-4 rounded-xl text-base inline-flex items-center gap-2">
-                Create free account <ArrowIcon />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/auth">
+                <InteractiveHoverLinkInner text="Create free account" />
               </Link>
-              <Link href="/market" className="btn-secondary px-10 py-4 rounded-xl text-base">
-                Explore marketplace
+              <Link href="/market">
+                <InteractiveHoverLinkInner text="Explore marketplace" className="border-zinc-600/40" />
               </Link>
             </div>
             <p className="text-xs mt-6 text-zinc-600">

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { DottedSurface } from '@/components/ui/dotted-surface';
+import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -482,32 +483,23 @@ function NegotiationModal({
 function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
   const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
   const isAgent = listing.type === 'AI_AGENT' || listing.type === 'BOT';
+  const squares = genRandomPattern();
 
   return (
-    <div
-      className="flex flex-col rounded-xl p-4 transition-all duration-300 group"
-      style={{
-        background: 'linear-gradient(135deg, rgba(9,9,16,0.9) 0%, rgba(14,12,25,0.9) 100%)',
-        border: '1px solid rgba(139,92,246,0.12)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.border = '1px solid rgba(139,92,246,0.35)';
-        (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 32px rgba(139,92,246,0.12), 0 0 0 1px rgba(139,92,246,0.05)';
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.border = '1px solid rgba(139,92,246,0.12)';
-        (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 24px rgba(0,0,0,0.3)';
-      }}
-    >
+    <div className="relative overflow-hidden flex flex-col p-5 transition-colors duration-200 hover:bg-monad-500/5 group">
+      {/* grid pattern decoration */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
+          <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
+            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay" />
+        </div>
+      </div>
+
       {/* Top row */}
-      <div className="flex items-start justify-between mb-3 gap-2">
+      <div className="relative z-10 flex items-start justify-between mb-3 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isAgent && (
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0"
-              style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}
-            >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border border-dashed border-emerald-400/20 bg-emerald-400/5">
               🤖
             </div>
           )}
@@ -518,32 +510,25 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {listing.agentEndpoint && (
-            <span
-              className="text-xs px-1.5 py-0.5 rounded font-mono"
-              style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}
-              title="Has AI negotiation agent"
-            >
+            <span className="text-xs px-1.5 py-0.5 rounded font-mono border border-dashed border-emerald-400/20 text-emerald-400 bg-emerald-400/5"
+              title="Has AI negotiation agent">
               AI
             </span>
           )}
-          <span className={`text-xs font-mono px-2 py-0.5 rounded border ${typeColor}`}>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded border border-dashed ${typeColor}`}>
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
         </div>
       </div>
 
       {/* Description */}
-      <p className="text-zinc-400 text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{listing.description}</p>
+      <p className="relative z-10 text-zinc-400 text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{listing.description}</p>
 
       {/* Tags */}
       {listing.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
+        <div className="relative z-10 flex flex-wrap gap-1 mb-3">
           {listing.tags.slice(0, 4).map((tag) => (
-            <span
-              key={tag}
-              className="text-xs font-mono px-2 py-0.5 rounded"
-              style={{ background: 'rgba(139,92,246,0.08)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.15)' }}
-            >
+            <span key={tag} className="text-xs font-mono px-2 py-0.5 rounded border border-dashed border-monad-500/20 text-monad-400/70 bg-monad-500/5">
               {tag}
             </span>
           ))}
@@ -553,14 +538,14 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       {/* Links */}
       {listing.agentUrl && (
         <a href={listing.agentUrl} target="_blank" rel="noopener noreferrer"
-          className="text-xs font-mono text-emerald-400/60 hover:text-emerald-400 transition-colors flex items-center gap-1 mb-1 truncate">
+          className="relative z-10 text-xs font-mono text-emerald-400/60 hover:text-emerald-400 transition-colors flex items-center gap-1 mb-1 truncate">
           <span>[agent url]</span>
           <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
         </a>
       )}
       {listing.fileKey && listing.fileName && (
         <a href={`${API_URL}/market/files/${listing.fileKey}`}
-          className="text-xs font-mono text-yellow-400/60 hover:text-yellow-400 transition-colors flex items-center gap-1 mb-1">
+          className="relative z-10 text-xs font-mono text-yellow-400/60 hover:text-yellow-400 transition-colors flex items-center gap-1 mb-1">
           <span>[file]</span>
           <span className="truncate">{listing.fileName}</span>
           {listing.fileSize && <span className="text-zinc-600 shrink-0">({formatBytes(listing.fileSize)})</span>}
@@ -568,12 +553,12 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       )}
 
       {/* Bottom row */}
-      <div className="flex items-center justify-between mt-3 pt-3 gap-2" style={{ borderTop: '1px solid rgba(139,92,246,0.08)' }}>
+      <div className="relative z-10 flex items-center justify-between mt-3 pt-3 gap-2 border-t border-dashed border-white/10">
         <div>
           <div className="font-mono font-black text-base">
             {listing.price === 0
-              ? <span style={{ color: '#4ade80' }}>FREE</span>
-              : <span style={{ color: '#c4b5fd' }}>{listing.price} <span className="text-xs font-normal text-zinc-400">{listing.currency}</span></span>
+              ? <span className="text-green-400">FREE</span>
+              : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-400">{listing.currency}</span></span>
             }
           </div>
           {listing.minPrice != null && (
@@ -583,8 +568,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
         <div className="flex gap-1.5 items-center">
           <Link
             href={`/agents/${listing.id}`}
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all"
-            style={{ color: '#71717a', border: '1px solid rgba(113,113,122,0.2)', background: 'transparent' }}
+            className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60"
           >
             profile
           </Link>
@@ -593,15 +577,11 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
               if (!isAuthenticated) { window.location.href = '/auth'; return; }
               onNegotiate();
             }}
-            className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all"
-            style={{
-              background: listing.agentEndpoint
-                ? 'linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.1))'
-                : 'linear-gradient(135deg,rgba(139,92,246,0.25),rgba(139,92,246,0.15))',
-              border: listing.agentEndpoint ? '1px solid rgba(16,185,129,0.4)' : '1px solid rgba(139,92,246,0.4)',
-              color: listing.agentEndpoint ? '#34d399' : '#c4b5fd',
-              boxShadow: listing.agentEndpoint ? '0 0 12px rgba(16,185,129,0.1)' : '0 0 12px rgba(139,92,246,0.1)',
-            }}
+            className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed ${
+              listing.agentEndpoint
+                ? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-400 hover:bg-emerald-400/20'
+                : 'bg-monad-500/10 border-monad-500/30 text-monad-300 hover:bg-monad-500/20'
+            }`}
           >
             {listing.agentEndpoint ? '🤖 negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
           </button>
@@ -1035,7 +1015,7 @@ export default function MarketPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10">
             {listings.map((listing) => (
               <AgentCard
                 key={listing.id}

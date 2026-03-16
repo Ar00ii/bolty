@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { DottedSurface } from '@/components/ui/dotted-surface';
+import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -482,98 +483,114 @@ export default function ReposPage() {
           Loading repositories...
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {repos.map((repo) => (
-            <TerminalCard key={repo.id} className="flex flex-col">
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-1 min-w-0">
-                    {repo.isLocked && (
-                      <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                    )}
-                    <a
-                      href={repo.isLocked ? '#' : repo.githubUrl}
-                      target={repo.isLocked ? undefined : '_blank'}
-                      rel="noopener noreferrer"
-                      className={`font-mono font-semibold text-sm transition-colors truncate ${
-                        repo.isLocked
-                          ? 'text-yellow-400 hover:text-yellow-300 cursor-default'
-                          : 'text-neon-400 hover:text-neon-300'
-                      }`}
-                    >
-                      {repo.name}
-                    </a>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10">
+          {repos.map((repo) => {
+            const squares = genRandomPattern();
+            return (
+              <div key={repo.id} className="relative overflow-hidden p-5 flex flex-col group hover:bg-monad-500/5 transition-colors duration-200">
+                {/* grid pattern decoration */}
+                <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
+                    <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
+                      className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay" />
                   </div>
-                  {repo.language && (
-                    <span className="terminal-badge ml-2 shrink-0">{repo.language}</span>
+                </div>
+
+                <div className="relative z-10 flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-1 min-w-0">
+                      {repo.isLocked && (
+                        <svg className="w-4 h-4 text-yellow-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                      )}
+                      <a
+                        href={repo.isLocked ? '#' : repo.githubUrl}
+                        target={repo.isLocked ? undefined : '_blank'}
+                        rel="noopener noreferrer"
+                        className={`font-mono font-semibold text-sm transition-colors truncate ${
+                          repo.isLocked
+                            ? 'text-yellow-400 hover:text-yellow-300 cursor-default'
+                            : 'text-monad-400 hover:text-monad-300'
+                        }`}
+                      >
+                        {repo.name}
+                      </a>
+                    </div>
+                    {repo.language && (
+                      <span className="text-xs font-mono px-2 py-0.5 rounded border border-monad-500/20 bg-monad-500/5 text-monad-400 ml-2 shrink-0">
+                        {repo.language}
+                      </span>
+                    )}
+                  </div>
+
+                  {repo.isLocked && repo.lockedPriceUsd && (
+                    <div className="inline-flex items-center gap-1 text-xs font-mono text-yellow-400 bg-yellow-400/10 border border-dashed border-yellow-400/20 rounded px-2 py-0.5 mb-2">
+                      <span>$</span>
+                      <span>{repo.lockedPriceUsd.toFixed(2)}</span>
+                      <span className="text-yellow-400/60">USD to unlock</span>
+                    </div>
+                  )}
+
+                  {repo.description && (
+                    <p className="text-zinc-500 text-xs leading-relaxed mb-3 line-clamp-2">
+                      {repo.isLocked ? '████ ███████ ██████ ██████ ████' : repo.description}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 text-zinc-600 text-xs font-mono mb-3">
+                    <span>★ {repo.stars}</span>
+                    <span>⑂ {repo.forks}</span>
+                    <span>↓ {repo.downloadCount}</span>
+                  </div>
+                  {!repo.isLocked && repo.topics.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {repo.topics.slice(0, 3).map((t) => (
+                        <span key={t} className="text-xs font-mono px-1.5 py-0.5 rounded border border-dashed border-white/10 text-zinc-500">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-zinc-600 text-xs flex items-center gap-1">
+                    <span className="text-monad-400/60">@</span>
+                    {repo.user.username}
+                  </div>
+                </div>
+
+                <div className="relative z-10 flex items-center justify-between mt-3 pt-3 border-t border-dashed border-white/10">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => vote(repo.id, 'UP')}
+                      disabled={!isAuthenticated}
+                      className="px-2 py-1 text-xs font-mono text-monad-400 hover:bg-monad-400/10 rounded transition-colors disabled:opacity-40"
+                    >
+                      ▲ {repo.upvotes}
+                    </button>
+                    <button
+                      onClick={() => vote(repo.id, 'DOWN')}
+                      disabled={!isAuthenticated}
+                      className="px-2 py-1 text-xs font-mono text-red-400 hover:bg-red-400/10 rounded transition-colors disabled:opacity-40"
+                    >
+                      ▼ {repo.downvotes}
+                    </button>
+                  </div>
+                  {repo.isLocked ? (
+                    <button
+                      className="text-xs py-1.5 px-3 font-mono bg-yellow-400/10 text-yellow-400 border border-dashed border-yellow-400/30 rounded hover:bg-yellow-400/20 transition-colors"
+                      onClick={() => payAndUnlock(repo)}
+                    >
+                      Unlock — ${repo.lockedPriceUsd} USD
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => download(repo.id, repo.githubUrl)}
+                      className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/30 rounded hover:bg-monad-500/10 transition-colors"
+                    >
+                      download
+                    </button>
                   )}
                 </div>
-
-                {repo.isLocked && repo.lockedPriceUsd && (
-                  <div className="inline-flex items-center gap-1 text-xs font-mono text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 rounded px-2 py-0.5 mb-2">
-                    <span>$</span>
-                    <span>{repo.lockedPriceUsd.toFixed(2)}</span>
-                    <span className="text-yellow-400/60">USD to unlock</span>
-                  </div>
-                )}
-
-                {repo.description && (
-                  <p className="text-terminal-muted text-xs leading-relaxed mb-3 line-clamp-2">
-                    {repo.isLocked ? '████ ███████ ██████ ██████ ████' : repo.description}
-                  </p>
-                )}
-                <div className="flex items-center gap-3 text-terminal-muted text-xs font-mono mb-3">
-                  <span>★ {repo.stars}</span>
-                  <span>⑂ {repo.forks}</span>
-                  <span>↓ {repo.downloadCount}</span>
-                </div>
-                {!repo.isLocked && repo.topics.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {repo.topics.slice(0, 3).map((t) => (
-                      <span key={t} className="terminal-badge">{t}</span>
-                    ))}
-                  </div>
-                )}
-                <div className="text-terminal-muted text-xs flex items-center gap-1">
-                  <span className="text-neon-400">@</span>
-                  {repo.user.username}
-                </div>
               </div>
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-terminal-border">
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => vote(repo.id, 'UP')}
-                    disabled={!isAuthenticated}
-                    className="px-2 py-1 text-xs font-mono text-neon-400 hover:bg-neon-400/10 rounded transition-colors disabled:opacity-40"
-                  >
-                    ▲ {repo.upvotes}
-                  </button>
-                  <button
-                    onClick={() => vote(repo.id, 'DOWN')}
-                    disabled={!isAuthenticated}
-                    className="px-2 py-1 text-xs font-mono text-red-400 hover:bg-red-400/10 rounded transition-colors disabled:opacity-40"
-                  >
-                    ▼ {repo.downvotes}
-                  </button>
-                </div>
-                {repo.isLocked ? (
-                  <button
-                    className="text-xs py-1 px-3 font-mono bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 rounded hover:bg-yellow-400/20 transition-colors"
-                    onClick={() => payAndUnlock(repo)}
-                  >
-                    Unlock — ${repo.lockedPriceUsd} USD
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => download(repo.id, repo.githubUrl)}
-                    className="btn-neon text-xs py-1 px-3"
-                  >
-                    download
-                  </button>
-                )}
-              </div>
-            </TerminalCard>
-          ))}
+            );
+          })}
           {repos.length === 0 && !loading && (
             <div className="col-span-3 text-center py-16 text-terminal-muted font-mono text-sm">
               {'// No repositories found. Be the first to publish!'}
