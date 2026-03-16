@@ -119,7 +119,7 @@ export default function ReposPage() {
       const data = await api.get<GitHubRepo[]>('/repos/github');
       const raw = Array.isArray(data) ? data : [];
       // Check if backend says the token was revoked and needs re-auth
-      const needsReauth = raw.some((r: Record<string, unknown>) => (r as Record<string, unknown>)._bolty_reauth);
+      const needsReauth = raw.some((r) => (r as unknown as Record<string, unknown>)._bolty_reauth);
       if (needsReauth) {
         setGhNeedsReauth(true);
         setGhRepos([]);

@@ -11,7 +11,6 @@ import { SplineScene } from '@/components/ui/splite';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
-import { FaqCardStack } from '@/components/ui/faq-card-stack';
 import {
   Code2,
   Bot,
@@ -28,6 +27,14 @@ import {
   ShoppingBag,
   Lock,
   Wallet,
+  Star,
+  Activity,
+  Terminal,
+  CheckCircle,
+  Globe,
+  Shield,
+  Cpu,
+  Hash,
 } from 'lucide-react';
 import AnimatedShaderBackground from '@/components/ui/animated-shader-background';
 
@@ -191,11 +198,73 @@ const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGPro
   { title: 'Debug assistance', icon: Zap as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Paste an error, get a clear explanation and fix suggestion immediately.' },
 ];
 
-const FAQ = [
-  { q: 'Is Bolty free to use?',            a: 'Yes, creating an account and publishing free repositories is completely free. You only pay if you want to purchase a locked repository from another developer.', icon: HelpCircle },
-  { q: 'How does the marketplace work?',   a: 'Developers list their bots, scripts, AI agents, and tools. Buyers browse listings and purchase access directly through the platform using ETH payments.', icon: ShoppingBag },
-  { q: 'What is a locked repository?',     a: 'A locked repo is a GitHub repository where the developer has set a price. Buyers pay in ETH to unlock full access to clone or download it.', icon: Lock },
+// ── New data ───────────────────────────────────────────────────────────────────
+const STATS = [
+  { value: '1,200+', label: 'Developers joined' },
+  { value: '3,400+', label: 'Repos published' },
+  { value: '240+', label: 'AI agents deployed' },
+  { value: '18.4 ETH', label: 'Earned by creators' },
+];
+
+const INTEGRATIONS = [
+  { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
+  { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
+  { name: 'Solana', icon: Zap, desc: 'Multi-chain support' },
+  { name: 'Any language', icon: Code2, desc: 'All stacks welcome' },
+  { name: 'AI models', icon: Bot, desc: 'GPT, Claude & more' },
+  { name: 'Terminal', icon: Terminal, desc: 'CLI toolkit coming soon' },
+];
+
+const COMMUNITY_STATS = [
+  { value: '40+', label: 'Countries represented' },
+  { value: '890+', label: 'Active this week' },
+  { value: '12K+', label: 'Messages sent' },
+  { value: '99.9%', label: 'Platform uptime' },
+];
+
+const RECENT_ACTIVITY = [
+  { time: '2m ago', action: 'alex_dev published a new AI agent', icon: Bot },
+  { time: '5m ago', action: 'sara_k locked a TypeScript repo for 0.02 ETH', icon: Lock },
+  { time: '9m ago', action: 'mikato joined Bolty', icon: UserPlus },
+  { time: '14m ago', action: 'jrd_builds published react-hooks-lib', icon: Code2 },
+  { time: '21m ago', action: 'nullbyte earned 0.08 ETH from 4 purchases', icon: Coins },
+  { time: '28m ago', action: 'yanira_dev shared in global chat', icon: MessageSquare },
+];
+
+const TESTIMONIALS = [
+  {
+    name: 'Alex R.',
+    role: 'Senior Full-Stack Dev',
+    text: 'I published three locked repos in my first week on Bolty and earned my first ETH without any crypto complexity. The GitHub sync made it incredibly simple.',
+  },
+  {
+    name: 'Yuki T.',
+    role: 'AI/ML Engineer',
+    text: 'The AI agent marketplace is exactly what I needed. I deployed my automation toolkit and it already has dozens of buyers — all handled through the platform.',
+  },
+  {
+    name: 'Sara M.',
+    role: 'Indie Developer',
+    text: 'The built-in AI assistant saves me hours every week. It understands context across my projects and gives me real code-level feedback, not generic advice.',
+  },
+];
+
+const EXTENDED_FAQ = [
+  { q: 'Is Bolty free to use?', a: 'Yes, creating an account and publishing free repositories is completely free. You only pay if you want to purchase a locked repository from another developer.', icon: HelpCircle },
+  { q: 'How does the marketplace work?', a: 'Developers list their bots, scripts, AI agents, and tools. Buyers browse listings and purchase access directly through the platform using ETH payments.', icon: ShoppingBag },
+  { q: 'What is a locked repository?', a: 'A locked repo is a GitHub repository where the developer has set a price. Buyers pay in ETH to unlock full access to clone or download it.', icon: Lock },
   { q: 'Can I use Bolty without a wallet?', a: 'Yes. You can sign up with email or GitHub and use all community features without a wallet. A wallet is only needed for on-chain transactions.', icon: Wallet },
+  { q: 'How does community voting work?', a: 'Every published repo and agent can be upvoted by the community. Higher votes increase visibility in search and discovery — there is no cost to vote.', icon: TrendingUp },
+  { q: 'What programming languages are supported?', a: 'Bolty supports any language you can push to GitHub — from JavaScript and Python to Rust, Go, Solidity, and beyond. The AI assistant is fully language-agnostic.', icon: Code2 },
+  { q: 'Can I earn without cryptocurrency?', a: 'Currently, payouts are settled in ETH on-chain. You need a compatible wallet address to receive payments, but you can explore and use all community features without one.', icon: Coins },
+  { q: 'How do AI agents work on the platform?', a: 'You upload your agent code, set a description and pricing, and it becomes discoverable in the marketplace. Buyers can purchase and integrate it into their own workflows instantly.', icon: Bot },
+];
+
+const AI_CHAT_PREVIEW = [
+  { role: 'user', text: 'How do I optimize this React re-render?' },
+  { role: 'ai', text: 'The issue is likely in your useEffect dependency array. Wrap your callback with useCallback and memoize expensive computations with useMemo to prevent unnecessary renders.' },
+  { role: 'user', text: 'Should I use useMemo or React.memo here?' },
+  { role: 'ai', text: 'Use React.memo to memoize the component itself when its props rarely change. Use useMemo for expensive in-component calculations. In your case, both would help — apply React.memo to the child first.' },
 ];
 
 // ── FAQ item ──────────────────────────────────────────────────────────────────
@@ -238,7 +307,6 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
   const squares = genRandomPattern();
   return (
     <div className={`relative overflow-hidden border border-dashed border-white/10 p-5 ${className}`}>
-      {/* grid pattern decoration */}
       <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
           <GridPattern
@@ -295,11 +363,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── STATS STRIP ──────────────────────────────────────────────────── */}
+      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[200px]"
+            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.04) 0%, transparent 70%)' }} />
+        </div>
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+            {STATS.map((s, i) => (
+              <AnimatedContainer key={s.label} delay={i * 0.1}>
+                <div className="py-2">
+                  <div
+                    className="text-4xl md:text-5xl font-black mb-2 tabular-nums"
+                    style={{
+                      background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 60%, #c4b5fd 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    {s.value}
+                  </div>
+                  <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
+                </div>
+              </AnimatedContainer>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
       <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* BackgroundPaths — full-width behind this section */}
         <BackgroundPaths />
-
         <div className="relative z-10 max-w-7xl mx-auto px-4">
           <AnimatedContainer className="text-center mb-14">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
@@ -311,9 +407,7 @@ export default function HomePage() {
             </p>
           </AnimatedContainer>
 
-          {/* Side-by-side: cards left (vertical), orbit right */}
           <div className="flex flex-col lg:flex-row gap-8 items-center">
-            {/* Left: Feature cards — vertical stack */}
             <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
               {PLATFORM_FEATURES.map((f, i) => {
                 const isCommunity = f.title === 'Community';
@@ -335,11 +429,62 @@ export default function HomePage() {
               })}
             </AnimatedContainer>
 
-            {/* Right: Orbital timeline */}
             <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
               <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
             </AnimatedContainer>
           </div>
+        </div>
+      </section>
+
+      {/* ── INTEGRATIONS ─────────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedContainer className="text-center mb-14">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Integrations</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+              Works with your stack
+            </h2>
+            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
+              Bolty connects with the tools and chains you already use — no complicated setup required.
+            </p>
+          </AnimatedContainer>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-12">
+            {INTEGRATIONS.map((item, i) => (
+              <AnimatedContainer key={item.name} delay={i * 0.05}>
+                <div className="border rounded-2xl p-5 text-center hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 group cursor-default"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200"
+                    style={{ background: 'rgba(131,110,249,0.1)' }}>
+                    <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+                  </div>
+                  <div className="text-sm font-medium text-zinc-300 mb-1">{item.name}</div>
+                  <div className="text-xs text-zinc-600">{item.desc}</div>
+                </div>
+              </AnimatedContainer>
+            ))}
+          </div>
+
+          {/* Integration sub-banner */}
+          <AnimatedContainer delay={0.3}>
+            <div className="border border-dashed border-white/08 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+              style={{ background: 'rgba(131,110,249,0.04)' }}>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-monad-500/20 flex items-center justify-center flex-shrink-0">
+                  <Globe className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-zinc-200">Open platform, open ecosystem</div>
+                  <div className="text-xs text-zinc-500 mt-0.5">More integrations and a public API are coming soon. Stay tuned.</div>
+                </div>
+              </div>
+              <Link href="/auth">
+                <span className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors whitespace-nowrap">
+                  Get early access →
+                </span>
+              </Link>
+            </div>
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -360,8 +505,40 @@ export default function HomePage() {
             delay={0.4}
             className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10"
           >
-            {STEPS.map((step) => (
-              <FeatureCard key={step.title} feature={step} />
+            {STEPS.map((step, i) => (
+              <div key={step.title} className="p-7 relative group hover:bg-monad-500/5 transition-colors duration-200">
+                <div className="flex items-start gap-4">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
+                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9', border: '1px solid rgba(131,110,249,0.25)' }}>
+                    {i + 1}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <step.icon className="w-4 h-4 text-monad-400" />
+                      <h3 className="text-sm font-semibold text-zinc-200">{step.title}</h3>
+                    </div>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{step.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </AnimatedContainer>
+
+          {/* Timeline detail */}
+          <AnimatedContainer delay={0.5} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { label: 'Time to first publish', value: '< 5 min', detail: 'Connect GitHub and you\'re live' },
+              { label: 'ETH settlement', value: 'Instant', detail: 'Payments go directly to your wallet' },
+              { label: 'Visibility boost', value: 'Day 1', detail: 'Community discovery from day one' },
+            ].map((item, i) => (
+              <AnimatedContainer key={item.label} delay={0.5 + i * 0.1}>
+                <div className="border border-white/06 rounded-xl p-4 text-center hover:border-monad-500/20 transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="text-xl font-bold text-monad-400 mb-1">{item.value}</div>
+                  <div className="text-xs font-medium text-zinc-300 mb-1">{item.label}</div>
+                  <div className="text-xs text-zinc-600">{item.detail}</div>
+                </div>
+              </AnimatedContainer>
             ))}
           </AnimatedContainer>
         </div>
@@ -426,46 +603,280 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── COMMUNITY ────────────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Left: community description + stats */}
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-5">
+                Built by developers,<br />for developers
+              </h2>
+              <p className="text-zinc-400 mb-8 leading-relaxed text-base">
+                Connect with a global community of developers, share your projects, collaborate
+                on ideas, and find the next person who needs exactly what you built.
+              </p>
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                {COMMUNITY_STATS.map(s => (
+                  <div key={s.label} className="border border-white/06 rounded-xl p-4 hover:border-monad-500/20 transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <div className="text-2xl font-bold text-monad-400 mb-1">{s.value}</div>
+                    <div className="text-xs text-zinc-500 font-mono">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/chat">
+                <InteractiveHoverLinkInner text="Join the community" className="text-sm" />
+              </Link>
+            </AnimatedContainer>
+
+            {/* Right: activity feed preview */}
+            <AnimatedContainer delay={0.2}>
+              <div className="border border-white/08 rounded-2xl overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <Activity className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-xs font-mono text-zinc-400">platform activity</span>
+                  <span className="text-xs text-zinc-700 ml-auto font-mono">preview</span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 ml-1 animate-pulse flex-shrink-0" />
+                </div>
+                <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+                  {RECENT_ACTIVITY.map((item, i) => (
+                    <div key={i} className="flex items-center gap-3 px-4 py-3 hover:bg-white/02 transition-colors">
+                      <span className="text-zinc-700 font-mono text-xs w-14 flex-shrink-0">{item.time}</span>
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(131,110,249,0.1)' }}>
+                        <item.icon className="w-3 h-3 text-monad-400/80" strokeWidth={1.5} />
+                      </div>
+                      <span className="text-zinc-400 text-xs leading-relaxed">{item.action}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-4 py-3 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                  <Link href="/chat" className="text-xs text-monad-400 hover:text-monad-300 font-mono transition-colors">
+                    Open global chat →
+                  </Link>
+                </div>
+              </div>
+            </AnimatedContainer>
+          </div>
+        </div>
+      </section>
+
       {/* ── AI SECTION ───────────────────────────────────────────────────── */}
       <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
         </div>
-        <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
-          <AnimatedContainer>
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Built-in AI</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
-              Ask, build, ship — faster
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left: copy + feature cards */}
+            <div>
+              <AnimatedContainer>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Built-in AI</p>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
+                  Ask, build, ship — faster
+                </h2>
+                <p className="text-base leading-relaxed mb-8 text-zinc-400">
+                  The Bolty AI assistant is always one click away.
+                  Ask code questions, get architecture advice, or debug issues — without leaving the platform.
+                </p>
+              </AnimatedContainer>
+              <AnimatedContainer
+                delay={0.3}
+                className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10 text-left"
+              >
+                {AI_FEATURES.map((item) => (
+                  <FeatureCard key={item.title} feature={item} />
+                ))}
+              </AnimatedContainer>
+              <AnimatedContainer delay={0.4} className="mt-8">
+                <Link href="/ai">
+                  <InteractiveHoverLinkInner text="Try AI assistant" className="text-sm" />
+                </Link>
+              </AnimatedContainer>
+            </div>
+
+            {/* Right: chat preview */}
+            <AnimatedContainer delay={0.2}>
+              <div className="border border-white/08 rounded-2xl overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-xs font-mono text-zinc-400">Bolty AI</span>
+                  <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-mono"
+                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9' }}>
+                    Live
+                  </span>
+                </div>
+                <div className="p-4 space-y-4">
+                  {AI_CHAT_PREVIEW.map((msg, i) => (
+                    <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
+                        msg.role === 'user'
+                          ? 'bg-zinc-800 text-zinc-400'
+                          : 'text-monad-400'
+                      }`}
+                        style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.15)' } : {}}>
+                        {msg.role === 'user' ? 'U' : <Bot className="w-3.5 h-3.5" strokeWidth={1.5} />}
+                      </div>
+                      <div className={`max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
+                        msg.role === 'user'
+                          ? 'bg-zinc-800/70 text-zinc-300 rounded-tr-none'
+                          : 'text-zinc-400 rounded-tl-none'
+                      }`}
+                        style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.15)' } : {}}>
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="px-4 pb-4">
+                  <div className="flex items-center gap-2 rounded-xl px-3 py-2 border"
+                    style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <span className="text-xs text-zinc-700 flex-1 font-mono">Ask anything about your code...</span>
+                    <Zap className="w-3.5 h-3.5 text-monad-400/50" strokeWidth={1.5} />
+                  </div>
+                </div>
+              </div>
+            </AnimatedContainer>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4">
+          <AnimatedContainer className="text-center mb-14">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+              What developers say
             </h2>
-            <p className="text-base leading-relaxed max-w-2xl mx-auto mb-10 text-zinc-400">
-              The Bolty AI assistant is always one click away.
-              Ask code questions, get architecture advice, or debug issues — without leaving the platform.
+            <p className="text-base mt-3 max-w-lg mx-auto text-zinc-500">
+              Real feedback from developers who publish, build, and earn on Bolty.
             </p>
           </AnimatedContainer>
-          <AnimatedContainer
-            delay={0.3}
-            className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10 max-w-3xl mx-auto text-left"
-          >
-            {AI_FEATURES.map((item) => (
-              <FeatureCard key={item.title} feature={item} />
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <AnimatedContainer key={t.name} delay={i * 0.15}>
+                <div className="border rounded-2xl p-6 h-full flex flex-col hover:border-monad-500/25 transition-colors duration-200 group"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="flex gap-1 mb-5">
+                    {[...Array(5)].map((_, j) => (
+                      <Star key={j} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />
+                    ))}
+                  </div>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-6 flex-1">&ldquo;{t.text}&rdquo;</p>
+                  <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-monad-400 flex-shrink-0"
+                      style={{ background: 'rgba(131,110,249,0.15)' }}>
+                      {t.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-zinc-200">{t.name}</div>
+                      <div className="text-xs text-zinc-600">{t.role}</div>
+                    </div>
+                    <CheckCircle className="w-4 h-4 text-monad-400/50 ml-auto" strokeWidth={1.5} />
+                  </div>
+                </div>
+              </AnimatedContainer>
             ))}
+          </div>
+
+          {/* Social proof strip */}
+          <AnimatedContainer delay={0.5} className="mt-10">
+            <div className="border border-dashed border-white/08 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left"
+              style={{ background: 'rgba(131,110,249,0.03)' }}>
+              <div className="flex -space-x-2 flex-shrink-0">
+                {['A', 'B', 'C', 'D', 'E'].map((l, i) => (
+                  <div key={l} className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-monad-400"
+                    style={{ background: `rgba(131,110,249,${0.1 + i * 0.04})` }}>
+                    {l}
+                  </div>
+                ))}
+                <div className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-zinc-500"
+                  style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  +
+                </div>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-zinc-200">Join 1,200+ developers already on the platform</div>
+                <div className="text-xs text-zinc-500 mt-1">From 40+ countries — free to start, no credit card required.</div>
+              </div>
+              <Link href="/auth" className="sm:ml-auto flex-shrink-0">
+                <InteractiveHoverLinkInner text="Get started free" className="text-sm" />
+              </Link>
+            </div>
           </AnimatedContainer>
         </div>
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <Section>
-          <div className="text-center mb-16">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
-            <h2 className="text-3xl font-bold tracking-tight text-white">Common questions</h2>
-            <p className="text-sm text-zinc-600 mt-2">Swipe or use arrows to navigate</p>
+      <section className="py-24 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-5xl mx-auto">
+          <Section>
+            <div className="text-center mb-14">
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Common questions</h2>
+              <p className="text-sm text-zinc-600 mt-3 max-w-md mx-auto">
+                Everything you need to know about Bolty. Can&apos;t find the answer? Chat with us in the community.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {EXTENDED_FAQ.map(item => (
+                <FAQItem key={item.q} q={item.q} a={item.a} />
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <p className="text-sm text-zinc-600 mb-4">Still have questions?</p>
+              <Link href="/chat">
+                <InteractiveHoverLinkInner text="Ask in community" className="text-sm" />
+              </Link>
+            </div>
+          </Section>
+        </div>
+      </section>
+
+      {/* ── PLATFORM HIGHLIGHTS ──────────────────────────────────────────── */}
+      <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                icon: Shield,
+                title: 'Security first',
+                desc: 'End-to-end encrypted, OWASP compliant, 2FA supported. Your code and payments are safe.',
+              },
+              {
+                icon: Cpu,
+                title: 'Developer-native',
+                desc: 'Built by developers for developers. No fluff, no bloat — just the tools you actually need.',
+              },
+              {
+                icon: Hash,
+                title: 'Truly decentralized',
+                desc: 'Payments go directly on-chain. No middleman takes a cut from your hard-earned ETH.',
+              },
+            ].map((item, i) => (
+              <AnimatedContainer key={item.title} delay={i * 0.1}>
+                <div className="border border-white/06 rounded-2xl p-6 hover:border-monad-500/20 transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: 'rgba(131,110,249,0.1)' }}>
+                    <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-zinc-200 mb-2">{item.title}</h3>
+                  <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                </div>
+              </AnimatedContainer>
+            ))}
           </div>
-          <div className="max-w-2xl mx-auto">
-            <FaqCardStack items={FAQ} />
-          </div>
-        </Section>
+        </div>
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}

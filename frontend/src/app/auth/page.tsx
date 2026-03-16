@@ -6,6 +6,19 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { Waves } from '@/components/ui/wave-background';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import {
+  Shield,
+  Lock,
+  CheckCircle,
+  Code2,
+  Bot,
+  Coins,
+  MessageSquare,
+  Users,
+  TrendingUp,
+  Star,
+  Zap,
+} from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -65,16 +78,19 @@ function PasswordStrengthMeter({ password }: { password: string }) {
 }
 
 // -- Field --------------------------------------------------------------------
-function Field({ label, type, value, onChange, placeholder, autoComplete, showToggle }: {
+function Field({ label, type, value, onChange, placeholder, autoComplete, showToggle, hint }: {
   label: string; type: string; value: string;
   onChange: (v: string) => void; placeholder?: string;
-  autoComplete?: string; showToggle?: boolean;
+  autoComplete?: string; showToggle?: boolean; hint?: string;
 }) {
   const [visible, setVisible] = React.useState(false);
   const inputType = showToggle ? (visible ? 'text' : 'password') : type;
   return (
     <div>
-      <label className="block text-xs font-medium text-zinc-400 mb-1.5">{label}</label>
+      <div className="flex items-center justify-between mb-1.5">
+        <label className="block text-xs font-medium text-zinc-400">{label}</label>
+        {hint && <span className="text-xs text-zinc-600">{hint}</span>}
+      </div>
       <div className="relative">
         <input
           type={inputType} value={value}
@@ -101,32 +117,169 @@ function Field({ label, type, value, onChange, placeholder, autoComplete, showTo
   );
 }
 
+// -- Divider with label -------------------------------------------------------
+function OrDivider({ label = 'or continue with email' }: { label?: string }) {
+  return (
+    <div className="flex items-center gap-3 my-5">
+      <div className="flex-1 h-px bg-zinc-800" />
+      <span className="text-xs text-zinc-600 whitespace-nowrap">{label}</span>
+      <div className="flex-1 h-px bg-zinc-800" />
+    </div>
+  );
+}
+
+// -- GitHub button ------------------------------------------------------------
+function GitHubButton({ label, disabled }: { label: string; disabled?: boolean }) {
+  const handleGitHub = () => {
+    window.location.href = `${API_URL}/auth/github`;
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleGitHub}
+      disabled={disabled}
+      className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-zinc-700 bg-zinc-900/50
+                 text-sm font-medium text-zinc-300 hover:bg-zinc-800/70 hover:border-zinc-600 hover:text-white
+                 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+      </svg>
+      {label}
+    </button>
+  );
+}
+
 // -- Brand panel --------------------------------------------------------------
+const BRAND_STATS = [
+  { value: '1,200+', label: 'Developers', icon: Users },
+  { value: '3,400+', label: 'Repos', icon: Code2 },
+  { value: '240+', label: 'AI Agents', icon: Bot },
+  { value: '18.4 ETH', label: 'Earned', icon: Coins },
+];
+
+const BRAND_FEATURES = [
+  { icon: Code2, title: 'Publish & monetize repos', desc: 'Connect GitHub and earn ETH from your locked repositories.' },
+  { icon: Bot, title: 'Deploy AI agents', desc: 'List automation tools, bots, and AI scripts on the marketplace.' },
+  { icon: MessageSquare, title: 'Global dev community', desc: 'Real-time chat, DMs, and social features with devs worldwide.' },
+  { icon: Zap, title: 'Built-in AI assistant', desc: 'Get instant code help without leaving the platform.' },
+];
+
+const BRAND_TESTIMONIAL = {
+  text: 'Published my first locked repo on Bolty and earned 0.12 ETH in the first week.',
+  name: 'Alex R.',
+  role: 'Senior Dev',
+};
+
 function BrandPanel() {
   return (
-    <div className="flex flex-col items-center justify-center text-center px-12">
+    <div className="flex flex-col items-center justify-center px-8 py-12 h-full w-full max-w-lg mx-auto">
       {/* Logo */}
-      <div className="relative mb-10" style={{ filter: 'drop-shadow(0 0 48px rgba(131,110,249,0.65))' }}>
-        <BoltyLogo size={220} />
+      <div className="relative mb-8" style={{ filter: 'drop-shadow(0 0 40px rgba(131,110,249,0.55))' }}>
+        <BoltyLogo size={80} />
       </div>
 
-      <p className="text-zinc-400 text-base leading-relaxed max-w-sm mb-10">
-        The developer platform for publishing AI agents, monetizing code, and connecting with a global community.
+      <h2 className="text-xl font-bold text-white mb-1 text-center">The developer platform</h2>
+      <p className="text-zinc-500 text-sm text-center mb-8 max-w-xs">
+        Publish AI agents, monetize code, and connect with a global community.
       </p>
 
-      <div className="space-y-3 w-full max-w-xs">
-        {[
-          'Publish repos and AI agents',
-          'Earn ETH from locked content',
-          'Chat with developers globally',
-          'Built-in AI assistant',
-        ].map(text => (
-          <div key={text} className="flex items-center gap-3 text-sm text-zinc-400">
-            <span className="text-monad-400 text-xs">&#9656;</span>
-            {text}
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 gap-3 w-full mb-8">
+        {BRAND_STATS.map(s => (
+          <div key={s.label} className="border border-white/06 rounded-xl p-3 text-center"
+            style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="flex items-center justify-center gap-1.5 mb-1">
+              <s.icon className="w-3 h-3 text-monad-400" strokeWidth={1.5} />
+            </div>
+            <div className="text-lg font-bold text-monad-400 leading-none mb-1">{s.value}</div>
+            <div className="text-xs text-zinc-600">{s.label}</div>
           </div>
         ))}
       </div>
+
+      {/* Feature list */}
+      <div className="w-full space-y-2.5 mb-8">
+        {BRAND_FEATURES.map(f => (
+          <div key={f.title} className="flex items-start gap-3 rounded-xl p-3 hover:border-monad-500/15 transition-colors border border-transparent"
+            style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
+              style={{ background: 'rgba(131,110,249,0.12)' }}>
+              <f.icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="text-xs font-semibold text-zinc-300">{f.title}</div>
+              <div className="text-xs text-zinc-600 mt-0.5">{f.desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Mini testimonial */}
+      <div className="w-full border border-white/06 rounded-xl p-4 mb-6"
+        style={{ background: 'rgba(131,110,249,0.04)' }}>
+        <div className="flex gap-1 mb-2">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className="w-3 h-3 text-monad-400 fill-monad-400" />
+          ))}
+        </div>
+        <p className="text-xs text-zinc-400 leading-relaxed mb-3">&ldquo;{BRAND_TESTIMONIAL.text}&rdquo;</p>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-monad-400 flex-shrink-0"
+            style={{ background: 'rgba(131,110,249,0.15)' }}>
+            {BRAND_TESTIMONIAL.name.charAt(0)}
+          </div>
+          <div>
+            <span className="text-xs font-medium text-zinc-300">{BRAND_TESTIMONIAL.name}</span>
+            <span className="text-xs text-zinc-600 ml-1.5">{BRAND_TESTIMONIAL.role}</span>
+          </div>
+          <CheckCircle className="w-3.5 h-3.5 text-monad-400/50 ml-auto" strokeWidth={1.5} />
+        </div>
+      </div>
+
+      {/* Security badges */}
+      <div className="flex flex-wrap gap-3 justify-center">
+        {[
+          { icon: Lock, label: 'End-to-end encrypted' },
+          { icon: Shield, label: 'OWASP compliant' },
+          { icon: CheckCircle, label: '2FA supported' },
+        ].map(b => (
+          <span key={b.label} className="flex items-center gap-1.5 text-xs text-zinc-600">
+            <b.icon className="w-3 h-3" strokeWidth={2} />
+            {b.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// -- Progress steps (register) ------------------------------------------------
+function RegisterProgress({ step }: { step: 1 | 2 }) {
+  return (
+    <div className="flex items-center gap-2 mb-6">
+      {[1, 2].map(s => (
+        <React.Fragment key={s}>
+          <div className={`flex items-center gap-1.5`}>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+              s < step
+                ? 'bg-monad-500 text-white'
+                : s === step
+                  ? 'border-2 border-monad-500 text-monad-400'
+                  : 'border border-zinc-700 text-zinc-600'
+            }`}>
+              {s < step
+                ? <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                : s
+              }
+            </div>
+            <span className={`text-xs hidden sm:inline ${s === step ? 'text-zinc-300 font-medium' : 'text-zinc-600'}`}>
+              {s === 1 ? 'Account' : 'Profile'}
+            </span>
+          </div>
+          {s < 2 && <div className={`flex-1 h-px transition-all ${s < step ? 'bg-monad-500' : 'bg-zinc-800'}`} />}
+        </React.Fragment>
+      ))}
     </div>
   );
 }
@@ -316,7 +469,7 @@ export default function AuthPage() {
           </>
         );
       }
-      return 'Step 2 of 2 - Optional profile details';
+      return 'Step 2 of 2 — Optional profile details';
     }
     if (tab === 'forgot') {
       return (
@@ -348,11 +501,31 @@ export default function AuthPage() {
         <div className="w-full max-w-md">
 
           {/* Mobile logo */}
-          <div className="flex items-center mb-8 lg:hidden">
-            <BoltyLogo size={40} />
+          <div className="flex items-center gap-3 mb-8 lg:hidden">
+            <BoltyLogo size={36} />
+            <span className="text-sm font-semibold text-zinc-300">Bolty</span>
           </div>
 
-          <div className="mb-8">
+          {/* Tab header (login / register) */}
+          {!twoFactorPending && tab !== 'forgot' && tab !== 'reset-sent' && (
+            <div className="flex gap-1 mb-7 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              {(['login', 'register'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => { setTab(t); if (t === 'register') setRegStep(1); clearMessages(); }}
+                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    tab === t
+                      ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30'
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {t === 'login' ? 'Sign in' : 'Create account'}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-white tracking-tight mb-1">
               {getHeading()}
             </h1>
@@ -360,6 +533,11 @@ export default function AuthPage() {
               {getSubheading()}
             </p>
           </div>
+
+          {/* Register step progress */}
+          {!twoFactorPending && tab === 'register' && (
+            <RegisterProgress step={regStep} />
+          )}
 
           {/* Error / success messages */}
           {error && (
@@ -382,6 +560,13 @@ export default function AuthPage() {
           {/* -- 2FA step ---------------------------------------------------- */}
           {twoFactorPending && (
             <form onSubmit={handle2FAVerify} className="space-y-4">
+              <div className="rounded-xl border border-monad-500/20 p-4 mb-2"
+                style={{ background: 'rgba(131,110,249,0.05)' }}>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Two-factor authentication is enabled on this account. We sent a 6-digit code to your email.
+                  It expires in 10 minutes.
+                </p>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-zinc-400 mb-1.5">Verification code</label>
                 <input
@@ -393,6 +578,7 @@ export default function AuthPage() {
                              text-center text-2xl font-mono tracking-[0.5em] outline-none
                              focus:border-monad-500/60 transition-all placeholder:text-zinc-700 placeholder:tracking-normal"
                 />
+                <p className="text-xs text-zinc-600 mt-1.5 text-center">Enter the 6-digit code from your inbox</p>
               </div>
               <button type="submit" disabled={loading === '2fa' || twoFactorCode.length !== 6}
                 className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
@@ -402,38 +588,49 @@ export default function AuthPage() {
               </button>
               <button type="button" onClick={() => { resetTwoFactor(); clearMessages(); }}
                 className="w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors py-1">
-                Back to sign in
+                ← Back to sign in
               </button>
             </form>
           )}
 
           {/* -- Login form -------------------------------------------------- */}
           {!twoFactorPending && tab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Field label="Email or username" type="text" value={loginIdentifier} onChange={setLoginIdentifier}
-                placeholder="you@email.com or your_username" autoComplete="username" />
-              <div>
-                <Field label="Password" type="password" value={loginPassword} onChange={setLoginPassword}
-                  placeholder="Your password" autoComplete="current-password" showToggle />
-                <div className="mt-1.5 text-right">
-                  <button type="button" onClick={() => { setTab('forgot'); clearMessages(); }}
-                    className="text-xs text-zinc-500 hover:text-monad-400 transition-colors">
-                    Forgot your password?
-                  </button>
+            <div>
+              <GitHubButton label="Continue with GitHub" disabled={anyLoading} />
+              <OrDivider />
+              <form onSubmit={handleLogin} className="space-y-4">
+                <Field label="Email or username" type="text" value={loginIdentifier} onChange={setLoginIdentifier}
+                  placeholder="you@email.com or your_username" autoComplete="username" />
+                <div>
+                  <Field label="Password" type="password" value={loginPassword} onChange={setLoginPassword}
+                    placeholder="Your password" autoComplete="current-password" showToggle />
+                  <div className="mt-1.5 text-right">
+                    <button type="button" onClick={() => { setTab('forgot'); clearMessages(); }}
+                      className="text-xs text-zinc-500 hover:text-monad-400 transition-colors">
+                      Forgot your password?
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <button type="submit" disabled={anyLoading}
-                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
-                {loading === 'email'
-                  ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Signing in...</span>
-                  : 'Sign in'}
-              </button>
-            </form>
+                <button type="submit" disabled={anyLoading}
+                  className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
+                  {loading === 'email'
+                    ? <span className="flex items-center justify-center gap-2"><span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />Signing in...</span>
+                    : 'Sign in'}
+                </button>
+              </form>
+            </div>
           )}
 
           {/* -- Forgot password form ---------------------------------------- */}
           {!twoFactorPending && tab === 'forgot' && (
             <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="rounded-xl border border-white/06 p-4 mb-2"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Enter your email or username and we&apos;ll send you a link to reset your password.
+                  The link expires in 30 minutes.
+                </p>
+              </div>
               <Field label="Email or username" type="text" value={forgotIdentifier} onChange={setForgotIdentifier}
                 placeholder="you@email.com or your_username" autoComplete="username" />
               <button type="submit" disabled={loading === 'forgot'}
@@ -457,6 +654,13 @@ export default function AuthPage() {
                   <p className="text-zinc-400 text-xs mt-0.5">If an account with that email exists, you will receive a link within a few minutes. Check your spam folder too.</p>
                 </div>
               </div>
+              <div className="rounded-xl border border-white/06 p-4"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Didn&apos;t receive it? Make sure to check your spam folder.
+                  The reset link expires in 30 minutes.
+                </p>
+              </div>
               <button type="button" onClick={() => { setTab('login'); clearMessages(); setForgotIdentifier(''); }}
                 className="w-full py-3 rounded-xl btn-primary">
                 Back to sign in
@@ -466,31 +670,41 @@ export default function AuthPage() {
 
           {/* -- Register form: Step 1 --------------------------------------- */}
           {!twoFactorPending && tab === 'register' && regStep === 1 && (
-            <form onSubmit={handleRegisterStep1} className="space-y-4">
-              <Field label="Email" type="email" value={regEmail} onChange={setRegEmail}
-                placeholder="you@email.com" autoComplete="email" />
-              <Field label="Username" type="text" value={regUsername}
-                onChange={v => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                placeholder="your_username" autoComplete="username" />
-              <div>
-                <Field label="Password" type="password" value={regPassword} onChange={setRegPassword}
-                  placeholder="Create a strong password" autoComplete="new-password" showToggle />
-                <PasswordStrengthMeter password={regPassword} />
-              </div>
-              <Field label="Confirm password" type="password" value={regConfirm} onChange={setRegConfirm}
-                placeholder="Repeat your password" autoComplete="new-password" showToggle />
-              <button type="submit" disabled={anyLoading}
-                className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
-                Continue
-              </button>
-            </form>
+            <div>
+              <GitHubButton label="Sign up with GitHub" disabled={anyLoading} />
+              <OrDivider />
+              <form onSubmit={handleRegisterStep1} className="space-y-4">
+                <Field label="Email" type="email" value={regEmail} onChange={setRegEmail}
+                  placeholder="you@email.com" autoComplete="email" hint="We'll never share your email" />
+                <Field label="Username" type="text" value={regUsername}
+                  onChange={v => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                  placeholder="your_username" autoComplete="username" hint="Lowercase letters, numbers, _ and -" />
+                <div>
+                  <Field label="Password" type="password" value={regPassword} onChange={setRegPassword}
+                    placeholder="Create a strong password" autoComplete="new-password" showToggle />
+                  <PasswordStrengthMeter password={regPassword} />
+                </div>
+                <Field label="Confirm password" type="password" value={regConfirm} onChange={setRegConfirm}
+                  placeholder="Repeat your password" autoComplete="new-password" showToggle />
+                <button type="submit" disabled={anyLoading}
+                  className="w-full py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed mt-1">
+                  Continue to step 2 →
+                </button>
+              </form>
+            </div>
           )}
 
           {/* -- Register form: Step 2 --------------------------------------- */}
           {!twoFactorPending && tab === 'register' && regStep === 2 && (
             <form onSubmit={handleRegisterStep2} className="space-y-4">
+              <div className="rounded-xl border border-white/06 p-4 mb-1"
+                style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <p className="text-xs text-zinc-500 leading-relaxed">
+                  Help us personalize your experience. Gender is required; everything else is optional.
+                </p>
+              </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Gender</label>
+                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Gender <span className="text-red-500">*</span></label>
                 <select
                   value={regGender}
                   onChange={e => setRegGender(e.target.value)}
@@ -507,14 +721,34 @@ export default function AuthPage() {
                 </select>
               </div>
               <Field label="Occupation" type="text" value={regOccupation} onChange={setRegOccupation}
-                placeholder="Your occupation" />
-              <Field label="What do you do?" type="text" value={regWhatDoYouDo} onChange={setRegWhatDoYouDo}
-                placeholder="e.g. Full-stack developer, Student, Designer..." />
+                placeholder="e.g. Software Engineer, Student, Freelancer..." hint="Optional" />
+              <Field label="What do you build?" type="text" value={regWhatDoYouDo} onChange={setRegWhatDoYouDo}
+                placeholder="e.g. Full-stack apps, AI tools, DeFi protocols..." hint="Optional" />
+
+              {/* What you get reminder */}
+              <div className="rounded-xl border border-monad-500/15 p-4"
+                style={{ background: 'rgba(131,110,249,0.04)' }}>
+                <p className="text-xs font-medium text-monad-400 mb-2">You&apos;re about to unlock:</p>
+                <div className="space-y-1.5">
+                  {[
+                    'Publish and monetize code repos',
+                    'Deploy AI agents to the marketplace',
+                    'Join the global developer community',
+                    'Access the built-in AI assistant',
+                  ].map(item => (
+                    <div key={item} className="flex items-center gap-2 text-xs text-zinc-400">
+                      <CheckCircle className="w-3 h-3 text-monad-400 flex-shrink-0" strokeWidth={2} />
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex gap-3 mt-1">
                 <button type="button" onClick={() => { setRegStep(1); clearMessages(); }}
                   className="flex-1 py-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-sm text-zinc-300
                              hover:bg-zinc-800/70 hover:border-zinc-700 transition-all">
-                  Back
+                  ← Back
                 </button>
                 <button type="submit" disabled={anyLoading}
                   className="flex-1 py-3 rounded-xl btn-primary disabled:opacity-50 disabled:cursor-not-allowed">
@@ -523,37 +757,51 @@ export default function AuthPage() {
                     : 'Create account'}
                 </button>
               </div>
+
+              <p className="text-xs text-center text-zinc-700 mt-2">
+                By creating an account you agree to our{' '}
+                <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">Terms of Service</span>
+                {' '}and{' '}
+                <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">Privacy Policy</span>.
+              </p>
             </form>
           )}
 
-          {/* Trust badges */}
-          {!twoFactorPending && (
-            <div className="mt-6 flex flex-wrap gap-4 text-xs text-zinc-600">
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                End-to-end encrypted
-              </span>
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
-                OWASP compliant
-              </span>
-              <span className="flex items-center gap-1.5">
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                2FA supported
-              </span>
+          {/* Trust badges (login + forgot only) */}
+          {!twoFactorPending && tab !== 'register' && (
+            <div className="mt-6 pt-6 border-t border-zinc-900">
+              <div className="flex flex-wrap gap-4 text-xs text-zinc-600">
+                <span className="flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5" strokeWidth={2} />
+                  End-to-end encrypted
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5" strokeWidth={2} />
+                  OWASP compliant
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle className="w-3.5 h-3.5" strokeWidth={2} />
+                  2FA supported
+                </span>
+              </div>
             </div>
           )}
         </div>
       </div>
 
       {/* -- Right side: Brand panel ----------------------------------------- */}
-      <div className="hidden lg:flex lg:w-[45%] relative items-center justify-center z-10">
+      <div className="hidden lg:flex lg:w-[45%] relative items-stretch justify-center z-10"
+        style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
         {/* Background rings */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full"
-          style={{ border: '1px solid rgba(131,110,249,0.1)' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full"
-          style={{ border: '1px solid rgba(131,110,249,0.08)' }} />
-        <BrandPanel />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full"
+          style={{ border: '1px solid rgba(131,110,249,0.07)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] rounded-full"
+          style={{ border: '1px solid rgba(131,110,249,0.04)' }} />
+        <div className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.04) 0%, transparent 65%)' }} />
+        <div className="relative z-10 flex items-center justify-center w-full overflow-y-auto py-8">
+          <BrandPanel />
+        </div>
       </div>
     </div>
   );
