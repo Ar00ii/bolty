@@ -13,7 +13,6 @@ import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import { FaqCardStack } from '@/components/ui/faq-card-stack';
 import {
-  Sparkles,
   Code2,
   Bot,
   Users,
@@ -69,7 +68,7 @@ function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationPr
 function AgentIcon() {
   return (
     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5M4.5 15.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
     </svg>
   );
 }
@@ -101,9 +100,9 @@ const ORBITAL_DATA = [
     id: 1,
     title: 'AI Assistant',
     date: 'Live',
-    content: 'Powered by Google Gemini. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.',
+    content: 'Intelligent code assistance built directly into the platform. Ask questions, get instant answers on code reviews, architecture decisions, and debugging.',
     category: 'AI',
-    icon: Sparkles,
+    icon: Bot,
     relatedIds: [2, 3],
     status: 'completed' as const,
     energy: 95,
@@ -112,7 +111,7 @@ const ORBITAL_DATA = [
     id: 2,
     title: 'Code Repos',
     date: 'Live',
-    content: 'Publish your GitHub repositories to the Bolty community. Offer free or paid access, get votes, and build your reputation.',
+    content: 'Publish your code repositories to the Bolty community. Offer free or paid access, earn reputation, and grow your developer profile.',
     category: 'Dev',
     icon: Code2,
     relatedIds: [1, 5],
@@ -123,7 +122,7 @@ const ORBITAL_DATA = [
     id: 3,
     title: 'AI Agents',
     date: 'Beta',
-    content: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.',
+    content: 'Publish and discover AI agents, bots, and automation tools. Share your creations with the community — upload directly from the platform.',
     category: 'Agents',
     icon: Bot,
     relatedIds: [1, 4],
@@ -134,7 +133,7 @@ const ORBITAL_DATA = [
     id: 4,
     title: 'Community',
     date: 'Live',
-    content: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, find collaborators.',
+    content: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, and find collaborators worldwide.',
     category: 'Social',
     icon: Users,
     relatedIds: [3, 5],
@@ -145,7 +144,7 @@ const ORBITAL_DATA = [
     id: 5,
     title: 'ETH Payments',
     date: 'Live',
-    content: 'On-chain payments for locked repos and agent listings. Buyers pay directly to your wallet in ETH — no middleman.',
+    content: 'On-chain payments for locked repos and agent listings. Buyers pay directly to your wallet in ETH — no middleman, no fees.',
     category: 'Payments',
     icon: Coins,
     relatedIds: [2, 6],
@@ -154,9 +153,9 @@ const ORBITAL_DATA = [
   },
   {
     id: 6,
-    title: 'GitHub Sync',
+    title: 'Repo Sync',
     date: 'Live',
-    content: 'Connect your GitHub account with one click. Sync repositories, track activity, and publish projects directly to the marketplace.',
+    content: 'Connect your version control account with one click. Sync repositories, track activity, and publish projects directly to the marketplace.',
     category: 'Integration',
     icon: GitBranch,
     relatedIds: [2, 5],
@@ -167,9 +166,9 @@ const ORBITAL_DATA = [
 
 // ── Feature cards data ─────────────────────────────────────────────────────────
 const PLATFORM_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; description: string; href: string }> = [
-  { title: 'AI Assistant', icon: AgentIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Powered by Google Gemini. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.', href: '#ai' },
-  { title: 'Code Repos', icon: CodeIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish your GitHub repositories to the Bolty community. Offer free or paid access, get votes, and build your reputation.', href: '/repos' },
-  { title: 'AI Agents', icon: MarketIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish and discover AI agents, bots, and automation tools. Share your agent with the world — upload directly, no GitHub needed.', href: '/market' },
+  { title: 'AI Assistant', icon: AgentIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Built-in AI assistant. Instant answers on code reviews, architecture decisions, and debugging — without leaving the platform.', href: '#ai' },
+  { title: 'Code Repos', icon: CodeIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish your code repositories to the Bolty community. Offer free or paid access, earn votes, and build your developer reputation.', href: '/repos' },
+  { title: 'AI Agents', icon: MarketIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Publish and discover AI agents, bots, and automation tools. Share your creations with the world — upload directly from the platform.', href: '/market' },
   { title: 'Community', icon: UsersIcon as React.ComponentType<React.SVGProps<SVGSVGElement>>, description: 'Real-time global chat, direct messages, and social features. Connect with developers, share ideas, find collaborators.', href: '/chat' },
 ];
 
@@ -429,7 +428,7 @@ export default function HomePage() {
               Ask, build, ship — faster
             </h2>
             <p className="text-base leading-relaxed max-w-2xl mx-auto mb-10 text-zinc-400">
-              The Bolty AI assistant, powered by Google Gemini, is always one click away.
+              The Bolty AI assistant is always one click away.
               Ask code questions, get architecture advice, or debug issues — without leaving the platform.
             </p>
           </AnimatedContainer>

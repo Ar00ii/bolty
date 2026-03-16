@@ -161,7 +161,7 @@ function BrandPanel() {
           'Publish repos and AI agents',
           'Earn ETH from locked content',
           'Chat with developers globally',
-          'Built-in Gemini AI assistant',
+          'Built-in AI assistant',
         ].map(text => (
           <div key={text} className="flex items-center gap-3 text-sm text-zinc-400">
             <span className="text-monad-400 text-xs">&#9656;</span>

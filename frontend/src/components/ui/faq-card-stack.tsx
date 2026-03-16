@@ -95,31 +95,30 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
                   onClick={() => { if (isFront) setShowAnswer(s => !s); }}
                   whileDrag={isFront ? { cursor: 'grabbing', scale: 1.02, zIndex: cards.length + 1 } : {}}
                 >
-                  <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                    <div>
-                      <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest mb-3">
-                        {String(currentIndex + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-                      </p>
-                      <h3 className="text-lg font-bold text-white leading-snug">{q}</h3>
-                    </div>
+                  {isFront && (
+                    <div className="absolute inset-0 p-8 flex flex-col justify-between">
+                      <div>
+                        <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest mb-3">
+                          {String(currentIndex + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                        </p>
+                        <h3 className="text-lg font-bold text-white leading-snug">{q}</h3>
+                      </div>
 
-                    <div>
-                      <motion.p
-                        initial={false}
-                        animate={{
-                          opacity: showAnswer && isFront ? 1 : 0,
-                          y: showAnswer && isFront ? 0 : 8,
-                        }}
-                        transition={{ duration: 0.2 }}
-                        className="text-zinc-400 text-sm leading-relaxed"
-                      >
-                        {a}
-                      </motion.p>
-                      {!showAnswer && isFront && (
-                        <p className="text-[11px] text-zinc-700 mt-1">Click to reveal answer ↩</p>
-                      )}
+                      <div>
+                        <motion.p
+                          initial={false}
+                          animate={{ opacity: showAnswer ? 1 : 0, y: showAnswer ? 0 : 8 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-zinc-400 text-sm leading-relaxed"
+                        >
+                          {a}
+                        </motion.p>
+                        {!showAnswer && (
+                          <p className="text-[11px] text-zinc-700 mt-1">Click to reveal answer ↩</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </motion.li>
               );
             })}
