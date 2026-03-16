@@ -141,14 +141,14 @@ export default function RadialOrbitalTimeline({
           style={{ perspective: "1000px" }}
         >
           {/* Center: Bolty logo */}
-          <div className="absolute w-16 h-16 rounded-full flex items-center justify-center z-10">
-            <div className="absolute w-20 h-20 rounded-full border border-monad-400/30 animate-ping opacity-50" />
+          <div className="absolute w-32 h-32 rounded-full flex items-center justify-center z-10">
+            <div className="absolute w-40 h-40 rounded-full border border-monad-400/30 animate-ping opacity-50" />
             <div
-              className="absolute w-24 h-24 rounded-full border border-monad-400/20 animate-ping opacity-30"
+              className="absolute w-48 h-48 rounded-full border border-monad-400/20 animate-ping opacity-30"
               style={{ animationDelay: "0.5s" }}
             />
             <div className="absolute inset-0 rounded-full blur-xl opacity-40" style={{ background: "rgba(131,110,249,0.6)" }} />
-            <BoltyLogo size={36} color="#836EF9" className="relative z-10" style={{ filter: "drop-shadow(0 0 8px rgba(131,110,249,0.8))" } as React.CSSProperties} />
+            <BoltyLogo size={88} color="#836EF9" className="relative z-10" style={{ filter: "drop-shadow(0 0 14px rgba(131,110,249,0.9))" } as React.CSSProperties} />
           </div>
 
           {/* Orbit ring */}
