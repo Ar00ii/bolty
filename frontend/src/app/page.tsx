@@ -257,11 +257,12 @@ export default function HomePage() {
     <div className="bg-black overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative h-screen flex items-center bg-black overflow-hidden">
+      <section className="relative h-screen bg-black overflow-hidden">
         <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
-        <div className="max-w-7xl mx-auto px-8 w-full h-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center h-full">
-            <div className="relative z-10 flex flex-col justify-center">
+        {/* Left content — absolutely centered vertically, ignores spline height */}
+        <div className="absolute inset-0 flex items-center pointer-events-none">
+          <div className="max-w-7xl mx-auto px-8 w-full">
+            <div className="relative z-10 flex flex-col max-w-lg pointer-events-auto">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
                 Built for developers
               </p>
@@ -278,14 +279,14 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
-            {/* Right — 3D robot */}
-            <div className="relative h-full hidden md:block">
-              <SplineScene
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
-            </div>
           </div>
+        </div>
+        {/* Right — 3D robot, takes full height */}
+        <div className="absolute right-0 top-0 w-1/2 h-full hidden md:block">
+          <SplineScene
+            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+            className="w-full h-full"
+          />
         </div>
       </section>
 

@@ -53,7 +53,7 @@ export function InteractiveHoverLinkInner({
   return (
     <span
       className={cn(
-        'group relative flex min-w-40 items-center justify-center overflow-hidden rounded-full border border-monad-500/40 bg-transparent p-2 px-6 font-semibold text-white transition-all duration-300',
+        'group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-monad-500/40 bg-transparent py-2 px-6 font-semibold text-white transition-all duration-300',
         classes,
         className,
       )}
