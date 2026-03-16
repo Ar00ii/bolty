@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { DottedSurface } from '@/components/ui/dotted-surface';
-import { MenuVertical } from '@/components/ui/menu-vertical';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -738,30 +737,14 @@ export default function MarketPage() {
           className="absolute -top-4 left-0 w-64 h-20 pointer-events-none"
           style={{ background: 'radial-gradient(ellipse at 0% 50%, rgba(139,92,246,0.15) 0%, transparent 70%)' }}
         />
-
-        {/* Vertical Menu Navigation */}
-        <div className="mb-10 pt-2">
-          <p className="text-xs font-mono text-zinc-600 mb-6 tracking-widest uppercase">Bolty Platform</p>
-          <MenuVertical
-            menuItems={[
-              { label: "AI Agents", href: "/market" },
-              { label: "Repositories", href: "/repos" },
-              { label: "Community", href: "/community" },
-              { label: "Messages", href: "/dm" },
-            ]}
-            color="#836ef9"
-          />
-        </div>
         <div className="relative flex items-start justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
                 style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}
               >
-                <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                </svg>
+                🤖
               </div>
               <div>
                 <h1

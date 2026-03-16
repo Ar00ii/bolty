@@ -105,7 +105,7 @@ export function Navbar() {
                   className={clsx(
                     'relative px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150',
                     pathname === link.href || pathname.startsWith(link.href + '/')
-                      ? 'text-white bg-white/8 border border-white/10'
+                      ? 'text-white bg-monad-500 border border-monad-400/40 shadow-[0_0_12px_rgba(131,110,249,0.3)]'
                       : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
                   )}
                 >
@@ -192,7 +192,7 @@ export function Navbar() {
                   className={clsx(
                     'relative flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mb-0.5',
                     pathname === link.href
-                      ? 'text-white bg-white/8'
+                      ? 'text-white bg-monad-500 border border-monad-400/40'
                       : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5',
                   )}
                 >
