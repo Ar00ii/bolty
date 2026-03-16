@@ -11,6 +11,7 @@ import { SplineScene } from '@/components/ui/splite';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
+import { FaqCardStack } from '@/components/ui/faq-card-stack';
 import {
   Sparkles,
   Code2,
@@ -291,38 +292,40 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES ─────────────────────────────────────────────────────── */}
-      <section className="relative max-w-7xl mx-auto px-4 py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* BackgroundPaths behind this section */}
+      <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* BackgroundPaths — full-width behind this section */}
         <BackgroundPaths />
 
-        <AnimatedContainer className="text-center mb-14 relative z-10">
-          <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-            Everything you need to build
-          </h2>
-          <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
-            From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
-          </p>
-        </AnimatedContainer>
-
-        {/* Side-by-side: cards left (vertical), orbit right */}
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-center">
-          {/* Left: Feature cards — vertical stack */}
-          <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
-            {PLATFORM_FEATURES.map((f, i) => (
-              <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                <FeatureCard
-                  feature={f}
-                  className="border border-dashed border-white/20 transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30"
-                />
-              </Link>
-            ))}
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          <AnimatedContainer className="text-center mb-14">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+              Everything you need to build
+            </h2>
+            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
+              From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
+            </p>
           </AnimatedContainer>
 
-          {/* Right: Orbital timeline */}
-          <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
-            <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
-          </AnimatedContainer>
+          {/* Side-by-side: cards left (vertical), orbit right */}
+          <div className="flex flex-col lg:flex-row gap-8 items-center">
+            {/* Left: Feature cards — vertical stack */}
+            <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
+              {PLATFORM_FEATURES.map((f, i) => (
+                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
+                  <FeatureCard
+                    feature={f}
+                    className="border border-dashed border-white/20 transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30"
+                  />
+                </Link>
+              ))}
+            </AnimatedContainer>
+
+            {/* Right: Orbital timeline */}
+            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
+              <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
+            </AnimatedContainer>
+          </div>
         </div>
       </section>
 
@@ -442,14 +445,15 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="py-24 max-w-3xl mx-auto px-4">
+      <section className="py-24 px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <Section>
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
             <h2 className="text-3xl font-bold tracking-tight text-white">Common questions</h2>
+            <p className="text-sm text-zinc-600 mt-2">Swipe or use arrows to navigate · click card to reveal answer</p>
           </div>
-          <div className="space-y-3">
-            {FAQ.map((item) => <FAQItem key={item.q} {...item} />)}
+          <div className="max-w-2xl mx-auto">
+            <FaqCardStack items={FAQ} />
           </div>
         </Section>
       </section>
