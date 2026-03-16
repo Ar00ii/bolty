@@ -49,6 +49,9 @@ interface PurchaseListingBody {
   txHash: string;
   amountWei: string;
   negotiationId?: string;
+  platformFeeTxHash?: string;
+  consentSignature?: string;
+  consentMessage?: string;
 }
 
 interface SendMessageBody {
@@ -169,7 +172,10 @@ export class MarketController {
     @Body() body: PurchaseListingBody,
   ) {
     if (!body.txHash?.trim()) throw new BadRequestException('txHash required');
-    return this.marketService.purchaseListing(id, buyerId, body.txHash, body.amountWei || '0', body.negotiationId);
+    return this.marketService.purchaseListing(
+      id, buyerId, body.txHash, body.amountWei || '0', body.negotiationId,
+      body.platformFeeTxHash, body.consentSignature, body.consentMessage,
+    );
   }
 
   @Delete(':id')

@@ -2,10 +2,12 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 
@@ -181,10 +183,19 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     });
   }
 
-  async purchaseListing(listingId: string, buyerId: string, txHash: string, amountWei: string, negotiationId?: string) {
+  async purchaseListing(
+    listingId: string,
+    buyerId: string,
+    txHash: string,
+    amountWei: string,
+    negotiationId?: string,
+    platformFeeTxHash?: string,
+    consentSignature?: string,
+    consentMessage?: string,
+  ) {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
-      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true },
+      include: { seller: { select: { id: true, walletAddress: true } } },
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
     if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot purchase your own listing');
@@ -197,8 +208,84 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     const dupTx = await this.prisma.marketPurchase.findUnique({ where: { txHash } });
     if (dupTx) throw new ForbiddenException('Transaction already recorded');
 
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
+    const sellerWallet = listing.seller.walletAddress;
+
+    // ── Consent signature verification ──────────────────────────────────
+    if (consentSignature && consentMessage) {
+      try {
+        const signerAddress = ethers.verifyMessage(consentMessage, consentSignature);
+        const buyer = await this.prisma.user.findUnique({
+          where: { id: buyerId },
+          select: { walletAddress: true },
+        });
+        if (!buyer?.walletAddress || signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()) {
+          throw new BadRequestException('Consent signature does not match buyer wallet');
+        }
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
+        throw new BadRequestException('Invalid consent signature');
+      }
+    }
+
+    // ── On-chain verification (seller payment) ───────────────────────────
+    let verifiedAmountWei = amountWei;
+    let platformFeeWei = '0';
+
+    if (sellerWallet) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const receipt = await provider.getTransactionReceipt(txHash);
+        if (!receipt || receipt.status !== 1) {
+          throw new BadRequestException('Seller payment transaction failed or not found');
+        }
+        const tx = await provider.getTransaction(txHash);
+        if (!tx) throw new BadRequestException('Transaction not found');
+        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
+          throw new BadRequestException('Transaction recipient does not match seller wallet');
+        }
+        verifiedAmountWei = tx.value.toString();
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
+        this.logger.error(`Market seller tx verification error: ${err instanceof Error ? err.message : err}`);
+        throw new BadRequestException('Could not verify seller payment on-chain');
+      }
+    }
+
+    // ── Platform commission verification (2.5%) ──────────────────────────
+    if (platformWallet && platformFeeTxHash) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
+        const feeTx = await provider.getTransaction(platformFeeTxHash);
+        if (!feeReceipt || feeReceipt.status !== 1) {
+          throw new BadRequestException('Platform fee transaction failed or not found');
+        }
+        if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
+          throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
+        }
+        platformFeeWei = feeTx.value.toString();
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
+        this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
+        throw new BadRequestException('Could not verify platform fee transaction');
+      }
+    }
+
     const purchase = await this.prisma.marketPurchase.create({
-      data: { txHash, amountWei, buyerId, listingId, negotiationId: negotiationId || null, verified: true },
+      data: {
+        txHash,
+        amountWei: verifiedAmountWei,
+        buyerId,
+        listingId,
+        negotiationId: negotiationId || null,
+        verified: true,
+        platformFeeTxHash: platformFeeTxHash || null,
+        platformFeeWei: platformFeeWei || null,
+        consentSignature: consentSignature || null,
+        consentMessage: consentMessage || null,
+      },
     });
 
     return { success: true, purchase };

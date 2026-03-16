@@ -6,6 +6,7 @@ import { DottedSurface } from '@/components/ui/dotted-surface';
 import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -145,6 +146,15 @@ function NegotiationModal({
   const [offerPrice, setOfferPrice] = useState('');
   const [error, setError] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [consentData, setConsentData] = useState<{
+    sellerWallet: string;
+    buyerAddress: string;
+    sellerWei: bigint;
+    platformWei: bigint;
+    totalWei: bigint;
+    negotiationId: string;
+    amountWei: string;
+  } | null>(null);
 
   useEffect(() => {
     api.post<Negotiation>(`/market/${listing.id}/negotiate`, {})
@@ -215,7 +225,7 @@ function NegotiationModal({
       const sellerWallet = (sellerData as any)?.seller?.walletAddress;
       if (!sellerWallet) { setError('Seller has no wallet linked'); setPaying(false); return; }
 
-      // Convert agreed price to ETH (using simple USD rate)
+      // Convert agreed price to ETH
       let ethPrice = 2000;
       try {
         const priceData = await api.get<{ price: number }>('/chart/price');
@@ -223,34 +233,31 @@ function NegotiationModal({
       } catch { /* use fallback */ }
 
       const currency = neg.listing.currency.toUpperCase();
-      let weiHex: string;
-      let amountWei: string;
+      let totalWei: bigint;
 
       if (currency === 'ETH') {
-        const wei = Math.ceil(neg.agreedPrice * 1e18);
-        weiHex = '0x' + wei.toString(16);
-        amountWei = wei.toString();
+        totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
       } else {
-        // USD or SOL — convert to ETH
         const usdValue = currency === 'SOL' ? neg.agreedPrice * 150 : neg.agreedPrice;
-        const eth = usdValue / ethPrice;
-        const wei = Math.ceil(eth * 1e18);
-        weiHex = '0x' + wei.toString(16);
-        amountWei = wei.toString();
+        totalWei = BigInt(Math.ceil((usdValue / ethPrice) * 1e18));
       }
 
-      const txHash = (await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{ to: sellerWallet, value: weiHex }],
-      })) as string;
+      const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
+      const platformWei = totalWei - sellerWei;
 
-      await api.post(`/market/${listing.id}/purchase`, {
-        txHash,
-        amountWei,
+      // Get buyer address
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+      const buyerAddress = accounts[0];
+
+      setConsentData({
+        sellerWallet,
+        buyerAddress,
+        sellerWei,
+        platformWei,
+        totalWei,
         negotiationId: neg.id,
+        amountWei: totalWei.toString(),
       });
-
-      setPaid(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied')) {
@@ -260,6 +267,54 @@ function NegotiationModal({
       }
     } finally {
       setPaying(false);
+    }
+  };
+
+  const executeMarketPurchase = async (signature: string, message: string) => {
+    if (!consentData) return;
+    const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei } = consentData;
+    setConsentData(null);
+
+    const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) { setError('MetaMask not found'); return; }
+
+    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+
+    try {
+      // tx1: pay seller (97.5%)
+      const txHash = (await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
+      })) as string;
+
+      // tx2: pay platform (2.5%)
+      let platformFeeTxHash: string | undefined;
+      if (platformWallet) {
+        platformFeeTxHash = (await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }],
+        })) as string;
+      }
+
+      await api.post(`/market/${listing.id}/purchase`, {
+        txHash,
+        amountWei,
+        negotiationId,
+        platformFeeTxHash,
+        consentSignature: signature,
+        consentMessage: message,
+      });
+
+      setPaid(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('rejected') || msg.includes('denied')) {
+        setError('Payment cancelled');
+      } else if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError('Payment failed: ' + msg.slice(0, 80));
+      }
     }
   };
 
@@ -474,6 +529,20 @@ function NegotiationModal({
           </div>
         )}
       </div>
+
+      {/* Payment Consent Modal — shown over negotiation modal */}
+      {consentData && neg && (
+        <PaymentConsentModal
+          listingTitle={listing.title}
+          sellerAddress={consentData.sellerWallet}
+          sellerAmountETH={(Number(consentData.sellerWei) / 1e18).toFixed(6)}
+          platformFeeETH={(Number(consentData.platformWei) / 1e18).toFixed(6)}
+          totalETH={(Number(consentData.totalWei) / 1e18).toFixed(6)}
+          buyerAddress={consentData.buyerAddress}
+          onConsent={executeMarketPurchase}
+          onCancel={() => setConsentData(null)}
+        />
+      )}
     </div>
   );
 }

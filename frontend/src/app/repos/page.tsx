@@ -6,6 +6,7 @@ import { DottedSurface } from '@/components/ui/dotted-surface';
 import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 
 interface Repository {
   id: string;
@@ -65,6 +66,16 @@ export default function ReposPage() {
   const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
   const [lockPrice, setLockPrice] = useState('');
   const [lockType, setLockType] = useState<'public' | 'locked'>('public');
+
+  // Payment consent modal state
+  const [consentModal, setConsentModal] = useState<{
+    repo: Repository;
+    sellerWallet: string;
+    buyerAddress: string;
+    sellerWei: bigint;
+    platformWei: bigint;
+    totalWei: bigint;
+  } | null>(null);
 
   const fetchRepos = useCallback(async () => {
     setLoading(true);
@@ -190,74 +201,80 @@ export default function ReposPage() {
   const payAndUnlock = async (repo: Repository) => {
     if (!repo.lockedPriceUsd) return;
 
-    // Fetch seller wallet from repo details
+    // Fetch seller wallet
     let sellerWallet: string | null = null;
     try {
       const details = await api.get<{ user: { walletAddress: string } }>(`/repos/${repo.id}`);
-      sellerWallet = details.user?.walletAddress;
+      sellerWallet = (details as any).user?.walletAddress;
     } catch {
       setError('Could not fetch seller wallet');
       return;
     }
+    if (!sellerWallet) { setError('Seller has no Ethereum wallet linked'); return; }
 
-    if (!sellerWallet) {
-      setError('Seller has no Ethereum wallet linked');
+    const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) { setError('MetaMask not found'); return; }
+
+    // Get ETH price
+    let ethPrice = 2000;
+    try {
+      const priceData = await api.get<{ price: number }>('/chart/price');
+      if ((priceData as any).price) ethPrice = (priceData as any).price;
+    } catch { /* use fallback */ }
+
+    const totalWei = BigInt(Math.ceil((repo.lockedPriceUsd / ethPrice) * 1e18));
+    const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
+    const platformWei = totalWei - sellerWei;
+
+    // Get buyer address from MetaMask
+    let buyerAddress: string;
+    try {
+      const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
+      buyerAddress = accounts[0];
+    } catch {
+      setError('Could not connect to MetaMask');
       return;
     }
 
-    const tokenContract = process.env.NEXT_PUBLIC_TOKEN_CONTRACT || '';
-    const tokenSymbol = process.env.NEXT_PUBLIC_TOKEN_SYMBOL || 'ETH';
-    const tokenPriceUsd = parseFloat(process.env.NEXT_PUBLIC_TOKEN_PRICE_USD || '0');
+    // Show consent modal
+    setConsentModal({ repo, sellerWallet, buyerAddress, sellerWei, platformWei, totalWei });
+  };
+
+  const executeRepoPurchase = async (signature: string, message: string) => {
+    if (!consentModal) return;
+    const { repo, sellerWallet, buyerAddress, sellerWei, platformWei } = consentModal;
+    setConsentModal(null);
+
+    const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) { setError('MetaMask not found'); return; }
+
+    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
 
     try {
-      const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
-      if (!ethereum) { setError('MetaMask not found'); return; }
+      // tx1: pay seller (97.5%)
+      const txHash = (await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
+      })) as string;
 
-      let txHash: string;
-
-      if (tokenContract && tokenPriceUsd > 0) {
-        // ERC-20 token payment
-        const tokenAmount = BigInt(Math.ceil(repo.lockedPriceUsd / tokenPriceUsd));
-        const decimals = parseInt(process.env.NEXT_PUBLIC_TOKEN_DECIMALS || '18');
-        const amount = tokenAmount * BigInt(10 ** decimals);
-        // transfer(address,uint256) selector
-        const data =
-          '0xa9059cbb' +
-          sellerWallet.slice(2).padStart(64, '0') +
-          amount.toString(16).padStart(64, '0');
-
-        txHash = (await ethereum.request({
+      // tx2: pay platform (2.5%)
+      let platformFeeTxHash: string | undefined;
+      if (platformWallet) {
+        platformFeeTxHash = (await ethereum.request({
           method: 'eth_sendTransaction',
-          params: [{ from: undefined, to: tokenContract, data }],
-        })) as string;
-      } else {
-        // ETH payment — get current ETH price from our API
-        let ethPrice = 2000; // fallback
-        try {
-          const priceData = await api.get<{ price: number }>('/chart/price');
-          if (priceData.price) ethPrice = priceData.price;
-        } catch { /* use fallback */ }
-
-        const ethAmount = repo.lockedPriceUsd / ethPrice;
-        const weiHex = '0x' + Math.ceil(ethAmount * 1e18).toString(16);
-
-        txHash = (await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{ to: sellerWallet, value: weiHex }],
+          params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }],
         })) as string;
       }
 
-      setError('');
-      // Verify and record purchase on backend
-      const result = await api.post<{ success: boolean; downloadUrl: string }>(
+      const result = await api.post<{ success: boolean; downloadUrl?: string }>(
         `/repos/${repo.id}/purchase`,
-        { txHash },
+        { txHash, platformFeeTxHash, consentSignature: signature, consentMessage: message },
       );
+      setError('');
       if (result.success && result.downloadUrl) {
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
-        await fetchRepos();
       }
-      alert(`Payment sent! ${tokenSymbol} transaction: ${txHash.slice(0, 12)}...`);
+      await fetchRepos();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied')) {
@@ -597,6 +614,20 @@ export default function ReposPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Payment Consent Modal */}
+      {consentModal && (
+        <PaymentConsentModal
+          listingTitle={consentModal.repo.name}
+          sellerAddress={consentModal.sellerWallet}
+          sellerAmountETH={(Number(consentModal.sellerWei) / 1e18).toFixed(6)}
+          platformFeeETH={(Number(consentModal.platformWei) / 1e18).toFixed(6)}
+          totalETH={(Number(consentModal.totalWei) / 1e18).toFixed(6)}
+          buyerAddress={consentModal.buyerAddress}
+          onConsent={executeRepoPurchase}
+          onCancel={() => setConsentModal(null)}
+        />
       )}
     </div>
   );

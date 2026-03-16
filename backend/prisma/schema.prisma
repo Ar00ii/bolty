@@ -147,9 +147,17 @@ model RepoPurchase {
   id           String     @id @default(cuid())
   createdAt    DateTime   @default(now())
 
-  txHash       String     @unique          // Ethereum tx hash
+  txHash       String     @unique          // Ethereum tx hash (seller payment, 97.5%)
   verified     Boolean    @default(false)
   amountWei    String     @default("0")    // stored as string to avoid precision loss
+
+  // Platform commission (2.5%)
+  platformFeeTxHash String?              // Bolty commission tx hash
+  platformFeeWei    String?              // commission amount in wei
+
+  // Consent document (EIP-191 signed)
+  consentSignature  String?  @db.Text    // buyer's personal_sign signature
+  consentMessage    String?  @db.Text    // exact message that was signed
 
   buyerId      String
   buyer        User       @relation("Buyer", fields: [buyerId], references: [id], onDelete: Cascade)
@@ -167,9 +175,17 @@ model MarketPurchase {
   id            String        @id @default(cuid())
   createdAt     DateTime      @default(now())
 
-  txHash        String        @unique
+  txHash        String        @unique       // seller payment tx (97.5%)
   amountWei     String        @default("0")
   verified      Boolean       @default(false)
+
+  // Platform commission (2.5%)
+  platformFeeTxHash String?
+  platformFeeWei    String?
+
+  // Consent document (EIP-191 signed)
+  consentSignature  String?   @db.Text
+  consentMessage    String?   @db.Text
 
   buyerId       String
   buyer         User          @relation("MarketBuyer", fields: [buyerId], references: [id], onDelete: Cascade)

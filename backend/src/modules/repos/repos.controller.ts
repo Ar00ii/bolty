@@ -88,6 +88,18 @@ class PurchaseRepoDto {
   @IsString()
   @IsNotEmpty()
   txHash: string;
+
+  @IsString()
+  @IsOptional()
+  platformFeeTxHash?: string;
+
+  @IsString()
+  @IsOptional()
+  consentSignature?: string;
+
+  @IsString()
+  @IsOptional()
+  consentMessage?: string;
 }
 
 class VoteDto {
@@ -202,7 +214,10 @@ export class ReposController {
     @Body() dto: PurchaseRepoDto,
     @CurrentUser('id') buyerId: string,
   ) {
-    return this.reposService.purchaseRepository(buyerId, repoId, dto.txHash);
+    return this.reposService.purchaseRepository(
+      buyerId, repoId, dto.txHash,
+      dto.platformFeeTxHash, dto.consentSignature, dto.consentMessage,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

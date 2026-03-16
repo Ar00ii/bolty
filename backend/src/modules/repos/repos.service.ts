@@ -429,7 +429,14 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
 
   // ── Purchase (locked repos) ────────────────────────────────────────────────
 
-  async purchaseRepository(buyerId: string, repoId: string, txHash: string) {
+  async purchaseRepository(
+    buyerId: string,
+    repoId: string,
+    txHash: string,
+    platformFeeTxHash?: string,
+    consentSignature?: string,
+    consentMessage?: string,
+  ) {
     const repo = await this.prisma.repository.findUnique({
       where: { id: repoId },
       include: { user: { select: { id: true, walletAddress: true } } },
@@ -448,6 +455,23 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     const sellerWallet = repo.user.walletAddress;
     if (!sellerWallet) {
       throw new BadRequestException('Seller has no wallet address configured');
+    }
+
+    // ── Consent signature verification ────────────────────────────────────
+    if (consentSignature && consentMessage) {
+      try {
+        const signerAddress = ethers.verifyMessage(consentMessage, consentSignature);
+        const buyer = await this.prisma.user.findUnique({
+          where: { id: buyerId },
+          select: { walletAddress: true },
+        });
+        if (!buyer?.walletAddress || signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()) {
+          throw new BadRequestException('Consent signature does not match buyer wallet');
+        }
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
+        throw new BadRequestException('Invalid consent signature');
+      }
     }
 
     // ── On-chain verification ──────────────────────────────────────────────
@@ -494,6 +518,30 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       throw new BadRequestException('Could not verify transaction on-chain');
     }
 
+    // ── Platform commission verification (2.5%) ───────────────────────────
+    const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
+    let platformFeeWei = '0';
+
+    if (platformWallet && platformFeeTxHash) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
+        const feeTx = await provider.getTransaction(platformFeeTxHash);
+
+        if (!feeReceipt || feeReceipt.status !== 1) {
+          throw new BadRequestException('Platform fee transaction failed or not found');
+        }
+        if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
+          throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
+        }
+        platformFeeWei = feeTx.value.toString();
+      } catch (err) {
+        if (err instanceof BadRequestException) throw err;
+        this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
+        throw new BadRequestException('Could not verify platform fee transaction');
+      }
+    }
+
     const purchase = await this.prisma.repoPurchase.create({
       data: {
         txHash,
@@ -501,6 +549,10 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         repositoryId: repoId,
         amountWei,
         verified,
+        platformFeeTxHash: platformFeeTxHash || null,
+        platformFeeWei: platformFeeWei || null,
+        consentSignature: consentSignature || null,
+        consentMessage: consentMessage || null,
       },
     });
 
