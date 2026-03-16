@@ -46,7 +46,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 
 		// Create particles
 		const positions: number[] = [];
-		const colors: number[] = [];
 
 		const geometry = new THREE.BufferGeometry();
 		for (let ix = 0; ix < AMOUNTX; ix++) {
@@ -54,8 +53,6 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 				const x = ix * SEPARATION - (AMOUNTX * SEPARATION) / 2;
 				const z = iy * SEPARATION - (AMOUNTY * SEPARATION) / 2;
 				positions.push(x, 0, z);
-				// Always use light dots (visible on dark background)
-				colors.push(180, 180, 220);
 			}
 		}
 
@@ -63,13 +60,12 @@ export function DottedSurface({ className, ...props }: DottedSurfaceProps) {
 			'position',
 			new THREE.Float32BufferAttribute(positions, 3),
 		);
-		geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
 		const material = new THREE.PointsMaterial({
 			size: 8,
-			vertexColors: true,
+			color: new THREE.Color(0x836ef9),
 			transparent: true,
-			opacity: 0.5,
+			opacity: 0.6,
 			sizeAttenuation: true,
 		});
 
