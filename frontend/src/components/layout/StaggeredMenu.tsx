@@ -9,9 +9,8 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, Menu, X, type LucideIcon,
+  UserPlus, type LucideIcon,
 } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
 
@@ -90,7 +89,6 @@ const PROFILE_ITEM: NavItem = {
 interface StaggeredMenuProps {
   open: boolean;
   onClose: () => void;
-  onToggle: () => void;
   isAuthenticated: boolean;
   user?: User | null;
   logout: () => void;
@@ -102,7 +100,6 @@ interface StaggeredMenuProps {
 export function StaggeredMenu({
   open,
   onClose,
-  onToggle,
   isAuthenticated,
   user,
   logout,
@@ -136,7 +133,7 @@ export function StaggeredMenu({
       if (!panel) return;
       const layers = pre ? Array.from(pre.querySelectorAll<HTMLElement>('.sm-prelayer')) : [];
       preLayerElsRef.current = layers;
-      gsap.set([panel, ...layers], { xPercent: -100 });
+      gsap.set([panel, ...layers], { xPercent: 100 });
     });
     return () => ctx.revert();
   }, []);
@@ -165,11 +162,11 @@ export function StaggeredMenu({
     const tl = gsap.timeline({ paused: true, onComplete: () => { busyRef.current = false; } });
 
     layers.forEach((el, i) => {
-      tl.fromTo(el, { xPercent: -100 }, { xPercent: 0, duration: 0.48, ease: 'power4.out' }, i * 0.07);
+      tl.fromTo(el, { xPercent: 100 }, { xPercent: 0, duration: 0.48, ease: 'power4.out' }, i * 0.07);
     });
 
     const panelStart = (layers.length - 1) * 0.07 + 0.08;
-    tl.fromTo(panel, { xPercent: -100 }, { xPercent: 0, duration: 0.62, ease: 'power4.out' }, panelStart);
+    tl.fromTo(panel, { xPercent: 100 }, { xPercent: 0, duration: 0.62, ease: 'power4.out' }, panelStart);
 
     if (itemEls.length) {
       tl.to(itemEls, { yPercent: 0, rotate: 0, duration: 0.9, ease: 'power4.out', stagger: { each: 0.08 } }, panelStart + 0.12);
@@ -191,7 +188,7 @@ export function StaggeredMenu({
     if (!panel) return;
     closeTweenRef.current?.kill();
     closeTweenRef.current = gsap.to([...layers, panel], {
-      xPercent: -100, duration: 0.28, ease: 'power3.in', overwrite: 'auto',
+      xPercent: 100, duration: 0.28, ease: 'power3.in', overwrite: 'auto',
       onComplete: () => { busyRef.current = false; },
     });
   }, []);
@@ -206,64 +203,11 @@ export function StaggeredMenu({
 
   return (
     <>
-      {/* ── Always-visible header: logo + toggle ─────────────────────────── */}
-      <header
-        className="staggered-menu-header"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 60,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '1rem 1.5rem',
-          background: 'transparent',
-          pointerEvents: 'none',
-        }}
-      >
-        {/* Logo */}
-        <Link
-          href="/"
-          style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}
-          onClick={() => open && onClose()}
-        >
-          <BoltyLogo size={36} />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em' }}>
-            Bolty
-          </span>
-        </Link>
-
-        {/* Toggle button */}
-        <button
-          onClick={onToggle}
-          aria-label={open ? 'Close menu' : 'Open menu'}
-          aria-expanded={open}
-          style={{
-            pointerEvents: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            border: `1px solid ${open ? 'rgba(131,110,249,0.6)' : 'rgba(255,255,255,0.12)'}`,
-            background: open ? 'rgba(131,110,249,0.12)' : 'rgba(255,255,255,0.05)',
-            color: open ? '#836ef9' : '#a1a1aa',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-          }}
-        >
-          {open ? <X size={16} /> : <Menu size={16} />}
-        </button>
-      </header>
-
       {/* ── Panel wrapper (fixed, pointer-events: none on root) ──────────── */}
       <div
         className="staggered-menu-wrapper fixed-wrapper"
         style={{ '--sm-accent': '#836ef9' } as React.CSSProperties}
-        data-position="left"
+        data-position="right"
         data-open={open || undefined}
         aria-hidden={!open}
         /* pointer-events: none by default — panel has pointer-events: auto */
