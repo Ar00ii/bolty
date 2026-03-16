@@ -8,6 +8,7 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
@@ -22,6 +23,7 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { MarketService } from './market.service';
 import { NegotiationService } from './negotiation.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
@@ -65,6 +67,7 @@ const ALLOWED_MIMETYPES = new Set([
   'application/toml', 'text/x-toml',
 ]);
 
+@UseGuards(JwtAuthGuard)
 @Controller('market')
 export class MarketController {
   constructor(
