@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, X, Menu } from 'lucide-react';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 const NAV_LINKS = [
@@ -94,12 +94,10 @@ export function Navbar() {
               {/* Menu toggle button */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex flex-col items-center justify-center gap-[5px] w-8 h-8 group"
+                className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-200 ${menuOpen ? 'border-monad-400/60 bg-monad-500/15 text-monad-400' : 'border-zinc-700 bg-white/5 text-zinc-300 hover:border-monad-400/50 hover:bg-monad-500/10 hover:text-monad-400'}`}
                 aria-label="Toggle menu"
               >
-                <span className={`block h-[2px] bg-zinc-400 group-hover:bg-monad-400 transition-all duration-300 ${menuOpen ? 'w-5 rotate-45 translate-y-[7px] bg-monad-400' : 'w-5'}`} />
-                <span className={`block h-[2px] bg-zinc-400 group-hover:bg-monad-400 transition-all duration-300 ${menuOpen ? 'opacity-0 w-5' : 'w-3.5'}`} />
-                <span className={`block h-[2px] bg-zinc-400 group-hover:bg-monad-400 transition-all duration-300 ${menuOpen ? 'w-5 -rotate-45 -translate-y-[7px] bg-monad-400' : 'w-5'}`} />
+                {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
 
               {/* Logo */}

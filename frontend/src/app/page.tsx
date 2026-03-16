@@ -295,7 +295,7 @@ export default function HomePage() {
         {/* BackgroundPaths behind this section */}
         <BackgroundPaths />
 
-        <AnimatedContainer className="text-center mb-10 relative z-10">
+        <AnimatedContainer className="text-center mb-14 relative z-10">
           <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
             Everything you need to build
@@ -305,24 +305,25 @@ export default function HomePage() {
           </p>
         </AnimatedContainer>
 
-        {/* Orbital timeline */}
-        <AnimatedContainer delay={0.3} className="relative z-10">
-          <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
-        </AnimatedContainer>
-
-        {/* Feature cards — dashed grid style */}
-        <AnimatedContainer delay={0.4} className="relative z-10 mt-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-x divide-y divide-dashed border border-dashed border-white/10">
-            {PLATFORM_FEATURES.map((f) => (
-              <Link key={f.href} href={f.href} className="block group">
+        {/* Side-by-side: cards left (vertical), orbit right */}
+        <div className="relative z-10 flex flex-col lg:flex-row gap-8 items-center">
+          {/* Left: Feature cards — vertical stack */}
+          <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
+            {PLATFORM_FEATURES.map((f, i) => (
+              <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
                 <FeatureCard
                   feature={f}
-                  className="h-full transition-colors duration-200 hover:bg-monad-500/5"
+                  className="border border-dashed border-white/20 transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30"
                 />
               </Link>
             ))}
-          </div>
-        </AnimatedContainer>
+          </AnimatedContainer>
+
+          {/* Right: Orbital timeline */}
+          <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
+            <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
+          </AnimatedContainer>
+        </div>
       </section>
 
       {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}

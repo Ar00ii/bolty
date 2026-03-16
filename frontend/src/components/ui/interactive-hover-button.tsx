@@ -26,7 +26,7 @@ export default function InteractiveHoverButton({
       {...props}
     >
       {/* expanding dot */}
-      <div className="absolute left-5 h-2 w-2 rounded-full bg-monad-500 transition-all duration-500 group-hover:scale-[40]" />
+      <div className="absolute left-5 h-2 w-2 rounded-full bg-monad-500 scale-0 transition-all duration-500 group-hover:scale-[40]" />
       {/* default text */}
       <span className="relative inline-block transition-all duration-500 group-hover:translate-x-20 group-hover:opacity-0 z-10">
         {text}
@@ -58,7 +58,7 @@ export function InteractiveHoverLinkInner({
         className,
       )}
     >
-      <span className="absolute left-5 h-2 w-2 rounded-full bg-monad-500 transition-all duration-500 group-hover:scale-[40]" />
+      <span className="absolute left-5 h-2 w-2 rounded-full bg-monad-500 scale-0 transition-all duration-500 group-hover:scale-[40]" />
       <span className="relative inline-block transition-all duration-500 group-hover:translate-x-20 group-hover:opacity-0 z-10">
         {text}
       </span>
