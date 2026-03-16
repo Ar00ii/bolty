@@ -221,18 +221,6 @@ export function StaggeredMenu({
     else      playClose();
   }, [open, playOpen, playClose]);
 
-  // Click-outside close
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open, onClose]);
-
   const toggleExpand = (href: string) => {
     setExpandedItem(prev => prev === href ? null : href);
   };
@@ -240,6 +228,7 @@ export function StaggeredMenu({
   return (
     <div
       className="staggered-menu-wrapper fixed-wrapper"
+      aria-modal={open || undefined}
       style={{ '--sm-accent': '#836ef9' } as React.CSSProperties}
       data-position="left"
       data-open={open || undefined}
