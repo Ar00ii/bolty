@@ -44,6 +44,8 @@ function SendIcon() {
   );
 }
 
+type ContactCategory = 'all' | 'friends' | 'sellers' | 'vendors';
+
 export default function DmPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -55,8 +57,19 @@ export default function DmPage() {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState('');
   const [showNewDm, setShowNewDm] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<ContactCategory>('all');
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  const CATEGORIES: { id: ContactCategory; label: string }[] = [
+    { id: 'all', label: 'All' },
+    { id: 'friends', label: 'Friends' },
+    { id: 'sellers', label: 'Sellers' },
+    { id: 'vendors', label: 'Vendors' },
+  ];
+
+  // For now all contacts fall under "all"; future: filter by user role tag
+  const filteredContacts = activeCategory === 'all' ? contacts : [];
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/auth');
@@ -191,9 +204,26 @@ export default function DmPage() {
             </div>
           )}
 
+          {/* Category tabs */}
+          <div className="flex gap-1 px-1 flex-wrap">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`text-xs px-2.5 py-1 rounded-lg transition-all duration-150 ${
+                  activeCategory === cat.id
+                    ? 'bg-monad-500/20 text-monad-400 border border-monad-400/30'
+                    : 'text-zinc-500 hover:text-zinc-300 border border-transparent hover:border-zinc-700'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
           {/* Contacts */}
           <div className="flex-1 overflow-y-auto space-y-0.5">
-            {contacts.map(c => (
+            {filteredContacts.map(c => (
               <button
                 key={c.user.id}
                 onClick={() => openConversation(c)}
@@ -219,9 +249,11 @@ export default function DmPage() {
                 </div>
               </button>
             ))}
-            {contacts.length === 0 && (
+            {filteredContacts.length === 0 && (
               <p className="text-xs text-center py-8" style={{ color: 'var(--text-muted)' }}>
-                No conversations yet. Start a new one.
+                {activeCategory === 'all'
+                  ? 'No conversations yet. Start a new one.'
+                  : `No ${activeCategory} yet.`}
               </p>
             )}
           </div>

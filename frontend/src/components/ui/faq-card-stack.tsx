@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { ComponentType, SVGProps } from 'react';
 
 interface FaqItem {
   q: string;
   a: string;
+  icon?: ComponentType<SVGProps<SVGSVGElement>>;
 }
 
 interface FaqCardStackProps {
@@ -16,7 +18,6 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
   const [cards, setCards] = useState(items.map((item, i) => ({ ...item, id: i })));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [dragDirection, setDragDirection] = useState<'left' | 'right' | null>(null);
-  const [showAnswer, setShowAnswer] = useState(false);
 
   const dragX = useMotionValue(0);
   const rotate = useTransform(dragX, [-200, 0, 200], [-6, 0, 6]);
@@ -30,13 +31,11 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
   const moveForward = () => {
     setCards(prev => [...prev.slice(1), prev[0]]);
     setCurrentIndex(prev => (prev + 1) % items.length);
-    setShowAnswer(false);
   };
 
   const moveBack = () => {
     setCards(prev => [prev[prev.length - 1], ...prev.slice(0, -1)]);
     setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
-    setShowAnswer(false);
   };
 
   const handleDragEnd = (_: React.PointerEvent, info: { offset: { x: number }; velocity: { x: number } }) => {
@@ -55,10 +54,10 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
   return (
     <div className="relative flex flex-col items-center w-full select-none">
       {/* Card stack */}
-      <div className="relative w-full max-w-2xl" style={{ height: '220px', marginBottom: '56px' }}>
+      <div className="relative w-full max-w-2xl" style={{ height: '260px', marginBottom: '56px' }}>
         <ul className="relative w-full h-full m-0 p-0">
           <AnimatePresence>
-            {cards.slice(0, 4).map(({ id, q, a }, i) => {
+            {cards.slice(0, 4).map(({ id, q, a, icon: Icon }, i) => {
               const isFront = i === 0;
               const brightness = Math.max(0.25, 1 - i * dimStep);
               return (
@@ -92,31 +91,33 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
                   dragElastic={0.6}
                   onDrag={(_e, info) => { if (isFront) dragX.set(info.offset.x); }}
                   onDragEnd={handleDragEnd as never}
-                  onClick={() => { if (isFront) setShowAnswer(s => !s); }}
                   whileDrag={isFront ? { cursor: 'grabbing', scale: 1.02, zIndex: cards.length + 1 } : {}}
                 >
                   {isFront && (
                     <div className="absolute inset-0 p-8 flex flex-col justify-between">
                       <div>
-                        <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest mb-3">
-                          {String(currentIndex + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
-                        </p>
-                        <h3 className="text-lg font-bold text-white leading-snug">{q}</h3>
+                        <div className="flex items-start justify-between mb-3">
+                          <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">
+                            {String(currentIndex + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                          </p>
+                          {Icon && (
+                            <Icon
+                              className="w-5 h-5 flex-shrink-0 ml-3"
+                              style={{ color: '#836EF9' }}
+                              strokeWidth={1.5}
+                            />
+                          )}
+                        </div>
+                        <h3 className="text-lg font-bold text-white leading-snug mb-3">{q}</h3>
                       </div>
 
-                      <div>
-                        <motion.p
-                          initial={false}
-                          animate={{ opacity: showAnswer ? 1 : 0, y: showAnswer ? 0 : 8 }}
-                          transition={{ duration: 0.2 }}
-                          className="text-zinc-400 text-sm leading-relaxed"
-                        >
-                          {a}
-                        </motion.p>
-                        {!showAnswer && (
-                          <p className="text-[11px] text-zinc-700 mt-1">Click to reveal answer ↩</p>
-                        )}
-                      </div>
+                      <motion.p
+                        initial={false}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-zinc-400 text-sm leading-relaxed"
+                      >
+                        {a}
+                      </motion.p>
                     </div>
                   )}
                 </motion.li>

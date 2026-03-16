@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { FloatingAIChat } from '@/components/ui/FloatingAIChat';
+import { Footer } from '@/components/ui/footer-section';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -32,20 +33,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         )}
         {children}
       </main>
-      <footer
-        className="border-t py-5 px-6 text-center text-xs"
-        style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
-      >
-        <span className="text-monad-400 font-semibold">Bolty</span>
-        <span className="mx-1.5" style={{ color: 'var(--text-muted)' }}>—</span>
-        <span>AI Developer Platform</span>
-        <span className="mx-3 opacity-30">|</span>
-        <Link href="/chat" className="hover:text-monad-400 transition-colors">Community</Link>
-        <span className="mx-2 opacity-30">·</span>
-        <Link href="/market" className="hover:text-monad-400 transition-colors">Agents</Link>
-        <span className="mx-2 opacity-30">·</span>
-        <Link href="/repos" className="hover:text-monad-400 transition-colors">Repos</Link>
-      </footer>
+      <Footer />
 
       {/* Floating AI Chat — bottom left */}
       <FloatingAIChat />

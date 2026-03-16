@@ -24,7 +24,12 @@ import {
   MessageSquare,
   Layers,
   Zap,
+  HelpCircle,
+  ShoppingBag,
+  Lock,
+  Wallet,
 } from 'lucide-react';
+import AnimatedShaderBackground from '@/components/ui/animated-shader-background';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -187,10 +192,10 @@ const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGPro
 ];
 
 const FAQ = [
-  { q: 'Is Bolty free to use?',            a: 'Yes, creating an account and publishing free repositories is completely free. You only pay if you want to purchase a locked repository from another developer.' },
-  { q: 'How does the marketplace work?',   a: 'Developers list their bots, scripts, AI agents, and tools. Buyers browse listings and purchase access directly through the platform using ETH payments.' },
-  { q: 'What is a locked repository?',     a: 'A locked repo is a GitHub repository where the developer has set a price. Buyers pay in ETH to unlock full access to clone or download it.' },
-  { q: 'Can I use Bolty without a wallet?', a: 'Yes. You can sign up with email or GitHub and use all community features without a wallet. A wallet is only needed for on-chain transactions.' },
+  { q: 'Is Bolty free to use?',            a: 'Yes, creating an account and publishing free repositories is completely free. You only pay if you want to purchase a locked repository from another developer.', icon: HelpCircle },
+  { q: 'How does the marketplace work?',   a: 'Developers list their bots, scripts, AI agents, and tools. Buyers browse listings and purchase access directly through the platform using ETH payments.', icon: ShoppingBag },
+  { q: 'What is a locked repository?',     a: 'A locked repo is a GitHub repository where the developer has set a price. Buyers pay in ETH to unlock full access to clone or download it.', icon: Lock },
+  { q: 'Can I use Bolty without a wallet?', a: 'Yes. You can sign up with email or GitHub and use all community features without a wallet. A wallet is only needed for on-chain transactions.', icon: Wallet },
 ];
 
 // ── FAQ item ──────────────────────────────────────────────────────────────────
@@ -310,14 +315,24 @@ export default function HomePage() {
           <div className="flex flex-col lg:flex-row gap-8 items-center">
             {/* Left: Feature cards — vertical stack */}
             <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
-              {PLATFORM_FEATURES.map((f, i) => (
-                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                  <FeatureCard
-                    feature={f}
-                    className="border border-dashed border-white/20 transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30"
-                  />
-                </Link>
-              ))}
+              {PLATFORM_FEATURES.map((f, i) => {
+                const isCommunity = f.title === 'Community';
+                return (
+                  <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
+                    <div className={`relative overflow-hidden border border-dashed transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30 ${isCommunity ? 'border-monad-400/30' : 'border-white/20'}`}>
+                      {isCommunity && (
+                        <div className="absolute inset-0 opacity-30">
+                          <AnimatedShaderBackground />
+                        </div>
+                      )}
+                      <FeatureCard
+                        feature={f}
+                        className="border-0 relative z-10"
+                      />
+                    </div>
+                  </Link>
+                );
+              })}
             </AnimatedContainer>
 
             {/* Right: Orbital timeline */}
@@ -388,12 +403,8 @@ export default function HomePage() {
                 style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.2), rgba(99,91,255,0.1))' }} />
               <DashedCard className="rounded-2xl">
                 <div className="flex items-center gap-2 px-4 py-3 mb-2" style={{ borderBottom: '1px dashed rgba(255,255,255,0.08)' }}>
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full" style={{ background: '#ff5f57' }} />
-                    <div className="w-3 h-3 rounded-full" style={{ background: '#febc2e' }} />
-                    <div className="w-3 h-3 rounded-full" style={{ background: '#28c840' }} />
-                  </div>
-                  <span className="text-xs font-mono ml-2 text-zinc-600">repo_showcase.ts</span>
+                  <Code2 className="w-3.5 h-3.5 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
+                  <span className="text-xs font-mono text-zinc-500">repo_showcase.ts</span>
                 </div>
                 <div className="p-5 font-mono text-xs space-y-1.5" style={{ lineHeight: '1.8' }}>
                   <div><span className="text-blue-400">const</span> <span className="text-monad-400">repo</span> <span className="text-zinc-500">= await</span> <span className="text-green-400">bolty.repos.publish</span><span className="text-zinc-500">{'({'}</span></div>
@@ -449,7 +460,7 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
             <h2 className="text-3xl font-bold tracking-tight text-white">Common questions</h2>
-            <p className="text-sm text-zinc-600 mt-2">Swipe or use arrows to navigate · click card to reveal answer</p>
+            <p className="text-sm text-zinc-600 mt-2">Swipe or use arrows to navigate</p>
           </div>
           <div className="max-w-2xl mx-auto">
             <FaqCardStack items={FAQ} />
