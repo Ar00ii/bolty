@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
+import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { Timeline } from '@/components/ui/timeline';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
@@ -534,7 +536,7 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
+    <div className="max-w-4xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
 
       {/* ── Hero header card ─────────────────────────────────────────── */}
       <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"
@@ -595,23 +597,54 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* ── Tab bar ──────────────────────────────────────────────────── */}
-      <div className="flex gap-0.5 mb-7 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-1 overflow-x-auto">
-        {TABS.map(({ id, label, Icon }) => (
-          <button
-            key={id}
-            onClick={() => setTab(id)}
-            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 flex-1 justify-center ${
-              tab === id
-                ? 'bg-monad-500/15 text-monad-300 border border-monad-500/25 shadow-[0_0_10px_rgba(131,110,249,0.1)]'
-                : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-white/5'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            <span>{label}</span>
-          </button>
+      {/* ── Settings Navigation Grid ─────────────────────────────── */}
+      <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+        {[
+          { id: 'general' as Tab, label: 'General', desc: 'Username, display name and bio', Icon: IconUser },
+          { id: 'social' as Tab, label: 'Social', desc: 'Link your X, LinkedIn and website', Icon: IconGlobe },
+          { id: 'wallet' as Tab, label: 'Wallet', desc: 'Connect MetaMask for payments', Icon: IconWallet },
+          { id: 'connections' as Tab, label: 'Connections', desc: 'Manage linked GitHub account', Icon: IconLink },
+          { id: 'friends' as Tab, label: 'Friends', desc: 'Find and manage your contacts', Icon: IconUsers },
+          { id: 'security' as Tab, label: 'Security', desc: '2FA, email and account settings', Icon: IconShield },
+        ].map(({ id, label, desc, Icon }) => (
+          <li key={id} className="min-h-[8rem] list-none">
+            <button
+              onClick={() => setTab(id)}
+              className="relative h-full w-full rounded-2xl border border-[var(--border)] p-2 text-left transition-all duration-200 hover:border-monad-500/30"
+              style={{
+                background: tab === id
+                  ? 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, var(--bg-card) 60%)'
+                  : 'var(--bg-card)',
+              }}
+            >
+              <GlowingEffect
+                spread={30}
+                glow={tab === id}
+                disabled={tab !== id}
+                proximity={48}
+                inactiveZone={0.01}
+                borderWidth={2}
+              />
+              <div className="relative flex h-full flex-col justify-between gap-3 overflow-hidden rounded-xl border border-[var(--border)] px-4 py-4"
+                style={{ background: 'var(--bg-elevated)' }}>
+                <div className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${
+                  tab === id
+                    ? 'bg-monad-500/15 border-monad-500/30'
+                    : 'bg-[var(--bg-card)] border-[var(--border)]'
+                }`}>
+                  <Icon className={`w-4 h-4 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
+                </div>
+                <div>
+                  <div className={`text-sm font-semibold leading-tight tracking-tight ${tab === id ? 'text-monad-300' : 'text-[var(--text)]'}`}>
+                    {label}
+                  </div>
+                  <div className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{desc}</div>
+                </div>
+              </div>
+            </button>
+          </li>
         ))}
-      </div>
+      </ul>
 
       {/* ════════════════════════════════════════════
           GENERAL  — monad purple tint
@@ -1283,6 +1316,92 @@ export default function ProfilePage() {
 
         </div>
       )}
+
+      {/* ── Build Timeline ─────────────────────────────────────────── */}
+      <div className="mt-20 border-t border-[var(--border)] pt-16">
+        <div className="mb-10">
+          <h2 className="text-2xl font-bold text-[var(--text)] tracking-tight">How Bolty was built</h2>
+          <p className="text-sm text-[var(--text-muted)] mt-1.5 max-w-lg">
+            From a blank terminal to a full AI developer platform. Here is the build log.
+          </p>
+        </div>
+        <Timeline
+          data={[
+            {
+              title: "Foundation",
+              content: (
+                <div className="space-y-3">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                    Started with the core infrastructure — Next.js 14, NestJS backend, PostgreSQL via Prisma, and GitHub OAuth. Built authentication, JWT sessions and the user profile system from scratch.
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {['Next.js 14 App Router', 'NestJS REST API', 'GitHub OAuth + JWT', 'Prisma + PostgreSQL', 'User profile & settings'].map(item => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ),
+            },
+            {
+              title: "Marketplace",
+              content: (
+                <div className="space-y-3">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                    Launched the Repository Showcase — developers can publish their GitHub repos, lock them behind ETH payments, and let the community vote and download. Integrated MetaMask and ERC-20 token payments.
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {['Repository publish & discovery', 'ETH & ERC-20 payments', 'Upvote / downvote system', 'Locked repo access control', 'MetaMask wallet linking'].map(item => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ),
+            },
+            {
+              title: "AI Agents",
+              content: (
+                <div className="space-y-3">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                    Added the AI Agent marketplace — sell bots, scripts and live AI agents. Sellers can post price updates via API keys. Real-time negotiation system with agent-to-agent chat powered by WebSockets.
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {['AI agent listings & discovery', 'Live agent endpoints', 'Agent API key system', 'Price negotiation chat', 'WebSocket real-time messaging'].map(item => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ),
+            },
+            {
+              title: "Community",
+              content: (
+                <div className="space-y-3">
+                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                    Built the social layer — friends system with requests and search, direct messages, community feed and public profiles. Added 2FA email authentication and full account security controls.
+                  </p>
+                  <div className="grid grid-cols-1 gap-1.5">
+                    {['Friends & DMs', 'Public user profiles', 'Community feed', '2FA email authentication', 'Account deletion flow'].map(item => (
+                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ),
+            },
+          ]}
+        />
+      </div>
 
     </div>
   );

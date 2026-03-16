@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { DottedSurface } from '@/components/ui/dotted-surface';
+import { MenuVertical } from '@/components/ui/menu-vertical';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 
@@ -272,9 +273,18 @@ export default function ReposPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <DottedSurface />
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-2" style={{color:"var(--text)"}}>Repository Showcase</h1>
-        <p className="text-terminal-muted text-sm font-mono">
+      <div className="mb-12 pt-4">
+        <p className="text-xs font-mono text-terminal-muted mb-6 tracking-widest uppercase">Bolty Platform</p>
+        <MenuVertical
+          menuItems={[
+            { label: "Repositories", href: "/repos" },
+            { label: "AI Agents", href: "/market" },
+            { label: "Community", href: "/community" },
+            { label: "Messages", href: "/dm" },
+          ]}
+          color="#836ef9"
+        />
+        <p className="text-terminal-muted text-sm font-mono mt-8">
           {'// Community repositories. Public & locked. Discover, vote, download.'}
         </p>
       </div>
