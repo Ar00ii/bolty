@@ -81,33 +81,46 @@ export class AuthService {
       expiresIn: this.config.get<string>('JWT_EXPIRES_IN', '15m'),
     });
 
-    const refreshToken = uuidv4();
-    const hashed = await bcrypt.hash(refreshToken, 12);
+    // Refresh token is a signed JWT so userId is self-contained (no access_token needed at refresh time)
+    const jti = uuidv4();
+    const refreshSecret = this.config.get<string>('JWT_SECRET') || 'a8f3d2e1c9b7a6f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0';
+    const refreshToken = this.jwtService.sign(
+      { sub: userId, jti, type: 'refresh' },
+      { secret: refreshSecret, expiresIn: '7d' },
+    );
+    const hashed = await bcrypt.hash(jti, 10);
 
-    // Store hashed refresh token
+    // Store hashed jti for rotation detection
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: hashed },
     });
 
-    // Also cache for fast lookup
-    await this.redis.set(
-      `refresh:${userId}`,
-      hashed,
-      7 * 24 * 60 * 60, // 7 days
-    );
-
     this.logger.log(`Tokens generated for user ${userId}`);
     return { accessToken, refreshToken };
   }
 
-  async refreshAccessToken(userId: string, refreshToken: string): Promise<AuthTokens> {
+  async refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
+    // Decode the self-contained refresh JWT to get userId without needing the access_token cookie
+    let payload: { sub: string; jti: string; type: string };
+    try {
+      const refreshSecret = this.config.get<string>('JWT_SECRET') || 'a8f3d2e1c9b7a6f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0';
+      payload = this.jwtService.verify(refreshToken, { secret: refreshSecret });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+
+    const userId = payload.sub;
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+    const isValid = await bcrypt.compare(payload.jti, user.refreshToken);
     if (!isValid) {
       // Possible token theft — invalidate everything
       await this.revokeAllTokens(userId);
@@ -122,7 +135,6 @@ export class AuthService {
       where: { id: userId },
       data: { refreshToken: null },
     });
-    await this.redis.del(`refresh:${userId}`);
     this.logger.warn(`All tokens revoked for user ${userId}`);
   }
 

@@ -366,32 +366,12 @@ export class AuthController {
   @Post('refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
-    const accessToken = req.cookies?.['access_token'];
 
-    if (!refreshToken || !accessToken) {
-      throw new UnauthorizedException('No tokens provided');
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
     }
 
-    let payload: { sub: string };
-    try {
-      payload = await this.authService.validateToken(accessToken);
-    } catch (err: any) {
-      // Only fall through to decode-without-verify when token has valid signature but is expired.
-      // Reject tokens with invalid signatures outright (prevents sub spoofing attacks).
-      if (err?.name !== 'TokenExpiredError') {
-        throw new UnauthorizedException('Invalid token');
-      }
-      try {
-        const parts = accessToken.split('.');
-        if (parts.length !== 3) throw new Error('Malformed token');
-        payload = JSON.parse(Buffer.from(parts[1], 'base64url').toString()) as { sub: string };
-        if (!payload?.sub) throw new Error('Missing sub claim');
-      } catch {
-        throw new UnauthorizedException('Invalid token');
-      }
-    }
-
-    const tokens = await this.authService.refreshAccessToken(payload.sub, refreshToken);
+    const tokens = await this.authService.refreshAccessToken(refreshToken);
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
