@@ -6,6 +6,7 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ethers } from 'ethers';
@@ -582,5 +583,117 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       where: { buyerId: userId, repositoryId: repoId, verified: true },
     });
     return { purchased: !!purchase };
+  }
+
+  // ── Collaborators ──────────────────────────────────────────────────────────
+
+  async getCollaborators(repoId: string) {
+    const repo = await this.prisma.repository.findUnique({ where: { id: repoId } });
+    if (!repo) throw new NotFoundException('Repository not found');
+
+    return this.prisma.repoCollaborator.findMany({
+      where: { repositoryId: repoId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            avatarUrl: true,
+            reputationPoints: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async addCollaborator(
+    requestingUserId: string,
+    repoId: string,
+    data: { targetUserId?: string; name?: string; type?: string; url?: string; role?: string },
+  ) {
+    const repo = await this.prisma.repository.findUnique({ where: { id: repoId } });
+    if (!repo) throw new NotFoundException('Repository not found');
+    if (repo.userId !== requestingUserId) {
+      throw new ForbiddenException('Only the repository owner can add collaborators');
+    }
+
+    const count = await this.prisma.repoCollaborator.count({ where: { repositoryId: repoId } });
+    if (count >= 10) throw new BadRequestException('Maximum 10 collaborators per repository');
+
+    const validTypes = ['USER', 'AI_AGENT', 'PROGRAM'];
+    const type = data.type && validTypes.includes(data.type) ? data.type : 'USER';
+
+    // If adding a user collaborator by ID, look them up
+    if (data.targetUserId) {
+      const targetUser = await this.prisma.user.findUnique({
+        where: { id: data.targetUserId },
+        select: { id: true, username: true, displayName: true },
+      });
+      if (!targetUser) throw new NotFoundException('User not found');
+      if (targetUser.id === requestingUserId) {
+        throw new BadRequestException('Cannot add yourself as a collaborator');
+      }
+
+      // Check unique constraint
+      const exists = await this.prisma.repoCollaborator.findUnique({
+        where: { repositoryId_userId: { repositoryId: repoId, userId: data.targetUserId } },
+      });
+      if (exists) throw new ConflictException('User is already a collaborator');
+
+      return this.prisma.repoCollaborator.create({
+        data: {
+          repositoryId: repoId,
+          userId: data.targetUserId,
+          name: targetUser.displayName || targetUser.username || 'Unknown',
+          type: 'USER' as any,
+          role: data.role?.slice(0, 80) || null,
+          url: null,
+        },
+        include: {
+          user: {
+            select: {
+              id: true, username: true, displayName: true,
+              avatarUrl: true, reputationPoints: true,
+            },
+          },
+        },
+      });
+    }
+
+    // Non-user collaborator (AI_AGENT or PROGRAM)
+    if (!data.name || data.name.trim().length < 2) {
+      throw new BadRequestException('Collaborator name is required');
+    }
+
+    return this.prisma.repoCollaborator.create({
+      data: {
+        repositoryId: repoId,
+        userId: null,
+        name: data.name.slice(0, 80),
+        type: type as any,
+        role: data.role?.slice(0, 80) || null,
+        url: data.url?.slice(0, 500) || null,
+      },
+    });
+  }
+
+  async removeCollaborator(requestingUserId: string, repoId: string, collaboratorId: string) {
+    const repo = await this.prisma.repository.findUnique({ where: { id: repoId } });
+    if (!repo) throw new NotFoundException('Repository not found');
+    if (repo.userId !== requestingUserId) {
+      throw new ForbiddenException('Only the repository owner can remove collaborators');
+    }
+
+    const collaborator = await this.prisma.repoCollaborator.findUnique({
+      where: { id: collaboratorId },
+    });
+    if (!collaborator || collaborator.repositoryId !== repoId) {
+      throw new NotFoundException('Collaborator not found');
+    }
+
+    await this.prisma.repoCollaborator.delete({ where: { id: collaboratorId } });
+    return { success: true };
   }
 }

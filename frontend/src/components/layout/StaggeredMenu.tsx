@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, Zap, Percent, Coins, type LucideIcon,
+  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
@@ -79,6 +79,16 @@ const NAV_ITEMS: NavItem[] = [
       { href: '/market?tab=deploy',  label: 'Deploy',      icon: Bot },
       { href: '/market?tab=explore', label: 'Explore All', icon: Globe },
       { href: '/market?tab=top',     label: 'Top Rated',   icon: Star },
+    ],
+  },
+  {
+    label: 'Hire',
+    href: '/services',
+    sub: [
+      { href: '/services',              label: 'Browse Services',  icon: Briefcase },
+      { href: '/services?category=AI_DEVELOPMENT',  label: 'AI Development', icon: Cpu },
+      { href: '/services?category=SMART_CONTRACTS', label: 'Smart Contracts', icon: Zap },
+      { href: '/reputation/leaderboard', label: 'Leaderboard',    icon: Trophy },
     ],
   },
 ];

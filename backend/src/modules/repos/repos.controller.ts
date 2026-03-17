@@ -10,6 +10,10 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  Res,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -23,11 +27,28 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { Response } from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { ReposService } from './repos.service';
 import { Request } from 'express';
+
+const LOGO_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'logos');
+
+// Only allow static images — no GIFs, no video, no executables
+const ALLOWED_IMAGE_MIMETYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/svg+xml',
+]);
 
 class PublishRepoDto {
   @IsNumber()
@@ -245,5 +266,88 @@ export class ReposController {
   @Post(':id/download')
   trackDownload(@Param('id') repoId: string) {
     return this.reposService.trackDownload(repoId);
+  }
+
+  // ── Logo image upload (drag-and-drop, static images only) ────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload-logo')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          if (!fs.existsSync(LOGO_UPLOADS_DIR)) {
+            fs.mkdirSync(LOGO_UPLOADS_DIR, { recursive: true });
+          }
+          cb(null, LOGO_UPLOADS_DIR);
+        },
+        filename: (_req, _file, cb) => {
+          const key = crypto.randomUUID();
+          cb(null, key);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
+      fileFilter: (_req, file, cb) => {
+        if (ALLOWED_IMAGE_MIMETYPES.has(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Only static images are allowed (PNG, JPG, WebP, SVG). GIFs and other formats are not permitted.'), false);
+        }
+      },
+    }),
+  )
+  uploadLogo(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    return {
+      logoKey: file.filename,
+      logoUrl: `/api/v1/repos/logos/${file.filename}`,
+      originalName: file.originalname,
+      size: file.size,
+      mimeType: file.mimetype,
+    };
+  }
+
+  @Public()
+  @Get('logos/:key')
+  serveLogo(@Param('key') key: string, @Res() res: Response) {
+    // Sanitize key — must be a UUID
+    if (!/^[0-9a-f-]{36}$/.test(key)) {
+      res.status(400).json({ message: 'Invalid logo key' });
+      return;
+    }
+    const filePath = path.join(LOGO_UPLOADS_DIR, key);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ message: 'Logo not found' });
+      return;
+    }
+    res.sendFile(filePath, { headers: { 'Cache-Control': 'public, max-age=86400' } });
+  }
+
+  // ── Collaborators ─────────────────────────────────────────────────────────
+
+  @Public()
+  @Get(':id/collaborators')
+  getCollaborators(@Param('id') repoId: string) {
+    return this.reposService.getCollaborators(repoId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/collaborators')
+  addCollaborator(
+    @Param('id') repoId: string,
+    @CurrentUser('sub') userId: string,
+    @Body() body: { targetUserId?: string; name?: string; type?: string; url?: string; role?: string },
+  ) {
+    return this.reposService.addCollaborator(userId, repoId, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id/collaborators/:collaboratorId')
+  removeCollaborator(
+    @Param('id') repoId: string,
+    @Param('collaboratorId') collaboratorId: string,
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.reposService.removeCollaborator(userId, repoId, collaboratorId);
   }
 }

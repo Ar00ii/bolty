@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { Send, Paperclip, X, Bot, User as UserIcon } from 'lucide-react';
+import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -18,6 +18,26 @@ interface ChatMessage {
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
+// Emoji categories for the picker
+const EMOJI_CATEGORIES = [
+  {
+    label: 'Smileys',
+    emojis: ['😀','😂','😍','🤔','😎','🥳','😭','🤩','😴','🤯','😤','🥺','😈','👻','💀','🤖','👽','🎃','🫡','🫠'],
+  },
+  {
+    label: 'Gestures',
+    emojis: ['👍','👎','👏','🙌','🤝','✌️','🤞','👌','🤌','💪','🦾','🙏','🫶','❤️','🔥','⚡','💯','✅','❌','💎'],
+  },
+  {
+    label: 'Tech',
+    emojis: ['💻','🖥️','⌨️','🖱️','📱','🤖','🦾','🧠','💡','🔧','⚙️','🚀','🛸','🌐','📡','🔬','🧬','🏗️','🔐','🗝️'],
+  },
+  {
+    label: 'Finance',
+    emojis: ['💰','💸','📈','📉','🪙','💳','🏦','💹','🤑','🧾','🏆','🥇','🎖️','🎯','📊','📋','🔑','🌟','⭐','🌙'],
+  },
+];
+
 export default function ChatPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
@@ -26,10 +46,12 @@ export default function ChatPage() {
   const [userCount, setUserCount] = useState(0);
   const [notice, setNotice] = useState('');
   const [connected, setConnected] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [activeEmojiCategory, setActiveEmojiCategory] = useState(0);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -75,11 +97,43 @@ export default function ChatPage() {
     }
   }, [input]);
 
+  // Close emoji picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmoji(false);
+      }
+    };
+    if (showEmoji) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmoji]);
+
+  const insertEmoji = (emoji: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setInput(prev => prev + emoji);
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newValue = input.slice(0, start) + emoji + input.slice(end);
+    setInput(newValue);
+    // Restore cursor position after emoji insert
+    requestAnimationFrame(() => {
+      textarea.selectionStart = start + emoji.length;
+      textarea.selectionEnd = start + emoji.length;
+      textarea.focus();
+    });
+  };
+
   const sendMessage = useCallback(() => {
     const content = input.trim();
     if (!content || !socketRef.current || !connected) return;
     socketRef.current.emit('sendMessage', { content });
     setInput('');
+    setShowEmoji(false);
   }, [input, connected]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -201,22 +255,71 @@ export default function ChatPage() {
         </div>
 
         {/* Input */}
-        <div className="border-t px-4 py-3" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+        <div className="border-t px-4 py-3 relative" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
           {notice && (
             <div className="text-xs font-mono mb-2 px-1" style={{ color: notice.includes('submitted') ? '#836EF9' : '#f87171' }}>
               {notice}
             </div>
           )}
-          <div className="flex gap-2 items-end">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2.5 rounded-xl border transition-all hover:border-monad-500/40 hover:bg-monad-500/10 self-end"
-              style={{ borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(161,161,170,0.5)' }}
-              title="Attach file"
+
+          {/* Emoji Picker */}
+          {showEmoji && (
+            <div
+              ref={emojiPickerRef}
+              className="absolute bottom-full mb-2 left-4 z-50 rounded-2xl overflow-hidden shadow-2xl"
+              style={{
+                background: '#16161a',
+                border: '1px solid rgba(131,110,249,0.25)',
+                width: 320,
+              }}
             >
-              <Paperclip className="w-4 h-4" />
+              {/* Category tabs */}
+              <div className="flex border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                {EMOJI_CATEGORIES.map((cat, idx) => (
+                  <button
+                    key={cat.label}
+                    onClick={() => setActiveEmojiCategory(idx)}
+                    className="flex-1 py-2 text-xs font-mono transition-colors"
+                    style={{
+                      color: activeEmojiCategory === idx ? '#836ef9' : 'rgba(161,161,170,0.5)',
+                      background: activeEmojiCategory === idx ? 'rgba(131,110,249,0.1)' : 'transparent',
+                      borderBottom: activeEmojiCategory === idx ? '2px solid #836ef9' : '2px solid transparent',
+                    }}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+              {/* Emoji grid */}
+              <div className="p-3 grid grid-cols-10 gap-1">
+                {EMOJI_CATEGORIES[activeEmojiCategory].emojis.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => insertEmoji(emoji)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-base hover:bg-monad-500/20 transition-colors"
+                    title={emoji}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 items-end">
+            {/* Emoji toggle button */}
+            <button
+              onClick={() => setShowEmoji(v => !v)}
+              className="p-2.5 rounded-xl border transition-all self-end"
+              style={{
+                borderColor: showEmoji ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.1)',
+                color: showEmoji ? '#836ef9' : 'rgba(161,161,170,0.5)',
+                background: showEmoji ? 'rgba(131,110,249,0.1)' : 'transparent',
+              }}
+              title="Emoji picker"
+            >
+              <Smile className="w-4 h-4" />
             </button>
-            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={() => {}} />
 
             <div className="flex-1 relative">
               <textarea
@@ -254,9 +357,9 @@ export default function ChatPage() {
             </button>
           </div>
 
-          {input.length === 0 && (
+          {input.length === 0 && !showEmoji && (
             <div className="mt-2.5 flex flex-wrap gap-2">
-              {['Hello everyone', 'Need help with my agent', 'Looking for collaborators'].map(q => (
+              {['Hello everyone 👋', 'Need help with my agent 🤖', 'Looking for collaborators 🤝'].map(q => (
                 <button
                   key={q}
                   onClick={() => setInput(q)}

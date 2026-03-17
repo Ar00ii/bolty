@@ -59,6 +59,9 @@ model User {
   isBanned      Boolean   @default(false)
   banReason     String?
 
+  // Reputation
+  reputationPoints Int @default(0)
+
   // Relations
   messages       ChatMessage[]
   repositories   Repository[]
@@ -76,6 +79,9 @@ model User {
   buyerNegotiations   AgentNegotiation[]   @relation("NegotiationBuyer")
   sentFriendRequests     Friendship[]  @relation("FriendSent")
   receivedFriendRequests Friendship[]  @relation("FriendReceived")
+  reputationEvents       ReputationEvent[]
+  repoCollaborations     RepoCollaborator[]
+  serviceListings        ServiceListing[]
 
   @@map("users")
 }
@@ -144,6 +150,7 @@ model Repository {
   votes          Vote[]
   marketListings MarketListing[]
   purchases      RepoPurchase[]
+  collaborators  RepoCollaborator[]
 
   @@map("repositories")
 }
@@ -528,4 +535,107 @@ enum FriendshipStatus {
   PENDING
   ACCEPTED
   DECLINED
+}
+
+// ─── Reputation Events ────────────────────────────────────────────────────────
+
+model ReputationEvent {
+  id          String              @id @default(cuid())
+  createdAt   DateTime            @default(now())
+
+  userId      String
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  points      Int
+  reason      ReputationReason
+  resourceId  String?             // ID of related resource (repoId, listingId, etc.)
+  note        String?
+
+  @@index([userId, createdAt])
+  @@map("reputation_events")
+}
+
+enum ReputationReason {
+  REPO_PUBLISHED
+  REPO_SOLD
+  REPO_UPVOTE_RECEIVED
+  LISTING_SOLD
+  PROFILE_COMPLETED
+  SERVICE_COMPLETED
+  FIRST_SALE
+  COLLABORATOR_ADDED
+}
+
+// ─── Repo Collaborators ────────────────────────────────────────────────────────
+
+model RepoCollaborator {
+  id           String           @id @default(cuid())
+  createdAt    DateTime         @default(now())
+
+  repositoryId String
+  repository   Repository       @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  userId       String?
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name         String           // display name (for non-user collaborators)
+  type         CollaboratorType @default(USER)
+  url          String?          // optional profile/agent link
+  role         String?          // e.g. "Backend Developer", "AI Model"
+
+  @@unique([repositoryId, userId])
+  @@index([repositoryId])
+  @@map("repo_collaborators")
+}
+
+enum CollaboratorType {
+  USER
+  AI_AGENT
+  PROGRAM
+}
+
+// ─── Service Listings (Freelance / Hire Section) ──────────────────────────────
+
+model ServiceListing {
+  id           String          @id @default(cuid())
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  title        String
+  description  String          @db.Text
+  category     ServiceCategory
+  skills       String[]
+
+  minBudget    Float?
+  maxBudget    Float?
+  currency     String          @default("USD")
+  deliveryDays Int?
+
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status       ServiceStatus   @default(ACTIVE)
+  imageUrl     String?         // Optional banner/portfolio image
+
+  @@index([userId, status])
+  @@index([category, status])
+  @@map("service_listings")
+}
+
+enum ServiceCategory {
+  AI_DEVELOPMENT
+  SMART_CONTRACTS
+  WEB_DEVELOPMENT
+  BOT_DEVELOPMENT
+  CONSULTING
+  CODE_REVIEW
+  MOBILE_DEVELOPMENT
+  DEVOPS
+  OTHER
+}
+
+enum ServiceStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
 }

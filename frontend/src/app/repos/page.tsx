@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { DottedSurface } from '@/components/ui/dotted-surface';
@@ -10,8 +10,18 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import {
   GitBranch, Lock, Globe, Star, Download,
-  ArrowUp, ArrowDown, MessageCircle, ExternalLink, Twitter, Wallet,
+  ArrowUp, ArrowDown, MessageCircle, Twitter, Wallet,
+  Upload, X, Users, Plus, Search,
 } from 'lucide-react';
+
+interface Collaborator {
+  id: string;
+  name: string;
+  type: 'USER' | 'AI_AGENT' | 'PROGRAM';
+  role: string | null;
+  url: string | null;
+  user: { id: string; username: string | null; avatarUrl: string | null; reputationPoints: number } | null;
+}
 
 interface Repository {
   id: string;
@@ -34,6 +44,18 @@ interface Repository {
   websiteUrl: string | null;
   twitterUrl: string | null;
   user: { username: string | null; avatarUrl: string | null };
+  collaborators?: Collaborator[];
+}
+
+// Reputation rank helper
+function getReputationRank(points: number): { label: string; color: string; badge: string } {
+  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: '⚡' };
+  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: '💠' };
+  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: '💎' };
+  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: '🥇' };
+  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: '🥈' };
+  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: '🥉' };
+  return { label: 'Newcomer', color: '#71717a', badge: '◎' };
 }
 
 interface GitHubRepo {
@@ -73,10 +95,26 @@ export default function ReposPage() {
   const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
   const [lockPrice, setLockPrice] = useState('');
   const [lockType, setLockType] = useState<'public' | 'locked'>('public');
-  // Extra branding fields in publish modal
+
+  // Logo upload (drag-and-drop)
   const [pubLogoUrl, setPubLogoUrl] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoDragOver, setLogoDragOver] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Branding fields
   const [pubWebsiteUrl, setPubWebsiteUrl] = useState('');
   const [pubTwitterUrl, setPubTwitterUrl] = useState('');
+
+  // Collaborators in publish modal
+  const [collaborators, setCollaborators] = useState<Array<{ type: string; name: string; role: string; url: string; userId?: string; avatarUrl?: string; reputationPoints?: number }>>([]);
+  const [collabSearch, setCollabSearch] = useState('');
+  const [collabSearchResults, setCollabSearchResults] = useState<Array<{ id: string; username: string; displayName: string | null; avatarUrl: string | null; reputationPoints: number }>>([]);
+  const [collabType, setCollabType] = useState<'USER' | 'AI_AGENT' | 'PROGRAM'>('USER');
+  const [collabName, setCollabName] = useState('');
+  const [collabRole, setCollabRole] = useState('');
+  const [collabUrl, setCollabUrl] = useState('');
+  const [showCollabForm, setShowCollabForm] = useState(false);
 
   const [consentModal, setConsentModal] = useState<{
     repo: Repository;
@@ -127,6 +165,43 @@ export default function ReposPage() {
     }
   };
 
+  // Logo upload handler
+  const handleLogoUpload = async (file: File) => {
+    // Validate file type — only static images
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'];
+    if (!allowed.includes(file.type)) {
+      setError('Only static images are allowed (PNG, JPG, WebP, SVG). GIFs are not permitted.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Logo image must be under 5 MB.');
+      return;
+    }
+    setLogoUploading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const result = await api.upload<{ logoUrl: string }>('/repos/upload-logo', formData);
+      setPubLogoUrl((result as any).logoUrl || '');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Logo upload failed');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  // User search for collaborators
+  const searchUsers = async (query: string) => {
+    if (query.length < 2) { setCollabSearchResults([]); return; }
+    try {
+      const results = await api.get<any[]>(`/users/search?q=${encodeURIComponent(query)}&limit=5`);
+      setCollabSearchResults(Array.isArray(results) ? results : []);
+    } catch {
+      setCollabSearchResults([]);
+    }
+  };
+
   const openLockModal = (repo: GitHubRepo) => {
     setLockModal({ repo });
     setLockType('public');
@@ -134,13 +209,17 @@ export default function ReposPage() {
     setPubLogoUrl('');
     setPubWebsiteUrl('');
     setPubTwitterUrl('');
+    setCollaborators([]);
+    setShowCollabForm(false);
+    setCollabSearch('');
+    setCollabSearchResults([]);
   };
 
   const publishRepo = async (repo: GitHubRepo, isLocked: boolean, lockedPriceUsd?: number) => {
     setPublishing(repo.id);
     setLockModal(null);
     try {
-      await api.post('/repos/publish', {
+      const publishedRepo = await api.post<{ id: string }>('/repos/publish', {
         id: repo.id, name: repo.name, full_name: repo.full_name,
         description: repo.description, language: repo.language,
         stargazers_count: repo.stargazers_count, forks_count: repo.forks_count,
@@ -151,6 +230,22 @@ export default function ReposPage() {
         websiteUrl: pubWebsiteUrl || undefined,
         twitterUrl: pubTwitterUrl || undefined,
       });
+
+      // Add collaborators after publishing
+      if (collaborators.length > 0 && publishedRepo?.id) {
+        for (const collab of collaborators) {
+          try {
+            await api.post(`/repos/${publishedRepo.id}/collaborators`, {
+              targetUserId: collab.userId || undefined,
+              name: collab.name,
+              type: collab.type,
+              role: collab.role || undefined,
+              url: collab.url || undefined,
+            });
+          } catch { /* ignore individual collaborator errors */ }
+        }
+      }
+
       await fetchRepos();
       setError('');
     } catch (err) {
@@ -405,20 +500,64 @@ export default function ReposPage() {
             <div className="border-t border-white/06 pt-5 mb-5">
               <p className="text-xs font-mono text-zinc-500 mb-3">Branding (optional)</p>
               <div className="space-y-3">
-                {/* Logo URL */}
+                {/* Logo drag-and-drop upload */}
                 <div>
-                  <label className="text-xs text-zinc-600 block mb-1">Logo URL</label>
+                  <label className="text-xs text-zinc-600 block mb-1.5">Project Logo</label>
                   <input
-                    type="url" placeholder="https://your-project.com/logo.png"
-                    value={pubLogoUrl} onChange={e => setPubLogoUrl(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp,image/svg+xml"
+                    className="hidden"
+                    onChange={e => {
+                      const file = e.target.files?.[0];
+                      if (file) handleLogoUpload(file);
+                    }}
                   />
-                  {pubLogoUrl && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <img src={pubLogoUrl} alt="logo preview"
-                        className="w-8 h-8 rounded-lg object-cover border border-white/10"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      <span className="text-xs text-zinc-600">preview</span>
+                  {pubLogoUrl ? (
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-white/08" style={{ background: 'rgba(255,255,255,0.02)' }}>
+                      <img
+                        src={pubLogoUrl.startsWith('/api') ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${pubLogoUrl}` : pubLogoUrl}
+                        alt="logo preview"
+                        className="w-10 h-10 rounded-xl object-cover border border-white/10 flex-shrink-0"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-zinc-400 truncate">Logo uploaded</p>
+                        <p className="text-xs text-zinc-600">PNG, JPG, WebP or SVG</p>
+                      </div>
+                      <button
+                        onClick={() => setPubLogoUrl('')}
+                        className="text-zinc-600 hover:text-red-400 transition-colors flex-shrink-0"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onDragOver={e => { e.preventDefault(); setLogoDragOver(true); }}
+                      onDragLeave={() => setLogoDragOver(false)}
+                      onDrop={e => {
+                        e.preventDefault();
+                        setLogoDragOver(false);
+                        const file = e.dataTransfer.files?.[0];
+                        if (file) handleLogoUpload(file);
+                      }}
+                      onClick={() => logoInputRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-dashed cursor-pointer transition-all"
+                      style={{
+                        borderColor: logoDragOver ? 'rgba(131,110,249,0.6)' : 'rgba(255,255,255,0.12)',
+                        background: logoDragOver ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.015)',
+                      }}
+                    >
+                      {logoUploading ? (
+                        <div className="w-4 h-4 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-zinc-600" strokeWidth={1.5} />
+                      )}
+                      <span className="text-xs text-zinc-600">
+                        {logoUploading ? 'Uploading...' : 'Drag & drop or click to upload'}
+                      </span>
+                      <span className="text-xs text-zinc-700">PNG, JPG, WebP, SVG · Max 5 MB · No GIFs</span>
                     </div>
                   )}
                 </div>
@@ -443,6 +582,164 @@ export default function ReposPage() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Collaborators section */}
+            <div className="border-t border-white/06 pt-5 mb-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-mono text-zinc-500">Collaborators (optional)</p>
+                <button
+                  onClick={() => setShowCollabForm(v => !v)}
+                  className="flex items-center gap-1 text-xs text-monad-400 hover:text-monad-300 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add
+                </button>
+              </div>
+
+              {collaborators.length > 0 && (
+                <div className="space-y-1.5 mb-3">
+                  {collaborators.map((c, idx) => (
+                    <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      {c.avatarUrl ? (
+                        <img src={c.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                          style={{ background: 'rgba(131,110,249,0.2)', color: '#836ef9' }}>
+                          {c.type === 'AI_AGENT' ? '🤖' : c.type === 'PROGRAM' ? '⚙️' : c.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-zinc-300 truncate">{c.name}</div>
+                        {c.role && <div className="text-xs text-zinc-600 truncate">{c.role}</div>}
+                      </div>
+                      <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: 'rgba(131,110,249,0.1)', color: '#836ef9', fontSize: '0.6rem' }}>
+                        {c.type === 'AI_AGENT' ? 'AI' : c.type === 'PROGRAM' ? 'PROG' : 'USER'}
+                      </span>
+                      <button onClick={() => setCollaborators(prev => prev.filter((_, i) => i !== idx))}
+                        className="text-zinc-600 hover:text-red-400 transition-colors flex-shrink-0">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {showCollabForm && (
+                <div className="rounded-xl p-3 space-y-2.5" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  {/* Type selector */}
+                  <div className="flex gap-1">
+                    {(['USER', 'AI_AGENT', 'PROGRAM'] as const).map(t => (
+                      <button key={t} onClick={() => { setCollabType(t); setCollabSearch(''); setCollabSearchResults([]); setCollabName(''); }}
+                        className="flex-1 py-1.5 text-xs font-mono rounded-lg transition-all"
+                        style={{
+                          background: collabType === t ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.03)',
+                          color: collabType === t ? '#836ef9' : 'rgba(161,161,170,0.5)',
+                          border: collabType === t ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.06)',
+                        }}>
+                        {t === 'AI_AGENT' ? '🤖 AI Agent' : t === 'PROGRAM' ? '⚙️ Program' : '👤 User'}
+                      </button>
+                    ))}
+                  </div>
+
+                  {collabType === 'USER' ? (
+                    <div className="relative">
+                      <div className="flex items-center gap-2 rounded-xl px-3 py-2 border border-zinc-800 bg-zinc-900/70 focus-within:border-monad-500/50 transition-colors">
+                        <Search className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" strokeWidth={1.5} />
+                        <input
+                          type="text"
+                          placeholder="Search users by username..."
+                          value={collabSearch}
+                          onChange={e => { setCollabSearch(e.target.value); searchUsers(e.target.value); }}
+                          className="flex-1 bg-transparent text-white text-xs outline-none placeholder:text-zinc-700"
+                        />
+                      </div>
+                      {collabSearchResults.length > 0 && (
+                        <div className="absolute top-full mt-1 left-0 right-0 z-20 rounded-xl overflow-hidden shadow-xl"
+                          style={{ background: '#1a1a1f', border: '1px solid rgba(131,110,249,0.2)' }}>
+                          {collabSearchResults.map(u => {
+                            const rank = getReputationRank(u.reputationPoints);
+                            return (
+                              <button
+                                key={u.id}
+                                onClick={() => {
+                                  if (collaborators.find(c => c.userId === u.id)) return;
+                                  setCollaborators(prev => [...prev, {
+                                    type: 'USER',
+                                    name: u.displayName || u.username,
+                                    role: collabRole,
+                                    url: '',
+                                    userId: u.id,
+                                    avatarUrl: u.avatarUrl || undefined,
+                                    reputationPoints: u.reputationPoints,
+                                  }]);
+                                  setCollabSearch('');
+                                  setCollabSearchResults([]);
+                                  setShowCollabForm(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-monad-500/10 transition-colors text-left"
+                              >
+                                {u.avatarUrl ? (
+                                  <img src={u.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                                    style={{ background: 'rgba(131,110,249,0.2)', color: '#836ef9' }}>
+                                    {(u.username || 'U')[0].toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs text-white truncate">{u.displayName || u.username}</div>
+                                  <div className="text-xs text-zinc-600">@{u.username}</div>
+                                </div>
+                                <span className="text-xs" title={rank.label}>{rank.badge}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder={collabType === 'AI_AGENT' ? 'AI Agent name (e.g. GPT-4, Claude)' : 'Program name (e.g. Webpack, Docker)'}
+                        value={collabName}
+                        onChange={e => setCollabName(e.target.value)}
+                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                      />
+                      <input
+                        type="url"
+                        placeholder="Link (optional)"
+                        value={collabUrl}
+                        onChange={e => setCollabUrl(e.target.value)}
+                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                      />
+                    </>
+                  )}
+
+                  <input
+                    type="text"
+                    placeholder="Role / contribution (optional)"
+                    value={collabRole}
+                    onChange={e => setCollabRole(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                  />
+
+                  {collabType !== 'USER' && (
+                    <button
+                      onClick={() => {
+                        if (!collabName.trim()) return;
+                        setCollaborators(prev => [...prev, { type: collabType, name: collabName, role: collabRole, url: collabUrl }]);
+                        setCollabName(''); setCollabRole(''); setCollabUrl(''); setShowCollabForm(false);
+                      }}
+                      className="w-full py-2 rounded-xl text-xs font-mono transition-colors"
+                      style={{ background: 'rgba(131,110,249,0.15)', color: '#836ef9', border: '1px solid rgba(131,110,249,0.25)' }}
+                    >
+                      Add Collaborator
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2">
@@ -512,6 +809,29 @@ export default function ReposPage() {
                         <span className="text-monad-400/40">@</span>{repo.user.username}
                       </div>
                     </div>
+
+                    {/* Collaborators avatars */}
+                    {repo.collaborators && repo.collaborators.length > 0 && (
+                      <div className="flex items-center -space-x-1.5 flex-shrink-0" title="Collaborators">
+                        {repo.collaborators.slice(0, 3).map(c => (
+                          <div key={c.id} className="w-5 h-5 rounded-full border border-zinc-900 flex items-center justify-center text-xs overflow-hidden"
+                            style={{ background: 'rgba(131,110,249,0.2)' }}
+                            title={c.name}>
+                            {c.user?.avatarUrl ? (
+                              <img src={c.user.avatarUrl} alt={c.name} className="w-full h-full object-cover" />
+                            ) : c.type === 'AI_AGENT' ? '🤖' : c.type === 'PROGRAM' ? '⚙️' : (
+                              <span className="text-monad-400 font-bold" style={{ fontSize: '0.55rem' }}>{c.name.charAt(0).toUpperCase()}</span>
+                            )}
+                          </div>
+                        ))}
+                        {repo.collaborators.length > 3 && (
+                          <div className="w-5 h-5 rounded-full border border-zinc-900 flex items-center justify-center"
+                            style={{ background: 'rgba(131,110,249,0.15)', fontSize: '0.55rem', color: '#836ef9' }}>
+                            +{repo.collaborators.length - 3}
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {repo.language && (
                       <span className="text-xs font-mono px-2 py-0.5 rounded-lg border border-monad-500/15 bg-monad-500/5 text-monad-400/70 flex-shrink-0">

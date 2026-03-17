@@ -34,6 +34,7 @@ export class UsersService {
         email: true,
         twoFactorEnabled: true,
         createdAt: true,
+        reputationPoints: true,
         _count: {
           select: { repositories: true, votes: true },
         },
@@ -53,7 +54,7 @@ export class UsersService {
       const tag = q.slice(1);
       return this.prisma.user.findMany({
         where: { userTag: tag },
-        select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true },
+        select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true, reputationPoints: true },
         take: 10,
       });
     }
@@ -62,7 +63,7 @@ export class UsersService {
     const term = q.replace(/^@/, '');
     return this.prisma.user.findMany({
       where: { username: { contains: term, mode: 'insensitive' } },
-      select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true },
+      select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true, reputationPoints: true },
       take: 10,
       orderBy: { username: 'asc' },
     });
@@ -110,6 +111,8 @@ export class UsersService {
         linkedinUrl: true,
         websiteUrl: true,
         role: true,
+        occupation: true,
+        reputationPoints: true,
         createdAt: true,
         repositories: {
           where: { isLocked: false },
