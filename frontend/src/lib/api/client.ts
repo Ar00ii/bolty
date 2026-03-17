@@ -54,6 +54,12 @@ class ApiClient {
     const raw = (error as { message?: unknown }).message;
     if (Array.isArray(raw)) return String(raw[0] || 'Request failed');
     if (typeof raw === 'string' && raw) return raw;
+    // NestJS wraps validation errors as a nested object: { message: { message: [...] } }
+    if (raw && typeof raw === 'object') {
+      const nested = (raw as { message?: unknown }).message;
+      if (Array.isArray(nested)) return String(nested[0] || 'Request failed');
+      if (typeof nested === 'string' && nested) return nested;
+    }
     return 'Request failed';
   }
 
