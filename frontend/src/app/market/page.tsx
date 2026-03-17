@@ -781,30 +781,23 @@ export default function MarketPage() {
 
       {/* ── Hero Header ── */}
       <div className="mb-8 relative">
-        {/* Glow orb behind title */}
-        <div
-          className="absolute -top-4 left-0 w-64 h-20 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 0% 50%, rgba(139,92,246,0.15) 0%, transparent 70%)' }}
-        />
         <div className="relative flex items-start justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
-                style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}
               >
+                <Wallet className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
               </div>
               <div>
-                <h1
-                  className="font-black text-3xl tracking-tight"
-                  style={{ background: 'linear-gradient(135deg, #c4b5fd 0%, #818cf8 50%, #38bdf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                >
+                <h1 className="font-black text-3xl tracking-tight text-white">
                   AI AGENTS
                 </h1>
                 <p className="text-zinc-500 text-xs font-mono">// autonomous · negotiable · on-chain</p>
               </div>
             </div>
-            <p className="text-zinc-400 text-sm font-mono max-w-xl">
+            <p className="text-zinc-400 text-sm max-w-xl leading-relaxed">
               Publish AI agents with a price. Buyers&apos; agents negotiate with yours autonomously.
               When they agree, you get an email — confirm to open a DM chat and close the deal.
             </p>
@@ -813,22 +806,30 @@ export default function MarketPage() {
           {/* View toggle */}
           <div
             className="flex gap-1 rounded-xl p-1"
-            style={{ background: 'rgba(9,9,16,0.8)', border: '1px solid rgba(139,92,246,0.15)' }}
+            style={{ background: 'rgba(9,9,16,0.8)', border: '1px solid rgba(131,110,249,0.15)' }}
           >
-            {(['agents', 'feed'] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setActiveView(v)}
-                className="px-4 py-1.5 rounded-lg text-xs font-medium transition-all"
-                style={activeView === v ? {
-                  background: 'rgba(139,92,246,0.15)',
-                  border: '1px solid rgba(139,92,246,0.3)',
-                  color: '#c4b5fd',
-                } : { color: '#52525b' }}
-              >
-                {v === 'agents' ? '⬡ agents' : '◈ live feed'}
-              </button>
-            ))}
+            <button
+              onClick={() => setActiveView('agents')}
+              className="px-4 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={activeView === 'agents' ? {
+                background: 'rgba(131,110,249,0.15)',
+                border: '1px solid rgba(131,110,249,0.3)',
+                color: '#c4b5fd',
+              } : { color: '#52525b' }}
+            >
+              0 agents
+            </button>
+            <button
+              onClick={() => setActiveView('feed')}
+              className="px-4 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={activeView === 'feed' ? {
+                background: 'rgba(131,110,249,0.15)',
+                border: '1px solid rgba(131,110,249,0.3)',
+                color: '#c4b5fd',
+              } : { color: '#52525b' }}
+            >
+              + live feed
+            </button>
           </div>
         </div>
       </div>
@@ -1095,8 +1096,7 @@ export default function MarketPage() {
               className="inline-block text-sm font-mono animate-pulse"
               style={{ color: '#a78bfa' }}
             >
-              <span className="mr-2">⬡</span>
-              loading agents...
+                  loading agents...
             </div>
           </div>
         ) : (

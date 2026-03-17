@@ -554,169 +554,257 @@ export default function HomePage() {
 
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* Shader background */}
         <div className="absolute inset-0 z-0">
           <AnimatedShaderBackground />
         </div>
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.1) 0%, transparent 65%)' }} />
+          <div className="absolute top-0 right-0 w-[600px] h-[400px]"
+            style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(131,110,249,0.06) 0%, transparent 60%)' }} />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
+        <div className="relative z-10 max-w-5xl mx-auto px-4">
           {/* Header */}
-          <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="mb-16">
             <AnimatedContainer>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Roadmap</p>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-                The journey<br />ahead
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Step by step</p>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
+                Platform Roadmap
               </h2>
-            </AnimatedContainer>
-            <AnimatedContainer delay={0.15}>
-              <p className="text-sm text-zinc-500 max-w-xs md:text-right leading-relaxed">
+              <p className="text-sm text-zinc-500 max-w-md leading-relaxed">
                 Bolty is built in three phases. Each version expands the platform with new capabilities and deeper infrastructure.
               </p>
             </AnimatedContainer>
           </div>
 
-          {/* Phase 1 — Beta: left offset */}
-          <div className="relative mb-16">
-            <AnimatedContainer>
-              <motion.div
-                initial={{ opacity: 0, x: -40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="relative md:ml-0 lg:ml-8 max-w-2xl"
-              >
-                <div className="absolute -inset-px rounded-2xl"
-                  style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.3) 0%, transparent 50%)' }} />
-                <div className="relative rounded-2xl border border-monad-500/30 p-8 overflow-hidden"
-                  style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
-                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-monad-500/40"
-                    style={{ background: 'rgba(131,110,249,0.12)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs font-mono text-monad-400">Current</span>
-                  </div>
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)' }}>
-                      <Radio className="w-6 h-6 text-monad-400" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">Version 1</div>
-                      <h3 className="text-2xl font-black text-white">Beta</h3>
-                    </div>
-                  </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed mb-6 max-w-lg">
-                    The first public release of Bolty. Core features are live: code repositories, AI assistant, community chat, ETH payments, and the agent marketplace. This is where we build the foundation and listen to real developer feedback.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Code repo publishing', 'AI assistant', 'Global community chat', 'ETH on-chain payments', 'Agent marketplace', 'GitHub sync'].map(f => (
-                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-400">
-                        <CheckCircle className="w-3.5 h-3.5 text-monad-400 flex-shrink-0" strokeWidth={2} />
-                        {f}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatedContainer>
-            <div className="hidden lg:block absolute top-1/2 right-0 w-1/3 h-px"
-              style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.3), transparent)' }} />
-          </div>
+          {/* Phase label: Beta */}
+          <AnimatedContainer>
+            <div className="flex items-center gap-3 mb-8">
+              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Version 1 — Beta</span>
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
+                <span className="text-xs font-mono text-monad-400">Current</span>
+              </div>
+            </div>
+          </AnimatedContainer>
 
-          {/* Phase 2 — Gamma: right offset */}
-          <div className="relative mb-16">
-            <AnimatedContainer delay={0.1}>
-              <motion.div
-                initial={{ opacity: 0, x: 40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
-                className="relative md:ml-auto lg:mr-8 max-w-2xl"
-              >
-                <div className="absolute -inset-px rounded-2xl"
-                  style={{ background: 'linear-gradient(225deg, rgba(131,110,249,0.2) 0%, transparent 50%)' }} />
-                <div className="relative rounded-2xl border border-white/10 p-8 overflow-hidden"
-                  style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }}>
-                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10"
-                    style={{ background: 'rgba(255,255,255,0.04)' }}>
-                    <span className="text-xs font-mono text-zinc-500">Upcoming</span>
+          {/* Step 01 — full width */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5 }}
+            className="mb-0 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">01</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Code2 className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.6), transparent)' }} />
                   </div>
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                      <FlaskConical className="w-6 h-6 text-monad-400/70" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <div className="text-xs font-mono text-monad-400/70 uppercase tracking-widest">Version 2</div>
-                      <h3 className="text-2xl font-black text-zinc-300">Gamma</h3>
-                    </div>
-                  </div>
-                  <p className="text-zinc-500 text-sm leading-relaxed mb-6 max-w-lg">
-                    Gamma expands on the Beta foundation with deeper integrations, developer tooling, and platform APIs. Bolty opens up its infrastructure for third-party builders — SDKs, webhooks, and programmatic access to repos and agents.
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {['Public REST API', 'Developer SDK', 'Webhook system', 'Advanced analytics', 'Multi-chain support', 'Team workspaces'].map(f => (
-                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-600">
-                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700 flex-shrink-0" strokeWidth={2} />
-                        {f}
-                      </div>
-                    ))}
-                  </div>
+                  <h3 className="text-white font-bold text-lg mb-1">Code Repository Publishing</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed max-w-xl mb-3">Publish and monetize code repositories directly on-chain. Set prices, manage access, and earn from every download.</p>
+                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
-              </motion.div>
-            </AnimatedContainer>
-            <div className="hidden lg:block absolute top-1/2 left-0 w-1/3 h-px"
-              style={{ background: 'linear-gradient(to left, rgba(131,110,249,0.15), transparent)' }} />
-          </div>
+              </div>
+            </div>
+          </motion.div>
 
-          {/* Phase 3 — Alpha: centered */}
-          <div className="relative">
-            <AnimatedContainer delay={0.2}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
-                className="relative mx-auto max-w-3xl"
-              >
-                <div className="absolute -inset-px rounded-2xl opacity-50"
-                  style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, transparent 70%)' }} />
-                <div className="relative rounded-2xl border border-white/06 p-8 overflow-hidden"
-                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
-                  <div className="absolute -right-4 -top-4 text-[80px] font-black leading-none select-none pointer-events-none"
-                    style={{ color: 'rgba(131,110,249,0.05)' }}>ALPHA</div>
-                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/06"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <span className="text-xs font-mono text-zinc-600">Future</span>
+          {/* Step 02 — indented */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
+            className="border-t pl-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">02</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Bot className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
+                    <div className="w-3/4 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.5), transparent)' }} />
                   </div>
-                  <div className="flex items-center gap-4 mb-5">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.1)' }}>
-                      <Rocket className="w-6 h-6 text-monad-400/40" strokeWidth={1.5} />
-                    </div>
+                  <h3 className="text-white font-bold text-lg mb-1">AI Assistant</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">An intelligent assistant built into the platform. Ask questions, get code suggestions, and navigate the ecosystem seamlessly.</p>
+                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Step 03 — wide */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
+            className="border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">03</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <MessageSquare className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.55), rgba(131,110,249,0.1), transparent)' }} />
+                  </div>
+                  <div className="flex items-start justify-between gap-8">
                     <div>
-                      <div className="text-xs font-mono text-monad-400/40 uppercase tracking-widest">Version 3</div>
-                      <h3 className="text-2xl font-black text-zinc-600">Alpha</h3>
+                      <h3 className="text-white font-bold text-lg mb-1">Global Community Chat</h3>
+                      <p className="text-zinc-500 text-sm leading-relaxed max-w-md mb-3">Real-time community hub for builders. Connect, collaborate, and share with developers worldwide.</p>
+                      <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                     </div>
-                  </div>
-                  <p className="text-zinc-600 text-sm leading-relaxed mb-6 max-w-xl">
-                    Alpha is the mature, full-featured version of Bolty. A self-sustaining ecosystem where developers discover, build, and monetize at scale. Full decentralization, DAO governance features, and Bolty as an open protocol.
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {['DAO governance', 'Open protocol', 'Cross-chain bridge', 'On-chain reputation', 'Decentralized storage', 'Native token'].map(f => (
-                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-700">
-                        <Sparkles className="w-3.5 h-3.5 text-zinc-800 flex-shrink-0" strokeWidth={2} />
-                        {f}
-                      </div>
-                    ))}
                   </div>
                 </div>
-              </motion.div>
-            </AnimatedContainer>
-          </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Step 04 */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 }}
+            className="border-t pl-12" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">04</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Wallet className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
+                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.45), transparent)' }} />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-1">ETH On-chain Payments</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">Trustless payments settled directly on Ethereum. No intermediaries, no delays — your keys, your assets, always.</p>
+                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Step 05 — current highlight */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.14 }}
+            className="border-t border-b" style={{ borderColor: 'rgba(131,110,249,0.2)' }}
+          >
+            <div className="py-7" style={{ background: 'rgba(131,110,249,0.03)' }}>
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">05</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <ShoppingBag className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, #836EF9, rgba(131,110,249,0.2), transparent)' }} />
+                    <span className="text-xs font-mono text-monad-400 shrink-0">Current</span>
+                  </div>
+                  <h3 className="text-white font-bold text-xl mb-1">Agent Marketplace</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-3">Publish AI agents with a price. Buyers&apos; agents negotiate autonomously. When they agree — confirm to open a DM and close the deal on-chain.</p>
+                  <ArrowRight className="w-4 h-4 text-monad-400/70" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Phase label: Gamma */}
+          <AnimatedContainer delay={0.1}>
+            <div className="flex items-center gap-3 mt-14 mb-8">
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Version 2 — Gamma</span>
+              <span className="text-xs font-mono text-zinc-600 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>Upcoming</span>
+            </div>
+          </AnimatedContainer>
+
+          {/* Step 06 */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
+            className="border-t opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">06</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Globe className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.25), transparent)' }} />
+                  </div>
+                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Public REST API</h3>
+                  <p className="text-zinc-600 text-sm leading-relaxed max-w-xl mb-3">Open Bolty infrastructure to third-party builders. Programmatic access to repositories, agents, and all platform data.</p>
+                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Step 07 */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
+            className="border-t pl-8 opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">07</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Zap className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
+                    <div className="w-1/2 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.2), transparent)' }} />
+                  </div>
+                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Developer SDK &amp; Webhooks</h3>
+                  <p className="text-zinc-600 text-sm leading-relaxed max-w-lg mb-3">First-class SDK for building on top of Bolty. Real-time webhooks, event subscriptions, and automation tooling.</p>
+                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Phase label: Alpha */}
+          <AnimatedContainer delay={0.1}>
+            <div className="flex items-center gap-3 mt-14 mb-8">
+              <span className="text-xs font-mono text-zinc-700 uppercase tracking-widest">Version 3 — Alpha</span>
+              <span className="text-xs font-mono text-zinc-700 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>Future</span>
+            </div>
+          </AnimatedContainer>
+
+          {/* Step 08 */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
+            className="border-t opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">08</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Shield className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
+                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.12), transparent)' }} />
+                  </div>
+                  <h3 className="text-zinc-600 font-bold text-lg mb-1">DAO Governance</h3>
+                  <p className="text-zinc-700 text-sm leading-relaxed max-w-xl mb-3">Community-driven decisions on platform direction, fees, and upgrades. Token holders vote on proposals on-chain.</p>
+                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Step 09 */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
+            className="border-t border-b opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+          >
+            <div className="py-7">
+              <div className="flex items-start gap-5">
+                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">09</span>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Hash className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
+                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.1), transparent)' }} />
+                  </div>
+                  <h3 className="text-zinc-600 font-bold text-lg mb-1">Open Protocol &amp; Native Token</h3>
+                  <p className="text-zinc-700 text-sm leading-relaxed max-w-lg mb-3">Bolty becomes a fully open, decentralized protocol. Cross-chain support, on-chain reputation, and the native $BOLTY token at the core.</p>
+                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

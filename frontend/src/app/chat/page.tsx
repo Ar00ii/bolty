@@ -4,8 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
-import { TerminalCard } from '@/components/ui/TerminalCard';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { Send, Paperclip, X, Bot, User as UserIcon } from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -24,10 +24,12 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [userCount, setUserCount] = useState(0);
-  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
   const [connected, setConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -45,45 +47,33 @@ export default function ChatPage() {
 
     socketRef.current = socket;
 
-    socket.on('connect', () => {
-      setConnected(true);
-      setError('');
-    });
-
-    socket.on('disconnect', () => {
-      setConnected(false);
-    });
-
-    socket.on('history', (msgs: ChatMessage[]) => {
-      setMessages(msgs);
-    });
-
-    socket.on('newMessage', (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    socket.on('userCount', (count: number) => {
-      setUserCount(count);
-    });
-
+    socket.on('connect', () => { setConnected(true); setNotice(''); });
+    socket.on('disconnect', () => setConnected(false));
+    socket.on('history', (msgs: ChatMessage[]) => setMessages(msgs));
+    socket.on('newMessage', (msg: ChatMessage) => setMessages((prev) => [...prev, msg]));
+    socket.on('userCount', (count: number) => setUserCount(count));
     socket.on('error', (err: { message: string }) => {
-      setError(err.message);
-      setTimeout(() => setError(''), 4000);
+      setNotice(err.message);
+      setTimeout(() => setNotice(''), 4000);
     });
-
     socket.on('reportSuccess', () => {
-      setError('Report submitted. Thank you.');
-      setTimeout(() => setError(''), 3000);
+      setNotice('Report submitted. Thank you.');
+      setTimeout(() => setNotice(''), 3000);
     });
 
-    return () => {
-      socket.disconnect();
-    };
+    return () => { socket.disconnect(); };
   }, [isAuthenticated]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 128) + 'px';
+    }
+  }, [input]);
 
   const sendMessage = useCallback(() => {
     const content = input.trim();
@@ -107,137 +97,177 @@ export default function ChatPage() {
   };
 
   const formatTime = (dateStr: string) =>
-    new Date(dateStr).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
+    new Date(dateStr).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   if (isLoading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <span className="text-neon-400 font-mono animate-pulse">Connecting...</span>
+    <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
+      <span className="text-monad-400 font-mono text-sm animate-pulse">Connecting...</span>
     </div>
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
-      <div className="flex flex-col h-full gap-3">
+    <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
+      <div className="flex flex-col h-full rounded-2xl overflow-hidden border" style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#0a0a0b' }}>
+
         {/* Header */}
-        <TerminalCard showDots={false} className="py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h1 className="text-neon-400 font-mono font-bold">GLOBAL_CHAT</h1>
+        <div className="px-5 py-4 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(131,110,249,0.04)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
+              <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-white">Community Chat</h1>
               <div className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-neon-400' : 'bg-red-500'}`}
-                  style={connected ? { boxShadow: '0 0 6px #39e87c' } : {}} />
-                <span className="text-terminal-muted text-xs">
+                <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-monad-400 animate-pulse' : 'bg-red-500'}`} />
+                <span className="text-xs" style={{ color: 'rgba(161,161,170,0.6)' }}>
                   {connected ? 'connected' : 'disconnected'}
                 </span>
               </div>
             </div>
-            <div className="text-terminal-muted text-xs font-mono">
-              {userCount} online
-            </div>
           </div>
-        </TerminalCard>
+          <span className="text-xs font-mono" style={{ color: 'rgba(161,161,170,0.4)' }}>{userCount} online</span>
+        </div>
 
         {/* Messages */}
-        <TerminalCard title="messages" className="flex-1 overflow-y-auto">
-          <div className="space-y-2">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex gap-3 group animate-fade-in ${
-                  msg.userId === user?.id ? 'flex-row-reverse' : ''
-                }`}
-              >
-                <div className="shrink-0 w-7 h-7 rounded bg-terminal-border flex items-center justify-center overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-sm font-mono" style={{ color: 'rgba(161,161,170,0.3)' }}>
+                {'// No messages yet. Be the first to say something.'}
+              </p>
+            </div>
+          )}
+          {messages.map((msg) => {
+            const isMe = msg.userId === user?.id;
+            return (
+              <div key={msg.id} className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}>
+                {/* Avatar */}
+                <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
+                  style={isMe
+                    ? { background: 'rgba(131,110,249,0.2)', border: '1px solid rgba(131,110,249,0.3)' }
+                    : { background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }
+                  }>
                   {msg.avatarUrl ? (
                     <img src={msg.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  ) : isMe ? (
+                    <UserIcon className="w-4 h-4 text-monad-400" strokeWidth={2} />
                   ) : (
-                    <span className="text-neon-400 text-xs font-mono">
+                    <span className="text-xs font-semibold text-zinc-400">
                       {(msg.username || 'U')[0].toUpperCase()}
                     </span>
                   )}
                 </div>
-                <div className={`max-w-[75%] ${msg.userId === user?.id ? 'items-end' : 'items-start'} flex flex-col`}>
-                  <div className="flex items-center gap-2 mb-0.5">
-                    {msg.userId !== user?.id && (
+
+                {/* Bubble */}
+                <div className={`max-w-[72%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    {!isMe && (
                       msg.username ? (
-                        <Link href={`/u/${msg.username}`} className="text-neon-400 text-xs font-mono hover:underline">
+                        <Link href={`/u/${msg.username}`} className="text-xs font-medium text-monad-400 hover:text-monad-300 transition-colors">
                           {msg.username}
                         </Link>
                       ) : (
-                        <span className="text-neon-400 text-xs font-mono">anonymous</span>
+                        <span className="text-xs font-medium" style={{ color: 'rgba(161,161,170,0.5)' }}>anonymous</span>
                       )
                     )}
-                    <span className="text-terminal-muted text-xs">{formatTime(msg.createdAt)}</span>
+                    <span className="text-xs" style={{ color: 'rgba(161,161,170,0.35)' }}>{formatTime(msg.createdAt)}</span>
                   </div>
                   <div
-                    className={`px-3 py-1.5 rounded text-sm font-mono leading-relaxed ${
-                      msg.userId === user?.id
-                        ? 'bg-neon-400/10 border border-neon-400/30 text-neon-400'
-                        : 'bg-terminal-card border border-terminal-border text-terminal-text'
-                    }`}
-                    // Sanitized server-side — safe to render
+                    className="px-3.5 py-2.5 text-sm leading-relaxed"
+                    style={isMe
+                      ? { background: 'rgba(131,110,249,0.2)', color: '#e4e4e7', borderRadius: '12px 12px 4px 12px', border: '1px solid rgba(131,110,249,0.25)' }
+                      : { background: 'rgba(255,255,255,0.06)', color: '#d4d4d8', borderRadius: '12px 12px 12px 4px', border: '1px solid rgba(255,255,255,0.08)' }
+                    }
                   >
                     {msg.content}
                   </div>
                 </div>
-                {msg.userId !== user?.id && (
+
+                {/* Report */}
+                {!isMe && (
                   <button
                     onClick={() => reportMessage(msg.id)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-terminal-muted hover:text-red-400 text-xs font-mono self-center"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity self-center"
+                    style={{ color: 'rgba(161,161,170,0.3)' }}
                     title="Report message"
                   >
-                    !
+                    <X className="w-3 h-3" />
                   </button>
                 )}
               </div>
-            ))}
-            {messages.length === 0 && (
-              <p className="text-terminal-muted text-sm text-center py-8 font-mono">
-                {'// No messages yet. Be the first to say something.'}
-              </p>
-            )}
-            <div ref={bottomRef} />
-          </div>
-        </TerminalCard>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
         {/* Input */}
-        <div className="terminal-card">
-          {error && (
-            <div className={`text-xs font-mono mb-2 px-1 ${
-              error.includes('submitted') ? 'text-neon-400' : 'text-red-400'
-            }`}>
-              {error}
+        <div className="border-t px-4 py-3" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+          {notice && (
+            <div className="text-xs font-mono mb-2 px-1" style={{ color: notice.includes('submitted') ? '#836EF9' : '#f87171' }}>
+              {notice}
             </div>
           )}
-          <div className="flex gap-2 items-center">
-            <span className="text-neon-400 font-mono text-sm shrink-0">
-              {user?.username || 'you'}&gt;
-            </span>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={!connected}
-              placeholder={connected ? 'Type a message...' : 'Connecting...'}
-              maxLength={500}
-              className="terminal-input flex-1"
-            />
-            <span className="text-terminal-muted text-xs shrink-0">
-              {input.length}/500
-            </span>
+          <div className="flex gap-2 items-end">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="p-2.5 rounded-xl border transition-all hover:border-monad-500/40 hover:bg-monad-500/10 self-end"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(161,161,170,0.5)' }}
+              title="Attach file"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
+            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={() => {}} />
+
+            <div className="flex-1 relative">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={!connected}
+                placeholder={connected ? `Message as ${user?.username || 'you'}...` : 'Connecting...'}
+                maxLength={500}
+                rows={1}
+                className="w-full px-4 py-2.5 rounded-xl resize-none outline-none transition-all text-sm"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  minHeight: '42px',
+                  maxHeight: '128px',
+                }}
+              />
+              {input.length > 0 && (
+                <span className="absolute bottom-1.5 right-3 text-xs" style={{ color: 'rgba(161,161,170,0.3)' }}>
+                  {input.length}/500
+                </span>
+              )}
+            </div>
+
             <button
               onClick={sendMessage}
               disabled={!connected || !input.trim()}
-              className="btn-neon py-1.5 px-4 text-sm disabled:opacity-50"
+              className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 self-end"
+              style={{ background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', color: '#fff' }}
             >
-              send
+              <Send className="w-4 h-4" />
             </button>
           </div>
+
+          {input.length === 0 && (
+            <div className="mt-2.5 flex flex-wrap gap-2">
+              {['Hello everyone', 'Need help with my agent', 'Looking for collaborators'].map(q => (
+                <button
+                  key={q}
+                  onClick={() => setInput(q)}
+                  className="px-3 py-1 text-xs rounded-full border transition-colors hover:border-monad-500/40 hover:text-monad-400"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(161,161,170,0.4)' }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
