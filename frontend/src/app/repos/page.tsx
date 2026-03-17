@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
-import { GitBranch, Lock, Globe, Star, Download, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  GitBranch, Lock, Globe, Star, Download,
+  ArrowUp, ArrowDown, MessageCircle, ExternalLink, Twitter,
+} from 'lucide-react';
 
 interface Repository {
   id: string;
@@ -26,6 +30,9 @@ interface Repository {
   isPrivate: boolean;
   isLocked: boolean;
   lockedPriceUsd: number | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  twitterUrl: string | null;
   user: { username: string | null; avatarUrl: string | null };
 }
 
@@ -66,6 +73,10 @@ export default function ReposPage() {
   const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
   const [lockPrice, setLockPrice] = useState('');
   const [lockType, setLockType] = useState<'public' | 'locked'>('public');
+  // Extra branding fields in publish modal
+  const [pubLogoUrl, setPubLogoUrl] = useState('');
+  const [pubWebsiteUrl, setPubWebsiteUrl] = useState('');
+  const [pubTwitterUrl, setPubTwitterUrl] = useState('');
 
   const [consentModal, setConsentModal] = useState<{
     repo: Repository;
@@ -119,6 +130,9 @@ export default function ReposPage() {
     setLockModal({ repo });
     setLockType('public');
     setLockPrice('');
+    setPubLogoUrl('');
+    setPubWebsiteUrl('');
+    setPubTwitterUrl('');
   };
 
   const publishRepo = async (repo: GitHubRepo, isLocked: boolean, lockedPriceUsd?: number) => {
@@ -132,6 +146,9 @@ export default function ReposPage() {
         html_url: repo.html_url, clone_url: repo.clone_url,
         topics: repo.topics, private: repo.private,
         isLocked, lockedPriceUsd: isLocked ? lockedPriceUsd : undefined,
+        logoUrl: pubLogoUrl || undefined,
+        websiteUrl: pubWebsiteUrl || undefined,
+        twitterUrl: pubTwitterUrl || undefined,
       });
       await fetchRepos();
       setError('');
@@ -266,30 +283,25 @@ export default function ReposPage() {
         </select>
         <div className="flex gap-1 flex-wrap">
           {SORTS.map(s => (
-            <button
-              key={s.value}
-              onClick={() => setSortBy(s.value as typeof sortBy)}
+            <button key={s.value} onClick={() => setSortBy(s.value as typeof sortBy)}
               className={`px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
                 sortBy === s.value
                   ? 'bg-monad-500/15 text-monad-400 border border-monad-500/30'
                   : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
-              }`}
-            >
+              }`}>
               {s.label}
             </button>
           ))}
         </div>
         {isAuthenticated && (
-          <button
-            onClick={loadGhRepos}
-            className="text-xs font-mono px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors"
-          >
+          <button onClick={loadGhRepos}
+            className="text-xs font-mono px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors">
             + publish repo
           </button>
         )}
       </div>
 
-      {/* Publish panel */}
+      {/* Publish panel with ActionSearchBar */}
       {showPublish && (
         <div className="border border-white/08 rounded-2xl p-5 mb-6"
           style={{ background: 'rgba(255,255,255,0.02)' }}>
@@ -297,7 +309,6 @@ export default function ReposPage() {
             <p className="text-sm font-medium text-zinc-300">Your GitHub repositories</p>
             <button onClick={() => setShowPublish(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">close</button>
           </div>
-
           {ghNeedsConnect && (
             <div className="mb-4 p-4 border border-monad-500/20 rounded-xl text-center" style={{ background: 'rgba(131,110,249,0.05)' }}>
               <p className="text-sm text-zinc-400 mb-3">Connect your GitHub account to publish repos.</p>
@@ -306,46 +317,37 @@ export default function ReposPage() {
               </a>
             </div>
           )}
-
           {ghNeedsReauth && (
             <div className="mb-4 p-4 border border-white/08 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
               <p className="text-sm text-zinc-400 mb-1">Your GitHub token needs to be refreshed.</p>
               <p className="text-xs text-zinc-600 mb-3">Reconnect to access private repos.</p>
-              <a
-                href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
-                className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors"
-              >
+              <a href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
+                className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">
                 Reconnect GitHub
               </a>
             </div>
           )}
-
           {!ghNeedsConnect && !ghNeedsReauth && (
-            <ActionSearchBar
-              actions={ghRepoActions}
-              placeholder="Search your repos..."
-              label="Select a repo to publish"
-              onSelect={handleRepoSelect}
-            />
+            <ActionSearchBar actions={ghRepoActions} placeholder="Search your repos..." label="Select a repo to publish" onSelect={handleRepoSelect} />
           )}
         </div>
       )}
 
-      {/* Publish modal */}
+      {/* ── Publish modal ─────────────────────────────────────────────────── */}
       {lockModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
-          <div className="w-full max-w-sm rounded-2xl p-6" style={{ background: '#1a1a1f', border: '1px solid rgba(131,110,249,0.2)' }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
+            style={{ background: '#1a1a1f', border: '1px solid rgba(131,110,249,0.2)' }}>
             <h3 className="font-semibold text-monad-400 mb-1 font-mono">Publish Options</h3>
             <p className="text-zinc-500 text-xs mb-5">
               {lockModal.repo.name}{lockModal.repo.private ? ' · private repo' : ''}
             </p>
 
+            {/* Visibility */}
             <div className="space-y-2.5 mb-5">
-              <button
-                onClick={() => setLockType('public')}
+              <button onClick={() => setLockType('public')}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all ${lockType === 'public' ? 'border-monad-500/50' : 'border-white/08 hover:border-white/15'}`}
-                style={{ background: lockType === 'public' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)' }}
-              >
+                style={{ background: lockType === 'public' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)' }}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'public' ? 'bg-monad-500/20' : 'bg-white/05'}`}>
                   <Globe className={`w-4 h-4 ${lockType === 'public' ? 'text-monad-400' : 'text-zinc-500'}`} strokeWidth={1.5} />
                 </div>
@@ -355,11 +357,9 @@ export default function ReposPage() {
                 </div>
               </button>
 
-              <button
-                onClick={() => setLockType('locked')}
+              <button onClick={() => setLockType('locked')}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all ${lockType === 'locked' ? 'border-monad-500/50' : 'border-white/08 hover:border-white/15'}`}
-                style={{ background: lockType === 'locked' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)' }}
-              >
+                style={{ background: lockType === 'locked' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)' }}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'locked' ? 'bg-monad-500/20' : 'bg-white/05'}`}>
                   <Lock className={`w-4 h-4 ${lockType === 'locked' ? 'text-monad-400' : 'text-zinc-500'}`} strokeWidth={1.5} />
                 </div>
@@ -375,27 +375,65 @@ export default function ReposPage() {
                 <label className="text-xs text-zinc-500 font-mono block mb-1.5">Price (USD)</label>
                 <div className="flex items-center gap-2 rounded-xl px-3 py-2.5 border border-zinc-800 bg-zinc-900/70 focus-within:border-monad-500/50 transition-colors">
                   <span className="text-zinc-600 font-mono text-sm">$</span>
-                  <input
-                    type="number" min="0.01" step="0.01" placeholder="9.99"
+                  <input type="number" min="0.01" step="0.01" placeholder="9.99"
                     value={lockPrice} onChange={e => setLockPrice(e.target.value)}
-                    className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-700"
-                  />
+                    className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-700" />
                 </div>
               </div>
             )}
 
+            {/* Branding section */}
+            <div className="border-t border-white/06 pt-5 mb-5">
+              <p className="text-xs font-mono text-zinc-500 mb-3">Branding (optional)</p>
+              <div className="space-y-3">
+                {/* Logo URL */}
+                <div>
+                  <label className="text-xs text-zinc-600 block mb-1">Logo URL</label>
+                  <input
+                    type="url" placeholder="https://your-project.com/logo.png"
+                    value={pubLogoUrl} onChange={e => setPubLogoUrl(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                  />
+                  {pubLogoUrl && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <img src={pubLogoUrl} alt="logo preview"
+                        className="w-8 h-8 rounded-lg object-cover border border-white/10"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      <span className="text-xs text-zinc-600">preview</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Website */}
+                <div>
+                  <label className="text-xs text-zinc-600 block mb-1">Website</label>
+                  <input
+                    type="url" placeholder="https://your-project.com"
+                    value={pubWebsiteUrl} onChange={e => setPubWebsiteUrl(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                  />
+                </div>
+
+                {/* Twitter / X */}
+                <div>
+                  <label className="text-xs text-zinc-600 block mb-1">X / Twitter</label>
+                  <input
+                    type="url" placeholder="https://x.com/yourproject"
+                    value={pubTwitterUrl} onChange={e => setPubTwitterUrl(e.target.value)}
+                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="flex gap-2">
-              <button
-                onClick={() => setLockModal(null)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-mono text-zinc-500 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300 transition-all"
-              >
+              <button onClick={() => setLockModal(null)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-mono text-zinc-500 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300 transition-all">
                 cancel
               </button>
-              <button
-                onClick={confirmPublish}
+              <button onClick={confirmPublish}
                 className="flex-1 py-2.5 rounded-xl text-xs font-mono text-white transition-all"
-                style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)' }}
-              >
+                style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)' }}>
                 confirm publish
               </button>
             </div>
@@ -416,6 +454,7 @@ export default function ReposPage() {
             const squares = genRandomPattern();
             return (
               <div key={repo.id} className="relative overflow-hidden p-5 flex flex-col group hover:bg-monad-500/4 transition-colors duration-200">
+                {/* Grid bg decoration */}
                 <div className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(white,transparent)]">
                   <div className="absolute inset-0 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
                     <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
@@ -424,43 +463,85 @@ export default function ReposPage() {
                 </div>
 
                 <div className="relative z-10 flex-1">
-                  <div className="flex items-start justify-between mb-2 gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {repo.isLocked && <Lock className="w-3.5 h-3.5 text-monad-400/60 flex-shrink-0" strokeWidth={1.5} />}
-                      <a
-                        href={repo.isLocked ? '#' : repo.githubUrl}
-                        target={repo.isLocked ? undefined : '_blank'}
-                        rel="noopener noreferrer"
-                        className="font-mono font-semibold text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
-                      >
-                        {repo.name}
-                      </a>
+                  {/* Header: logo + name */}
+                  <div className="flex items-start gap-3 mb-3">
+                    {/* Logo or fallback avatar */}
+                    {repo.logoUrl ? (
+                      <img src={repo.logoUrl} alt={repo.name}
+                        className="w-10 h-10 rounded-xl object-cover border border-white/08 flex-shrink-0"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-sm text-monad-400"
+                        style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
+                        {repo.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        {repo.isLocked && <Lock className="w-3 h-3 text-monad-400/60 flex-shrink-0" strokeWidth={1.5} />}
+                        <a
+                          href={repo.isLocked ? '#' : repo.githubUrl}
+                          target={repo.isLocked ? undefined : '_blank'}
+                          rel="noopener noreferrer"
+                          className="font-mono font-semibold text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
+                        >
+                          {repo.name}
+                        </a>
+                      </div>
+                      <div className="text-zinc-600 text-xs flex items-center gap-1 mt-0.5">
+                        <span className="text-monad-400/40">@</span>{repo.user.username}
+                      </div>
                     </div>
+
                     {repo.language && (
-                      <span className="text-xs font-mono px-2 py-0.5 rounded-lg border border-monad-500/15 bg-monad-500/5 text-monad-400/70 ml-auto shrink-0">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-lg border border-monad-500/15 bg-monad-500/5 text-monad-400/70 flex-shrink-0">
                         {repo.language}
                       </span>
                     )}
                   </div>
 
+                  {/* Price badge */}
                   {repo.isLocked && repo.lockedPriceUsd && (
                     <div className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg px-2 py-0.5 mb-2">
                       ${repo.lockedPriceUsd.toFixed(2)} USD
                     </div>
                   )}
 
+                  {/* Description */}
                   {repo.description && (
                     <p className="text-zinc-500 text-xs leading-relaxed mb-3 line-clamp-2">
                       {repo.isLocked ? '████ ███████ ██████ ████ ██████' : repo.description}
                     </p>
                   )}
 
+                  {/* Stats row */}
                   <div className="flex items-center gap-3 text-zinc-600 text-xs font-mono mb-3">
                     <span className="flex items-center gap-1"><Star className="w-3 h-3" strokeWidth={1.5} /> {repo.stars}</span>
                     <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" strokeWidth={1.5} /> {repo.forks}</span>
                     <span className="flex items-center gap-1"><Download className="w-3 h-3" strokeWidth={1.5} /> {repo.downloadCount}</span>
                   </div>
 
+                  {/* Social links */}
+                  {(repo.websiteUrl || repo.twitterUrl) && (
+                    <div className="flex items-center gap-2 mb-3">
+                      {repo.websiteUrl && (
+                        <a href={repo.websiteUrl} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs text-zinc-600 hover:text-monad-400 transition-colors">
+                          <Globe className="w-3 h-3" strokeWidth={1.5} />
+                          <span className="truncate max-w-24">{repo.websiteUrl.replace(/^https?:\/\//, '')}</span>
+                        </a>
+                      )}
+                      {repo.twitterUrl && (
+                        <a href={repo.twitterUrl} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1 text-xs text-zinc-600 hover:text-monad-400 transition-colors">
+                          <Twitter className="w-3 h-3" strokeWidth={1.5} />
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Topics */}
                   {!repo.isLocked && repo.topics.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {repo.topics.slice(0, 3).map(t => (
@@ -468,12 +549,9 @@ export default function ReposPage() {
                       ))}
                     </div>
                   )}
-
-                  <div className="text-zinc-600 text-xs flex items-center gap-1">
-                    <span className="text-monad-400/50">@</span>{repo.user.username}
-                  </div>
                 </div>
 
+                {/* Footer: votes + action buttons */}
                 <div className="relative z-10 flex items-center justify-between mt-3 pt-3 border-t border-dashed border-white/06">
                   <div className="flex items-center gap-0.5">
                     <button onClick={() => vote(repo.id, 'UP')} disabled={!isAuthenticated}
@@ -485,17 +563,29 @@ export default function ReposPage() {
                       <ArrowDown className="w-3 h-3" strokeWidth={2} /> {repo.downvotes}
                     </button>
                   </div>
-                  {repo.isLocked ? (
-                    <button onClick={() => payAndUnlock(repo)}
-                      className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg hover:bg-monad-500/10 transition-colors">
-                      Unlock — ${repo.lockedPriceUsd} USD
-                    </button>
-                  ) : (
-                    <button onClick={() => download(repo.id, repo.githubUrl)}
-                      className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
-                      download
-                    </button>
-                  )}
+
+                  <div className="flex items-center gap-1.5">
+                    {/* Message button → DM the author */}
+                    {repo.user.username && (
+                      <Link href={`/dm?user=${repo.user.username}`}
+                        className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:text-monad-400 hover:bg-monad-400/10 rounded transition-colors"
+                        title={`Message @${repo.user.username}`}>
+                        <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </Link>
+                    )}
+
+                    {repo.isLocked ? (
+                      <button onClick={() => payAndUnlock(repo)}
+                        className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg hover:bg-monad-500/10 transition-colors">
+                        Unlock — ${repo.lockedPriceUsd} USD
+                      </button>
+                    ) : (
+                      <button onClick={() => download(repo.id, repo.githubUrl)}
+                        className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
+                        download
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             );

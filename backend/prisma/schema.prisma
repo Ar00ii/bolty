@@ -134,6 +134,11 @@ model Repository {
   isLocked      Boolean   @default(false)
   lockedPriceUsd Float?
 
+  // Publisher branding
+  logoUrl        String?
+  websiteUrl     String?
+  twitterUrl     String?
+
   votes          Vote[]
   marketListings MarketListing[]
   purchases      RepoPurchase[]

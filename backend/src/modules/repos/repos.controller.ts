@@ -77,6 +77,18 @@ class PublishRepoDto {
   @IsOptional()
   isLocked?: boolean;
 
+  @IsString()
+  @IsOptional()
+  logoUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  websiteUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  twitterUrl?: string;
+
   @IsNumber()
   @IsOptional()
   @Min(0.01)

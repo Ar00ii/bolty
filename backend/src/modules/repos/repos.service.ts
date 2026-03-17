@@ -227,6 +227,9 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
       private?: boolean;
       isLocked?: boolean;
       lockedPriceUsd?: number;
+      logoUrl?: string;
+      websiteUrl?: string;
+      twitterUrl?: string;
     },
   ) {
     const isPrivate = githubRepoData.private === true;
@@ -276,6 +279,9 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         isPrivate,
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
+        logoUrl: githubRepoData.logoUrl?.slice(0, 500) || null,
+        websiteUrl: githubRepoData.websiteUrl?.slice(0, 500) || null,
+        twitterUrl: githubRepoData.twitterUrl?.slice(0, 500) || null,
         userId,
       },
       update: {
@@ -284,6 +290,9 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
         description: githubRepoData.description?.slice(0, 1000),
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
+        logoUrl: githubRepoData.logoUrl?.slice(0, 500) || null,
+        websiteUrl: githubRepoData.websiteUrl?.slice(0, 500) || null,
+        twitterUrl: githubRepoData.twitterUrl?.slice(0, 500) || null,
       },
     });
   }
@@ -301,14 +310,19 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
-    const where = {
-      isPrivate: false,
+    const where: any = {
+      // Show public repos OR locked repos (private locked repos are visible but content is hidden)
+      OR: [{ isPrivate: false }, { isLocked: true }],
       ...(language ? { language: { equals: language, mode: 'insensitive' as const } } : {}),
       ...(search
         ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' as const } },
-              { description: { contains: search, mode: 'insensitive' as const } },
+            AND: [
+              {
+                OR: [
+                  { name: { contains: search, mode: 'insensitive' as const } },
+                  { description: { contains: search, mode: 'insensitive' as const } },
+                ],
+              },
             ],
           }
         : {}),
