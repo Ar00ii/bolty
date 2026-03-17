@@ -12,6 +12,9 @@ const nextConfig = {
   reactStrictMode: true,
 
   webpack: (config, { isServer }) => {
+    // Ensure @/ path alias resolves to src/ (backup for tsconfig paths)
+    config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+
     if (isServer) {
       // Replace @splinetool packages with a stub on the server.
       // @splinetool/runtime executes `new class extends null` at module-level
