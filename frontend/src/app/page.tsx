@@ -18,6 +18,7 @@ import dynamic from 'next/dynamic';
 const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
 const CardSwap = dynamic(() => import('@/components/ui/CardSwap'), { ssr: false });
 import { Card } from '@/components/ui/CardSwap';
+const GridScan = dynamic(() => import('@/components/ui/GridScan').then(m => ({ default: m.GridScan })), { ssr: false });
 import {
   Code2,
   Bot,
@@ -929,7 +930,22 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+        {/* GridScan full-bleed background */}
+        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+          <GridScan
+            sensitivity={0.55}
+            lineThickness={1}
+            linesColor="#3b2060"
+            gridScale={0.1}
+            scanColor="#836EF9"
+            scanOpacity={0.4}
+            enablePost
+            bloomIntensity={0.6}
+            chromaticAberration={0.002}
+            noiseIntensity={0.01}
+          />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 relative" style={{ zIndex: 1 }}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
