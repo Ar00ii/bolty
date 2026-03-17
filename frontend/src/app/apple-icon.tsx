@@ -32,6 +32,6 @@ export default function AppleIcon() {
         </svg>
       </div>
     ),
-    { ...size },
+    { ...size, fonts: [] },
   );
 }
