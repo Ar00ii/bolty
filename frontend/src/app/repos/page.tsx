@@ -10,7 +10,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import {
   GitBranch, Lock, Globe, Star, Download,
-  ArrowUp, ArrowDown, MessageCircle, ExternalLink, Twitter,
+  ArrowUp, ArrowDown, MessageCircle, ExternalLink, Twitter, Wallet,
 } from 'lucide-react';
 
 interface Repository {
@@ -309,6 +309,23 @@ export default function ReposPage() {
             <p className="text-sm font-medium text-zinc-300">Your GitHub repositories</p>
             <button onClick={() => setShowPublish(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">close</button>
           </div>
+          {/* Wallet not linked warning */}
+          {!user?.walletAddress && (
+            <div className="mb-4 flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-monad-500/25"
+              style={{ background: 'rgba(131,110,249,0.04)' }}>
+              <Wallet className="w-4 h-4 text-monad-400/60 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-zinc-400 mb-0.5">No MetaMask wallet linked</p>
+                <p className="text-xs text-zinc-600 mb-2">To publish locked repos and receive payments, link your wallet first.</p>
+                <Link href="/profile?tab=wallet"
+                  className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-500/30 hover:bg-monad-500/10 rounded-lg px-2.5 py-1 transition-colors">
+                  <Wallet className="w-3 h-3" strokeWidth={1.5} />
+                  Link wallet →
+                </Link>
+              </div>
+            </div>
+          )}
+
           {ghNeedsConnect && (
             <div className="mb-4 p-4 border border-monad-500/20 rounded-xl text-center" style={{ background: 'rgba(131,110,249,0.05)' }}>
               <p className="text-sm text-zinc-400 mb-3">Connect your GitHub account to publish repos.</p>

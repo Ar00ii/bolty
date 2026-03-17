@@ -292,7 +292,7 @@ export default function ProfilePage() {
       .catch(() => {});
   }, [user]);
 
-  // ?linked=github redirect
+  // ?linked=github redirect  |  ?tab=wallet direct link
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
@@ -301,6 +301,11 @@ export default function ProfilePage() {
       window.history.replaceState({}, '', '/profile');
       setTab('connections');
       setConMsg('GitHub account linked successfully.');
+    }
+    const tabParam = params.get('tab') as Tab | null;
+    if (tabParam && ['general','social','wallet','connections','friends','security'].includes(tabParam)) {
+      setTab(tabParam);
+      window.history.replaceState({}, '', '/profile');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

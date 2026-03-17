@@ -7,6 +7,7 @@ import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-card
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { Wallet } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -896,6 +897,23 @@ export default function MarketPage() {
             </div>
             <span className="text-zinc-400 font-mono text-xs ml-1">publish_agent.config</span>
           </div>
+
+          {/* Wallet not linked warning */}
+          {!user?.walletAddress && (
+            <div className="mb-5 flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-monad-500/25"
+              style={{ background: 'rgba(131,110,249,0.04)' }}>
+              <Wallet className="w-4 h-4 text-monad-400/60 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-zinc-400 mb-0.5">No MetaMask wallet linked</p>
+                <p className="text-xs text-zinc-600 mb-2">Buyers pay through MetaMask. Link your wallet to receive payments for your listings.</p>
+                <Link href="/profile?tab=wallet"
+                  className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-500/30 hover:bg-monad-500/10 rounded-lg px-2.5 py-1 transition-colors">
+                  <Wallet className="w-3 h-3" strokeWidth={1.5} />
+                  Link wallet →
+                </Link>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             {/* Title */}
