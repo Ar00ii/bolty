@@ -85,6 +85,7 @@ export default function ReposPage() {
     sellerWei: bigint;
     platformWei: bigint;
     totalWei: bigint;
+    totalUsd: number;
   } | null>(null);
 
   const fetchRepos = useCallback(async () => {
@@ -189,10 +190,11 @@ export default function ReposPage() {
     if (!ethereum) { setError('MetaMask not found'); return; }
     let ethPrice = 2000;
     try {
-      const priceData = await api.get<{ price: number }>('/chart/price');
+      const priceData = await api.get<{ price: number }>('/chart/eth-price');
       if ((priceData as any).price) ethPrice = (priceData as any).price;
     } catch { /* fallback */ }
-    const totalWei = BigInt(Math.ceil((repo.lockedPriceUsd / ethPrice) * 1e18));
+    const totalUsd = repo.lockedPriceUsd;
+    const totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
     const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
     const platformWei = totalWei - sellerWei;
     let buyerAddress: string;
@@ -200,7 +202,7 @@ export default function ReposPage() {
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
       buyerAddress = accounts[0];
     } catch { setError('Could not connect to MetaMask'); return; }
-    setConsentModal({ repo, sellerWallet, buyerAddress, sellerWei, platformWei, totalWei });
+    setConsentModal({ repo, sellerWallet, buyerAddress, sellerWei, platformWei, totalWei, totalUsd });
   };
 
   const executeRepoPurchase = async (signature: string, message: string) => {
@@ -622,6 +624,7 @@ export default function ReposPage() {
           sellerAmountETH={(Number(consentModal.sellerWei) / 1e18).toFixed(6)}
           platformFeeETH={(Number(consentModal.platformWei) / 1e18).toFixed(6)}
           totalETH={(Number(consentModal.totalWei) / 1e18).toFixed(6)}
+          totalUsd={consentModal.totalUsd.toFixed(2)}
           buyerAddress={consentModal.buyerAddress}
           onConsent={executeRepoPurchase}
           onCancel={() => setConsentModal(null)}

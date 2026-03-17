@@ -16,6 +16,7 @@ const PriceSchema = z.object({
 
 const CACHE_TTL = 30; // seconds
 const PRICE_CACHE_KEY = 'bolty_price';
+const ETH_PRICE_CACHE_KEY = 'eth_usd_price';
 const HISTORY_LIMIT = 288; // 24h at 5-min intervals
 
 @Injectable()
@@ -89,6 +90,30 @@ export class ChartService {
     } catch (err) {
       this.logger.warn('Price API error, using cached/mock data', err);
       return this.getMockPrice();
+    }
+  }
+
+  async getEthPrice(): Promise<{ price: number }> {
+    const cached = await this.redis.get(ETH_PRICE_CACHE_KEY);
+    if (cached) return JSON.parse(cached) as { price: number };
+
+    try {
+      const response = await axios.get(
+        'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd',
+        {
+          timeout: 5000,
+          headers: { 'User-Agent': 'Bolty-Platform/1.0' },
+          maxContentLength: 10 * 1024,
+        },
+      );
+      const price = response.data?.ethereum?.usd;
+      if (typeof price !== 'number' || price <= 0) throw new Error('Invalid ETH price');
+      const result = { price };
+      await this.redis.set(ETH_PRICE_CACHE_KEY, JSON.stringify(result), CACHE_TTL);
+      return result;
+    } catch (err) {
+      this.logger.warn('ETH price API error, using fallback', err);
+      return { price: 2000 };
     }
   }
 

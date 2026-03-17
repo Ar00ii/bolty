@@ -26,6 +26,13 @@ export class ChartController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 60, ttl: 60000 } })
+  @Get('eth-price')
+  getEthPrice() {
+    return this.chartService.getEthPrice();
+  }
+
+  @Public()
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Get('history')
   getHistory(@Query() query: HistoryQuery) {

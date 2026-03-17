@@ -8,6 +8,7 @@ interface PaymentConsentModalProps {
   sellerAmountETH: string;   // 97.5% of total
   platformFeeETH: string;    // 2.5% of total
   totalETH: string;
+  totalUsd: string;          // total in USD
   buyerAddress: string;
   onConsent: (signature: string, message: string) => void;
   onCancel: () => void;
@@ -19,6 +20,7 @@ export function PaymentConsentModal({
   sellerAmountETH,
   platformFeeETH,
   totalETH,
+  totalUsd,
   buyerAddress,
   onConsent,
   onCancel,
@@ -129,7 +131,10 @@ export function PaymentConsentModal({
             </div>
             <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
               <span className="text-zinc-200 font-semibold">Total (2 transactions)</span>
-              <span className="text-monad-300 font-mono font-bold">{totalETH} ETH</span>
+              <div className="text-right">
+                <span className="text-monad-300 font-mono font-bold">{totalETH} ETH</span>
+                <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
+              </div>
             </div>
           </div>
         </div>

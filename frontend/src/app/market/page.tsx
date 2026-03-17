@@ -155,6 +155,7 @@ function NegotiationModal({
     totalWei: bigint;
     negotiationId: string;
     amountWei: string;
+    totalUsd: number;
   } | null>(null);
 
   useEffect(() => {
@@ -229,18 +230,20 @@ function NegotiationModal({
       // Convert agreed price to ETH
       let ethPrice = 2000;
       try {
-        const priceData = await api.get<{ price: number }>('/chart/price');
+        const priceData = await api.get<{ price: number }>('/chart/eth-price');
         if ((priceData as any).price) ethPrice = (priceData as any).price;
       } catch { /* use fallback */ }
 
       const currency = neg.listing.currency.toUpperCase();
       let totalWei: bigint;
+      let totalUsd: number;
 
       if (currency === 'ETH') {
         totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
+        totalUsd = neg.agreedPrice * ethPrice;
       } else {
-        const usdValue = currency === 'SOL' ? neg.agreedPrice * 150 : neg.agreedPrice;
-        totalWei = BigInt(Math.ceil((usdValue / ethPrice) * 1e18));
+        totalUsd = currency === 'SOL' ? neg.agreedPrice * 150 : neg.agreedPrice;
+        totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
       }
 
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
@@ -258,6 +261,7 @@ function NegotiationModal({
         totalWei,
         negotiationId: neg.id,
         amountWei: totalWei.toString(),
+        totalUsd,
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -539,6 +543,7 @@ function NegotiationModal({
           sellerAmountETH={(Number(consentData.sellerWei) / 1e18).toFixed(6)}
           platformFeeETH={(Number(consentData.platformWei) / 1e18).toFixed(6)}
           totalETH={(Number(consentData.totalWei) / 1e18).toFixed(6)}
+          totalUsd={consentData.totalUsd.toFixed(2)}
           buyerAddress={consentData.buyerAddress}
           onConsent={executeMarketPurchase}
           onCancel={() => setConsentData(null)}
