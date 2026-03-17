@@ -57,8 +57,13 @@ module.exports = {
         'pulse-neon': 'pulseNeon 2s ease-in-out infinite',
         'cursor-blink': 'blink 1s step-end infinite',
         'spotlight': 'spotlight 2s ease .75s 1 forwards',
+        'grid': 'grid 15s linear infinite',
       },
       keyframes: {
+        grid: {
+          '0%': { transform: 'translateY(-50%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
         spotlight: {
           '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
           '100%': { opacity: '1', transform: 'translate(-50%, -40%) scale(1)' },
