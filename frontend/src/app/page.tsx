@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { GeometricBg } from '@/components/ui/GeometricBg';
@@ -326,13 +327,13 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
+  const { isAuthenticated } = useAuth();
   return (
     <div className="bg-black overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative h-screen bg-black overflow-hidden">
         <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
-        {/* Left content — absolutely centered vertically, ignores spline height */}
         <div className="absolute inset-0 flex items-center pointer-events-none">
           <div className="max-w-7xl mx-auto px-8 w-full">
             <div className="relative z-10 flex flex-col max-w-lg pointer-events-auto">
@@ -346,15 +347,16 @@ export default function HomePage() {
                 Bolty brings together code, AI agents, and community in one developer-first platform.
                 Share your work and grow your audience.
               </p>
-              <div>
-                <Link href="/auth">
-                  <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                </Link>
-              </div>
+              {!isAuthenticated && (
+                <div>
+                  <Link href="/auth">
+                    <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
-        {/* Right — 3D robot, takes full height */}
         <div className="absolute right-0 top-0 w-1/2 h-full hidden md:block">
           <SplineScene
             scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
@@ -363,52 +365,53 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── STATS STRIP ──────────────────────────────────────────────────── */}
-      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
+      <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[200px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.04) 0%, transparent 70%)' }} />
+          <div className="absolute top-1/2 right-0 w-[400px] h-[300px] -translate-y-1/2"
+            style={{ background: 'radial-gradient(ellipse at right, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
         </div>
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {STATS.map((s, i) => (
-              <AnimatedContainer key={s.label} delay={i * 0.1}>
-                <div className="py-2">
-                  <div
-                    className="text-4xl md:text-5xl font-black mb-2 tabular-nums"
-                    style={{
-                      background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 60%, #c4b5fd 100%)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    {s.value}
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform overview</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                The platform,<br />by the numbers
+              </h2>
+              <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
+                A growing ecosystem of developers publishing code, deploying agents, and earning on-chain — from 40+ countries.
+              </p>
+            </AnimatedContainer>
+            <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
+              {STATS.map((s, i) => (
+                <AnimatedContainer key={s.label} delay={i * 0.08}>
+                  <div className="px-8 py-7 bg-black hover:bg-monad-500/4 transition-colors">
+                    <div className="text-4xl font-black mb-2 tabular-nums"
+                      style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                      {s.value}
+                    </div>
+                    <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
                   </div>
-                  <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
-                </div>
-              </AnimatedContainer>
-            ))}
+                </AnimatedContainer>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ─────────────────────────────────────────────────────── */}
+      {/* ── FEATURES — feature list left + orbital right ──────────────── */}
       <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <BackgroundPaths />
         <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <AnimatedContainer className="text-center mb-14">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Platform features</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Everything you need to build
-            </h2>
-            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
-              From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
-            </p>
-          </AnimatedContainer>
-
           <div className="flex flex-col lg:flex-row gap-8 items-center">
             <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                Everything you need to build
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
+                From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
+              </p>
               {PLATFORM_FEATURES.map((f, i) => {
                 const isCommunity = f.title === 'Community';
                 return (
@@ -419,16 +422,12 @@ export default function HomePage() {
                           <AnimatedShaderBackground />
                         </div>
                       )}
-                      <FeatureCard
-                        feature={f}
-                        className="border-0 relative z-10"
-                      />
+                      <FeatureCard feature={f} className="border-0 relative z-10" />
                     </div>
                   </Link>
                 );
               })}
             </AnimatedContainer>
-
             <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
               <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
             </AnimatedContainer>
@@ -436,145 +435,95 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── INTEGRATIONS ─────────────────────────────────────────────────── */}
+      {/* ── INTEGRATIONS — left title + right grid ────────────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <AnimatedContainer className="text-center mb-14">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Integrations</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Works with your stack
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+            {/* Left: title */}
+            <AnimatedContainer className="lg:sticky lg:top-24">
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                Works with<br />your stack
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-6 max-w-xs">
+                Bolty connects with the tools and chains you already use — no complicated setup required.
+              </p>
+              <Link href="/auth">
+                <span className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
+                  Get early access →
+                </span>
+              </Link>
+            </AnimatedContainer>
+            {/* Right: integration tiles 2x3 */}
+            <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+              {INTEGRATIONS.map((item, i) => (
+                <AnimatedContainer key={item.name} delay={i * 0.07}>
+                  <div className="border rounded-2xl p-5 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 group cursor-default h-full"
+                    style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors"
+                      style={{ background: 'rgba(131,110,249,0.1)' }}>
+                      <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+                    </div>
+                    <div className="text-sm font-medium text-zinc-300 mb-1">{item.name}</div>
+                    <div className="text-xs text-zinc-600">{item.desc}</div>
+                  </div>
+                </AnimatedContainer>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── HOW IT WORKS — vertical numbered steps ────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-5xl mx-auto px-4 relative z-10">
+          <AnimatedContainer className="mb-16">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white max-w-sm">
+              Up and running in minutes
             </h2>
-            <p className="text-base mt-3 max-w-xl mx-auto text-zinc-400">
-              Bolty connects with the tools and chains you already use — no complicated setup required.
-            </p>
           </AnimatedContainer>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-12">
-            {INTEGRATIONS.map((item, i) => (
-              <AnimatedContainer key={item.name} delay={i * 0.05}>
-                <div className="border rounded-2xl p-5 text-center hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 group cursor-default"
-                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 transition-colors duration-200"
-                    style={{ background: 'rgba(131,110,249,0.1)' }}>
-                    <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+          <div className="space-y-0">
+            {STEPS.map((step, i) => (
+              <AnimatedContainer key={step.title} delay={0.15 * i}>
+                <div className="grid grid-cols-12 gap-6 py-10 border-b border-dashed border-white/08 group hover:bg-monad-500/2 transition-colors px-2">
+                  {/* Big step number */}
+                  <div className="col-span-2 flex items-start justify-end pt-1">
+                    <span className="text-6xl font-black tabular-nums leading-none select-none"
+                      style={{ color: 'rgba(131,110,249,0.12)', fontVariantNumeric: 'tabular-nums' }}>
+                      0{i + 1}
+                    </span>
                   </div>
-                  <div className="text-sm font-medium text-zinc-300 mb-1">{item.name}</div>
-                  <div className="text-xs text-zinc-600">{item.desc}</div>
+                  {/* Icon + content */}
+                  <div className="col-span-8 md:col-span-7">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
+                        <step.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                      </div>
+                      <h3 className="text-base font-semibold text-zinc-200">{step.title}</h3>
+                    </div>
+                    <p className="text-sm text-zinc-500 leading-relaxed max-w-md">{step.description}</p>
+                  </div>
+                  {/* Metric */}
+                  <div className="col-span-2 md:col-span-3 flex items-center justify-end">
+                    {i === 0 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">email · GitHub<br />or Web3 wallet</span>}
+                    {i === 1 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">{'< 5 min'}<br />to go live</span>}
+                    {i === 2 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">instant<br />ETH payout</span>}
+                  </div>
                 </div>
               </AnimatedContainer>
             ))}
           </div>
-
-          {/* Integration sub-banner */}
-          <AnimatedContainer delay={0.3}>
-            <div className="border border-dashed border-white/08 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-              style={{ background: 'rgba(131,110,249,0.04)' }}>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-monad-500/20 flex items-center justify-center flex-shrink-0">
-                  <Globe className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-zinc-200">Open platform, open ecosystem</div>
-                  <div className="text-xs text-zinc-500 mt-0.5">More integrations and a public API are coming soon. Stay tuned.</div>
-                </div>
-              </div>
-              <Link href="/auth">
-                <span className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors whitespace-nowrap">
-                  Get early access →
-                </span>
-              </Link>
-            </div>
-          </AnimatedContainer>
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ─────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto px-4 relative z-10">
-          <AnimatedContainer className="text-center mb-14">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Up and running in minutes
-            </h2>
-            <p className="text-zinc-500 mt-4 text-sm tracking-wide">
-              Everything you need to publish, grow, and earn on Bolty.
-            </p>
-          </AnimatedContainer>
-
-          <AnimatedContainer
-            delay={0.4}
-            className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10"
-          >
-            {STEPS.map((step, i) => (
-              <div key={step.title} className="p-7 relative group hover:bg-monad-500/5 transition-colors duration-200">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm"
-                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9', border: '1px solid rgba(131,110,249,0.25)' }}>
-                    {i + 1}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <step.icon className="w-4 h-4 text-monad-400" />
-                      <h3 className="text-sm font-semibold text-zinc-200">{step.title}</h3>
-                    </div>
-                    <p className="text-xs text-zinc-500 leading-relaxed">{step.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </AnimatedContainer>
-
-          {/* Timeline detail */}
-          <AnimatedContainer delay={0.5} className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { label: 'Time to first publish', value: '< 5 min', detail: 'Connect GitHub and you\'re live' },
-              { label: 'ETH settlement', value: 'Instant', detail: 'Payments go directly to your wallet' },
-              { label: 'Visibility boost', value: 'Day 1', detail: 'Community discovery from day one' },
-            ].map((item, i) => (
-              <AnimatedContainer key={item.label} delay={0.5 + i * 0.1}>
-                <div className="border border-white/06 rounded-xl p-4 text-center hover:border-monad-500/20 transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="text-xl font-bold text-monad-400 mb-1">{item.value}</div>
-                  <div className="text-xs font-medium text-zinc-300 mb-1">{item.label}</div>
-                  <div className="text-xs text-zinc-600">{item.detail}</div>
-                </div>
-              </AnimatedContainer>
-            ))}
-          </AnimatedContainer>
-        </div>
-      </section>
-
-      {/* ── CODE SHOWCASE ────────────────────────────────────────────────── */}
+      {/* ── CODE SHOWCASE — code left, text right ─────────────────────── */}
       <section className="py-24 max-w-7xl mx-auto px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <Section>
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Code marketplace</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
-              Monetize your GitHub repositories
-            </h2>
-            <p className="text-base leading-relaxed mb-6 text-zinc-400">
-              Publish any repository — public or private — with a free or paid price tag.
-              Buyers pay in ETH directly to your wallet to unlock full access.
-            </p>
-            <ul className="space-y-3 mb-8">
-              {[
-                'Connect GitHub with one click',
-                'Set free or paid price per repo',
-                'Automatic on-chain ETH payments',
-                'Community voting and discovery',
-              ].map(item => (
-                <li key={item} className="flex items-center gap-3 text-sm text-zinc-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 flex-shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <Link href="/repos">
-              <InteractiveHoverLinkInner text="Browse repos" className="text-sm" />
-            </Link>
-          </Section>
-
-          <Section className="reveal-d2">
+          {/* Code card first on desktop */}
+          <Section className="order-2 lg:order-1 reveal-d2">
             <div className="relative group">
               <div className="absolute -inset-1 rounded-2xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"
                 style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.2), rgba(99,91,255,0.1))' }} />
@@ -600,16 +549,42 @@ export default function HomePage() {
               </DashedCard>
             </div>
           </Section>
+
+          {/* Text second on desktop */}
+          <Section className="order-1 lg:order-2">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Code marketplace</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
+              Monetize your GitHub repositories
+            </h2>
+            <p className="text-base leading-relaxed mb-6 text-zinc-400">
+              Publish any repository — public or private — with a free or paid price tag.
+              Buyers pay in ETH directly to your wallet to unlock full access.
+            </p>
+            <ul className="space-y-3 mb-8">
+              {[
+                'Connect GitHub with one click',
+                'Set free or paid price per repo',
+                'Automatic on-chain ETH payments',
+                'Community voting and discovery',
+              ].map(item => (
+                <li key={item} className="flex items-center gap-3 text-sm text-zinc-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 flex-shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/repos">
+              <InteractiveHoverLinkInner text="Browse repos" className="text-sm" />
+            </Link>
+          </Section>
         </div>
       </section>
 
-      {/* ── COMMUNITY ────────────────────────────────────────────────────── */}
+      {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: '#000' }}>
-        {/* Aurora shader background */}
         <AnimatedShaderBackground />
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Left: community description + stats */}
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-5">
@@ -632,15 +607,12 @@ export default function HomePage() {
                 <InteractiveHoverLinkInner text="Join the community" className="text-sm" />
               </Link>
             </AnimatedContainer>
-
-            {/* Right: activity feed preview */}
             <AnimatedContainer delay={0.2}>
-              <div className="border border-white/08 rounded-2xl overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <div className="border border-white/08 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
                 <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <Activity className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
                   <span className="text-xs font-mono text-zinc-400">platform activity</span>
-                  <span className="text-xs text-zinc-700 ml-auto font-mono">preview</span>
+                  <span className="text-xs text-zinc-700 ml-auto font-mono">live</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-green-400 ml-1 animate-pulse flex-shrink-0" />
                 </div>
                 <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
@@ -666,70 +638,51 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── AI SECTION ───────────────────────────────────────────────────── */}
+      {/* ── AI SECTION — full header top, chat left + features right ──── */}
       <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
         </div>
         <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left: copy + feature cards */}
-            <div>
-              <AnimatedContainer>
-                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Built-in AI</p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
-                  Ask, build, ship — faster
-                </h2>
-                <p className="text-base leading-relaxed mb-8 text-zinc-400">
-                  The Bolty AI assistant is always one click away.
-                  Ask code questions, get architecture advice, or debug issues — without leaving the platform.
-                </p>
-              </AnimatedContainer>
-              <AnimatedContainer
-                delay={0.3}
-                className="grid grid-cols-1 sm:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10 text-left"
-              >
-                {AI_FEATURES.map((item) => (
-                  <FeatureCard key={item.title} feature={item} />
-                ))}
-              </AnimatedContainer>
-              <AnimatedContainer delay={0.4} className="mt-8">
-                <Link href="/ai">
-                  <InteractiveHoverLinkInner text="Try AI assistant" className="text-sm" />
-                </Link>
-              </AnimatedContainer>
-            </div>
-
-            {/* Right: chat preview */}
+          {/* Header row — left aligned */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Built-in AI</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                Ask, build, ship — faster
+              </h2>
+            </AnimatedContainer>
             <AnimatedContainer delay={0.2}>
-              <div className="border border-white/08 rounded-2xl overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.02)' }}>
+              <p className="text-sm leading-relaxed text-zinc-400 max-w-sm md:text-right">
+                The Bolty AI assistant is always one click away.
+                Ask code questions, get architecture advice, or debug issues.
+              </p>
+            </AnimatedContainer>
+          </div>
+
+          {/* Content: chat preview LEFT, features RIGHT */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Chat preview */}
+            <AnimatedContainer delay={0.1}>
+              <div className="border border-white/08 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
                 <div className="px-4 py-3 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                   <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
                   <span className="text-xs font-mono text-zinc-400">Bolty AI</span>
                   <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-mono"
-                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9' }}>
-                    Live
-                  </span>
+                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9' }}>Live</span>
                 </div>
                 <div className="p-4 space-y-4">
                   {AI_CHAT_PREVIEW.map((msg, i) => (
                     <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                        msg.role === 'user'
-                          ? 'bg-zinc-800 text-zinc-400'
-                          : 'text-monad-400'
-                      }`}
-                        style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.15)' } : {}}>
+                        msg.role === 'user' ? 'bg-zinc-800 text-zinc-400' : 'text-monad-400'
+                      }`} style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.15)' } : {}}>
                         {msg.role === 'user' ? 'U' : <Bot className="w-3.5 h-3.5" strokeWidth={1.5} />}
                       </div>
                       <div className={`max-w-[80%] rounded-xl px-3 py-2 text-xs leading-relaxed ${
-                        msg.role === 'user'
-                          ? 'bg-zinc-800/70 text-zinc-300 rounded-tr-none'
-                          : 'text-zinc-400 rounded-tl-none'
-                      }`}
-                        style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.15)' } : {}}>
+                        msg.role === 'user' ? 'bg-zinc-800/70 text-zinc-300 rounded-tr-none' : 'text-zinc-400 rounded-tl-none'
+                      }`} style={msg.role === 'ai' ? { background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.15)' } : {}}>
                         {msg.text}
                       </div>
                     </div>
@@ -744,36 +697,80 @@ export default function HomePage() {
                 </div>
               </div>
             </AnimatedContainer>
+
+            {/* Features + CTA */}
+            <div>
+              <AnimatedContainer delay={0.3}
+                className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 divide-x-0 lg:divide-x lg:divide-y-0 divide-y divide-dashed border border-dashed border-white/10 text-left mb-6">
+                {AI_FEATURES.map((item) => (
+                  <FeatureCard key={item.title} feature={item} />
+                ))}
+              </AnimatedContainer>
+              <AnimatedContainer delay={0.4}>
+                <Link href="/ai">
+                  <InteractiveHoverLinkInner text="Try AI assistant" className="text-sm" />
+                </Link>
+              </AnimatedContainer>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ─────────────────────────────────────────────────── */}
+      {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <AnimatedContainer className="text-center mb-14">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              What developers say
-            </h2>
-            <p className="text-base mt-3 max-w-lg mx-auto text-zinc-500">
-              Real feedback from developers who publish, build, and earn on Bolty.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                What developers say
+              </h2>
+            </AnimatedContainer>
+            <AnimatedContainer delay={0.1}>
+              <p className="text-sm text-zinc-500 max-w-xs md:text-right">
+                Real feedback from developers who publish, build, and earn on Bolty.
+              </p>
+            </AnimatedContainer>
+          </div>
+
+          {/* Featured quote full-width */}
+          <AnimatedContainer delay={0.1} className="mb-6">
+            <div className="border rounded-2xl p-8 md:p-10 relative overflow-hidden hover:border-monad-500/25 transition-colors"
+              style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+              <div className="absolute top-6 right-8 text-7xl font-black leading-none select-none"
+                style={{ color: 'rgba(131,110,249,0.08)' }}>"</div>
+              <div className="flex gap-1 mb-5">
+                {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 text-monad-400 fill-monad-400" />)}
+              </div>
+              <p className="text-zinc-300 text-lg md:text-xl leading-relaxed mb-8 max-w-3xl">
+                &ldquo;{TESTIMONIALS[0].text}&rdquo;
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-monad-400"
+                  style={{ background: 'rgba(131,110,249,0.15)' }}>
+                  {TESTIMONIALS[0].name.charAt(0)}
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-zinc-200">{TESTIMONIALS[0].name}</div>
+                  <div className="text-xs text-zinc-600">{TESTIMONIALS[0].role}</div>
+                </div>
+                <CheckCircle className="w-4 h-4 text-monad-400/50 ml-auto" strokeWidth={1.5} />
+              </div>
+            </div>
           </AnimatedContainer>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <AnimatedContainer key={t.name} delay={i * 0.15}>
-                <div className="border rounded-2xl p-6 h-full flex flex-col hover:border-monad-500/25 transition-colors duration-200 group"
+          {/* 2 smaller cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            {TESTIMONIALS.slice(1).map((t, i) => (
+              <AnimatedContainer key={t.name} delay={0.2 + i * 0.1}>
+                <div className="border rounded-2xl p-6 h-full flex flex-col hover:border-monad-500/25 transition-colors"
                   style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="flex gap-1 mb-5">
-                    {[...Array(5)].map((_, j) => (
-                      <Star key={j} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />
-                    ))}
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, j) => <Star key={j} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />)}
                   </div>
-                  <p className="text-zinc-400 text-sm leading-relaxed mb-6 flex-1">&ldquo;{t.text}&rdquo;</p>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-5 flex-1">&ldquo;{t.text}&rdquo;</p>
                   <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-monad-400 flex-shrink-0"
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-monad-400"
                       style={{ background: 'rgba(131,110,249,0.15)' }}>
                       {t.name.charAt(0)}
                     </div>
@@ -789,28 +786,26 @@ export default function HomePage() {
           </div>
 
           {/* Social proof strip */}
-          <AnimatedContainer delay={0.5} className="mt-10">
+          <AnimatedContainer delay={0.4}>
             <div className="border border-dashed border-white/08 rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left"
               style={{ background: 'rgba(131,110,249,0.03)' }}>
               <div className="flex -space-x-2 flex-shrink-0">
-                {['A', 'B', 'C', 'D', 'E'].map((l, i) => (
+                {['A','B','C','D','E'].map((l, i) => (
                   <div key={l} className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-monad-400"
-                    style={{ background: `rgba(131,110,249,${0.1 + i * 0.04})` }}>
-                    {l}
-                  </div>
+                    style={{ background: `rgba(131,110,249,${0.1 + i * 0.04})` }}>{l}</div>
                 ))}
                 <div className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center text-xs font-bold text-zinc-500"
-                  style={{ background: 'rgba(255,255,255,0.06)' }}>
-                  +
-                </div>
+                  style={{ background: 'rgba(255,255,255,0.06)' }}>+</div>
               </div>
               <div>
                 <div className="text-sm font-semibold text-zinc-200">Join 1,200+ developers already on the platform</div>
                 <div className="text-xs text-zinc-500 mt-1">From 40+ countries — free to start, no credit card required.</div>
               </div>
-              <Link href="/auth" className="sm:ml-auto flex-shrink-0">
-                <InteractiveHoverLinkInner text="Get started free" className="text-sm" />
-              </Link>
+              {!isAuthenticated && (
+                <Link href="/auth" className="sm:ml-auto flex-shrink-0">
+                  <InteractiveHoverLinkInner text="Get started free" className="text-sm" />
+                </Link>
+              )}
             </div>
           </AnimatedContainer>
         </div>
@@ -820,11 +815,13 @@ export default function HomePage() {
       <section className="py-24 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-5xl mx-auto">
           <Section>
-            <div className="text-center mb-14">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Common questions</h2>
-              <p className="text-sm text-zinc-600 mt-3 max-w-md mx-auto">
-                Everything you need to know about Bolty. Can&apos;t find the answer? Chat with us in the community.
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
+              <div>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Common questions</h2>
+              </div>
+              <p className="text-sm text-zinc-600 max-w-xs md:text-right">
+                Can&apos;t find the answer? Chat with us in the community.
               </p>
             </div>
 
@@ -844,36 +841,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── PLATFORM HIGHLIGHTS ──────────────────────────────────────────── */}
-      <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── PLATFORM HIGHLIGHTS — horizontal strip ────────────────────── */}
+      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-dashed border border-dashed border-white/08">
             {[
-              {
-                icon: Shield,
-                title: 'Security first',
-                desc: 'End-to-end encrypted, OWASP compliant, 2FA supported. Your code and payments are safe.',
-              },
-              {
-                icon: Cpu,
-                title: 'Developer-native',
-                desc: 'Built by developers for developers. No fluff, no bloat — just the tools you actually need.',
-              },
-              {
-                icon: Hash,
-                title: 'Truly decentralized',
-                desc: 'Payments go directly on-chain. No middleman takes a cut from your hard-earned ETH.',
-              },
+              { icon: Shield, title: 'Security first', desc: 'End-to-end encrypted, OWASP compliant, 2FA supported. Your code and payments are safe.' },
+              { icon: Cpu,    title: 'Developer-native', desc: 'Built by developers for developers. No fluff, no bloat — just the tools you actually need.' },
+              { icon: Hash,   title: 'Truly decentralized', desc: 'Payments go directly on-chain. No middleman takes a cut from your hard-earned ETH.' },
             ].map((item, i) => (
               <AnimatedContainer key={item.title} delay={i * 0.1}>
-                <div className="border border-white/06 rounded-2xl p-6 hover:border-monad-500/20 transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                <div className="flex items-start gap-5 p-8 hover:bg-monad-500/4 transition-colors h-full">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{ background: 'rgba(131,110,249,0.1)' }}>
                     <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-sm font-semibold text-zinc-200 mb-2">{item.title}</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                  <div>
+                    <h3 className="text-sm font-semibold text-zinc-200 mb-2">{item.title}</h3>
+                    <p className="text-xs text-zinc-500 leading-relaxed">{item.desc}</p>
+                  </div>
                 </div>
               </AnimatedContainer>
             ))}
@@ -886,10 +872,7 @@ export default function HomePage() {
         <GeometricBg />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px]"
-            style={{
-              background: 'radial-gradient(ellipse, rgba(131,110,249,0.12) 0%, transparent 65%)',
-              animation: 'hero-glow-pulse 5s ease-in-out infinite',
-            }} />
+            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.12) 0%, transparent 65%)', animation: 'hero-glow-pulse 5s ease-in-out infinite' }} />
         </div>
         <Section>
           <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -901,12 +884,7 @@ export default function HomePage() {
               </div>
             </div>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
-              <span style={{
-                background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 50%, #c4b5fd 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>
+              <span style={{ background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 50%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Start building today.
               </span>
             </h2>
@@ -914,12 +892,20 @@ export default function HomePage() {
               Join developers who are already publishing code, deploying agents, and growing their audience on Bolty.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/auth">
-                <InteractiveHoverLinkInner text="Create free account" />
-              </Link>
-              <Link href="/market">
-                <InteractiveHoverLinkInner text="Explore marketplace" className="border-zinc-600/40" />
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link href="/auth">
+                    <InteractiveHoverLinkInner text="Create free account" />
+                  </Link>
+                  <Link href="/market">
+                    <InteractiveHoverLinkInner text="Explore marketplace" className="border-zinc-600/40" />
+                  </Link>
+                </>
+              ) : (
+                <Link href="/market">
+                  <InteractiveHoverLinkInner text="Explore marketplace" />
+                </Link>
+              )}
             </div>
             <p className="text-xs mt-6 text-zinc-600">
               No credit card required. Connect with email or GitHub.
