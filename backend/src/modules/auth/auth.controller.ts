@@ -221,7 +221,7 @@ export class AuthController {
   githubAuth(@Res() res: Response) {
     // Bypass passport redirect — construct GitHub OAuth URL manually to guarantee 'repo' scope
     // This ensures private repos are accessible (passport-github2 may not pass scope correctly)
-    const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || 'Ov23liO79MvZtWDEdy2a';
+    const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || '';
     const callbackURL = this.config.get<string>('GITHUB_CALLBACK_URL') || 'http://localhost:3001/api/v1/auth/github/callback';
     const scope = 'read:user repo';
     const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackURL)}&scope=${encodeURIComponent(scope)}`;

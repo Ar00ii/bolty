@@ -408,7 +408,7 @@ export default function ProfilePage() {
   };
 
   const handleLinkGitHub = () => {
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a';
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
     const callbackUrl = process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback';
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&scope=read%3Auser%20repo`;
   };

@@ -124,8 +124,8 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
           needsReauth = true;
 
           // Revoke the old token via GitHub API so next OAuth gives fresh scopes
-          const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || 'Ov23liO79MvZtWDEdy2a';
-          const clientSecret = this.config.get<string>('GITHUB_CLIENT_SECRET') || 'b9e08f25b6e46d0b012e7be6183e38bb0d43d662';
+          const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || '';
+          const clientSecret = this.config.get<string>('GITHUB_CLIENT_SECRET') || '';
           try {
             await axios.delete(`https://api.github.com/applications/${clientId}/token`, {
               auth: { username: clientId, password: clientSecret },

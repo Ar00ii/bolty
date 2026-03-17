@@ -146,7 +146,7 @@ export default function ReposPage() {
   const [ghNeedsReauth, setGhNeedsReauth] = useState(false);
   const [ghNeedsConnect, setGhNeedsConnect] = useState(false);
 
-  const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`;
+  const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`;
 
   const loadGhRepos = async () => {
     setShowPublish(true);
@@ -435,7 +435,7 @@ export default function ReposPage() {
             <div className="mb-4 p-4 border border-white/08 rounded-xl text-center" style={{ background: 'rgba(255,255,255,0.02)' }}>
               <p className="text-sm text-zinc-400 mb-1">Your GitHub token needs to be refreshed.</p>
               <p className="text-xs text-zinc-600 mb-3">Reconnect to access private repos.</p>
-              <a href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || 'Ov23liO79MvZtWDEdy2a'}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
+              <a href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
                 className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">
                 Reconnect GitHub
               </a>

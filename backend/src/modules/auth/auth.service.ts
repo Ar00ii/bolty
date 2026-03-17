@@ -83,7 +83,7 @@ export class AuthService {
 
     // Refresh token is a signed JWT so userId is self-contained (no access_token needed at refresh time)
     const jti = uuidv4();
-    const refreshSecret = this.config.get<string>('JWT_SECRET') || 'a8f3d2e1c9b7a6f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0';
+    const refreshSecret = this.config.get<string>('JWT_SECRET') || 'changeme';
     const refreshToken = this.jwtService.sign(
       { sub: userId, jti, type: 'refresh' },
       { secret: refreshSecret, expiresIn: '7d' },
@@ -104,7 +104,7 @@ export class AuthService {
     // Decode the self-contained refresh JWT to get userId without needing the access_token cookie
     let payload: { sub: string; jti: string; type: string };
     try {
-      const refreshSecret = this.config.get<string>('JWT_SECRET') || 'a8f3d2e1c9b7a6f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0';
+      const refreshSecret = this.config.get<string>('JWT_SECRET') || 'changeme';
       payload = this.jwtService.verify(refreshToken, { secret: refreshSecret });
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
