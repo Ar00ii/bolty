@@ -75,10 +75,10 @@ interface FeedPost {
 const TYPES = ['ALL', 'AI_AGENT', 'BOT', 'SCRIPT', 'REPO', 'OTHER'];
 const TYPE_LABELS: Record<string, string> = { ALL: 'all', AI_AGENT: 'ai agent', BOT: 'bot', SCRIPT: 'script', REPO: 'repo', OTHER: 'other' };
 const TYPE_COLORS: Record<string, string> = {
-  REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
-  BOT: 'text-violet-400 border-violet-400/30 bg-violet-400/5',
-  AI_AGENT: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
-  SCRIPT: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5',
+  REPO: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+  BOT: 'text-monad-400/80 border-monad-400/25 bg-monad-400/5',
+  AI_AGENT: 'text-monad-400/70 border-monad-400/20 bg-monad-400/5',
+  SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
 const ACCEPTS_FILE = new Set(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER']);
@@ -89,19 +89,19 @@ const ROLE_LABELS: Record<string, string> = {
   buyer: 'you',
   seller: 'seller',
   buyer_agent: 'your agent',
-  seller_agent: '🤖 agent',
+  seller_agent: 'agent',
 };
 const ROLE_COLORS: Record<string, string> = {
-  buyer: 'bg-violet-500/10 border-violet-500/20 text-violet-300',
-  seller: 'bg-blue-500/10 border-blue-500/20 text-blue-300',
-  buyer_agent: 'bg-purple-500/10 border-purple-500/20 text-purple-300',
-  seller_agent: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300',
+  buyer: 'bg-monad-500/10 border-monad-500/20 text-monad-300',
+  seller: 'bg-zinc-800/50 border-zinc-700/30 text-zinc-300',
+  buyer_agent: 'bg-monad-500/8 border-monad-500/15 text-monad-200',
+  seller_agent: 'bg-monad-500/10 border-monad-500/15 text-monad-300',
 };
 
 const POST_TYPE_COLORS: Record<string, string> = {
   GENERAL: 'text-zinc-400 border-zinc-700',
-  PRICE_UPDATE: 'text-yellow-400 border-yellow-400/30',
-  ANNOUNCEMENT: 'text-violet-400 border-violet-400/30',
+  PRICE_UPDATE: 'text-zinc-400 border-zinc-600/30',
+  ANNOUNCEMENT: 'text-monad-400 border-monad-400/30',
   DEAL: 'text-green-400 border-green-400/30',
 };
 const POST_TYPE_LABELS: Record<string, string> = {
@@ -335,14 +335,14 @@ function NegotiationModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
-            <span className="text-violet-400 font-mono text-xs font-bold shrink-0">negotiate://</span>
+            <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse" />
+            <span className="text-monad-400 font-mono text-xs font-bold shrink-0">negotiate://</span>
             <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
             {neg && (
               <span className={`text-xs font-mono font-bold ml-1 ${
                 neg.status === 'AGREED' ? 'text-green-400' :
                 neg.status === 'REJECTED' ? 'text-red-400' :
-                neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-violet-400'
+                neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'
               }`}>[{neg.status.toLowerCase()}]</span>
             )}
           </div>
@@ -352,15 +352,15 @@ function NegotiationModal({
         {/* Agent badge */}
         {listing.agentEndpoint && (
           <div className="px-4 py-2 border-b" style={{ borderColor: 'rgba(16,185,129,0.15)', background: 'rgba(16,185,129,0.04)' }}>
-            <p className="text-emerald-400 text-xs font-mono flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+            <p className="text-monad-400/80 text-xs font-mono flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse inline-block" />
               AI agent active — responses are automated
             </p>
           </div>
         )}
         {listing.minPrice != null && (
           <div className="px-4 py-1.5 border-b" style={{ borderColor: 'rgba(250,204,21,0.1)', background: 'rgba(250,204,21,0.03)' }}>
-            <p className="text-yellow-400/70 text-xs font-mono">
+            <p className="text-zinc-500 text-xs font-mono">
               floor: {listing.minPrice} {listing.currency} — agent will not go below this
             </p>
           </div>
@@ -369,7 +369,7 @@ function NegotiationModal({
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
           {loading && (
-            <p className="text-violet-400 text-xs font-mono animate-pulse text-center py-8">
+            <p className="text-monad-400 text-xs font-mono animate-pulse text-center py-8">
               initializing negotiation protocol...
             </p>
           )}
@@ -383,7 +383,7 @@ function NegotiationModal({
                   style={{ boxShadow: isAgent ? '0 0 12px rgba(16,185,129,0.08)' : undefined }}
                 >
                   <div className="text-zinc-500 text-xs mb-1 flex items-center gap-1">
-                    {isAgent && <span className="w-1 h-1 rounded-full bg-emerald-400 inline-block" />}
+                    {isAgent && <span className="w-1 h-1 rounded-full bg-monad-400 inline-block" />}
                     {ROLE_LABELS[msg.fromRole]}
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
@@ -448,7 +448,7 @@ function NegotiationModal({
                 className="inline-block rounded-xl px-5 py-4"
                 style={{ border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.08)' }}
               >
-                <p className="text-violet-300 font-mono text-sm font-bold mb-2">✓ PAYMENT SENT</p>
+                <p className="text-monad-300 font-mono text-sm font-bold mb-2">✓ PAYMENT SENT</p>
                 <p className="text-zinc-400 text-xs font-mono mb-3">Transaction recorded. Check your DMs to coordinate with the seller.</p>
                 <Link
                   href="/dm"
@@ -568,8 +568,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       <div className="relative z-10 flex items-start justify-between mb-3 gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {isAgent && (
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border border-dashed border-emerald-400/20 bg-emerald-400/5">
-              🤖
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border border-dashed border-monad-500/15 bg-monad-500/5">
             </div>
           )}
           <div className="min-w-0">
@@ -579,7 +578,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           {listing.agentEndpoint && (
-            <span className="text-xs px-1.5 py-0.5 rounded font-mono border border-dashed border-emerald-400/20 text-emerald-400 bg-emerald-400/5"
+            <span className="text-xs px-1.5 py-0.5 rounded font-mono border border-dashed border-monad-500/15 text-monad-400 bg-monad-500/5"
               title="Has AI negotiation agent">
               AI
             </span>
@@ -607,14 +606,14 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       {/* Links */}
       {listing.agentUrl && (
         <a href={listing.agentUrl} target="_blank" rel="noopener noreferrer"
-          className="relative z-10 text-xs font-mono text-emerald-400/60 hover:text-emerald-400 transition-colors flex items-center gap-1 mb-1 truncate">
+          className="relative z-10 text-xs font-mono text-monad-400/60 hover:text-monad-400 transition-colors flex items-center gap-1 mb-1 truncate">
           <span>[agent url]</span>
           <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
         </a>
       )}
       {listing.fileKey && listing.fileName && (
         <a href={`${API_URL}/market/files/${listing.fileKey}`}
-          className="relative z-10 text-xs font-mono text-yellow-400/60 hover:text-yellow-400 transition-colors flex items-center gap-1 mb-1">
+          className="relative z-10 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1 mb-1">
           <span>[file]</span>
           <span className="truncate">{listing.fileName}</span>
           {listing.fileSize && <span className="text-zinc-600 shrink-0">({formatBytes(listing.fileSize)})</span>}
@@ -631,7 +630,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
             }
           </div>
           {listing.minPrice != null && (
-            <div className="text-xs font-mono text-yellow-400/50 mt-0.5">floor: {listing.minPrice} {listing.currency}</div>
+            <div className="text-xs font-mono text-zinc-600 mt-0.5">floor: {listing.minPrice} {listing.currency}</div>
           )}
         </div>
         <div className="flex gap-1.5 items-center">
@@ -648,11 +647,11 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
             }}
             className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed ${
               listing.agentEndpoint
-                ? 'bg-emerald-400/10 border-emerald-400/30 text-emerald-400 hover:bg-emerald-400/20'
+                ? 'bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20'
                 : 'bg-monad-500/10 border-monad-500/30 text-monad-300 hover:bg-monad-500/20'
             }`}
           >
-            {listing.agentEndpoint ? '🤖 negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
+            {listing.agentEndpoint ? 'negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
           </button>
         </div>
       </div>
@@ -793,7 +792,6 @@ export default function MarketPage() {
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-lg"
                 style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}
               >
-                🤖
               </div>
               <div>
                 <h1
@@ -893,7 +891,7 @@ export default function MarketPage() {
           <div className="flex items-center gap-2 mb-5 pb-4" style={{ borderBottom: '1px solid rgba(139,92,246,0.1)' }}>
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+              <div className="w-2.5 h-2.5 rounded-full bg-zinc-500" />
               <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
             </div>
             <span className="text-zinc-400 font-mono text-xs ml-1">publish_agent.config</span>
@@ -979,7 +977,7 @@ export default function MarketPage() {
                 </label>
                 {uploadedFile ? (
                   <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                    <span className="text-emerald-400 text-sm">✓</span>
+                    <span className="text-monad-400 text-sm">✓</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-zinc-200 text-xs font-mono truncate">{uploadedFile.fileName}</p>
                       <p className="text-zinc-500 text-xs font-mono">{formatBytes(uploadedFile.fileSize)}</p>
@@ -996,7 +994,7 @@ export default function MarketPage() {
                     onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)')}
                   >
                     {uploading
-                      ? <p className="text-violet-400 text-xs font-mono animate-pulse">uploading...</p>
+                      ? <p className="text-monad-400 text-xs font-mono animate-pulse">uploading...</p>
                       : <p className="text-zinc-500 text-xs font-mono">click to upload agent / bot / script file</p>
                     }
                   </div>
@@ -1010,8 +1008,8 @@ export default function MarketPage() {
             {/* Agent endpoint */}
             {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
               <div className="md:col-span-2 rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)' }}>
-                <label className="text-emerald-400 text-xs font-mono font-bold block mb-1">
-                  🤖 negotiation webhook
+                <label className="text-monad-400 text-xs font-mono font-bold block mb-1">
+                  AI negotiation webhook
                 </label>
                 <p className="text-zinc-500 text-xs font-mono mb-2">
                   Your bot receives POST events when buyers negotiate. Reply:{' '}
@@ -1129,10 +1127,9 @@ export default function MarketPage() {
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
                       style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}
                     >
-                      🤖
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-zinc-200 group-hover:text-violet-400 transition-colors">
+                      <p className="text-xs font-semibold text-zinc-200 group-hover:text-monad-400 transition-colors">
                         {post.listing.title}
                       </p>
                       <p className="text-xs text-zinc-500">by @{post.listing.seller.username || 'anon'}</p>
@@ -1148,7 +1145,7 @@ export default function MarketPage() {
                 <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-300">{post.content}</p>
                 {post.postType === 'PRICE_UPDATE' && post.price != null && (
                   <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(250,204,21,0.15)' }}>
-                    <span className="text-yellow-400 font-mono font-bold">{post.price} {post.currency}</span>
+                    <span className="text-monad-400 font-mono font-bold">{post.price} {post.currency}</span>
                   </div>
                 )}
               </div>

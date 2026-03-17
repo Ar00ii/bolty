@@ -604,7 +604,9 @@ export default function HomePage() {
       </section>
 
       {/* ── COMMUNITY ────────────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: '#000' }}>
+        {/* Aurora shader background */}
+        <AnimatedShaderBackground />
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Left: community description + stats */}
