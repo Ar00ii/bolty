@@ -36,8 +36,14 @@ import {
   Shield,
   Cpu,
   Hash,
+  Rocket,
+  FlaskConical,
+  Sparkles,
+  ArrowRight,
+  Radio,
 } from 'lucide-react';
 import AnimatedShaderBackground from '@/components/ui/animated-shader-background';
+import DatabaseWithRestApi from '@/components/ui/database-with-rest-api';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -201,10 +207,10 @@ const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGPro
 
 // ── New data ───────────────────────────────────────────────────────────────────
 const STATS = [
-  { value: '1,200+', label: 'Developers joined' },
-  { value: '3,400+', label: 'Repos published' },
-  { value: '240+', label: 'AI agents deployed' },
-  { value: '18.4 ETH', label: 'Earned by creators' },
+  { value: 'Beta', label: 'Current version' },
+  { value: '3', label: 'Planned releases' },
+  { value: 'ETH', label: 'On-chain payments' },
+  { value: '100%', label: 'Open to devs' },
 ];
 
 const INTEGRATIONS = [
@@ -217,10 +223,10 @@ const INTEGRATIONS = [
 ];
 
 const COMMUNITY_STATS = [
-  { value: '40+', label: 'Countries represented' },
-  { value: '890+', label: 'Active this week' },
-  { value: '12K+', label: 'Messages sent' },
-  { value: '99.9%', label: 'Platform uptime' },
+  { value: 'Global', label: 'Open to all devs' },
+  { value: 'Live', label: 'Real-time chat' },
+  { value: 'Free', label: 'No cost to join' },
+  { value: '24/7', label: 'Platform available' },
 ];
 
 const RECENT_ACTIVITY = [
@@ -379,7 +385,7 @@ export default function HomePage() {
                 The platform,<br />by the numbers
               </h2>
               <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
-                A growing ecosystem of developers publishing code, deploying agents, and earning on-chain — from 40+ countries.
+                Bolty is launching in Beta. Three planned releases — Beta, Gamma, and Alpha — each expanding the platform with new capabilities.
               </p>
             </AnimatedContainer>
             <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
@@ -435,41 +441,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── INTEGRATIONS — left title + right grid ────────────────────── */}
+      {/* ── INTEGRATIONS — left text+tiles + right DatabaseWithRestApi ── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-            {/* Left: title */}
-            <AnimatedContainer className="lg:sticky lg:top-24">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                Works with<br />your stack
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-6 max-w-xs">
-                Bolty connects with the tools and chains you already use — no complicated setup required.
-              </p>
-              <Link href="/auth">
-                <span className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
-                  Get early access →
-                </span>
-              </Link>
-            </AnimatedContainer>
-            {/* Right: integration tiles 2x3 */}
-            <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-3">
-              {INTEGRATIONS.map((item, i) => (
-                <AnimatedContainer key={item.name} delay={i * 0.07}>
-                  <div className="border rounded-2xl p-5 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 group cursor-default h-full"
-                    style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors"
-                      style={{ background: 'rgba(131,110,249,0.1)' }}>
-                      <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left: title + description + integration tiles */}
+            <div>
+              <AnimatedContainer>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                  Works with<br />your stack
+                </h2>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
+                  Bolty connects with the tools and chains you already use — no complicated setup required.
+                </p>
+              </AnimatedContainer>
+              <div className="grid grid-cols-2 gap-3">
+                {INTEGRATIONS.map((item, i) => (
+                  <AnimatedContainer key={item.name} delay={i * 0.07}>
+                    <div className="border rounded-xl p-4 flex items-center gap-3 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
+                      style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(131,110,249,0.1)' }}>
+                        <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-zinc-300">{item.name}</div>
+                        <div className="text-xs text-zinc-600">{item.desc}</div>
+                      </div>
                     </div>
-                    <div className="text-sm font-medium text-zinc-300 mb-1">{item.name}</div>
-                    <div className="text-xs text-zinc-600">{item.desc}</div>
-                  </div>
-                </AnimatedContainer>
-              ))}
+                  </AnimatedContainer>
+                ))}
+              </div>
+              <AnimatedContainer delay={0.4} className="mt-6">
+                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
+                  style={{ background: 'rgba(131,110,249,0.04)' }}>
+                  <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
+                  <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
+                </div>
+              </AnimatedContainer>
             </div>
+
+            {/* Right: DatabaseWithRestApi visual */}
+            <AnimatedContainer delay={0.2} className="flex items-center justify-center">
+              <div className="w-full max-w-md">
+                <DatabaseWithRestApi
+                  title="Bolty Platform API"
+                  circleText="ETH"
+                  badgeTexts={{ first: 'GET', second: 'POST', third: 'PUT', fourth: 'DELETE' }}
+                  buttonTexts={{ first: 'bolty.dev', second: 'beta_v1' }}
+                  lightColor="#836EF9"
+                />
+              </div>
+            </AnimatedContainer>
           </div>
         </div>
       </section>
@@ -515,6 +539,174 @@ export default function HomePage() {
                 </div>
               </AnimatedContainer>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
+      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* Shader background */}
+        <div className="absolute inset-0 z-0">
+          <AnimatedShaderBackground />
+        </div>
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px]"
+            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.1) 0%, transparent 65%)' }} />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4">
+          {/* Header */}
+          <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Roadmap</p>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white">
+                The journey<br />ahead
+              </h2>
+            </AnimatedContainer>
+            <AnimatedContainer delay={0.15}>
+              <p className="text-sm text-zinc-500 max-w-xs md:text-right leading-relaxed">
+                Bolty is built in three phases. Each version expands the platform with new capabilities and deeper infrastructure.
+              </p>
+            </AnimatedContainer>
+          </div>
+
+          {/* Phase 1 — Beta: left offset */}
+          <div className="relative mb-16">
+            <AnimatedContainer>
+              <motion.div
+                initial={{ opacity: 0, x: -40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+                className="relative md:ml-0 lg:ml-8 max-w-2xl"
+              >
+                <div className="absolute -inset-px rounded-2xl"
+                  style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.3) 0%, transparent 50%)' }} />
+                <div className="relative rounded-2xl border border-monad-500/30 p-8 overflow-hidden"
+                  style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(12px)' }}>
+                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-monad-500/40"
+                    style={{ background: 'rgba(131,110,249,0.12)' }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs font-mono text-monad-400">Current</span>
+                  </div>
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)' }}>
+                      <Radio className="w-6 h-6 text-monad-400" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">Version 1</div>
+                      <h3 className="text-2xl font-black text-white">Beta</h3>
+                    </div>
+                  </div>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-6 max-w-lg">
+                    The first public release of Bolty. Core features are live: code repositories, AI assistant, community chat, ETH payments, and the agent marketplace. This is where we build the foundation and listen to real developer feedback.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Code repo publishing', 'AI assistant', 'Global community chat', 'ETH on-chain payments', 'Agent marketplace', 'GitHub sync'].map(f => (
+                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-400">
+                        <CheckCircle className="w-3.5 h-3.5 text-monad-400 flex-shrink-0" strokeWidth={2} />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatedContainer>
+            <div className="hidden lg:block absolute top-1/2 right-0 w-1/3 h-px"
+              style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.3), transparent)' }} />
+          </div>
+
+          {/* Phase 2 — Gamma: right offset */}
+          <div className="relative mb-16">
+            <AnimatedContainer delay={0.1}>
+              <motion.div
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+                className="relative md:ml-auto lg:mr-8 max-w-2xl"
+              >
+                <div className="absolute -inset-px rounded-2xl"
+                  style={{ background: 'linear-gradient(225deg, rgba(131,110,249,0.2) 0%, transparent 50%)' }} />
+                <div className="relative rounded-2xl border border-white/10 p-8 overflow-hidden"
+                  style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }}>
+                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10"
+                    style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <span className="text-xs font-mono text-zinc-500">Upcoming</span>
+                  </div>
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                      <FlaskConical className="w-6 h-6 text-monad-400/70" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono text-monad-400/70 uppercase tracking-widest">Version 2</div>
+                      <h3 className="text-2xl font-black text-zinc-300">Gamma</h3>
+                    </div>
+                  </div>
+                  <p className="text-zinc-500 text-sm leading-relaxed mb-6 max-w-lg">
+                    Gamma expands on the Beta foundation with deeper integrations, developer tooling, and platform APIs. Bolty opens up its infrastructure for third-party builders — SDKs, webhooks, and programmatic access to repos and agents.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['Public REST API', 'Developer SDK', 'Webhook system', 'Advanced analytics', 'Multi-chain support', 'Team workspaces'].map(f => (
+                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-600">
+                        <ArrowRight className="w-3.5 h-3.5 text-zinc-700 flex-shrink-0" strokeWidth={2} />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatedContainer>
+            <div className="hidden lg:block absolute top-1/2 left-0 w-1/3 h-px"
+              style={{ background: 'linear-gradient(to left, rgba(131,110,249,0.15), transparent)' }} />
+          </div>
+
+          {/* Phase 3 — Alpha: centered */}
+          <div className="relative">
+            <AnimatedContainer delay={0.2}>
+              <motion.div
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: 'easeOut', delay: 0.15 }}
+                className="relative mx-auto max-w-3xl"
+              >
+                <div className="absolute -inset-px rounded-2xl opacity-50"
+                  style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, transparent 70%)' }} />
+                <div className="relative rounded-2xl border border-white/06 p-8 overflow-hidden"
+                  style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+                  <div className="absolute -right-4 -top-4 text-[80px] font-black leading-none select-none pointer-events-none"
+                    style={{ color: 'rgba(131,110,249,0.05)' }}>ALPHA</div>
+                  <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/06"
+                    style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <span className="text-xs font-mono text-zinc-600">Future</span>
+                  </div>
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                      style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.1)' }}>
+                      <Rocket className="w-6 h-6 text-monad-400/40" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-mono text-monad-400/40 uppercase tracking-widest">Version 3</div>
+                      <h3 className="text-2xl font-black text-zinc-600">Alpha</h3>
+                    </div>
+                  </div>
+                  <p className="text-zinc-600 text-sm leading-relaxed mb-6 max-w-xl">
+                    Alpha is the mature, full-featured version of Bolty. A self-sustaining ecosystem where developers discover, build, and monetize at scale. Full decentralization, DAO governance features, and Bolty as an open protocol.
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {['DAO governance', 'Open protocol', 'Cross-chain bridge', 'On-chain reputation', 'Decentralized storage', 'Native token'].map(f => (
+                      <div key={f} className="flex items-center gap-2 text-xs text-zinc-700">
+                        <Sparkles className="w-3.5 h-3.5 text-zinc-800 flex-shrink-0" strokeWidth={2} />
+                        {f}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatedContainer>
           </div>
         </div>
       </section>
@@ -798,8 +990,8 @@ export default function HomePage() {
                   style={{ background: 'rgba(255,255,255,0.06)' }}>+</div>
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-200">Join 1,200+ developers already on the platform</div>
-                <div className="text-xs text-zinc-500 mt-1">From 40+ countries — free to start, no credit card required.</div>
+                <div className="text-sm font-semibold text-zinc-200">Be part of the first wave of developers on Bolty</div>
+                <div className="text-xs text-zinc-500 mt-1">Launching in Beta — free to start, no credit card required.</div>
               </div>
               {!isAuthenticated && (
                 <Link href="/auth" className="sm:ml-auto flex-shrink-0">
