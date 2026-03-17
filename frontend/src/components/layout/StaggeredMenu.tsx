@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, type LucideIcon,
+  UserPlus, Zap, Percent, Coins, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
@@ -32,6 +32,15 @@ interface NavItem {
 // ── Nav data ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    label: 'How it Works',
+    href: '/how-it-works',
+    sub: [
+      { href: '/how-it-works#roadmap',     label: 'Trade Roadmap', icon: Zap },
+      { href: '/how-it-works#fees',        label: '2.5% Fee Info', icon: Percent },
+      { href: '/how-it-works#bolty-token', label: '$BOLTY Token',  icon: Coins },
+    ],
+  },
   {
     label: 'Community',
     href: '/chat',
