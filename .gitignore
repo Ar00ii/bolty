@@ -32,8 +32,8 @@ Thumbs.db
 # Testing
 coverage/
 
-# Prisma
-backend/prisma/migrations/
+# Prisma (migrations are tracked so schema changes can be applied)
+# backend/prisma/migrations/
 
 # ZIP
 *.zip
