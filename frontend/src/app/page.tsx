@@ -374,7 +374,7 @@ export default function HomePage() {
 
       {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
       <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <RetroGrid className="opacity-30" angle={65} />
+        <RetroGrid className="opacity-70" angle={65} />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 right-0 w-[400px] h-[300px] -translate-y-1/2"
             style={{ background: 'radial-gradient(ellipse at right, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
