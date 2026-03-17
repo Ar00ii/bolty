@@ -146,8 +146,13 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
             });
           }
         }
-      } catch {
-        // Token might be invalid, continue with what we can get
+      } catch (scopeCheckErr) {
+        // Token is invalid or expired — treat as needing reauth
+        this.logger.warn(`GitHub scope check failed for ${githubLogin}: ${scopeCheckErr}`);
+        needsReauth = true;
+        if (userId) {
+          await this.prisma.user.update({ where: { id: userId }, data: { githubToken: null } }).catch(() => {});
+        }
       }
 
       if (needsReauth) {
@@ -165,19 +170,35 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
 
       // Token has correct scopes — fetch all repos
       let page = 1;
-      while (true) {
-        const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
-        if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
+      try {
+        while (true) {
+          const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
+          if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
 
-        const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
-        this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
+          const response = await axios.get<unknown[]>(url, { headers, timeout: 10000 });
+          this.logger.log(`GitHub returned ${response.data?.length ?? 0} repos on page ${page}`);
 
-        const batch = response.data;
-        if (!batch || batch.length === 0) break;
+          const batch = response.data;
+          if (!batch || batch.length === 0) break;
 
-        allRepos = allRepos.concat(batch);
-        if (batch.length < 100) break;
-        page++;
+          allRepos = allRepos.concat(batch);
+          if (batch.length < 100) break;
+          page++;
+        }
+      } catch (fetchErr) {
+        this.logger.warn(`GitHub repo fetch failed for ${githubLogin}: ${fetchErr}`);
+        if (userId) {
+          await this.prisma.user.update({ where: { id: userId }, data: { githubToken: null } }).catch(() => {});
+        }
+        return [{
+          _bolty_reauth: true,
+          name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
+          id: -1,
+          full_name: 'reauth',
+          html_url: '',
+          stargazers_count: 0,
+          forks_count: 0,
+        }] as unknown[];
       }
     } else {
       // No token: use public API (only returns public repos)

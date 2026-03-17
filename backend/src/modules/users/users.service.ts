@@ -115,7 +115,6 @@ export class UsersService {
         reputationPoints: true,
         createdAt: true,
         repositories: {
-          where: { isLocked: false },
           orderBy: { createdAt: 'desc' },
           take: 20,
           select: {

@@ -82,6 +82,7 @@ model User {
   reputationEvents       ReputationEvent[]
   repoCollaborations     RepoCollaborator[]
   serviceListings        ServiceListing[]
+  certifications         UserCertification[]
 
   @@map("users")
 }
@@ -638,4 +639,23 @@ enum ServiceStatus {
   ACTIVE
   PAUSED
   COMPLETED
+}
+
+// ─── User Certifications ──────────────────────────────────────────────────────
+
+model UserCertification {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  certId        String    // slug from the predefined catalog (e.g. "oscp", "ccna")
+  credentialUrl String?   // optional link to verify credential
+  issueDate     String?   // "2024-03" (month precision is enough)
+  expiryDate    String?   // null = doesn't expire
+
+  @@unique([userId, certId])
+  @@index([userId])
+  @@map("user_certifications")
 }
