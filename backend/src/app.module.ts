@@ -14,6 +14,7 @@ import { UsersModule } from './modules/users/users.module';
 import { DmModule } from './modules/dm/dm.module';
 import { MarketModule } from './modules/market/market.module';
 import { SocialModule } from './modules/social/social.module';
+import { OrdersModule } from './modules/orders/orders.module';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -57,6 +58,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
     UsersModule,
     DmModule,
     MarketModule,
+    OrdersModule,
   ],
   providers: [
     // Global rate limiting guard

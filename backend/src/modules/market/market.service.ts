@@ -280,9 +280,11 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
         txHash,
         amountWei: verifiedAmountWei,
         buyerId,
+        sellerId: listing.sellerId,
         listingId,
         negotiationId: negotiationId || null,
         verified: true,
+        status: 'PENDING_DELIVERY',
         platformFeeTxHash: platformFeeTxHash || null,
         platformFeeWei: platformFeeWei || null,
         consentSignature: consentSignature || null,
@@ -290,7 +292,20 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
       },
     });
 
-    return { success: true, purchase };
+    // Auto-create welcome message in order chat
+    try {
+      await this.prisma.orderMessage.create({
+        data: {
+          orderId: purchase.id,
+          senderId: listing.sellerId,
+          content: `👋 Order created! Payment confirmed on-chain. Hi, I'm ready to fulfill your order for "${listing.title}". Feel free to message me here with any questions.`,
+        },
+      });
+    } catch (err) {
+      this.logger.error('Failed to create order welcome message', err);
+    }
+
+    return { success: true, purchase, orderId: purchase.id };
   }
 
   async deleteListing(id: string, userId: string) {

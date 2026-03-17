@@ -71,6 +71,8 @@ model User {
   marketListings      MarketListing[]      @relation("MarketSeller")
   purchasesMade       RepoPurchase[]       @relation("Buyer")
   marketPurchasesMade MarketPurchase[]     @relation("MarketBuyer")
+  marketSales         MarketPurchase[]     @relation("OrderSeller")
+  orderMessagesSent   OrderMessage[]       @relation("OrderMessageSender")
   buyerNegotiations   AgentNegotiation[]   @relation("NegotiationBuyer")
   sentFriendRequests     Friendship[]  @relation("FriendSent")
   receivedFriendRequests Friendship[]  @relation("FriendReceived")
@@ -174,7 +176,7 @@ model RepoPurchase {
   @@map("repo_purchases")
 }
 
-// ─── Market Purchases (agent/listing payments) ───────────────────────────────
+// ─── Market Purchases / Orders (agent/listing payments) ──────────────────────
 
 model MarketPurchase {
   id            String        @id @default(cuid())
@@ -192,16 +194,51 @@ model MarketPurchase {
   consentSignature  String?   @db.Text
   consentMessage    String?   @db.Text
 
+  // Order lifecycle
+  status        OrderStatus   @default(PENDING_DELIVERY)
+  deliveryNote  String?       @db.Text
+  completedAt   DateTime?
+
   buyerId       String
   buyer         User          @relation("MarketBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  // Denormalized seller for fast seller-side order queries
+  sellerId      String
+  seller        User          @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
 
   listingId     String
   listing       MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   negotiationId String?
 
+  messages      OrderMessage[]
+
   @@index([buyerId, listingId])
+  @@index([sellerId, status])
   @@map("market_purchases")
+}
+
+enum OrderStatus {
+  PENDING_DELIVERY
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED
+  DISPUTED
+}
+
+// ─── Order Messages (per-order chat) ─────────────────────────────────────────
+
+model OrderMessage {
+  id        String         @id @default(cuid())
+  createdAt DateTime       @default(now())
+  content   String         @db.Text
+  senderId  String
+  sender    User           @relation("OrderMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  orderId   String
+  order     MarketPurchase @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@map("order_messages")
 }
 
 // ─── Votes ───────────────────────────────────────────────────────────────────
