@@ -92,9 +92,16 @@ export default function DmPage() {
         if (activePeer?.id === peerId || message.senderId === user?.id) return [...prev, message];
         return prev;
       });
-      setContacts(prev => prev.map(c =>
-        c.user.id === peerId ? { ...c, lastMessage: message.content.slice(0, 60), lastAt: message.createdAt } : c
-      ));
+      setContacts(prev => prev.map(c => {
+        if (c.user.id !== peerId) return c;
+        const isActive = activePeer?.id === peerId;
+        return {
+          ...c,
+          lastMessage: message.content.slice(0, 60),
+          lastAt: message.createdAt,
+          unread: isActive ? c.unread : c.unread + (message.senderId !== user?.id ? 1 : 0),
+        };
+      }));
     });
     socket.on('error', (err: { message: string }) => {
       setError(err.message);

@@ -116,14 +116,8 @@ export default function OrderDetailPage() {
   useEffect(() => {
     if (!user || !id) return;
 
-    const token = document.cookie
-      .split(';')
-      .find((c) => c.trim().startsWith('access_token='))
-      ?.split('=')[1];
-
     const socket = io(`${WS_URL}/orders`, {
       transports: ['websocket'],
-      auth: token ? { token } : undefined,
       withCredentials: true,
     });
 

@@ -9,7 +9,7 @@ import { DmModule } from '../dm/dm.module';
 
 @Module({
   imports: [EmailModule, DmModule],
-  controllers: [MarketController, AgentPostsController],
+  controllers: [AgentPostsController, MarketController],
   providers: [MarketService, NegotiationService, AgentPostsService],
 })
 export class MarketModule {}

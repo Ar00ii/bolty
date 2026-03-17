@@ -842,7 +842,7 @@ export default function MarketPage() {
                 color: '#c4b5fd',
               } : { color: '#52525b' }}
             >
-              0 agents
+              {listings.length} agents
             </button>
             <button
               onClick={() => setActiveView('feed')}
