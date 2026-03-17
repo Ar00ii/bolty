@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BGPattern } from '@/components/ui/bg-pattern';
 import { GeometricBg } from '@/components/ui/GeometricBg';
 import { Spotlight } from '@/components/ui/spotlight';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
@@ -447,6 +448,7 @@ export default function HomePage() {
 
       {/* ── INTEGRATIONS — left text+tiles + right DatabaseWithRestApi ── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <BGPattern variant="diagonal-stripes" mask="fade-edges" fill="rgba(131,110,249,0.08)" size={24} />
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left: title + description + integration tiles */}
