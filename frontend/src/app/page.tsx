@@ -13,6 +13,7 @@ import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import { RetroGrid } from '@/components/ui/retro-grid';
+import Particles from '@/components/ui/Particles';
 import {
   Code2,
   Bot,
@@ -835,6 +836,17 @@ export default function HomePage() {
       {/* ── AI SECTION — full header top, chat left + features right ──── */}
       <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="absolute inset-0 pointer-events-none">
+          <Particles
+            particleColors={['#836EF9', '#c4b5fd', '#ffffff']}
+            particleCount={200}
+            particleSpread={10}
+            speed={0.1}
+            particleBaseSize={100}
+            moveParticlesOnHover
+            alphaParticles={false}
+            disableRotation={false}
+            pixelRatio={1}
+          />
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px]"
             style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
         </div>
