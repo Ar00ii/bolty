@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 const wsUrl  = process.env.NEXT_PUBLIC_WS_URL  || 'http://localhost:3001';
 
@@ -9,6 +10,23 @@ const wsOriginWs = wsOrigin.replace(/^http/, 'ws');
 
 const nextConfig = {
   reactStrictMode: true,
+
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Replace @splinetool packages with a stub on the server.
+      // @splinetool/runtime executes `new class extends null` at module-level
+      // which throws in Node.js ("Super constructor null is not a constructor").
+      config.resolve.alias['@splinetool/react-spline'] = path.resolve(
+        __dirname,
+        'src/__stubs__/spline-stub.js',
+      );
+      config.resolve.alias['@splinetool/runtime'] = path.resolve(
+        __dirname,
+        'src/__stubs__/spline-stub.js',
+      );
+    }
+    return config;
+  },
 
   // Security headers
   async headers() {

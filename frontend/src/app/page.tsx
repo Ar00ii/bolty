@@ -13,7 +13,8 @@ import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import { RetroGrid } from '@/components/ui/retro-grid';
-import Particles from '@/components/ui/Particles';
+import dynamic from 'next/dynamic';
+const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
 import {
   Code2,
   Bot,
@@ -44,7 +45,7 @@ import {
   ArrowRight,
   Radio,
 } from 'lucide-react';
-import AnimatedShaderBackground from '@/components/ui/animated-shader-background';
+const AnimatedShaderBackground = dynamic(() => import('@/components/ui/animated-shader-background'), { ssr: false });
 import DatabaseWithRestApi from '@/components/ui/database-with-rest-api';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────

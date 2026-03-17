@@ -168,7 +168,7 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     const listing = await this.prisma.marketListing.findUnique({
       where: { id },
       include: {
-        seller: { select: { id: true, username: true, avatarUrl: true } },
+        seller: { select: { id: true, username: true, avatarUrl: true, walletAddress: true } },
         repository: { select: { id: true, name: true, githubUrl: true, language: true, stars: true } },
       },
     });
@@ -212,6 +212,10 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
     const sellerWallet = listing.seller.walletAddress;
 
+    if (!sellerWallet) {
+      throw new BadRequestException('Seller has no wallet address configured');
+    }
+
     // ── Consent signature verification ──────────────────────────────────
     if (consentSignature && consentMessage) {
       try {
@@ -233,24 +237,22 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
     let verifiedAmountWei = amountWei;
     let platformFeeWei = '0';
 
-    if (sellerWallet) {
-      try {
-        const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const receipt = await provider.getTransactionReceipt(txHash);
-        if (!receipt || receipt.status !== 1) {
-          throw new BadRequestException('Seller payment transaction failed or not found');
-        }
-        const tx = await provider.getTransaction(txHash);
-        if (!tx) throw new BadRequestException('Transaction not found');
-        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
-          throw new BadRequestException('Transaction recipient does not match seller wallet');
-        }
-        verifiedAmountWei = tx.value.toString();
-      } catch (err) {
-        if (err instanceof BadRequestException) throw err;
-        this.logger.error(`Market seller tx verification error: ${err instanceof Error ? err.message : err}`);
-        throw new BadRequestException('Could not verify seller payment on-chain');
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const receipt = await provider.getTransactionReceipt(txHash);
+      if (!receipt || receipt.status !== 1) {
+        throw new BadRequestException('Seller payment transaction failed or not found');
       }
+      const tx = await provider.getTransaction(txHash);
+      if (!tx) throw new BadRequestException('Transaction not found');
+      if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
+        throw new BadRequestException('Transaction recipient does not match seller wallet');
+      }
+      verifiedAmountWei = tx.value.toString();
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      this.logger.error(`Market seller tx verification error: ${err instanceof Error ? err.message : err}`);
+      throw new BadRequestException('Could not verify seller payment on-chain');
     }
 
     // ── Platform commission verification (2.5%) ──────────────────────────
