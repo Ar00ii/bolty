@@ -129,24 +129,6 @@ function FeeCard({
   );
 }
 
-/* ─── Token Benefit ──────────────────────────────────────────────────────── */
-function TokenBenefit({ icon: Icon, text, delay }: { icon: React.ElementType; text: string; delay?: number }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
-  return (
-    <motion.li
-      ref={ref}
-      initial={{ opacity: 0, x: -20 }}
-      animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.45, delay: delay ?? 0 }}
-      className="token-benefit"
-    >
-      <Icon className="token-benefit-icon" strokeWidth={1.5} />
-      <span>{text}</span>
-    </motion.li>
-  );
-}
-
 /* ─── Page data ──────────────────────────────────────────────────────────── */
 
 const ROADMAP_STEPS: RoadmapStep[] = [
@@ -202,12 +184,12 @@ const ROADMAP_STEPS: RoadmapStep[] = [
 ];
 
 const TOKEN_BENEFITS = [
-  { icon: Zap,             text: '0% trading fee when paying with $BOLTY' },
-  { icon: Star,            text: 'Priority access to new features & beta drops' },
-  { icon: Lock,            text: 'Governance rights — vote on platform decisions' },
-  { icon: TrendingUp,      text: 'Staking rewards from platform revenue share' },
-  { icon: CheckCircle2,    text: 'Verified trader badge & boosted listing visibility' },
-  { icon: Rocket,          text: 'Early access to AI Agent launches' },
+  { icon: Zap,          title: '0% Trading Fee',       text: 'Pay zero platform fee on every trade when using $BOLTY',  color: '#836EF9', glow: 'rgba(131,110,249,0.1)' },
+  { icon: Star,         title: 'Priority Access',       text: 'First in line for new features, beta drops, and launches', color: '#f59e0b', glow: 'rgba(245,158,11,0.1)' },
+  { icon: Lock,         title: 'Governance Rights',     text: 'Vote on platform decisions and shape the future of Bolty', color: '#60a5fa', glow: 'rgba(96,165,250,0.1)' },
+  { icon: TrendingUp,   title: 'Staking Rewards',       text: 'Earn yield from platform revenue share by staking $BOLTY', color: '#34d399', glow: 'rgba(52,211,153,0.1)' },
+  { icon: CheckCircle2, title: 'Verified Trader Badge', text: 'Get a verified badge and boosted listing visibility',       color: '#a78bfa', glow: 'rgba(167,139,250,0.1)' },
+  { icon: Rocket,       title: 'AI Agent Early Access', text: 'Be first to access new AI agent launches on the platform',  color: '#f87171', glow: 'rgba(248,113,113,0.1)' },
 ];
 
 /* ─── Page ───────────────────────────────────────────────────────────────── */
@@ -215,7 +197,7 @@ const TOKEN_BENEFITS = [
 export default function HowItWorksPage() {
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroY    = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
+  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '30%']);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
 
   return (
@@ -255,10 +237,10 @@ export default function HowItWorksPage() {
           <FadeUp delay={0.3}>
             <div className="hiw-hero-stats">
               {[
-                { label: 'Platform Fee',  value: '2.5%',    icon: Percent },
-                { label: '$BOLTY Tax',    value: '0%',      icon: Coins },
-                { label: 'Settlement',    value: '~2s',     icon: Clock },
-                { label: 'Escrow',        value: 'On-chain',icon: Shield },
+                { label: 'Platform Fee', value: '2.5%',     icon: Percent },
+                { label: '$BOLTY Tax',   value: '0%',       icon: Coins },
+                { label: 'Settlement',   value: '~2s',      icon: Clock },
+                { label: 'Escrow',       value: 'On-chain', icon: Shield },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="hiw-stat">
                   <Icon className="hiw-stat-icon" strokeWidth={1.5} />
@@ -283,9 +265,7 @@ export default function HowItWorksPage() {
           </FadeUp>
 
           <div className="hiw-roadmap">
-            {/* Vertical line */}
             <div className="hiw-roadmap-line" aria-hidden="true" />
-
             <div className="hiw-roadmap-steps">
               {ROADMAP_STEPS.map((step, i) => (
                 <RoadmapCard key={step.step} item={step} index={i} />
@@ -367,68 +347,45 @@ export default function HowItWorksPage() {
       {/* ── BOLTY TOKEN ──────────────────────────────────────────────────── */}
       <section className="hiw-section" id="bolty-token">
         <div className="hiw-container">
-          <div className="hiw-token-wrap">
-            {/* Left — text */}
-            <FadeUp className="hiw-token-text">
-              <span className="hiw-section-tag">Coming Soon</span>
-              <h2 className="hiw-section-title" style={{ marginTop: '0.75rem' }}>
-                The <span className="hiw-brand-text">$BOLTY</span> Token
-              </h2>
-              <p className="hiw-section-sub" style={{ marginTop: '0.75rem' }}>
-                $BOLTY is the native utility token of the Bolty platform. Designed for the
-                community, by the community — with zero tax on every transaction.
-              </p>
+          <FadeUp className="hiw-section-header">
+            <span className="hiw-section-tag">Coming Soon</span>
+            <h2 className="hiw-section-title">
+              The <span className="hiw-brand-text">$BOLTY</span> Token
+            </h2>
+            <p className="hiw-section-sub">
+              $BOLTY is the native utility token of the Bolty platform. Designed for the
+              community, by the community — with zero tax on every transaction.
+            </p>
+          </FadeUp>
 
-              <ul className="token-benefits-list">
-                {TOKEN_BENEFITS.map(({ icon, text }, i) => (
-                  <TokenBenefit key={text} icon={icon} text={text} delay={i * 0.07} />
-                ))}
-              </ul>
-
-              <div className="hiw-token-cta">
-                <span className="hiw-token-cta-label">
-                  <Clock strokeWidth={1.5} style={{ width: 14, height: 14 }} />
-                  Launch details coming soon — stay tuned
-                </span>
-              </div>
-            </FadeUp>
-
-            {/* Right — token visual */}
-            <FadeUp delay={0.15} className="hiw-token-visual">
-              <div className="hiw-token-card">
-                <div className="hiw-token-glow" aria-hidden="true" />
-                <div className="hiw-token-badge">
-                  <Coins className="hiw-token-badge-icon" strokeWidth={1} />
+          <div className="hiw-token-grid">
+            {TOKEN_BENEFITS.map(({ icon: Icon, title, text, color, glow }, i) => (
+              <motion.div
+                key={title}
+                className="hiw-token-feature"
+                style={{ '--feat-glow': glow, '--feat-color': color } as React.CSSProperties}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.5, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="hiw-token-feat-icon" style={{ background: glow, borderColor: `${color}30` }}>
+                  <Icon strokeWidth={1.5} style={{ width: 20, height: 20, color }} />
                 </div>
-                <div className="hiw-token-name">$BOLTY</div>
-                <div className="hiw-token-tagline">Zero Tax. Full Power.</div>
-
-                <div className="hiw-token-stats">
-                  {[
-                    { label: 'Tax',         value: '0%',     highlight: true },
-                    { label: 'Network',      value: 'TBA' },
-                    { label: 'Utility',      value: '6+',     suffix: ' perks' },
-                  ].map(({ label, value, highlight, suffix }) => (
-                    <div key={label} className={`hiw-token-stat ${highlight ? 'hiw-token-stat--highlight' : ''}`}>
-                      <span className="hiw-token-stat-value">{value}{suffix}</span>
-                      <span className="hiw-token-stat-label">{label}</span>
-                    </div>
-                  ))}
+                <div>
+                  <div className="hiw-token-feat-title">{title}</div>
+                  <div className="hiw-token-feat-desc">{text}</div>
                 </div>
-
-                <div className="hiw-token-divider" />
-
-                <ul className="hiw-token-perks">
-                  {['0% Fee on all trades', 'Governance voting', 'Staking rewards'].map((p) => (
-                    <li key={p}>
-                      <CheckCircle2 strokeWidth={1.5} style={{ width: 13, height: 13, color: '#836EF9', flexShrink: 0 }} />
-                      {p}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </FadeUp>
+              </motion.div>
+            ))}
           </div>
+
+          <FadeUp delay={0.2} className="hiw-token-footer">
+            <span className="hiw-token-cta-label">
+              <Clock strokeWidth={1.5} style={{ width: 14, height: 14 }} />
+              Launch details coming soon — stay tuned
+            </span>
+          </FadeUp>
         </div>
       </section>
 
@@ -641,7 +598,7 @@ export default function HowItWorksPage() {
         .roadmap-card {
           background: var(--bg-card);
           border: 1px solid var(--border);
-          border-radius: 18px;
+          border-radius: 16px;
           padding: 1.4rem 1.6rem;
           cursor: default;
           transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
@@ -733,7 +690,7 @@ export default function HowItWorksPage() {
         .fee-card {
           background: var(--bg-card);
           border: 1px solid var(--border);
-          border-radius: 18px;
+          border-radius: 16px;
           padding: 2rem 1.6rem;
           text-align: center;
           position: relative;
@@ -806,7 +763,7 @@ export default function HowItWorksPage() {
         .hiw-fee-breakdown {
           background: var(--bg-card);
           border: 1px solid var(--border);
-          border-radius: 18px;
+          border-radius: 16px;
           padding: 1.8rem 2rem;
         }
         .hiw-breakdown-label {
@@ -856,37 +813,50 @@ export default function HowItWorksPage() {
         }
 
         /* ── Token section ── */
-        .hiw-token-wrap {
+        .hiw-token-grid {
           display: grid;
-          grid-template-columns: 1fr;
-          gap: 3rem;
-          align-items: center;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2.5rem;
         }
-        @media (min-width: 900px) {
-          .hiw-token-wrap { grid-template-columns: 1fr 1fr; }
-        }
-        .hiw-token-text {}
-        .token-benefits-list {
-          list-style: none;
-          margin: 1.5rem 0;
+        .hiw-token-feature {
           display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
+          align-items: flex-start;
+          gap: 1rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 1.4rem;
+          transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
         }
-        .token-benefit {
+        .hiw-token-feature:hover {
+          border-color: var(--feat-color, rgba(131,110,249,0.3));
+          transform: translateY(-3px);
+          box-shadow: 0 12px 32px var(--feat-glow, rgba(131,110,249,0.08));
+        }
+        .hiw-token-feat-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 12px;
+          border: 1px solid;
           display: flex;
           align-items: center;
-          gap: 0.75rem;
-          font-size: 0.92rem;
-          color: var(--text-muted);
-        }
-        .token-benefit-icon {
-          width: 16px; height: 16px;
-          color: #836EF9;
+          justify-content: center;
           flex-shrink: 0;
         }
-        .hiw-token-cta {
-          margin-top: 0.5rem;
+        .hiw-token-feat-title {
+          font-size: 0.95rem;
+          font-weight: 700;
+          margin-bottom: 0.3rem;
+        }
+        .hiw-token-feat-desc {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          line-height: 1.55;
+        }
+        .hiw-token-footer {
+          display: flex;
+          justify-content: center;
         }
         .hiw-token-cta-label {
           display: inline-flex;
@@ -896,136 +866,7 @@ export default function HowItWorksPage() {
           color: var(--text-muted);
           border: 1px solid var(--border);
           border-radius: 999px;
-          padding: 0.3rem 0.8rem;
-        }
-
-        /* Token Card */
-        .hiw-token-visual {
-          display: flex;
-          justify-content: center;
-        }
-        .hiw-token-card {
-          background: var(--bg-card);
-          border: 1px solid rgba(131,110,249,0.25);
-          border-radius: 24px;
-          padding: 2.5rem 2rem;
-          text-align: center;
-          width: 100%;
-          max-width: 340px;
-          position: relative;
-          overflow: hidden;
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .hiw-token-card:hover {
-          transform: translateY(-6px) scale(1.01);
-          box-shadow: 0 24px 60px rgba(131,110,249,0.2);
-        }
-        .hiw-token-glow {
-          position: absolute;
-          top: -60px; left: 50%;
-          width: 280px; height: 280px;
-          transform: translateX(-50%);
-          background: radial-gradient(circle, rgba(131,110,249,0.25) 0%, transparent 70%);
-          pointer-events: none;
-        }
-        .hiw-token-badge {
-          position: relative;
-          z-index: 1;
-          width: 72px; height: 72px;
-          background: linear-gradient(135deg, rgba(131,110,249,0.2), rgba(131,110,249,0.05));
-          border: 1px solid rgba(131,110,249,0.35);
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 0 auto 1.2rem;
-          animation: token-pulse 3s ease-in-out infinite;
-        }
-        @keyframes token-pulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(131,110,249,0); }
-          50%       { box-shadow: 0 0 0 12px rgba(131,110,249,0.12); }
-        }
-        .hiw-token-badge-icon {
-          width: 34px; height: 34px;
-          color: #836EF9;
-        }
-        .hiw-token-name {
-          position: relative;
-          z-index: 1;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 2rem;
-          font-weight: 800;
-          background: linear-gradient(135deg, #836EF9, #a78bfa);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: 0.3rem;
-        }
-        .hiw-token-tagline {
-          position: relative;
-          z-index: 1;
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          letter-spacing: 0.04em;
-          margin-bottom: 1.5rem;
-        }
-        .hiw-token-stats {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          justify-content: center;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-        .hiw-token-stat {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.2rem;
-          background: var(--bg-elevated);
-          border: 1px solid var(--border);
-          border-radius: 10px;
-          padding: 0.6rem 0.8rem;
-          min-width: 64px;
-        }
-        .hiw-token-stat--highlight {
-          border-color: rgba(131,110,249,0.35);
-          background: rgba(131,110,249,0.08);
-        }
-        .hiw-token-stat-value {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 1.15rem;
-          font-weight: 700;
-          color: #836EF9;
-        }
-        .hiw-token-stat-label {
-          font-size: 0.65rem;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-        }
-        .hiw-token-divider {
-          position: relative;
-          z-index: 1;
-          border: none;
-          border-top: 1px solid var(--border);
-          margin: 0 0 1.2rem;
-        }
-        .hiw-token-perks {
-          position: relative;
-          z-index: 1;
-          list-style: none;
-          display: flex;
-          flex-direction: column;
-          gap: 0.55rem;
-          text-align: left;
-        }
-        .hiw-token-perks li {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.84rem;
-          color: var(--text-muted);
+          padding: 0.35rem 1rem;
         }
 
         /* ── CTA ── */
@@ -1089,12 +930,13 @@ export default function HowItWorksPage() {
           box-shadow: 0 8px 24px rgba(131,110,249,0.08);
         }
 
-        /* ── Responsive tweaks ── */
+        /* ── Responsive ── */
         @media (max-width: 600px) {
           .hiw-hero { padding-top: 7rem; min-height: auto; }
           .hiw-section { padding: 4rem 0; }
           .hiw-breakdown-bar { height: 36px; }
           .hiw-bar-seller { font-size: 0.72rem; }
+          .hiw-token-grid { grid-template-columns: 1fr; }
         }
       `}</style>
     </div>
