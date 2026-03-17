@@ -1,37 +1,20 @@
-import { ImageResponse } from 'next/og';
-
 export const size = { width: 180, height: 180 };
-export const contentType = 'image/png';
+export const contentType = 'image/svg+xml';
+export const dynamic = 'force-static';
 
 export default function AppleIcon() {
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: 180,
-          height: 180,
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-          borderRadius: 40,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <svg
-          width="110"
-          height="110"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-          <path d="M18.188 8.688l.437-1.562.438 1.562a2.25 2.25 0 001.5 1.5l1.563.438-1.563.437a2.25 2.25 0 00-1.5 1.5l-.438 1.563-.437-1.563a2.25 2.25 0 00-1.5-1.5l-1.563-.437 1.563-.438a2.25 2.25 0 001.5-1.5z" />
-        </svg>
-      </div>
-    ),
-    { ...size, fonts: [] },
+  return new Response(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+      <defs>
+        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8b5cf6"/>
+          <stop offset="100%" stop-color="#6d28d9"/>
+        </linearGradient>
+      </defs>
+      <rect width="180" height="180" rx="40" fill="url(#g)"/>
+      <path d="M55.313 89.532L50 109.375l-5.313-19.843a28.125 28.125 0 00-19.312-19.313L5.625 65l20.75-5.313a28.125 28.125 0 0019.313-19.312L50 20.625l5.313 19.75a28.125 28.125 0 0019.312 19.312L94.375 65l-19.75 5.313a28.125 28.125 0 00-19.312 19.219z" fill="white" stroke="none"/>
+      <path d="M113.675 54.3l2.825-10.05 2.825 10.05a14.063 14.063 0 009.375 9.375l10.05 2.825-10.05 2.825a14.063 14.063 0 00-9.375 9.375l-2.825 10.05-2.825-10.05a14.063 14.063 0 00-9.375-9.375l-10.05-2.825 10.05-2.825a14.063 14.063 0 009.375-9.375z" fill="white" stroke="none"/>
+    </svg>`,
+    { headers: { 'Content-Type': 'image/svg+xml' } },
   );
 }
