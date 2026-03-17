@@ -125,12 +125,12 @@ const ORBITAL_DATA = [
   {
     id: 1,
     title: 'AI Assistant',
-    date: 'Live',
-    content: 'Intelligent code assistance built directly into the platform. Ask questions, get instant answers on code reviews, architecture decisions, and debugging.',
+    date: 'Maintenance',
+    content: 'Intelligent code assistance built directly into the platform. Currently undergoing scheduled maintenance — will be back online soon.',
     category: 'AI',
     icon: Bot,
     relatedIds: [2, 3],
-    status: 'completed' as const,
+    status: 'in-progress' as const,
     energy: 95,
   },
   {
@@ -970,7 +970,7 @@ export default function HomePage() {
                   <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
                   <span className="text-xs font-mono text-zinc-400">Bolty AI</span>
                   <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-mono"
-                    style={{ background: 'rgba(131,110,249,0.15)', color: '#836EF9' }}>Live</span>
+                    style={{ background: 'rgba(234,179,8,0.15)', color: '#facc15' }}>Maintenance</span>
                 </div>
                 <div className="p-4 space-y-4">
                   {AI_CHAT_PREVIEW.map((msg, i) => (

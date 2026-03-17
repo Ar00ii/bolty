@@ -7,7 +7,8 @@ import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-card
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Wallet } from 'lucide-react';
+import { Wallet, AlertTriangle } from 'lucide-react';
+import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -555,10 +556,11 @@ function NegotiationModal({
 
 // ── Agent Card ─────────────────────────────────────────────────────────────────
 
-function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
+function AgentCard({ listing, isAuthenticated, onNegotiate, onWalletAuth }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void; onWalletAuth: () => Promise<boolean> }) {
   const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
   const isAgent = listing.type === 'AI_AGENT' || listing.type === 'BOT';
   const squares = genRandomPattern();
+  const [connecting, setConnecting] = useState(false);
 
   return (
     <div className="relative overflow-hidden flex flex-col p-5 transition-colors duration-200 hover:bg-monad-500/5 group">
@@ -647,17 +649,24 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
             profile
           </Link>
           <button
-            onClick={() => {
-              if (!isAuthenticated) { window.location.href = '/auth'; return; }
+            onClick={async () => {
+              if (!isAuthenticated) {
+                if (!isMetaMaskInstalled()) { window.location.href = '/auth'; return; }
+                setConnecting(true);
+                const ok = await onWalletAuth();
+                setConnecting(false);
+                if (!ok) return;
+              }
               onNegotiate();
             }}
-            className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed ${
+            disabled={connecting}
+            className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed disabled:opacity-50 ${
               listing.agentEndpoint
                 ? 'bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20'
                 : 'bg-monad-500/10 border-monad-500/30 text-monad-300 hover:bg-monad-500/20'
             }`}
           >
-            {listing.agentEndpoint ? 'negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
+            {connecting ? 'connecting wallet...' : listing.agentEndpoint ? 'negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
           </button>
         </div>
       </div>
@@ -668,7 +677,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function MarketPage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, refresh } = useAuth();
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState('AI_AGENT');
@@ -694,6 +703,17 @@ export default function MarketPage() {
     agentUrl: '',
     agentEndpoint: '',
   });
+
+  const handleWalletAuth = useCallback(async (): Promise<boolean> => {
+    try {
+      await connectMetaMask();
+      await refresh();
+      return true;
+    } catch {
+      setError('Wallet connection failed. Please try again or sign in.');
+      return false;
+    }
+  }, [refresh]);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);
@@ -1112,6 +1132,7 @@ export default function MarketPage() {
                 listing={listing}
                 isAuthenticated={isAuthenticated}
                 onNegotiate={() => setNegotiatingListing(listing)}
+                onWalletAuth={handleWalletAuth}
               />
             ))}
             {listings.length === 0 && (
