@@ -781,17 +781,13 @@ export default function ReposPage() {
                 <div className="relative z-10 flex-1">
                   {/* Header: logo + name */}
                   <div className="flex items-start gap-3 mb-3">
-                    {/* Logo or fallback avatar */}
-                    {repo.logoUrl ? (
-                      <img src={repo.logoUrl} alt={repo.name}
-                        className="w-10 h-10 rounded-xl object-cover border border-white/08 flex-shrink-0"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold text-sm text-monad-400"
-                        style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
-                        {repo.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    {/* Logo or fallback bolty logo */}
+                    <img
+                      src={repo.logoUrl || '/bolty-logo.png'}
+                      alt={repo.name}
+                      className="w-10 h-10 rounded-xl object-cover border border-white/08 flex-shrink-0"
+                      onError={e => { (e.target as HTMLImageElement).src = '/bolty-logo.png'; }}
+                    />
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
