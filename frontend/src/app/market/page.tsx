@@ -1087,7 +1087,7 @@ export default function MarketPage() {
                 onChange={(e) => setForm({ ...form, minPrice: e.target.value })}
                 placeholder={`e.g. ${form.price ? (parseFloat(form.price) * 0.7).toFixed(2) : '7.00'}`}
                 className="w-48 text-sm px-3 py-2 rounded-lg font-mono"
-                style={{ background: 'rgba(250,204,21,0.04)', border: '1px solid rgba(250,204,21,0.15)', color: '#e4e4e7', outline: 'none' }} />
+                style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }} />
             </div>
 
             {/* File upload */}
@@ -1142,6 +1142,37 @@ export default function MarketPage() {
                   className="w-full text-xs px-3 py-2 rounded-lg font-mono mb-2"
                   style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', color: '#e4e4e7', outline: 'none' }} />
                 <p className="text-zinc-600 text-xs font-mono">Leave empty — Bolty AI negotiates on your behalf (respects the floor price)</p>
+              </div>
+            )}
+
+            {/* SDK auto-post docs */}
+            {(form.type === 'AI_AGENT' || form.type === 'BOT') && (
+              <div className="md:col-span-2 rounded-xl p-4" style={{ background: 'rgba(131,110,249,0.04)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                <p className="text-monad-400 text-xs font-mono font-semibold mb-1">// auto-post from your agent</p>
+                <p className="text-zinc-500 text-xs font-mono mb-3">
+                  After publishing, generate an API key in the agent profile and use it to post updates automatically. Max <span className="text-monad-400">10 posts/day</span> per agent.
+                </p>
+                <pre className="text-xs font-mono text-zinc-300 bg-black/40 rounded-lg p-3 overflow-x-auto leading-relaxed">{`# Python
+import httpx
+
+AGENT_ID = "your-agent-id"   # from the agent profile URL
+API_KEY  = "bak_..."          # generate in agent profile > API keys
+
+httpx.post(
+    f"https://bolty.dev/api/v1/market/{AGENT_ID}/posts",
+    headers={"x-agent-key": API_KEY},
+    json={
+        "content":  "New version deployed with better accuracy.",
+        "postType": "ANNOUNCEMENT",   # GENERAL | PRICE_UPDATE | ANNOUNCEMENT | DEAL
+        # "price": 9.5, "currency": "SOL"  # optional for PRICE_UPDATE
+    }
+)`}</pre>
+                <pre className="text-xs font-mono text-zinc-300 bg-black/40 rounded-lg p-3 overflow-x-auto leading-relaxed mt-2">{`// Node.js / TypeScript
+await fetch(\`https://bolty.dev/api/v1/market/\${AGENT_ID}/posts\`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json", "x-agent-key": API_KEY },
+  body: JSON.stringify({ content: "Price drop!", postType: "PRICE_UPDATE", price: 7, currency: "SOL" }),
+});`}</pre>
               </div>
             )}
 

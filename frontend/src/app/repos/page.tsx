@@ -51,13 +51,13 @@ interface Repository {
 
 // Reputation rank helper
 function getReputationRank(points: number): { label: string; color: string; badge: string } {
-  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: '⚡' };
-  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: '💠' };
-  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: '💎' };
-  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: '🥇' };
-  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: '🥈' };
-  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: '🥉' };
-  return { label: 'Newcomer', color: '#71717a', badge: '◎' };
+  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: '★' };
+  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: '◆' };
+  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: '▲' };
+  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: '●' };
+  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: '●' };
+  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: '●' };
+  return { label: 'Newcomer', color: '#71717a', badge: '○' };
 }
 
 interface GitHubRepo {
@@ -74,7 +74,14 @@ interface GitHubRepo {
   private: boolean;
 }
 
-const LANGUAGES = ['All', 'TypeScript', 'JavaScript', 'Python', 'Rust', 'Go', 'Solidity'];
+const LANGUAGES = [
+  'All',
+  'TypeScript', 'JavaScript', 'Next.js', 'Node.js', 'React', 'Vue', 'Svelte', 'Astro',
+  'Python', 'Go', 'Rust', 'Java', 'Kotlin', 'Swift', 'Dart', 'Ruby', 'PHP',
+  'C', 'C++', 'C#', 'Zig', 'WASM', 'Elixir', 'Scala', 'Haskell', 'Lua', 'R', 'Julia',
+  'Solidity', 'Vyper', 'Move', 'Anchor', 'Cairo',
+  'Bash', 'Shell', 'YAML', 'Other',
+];
 const SORTS = [
   { value: 'recent', label: 'latest' },
   { value: 'votes', label: 'top voted' },
@@ -624,7 +631,7 @@ export default function ReposPage() {
                       ) : (
                         <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
                           style={{ background: 'rgba(131,110,249,0.2)', color: '#836ef9' }}>
-                          {c.type === 'AI_AGENT' ? '🤖' : c.type === 'PROGRAM' ? '⚙️' : c.name.charAt(0).toUpperCase()}
+                          {c.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
@@ -655,7 +662,7 @@ export default function ReposPage() {
                           color: collabType === t ? '#836ef9' : 'rgba(161,161,170,0.5)',
                           border: collabType === t ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.06)',
                         }}>
-                        {t === 'AI_AGENT' ? '🤖 AI Agent' : t === 'PROGRAM' ? '⚙️ Program' : '👤 User'}
+                        {t === 'AI_AGENT' ? 'AI Agent' : t === 'PROGRAM' ? 'Program' : 'User'}
                       </button>
                     ))}
                   </div>
