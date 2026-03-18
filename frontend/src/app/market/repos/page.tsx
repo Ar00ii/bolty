@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
+import { DottedSurface } from '@/components/ui/dotted-surface';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -634,6 +635,7 @@ export default function ReposMarketPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      <DottedSurface />
       <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
 
         {/* Header */}
