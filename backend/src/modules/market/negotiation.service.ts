@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import axios from 'axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
@@ -22,7 +22,7 @@ interface AgentResponse {
 @Injectable()
 export class NegotiationService {
   private readonly logger = new Logger(NegotiationService.name);
-  private readonly genAI: GoogleGenerativeAI;
+  private readonly anthropic: Anthropic;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -30,8 +30,9 @@ export class NegotiationService {
     private readonly emailService: EmailService,
     private readonly dmService: DmService,
   ) {
-    const key = this.config.get<string>('GEMINI_API_KEY') || '';
-    this.genAI = new GoogleGenerativeAI(key);
+    this.anthropic = new Anthropic({
+      apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
+    });
   }
 
   // ── Start or resume a negotiation ─────────────────────────────────────────
@@ -217,7 +218,7 @@ export class NegotiationService {
     });
   }
 
-  // ── Internal: call seller's webhook or fall back to Gemini ───────────────
+  // ── Internal: call seller's webhook or fall back to Claude ───────────────
 
   private async sellerAgentGreet(neg: any): Promise<AgentResponse | null> {
     if (neg.listing.agentEndpoint && isSafeUrl(neg.listing.agentEndpoint)) {
@@ -229,7 +230,7 @@ export class NegotiationService {
         history: [],
       });
     }
-    return this.geminiGreet(neg.listing);
+    return this.claudeGreet(neg.listing);
   }
 
   private async callSellerAgent(neg: any, message: string, proposedPrice?: number): Promise<AgentResponse | null> {
@@ -249,7 +250,7 @@ export class NegotiationService {
         })),
       });
     }
-    return this.geminiNegotiate(neg, message, proposedPrice);
+    return this.claudeNegotiate(neg, message, proposedPrice);
   }
 
   private async callWebhook(url: string, payload: unknown): Promise<AgentResponse | null> {
@@ -272,34 +273,40 @@ export class NegotiationService {
     }
   }
 
-  private async geminiGreet(listing: { title: string; price: number; currency: string; minPrice?: number | null }): Promise<AgentResponse | null> {
+  private parseJson(text: string): any | null {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try { return JSON.parse(match[0]); } catch { return null; }
+  }
+
+  private async claudeGreet(listing: { title: string; price: number; currency: string; minPrice?: number | null }): Promise<AgentResponse | null> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const floorNote = listing.minPrice != null
         ? ` (minimum I can accept: ${listing.minPrice} ${listing.currency})`
         : '';
       const prompt = `You are an AI sales agent for "${listing.title}" listed at ${listing.price} ${listing.currency}${floorNote}.
 A potential buyer just opened a negotiation. Greet them, briefly mention the product, and state the asking price. Be friendly and concise (2-3 sentences max).
 Respond with ONLY JSON: {"reply": "your greeting"}`;
-      const result = await model.generateContent(prompt);
-      const match = result.response.text().match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        return { reply: String(parsed.reply), action: 'counter' };
-      }
+
+      const res = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const parsed = this.parseJson((res.content[0] as { type: string; text: string }).text ?? '');
+      if (parsed) return { reply: String(parsed.reply), action: 'counter' };
     } catch (err) {
-      this.logger.error('Gemini greet failed', err);
+      this.logger.error('Claude greet failed', err);
     }
     return { reply: `Hi! I'm the agent for "${listing.title}". Asking price is ${listing.price} ${listing.currency}. Make me an offer!`, action: 'counter' };
   }
 
-  private async geminiNegotiate(
+  private async claudeNegotiate(
     neg: any,
     buyerMessage: string,
     proposedPrice?: number,
   ): Promise<AgentResponse | null> {
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       const history = neg.messages
         .map((m: any) => `[${m.fromRole}]${m.proposedPrice != null ? ` (offer: ${m.proposedPrice} ${neg.listing.currency})` : ''}: ${m.content}`)
         .join('\n');
@@ -324,10 +331,13 @@ Buyer: "${buyerMessage}"${proposedPrice != null ? `\nBuyer offer: ${proposedPric
 
 Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "action": "accept|reject|counter"}`;
 
-      const result = await model.generateContent(prompt);
-      const match = result.response.text().trim().match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
+      const res = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
+        messages: [{ role: 'user', content: prompt }],
+      });
+      const parsed = this.parseJson((res.content[0] as { type: string; text: string }).text ?? '');
+      if (parsed) {
         let action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(parsed.action) ? parsed.action : 'counter';
         let finalPrice: number | undefined = parsed.proposedPrice != null ? Number(parsed.proposedPrice) : undefined;
 
@@ -348,7 +358,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         };
       }
     } catch (err) {
-      this.logger.error('Gemini negotiation failed', err);
+      this.logger.error('Claude negotiation failed', err);
     }
     return null;
   }
