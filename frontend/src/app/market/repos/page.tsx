@@ -91,7 +91,7 @@ function timeAgo(d: string) {
 
 // ── Repo Card (marketplace) ────────────────────────────────────────────────────
 
-function RepoCard({ repo, isAuthenticated, userId, onVote, onDownload, onUnlock }: {
+function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
   repo: Repository; isAuthenticated: boolean; userId?: string;
   onVote: (id: string, v: 'UP' | 'DOWN') => void;
   onDownload: (id: string, url: string) => void;
@@ -115,18 +115,25 @@ function RepoCard({ repo, isAuthenticated, userId, onVote, onDownload, onUnlock 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-0.5 flex-wrap">
               <h3 className="text-sm font-bold text-zinc-100 truncate">{repo.name}</h3>
-              {repo.isLocked && <Badge className="rounded-full bg-yellow-500/10 border border-yellow-500/25 px-2 py-0 text-xs font-mono text-yellow-400"><Lock className="w-2.5 h-2.5 inline mr-0.5" />paid</Badge>}
-              {repo.language && <Badge className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-500">{repo.language}</Badge>}
+              {repo.isLocked && (
+                <Badge className="rounded-full px-2 py-0 text-xs font-mono" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#a78bfa' }}>
+                  <Lock className="w-2.5 h-2.5 inline mr-0.5" />paid
+                </Badge>
+              )}
             </div>
             <p className="text-xs text-zinc-600 font-mono">@{repo.user.username || 'anon'}</p>
           </div>
         </div>
-        {repo.description && <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-3">{repo.description}</p>}
-        <div className="flex flex-wrap gap-1 mb-3">
-          {repo.topics.slice(0, 3).map(t => (
-            <Badge key={t} className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">{t}</Badge>
-          ))}
-        </div>
+        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-3 min-h-[2.5rem]">
+          {repo.description || <span className="text-zinc-700 italic">no description</span>}
+        </p>
+        {repo.topics.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {repo.topics.slice(0, 3).map(t => (
+              <Badge key={t} className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">{t}</Badge>
+            ))}
+          </div>
+        )}
         <div className="flex items-center gap-4 text-xs font-mono text-zinc-600">
           <span className="flex items-center gap-1"><Star className="w-3 h-3" />{repo.stars}</span>
           <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" />{repo.forks}</span>
@@ -144,17 +151,14 @@ function RepoCard({ repo, isAuthenticated, userId, onVote, onDownload, onUnlock 
         </div>
         <div className="flex items-center gap-1.5">
           {repo.isLocked && repo.lockedPriceUsd ? (
-            <button onClick={() => onUnlock(repo)} className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.25)', color: '#fbbf24' }}>
+            <button onClick={() => onUnlock(repo)} className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>
               unlock ${repo.lockedPriceUsd}
             </button>
           ) : (
-            <button onClick={() => onDownload(repo.id, repo.githubUrl)} className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all text-zinc-400 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60">
+            <button onClick={() => onDownload(repo.id, repo.githubUrl)} className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#c4b5fd' }}>
               download
             </button>
           )}
-          <a href={repo.githubUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-600 border border-dashed border-zinc-800/60 hover:text-zinc-400 hover:border-zinc-700/60 transition-all">
-            GitHub
-          </a>
         </div>
       </CardFooter>
     </Card>
@@ -198,8 +202,7 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-bold text-zinc-100 truncate">{repo.name}</h3>
-            {repo.isLocked && <Badge className="rounded-full bg-yellow-500/10 border border-yellow-500/25 px-2 py-0 text-xs font-mono text-yellow-400">locked ${repo.lockedPriceUsd}</Badge>}
-            {repo.language && <Badge className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">{repo.language}</Badge>}
+            {repo.isLocked && <Badge className="rounded-full px-2 py-0 text-xs font-mono" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#a78bfa' }}>locked ${repo.lockedPriceUsd}</Badge>}
             {repo.isPrivate && <Badge className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">private</Badge>}
           </div>
           <p className="text-xs text-zinc-600 font-mono mt-0.5">
@@ -368,6 +371,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
   const { user } = useAuth();
   const [lockType, setLockType] = useState<'public' | 'locked'>('public');
   const [lockPrice, setLockPrice] = useState('');
+  const [description, setDescription] = useState(ghRepo.description || '');
   const [logoUrl, setLogoUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [twitterUrl, setTwitterUrl] = useState('');
@@ -397,7 +401,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
     try {
       const published = await api.post<{ id: string }>('/repos/publish', {
         id: ghRepo.id, name: ghRepo.name, full_name: ghRepo.full_name,
-        description: ghRepo.description, language: ghRepo.language,
+        description: description.trim() || ghRepo.description, language: ghRepo.language,
         stargazers_count: ghRepo.stargazers_count, forks_count: ghRepo.forks_count,
         html_url: ghRepo.html_url, clone_url: ghRepo.clone_url,
         topics: ghRepo.topics, private: ghRepo.private,
@@ -424,6 +428,11 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
           <button onClick={onClose} className="text-zinc-600 hover:text-zinc-300 transition-colors"><X className="w-4 h-4" /></button>
         </div>
         <div className="px-5 py-4 space-y-4">
+          {/* Description */}
+          <div>
+            <label className="text-xs text-zinc-500 font-mono block mb-1.5">Description <span className="text-zinc-700">(what is this repo?)</span></label>
+            <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Explain what this repository does..." rows={3} maxLength={500} className="w-full text-sm px-3 py-2 rounded-xl font-mono resize-none" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
+          </div>
           {/* Visibility */}
           <div className="space-y-2">
             {([['public', 'Public — Free', 'Anyone can see and download', <Globe key="g" className="w-4 h-4" />], ['locked', 'Locked — Paid Access', 'Users pay to unlock download', <Lock key="l" className="w-4 h-4" />]] as const).map(([val, label, desc, icon]) => (
@@ -435,7 +444,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
           </div>
           {lockType === 'locked' && (
             <div>
-              <label className="text-xs text-zinc-500 font-mono block mb-1.5">Price (USD)</label>
+              <label className="text-xs text-zinc-500 font-mono block mb-1.5">Price in USD <span className="text-zinc-700">(paid via ETH on Base)</span></label>
               <div className="flex items-center gap-2 rounded-xl px-3 py-2.5 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <span className="text-zinc-600 font-mono text-sm">$</span>
                 <input type="number" min="0.01" step="0.01" placeholder="9.99" value={lockPrice} onChange={e => setLockPrice(e.target.value)} className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-700" />
