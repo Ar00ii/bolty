@@ -12,6 +12,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
 import { DmService } from '../dm/dm.service';
 import { isSafeUrl, sanitizeAiPrompt } from '../../common/sanitize/sanitize.util';
+import { AgentSandboxService, SandboxContext } from './agent-sandbox.service';
 
 interface AgentResponse {
   reply: string;
@@ -29,6 +30,7 @@ export class NegotiationService {
     private readonly config: ConfigService,
     private readonly emailService: EmailService,
     private readonly dmService: DmService,
+    private readonly sandbox: AgentSandboxService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -40,7 +42,7 @@ export class NegotiationService {
   async startNegotiation(buyerId: string, listingId: string) {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
-      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true, agentEndpoint: true, minPrice: true },
+      select: { id: true, status: true, sellerId: true, title: true, price: true, currency: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true },
     });
     if (!listing || listing.status !== 'ACTIVE') throw new NotFoundException('Listing not found');
     if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot negotiate on your own listing');
@@ -49,7 +51,7 @@ export class NegotiationService {
     const existing = await this.prisma.agentNegotiation.findFirst({
       where: { listingId, buyerId, status: 'ACTIVE' },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -59,7 +61,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.create({
       data: { listingId, buyerId },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -87,7 +89,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true } },
         buyer: { select: { id: true, username: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
@@ -120,7 +122,7 @@ export class NegotiationService {
     const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -146,7 +148,7 @@ export class NegotiationService {
     const updated = await this.prisma.agentNegotiation.findUnique({
       where: { id },
       include: {
-        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true } },
+        listing: { select: { id: true, title: true, price: true, currency: true, sellerId: true, agentEndpoint: true, minPrice: true, fileKey: true, fileName: true, fileMimeType: true } },
         messages: { orderBy: { createdAt: 'asc' } },
       },
     });
@@ -220,36 +222,56 @@ export class NegotiationService {
 
   // ── Internal: call seller's webhook or fall back to Claude ───────────────
 
+  private buildSandboxContext(neg: any, event: 'negotiation.start' | 'negotiation.message', message?: string, proposedPrice?: number): SandboxContext {
+    return {
+      event,
+      negotiationId: neg.id,
+      listingId: neg.listing.id,
+      listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency, minPrice: neg.listing.minPrice },
+      message,
+      proposedPrice,
+      history: (neg.messages ?? []).map((m: any) => ({
+        role: m.fromRole,
+        content: m.content,
+        proposedPrice: m.proposedPrice,
+        timestamp: m.createdAt,
+      })),
+    };
+  }
+
   private async sellerAgentGreet(neg: any): Promise<AgentResponse | null> {
+    const ctx = this.buildSandboxContext(neg, 'negotiation.start');
+
+    // 1. Webhook endpoint (external agent server)
     if (neg.listing.agentEndpoint && isSafeUrl(neg.listing.agentEndpoint)) {
-      return this.callWebhook(neg.listing.agentEndpoint, {
-        event: 'negotiation.start',
-        negotiationId: neg.id,
-        listingId: neg.listing.id,
-        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency, minPrice: neg.listing.minPrice },
-        history: [],
-      });
+      return this.callWebhook(neg.listing.agentEndpoint, ctx);
     }
+
+    // 2. Uploaded script (sandbox execution)
+    if (neg.listing.fileKey && neg.listing.fileName) {
+      const result = await this.sandbox.run(neg.listing.fileKey, neg.listing.fileName, neg.listing.fileMimeType ?? '', ctx);
+      if (result) return result;
+    }
+
+    // 3. Claude fallback
     return this.claudeGreet(neg.listing);
   }
 
   private async callSellerAgent(neg: any, message: string, proposedPrice?: number): Promise<AgentResponse | null> {
+    const ctx = this.buildSandboxContext(neg, 'negotiation.message', message, proposedPrice);
+
+    // 1. Webhook endpoint (external agent server)
     if (neg.listing.agentEndpoint && isSafeUrl(neg.listing.agentEndpoint)) {
-      return this.callWebhook(neg.listing.agentEndpoint, {
-        event: 'negotiation.message',
-        negotiationId: neg.id,
-        listingId: neg.listing.id,
-        listing: { title: neg.listing.title, askingPrice: neg.listing.price, currency: neg.listing.currency, minPrice: neg.listing.minPrice },
-        message,
-        proposedPrice,
-        history: neg.messages.map((m: any) => ({
-          role: m.fromRole,
-          content: m.content,
-          proposedPrice: m.proposedPrice,
-          timestamp: m.createdAt,
-        })),
-      });
+      return this.callWebhook(neg.listing.agentEndpoint, ctx);
     }
+
+    // 2. Uploaded script (sandbox execution)
+    if (neg.listing.fileKey && neg.listing.fileName) {
+      const result = await this.sandbox.run(neg.listing.fileKey, neg.listing.fileName, neg.listing.fileMimeType ?? '', ctx);
+      if (result) return result;
+    }
+
+    // 3. Claude / rule-based fallback
     return this.claudeNegotiate(neg, message, proposedPrice);
   }
 

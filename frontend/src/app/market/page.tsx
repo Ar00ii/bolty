@@ -7,7 +7,8 @@ import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-card
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Wallet, AlertTriangle, Bot, User, X } from 'lucide-react';
+import { Wallet, AlertTriangle, Bot, User, X, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { AnimatedDownload } from '@/components/ui/animated-download';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
@@ -57,6 +58,8 @@ interface UploadedFileMeta {
   fileName: string;
   fileSize: number;
   fileMimeType: string;
+  scanPassed?: boolean;
+  scanNote?: string;
 }
 
 interface FeedPost {
@@ -763,6 +766,7 @@ export default function MarketPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [scanning, setScanning] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -820,22 +824,28 @@ export default function MarketPage() {
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { setError('File too large — max 10 MB'); return; }
     setUploading(true);
+    setScanning(true);
     setError('');
     try {
       const fd = new FormData();
       fd.append('file', file);
       const result = await api.upload<UploadedFileMeta>('/market/upload', fd);
       setUploadedFile(result);
+      if (result.scanPassed === false) {
+        setError(`Security scan failed: ${result.scanNote ?? 'Potentially unsafe code detected.'}`);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
+      setScanning(false);
     }
   };
 
   const resetForm = () => {
     setForm({ title: '', description: '', type: 'AI_AGENT', price: '', minPrice: '', currency: 'SOL', tags: '', agentUrl: '', agentEndpoint: '' });
     setUploadedFile(null);
+    setScanning(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -1094,32 +1104,61 @@ export default function MarketPage() {
             {ACCEPTS_FILE.has(form.type) && (
               <div className="md:col-span-2">
                 <label className="text-zinc-500 text-xs font-mono block mb-1.5">
-                  upload file <span className="text-zinc-600">(.py .js .ts .zip .json .yaml .sh .txt — max 10 MB)</span>
+                  upload agent file <span className="text-zinc-600">(.py .js .ts .zip .json .yaml .sh .txt — max 10 MB)</span>
                 </label>
-                {uploadedFile ? (
-                  <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                    <span className="text-monad-400 text-sm">✓</span>
+
+                {/* Scanning animation */}
+                {(uploading || scanning) && (
+                  <div className="rounded-xl p-4 mb-2" style={{ background: 'rgba(131,110,249,0.06)', border: '1px solid rgba(131,110,249,0.2)' }}>
+                    <AnimatedDownload
+                      isAnimating
+                      label={scanning ? 'SCANNING' : 'UPLOADING'}
+                      className="text-zinc-200"
+                    />
+                    <p className="text-zinc-500 text-xs font-mono mt-3">
+                      {scanning ? '// claude is reviewing your code for security threats...' : '// uploading file...'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Uploaded file result */}
+                {!uploading && !scanning && uploadedFile && (
+                  <div className="flex items-start gap-3 p-3 rounded-lg" style={{
+                    background: uploadedFile.scanPassed === false ? 'rgba(239,68,68,0.05)' : 'rgba(16,185,129,0.05)',
+                    border: `1px solid ${uploadedFile.scanPassed === false ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.2)'}`,
+                  }}>
+                    {uploadedFile.scanPassed === false
+                      ? <ShieldAlert size={16} className="text-red-400 mt-0.5 shrink-0" />
+                      : <ShieldCheck size={16} className="text-emerald-400 mt-0.5 shrink-0" />
+                    }
                     <div className="flex-1 min-w-0">
                       <p className="text-zinc-200 text-xs font-mono truncate">{uploadedFile.fileName}</p>
                       <p className="text-zinc-500 text-xs font-mono">{formatBytes(uploadedFile.fileSize)}</p>
+                      {uploadedFile.scanNote && (
+                        <p className={`text-xs font-mono mt-1 ${uploadedFile.scanPassed === false ? 'text-red-400' : 'text-emerald-500'}`}>
+                          {uploadedFile.scanNote}
+                        </p>
+                      )}
                     </div>
                     <button onClick={() => { setUploadedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                      className="text-zinc-500 hover:text-red-400 text-xs font-mono">[remove]</button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border border-dashed rounded-lg p-4 text-center cursor-pointer transition-all"
-                    style={{ borderColor: 'rgba(139,92,246,0.2)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)')}
-                  >
-                    {uploading
-                      ? <p className="text-monad-400 text-xs font-mono animate-pulse">uploading...</p>
-                      : <p className="text-zinc-500 text-xs font-mono">click to upload agent / bot / script file</p>
-                    }
+                      className="text-zinc-500 hover:text-red-400 text-xs font-mono shrink-0">[remove]</button>
                   </div>
                 )}
+
+                {/* Upload drop zone */}
+                {!uploading && !scanning && !uploadedFile && (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border border-dashed rounded-lg p-6 text-center cursor-pointer transition-all"
+                    style={{ borderColor: 'rgba(139,92,246,0.2)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.5)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)')}
+                  >
+                    <p className="text-zinc-400 text-xs font-mono mb-1">click to upload agent / bot / script</p>
+                    <p className="text-zinc-600 text-xs font-mono">// claude will scan for security threats on upload</p>
+                  </div>
+                )}
+
                 <input ref={fileInputRef} type="file" onChange={handleFileChange}
                   accept=".py,.js,.ts,.mjs,.cjs,.zip,.json,.yaml,.yml,.sh,.txt,.md,.toml,.csv"
                   className="hidden" />
