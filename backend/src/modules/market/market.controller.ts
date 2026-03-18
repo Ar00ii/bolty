@@ -224,4 +224,22 @@ export class MarketController {
   rejectDeal(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.negotiationService.rejectDeal(id, userId);
   }
+
+  /**
+   * Request switching from AI-vs-AI to human negotiation.
+   * The other party must call /accept-human to confirm (Pokemon trade handshake).
+   */
+  @Post('negotiations/:id/request-human')
+  requestHumanSwitch(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.requestHumanSwitch(id, userId);
+  }
+
+  /**
+   * Accept the pending human-mode switch request from the other party.
+   * Once accepted, both users can type freely.
+   */
+  @Post('negotiations/:id/accept-human')
+  acceptHumanSwitch(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.acceptHumanSwitch(id, userId);
+  }
 }
