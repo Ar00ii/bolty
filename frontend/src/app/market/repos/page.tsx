@@ -719,7 +719,11 @@ export default function ReposMarketPage() {
                     {ghNeedsConnect && (
                       <div className="p-4 rounded-xl border text-center mb-3" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'rgba(131,110,249,0.05)' }}>
                         <p className="text-sm text-zinc-400 mb-3">Connect GitHub to publish repos</p>
-                        <a href={GITHUB_OAUTH_URL} className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">Connect GitHub</a>
+                        {process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ? (
+                          <a href={GITHUB_OAUTH_URL} className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">Connect GitHub</a>
+                        ) : (
+                          <p className="text-xs font-mono text-zinc-600">GitHub OAuth not configured — set NEXT_PUBLIC_GITHUB_CLIENT_ID</p>
+                        )}
                       </div>
                     )}
                     {ghNeedsReauth && (
