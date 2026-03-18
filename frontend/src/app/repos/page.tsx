@@ -13,6 +13,8 @@ import {
   ArrowUp, ArrowDown, MessageCircle, Twitter, Wallet,
   Upload, X, Users, Plus, Search,
 } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 interface Collaborator {
   id: string;
@@ -765,168 +767,146 @@ export default function ReposPage() {
           <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/08">
-          {repos.map(repo => {
-            const squares = genRandomPattern();
-            return (
-              <div key={repo.id} className="relative overflow-hidden p-5 flex flex-col group hover:bg-monad-500/4 transition-colors duration-200">
-                {/* Grid bg decoration */}
-                <div className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(white,transparent)]">
-                  <div className="absolute inset-0 [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-                    <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
-                      className="fill-white/3 stroke-white/6 absolute inset-0 h-full w-full mix-blend-overlay" />
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {repos.map(repo => (
+            <Card key={repo.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-lg hover:border-monad-500/25 transition-colors duration-200">
+              {/* Cover banner */}
+              <div className="relative h-20 w-full overflow-hidden">
+                {repo.logoUrl ? (
+                  <img
+                    src={repo.logoUrl}
+                    alt={repo.name}
+                    className="w-full h-full object-cover opacity-40"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                ) : null}
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(99,102,241,0.05) 100%)' }} />
+                {/* Badges overlay */}
+                <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                  {repo.isLocked && (
+                    <Badge className="rounded-full bg-monad-500/20 border border-monad-500/30 px-2 py-0.5 text-xs font-mono text-monad-400 flex items-center gap-1">
+                      <Lock className="w-2.5 h-2.5" strokeWidth={2} /> locked
+                    </Badge>
+                  )}
+                  {repo.language && (
+                    <Badge className="rounded-full bg-zinc-800/80 border border-white/10 px-2 py-0.5 text-xs font-mono text-zinc-400">
+                      {repo.language}
+                    </Badge>
+                  )}
                 </div>
-
-                <div className="relative z-10 flex-1">
-                  {/* Header: logo + name */}
-                  <div className="flex items-start gap-3 mb-3">
-                    {/* Logo only if set by user */}
-                    {repo.logoUrl && (
-                      <img
-                        src={repo.logoUrl}
-                        alt={repo.name}
-                        className="w-10 h-10 rounded-xl object-cover border border-white/08 flex-shrink-0"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        {repo.isLocked && <Lock className="w-3 h-3 text-monad-400/60 flex-shrink-0" strokeWidth={1.5} />}
-                        <a
-                          href={repo.isLocked ? '#' : repo.githubUrl}
-                          target={repo.isLocked ? undefined : '_blank'}
-                          rel="noopener noreferrer"
-                          className="font-mono font-semibold text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
-                        >
-                          {repo.name}
-                        </a>
-                      </div>
-                      <div className="text-zinc-600 text-xs flex items-center gap-1 mt-0.5">
-                        <span className="text-monad-400/40">@</span>{repo.user.username}
-                      </div>
-                    </div>
-
-                    {/* Collaborators avatars */}
-                    {repo.collaborators && repo.collaborators.length > 0 && (
-                      <div className="flex items-center -space-x-1.5 flex-shrink-0" title="Collaborators">
-                        {repo.collaborators.slice(0, 3).map(c => (
-                          <div key={c.id} className="w-5 h-5 rounded-full border border-zinc-900 flex items-center justify-center text-xs overflow-hidden"
-                            style={{ background: 'rgba(131,110,249,0.2)' }}
-                            title={c.name}>
-                            {c.user?.avatarUrl ? (
-                              <img src={c.user.avatarUrl} alt={c.name} className="w-full h-full object-cover" />
-                            ) : c.type === 'AI_AGENT' ? '🤖' : c.type === 'PROGRAM' ? '⚙️' : (
-                              <span className="text-monad-400 font-bold" style={{ fontSize: '0.55rem' }}>{c.name.charAt(0).toUpperCase()}</span>
-                            )}
-                          </div>
-                        ))}
-                        {repo.collaborators.length > 3 && (
-                          <div className="w-5 h-5 rounded-full border border-zinc-900 flex items-center justify-center"
-                            style={{ background: 'rgba(131,110,249,0.15)', fontSize: '0.55rem', color: '#836ef9' }}>
-                            +{repo.collaborators.length - 3}
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {repo.language && (
-                      <span className="text-xs font-mono px-2 py-0.5 rounded-lg border border-monad-500/15 bg-monad-500/5 text-monad-400/70 flex-shrink-0">
-                        {repo.language}
+                {/* Author */}
+                <div className="absolute bottom-2 left-3 flex items-center gap-2">
+                  {repo.user.avatarUrl ? (
+                    <img src={repo.user.avatarUrl} alt={repo.user.username || ''} className="w-5 h-5 rounded-full border border-white/20 object-cover" />
+                  ) : (
+                    <div className="w-5 h-5 rounded-full bg-monad-500/20 border border-monad-500/20 flex items-center justify-center">
+                      <span className="text-monad-400 font-bold" style={{ fontSize: '0.5rem' }}>
+                        {(repo.user.username || 'U').charAt(0).toUpperCase()}
                       </span>
-                    )}
-                  </div>
-
-                  {/* Price badge */}
-                  {repo.isLocked && repo.lockedPriceUsd && (
-                    <div className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg px-2 py-0.5 mb-2">
-                      ${repo.lockedPriceUsd.toFixed(2)} USD
                     </div>
                   )}
-
-                  {/* Description */}
-                  {repo.description && (
-                    <p className="text-zinc-500 text-xs leading-relaxed mb-3 line-clamp-2">
-                      {repo.isLocked ? '████ ███████ ██████ ████ ██████' : repo.description}
-                    </p>
+                  <span className="text-zinc-400 text-xs font-mono">@{repo.user.username}</span>
+                  {/* Collaborators */}
+                  {repo.collaborators && repo.collaborators.length > 0 && (
+                    <div className="flex items-center -space-x-1">
+                      {repo.collaborators.slice(0, 3).map(c => (
+                        <div key={c.id} className="w-4 h-4 rounded-full border border-zinc-900 overflow-hidden flex items-center justify-center text-xs"
+                          style={{ background: 'rgba(131,110,249,0.2)' }} title={c.name}>
+                          {c.user?.avatarUrl ? (
+                            <img src={c.user.avatarUrl} alt={c.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-monad-400 font-bold" style={{ fontSize: '0.45rem' }}>{c.name.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
+                </div>
+              </div>
 
-                  {/* Stats row */}
-                  <div className="flex items-center gap-3 text-zinc-600 text-xs font-mono mb-3">
-                    <span className="flex items-center gap-1"><Star className="w-3 h-3" strokeWidth={1.5} /> {repo.stars}</span>
-                    <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" strokeWidth={1.5} /> {repo.forks}</span>
-                    <span className="flex items-center gap-1"><Download className="w-3 h-3" strokeWidth={1.5} /> {repo.downloadCount}</span>
+              <CardContent className="flex-grow p-3 pt-3">
+                {/* Topics */}
+                {!repo.isLocked && repo.topics.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {repo.topics.slice(0, 3).map(t => (
+                      <Badge key={t} className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0.5 text-xs font-mono text-zinc-500 hover:text-zinc-300">
+                        {t}
+                      </Badge>
+                    ))}
                   </div>
-
-                  {/* Social links */}
+                )}
+                <div className="flex items-center gap-1.5 mb-1">
+                  {repo.isLocked && <Lock className="w-3 h-3 text-monad-400/60 shrink-0" strokeWidth={1.5} />}
+                  <a
+                    href={repo.isLocked ? '#' : repo.githubUrl}
+                    target={repo.isLocked ? undefined : '_blank'}
+                    rel="noopener noreferrer"
+                    className="font-mono font-bold text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
+                  >
+                    {repo.name}
+                  </a>
+                </div>
+                {repo.description && (
+                  <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                    {repo.isLocked ? '████ ███████ ██████ ████ ██████' : repo.description}
+                  </p>
+                )}
+                {/* Stats */}
+                <div className="flex items-center gap-3 text-zinc-600 text-xs font-mono mt-2">
+                  <span className="flex items-center gap-1"><Star className="w-3 h-3" strokeWidth={1.5} /> {repo.stars}</span>
+                  <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" strokeWidth={1.5} /> {repo.forks}</span>
+                  <span className="flex items-center gap-1"><Download className="w-3 h-3" strokeWidth={1.5} /> {repo.downloadCount}</span>
                   {(repo.websiteUrl || repo.twitterUrl) && (
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-1.5 ml-auto">
                       {repo.websiteUrl && (
-                        <a href={repo.websiteUrl} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-zinc-600 hover:text-monad-400 transition-colors">
+                        <a href={repo.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-monad-400 transition-colors">
                           <Globe className="w-3 h-3" strokeWidth={1.5} />
-                          <span className="truncate max-w-24">{repo.websiteUrl.replace(/^https?:\/\//, '')}</span>
                         </a>
                       )}
                       {repo.twitterUrl && (
-                        <a href={repo.twitterUrl} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-zinc-600 hover:text-monad-400 transition-colors">
+                        <a href={repo.twitterUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-600 hover:text-monad-400 transition-colors">
                           <Twitter className="w-3 h-3" strokeWidth={1.5} />
                         </a>
                       )}
                     </div>
                   )}
+                </div>
+              </CardContent>
 
-                  {/* Topics */}
-                  {!repo.isLocked && repo.topics.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {repo.topics.slice(0, 3).map(t => (
-                        <span key={t} className="text-xs font-mono px-1.5 py-0.5 rounded border border-dashed border-white/08 text-zinc-600">{t}</span>
-                      ))}
-                    </div>
+              <CardFooter className="flex items-center justify-between p-3 pt-0 border-t border-white/[0.06]">
+                <div className="flex items-center gap-0.5">
+                  <button onClick={() => vote(repo.id, 'UP')} disabled={!isAuthenticated}
+                    className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-monad-400 hover:bg-monad-400/10 rounded transition-colors disabled:opacity-30">
+                    <ArrowUp className="w-3 h-3" strokeWidth={2} /> {repo.upvotes}
+                  </button>
+                  <button onClick={() => vote(repo.id, 'DOWN')} disabled={!isAuthenticated}
+                    className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:bg-zinc-500/10 rounded transition-colors disabled:opacity-30">
+                    <ArrowDown className="w-3 h-3" strokeWidth={2} /> {repo.downvotes}
+                  </button>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {repo.user.username && (
+                    <Link href={`/dm?user=${repo.user.username}`}
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:text-monad-400 hover:bg-monad-400/10 rounded transition-colors"
+                      title={`Message @${repo.user.username}`}>
+                      <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    </Link>
+                  )}
+                  {repo.isLocked ? (
+                    <button onClick={() => payAndUnlock(repo)}
+                      className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg hover:bg-monad-500/10 transition-colors">
+                      Unlock — ${repo.lockedPriceUsd} USD
+                    </button>
+                  ) : (
+                    <button onClick={() => download(repo.id, repo.githubUrl)}
+                      className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
+                      download
+                    </button>
                   )}
                 </div>
-
-                {/* Footer: votes + action buttons */}
-                <div className="relative z-10 flex items-center justify-between mt-3 pt-3 border-t border-dashed border-white/06">
-                  <div className="flex items-center gap-0.5">
-                    <button onClick={() => vote(repo.id, 'UP')} disabled={!isAuthenticated}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-monad-400 hover:bg-monad-400/10 rounded transition-colors disabled:opacity-30">
-                      <ArrowUp className="w-3 h-3" strokeWidth={2} /> {repo.upvotes}
-                    </button>
-                    <button onClick={() => vote(repo.id, 'DOWN')} disabled={!isAuthenticated}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:bg-zinc-500/10 rounded transition-colors disabled:opacity-30">
-                      <ArrowDown className="w-3 h-3" strokeWidth={2} /> {repo.downvotes}
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {/* Message button → DM the author */}
-                    {repo.user.username && (
-                      <Link href={`/dm?user=${repo.user.username}`}
-                        className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:text-monad-400 hover:bg-monad-400/10 rounded transition-colors"
-                        title={`Message @${repo.user.username}`}>
-                        <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
-                      </Link>
-                    )}
-
-                    {repo.isLocked ? (
-                      <button onClick={() => payAndUnlock(repo)}
-                        className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg hover:bg-monad-500/10 transition-colors">
-                        Unlock — ${repo.lockedPriceUsd} USD
-                      </button>
-                    ) : (
-                      <button onClick={() => download(repo.id, repo.githubUrl)}
-                        className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
-                        download
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+              </CardFooter>
+            </Card>
+          ))}
           {repos.length === 0 && !loading && (
             <div className="col-span-3 text-center py-20 text-zinc-600 font-mono text-sm">
               No repositories found. Be the first to publish.

@@ -7,7 +7,9 @@ import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-card
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Wallet, AlertTriangle } from 'lucide-react';
+import { Wallet, AlertTriangle, Bot, User, X } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -554,123 +556,198 @@ function NegotiationModal({
   );
 }
 
-// ── Agent Card ─────────────────────────────────────────────────────────────────
+// ── Negotiate Choice Modal ──────────────────────────────────────────────────────
 
-function AgentCard({ listing, isAuthenticated, onNegotiate, onWalletAuth }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void; onWalletAuth: () => Promise<boolean> }) {
-  const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
-  const isAgent = listing.type === 'AI_AGENT' || listing.type === 'BOT';
-  const squares = genRandomPattern();
-  const [connecting, setConnecting] = useState(false);
+function NegotiateChoiceModal({
+  listing,
+  userId,
+  onClose,
+  onNegotiateManual,
+}: {
+  listing: MarketListing;
+  userId: string;
+  onClose: () => void;
+  onNegotiateManual: () => void;
+}) {
+  const [userAgents, setUserAgents] = useState<MarketListing[]>([]);
+  const [loadingAgents, setLoadingAgents] = useState(true);
+
+  useEffect(() => {
+    api.get<{ data: MarketListing[] }>('/market?type=AI_AGENT')
+      .then(res => setUserAgents(res.data.filter(a => a.seller.id === userId && !!a.agentEndpoint)))
+      .catch(() => {})
+      .finally(() => setLoadingAgents(false));
+  }, [userId]);
+
+  const hasAgent = userAgents.length > 0;
 
   return (
-    <div className="relative overflow-hidden flex flex-col p-5 transition-colors duration-200 hover:bg-monad-500/5 group">
-      {/* grid pattern decoration */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-          <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
-            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay" />
-        </div>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
+      <div className="relative w-full max-w-sm rounded-2xl p-6" style={{ background: '#0c0c14', border: '1px solid rgba(131,110,249,0.25)' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+        <h3 className="font-bold text-white text-base mb-1">How do you want to negotiate?</h3>
+        <p className="text-zinc-500 text-xs mb-5">Choose whether to negotiate yourself or let your AI agent handle it.</p>
 
-      {/* Top row */}
-      <div className="relative z-10 flex items-start justify-between mb-3 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          {isAgent && (
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border border-dashed border-monad-500/15 bg-monad-500/5">
-            </div>
-          )}
-          <div className="min-w-0">
-            <h3 className="text-zinc-100 font-semibold text-sm leading-tight truncate">{listing.title}</h3>
-            <p className="text-zinc-500 text-xs font-mono mt-0.5">@{listing.seller.username || 'anon'}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {listing.agentEndpoint && (
-            <span className="text-xs px-1.5 py-0.5 rounded font-mono border border-dashed border-monad-500/15 text-monad-400 bg-monad-500/5"
-              title="Has AI negotiation agent">
-              AI
-            </span>
-          )}
-          <span className={`text-xs font-mono px-2 py-0.5 rounded border border-dashed ${typeColor}`}>
-            {listing.type.toLowerCase().replace('_', ' ')}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="relative z-10 text-zinc-400 text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{listing.description}</p>
-
-      {/* Tags */}
-      {listing.tags.length > 0 && (
-        <div className="relative z-10 flex flex-wrap gap-1 mb-3">
-          {listing.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="text-xs font-mono px-2 py-0.5 rounded border border-dashed border-monad-500/20 text-monad-400/70 bg-monad-500/5">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Links */}
-      {listing.agentUrl && (
-        <a href={listing.agentUrl} target="_blank" rel="noopener noreferrer"
-          className="relative z-10 text-xs font-mono text-monad-400/60 hover:text-monad-400 transition-colors flex items-center gap-1 mb-1 truncate">
-          <span>[agent url]</span>
-          <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
-        </a>
-      )}
-      {listing.fileKey && listing.fileName && (
-        <a href={`${API_URL}/market/files/${listing.fileKey}`}
-          className="relative z-10 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1 mb-1">
-          <span>[file]</span>
-          <span className="truncate">{listing.fileName}</span>
-          {listing.fileSize && <span className="text-zinc-600 shrink-0">({formatBytes(listing.fileSize)})</span>}
-        </a>
-      )}
-
-      {/* Bottom row */}
-      <div className="relative z-10 flex items-center justify-between mt-3 pt-3 gap-2 border-t border-dashed border-white/10">
-        <div>
-          <div className="font-mono font-black text-base">
-            {listing.price === 0
-              ? <span className="text-green-400">FREE</span>
-              : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-400">{listing.currency}</span></span>
-            }
-          </div>
-          {listing.minPrice != null && (
-            <div className="text-xs font-mono text-zinc-600 mt-0.5">floor: {listing.minPrice} {listing.currency}</div>
-          )}
-        </div>
-        <div className="flex gap-1.5 items-center">
-          <Link
-            href={`/agents/${listing.id}`}
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60"
-          >
-            profile
-          </Link>
+        <div className="flex flex-col gap-3">
+          {/* Manual */}
           <button
-            onClick={async () => {
-              if (!isAuthenticated) {
-                if (!isMetaMaskInstalled()) { window.location.href = '/auth'; return; }
-                setConnecting(true);
-                const ok = await onWalletAuth();
-                setConnecting(false);
-                if (!ok) return;
-              }
-              onNegotiate();
-            }}
-            disabled={connecting}
-            className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed disabled:opacity-50 ${
-              listing.agentEndpoint
-                ? 'bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20'
-                : 'bg-monad-500/10 border-monad-500/30 text-monad-300 hover:bg-monad-500/20'
-            }`}
+            onClick={() => { onClose(); onNegotiateManual(); }}
+            className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-white/10 hover:border-monad-500/40 hover:bg-monad-500/5"
           >
-            {connecting ? 'connecting wallet...' : listing.agentEndpoint ? 'negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-monad-500/10 border border-monad-500/20 shrink-0 mt-0.5">
+              <User className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-100">Negotiate yourself</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Chat directly with the seller and make your own offers.</p>
+            </div>
           </button>
+
+          {/* AI Agent */}
+          {loadingAgents ? (
+            <div className="p-4 rounded-xl border border-dashed border-white/10 opacity-50 text-xs font-mono text-zinc-600">loading your agents...</div>
+          ) : hasAgent ? (
+            <button
+              onClick={() => { onClose(); onNegotiateManual(); }}
+              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-monad-500/30 hover:border-monad-500/50 hover:bg-monad-500/5"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-monad-500/10 border border-monad-500/20 shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-monad-300">Let AI agent negotiate</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Your agent <span className="text-monad-400 font-mono">{userAgents[0].title}</span> will negotiate autonomously on your behalf.</p>
+              </div>
+            </button>
+          ) : (
+            <Link
+              href="/market"
+              onClick={onClose}
+              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-white/10 hover:border-monad-500/30 hover:bg-monad-500/5"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-800 border border-white/10 shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-zinc-500" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-zinc-400">Let AI agent negotiate</p>
+                <p className="text-xs text-zinc-600 mt-0.5">You don&apos;t have an AI agent yet. <span className="text-monad-400 underline">Upload one</span> to use this feature.</p>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Agent Card ─────────────────────────────────────────────────────────────────
+
+function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
+  const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
+  const [showChoice, setShowChoice] = useState(false);
+  const { user } = useAuth();
+
+  const handleNegotiateClick = () => {
+    if (!isAuthenticated) {
+      window.location.href = '/auth';
+      return;
+    }
+    setShowChoice(true);
+  };
+
+  return (
+    <>
+      {showChoice && user && (
+        <NegotiateChoiceModal
+          listing={listing}
+          userId={user.id}
+          onClose={() => setShowChoice(false)}
+          onNegotiateManual={onNegotiate}
+        />
+      )}
+      <Card className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-lg hover:border-monad-500/25 transition-colors duration-200 h-full">
+        {/* Small cover banner */}
+        <div className="relative h-20 w-full overflow-hidden">
+          {listing.seller.avatarUrl ? (
+            <img
+              src={listing.seller.avatarUrl}
+              alt={listing.title}
+              className="w-full h-full object-cover opacity-30"
+            />
+          ) : null}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(99,102,241,0.08) 100%)' }} />
+          {/* Type badges overlay */}
+          <div className="absolute top-2 right-2 flex items-center gap-1.5">
+            {listing.agentEndpoint && (
+              <Badge className="rounded-full bg-monad-500/20 border border-monad-500/30 px-2 py-0.5 text-xs font-mono text-monad-400 hover:bg-monad-500/30">
+                AI
+              </Badge>
+            )}
+            <Badge className={`rounded-full border border-dashed px-2 py-0.5 text-xs font-mono ${typeColor}`}>
+              {listing.type.toLowerCase().replace('_', ' ')}
+            </Badge>
+          </div>
+          {/* Avatar */}
+          <div className="absolute bottom-2 left-3 flex items-center gap-2">
+            {listing.seller.avatarUrl ? (
+              <img src={listing.seller.avatarUrl} alt={listing.seller.username || ''} className="w-6 h-6 rounded-full border border-white/20 object-cover" />
+            ) : (
+              <div className="w-6 h-6 rounded-full border border-white/10 bg-monad-500/20 flex items-center justify-center">
+                <span className="text-monad-400 font-bold" style={{ fontSize: '0.6rem' }}>
+                  {(listing.seller.username || 'A').charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <span className="text-zinc-400 text-xs font-mono">@{listing.seller.username || 'anon'}</span>
+          </div>
+        </div>
+
+        <CardContent className="flex-grow p-3 pt-3">
+          {/* Tags */}
+          {listing.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {listing.tags.slice(0, 3).map(tag => (
+                <Badge key={tag} className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0.5 text-xs font-mono text-zinc-500 hover:text-zinc-300">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
+          <h3 className="text-sm font-bold leading-tight text-zinc-100 mb-1.5">{listing.title}</h3>
+          <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">{listing.description}</p>
+        </CardContent>
+
+        <CardFooter className="flex items-center justify-between p-3 pt-0 border-t border-white/[0.06] mt-auto">
+          <div>
+            <div className="font-mono font-black text-sm">
+              {listing.price === 0
+                ? <span className="text-green-400">FREE</span>
+                : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-500">{listing.currency}</span></span>
+              }
+            </div>
+            {listing.minPrice != null && (
+              <div className="text-xs font-mono text-zinc-600">floor: {listing.minPrice}</div>
+            )}
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <Link
+              href={`/agents/${listing.id}`}
+              className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60"
+            >
+              profile
+            </Link>
+            <button
+              onClick={handleNegotiateClick}
+              className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20"
+            >
+              {listing.price === 0 ? 'get free' : 'negotiate'}
+            </button>
+          </div>
+        </CardFooter>
+      </Card>
+    </>
   );
 }
 
@@ -1125,14 +1202,13 @@ export default function MarketPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {listings.map((listing) => (
               <AgentCard
                 key={listing.id}
                 listing={listing}
                 isAuthenticated={isAuthenticated}
                 onNegotiate={() => setNegotiatingListing(listing)}
-                onWalletAuth={handleWalletAuth}
               />
             ))}
             {listings.length === 0 && (
