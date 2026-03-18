@@ -717,4 +717,12 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     await this.prisma.repoCollaborator.delete({ where: { id: collaboratorId } });
     return { success: true };
   }
+
+  async deleteRepository(userId: string, repoId: string) {
+    const repo = await this.prisma.repository.findUnique({ where: { id: repoId } });
+    if (!repo) throw new NotFoundException('Repository not found');
+    if (repo.userId !== userId) throw new ForbiddenException('Not your repository');
+    await this.prisma.repository.delete({ where: { id: repoId } });
+    return { success: true };
+  }
 }

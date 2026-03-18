@@ -342,6 +342,15 @@ export class ReposController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  deleteRepo(
+    @Param('id') repoId: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.reposService.deleteRepository(userId, repoId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Delete(':id/collaborators/:collaboratorId')
   removeCollaborator(
     @Param('id') repoId: string,

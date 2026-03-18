@@ -11,7 +11,7 @@ import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import {
   GitBranch, Lock, Globe, Star, Download,
   ArrowUp, ArrowDown, MessageCircle, Twitter, Wallet,
-  Upload, X, Users, Plus, Search,
+  Upload, X, Users, Plus, Search, Trash2,
 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -93,6 +93,8 @@ export default function ReposPage() {
   const [showPublish, setShowPublish] = useState(false);
   const [error, setError] = useState('');
   const [publishing, setPublishing] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
   const [lockPrice, setLockPrice] = useState('');
@@ -144,6 +146,20 @@ export default function ReposPage() {
   }, [search, language, sortBy]);
 
   useEffect(() => { fetchRepos(); }, [fetchRepos]);
+
+  const deleteRepo = async (repoId: string) => {
+    setDeletingId(repoId);
+    setError('');
+    try {
+      await api.delete(`/repos/${repoId}`);
+      setRepos(prev => prev.filter(r => r.id !== repoId));
+      setConfirmDeleteId(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to delete repository');
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const [ghNeedsReauth, setGhNeedsReauth] = useState(false);
   const [ghNeedsConnect, setGhNeedsConnect] = useState(false);
@@ -902,6 +918,34 @@ export default function ReposPage() {
                       className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
                       download
                     </button>
+                  )}
+                  {/* Delete — only for the owner */}
+                  {user && repo.user.username === user.username && (
+                    confirmDeleteId === repo.id ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => deleteRepo(repo.id)}
+                          disabled={deletingId === repo.id}
+                          className="text-xs py-1.5 px-2 font-mono text-red-400 border border-dashed border-red-500/40 rounded-lg hover:bg-red-500/10 transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === repo.id ? '...' : 'confirm'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="text-xs py-1.5 px-2 font-mono text-zinc-500 border border-dashed border-white/10 rounded-lg hover:bg-white/05 transition-colors"
+                        >
+                          cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(repo.id)}
+                        className="p-1.5 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Delete repository"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </button>
+                    )
                   )}
                 </div>
               </CardFooter>
