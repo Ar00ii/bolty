@@ -783,10 +783,10 @@ export default function ReposPage() {
                   <div className="flex items-start gap-3 mb-3">
                     {/* Logo or fallback bolty logo */}
                     <img
-                      src={repo.logoUrl || '/bolty-logo.png'}
+                      src={repo.logoUrl || '/bolty-icon.png'}
                       alt={repo.name}
                       className="w-10 h-10 rounded-xl object-cover border border-white/08 flex-shrink-0"
-                      onError={e => { (e.target as HTMLImageElement).src = '/bolty-logo.png'; }}
+                      onError={e => { (e.target as HTMLImageElement).src = '/bolty-icon.png'; }}
                     />
 
                     <div className="flex-1 min-w-0">
