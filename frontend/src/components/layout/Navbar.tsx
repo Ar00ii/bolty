@@ -71,7 +71,7 @@ export function Navbar({ menuOpen, setMenuOpen }: NavbarProps) {
               <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-110">
                 <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-60 blur-md transition-opacity duration-300"
                   style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)' }} />
-                <BoltyLogo size={28} color="#836EF9" className="relative z-10" />
+                <BoltyLogo size={44} color="#836EF9" className="relative z-10" />
               </div>
               <span className="text-white font-bold text-base tracking-tight group-hover:text-monad-300 transition-colors">Bolty</span>
               <span className="hidden sm:block text-xs text-zinc-600 font-mono">—</span>

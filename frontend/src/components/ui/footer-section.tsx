@@ -66,7 +66,7 @@ export function Footer() {
         {/* Brand column */}
         <AnimatedContainer className="space-y-4">
           <div className="flex items-center gap-2.5">
-            <BoltyLogo size={28} color="#836EF9" />
+            <BoltyLogo size={44} color="#836EF9" />
             <span className="text-white font-bold text-base tracking-tight">Bolty</span>
           </div>
           <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#71717a' }}>

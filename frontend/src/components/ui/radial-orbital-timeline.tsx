@@ -148,7 +148,7 @@ export default function RadialOrbitalTimeline({
               style={{ animationDelay: "0.5s" }}
             />
             <div className="absolute inset-0 rounded-full blur-xl opacity-40" style={{ background: "rgba(131,110,249,0.6)" }} />
-            <BoltyLogo size={88} color="#836EF9" className="relative z-10" style={{ filter: "drop-shadow(0 0 14px rgba(131,110,249,0.9))" } as React.CSSProperties} />
+            <BoltyLogo size={120} color="#836EF9" className="relative z-10" style={{ filter: "drop-shadow(0 0 14px rgba(131,110,249,0.9))" } as React.CSSProperties} />
           </div>
 
           {/* Orbit ring */}

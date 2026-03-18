@@ -176,7 +176,7 @@ function BrandPanel() {
       {/* Logo + title */}
       <div className="flex items-center gap-3 mb-6">
         <div style={{ filter: 'drop-shadow(0 0 20px rgba(131,110,249,0.6))' }}>
-          <BoltyLogo size={36} />
+          <BoltyLogo size={80} />
         </div>
         <div>
           <div className="text-base font-bold text-white leading-none">Bolty</div>
@@ -481,7 +481,7 @@ export default function AuthPage() {
 
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-7 lg:hidden">
-            <BoltyLogo size={28} />
+            <BoltyLogo size={56} />
             <span className="text-sm font-semibold text-zinc-300">Bolty</span>
           </div>
 
