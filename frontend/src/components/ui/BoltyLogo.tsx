@@ -12,7 +12,7 @@ export function BoltyLogo({ className = '', size = 40, style }: BoltyLogoProps) 
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src="/bolty-logo.png"
+      src="/bolty-icon.png"
       alt="Bolty"
       width={size}
       height={size}
