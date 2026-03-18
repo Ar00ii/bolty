@@ -176,7 +176,7 @@ function BrandPanel() {
       {/* Logo + title */}
       <div className="flex items-center gap-3 mb-6">
         <div style={{ filter: 'drop-shadow(0 0 20px rgba(131,110,249,0.6))' }}>
-          <BoltyLogo size={44} />
+          <BoltyLogo size={100} />
         </div>
         <div>
           <div className="text-base font-bold text-white leading-none">Bolty</div>
