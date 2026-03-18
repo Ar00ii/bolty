@@ -360,7 +360,23 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
     } catch (err) {
       this.logger.error('Claude negotiation failed', err);
     }
-    return null;
+
+    // Fallback: rule-based negotiation when Claude is unavailable
+    const asking = neg.listing.price;
+    const minPrice = neg.listing.minPrice;
+    if (proposedPrice != null) {
+      const ratio = proposedPrice / asking;
+      if (ratio >= 0.8 && (minPrice == null || proposedPrice >= minPrice)) {
+        return { reply: `Deal! I accept your offer of ${proposedPrice} ${neg.listing.currency}.`, proposedPrice, action: 'accept' };
+      } else if (ratio >= 0.4 && (minPrice == null || proposedPrice >= minPrice)) {
+        const counter = Math.round(((proposedPrice + asking) / 2) * 1e6) / 1e6;
+        return { reply: `I appreciate the offer! How about we meet in the middle at ${counter} ${neg.listing.currency}?`, proposedPrice: counter, action: 'counter' };
+      } else {
+        const floor = minPrice ?? Math.round(asking * 0.7 * 1e6) / 1e6;
+        return { reply: `That's below what I can accept. The lowest I can go is ${floor} ${neg.listing.currency}.`, proposedPrice: floor, action: 'counter' };
+      }
+    }
+    return { reply: `Thanks for reaching out! My asking price is ${asking} ${neg.listing.currency}. What's your offer?`, action: 'counter' };
   }
 
   private async applyAction(negId: string, response: AgentResponse, neg: any) {
