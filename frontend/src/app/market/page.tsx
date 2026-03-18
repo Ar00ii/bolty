@@ -237,7 +237,7 @@ function NegotiationModal({
         if ((priceData as any).price) ethPrice = (priceData as any).price;
       } catch { /* use fallback */ }
 
-      const currency = neg.listing.currency.toUpperCase();
+      const currency = neg.listing?.currency.toUpperCase();
       let totalWei: bigint;
       let totalUsd: number;
 
@@ -397,7 +397,7 @@ function NegotiationModal({
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
                     <div className="mt-1.5 pt-1.5 border-t border-current/20 font-bold">
-                      offer: {msg.proposedPrice} {neg.listing.currency}
+                      offer: {msg.proposedPrice} {neg.listing?.currency}
                     </div>
                   )}
                 </div>
@@ -415,7 +415,7 @@ function NegotiationModal({
                 <p className="text-green-400 font-mono text-xs font-bold mb-1">✓ DEAL AGREED</p>
                 {neg.agreedPrice != null && (
                   <p className="text-green-300 font-mono text-xl font-black mb-3">
-                    {neg.agreedPrice} {neg.listing.currency}
+                    {neg.agreedPrice} {neg.listing?.currency}
                   </p>
                 )}
                 {/* Seller sees: confirm (creates DM) */}
@@ -441,7 +441,7 @@ function NegotiationModal({
                       className="block w-full text-xs font-mono font-bold py-2.5 px-4 rounded-lg transition-all disabled:opacity-40"
                       style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.3),rgba(59,130,246,0.2))', border: '1px solid rgba(139,92,246,0.5)', color: '#c4b5fd', boxShadow: '0 0 16px rgba(139,92,246,0.15)' }}
                     >
-                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing.currency}`}
+                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
                     </button>
                   </div>
                 )}
