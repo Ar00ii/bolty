@@ -269,21 +269,21 @@ export function StaggeredMenu({
                             {unreadDMs > 99 ? '99+' : unreadDMs}
                           </span>
                         )}
-                        <span className="sm-item-chevron" aria-hidden="true">›</span>
                       </Link>
                       <button
                         onClick={() => toggleExpand(item.href)}
                         aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                         style={{
                           background: 'transparent', border: 'none', cursor: 'pointer',
-                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.15)',
-                          padding: '0.25rem 0.3rem', flexShrink: 0, fontSize: '0.7rem',
+                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.3)',
+                          padding: '0.4rem 0.6rem', flexShrink: 0, fontSize: '1.1rem',
+                          lineHeight: 1,
                           transition: 'color 0.15s ease, transform 0.18s ease',
                           transform: isExpanded ? 'rotate(90deg)' : 'none',
                           transformOrigin: '50% 50%',
                         }}
                       >
-                        ❯
+                        ›
                       </button>
                     </div>
 
