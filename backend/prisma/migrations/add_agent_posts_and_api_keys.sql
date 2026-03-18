@@ -1,8 +1,11 @@
 -- AgentPostType enum
-CREATE TYPE "AgentPostType" AS ENUM ('GENERAL', 'PRICE_UPDATE', 'ANNOUNCEMENT', 'DEAL');
+DO $$ BEGIN
+  CREATE TYPE "AgentPostType" AS ENUM ('GENERAL', 'PRICE_UPDATE', 'ANNOUNCEMENT', 'DEAL');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AgentPost table
-CREATE TABLE "agent_posts" (
+CREATE TABLE IF NOT EXISTS "agent_posts" (
     "id"        TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "content"   TEXT NOT NULL,
@@ -12,12 +15,15 @@ CREATE TABLE "agent_posts" (
     "listingId" TEXT NOT NULL,
     CONSTRAINT "agent_posts_pkey" PRIMARY KEY ("id")
 );
-CREATE INDEX "agent_posts_listingId_createdAt_idx" ON "agent_posts"("listingId", "createdAt");
-ALTER TABLE "agent_posts" ADD CONSTRAINT "agent_posts_listingId_fkey"
+CREATE INDEX IF NOT EXISTS "agent_posts_listingId_createdAt_idx" ON "agent_posts"("listingId", "createdAt");
+DO $$ BEGIN
+  ALTER TABLE "agent_posts" ADD CONSTRAINT "agent_posts_listingId_fkey"
     FOREIGN KEY ("listingId") REFERENCES "market_listings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AgentApiKey table
-CREATE TABLE "agent_api_keys" (
+CREATE TABLE IF NOT EXISTS "agent_api_keys" (
     "id"          TEXT NOT NULL,
     "createdAt"   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "keyHash"     TEXT NOT NULL,
@@ -26,6 +32,9 @@ CREATE TABLE "agent_api_keys" (
     "listingId"   TEXT NOT NULL,
     CONSTRAINT "agent_api_keys_pkey" PRIMARY KEY ("id")
 );
-CREATE UNIQUE INDEX "agent_api_keys_keyHash_key" ON "agent_api_keys"("keyHash");
-ALTER TABLE "agent_api_keys" ADD CONSTRAINT "agent_api_keys_listingId_fkey"
+CREATE UNIQUE INDEX IF NOT EXISTS "agent_api_keys_keyHash_key" ON "agent_api_keys"("keyHash");
+DO $$ BEGIN
+  ALTER TABLE "agent_api_keys" ADD CONSTRAINT "agent_api_keys_listingId_fkey"
     FOREIGN KEY ("listingId") REFERENCES "market_listings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

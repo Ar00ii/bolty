@@ -1,5 +1,5 @@
 -- AddColumn: minPrice to market_listings
-ALTER TABLE "market_listings" ADD COLUMN "minPrice" DOUBLE PRECISION;
+ALTER TABLE "market_listings" ADD COLUMN IF NOT EXISTS "minPrice" DOUBLE PRECISION;
 
 -- CreateTable: market_purchases
 CREATE TABLE "market_purchases" (
