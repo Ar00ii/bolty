@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, type LucideIcon,
+  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, ShoppingCart, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
@@ -62,23 +62,14 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Repos',
-    href: '/repos',
-    sub: [
-      { href: '/repos',             label: 'Browse All', icon: Code2 },
-      { href: '/repos?tab=mine',    label: 'My Repos',   icon: GitBranch },
-      { href: '/repos?tab=starred', label: 'Starred',    icon: Star },
-    ],
-  },
-  {
-    label: 'Agents',
+    label: 'Market',
     href: '/market',
     sub: [
-      { href: '/market',             label: 'Marketplace', icon: Package },
-      { href: '/market?tab=mine',    label: 'My Agents',   icon: Cpu },
-      { href: '/market?tab=deploy',  label: 'Deploy',      icon: Bot },
-      { href: '/market?tab=explore', label: 'Explore All', icon: Globe },
-      { href: '/market?tab=top',     label: 'Top Rated',   icon: Star },
+      { href: '/market',                      label: 'Overview',        icon: ShoppingCart },
+      { href: '/market/agents',               label: 'AI Agents',       icon: Bot },
+      { href: '/market/agents?tab=mine',      label: 'My Agents',       icon: Cpu },
+      { href: '/market/repos',                label: 'Repos',           icon: GitBranch },
+      { href: '/market/repos?tab=mine',       label: 'My Repos',        icon: Code2 },
     ],
   },
   {
