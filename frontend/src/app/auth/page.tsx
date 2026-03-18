@@ -174,17 +174,14 @@ function BrandPanel() {
   return (
     <div className="flex flex-col px-8 py-10 h-full justify-center">
       {/* Logo + title */}
-      <div className="flex items-center gap-3 mb-6">
-        <div style={{ filter: 'drop-shadow(0 0 20px rgba(131,110,249,0.6))' }}>
-          <BoltyLogo size={100} />
+      <div className="flex flex-col items-center text-center mb-6">
+        <div style={{ filter: 'drop-shadow(0 0 28px rgba(131,110,249,0.7))' }} className="mb-4">
+          <BoltyLogo size={140} />
         </div>
-        <div>
-          <div className="text-base font-bold text-white leading-none">Bolty</div>
-          <div className="text-xs text-zinc-500 mt-0.5">The developer platform</div>
-        </div>
+        <div className="text-xs text-zinc-500">The developer platform</div>
       </div>
 
-      <p className="text-xs text-zinc-500 leading-relaxed mb-6 max-w-[220px]">
+      <p className="text-xs text-zinc-500 leading-relaxed mb-6 text-center">
         Publish AI agents, monetize code, and connect with a global community.
       </p>
 
