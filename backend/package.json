@@ -24,6 +24,7 @@
     "audit": "npm audit --audit-level=high"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.79.0",
     "@google/generative-ai": "^0.21.0",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.1",
