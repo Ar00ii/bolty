@@ -5,7 +5,7 @@ import { Component, ReactNode } from 'react';
 // next/dynamic with ssr:false prevents @splinetool/runtime from evaluating
 // during SSR *and* during client hydration before the component mounts,
 // avoiding the "Super constructor null is not a constructor" crash.
-const Spline = dynamic(() => import('@splinetool/react-spline/next'), { ssr: false });
+const Spline = dynamic(() => import('@splinetool/react-spline'), { ssr: false });
 
 interface SplineSceneProps {
   scene: string;
