@@ -35,9 +35,11 @@ const nextConfig = {
         __dirname,
         'node_modules/@splinetool/react-spline/dist/react-spline.js',
       );
-      // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding
-      // "encoding" and "fs" are Node.js-only; stub them out in browser bundles.
+      // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding + fs
+      // These are Node.js-only modules; alias to false to exclude from browser bundle.
       config.resolve.alias['encoding'] = false;
+      config.resolve.alias['fs'] = false;
+      config.resolve.alias['path'] = false;
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
