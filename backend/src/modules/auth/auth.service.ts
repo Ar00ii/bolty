@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { randomInt } from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { UsersService } from '../users/users.service';
@@ -151,12 +152,12 @@ export class AuthService {
   /** Generate a unique 4-digit user tag (#1000–#9999) */
   private async generateUserTag(): Promise<string> {
     for (let i = 0; i < 20; i++) {
-      const tag = String(Math.floor(1000 + Math.random() * 9000));
+      const tag = String(randomInt(1000, 10000));
       const existing = await this.prisma.user.findUnique({ where: { userTag: tag } });
       if (!existing) return tag;
     }
     // Fallback to 5 digits if pool is full
-    return String(Math.floor(10000 + Math.random() * 90000));
+    return String(randomInt(10000, 100000));
   }
 
   // ── Email / Password Auth ─────────────────────────────────────────────────
@@ -219,7 +220,7 @@ export class AuthService {
 
     // 2FA required
     if (user.twoFactorEnabled && user.email) {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = randomInt(100000, 1000000).toString();
       await this.redis.set(`2fa:${user.id}`, code, 600); // 10 min
       await this.emailService.send2FACode(user.email, code);
 

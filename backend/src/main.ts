@@ -7,7 +7,19 @@ import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { WinstonLogger } from './common/logger/winston.logger';
 
+const REQUIRED_ENV_VARS = [
+  'JWT_SECRET',
+  'DATABASE_URL',
+  'FRONTEND_URL',
+];
+
 async function bootstrap() {
+  const missing = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);
+  if (missing.length > 0) {
+    console.error(`[Bootstrap] Missing required environment variables: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });

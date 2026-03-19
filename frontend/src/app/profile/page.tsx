@@ -4,12 +4,11 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Timeline } from '@/components/ui/timeline';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security';
 

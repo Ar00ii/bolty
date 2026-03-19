@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { API_URL, WS_URL } from '@/lib/api/client';
 
 interface DMMessage {
   id: string;
@@ -23,7 +24,6 @@ interface Contact {
   unread: number;
 }
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
 function Avatar({ name, url, size = 8 }: { name?: string | null; url?: string | null; size?: number }) {
   const sz = `w-${size} h-${size}`;
@@ -144,7 +144,6 @@ export default function DmPage() {
 
     if (!isUuid) {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
         const resp = await fetch(`${API_URL}/users/${encodeURIComponent(input)}`, { credentials: 'include' });
         if (!resp.ok) { setError('User not found'); setTimeout(() => setError(''), 4000); return; }
         const data = await resp.json();

@@ -3,13 +3,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { API_URL } from '@/lib/api/client';
 import { motion } from 'framer-motion';
 import {
   ShoppingBag, Package, Clock, CheckCircle2, AlertTriangle,
   Truck, ArrowRight, BarChart3, TrendingUp, Users,
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 

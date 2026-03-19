@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { API_URL, WS_URL } from '@/lib/api/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { io, Socket } from 'socket.io-client';
 import {
@@ -10,8 +11,7 @@ import {
   Truck, ExternalLink, Copy, Check, ChevronRight,
 } from 'lucide-react';
 
-const API    = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL  || 'http://localhost:3001';
+const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 

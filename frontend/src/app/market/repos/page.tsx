@@ -4,7 +4,7 @@ import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { DottedSurface } from '@/components/ui/dotted-surface';
@@ -78,7 +78,6 @@ const SORTS = [
   { value: 'stars', label: 'most starred' },
   { value: 'downloads', label: 'most downloaded' },
 ];
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`;
 
 function timeAgo(d: string) {

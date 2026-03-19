@@ -21,11 +21,16 @@ interface AuthenticatedSocket extends Socket {
 /** Simple sliding-window rate limiter: max messages per window (ms) per user */
 class WsRateLimiter {
   private readonly counts = new Map<string, { count: number; resetAt: number }>();
+  private cleanupTimer: NodeJS.Timeout;
 
   constructor(
     private readonly maxMessages: number,
     private readonly windowMs: number,
-  ) {}
+  ) {
+    // Purge expired entries every 5 minutes to prevent unbounded memory growth
+    this.cleanupTimer = setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    this.cleanupTimer.unref?.();
+  }
 
   isAllowed(userId: string): boolean {
     const now = Date.now();
@@ -41,12 +46,23 @@ class WsRateLimiter {
     entry.count++;
     return true;
   }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.counts) {
+      if (now >= entry.resetAt) this.counts.delete(key);
+    }
+  }
+
+  destroy(): void {
+    clearInterval(this.cleanupTimer);
+  }
 }
 
 @WebSocketGateway({
   namespace: '/chat',
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   },
   transports: ['websocket'],

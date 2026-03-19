@@ -21,7 +21,7 @@ interface AuthSocket extends Socket {
 @WebSocketGateway({
   namespace: '/orders',
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   },
   transports: ['websocket'],
@@ -74,8 +74,8 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.ordersService.getOrder(data.orderId, client.userId);
       client.join(`order:${data.orderId}`);
       client.emit('joinedOrder', { orderId: data.orderId });
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      client.emit('error', { message: err instanceof Error ? err.message : 'Unknown error' });
     }
   }
 
@@ -105,8 +105,8 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Broadcast to everyone in the order room (buyer + seller)
       this.server.to(`order:${data.orderId}`).emit('newOrderMessage', payload);
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      client.emit('error', { message: err instanceof Error ? err.message : 'Unknown error' });
     }
   }
 

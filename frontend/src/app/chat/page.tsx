@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { WS_URL } from '@/lib/api/client';
 import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
 
 interface ChatMessage {
@@ -16,7 +17,6 @@ interface ChatMessage {
   createdAt: string;
 }
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001';
 
 // Emoji categories for the picker
 const EMOJI_CATEGORIES = [

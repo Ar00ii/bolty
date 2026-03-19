@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api/client';
 
 export function useUnreadDMs(isAuthenticated: boolean) {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
     const fetchCount = async () => {
       try {

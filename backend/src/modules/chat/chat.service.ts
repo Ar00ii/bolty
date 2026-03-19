@@ -86,11 +86,12 @@ export class ChatService {
     return message;
   }
 
-  async getRecentMessages(limit = 50) {
+  async getRecentMessages(limit = 50, cursor?: string) {
     const messages = await this.prisma.chatMessage.findMany({
       where: { isDeleted: false },
       orderBy: { createdAt: 'desc' },
-      take: limit,
+      take: Math.min(limit, 100),
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         user: {
           select: { username: true, avatarUrl: true, id: true },
