@@ -35,6 +35,9 @@ const nextConfig = {
         __dirname,
         'node_modules/@splinetool/react-spline/dist/react-spline.js',
       );
+      // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding
+      // "encoding" is a Node.js native module; stub it out in browser bundles.
+      config.resolve.alias['encoding'] = false;
     }
     return config;
   },
