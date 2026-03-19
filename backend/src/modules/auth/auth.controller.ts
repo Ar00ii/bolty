@@ -42,6 +42,9 @@ const COOKIE_OPTIONS = {
   path: '/',
 };
 
+const ACCESS_TOKEN_MAX_AGE  = 15 * 60 * 1000;        // 15 minutes — matches JWT_EXPIRES_IN
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -67,11 +70,11 @@ export class AuthController {
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.status(HttpStatus.CREATED).json({ success: true });
@@ -93,11 +96,11 @@ export class AuthController {
 
     res.cookie('access_token', result.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', result.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.json({ success: true });
@@ -112,11 +115,11 @@ export class AuthController {
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.json({ success: true });
@@ -250,7 +253,7 @@ export class AuthController {
         });
         res.cookie('gh_token', req.user.accessToken, {
           ...COOKIE_OPTIONS,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          maxAge: REFRESH_TOKEN_MAX_AGE,
         });
         return res.redirect(`${frontendUrl}/profile?linked=github`);
       } catch {
@@ -268,15 +271,15 @@ export class AuthController {
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
     res.cookie('gh_token', req.user.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.redirect(`${frontendUrl}/auth/success`);
@@ -349,11 +352,11 @@ export class AuthController {
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.json({ success: true });
@@ -375,11 +378,11 @@ export class AuthController {
 
     res.cookie('access_token', tokens.accessToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: ACCESS_TOKEN_MAX_AGE,
     });
     res.cookie('refresh_token', tokens.refreshToken, {
       ...COOKIE_OPTIONS,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: REFRESH_TOKEN_MAX_AGE,
     });
 
     return res.json({ success: true });

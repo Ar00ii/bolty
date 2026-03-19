@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { Wallet, AlertTriangle, Bot, User, X, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { AnimatedDownload } from '@/components/ui/animated-download';
@@ -90,7 +90,6 @@ const TYPE_COLORS: Record<string, string> = {
 };
 const ACCEPTS_FILE = new Set(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER']);
 const ACCEPTS_AGENT_ENDPOINT = new Set(['AI_AGENT', 'BOT']);
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 const ROLE_LABELS: Record<string, string> = {
   buyer: 'you',

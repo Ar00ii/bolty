@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -57,7 +57,6 @@ const TYPE_COLORS: Record<string, string> = {
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 function formatBytes(b: number) {
   if (b < 1024) return `${b} B`;
