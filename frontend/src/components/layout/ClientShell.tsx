@@ -122,7 +122,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
             </div>
           )}
 
-          {/* ── Bolty logo box — shown on Agents & Repos pages ──────────── */}
+          {/* ── Bolty logo circle — shown on Agents & Repos pages ─────── */}
           {showLogoBox && (
             <div
               style={{
@@ -130,28 +130,21 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
                 top: '1.1rem',
                 left: '8.5rem',
                 zIndex: 60,
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                background: 'rgba(131,110,249,0.12)',
+                border: '2px solid rgba(131,110,249,0.45)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                boxShadow: '0 0 18px rgba(131,110,249,0.25), 0 4px 20px rgba(0,0,0,0.5)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '0 20px 0 10px',
-                height: 50,
-                background: 'rgba(131,110,249,0.10)',
-                border: '2px solid rgba(131,110,249,0.35)',
-                borderRadius: '28px',
-                backdropFilter: 'blur(14px)',
-                WebkitBackdropFilter: 'blur(14px)',
-                boxShadow: '0 0 24px rgba(131,110,249,0.18), 0 4px 20px rgba(0,0,0,0.5)',
+                justifyContent: 'center',
+                overflow: 'hidden',
               }}
             >
-              <BoltyLogo size={36} />
-              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
-                <span style={{ color: '#e4e4e7', fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
-                  Bolty
-                </span>
-                <span style={{ color: '#836ef9', fontSize: '0.65rem', fontWeight: 500, whiteSpace: 'nowrap', letterSpacing: '0.03em' }}>
-                  AI Platform
-                </span>
-              </div>
+              <BoltyLogo size={50} />
             </div>
           )}
 
