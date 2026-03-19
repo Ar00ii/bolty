@@ -14,6 +14,7 @@ import {
   ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
   AlertTriangle, Wallet,
 } from 'lucide-react';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -757,17 +758,9 @@ export default function AgentsPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{
-      background: 'var(--bg)',
-      color: 'var(--text)',
-      backgroundImage: [
-        'radial-gradient(ellipse 80% 40% at 50% -10%, rgba(131,110,249,0.06) 0%, transparent 60%)',
-        'linear-gradient(rgba(131,110,249,0.015) 1px, transparent 1px)',
-        'linear-gradient(90deg, rgba(131,110,249,0.015) 1px, transparent 1px)',
-      ].join(', '),
-      backgroundSize: '100% 100%, 40px 40px, 40px 40px',
-    }}>
-      <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      <BackgroundBeams className="opacity-40" />
+      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
 
         {/* Header */}
         <div className="mb-8 pb-6 border-b border-[#21262d]">

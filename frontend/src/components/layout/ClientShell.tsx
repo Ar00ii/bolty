@@ -122,7 +122,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
             </div>
           )}
 
-          {/* ── Bolty logo circle — shown on Agents & Repos pages ─────── */}
+          {/* ── Bolty logo pill — shown on Agents & Repos pages ─────── */}
           {showLogoBox && (
             <div
               style={{
@@ -130,9 +130,8 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
                 top: '1.1rem',
                 left: '8.5rem',
                 zIndex: 60,
-                width: 50,
                 height: 50,
-                borderRadius: '50%',
+                borderRadius: 28,
                 background: 'rgba(131,110,249,0.12)',
                 border: '2px solid rgba(131,110,249,0.45)',
                 backdropFilter: 'blur(12px)',
@@ -140,21 +139,23 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
                 boxShadow: '0 0 18px rgba(131,110,249,0.25), 0 4px 20px rgba(0,0,0,0.5)',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
+                gap: 10,
+                padding: '0 16px 0 6px',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/bolty-icon.png"
-                alt="Bolty"
-                style={{
-                  width: '150%',
-                  height: '150%',
-                  objectFit: 'cover',
-                  display: 'block',
-                }}
-              />
+              {/* Logo scaled up via transform so it fills without offset issues */}
+              <div style={{ width: 42, height: 42, overflow: 'hidden', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/bolty-icon.png"
+                  alt="Bolty"
+                  style={{ width: 42, height: 42, objectFit: 'contain', transform: 'scale(2)', display: 'block' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                <span style={{ color: '#e4e4e7', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>Bolty</span>
+                <span style={{ color: '#836ef9', fontSize: '0.6rem', fontWeight: 500, whiteSpace: 'nowrap' }}>AI Platform</span>
+              </div>
             </div>
           )}
 
