@@ -36,8 +36,14 @@ const nextConfig = {
         'node_modules/@splinetool/react-spline/dist/react-spline.js',
       );
       // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding
-      // "encoding" is a Node.js native module; stub it out in browser bundles.
+      // "encoding" and "fs" are Node.js-only; stub them out in browser bundles.
       config.resolve.alias['encoding'] = false;
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+      };
     }
     return config;
   },
@@ -90,11 +96,6 @@ const nextConfig = {
     ],
   },
 
-  // Environment variables available to browser (non-secret only)
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1',
-    NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001',
-  },
 };
 
 module.exports = nextConfig;
