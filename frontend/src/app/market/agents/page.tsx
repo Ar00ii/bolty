@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -703,6 +703,14 @@ function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: Marke
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--bg)' }} />}>
+      <AgentsPageContent />
+    </Suspense>
+  );
+}
+
+function AgentsPageContent() {
   const { isAuthenticated, user, refresh } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
