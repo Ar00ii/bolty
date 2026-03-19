@@ -144,7 +144,17 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
                 overflow: 'hidden',
               }}
             >
-              <BoltyLogo size={50} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/bolty-icon.png"
+                alt="Bolty"
+                style={{
+                  width: '150%',
+                  height: '150%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
             </div>
           )}
 
