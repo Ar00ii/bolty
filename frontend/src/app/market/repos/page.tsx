@@ -14,7 +14,6 @@ import {
   GitBranch, Lock, Globe, Star, Download, ArrowUp, ArrowDown,
   Trash2, Plus, Users, Wallet, X, Upload,
 } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -692,15 +691,6 @@ export default function ReposMarketPage() {
       backgroundSize: '100% 100%, 40px 40px, 40px 40px',
     }}>
       <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
-
-        {/* Logo top-left */}
-        <div className="flex items-center gap-3 mb-8">
-          <BoltyLogo size={80} />
-          <div>
-            <p className="text-base font-semibold text-[#e6edf3]">Bolty</p>
-            <p className="text-xs text-[#8b949e]">AI Developer Platform</p>
-          </div>
-        </div>
 
         {/* Header */}
         <div className="mb-8 pb-6 border-b border-[#21262d]">
