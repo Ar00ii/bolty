@@ -324,9 +324,8 @@ export function StaggeredMenu({
               <h3 className="sm-socials-title">Socials</h3>
               <ul className="sm-socials-list" role="list">
                 {[
-                  { label: 'Twitter',  href: 'https://twitter.com/boltynetwork' },
+                  { label: 'X',        href: 'https://twitter.com/boltynetwork' },
                   { label: 'GitHub',   href: 'https://github.com/boltynetwork' },
-                  { label: 'Discord',  href: 'https://discord.gg/bolty' },
                 ].map(s => (
                   <li key={s.label}>
                     <a href={s.href} target="_blank" rel="noopener noreferrer" className="sm-socials-link">

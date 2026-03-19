@@ -50,8 +50,6 @@ const footerLinks: FooterSection[] = [
     label: 'Social',
     links: [
       { title: '@boltynetwork', href: 'https://x.com/boltynetwork', icon: TwitterIcon, external: true },
-      { title: 'GitHub', href: 'https://github.com', icon: GithubIcon, external: true },
-      { title: 'Community Chat', href: '/chat', icon: MessageSquareIcon },
     ],
   },
 ];
