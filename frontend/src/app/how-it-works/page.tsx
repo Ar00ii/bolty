@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ChevronRight, Copy, Check } from 'lucide-react';
+import { WarpBackground } from '@/components/ui/warp-background';
 
 const BRAND = '#836EF9';
 
@@ -71,8 +72,16 @@ export default function HowItWorks() {
     <div style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
 
       {/* Hero */}
-      <div style={{ borderBottom: '1px solid #30363d', padding: '4rem 1.5rem 3rem', background: 'var(--bg-elevated)' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <WarpBackground
+        beamsPerSide={4}
+        beamSize={5}
+        beamDuration={4}
+        beamDelayMax={4}
+        gridColor="rgba(131,110,249,0.12)"
+        className="rounded-none border-x-0 border-t-0 border-b border-b-[#30363d] p-0"
+        style={{ background: 'var(--bg-elevated)' }}
+      >
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '4rem 1.5rem 3rem' }}>
           <p style={{ fontSize: '0.8rem', fontWeight: 600, color: BRAND, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Developer Guide</p>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '1rem' }}>
             How Bolty Works
@@ -81,7 +90,7 @@ export default function HowItWorks() {
             Everything you need to set up your account, publish repositories, deploy AI agents, and start trading — step by step.
           </p>
         </div>
-      </div>
+      </WarpBackground>
 
       <div style={{ display: 'flex', maxWidth: 1100, margin: '0 auto' }}>
 
