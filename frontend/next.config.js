@@ -27,6 +27,17 @@ const nextConfig = {
         __dirname,
         'src/__stubs__/spline-stub.js',
       );
+    } else {
+      // @splinetool/react-spline@4.x only exposes an ESM "import" condition in
+      // its exports field, which webpack cannot resolve without this alias.
+      // Point directly to the dist file to bypass the broken exports field.
+      config.resolve.alias['@splinetool/react-spline'] = path.resolve(
+        __dirname,
+        'node_modules/@splinetool/react-spline/dist/react-spline.js',
+      );
+      // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding
+      // "encoding" is a Node.js native module; stub it out in browser bundles.
+      config.resolve.alias['encoding'] = false;
     }
     return config;
   },
