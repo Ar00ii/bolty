@@ -178,7 +178,7 @@
   color: rgba(255, 255, 255, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-family: ui-monospace, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
 /* Nav list */
@@ -327,7 +327,7 @@
   color: var(--sm-accent, #836ef9);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-family: ui-monospace, monospace;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 .sm-socials-list {
   list-style: none;
@@ -342,7 +342,7 @@
 .sm-socials-link {
   font-size: 0.8rem;
   font-weight: 500;
-  color: #52525b;
+  color: #a1a1aa;
   text-decoration: none;
   transition: color 0.2s ease, opacity 0.2s ease;
 }

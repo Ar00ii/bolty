@@ -18,7 +18,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const unreadDMs = useUnreadDMs(isAuthenticated);
-  const isHome = pathname === '/';
+  const isHome = pathname === '/'; // kept for conditional home button
 
   const closeMenu = () => setMenuOpen(false);
   const toggleMenu = () => setMenuOpen(v => !v);
@@ -128,8 +128,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
 
-        {/* Footer only on home page */}
-        {isHome && <Footer />}
+        <Footer />
       </div>
 
       {/* FloatingAIChat outside push wrapper so it stays put */}
