@@ -90,7 +90,24 @@ function timeAgo(d: string) {
   return `${Math.floor(h / 24)}d`;
 }
 
-// ── Repo Card (marketplace) ────────────────────────────────────────────────────
+// Language color dots — GitHub style
+const LANG_COLORS: Record<string, string> = {
+  TypeScript: '#3178c6', JavaScript: '#f1e05a', Python: '#3572A5', Go: '#00add8',
+  Rust: '#dea584', Java: '#b07219', Kotlin: '#A97BFF', Swift: '#F05138',
+  Ruby: '#701516', PHP: '#4F5D95', 'C++': '#f34b7d', 'C#': '#178600',
+  C: '#555555', Solidity: '#AA6746', Dart: '#00B4AB', Shell: '#89e051',
+  Bash: '#89e051', Move: '#4a9eda', Anchor: '#9945FF',
+};
+
+function LanguageDot({ lang }: { lang: string }) {
+  const color = LANG_COLORS[lang] || '#8b949e';
+  return (
+    <span className="flex items-center gap-1.5 text-xs text-[#8b949e]">
+      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
+      {lang}
+    </span>
+  );
+}
 
 function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
   repo: Repository; isAuthenticated: boolean; userId?: string;
@@ -99,70 +116,99 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
   onUnlock: (repo: Repository) => void;
 }) {
   return (
-    <Card className="flex flex-col rounded-2xl border border-white/[0.07] bg-[#0a0a12] hover:border-monad-500/20 transition-colors duration-200 overflow-hidden">
-      <CardContent className="p-4 flex-1">
+    <div className="flex flex-col bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#58a6ff]/40 hover:shadow-[0_0_0_1px_rgba(88,166,255,0.08)] transition-all duration-200 overflow-hidden">
+      <div className="p-4 flex-1">
+        {/* Repo header */}
         <div className="flex items-start gap-3 mb-3">
           {repo.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={repo.logoUrl.startsWith('/api') ? `${API_URL.replace('/api/v1', '')}${repo.logoUrl}` : repo.logoUrl}
-              alt={repo.name} className="w-10 h-10 rounded-xl object-cover border border-white/10 shrink-0"
+              alt={repo.name} className="w-9 h-9 rounded-md object-cover border border-[#30363d] shrink-0"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className="w-10 h-10 rounded-xl border border-white/10 bg-monad-500/10 flex items-center justify-center shrink-0">
-              <GitBranch className="w-5 h-5 text-monad-400/60" strokeWidth={1.5} />
+            <div className="w-9 h-9 rounded-md border border-[#30363d] bg-[#161b22] flex items-center justify-center shrink-0">
+              <GitBranch className="w-4 h-4 text-[#8b949e]" strokeWidth={1.5} />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-              <h3 className="text-sm font-bold text-zinc-100 truncate">{repo.name}</h3>
-              {repo.isLocked && (
-                <Badge className="rounded-full px-2 py-0 text-xs font-mono" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#a78bfa' }}>
-                  <Lock className="w-2.5 h-2.5 inline mr-0.5" />paid
-                </Badge>
-              )}
+            <div className="flex items-center gap-2 flex-wrap mb-0.5">
+              <h3 className="text-sm font-semibold text-[#58a6ff] hover:underline truncate">{repo.name}</h3>
+              <span className={`px-1.5 py-0.5 rounded-full text-[11px] border ${
+                repo.isLocked
+                  ? 'bg-[#388bfd]/10 border-[#388bfd]/30 text-[#58a6ff]'
+                  : 'bg-transparent border-[#30363d] text-[#8b949e]'
+              }`}>
+                {repo.isLocked ? 'Paid' : 'Public'}
+              </span>
             </div>
-            <p className="text-xs text-zinc-600 font-mono">@{repo.user.username || 'anon'}</p>
+            <p className="text-xs text-[#8b949e]">@{repo.user.username || 'anon'}</p>
           </div>
         </div>
-        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 mb-3 min-h-[2.5rem]">
-          {repo.description || <span className="text-zinc-700 italic">no description</span>}
+
+        {/* Description */}
+        <p className="text-xs text-[#8b949e] leading-relaxed line-clamp-2 mb-3 min-h-[2.5rem]">
+          {repo.description || <span className="italic text-[#6e7681]">No description</span>}
         </p>
+
+        {/* Topics */}
         {repo.topics.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-3">
-            {repo.topics.slice(0, 3).map(t => (
-              <Badge key={t} className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">{t}</Badge>
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {repo.topics.slice(0, 4).map(t => (
+              <span key={t} className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#388bfd]/10 text-[#58a6ff] border border-[#388bfd]/20">
+                {t}
+              </span>
             ))}
           </div>
         )}
-        <div className="flex items-center gap-4 text-xs font-mono text-zinc-600">
+
+        {/* Stats row */}
+        <div className="flex items-center gap-4 text-xs text-[#8b949e]">
+          {repo.language && <LanguageDot lang={repo.language} />}
           <span className="flex items-center gap-1"><Star className="w-3 h-3" />{repo.stars}</span>
           <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" />{repo.forks}</span>
           <span className="flex items-center gap-1"><Download className="w-3 h-3" />{repo.downloadCount}</span>
         </div>
-      </CardContent>
-      <CardFooter className="flex items-center justify-between p-3 border-t border-white/[0.05] mt-auto">
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[#21262d]">
         <div className="flex items-center gap-1">
-          <button onClick={() => isAuthenticated && onVote(repo.id, 'UP')} className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono text-zinc-500 hover:text-green-400 hover:bg-green-400/5 transition-all" disabled={!isAuthenticated}>
-            <ArrowUp className="w-3 h-3" />{repo.upvotes}
+          <button
+            onClick={() => isAuthenticated && onVote(repo.id, 'UP')}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-[#8b949e] hover:text-emerald-400 hover:bg-emerald-400/8 transition-all disabled:opacity-50"
+            disabled={!isAuthenticated}
+          >
+            <ArrowUp className="w-3.5 h-3.5" />{repo.upvotes}
           </button>
-          <button onClick={() => isAuthenticated && onVote(repo.id, 'DOWN')} className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-mono text-zinc-500 hover:text-red-400 hover:bg-red-400/5 transition-all" disabled={!isAuthenticated}>
-            <ArrowDown className="w-3 h-3" />{repo.downvotes}
+          <button
+            onClick={() => isAuthenticated && onVote(repo.id, 'DOWN')}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-[#8b949e] hover:text-red-400 hover:bg-red-400/8 transition-all disabled:opacity-50"
+            disabled={!isAuthenticated}
+          >
+            <ArrowDown className="w-3.5 h-3.5" />{repo.downvotes}
           </button>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div>
           {repo.isLocked && repo.lockedPriceUsd ? (
-            <button onClick={() => onUnlock(repo)} className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>
-              unlock ${repo.lockedPriceUsd}
+            <button
+              onClick={() => onUnlock(repo)}
+              className="px-3 py-1.5 rounded-md text-xs font-medium text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043] transition-all"
+            >
+              Unlock — ${repo.lockedPriceUsd}
             </button>
           ) : (
-            <button onClick={() => onDownload(repo.id, repo.githubUrl)} className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#c4b5fd' }}>
-              download
+            <button
+              onClick={() => onDownload(repo.id, repo.githubUrl)}
+              className="px-3 py-1.5 rounded-md text-xs font-medium text-[#e6edf3] bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] transition-all"
+            >
+              Download
             </button>
           )}
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -635,37 +681,43 @@ export default function ReposMarketPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
-      <DottedSurface />
       <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-600 mb-3">
-            <Link href="/market" className="hover:text-monad-400 transition-colors">market</Link>
-            <span>/</span>
-            <span className="text-monad-400">repos</span>
+        <div className="mb-8 pb-6 border-b border-[#21262d]">
+          <div className="flex items-center gap-2 text-xs text-[#8b949e] mb-4">
+            <Link href="/market" className="hover:text-[#58a6ff] transition-colors">Market</Link>
+            <span className="text-[#30363d]">/</span>
+            <span className="text-[#e6edf3]">Repositories</span>
           </div>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-2xl font-black text-zinc-100 mb-1">Repositories</h1>
-              <p className="text-zinc-500 text-sm">Community code — discover, vote, download</p>
+              <h1 className="text-2xl font-bold text-[#e6edf3] mb-1">Repositories</h1>
+              <p className="text-[#8b949e] text-sm">Discover, vote on, and download community code repositories.</p>
             </div>
             {isAuthenticated && (
               <button
                 onClick={() => { switchTab('mine'); loadGhRepos(); }}
-                className="flex items-center gap-2 text-sm font-mono font-semibold px-4 py-2 rounded-xl transition-all"
-                style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}
+                className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-md transition-all text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043]"
               >
-                <Plus className="w-4 h-4" /> publish repo
+                <Plus className="w-4 h-4" /> Publish Repo
               </button>
             )}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Publications', <GitBranch key="b" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
-            <button key={id} onClick={() => switchTab(id)} className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono font-semibold transition-all ${activeTab === id ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30' : 'text-zinc-500 hover:text-zinc-300'}`}>
+        <div className="flex gap-0 mb-6 border-b border-[#21262d]">
+          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Repos', <GitBranch key="b" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+            <button
+              key={id}
+              onClick={() => switchTab(id)}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
+                activeTab === id
+                  ? 'border-[#f78166] text-[#e6edf3]'
+                  : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+              }`}
+            >
               {icon}{label}
             </button>
           ))}
@@ -674,26 +726,49 @@ export default function ReposMarketPage() {
         {/* ── Marketplace tab ── */}
         {activeTab === 'market' && (
           <>
-            <div className="flex flex-wrap gap-2 mb-5">
-              <input type="text" placeholder="search repositories..." value={search} onChange={e => setSearch(e.target.value)} className="text-sm px-3 py-2 rounded-lg font-mono flex-1 min-w-[180px]" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
-              <select value={language} onChange={e => setLanguage(e.target.value)} className="text-sm px-3 py-2 rounded-lg font-mono" style={{ background: '#0f0f18', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }}>
+            {/* Search + filters */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className="relative flex-1 min-w-[220px]">
+                <input
+                  type="text"
+                  placeholder="Search repositories..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full text-sm px-4 py-2 rounded-md bg-[#0d1117] border border-[#30363d] text-[#e6edf3] placeholder-[#8b949e] focus:border-[#58a6ff] focus:outline-none transition-colors"
+                />
+              </div>
+              <select
+                value={language}
+                onChange={e => setLanguage(e.target.value)}
+                className="text-sm px-3 py-2 rounded-md bg-[#161b22] border border-[#30363d] text-[#e6edf3] focus:border-[#58a6ff] focus:outline-none transition-colors"
+              >
                 {LANGUAGES.map(l => <option key={l} value={l === 'All' ? '' : l}>{l}</option>)}
               </select>
-              <div className="flex gap-1">
+              <div className="flex gap-1.5 flex-wrap">
                 {SORTS.map(s => (
-                  <button key={s.value} onClick={() => setSortBy(s.value as typeof sortBy)} className={`text-xs font-mono px-3 py-2 rounded-lg border transition-all ${sortBy === s.value ? 'bg-monad-500/20 border-monad-500/30 text-monad-300' : 'border-white/08 text-zinc-500 hover:border-white/15'}`}>{s.label}</button>
+                  <button
+                    key={s.value}
+                    onClick={() => setSortBy(s.value as typeof sortBy)}
+                    className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
+                      sortBy === s.value
+                        ? 'bg-[#388bfd]/15 border-[#388bfd]/40 text-[#58a6ff]'
+                        : 'bg-transparent border-[#30363d] text-[#8b949e] hover:border-[#8b949e] hover:text-[#e6edf3]'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
                 ))}
               </div>
             </div>
-            {error && <p className="text-red-400 font-mono text-sm mb-4">{error}</p>}
+            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded-2xl border border-white/[0.06] bg-[#0a0a12] h-56 animate-pulse" />)}
+                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded-lg border border-[#21262d] bg-[#0d1117] h-56 animate-pulse" />)}
               </div>
             ) : repos.length === 0 ? (
-              <div className="text-center py-20">
-                <GitBranch className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-                <p className="text-zinc-600 font-mono text-sm">no repositories found</p>
+              <div className="text-center py-20 border border-dashed border-[#30363d] rounded-lg">
+                <GitBranch className="w-10 h-10 text-[#30363d] mx-auto mb-3" strokeWidth={1} />
+                <p className="text-[#8b949e] text-sm">No repositories found matching your search.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

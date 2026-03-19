@@ -253,38 +253,40 @@
 .sm-sub-list {
   list-style: none;
   margin: 0;
-  padding: 0 0 0.5rem 0;
+  padding: 0 0 0.75rem 0;
   display: flex;
   flex-direction: column;
   gap: 0;
   overflow: hidden;
-  border-left: 1px solid rgba(131, 110, 249, 0.18);
+  border-left: 2px solid rgba(131, 110, 249, 0.25);
   margin-left: 0.5rem;
-  padding-left: 0.75rem;
+  padding-left: 0.875rem;
 }
 .sm-sub-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.5rem;
-  border-radius: 0.4rem;
-  font-size: 0.75rem;
+  gap: 0.625rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: #52525b;
+  color: #71717a;
   text-decoration: none;
   transition: color 0.15s ease, background 0.15s ease;
 }
 .sm-sub-link:hover {
-  color: #d4d4d8;
-  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+  background: rgba(255, 255, 255, 0.05);
 }
 .sm-sub-link[data-active='true'] {
   color: var(--sm-accent, #836ef9);
+  background: rgba(131, 110, 249, 0.08);
+  font-weight: 600;
 }
 .sm-sub-dot {
   margin-left: auto;
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--sm-accent, #836ef9);
   flex-shrink: 0;

@@ -274,11 +274,16 @@ export function StaggeredMenu({
                         onClick={() => toggleExpand(item.href)}
                         aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                         style={{
-                          background: 'transparent', border: 'none', cursor: 'pointer',
-                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.3)',
-                          padding: '0.4rem 0.6rem', flexShrink: 0, fontSize: '1.1rem',
+                          background: isExpanded ? 'rgba(131,110,249,0.12)' : 'transparent',
+                          border: isExpanded ? '1px solid rgba(131,110,249,0.25)' : '1px solid transparent',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.4)',
+                          padding: '0.5rem 0.75rem', flexShrink: 0, fontSize: '1.5rem',
                           lineHeight: 1,
-                          transition: 'color 0.15s ease, transform 0.18s ease',
+                          minWidth: '2.5rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'color 0.15s ease, transform 0.18s ease, background 0.15s ease',
                           transform: isExpanded ? 'rotate(90deg)' : 'none',
                           transformOrigin: '50% 50%',
                         }}
@@ -300,7 +305,7 @@ export function StaggeredMenu({
                                 data-active={subActive || undefined}
                                 onClick={() => onClose()}
                               >
-                                <SubIcon style={{ width: 13, height: 13, flexShrink: 0 }} strokeWidth={1.5} />
+                                <SubIcon style={{ width: 16, height: 16, flexShrink: 0 }} strokeWidth={1.5} />
                                 {sub.label}
                                 {subActive && <span className="sm-sub-dot" />}
                               </Link>

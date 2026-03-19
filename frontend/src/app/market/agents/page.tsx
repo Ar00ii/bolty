@@ -311,57 +311,97 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
   );
 }
 
-// ── Agent Card (marketplace) ───────────────────────────────────────────────────
+// ── Agent Card (marketplace — GitHub Marketplace style) ───────────────────────
+
+const TYPE_ICON_BG: Record<string, string> = {
+  AI_AGENT: 'bg-violet-500/15 text-violet-400',
+  BOT:      'bg-blue-500/15 text-blue-400',
+  SCRIPT:   'bg-zinc-700/40 text-zinc-400',
+  OTHER:    'bg-zinc-700/40 text-zinc-400',
+};
 
 function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
-  const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
+  const iconBg = TYPE_ICON_BG[listing.type] || TYPE_ICON_BG.OTHER;
   return (
-    <Card className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-lg hover:border-monad-500/25 transition-colors duration-200 h-full">
-      <div className="relative h-20 w-full overflow-hidden">
-        {listing.seller.avatarUrl && <img src={listing.seller.avatarUrl} alt={listing.title} className="w-full h-full object-cover opacity-30" />}
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(99,102,241,0.08) 100%)' }} />
-        <div className="absolute top-2 right-2 flex items-center gap-1.5">
-          {listing.agentEndpoint && <Badge className="rounded-full bg-monad-500/20 border border-monad-500/30 px-2 py-0.5 text-xs font-mono text-monad-400">AI</Badge>}
-          <Badge className={`rounded-full border border-dashed px-2 py-0.5 text-xs font-mono ${typeColor}`}>{listing.type.toLowerCase().replace('_', ' ')}</Badge>
+    <div className="flex flex-col bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#58a6ff]/40 hover:shadow-[0_0_0_1px_rgba(88,166,255,0.1)] transition-all duration-200 h-full overflow-hidden">
+      {/* Card header */}
+      <div className="flex items-start gap-3 p-4 pb-3">
+        {/* Agent icon */}
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}>
+          <Bot className="w-5 h-5" strokeWidth={1.5} />
         </div>
-        <div className="absolute bottom-2 left-3 flex items-center gap-2">
-          {listing.seller.avatarUrl ? (
-            <img src={listing.seller.avatarUrl} alt={listing.seller.username || ''} className="w-6 h-6 rounded-full border border-white/20 object-cover" />
-          ) : (
-            <div className="w-6 h-6 rounded-full border border-white/10 bg-monad-500/20 flex items-center justify-center">
-              <span className="text-monad-400 font-bold" style={{ fontSize: '0.6rem' }}>{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
-            </div>
-          )}
-          <span className="text-zinc-400 text-xs font-mono">@{listing.seller.username || 'anon'}</span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <h3 className="text-sm font-semibold text-[#e6edf3] truncate">{listing.title}</h3>
+            {listing.agentEndpoint && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-medium bg-violet-500/15 text-violet-400 border border-violet-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse inline-block" />
+                AI live
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {listing.seller.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={listing.seller.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+            ) : (
+              <div className="w-4 h-4 rounded-full bg-zinc-700 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-zinc-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
+              </div>
+            )}
+            <span className="text-xs text-[#8b949e]">by {listing.seller.username || 'anonymous'}</span>
+          </div>
         </div>
+        {/* Category badge */}
+        <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-medium border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
+          {listing.type.toLowerCase().replace('_', ' ')}
+        </span>
       </div>
-      <CardContent className="flex-grow p-3 pt-3">
+
+      {/* Description */}
+      <div className="px-4 pb-3 flex-1">
+        <p className="text-xs text-[#8b949e] leading-relaxed line-clamp-2 min-h-[2.5rem]">
+          {listing.description || 'No description provided.'}
+        </p>
         {listing.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mb-2">
+          <div className="flex flex-wrap gap-1 mt-2.5">
             {listing.tags.slice(0, 3).map(tag => (
-              <Badge key={tag} className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0.5 text-xs font-mono text-zinc-500 hover:text-zinc-300">{tag}</Badge>
+              <span key={tag} className="px-2 py-0.5 rounded-full text-[11px] bg-[#1f2937] text-[#8b949e] border border-[#30363d]">{tag}</span>
             ))}
           </div>
         )}
-        <h3 className="text-sm font-bold leading-tight text-zinc-100 mb-1.5">{listing.title}</h3>
-        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">{listing.description}</p>
-      </CardContent>
-      <CardFooter className="flex items-center justify-between p-3 pt-0 border-t border-white/[0.06] mt-auto">
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[#21262d]">
         <div>
-          <div className="font-mono font-black text-sm">
-            {listing.price === 0 ? <span className="text-green-400">FREE</span> : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-500">{listing.currency}</span></span>}
-          </div>
-          {listing.minPrice != null && <div className="text-xs font-mono text-zinc-600">floor: {listing.minPrice}</div>}
+          {listing.price === 0 ? (
+            <span className="text-sm font-semibold text-emerald-400">Free</span>
+          ) : (
+            <span className="text-sm font-semibold text-[#e6edf3]">
+              {listing.price} <span className="text-xs font-normal text-[#8b949e]">{listing.currency}</span>
+            </span>
+          )}
+          {listing.minPrice != null && (
+            <p className="text-[11px] text-[#6e7681]">floor: {listing.minPrice} {listing.currency}</p>
+          )}
         </div>
-        <div className="flex gap-1.5 items-center">
-          <Link href={`/agents/${listing.id}`} className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all">profile</Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/agents/${listing.id}`}
+            className="px-3 py-1.5 rounded-md text-xs font-medium text-[#8b949e] border border-[#30363d] hover:border-[#8b949e] hover:text-[#e6edf3] transition-all bg-transparent"
+          >
+            View
+          </Link>
           <button
             onClick={() => { if (!isAuthenticated) { window.location.href = '/auth'; return; } onNegotiate(); }}
-            className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg border border-dashed bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20 transition-all"
-          >{listing.price === 0 ? 'get free' : 'negotiate'}</button>
+            className="px-3 py-1.5 rounded-md text-xs font-medium text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043] transition-all"
+          >
+            {listing.price === 0 ? 'Deploy' : 'Negotiate'}
+          </button>
         </div>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -721,36 +761,39 @@ export default function AgentsPage() {
       <div className="max-w-6xl mx-auto px-4 pt-20 pb-16">
 
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 text-xs font-mono text-zinc-600 mb-3">
-            <Link href="/market" className="hover:text-monad-400 transition-colors">market</Link>
-            <span>/</span>
-            <span className="text-monad-400">agents</span>
+        <div className="mb-8 pb-6 border-b border-[#21262d]">
+          <div className="flex items-center gap-2 text-xs text-[#8b949e] mb-4">
+            <Link href="/market" className="hover:text-[#58a6ff] transition-colors">Market</Link>
+            <span className="text-[#30363d]">/</span>
+            <span className="text-[#e6edf3]">AI Agents</span>
           </div>
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-2xl font-black text-zinc-100 mb-1">AI Agents</h1>
-              <p className="text-zinc-500 text-sm">Autonomous bots, scripts & AI agents</p>
+              <h1 className="text-2xl font-bold text-[#e6edf3] mb-1">AI Agents</h1>
+              <p className="text-[#8b949e] text-sm">Discover autonomous agents, bots, and automation tools built by the community.</p>
             </div>
             {isAuthenticated && (
               <button
                 onClick={() => { switchTab('mine'); setShowCreate(true); }}
-                className="flex items-center gap-2 text-sm font-mono font-semibold px-4 py-2 rounded-xl transition-all"
-                style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}
+                className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-md transition-all text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043]"
               >
-                <Plus className="w-4 h-4" /> deploy agent
+                <Plus className="w-4 h-4" /> Deploy Agent
               </button>
             )}
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Publications', <Cpu key="c" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+        <div className="flex gap-0 mb-6 border-b border-[#21262d]">
+          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
             <button
               key={id}
               onClick={() => switchTab(id)}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-mono font-semibold transition-all ${activeTab === id ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30' : 'text-zinc-500 hover:text-zinc-300'}`}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
+                activeTab === id
+                  ? 'border-[#f78166] text-[#e6edf3]'
+                  : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+              }`}
             >
               {icon}{label}
             </button>
@@ -760,34 +803,44 @@ export default function AgentsPage() {
         {/* ── Marketplace tab ── */}
         {activeTab === 'market' && (
           <>
-            <div className="flex flex-wrap gap-2 mb-5">
-              <input
-                type="text"
-                placeholder="search agents..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="text-sm px-3 py-2 rounded-lg font-mono flex-1 min-w-[180px]"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }}
-              />
-              <div className="flex gap-1 flex-wrap">
+            {/* Search + filter bar */}
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <div className="relative flex-1 min-w-[220px]">
+                <input
+                  type="text"
+                  placeholder="Search agents..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  className="w-full text-sm px-4 py-2 rounded-md bg-[#0d1117] border border-[#30363d] text-[#e6edf3] placeholder-[#8b949e] focus:border-[#58a6ff] focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="flex gap-1.5 flex-wrap">
                 {TYPES.map(t => (
-                  <button key={t} onClick={() => setType(t)} className={`text-xs font-mono px-3 py-2 rounded-lg border transition-all ${type === t ? 'bg-monad-500/20 border-monad-500/30 text-monad-300' : 'border-white/08 text-zinc-500 hover:border-white/15'}`}>
+                  <button
+                    key={t}
+                    onClick={() => setType(t)}
+                    className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
+                      type === t
+                        ? 'bg-[#388bfd]/15 border-[#388bfd]/40 text-[#58a6ff]'
+                        : 'bg-transparent border-[#30363d] text-[#8b949e] hover:border-[#8b949e] hover:text-[#e6edf3]'
+                    }`}
+                  >
                     {TYPE_LABELS[t]}
                   </button>
                 ))}
               </div>
             </div>
-            {error && <p className="text-red-400 font-mono text-sm mb-4">{error}</p>}
+            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
             {loading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border border-white/[0.06] bg-[#0a0a12] h-52 animate-pulse" />
+                  <div key={i} className="rounded-lg border border-[#21262d] bg-[#0d1117] h-52 animate-pulse" />
                 ))}
               </div>
             ) : listings.length === 0 ? (
-              <div className="text-center py-20">
-                <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-                <p className="text-zinc-600 font-mono text-sm">no agents found</p>
+              <div className="text-center py-20 border border-dashed border-[#30363d] rounded-lg">
+                <Bot className="w-10 h-10 text-[#30363d] mx-auto mb-3" strokeWidth={1} />
+                <p className="text-[#8b949e] text-sm">No agents found matching your search.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
