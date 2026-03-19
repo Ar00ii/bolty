@@ -24,7 +24,7 @@ function shell(title: string, preheader: string, body: string): string {
           <tr>
             <td align="center" style="padding-bottom:28px;">
               <a href="https://bolty-neon.vercel.app" style="text-decoration:none;">
-                <img src="https://bolty-neon.vercel.app/bolty-logo.png" alt="Bolty" width="64" height="64" style="display:block;border:0;outline:none;" />
+                <img src="https://bolty-neon.vercel.app/bolty-icon.png" alt="Bolty" width="96" height="96" style="display:block;border:0;outline:none;" />
               </a>
             </td>
           </tr>

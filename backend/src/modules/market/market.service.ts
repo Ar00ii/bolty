@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
@@ -31,21 +31,35 @@ interface CreateListingDto {
 @Injectable()
 export class MarketService {
   private readonly logger = new Logger(MarketService.name);
-  private readonly genAI: GoogleGenerativeAI;
+  private readonly anthropic: Anthropic;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {
-    const key = this.config.get<string>('GEMINI_API_KEY') || '';
-    this.genAI = new GoogleGenerativeAI(key);
+    this.anthropic = new Anthropic({
+      apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
+    });
   }
 
-  /** AI-powered content security scan — returns { safe, reason } */
-  async scanContent(title: string, description: string): Promise<{ safe: boolean; reason: string }> {
+  private parseJson(text: string): { safe: boolean; reason: string } | null {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const prompt = `You are a content safety moderator for a developer marketplace.
+      const parsed = JSON.parse(match[0]);
+      return { safe: Boolean(parsed.safe), reason: String(parsed.reason || '') };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Two-tier Claude security scan:
+   *  Tier 1 — Haiku: fast initial analysis
+   *  Tier 2 — Sonnet: deep analysis only when Haiku flags something suspicious
+   */
+  async scanContent(title: string, description: string): Promise<{ safe: boolean; reason: string }> {
+    const basePrompt = `You are a content safety moderator for a developer marketplace.
 Analyze the following listing and determine if it is safe and legitimate.
 
 REJECT if it contains:
@@ -67,13 +81,37 @@ Description: ${description.slice(0, 1000)}
 
 Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence explanation"}`;
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim();
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return { safe: Boolean(parsed.safe), reason: String(parsed.reason || '') };
+    try {
+      // ── Tier 1: Haiku — fast scan ──────────────────────────────────────────
+      const haikuRes = await this.anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: basePrompt }],
+      });
+      const haikuText = (haikuRes.content[0] as { type: string; text: string }).text ?? '';
+      const haikuResult = this.parseJson(haikuText);
+
+      if (haikuResult?.safe) {
+        return { safe: true, reason: haikuResult.reason };
       }
+
+      // ── Tier 2: Sonnet — deep analysis when suspicious ─────────────────────
+      this.logger.warn(`Haiku flagged listing "${title}" — escalating to Sonnet`);
+      const sonnetRes = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
+        messages: [
+          {
+            role: 'user',
+            content: `${basePrompt}
+
+NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thorough analysis before making a final decision.`,
+          },
+        ],
+      });
+      const sonnetText = (sonnetRes.content[0] as { type: string; text: string }).text ?? '';
+      const sonnetResult = this.parseJson(sonnetText);
+      if (sonnetResult) return sonnetResult;
     } catch (err) {
       this.logger.error('Content scan failed', err);
     }

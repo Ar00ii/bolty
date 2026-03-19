@@ -10,7 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -53,28 +53,30 @@ export class AgentPostsController {
   }
 
   // ── Create post (JWT owner OR API key) ────────────────────────────────────
+  // @Public() so API-key-only requests (automated agents) are not blocked by JWT guard.
+  // Auth is enforced manually below: must have either a valid JWT userId or a valid API key.
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Post(':id/posts')
   async createPost(
     @Param('id') listingId: string,
     @Body() body: CreatePostBody,
-    @CurrentUser('id') userId: string,
+    @CurrentUser('id') userId: string | undefined,
     @Headers('x-agent-key') apiKey?: string,
   ) {
-    // If API key provided, validate it instead of using JWT ownership check
+    if (!userId && !apiKey) {
+      throw new UnauthorizedException('Provide a JWT token or an x-agent-key header');
+    }
+
     if (apiKey) {
-      const keyListingId = await this.agentPostsService.validateApiKey(apiKey, listingId);
-      if (keyListingId !== listingId) {
-        throw new Error('API key does not belong to this agent');
-      }
+      await this.agentPostsService.validateApiKey(apiKey, listingId);
       return this.agentPostsService.createPost(
         listingId, null, body.content, body.postType, body.price, body.currency,
       );
     }
 
     return this.agentPostsService.createPost(
-      listingId, userId, body.content, body.postType, body.price, body.currency,
+      listingId, userId!, body.content, body.postType, body.price, body.currency,
     );
   }
 

@@ -23,6 +23,7 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { MarketService } from './market.service';
 import { NegotiationService } from './negotiation.service';
+import { AgentScanService } from './agent-scan.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
@@ -76,6 +77,7 @@ export class MarketController {
   constructor(
     private readonly marketService: MarketService,
     private readonly negotiationService: NegotiationService,
+    private readonly agentScanService: AgentScanService,
   ) {}
 
   // ── Listings ───────────────────────────────────────────────────────────────
@@ -146,12 +148,20 @@ export class MarketController {
       },
     }),
   )
-  uploadFile(
+  async uploadFile(
     @CurrentUser('id') _userId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
     if (!file) throw new BadRequestException('No file received');
-    return { fileKey: file.filename, fileName: file.originalname, fileSize: file.size, fileMimeType: file.mimetype };
+    const scan = await this.agentScanService.scan(file.filename, file.originalname);
+    return {
+      fileKey: file.filename,
+      fileName: file.originalname,
+      fileSize: file.size,
+      fileMimeType: file.mimetype,
+      scanPassed: scan.passed,
+      scanNote: scan.note,
+    };
   }
 
   @Post()
@@ -213,5 +223,23 @@ export class MarketController {
   @HttpCode(HttpStatus.OK)
   rejectDeal(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.negotiationService.rejectDeal(id, userId);
+  }
+
+  /**
+   * Request switching from AI-vs-AI to human negotiation.
+   * The other party must call /accept-human to confirm (Pokemon trade handshake).
+   */
+  @Post('negotiations/:id/request-human')
+  requestHumanSwitch(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.requestHumanSwitch(id, userId);
+  }
+
+  /**
+   * Accept the pending human-mode switch request from the other party.
+   * Once accepted, both users can type freely.
+   */
+  @Post('negotiations/:id/accept-human')
+  acceptHumanSwitch(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.negotiationService.acceptHumanSwitch(id, userId);
   }
 }

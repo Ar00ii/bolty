@@ -1,8 +1,8 @@
 -- AddColumn: minPrice to market_listings
-ALTER TABLE "market_listings" ADD COLUMN "minPrice" DOUBLE PRECISION;
+ALTER TABLE "market_listings" ADD COLUMN IF NOT EXISTS "minPrice" DOUBLE PRECISION;
 
 -- CreateTable: market_purchases
-CREATE TABLE "market_purchases" (
+CREATE TABLE IF NOT EXISTS "market_purchases" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "txHash" TEXT NOT NULL,
@@ -16,15 +16,21 @@ CREATE TABLE "market_purchases" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "market_purchases_txHash_key" ON "market_purchases"("txHash");
+CREATE UNIQUE INDEX IF NOT EXISTS "market_purchases_txHash_key" ON "market_purchases"("txHash");
 
 -- CreateIndex
-CREATE INDEX "market_purchases_buyerId_listingId_idx" ON "market_purchases"("buyerId", "listingId");
+CREATE INDEX IF NOT EXISTS "market_purchases_buyerId_listingId_idx" ON "market_purchases"("buyerId", "listingId");
 
 -- AddForeignKey
-ALTER TABLE "market_purchases" ADD CONSTRAINT "market_purchases_buyerId_fkey"
+DO $$ BEGIN
+  ALTER TABLE "market_purchases" ADD CONSTRAINT "market_purchases_buyerId_fkey"
     FOREIGN KEY ("buyerId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "market_purchases" ADD CONSTRAINT "market_purchases_listingId_fkey"
+DO $$ BEGIN
+  ALTER TABLE "market_purchases" ADD CONSTRAINT "market_purchases_listingId_fkey"
     FOREIGN KEY ("listingId") REFERENCES "market_listings"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;

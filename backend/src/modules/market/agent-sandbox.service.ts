@@ -1,0 +1,121 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { spawn } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
+
+const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
+const SANDBOX_TIMEOUT_MS = 10_000;
+
+export interface SandboxContext {
+  event: 'negotiation.start' | 'negotiation.message';
+  negotiationId: string;
+  listingId: string;
+  listing: { title: string; askingPrice: number; currency: string; minPrice?: number | null };
+  message?: string;
+  proposedPrice?: number;
+  history: Array<{ role: string; content: string; proposedPrice?: number | null; timestamp: Date }>;
+}
+
+export interface SandboxResponse {
+  reply: string;
+  proposedPrice?: number;
+  action?: 'accept' | 'reject' | 'counter';
+}
+
+@Injectable()
+export class AgentSandboxService {
+  private readonly logger = new Logger(AgentSandboxService.name);
+
+  /** Detect runtime from original filename extension */
+  private detectRuntime(fileName: string, fileMimeType: string): 'node' | 'python3' | null {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    if (ext === 'js' || ext === 'mjs' || ext === 'cjs') return 'node';
+    if (ext === 'ts') return 'node'; // transpiled by ts-node if available, else skip
+    if (ext === 'py') return 'python3';
+    if (fileMimeType === 'application/javascript' || fileMimeType === 'text/javascript') return 'node';
+    if (fileMimeType === 'text/x-python' || fileMimeType === 'application/x-python') return 'python3';
+    return null;
+  }
+
+  async run(
+    fileKey: string,
+    fileName: string,
+    fileMimeType: string,
+    context: SandboxContext,
+  ): Promise<SandboxResponse | null> {
+    const runtime = this.detectRuntime(fileName, fileMimeType);
+    if (!runtime) {
+      this.logger.warn(`Unsupported runtime for file: ${fileName}`);
+      return null;
+    }
+
+    const scriptPath = path.join(UPLOADS_DIR, fileKey);
+    if (!fs.existsSync(scriptPath)) {
+      this.logger.warn(`Script file not found: ${fileKey}`);
+      return null;
+    }
+
+    const input = JSON.stringify(context);
+
+    return new Promise((resolve) => {
+      const child = spawn(runtime, [scriptPath], {
+        env: {
+          // Only expose minimal env vars — no secrets
+          PATH: process.env.PATH,
+          HOME: process.env.HOME,
+          TMPDIR: process.env.TMPDIR,
+        },
+        timeout: SANDBOX_TIMEOUT_MS,
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdin.write(input);
+      child.stdin.end();
+
+      child.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
+      child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+
+      const timer = setTimeout(() => {
+        child.kill('SIGKILL');
+        this.logger.warn(`Agent script timed out: ${fileKey}`);
+        resolve(null);
+      }, SANDBOX_TIMEOUT_MS + 500);
+
+      child.on('close', (code) => {
+        clearTimeout(timer);
+        if (code !== 0) {
+          this.logger.warn(`Agent script exited with code ${code}: ${stderr.slice(0, 500)}`);
+          resolve(null);
+          return;
+        }
+        try {
+          // Find the first JSON object in stdout
+          const match = stdout.match(/\{[\s\S]*\}/);
+          if (!match) { resolve(null); return; }
+          const parsed = JSON.parse(match[0]) as SandboxResponse;
+          if (!parsed.reply) { resolve(null); return; }
+          const action = (['accept', 'reject', 'counter'] as const).includes(parsed.action as any)
+            ? parsed.action
+            : 'counter';
+          resolve({
+            reply: String(parsed.reply).slice(0, 1000),
+            proposedPrice: parsed.proposedPrice != null ? Number(parsed.proposedPrice) : undefined,
+            action,
+          });
+        } catch {
+          this.logger.warn(`Could not parse agent script output: ${stdout.slice(0, 200)}`);
+          resolve(null);
+        }
+      });
+
+      child.on('error', (err) => {
+        clearTimeout(timer);
+        this.logger.warn(`Agent script spawn error: ${err.message}`);
+        resolve(null);
+      });
+    });
+  }
+}

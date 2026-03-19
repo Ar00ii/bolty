@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, type LucideIcon,
+  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, ShoppingCart, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
@@ -62,23 +62,14 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Repos',
-    href: '/repos',
-    sub: [
-      { href: '/repos',             label: 'Browse All', icon: Code2 },
-      { href: '/repos?tab=mine',    label: 'My Repos',   icon: GitBranch },
-      { href: '/repos?tab=starred', label: 'Starred',    icon: Star },
-    ],
-  },
-  {
-    label: 'Agents',
+    label: 'Market',
     href: '/market',
     sub: [
-      { href: '/market',             label: 'Marketplace', icon: Package },
-      { href: '/market?tab=mine',    label: 'My Agents',   icon: Cpu },
-      { href: '/market?tab=deploy',  label: 'Deploy',      icon: Bot },
-      { href: '/market?tab=explore', label: 'Explore All', icon: Globe },
-      { href: '/market?tab=top',     label: 'Top Rated',   icon: Star },
+      { href: '/market',                      label: 'Overview',        icon: ShoppingCart },
+      { href: '/market/agents',               label: 'AI Agents',       icon: Bot },
+      { href: '/market/agents?tab=mine',      label: 'My Agents',       icon: Cpu },
+      { href: '/market/repos',                label: 'Repos',           icon: GitBranch },
+      { href: '/market/repos?tab=mine',       label: 'My Repos',        icon: Code2 },
     ],
   },
   {
@@ -278,21 +269,26 @@ export function StaggeredMenu({
                             {unreadDMs > 99 ? '99+' : unreadDMs}
                           </span>
                         )}
-                        <span className="sm-item-chevron" aria-hidden="true">›</span>
                       </Link>
                       <button
                         onClick={() => toggleExpand(item.href)}
                         aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                         style={{
-                          background: 'transparent', border: 'none', cursor: 'pointer',
-                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.15)',
-                          padding: '0.25rem 0.3rem', flexShrink: 0, fontSize: '0.7rem',
-                          transition: 'color 0.15s ease, transform 0.18s ease',
+                          background: isExpanded ? 'rgba(131,110,249,0.12)' : 'transparent',
+                          border: isExpanded ? '1px solid rgba(131,110,249,0.25)' : '1px solid transparent',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          color: isExpanded ? '#836ef9' : 'rgba(255,255,255,0.4)',
+                          padding: '0.5rem 0.75rem', flexShrink: 0, fontSize: '1.5rem',
+                          lineHeight: 1,
+                          minWidth: '2.5rem',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'color 0.15s ease, transform 0.18s ease, background 0.15s ease',
                           transform: isExpanded ? 'rotate(90deg)' : 'none',
                           transformOrigin: '50% 50%',
                         }}
                       >
-                        ❯
+                        ›
                       </button>
                     </div>
 
@@ -309,7 +305,7 @@ export function StaggeredMenu({
                                 data-active={subActive || undefined}
                                 onClick={() => onClose()}
                               >
-                                <SubIcon style={{ width: 13, height: 13, flexShrink: 0 }} strokeWidth={1.5} />
+                                <SubIcon style={{ width: 16, height: 16, flexShrink: 0 }} strokeWidth={1.5} />
                                 {sub.label}
                                 {subActive && <span className="sm-sub-dot" />}
                               </Link>

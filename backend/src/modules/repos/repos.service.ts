@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
@@ -18,32 +18,48 @@ import axios from 'axios';
 @Injectable()
 export class ReposService {
   private readonly logger = new Logger(ReposService.name);
-  private readonly genAI: GoogleGenerativeAI;
+  private readonly anthropic: Anthropic;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
   ) {
-    this.genAI = new GoogleGenerativeAI(this.config.get<string>('GEMINI_API_KEY') || '');
+    this.anthropic = new Anthropic({
+      apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
+    });
   }
 
-  /** AI security scan for repo name + description */
+  /** Parse JSON from Claude response text */
+  private parseJson(text: string): { safe: boolean; reason: string } | null {
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    try {
+      const parsed = JSON.parse(match[0]);
+      return { safe: Boolean(parsed.safe), reason: String(parsed.reason || '') };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Two-tier Claude security scan (mirrors the image):
+   *  Tier 1 — Haiku: fast initial analysis
+   *  Tier 2 — Sonnet: deep analysis only when Haiku flags something suspicious
+   */
   private async scanRepoContent(
     name: string,
     description: string,
     topics: string[],
   ): Promise<{ safe: boolean; reason: string }> {
-    try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-      const prompt = `You are a security moderator for a developer platform.
+    const basePrompt = `You are a security moderator for a developer platform.
 
 REJECT (safe=false) if name/description suggests:
 - Malware, spyware, ransomware, keylogger, RAT
 - Credential/password stealers, phishing kits
 - DDoS or network attack tools
 - Crypto wallet drainers or private key stealers
-- Clearly illegal services or hacking tools targeting production systems
+- Clearly illegal hacking tools targeting production systems
 
 ACCEPT (safe=true) for: legitimate open-source projects, developer tools, bots, trading scripts, automation utilities, security research.
 
@@ -53,16 +69,42 @@ Topics: ${topics.slice(0, 10).join(', ')}
 
 Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
 
-      const result = await model.generateContent(prompt);
-      const text = result.response.text().trim();
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        const parsed = JSON.parse(match[0]);
-        return { safe: Boolean(parsed.safe), reason: String(parsed.reason || '') };
+    try {
+      // ── Tier 1: Haiku — fast scan ──────────────────────────────────────────
+      const haikuRes = await this.anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: basePrompt }],
+      });
+      const haikuText = (haikuRes.content[0] as { type: string; text: string }).text ?? '';
+      const haikuResult = this.parseJson(haikuText);
+
+      // If Haiku clears it → safe, no need for Sonnet
+      if (haikuResult?.safe) {
+        return { safe: true, reason: haikuResult.reason };
       }
+
+      // ── Tier 2: Sonnet — deep analysis when suspicious ─────────────────────
+      this.logger.warn(`Haiku flagged "${name}" — escalating to Sonnet`);
+      const sonnetRes = await this.anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 512,
+        messages: [
+          {
+            role: 'user',
+            content: `${basePrompt}
+
+NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thorough analysis before making a final decision. Consider context carefully — security research and ethical hacking tools are acceptable.`,
+          },
+        ],
+      });
+      const sonnetText = (sonnetRes.content[0] as { type: string; text: string }).text ?? '';
+      const sonnetResult = this.parseJson(sonnetText);
+      if (sonnetResult) return sonnetResult;
     } catch (err) {
       this.logger.error('Repo content scan failed', err);
     }
+
     return { safe: true, reason: 'Scan unavailable — logged for manual review' };
   }
 
@@ -715,6 +757,14 @@ Reply ONLY with JSON: {"safe": true|false, "reason": "brief reason"}`;
     }
 
     await this.prisma.repoCollaborator.delete({ where: { id: collaboratorId } });
+    return { success: true };
+  }
+
+  async deleteRepository(userId: string, repoId: string) {
+    const repo = await this.prisma.repository.findUnique({ where: { id: repoId } });
+    if (!repo) throw new NotFoundException('Repository not found');
+    if (repo.userId !== userId) throw new ForbiddenException('Not your repository');
+    await this.prisma.repository.delete({ where: { id: repoId } });
     return { success: true };
   }
 }

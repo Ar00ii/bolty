@@ -7,7 +7,10 @@ import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-card
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Wallet, AlertTriangle } from 'lucide-react';
+import { Wallet, AlertTriangle, Bot, User, X, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { AnimatedDownload } from '@/components/ui/animated-download';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -55,6 +58,8 @@ interface UploadedFileMeta {
   fileName: string;
   fileSize: number;
   fileMimeType: string;
+  scanPassed?: boolean;
+  scanNote?: string;
 }
 
 interface FeedPost {
@@ -235,7 +240,7 @@ function NegotiationModal({
         if ((priceData as any).price) ethPrice = (priceData as any).price;
       } catch { /* use fallback */ }
 
-      const currency = neg.listing.currency.toUpperCase();
+      const currency = neg.listing?.currency.toUpperCase();
       let totalWei: bigint;
       let totalUsd: number;
 
@@ -324,7 +329,7 @@ function NegotiationModal({
     }
   };
 
-  const isSeller = neg?.listing.sellerId === userId;
+  const isSeller = neg?.listing?.sellerId === userId;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
@@ -395,7 +400,7 @@ function NegotiationModal({
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
                     <div className="mt-1.5 pt-1.5 border-t border-current/20 font-bold">
-                      offer: {msg.proposedPrice} {neg.listing.currency}
+                      offer: {msg.proposedPrice} {neg.listing?.currency}
                     </div>
                   )}
                 </div>
@@ -413,7 +418,7 @@ function NegotiationModal({
                 <p className="text-green-400 font-mono text-xs font-bold mb-1">✓ DEAL AGREED</p>
                 {neg.agreedPrice != null && (
                   <p className="text-green-300 font-mono text-xl font-black mb-3">
-                    {neg.agreedPrice} {neg.listing.currency}
+                    {neg.agreedPrice} {neg.listing?.currency}
                   </p>
                 )}
                 {/* Seller sees: confirm (creates DM) */}
@@ -439,7 +444,7 @@ function NegotiationModal({
                       className="block w-full text-xs font-mono font-bold py-2.5 px-4 rounded-lg transition-all disabled:opacity-40"
                       style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.3),rgba(59,130,246,0.2))', border: '1px solid rgba(139,92,246,0.5)', color: '#c4b5fd', boxShadow: '0 0 16px rgba(139,92,246,0.15)' }}
                     >
-                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing.currency}`}
+                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
                     </button>
                   </div>
                 )}
@@ -554,649 +559,251 @@ function NegotiationModal({
   );
 }
 
-// ── Agent Card ─────────────────────────────────────────────────────────────────
+// ── Negotiate Choice Modal ──────────────────────────────────────────────────────
 
-function AgentCard({ listing, isAuthenticated, onNegotiate, onWalletAuth }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void; onWalletAuth: () => Promise<boolean> }) {
-  const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
-  const isAgent = listing.type === 'AI_AGENT' || listing.type === 'BOT';
-  const squares = genRandomPattern();
-  const [connecting, setConnecting] = useState(false);
+function NegotiateChoiceModal({
+  listing,
+  userId,
+  onClose,
+  onNegotiateManual,
+}: {
+  listing: MarketListing;
+  userId: string;
+  onClose: () => void;
+  onNegotiateManual: () => void;
+}) {
+  const [userAgents, setUserAgents] = useState<MarketListing[]>([]);
+  const [loadingAgents, setLoadingAgents] = useState(true);
+
+  useEffect(() => {
+    api.get<{ data: MarketListing[] }>('/market?type=AI_AGENT')
+      .then(res => setUserAgents(res.data.filter(a => a.seller.id === userId && !!a.agentEndpoint)))
+      .catch(() => {})
+      .finally(() => setLoadingAgents(false));
+  }, [userId]);
+
+  const hasAgent = userAgents.length > 0;
 
   return (
-    <div className="relative overflow-hidden flex flex-col p-5 transition-colors duration-200 hover:bg-monad-500/5 group">
-      {/* grid pattern decoration */}
-      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-          <GridPattern width={20} height={20} x="-12" y="4" squares={squares}
-            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay" />
-        </div>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
+      <div className="relative w-full max-w-sm rounded-2xl p-6" style={{ background: '#0c0c14', border: '1px solid rgba(131,110,249,0.25)' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+        <h3 className="font-bold text-white text-base mb-1">How do you want to negotiate?</h3>
+        <p className="text-zinc-500 text-xs mb-5">Choose whether to negotiate yourself or let your AI agent handle it.</p>
 
-      {/* Top row */}
-      <div className="relative z-10 flex items-start justify-between mb-3 gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          {isAgent && (
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm shrink-0 border border-dashed border-monad-500/15 bg-monad-500/5">
-            </div>
-          )}
-          <div className="min-w-0">
-            <h3 className="text-zinc-100 font-semibold text-sm leading-tight truncate">{listing.title}</h3>
-            <p className="text-zinc-500 text-xs font-mono mt-0.5">@{listing.seller.username || 'anon'}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {listing.agentEndpoint && (
-            <span className="text-xs px-1.5 py-0.5 rounded font-mono border border-dashed border-monad-500/15 text-monad-400 bg-monad-500/5"
-              title="Has AI negotiation agent">
-              AI
-            </span>
-          )}
-          <span className={`text-xs font-mono px-2 py-0.5 rounded border border-dashed ${typeColor}`}>
-            {listing.type.toLowerCase().replace('_', ' ')}
-          </span>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="relative z-10 text-zinc-400 text-xs leading-relaxed mb-3 line-clamp-2 flex-1">{listing.description}</p>
-
-      {/* Tags */}
-      {listing.tags.length > 0 && (
-        <div className="relative z-10 flex flex-wrap gap-1 mb-3">
-          {listing.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="text-xs font-mono px-2 py-0.5 rounded border border-dashed border-monad-500/20 text-monad-400/70 bg-monad-500/5">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Links */}
-      {listing.agentUrl && (
-        <a href={listing.agentUrl} target="_blank" rel="noopener noreferrer"
-          className="relative z-10 text-xs font-mono text-monad-400/60 hover:text-monad-400 transition-colors flex items-center gap-1 mb-1 truncate">
-          <span>[agent url]</span>
-          <span className="truncate">{listing.agentUrl.replace(/^https?:\/\//, '').slice(0, 40)}</span>
-        </a>
-      )}
-      {listing.fileKey && listing.fileName && (
-        <a href={`${API_URL}/market/files/${listing.fileKey}`}
-          className="relative z-10 text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1 mb-1">
-          <span>[file]</span>
-          <span className="truncate">{listing.fileName}</span>
-          {listing.fileSize && <span className="text-zinc-600 shrink-0">({formatBytes(listing.fileSize)})</span>}
-        </a>
-      )}
-
-      {/* Bottom row */}
-      <div className="relative z-10 flex items-center justify-between mt-3 pt-3 gap-2 border-t border-dashed border-white/10">
-        <div>
-          <div className="font-mono font-black text-base">
-            {listing.price === 0
-              ? <span className="text-green-400">FREE</span>
-              : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-400">{listing.currency}</span></span>
-            }
-          </div>
-          {listing.minPrice != null && (
-            <div className="text-xs font-mono text-zinc-600 mt-0.5">floor: {listing.minPrice} {listing.currency}</div>
-          )}
-        </div>
-        <div className="flex gap-1.5 items-center">
-          <Link
-            href={`/agents/${listing.id}`}
-            className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60"
-          >
-            profile
-          </Link>
+        <div className="flex flex-col gap-3">
+          {/* Manual */}
           <button
-            onClick={async () => {
-              if (!isAuthenticated) {
-                if (!isMetaMaskInstalled()) { window.location.href = '/auth'; return; }
-                setConnecting(true);
-                const ok = await onWalletAuth();
-                setConnecting(false);
-                if (!ok) return;
-              }
-              onNegotiate();
-            }}
-            disabled={connecting}
-            className={`text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed disabled:opacity-50 ${
-              listing.agentEndpoint
-                ? 'bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20'
-                : 'bg-monad-500/10 border-monad-500/30 text-monad-300 hover:bg-monad-500/20'
-            }`}
+            onClick={() => { onClose(); onNegotiateManual(); }}
+            className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-white/10 hover:border-monad-500/40 hover:bg-monad-500/5"
           >
-            {connecting ? 'connecting wallet...' : listing.agentEndpoint ? 'negotiate' : listing.price === 0 ? 'get free' : 'buy now'}
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-monad-500/10 border border-monad-500/20 shrink-0 mt-0.5">
+              <User className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-100">Negotiate yourself</p>
+              <p className="text-xs text-zinc-500 mt-0.5">Chat directly with the seller and make your own offers.</p>
+            </div>
           </button>
+
+          {/* AI Agent */}
+          {loadingAgents ? (
+            <div className="p-4 rounded-xl border border-dashed border-white/10 opacity-50 text-xs font-mono text-zinc-600">loading your agents...</div>
+          ) : hasAgent ? (
+            <button
+              onClick={() => { onClose(); onNegotiateManual(); }}
+              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-monad-500/30 hover:border-monad-500/50 hover:bg-monad-500/5"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-monad-500/10 border border-monad-500/20 shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-monad-300">Let AI agent negotiate</p>
+                <p className="text-xs text-zinc-500 mt-0.5">Your agent <span className="text-monad-400 font-mono">{userAgents[0].title}</span> will negotiate autonomously on your behalf.</p>
+              </div>
+            </button>
+          ) : (
+            <Link
+              href="/market"
+              onClick={onClose}
+              className="flex items-start gap-3 p-4 rounded-xl text-left transition-all border border-dashed border-white/10 hover:border-monad-500/30 hover:bg-monad-500/5"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-zinc-800 border border-white/10 shrink-0 mt-0.5">
+                <Bot className="w-4 h-4 text-zinc-500" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-zinc-400">Let AI agent negotiate</p>
+                <p className="text-xs text-zinc-600 mt-0.5">You don&apos;t have an AI agent yet. <span className="text-monad-400 underline">Upload one</span> to use this feature.</p>
+              </div>
+            </Link>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Main Page ──────────────────────────────────────────────────────────────────
+// ── Agent Card ─────────────────────────────────────────────────────────────────
 
-export default function MarketPage() {
-  const { isAuthenticated, user, refresh } = useAuth();
-  const [listings, setListings] = useState<MarketListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [type, setType] = useState('AI_AGENT');
-  const [search, setSearch] = useState('');
-  const [error, setError] = useState('');
-  const [showCreate, setShowCreate] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
-  const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [feed, setFeed] = useState<FeedPost[]>([]);
-  const [activeView, setActiveView] = useState<'agents' | 'feed'>('agents');
+function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
+  const typeColor = TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER;
+  const [showChoice, setShowChoice] = useState(false);
+  const { user } = useAuth();
 
-  const [form, setForm] = useState({
-    title: '',
-    description: '',
-    type: 'AI_AGENT' as MarketListing['type'],
-    price: '',
-    minPrice: '',
-    currency: 'SOL',
-    tags: '',
-    agentUrl: '',
-    agentEndpoint: '',
-  });
-
-  const handleWalletAuth = useCallback(async (): Promise<boolean> => {
-    try {
-      await connectMetaMask();
-      await refresh();
-      return true;
-    } catch {
-      setError('Wallet connection failed. Please try again or sign in.');
-      return false;
+  const handleNegotiateClick = () => {
+    if (!isAuthenticated) {
+      window.location.href = '/auth';
+      return;
     }
-  }, [refresh]);
-
-  const fetchListings = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (type !== 'ALL') params.set('type', type);
-      if (search) params.set('search', search);
-      const data = await api.get<{ data: MarketListing[] }>(`/market?${params}`);
-      setListings(data.data);
-    } catch {
-      setError('Failed to load listings');
-    } finally {
-      setLoading(false);
-    }
-  }, [type, search]);
-
-  useEffect(() => { fetchListings(); }, [fetchListings]);
-
-  useEffect(() => {
-    if (activeView === 'feed') {
-      api.get<FeedPost[]>('/market/feed').then(setFeed).catch(() => {});
-    }
-  }, [activeView]);
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setError('File too large — max 10 MB'); return; }
-    setUploading(true);
-    setError('');
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const result = await api.upload<UploadedFileMeta>('/market/upload', fd);
-      setUploadedFile(result);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Upload failed');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const resetForm = () => {
-    setForm({ title: '', description: '', type: 'AI_AGENT', price: '', minPrice: '', currency: 'SOL', tags: '', agentUrl: '', agentEndpoint: '' });
-    setUploadedFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
-  const createListing = async () => {
-    if (!form.title.trim() || !form.description.trim()) { setError('Title and description are required'); return; }
-    setSubmitting(true);
-    setError('');
-    try {
-      const minP = form.minPrice ? parseFloat(form.minPrice) : undefined;
-      const askP = parseFloat(form.price) || 0;
-      if (minP != null && minP > askP) { setError('Minimum price cannot exceed asking price'); setSubmitting(false); return; }
-      await api.post('/market', {
-        title: form.title.trim(),
-        description: form.description.trim(),
-        type: form.type,
-        price: askP,
-        minPrice: minP,
-        currency: form.currency,
-        tags: form.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        agentUrl: form.agentUrl.trim() || undefined,
-        agentEndpoint: form.agentEndpoint.trim() || undefined,
-        ...(uploadedFile ? uploadedFile : {}),
-      });
-      setShowCreate(false);
-      resetForm();
-      await fetchListings();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to create listing');
-    } finally {
-      setSubmitting(false);
-    }
+    setShowChoice(true);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <DottedSurface />
-
-      {negotiatingListing && user && (
-        <NegotiationModal
-          listing={negotiatingListing}
+    <>
+      {showChoice && user && (
+        <NegotiateChoiceModal
+          listing={listing}
           userId={user.id}
-          onClose={() => setNegotiatingListing(null)}
+          onClose={() => setShowChoice(false)}
+          onNegotiateManual={onNegotiate}
         />
       )}
-
-      {/* ── Hero Header ── */}
-      <div className="mb-8 relative">
-        <div className="relative flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}
-              >
-                <Wallet className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
-              </div>
-              <div>
-                <h1 className="font-black text-3xl tracking-tight text-white">
-                  AI AGENTS
-                </h1>
-                <p className="text-zinc-500 text-xs font-mono">// autonomous · negotiable · on-chain</p>
-              </div>
-            </div>
-            <p className="text-zinc-400 text-sm max-w-xl leading-relaxed">
-              Publish AI agents with a price. Buyers&apos; agents negotiate with yours autonomously.
-              When they agree, you get an email — confirm to open a DM chat and close the deal.
-            </p>
+      <Card className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-lg hover:border-monad-500/25 transition-colors duration-200 h-full">
+        {/* Small cover banner */}
+        <div className="relative h-20 w-full overflow-hidden">
+          {listing.seller.avatarUrl ? (
+            <img
+              src={listing.seller.avatarUrl}
+              alt={listing.title}
+              className="w-full h-full object-cover opacity-30"
+            />
+          ) : null}
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(99,102,241,0.08) 100%)' }} />
+          {/* Type badges overlay */}
+          <div className="absolute top-2 right-2 flex items-center gap-1.5">
+            {listing.agentEndpoint && (
+              <Badge className="rounded-full bg-monad-500/20 border border-monad-500/30 px-2 py-0.5 text-xs font-mono text-monad-400 hover:bg-monad-500/30">
+                AI
+              </Badge>
+            )}
+            <Badge className={`rounded-full border border-dashed px-2 py-0.5 text-xs font-mono ${typeColor}`}>
+              {listing.type.toLowerCase().replace('_', ' ')}
+            </Badge>
           </div>
-
-          {/* View toggle */}
-          <div
-            className="flex gap-1 rounded-xl p-1"
-            style={{ background: 'rgba(9,9,16,0.8)', border: '1px solid rgba(131,110,249,0.15)' }}
-          >
-            <button
-              onClick={() => setActiveView('agents')}
-              className="px-4 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={activeView === 'agents' ? {
-                background: 'rgba(131,110,249,0.15)',
-                border: '1px solid rgba(131,110,249,0.3)',
-                color: '#c4b5fd',
-              } : { color: '#52525b' }}
-            >
-              {listings.length} agents
-            </button>
-            <button
-              onClick={() => setActiveView('feed')}
-              className="px-4 py-1.5 rounded-lg text-xs font-medium transition-all"
-              style={activeView === 'feed' ? {
-                background: 'rgba(131,110,249,0.15)',
-                border: '1px solid rgba(131,110,249,0.3)',
-                color: '#c4b5fd',
-              } : { color: '#52525b' }}
-            >
-              + live feed
-            </button>
+          {/* Avatar */}
+          <div className="absolute bottom-2 left-3 flex items-center gap-2">
+            {listing.seller.avatarUrl ? (
+              <img src={listing.seller.avatarUrl} alt={listing.seller.username || ''} className="w-6 h-6 rounded-full border border-white/20 object-cover" />
+            ) : (
+              <div className="w-6 h-6 rounded-full border border-white/10 bg-monad-500/20 flex items-center justify-center">
+                <span className="text-monad-400 font-bold" style={{ fontSize: '0.6rem' }}>
+                  {(listing.seller.username || 'A').charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+            <span className="text-zinc-400 text-xs font-mono">@{listing.seller.username || 'anon'}</span>
           </div>
         </div>
-      </div>
 
-      {/* ── Search / filters — agents view ── */}
-      {activeView === 'agents' && (
-        <div
-          className="mb-6 p-3 rounded-xl"
-          style={{ background: 'rgba(9,9,16,0.6)', border: '1px solid rgba(139,92,246,0.12)' }}
-        >
-          <div className="flex flex-wrap gap-3 items-center">
-            <input
-              type="text"
-              placeholder="search agents..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1 min-w-48 text-sm px-3 py-2 rounded-lg font-mono"
-              style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }}
-            />
-            <div className="flex gap-1 flex-wrap">
-              {TYPES.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setType(t)}
-                  className="px-3 py-1.5 text-xs font-mono rounded-lg transition-all"
-                  style={type === t ? {
-                    background: 'rgba(139,92,246,0.15)',
-                    border: '1px solid rgba(139,92,246,0.35)',
-                    color: '#c4b5fd',
-                  } : { color: '#52525b', border: '1px solid transparent' }}
-                >
-                  {TYPE_LABELS[t]}
-                </button>
+        <CardContent className="flex-grow p-3 pt-3">
+          {/* Tags */}
+          {listing.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-2">
+              {listing.tags.slice(0, 3).map(tag => (
+                <Badge key={tag} className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0.5 text-xs font-mono text-zinc-500 hover:text-zinc-300">
+                  {tag}
+                </Badge>
               ))}
             </div>
-            {isAuthenticated && (
-              <button
-                onClick={() => setShowCreate(!showCreate)}
-                className="text-xs font-mono font-bold px-4 py-2 rounded-lg transition-all"
-                style={{
-                  background: 'linear-gradient(135deg,rgba(139,92,246,0.3),rgba(99,102,241,0.2))',
-                  border: '1px solid rgba(139,92,246,0.5)',
-                  color: '#c4b5fd',
-                  boxShadow: '0 0 16px rgba(139,92,246,0.15)',
-                }}
-              >
-                + publish agent
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Create listing form ── */}
-      {activeView === 'agents' && showCreate && (
-        <div
-          className="mb-6 rounded-xl p-5"
-          style={{ background: 'rgba(9,9,16,0.9)', border: '1px solid rgba(139,92,246,0.25)', boxShadow: '0 0 30px rgba(139,92,246,0.08)' }}
-        >
-          {/* Form header */}
-          <div className="flex items-center gap-2 mb-5 pb-4" style={{ borderBottom: '1px solid rgba(139,92,246,0.1)' }}>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-              <div className="w-2.5 h-2.5 rounded-full bg-zinc-500" />
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-            </div>
-            <span className="text-zinc-400 font-mono text-xs ml-1">publish_agent.config</span>
-          </div>
-
-          {/* Wallet not linked warning */}
-          {!user?.walletAddress && (
-            <div className="mb-5 flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-monad-500/25"
-              style={{ background: 'rgba(131,110,249,0.04)' }}>
-              <Wallet className="w-4 h-4 text-monad-400/60 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-zinc-400 mb-0.5">No MetaMask wallet linked</p>
-                <p className="text-xs text-zinc-600 mb-2">Buyers pay through MetaMask. Link your wallet to receive payments for your listings.</p>
-                <Link href="/profile?tab=wallet"
-                  className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-500/30 hover:bg-monad-500/10 rounded-lg px-2.5 py-1 transition-colors">
-                  <Wallet className="w-3 h-3" strokeWidth={1.5} />
-                  Link wallet →
-                </Link>
-              </div>
-            </div>
           )}
+          <h3 className="text-sm font-bold leading-tight text-zinc-100 mb-1.5">{listing.title}</h3>
+          <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2">{listing.description}</p>
+        </CardContent>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            {/* Title */}
-            <div className="md:col-span-2">
-              <label className="text-zinc-500 text-xs font-mono block mb-1.5">title *</label>
-              <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                maxLength={200} placeholder="My Trading Agent v2"
-                className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-                style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }} />
+        <CardFooter className="flex items-center justify-between p-3 pt-0 border-t border-white/[0.06] mt-auto">
+          <div>
+            <div className="font-mono font-black text-sm">
+              {listing.price === 0
+                ? <span className="text-green-400">FREE</span>
+                : <span className="text-monad-300">{listing.price} <span className="text-xs font-normal text-zinc-500">{listing.currency}</span></span>
+              }
             </div>
-
-            {/* Description */}
-            <div className="md:col-span-2">
-              <label className="text-zinc-500 text-xs font-mono block mb-1.5">description *</label>
-              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                maxLength={5000} rows={3} placeholder="What does your agent do? Features, integrations, use cases..."
-                className="w-full text-sm px-3 py-2 rounded-lg font-mono resize-none"
-                style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }} />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label className="text-zinc-500 text-xs font-mono block mb-1.5">type</label>
-              <select
-                value={form.type}
-                onChange={(e) => {
-                  const t = e.target.value as typeof form.type;
-                  setForm({ ...form, type: t });
-                  if (!ACCEPTS_FILE.has(t)) { setUploadedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }
-                }}
-                className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-                style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }}
-              >
-                {['AI_AGENT', 'BOT', 'SCRIPT', 'REPO', 'OTHER'].map((t) => (
-                  <option key={t} value={t}>{TYPE_LABELS[t] || t.toLowerCase()}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price + currency + minPrice */}
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="text-zinc-500 text-xs font-mono block mb-1.5">asking price</label>
-                <input type="number" min="0" step="0.01" value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  placeholder="10"
-                  className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-                  style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }} />
-              </div>
-              <div className="w-20">
-                <label className="text-zinc-500 text-xs font-mono block mb-1.5">currency</label>
-                <select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                  className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-                  style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }}>
-                  <option value="SOL">SOL</option>
-                  <option value="ETH">ETH</option>
-                  <option value="USD">USD</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Minimum price */}
-            <div className="md:col-span-2">
-              <label className="text-zinc-500 text-xs font-mono block mb-1.5">
-                negotiation floor <span className="text-zinc-600">(min price agent will accept — leave blank for no limit)</span>
-              </label>
-              <input type="number" min="0" step="0.01" value={form.minPrice}
-                onChange={(e) => setForm({ ...form, minPrice: e.target.value })}
-                placeholder={`e.g. ${form.price ? (parseFloat(form.price) * 0.7).toFixed(2) : '7.00'}`}
-                className="w-48 text-sm px-3 py-2 rounded-lg font-mono"
-                style={{ background: 'rgba(250,204,21,0.04)', border: '1px solid rgba(250,204,21,0.15)', color: '#e4e4e7', outline: 'none' }} />
-            </div>
-
-            {/* File upload */}
-            {ACCEPTS_FILE.has(form.type) && (
-              <div className="md:col-span-2">
-                <label className="text-zinc-500 text-xs font-mono block mb-1.5">
-                  upload file <span className="text-zinc-600">(.py .js .ts .zip .json .yaml .sh .txt — max 10 MB)</span>
-                </label>
-                {uploadedFile ? (
-                  <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                    <span className="text-monad-400 text-sm">✓</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-zinc-200 text-xs font-mono truncate">{uploadedFile.fileName}</p>
-                      <p className="text-zinc-500 text-xs font-mono">{formatBytes(uploadedFile.fileSize)}</p>
-                    </div>
-                    <button onClick={() => { setUploadedFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                      className="text-zinc-500 hover:text-red-400 text-xs font-mono">[remove]</button>
-                  </div>
-                ) : (
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border border-dashed rounded-lg p-4 text-center cursor-pointer transition-all"
-                    style={{ borderColor: 'rgba(139,92,246,0.2)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.4)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)')}
-                  >
-                    {uploading
-                      ? <p className="text-monad-400 text-xs font-mono animate-pulse">uploading...</p>
-                      : <p className="text-zinc-500 text-xs font-mono">click to upload agent / bot / script file</p>
-                    }
-                  </div>
-                )}
-                <input ref={fileInputRef} type="file" onChange={handleFileChange}
-                  accept=".py,.js,.ts,.mjs,.cjs,.zip,.json,.yaml,.yml,.sh,.txt,.md,.toml,.csv"
-                  className="hidden" />
-              </div>
+            {listing.minPrice != null && (
+              <div className="text-xs font-mono text-zinc-600">floor: {listing.minPrice}</div>
             )}
-
-            {/* Agent endpoint */}
-            {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
-              <div className="md:col-span-2 rounded-xl p-4" style={{ background: 'rgba(16,185,129,0.04)', border: '1px solid rgba(16,185,129,0.15)' }}>
-                <label className="text-monad-400 text-xs font-mono font-bold block mb-1">
-                  AI negotiation webhook
-                </label>
-                <p className="text-zinc-500 text-xs font-mono mb-2">
-                  Your bot receives POST events when buyers negotiate. Reply:{' '}
-                  <code className="text-zinc-400">{'{"reply":"...", "proposedPrice": 0, "action": "accept|reject|counter"}'}</code>
-                </p>
-                <input type="url" value={form.agentEndpoint}
-                  onChange={(e) => setForm({ ...form, agentEndpoint: e.target.value })}
-                  placeholder="https://your-agent.example.com/negotiate"
-                  className="w-full text-xs px-3 py-2 rounded-lg font-mono mb-2"
-                  style={{ background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.2)', color: '#e4e4e7', outline: 'none' }} />
-                <p className="text-zinc-600 text-xs font-mono">Leave empty — Bolty AI negotiates on your behalf (respects the floor price)</p>
-              </div>
-            )}
-
-            {/* Tags */}
-            <div className="md:col-span-2">
-              <label className="text-zinc-500 text-xs font-mono block mb-1.5">tags (comma separated)</label>
-              <input type="text" value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })}
-                placeholder="solana, trading, automation, defi"
-                className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-                style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)', color: '#e4e4e7', outline: 'none' }} />
-            </div>
           </div>
-
-          <div className="flex items-center justify-between">
-            <p className="text-zinc-600 text-xs font-mono">// all listings are AI-scanned before going live</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setShowCreate(false); resetForm(); }}
-                className="text-zinc-500 text-xs font-mono hover:text-zinc-300 px-3 py-1.5"
-              >
-                [cancel]
-              </button>
-              <button
-                onClick={createListing}
-                disabled={submitting || uploading}
-                className="text-xs font-mono font-bold px-5 py-1.5 rounded-lg transition-all disabled:opacity-40"
-                style={{
-                  background: 'linear-gradient(135deg,rgba(139,92,246,0.35),rgba(99,102,241,0.25))',
-                  border: '1px solid rgba(139,92,246,0.5)',
-                  color: '#c4b5fd',
-                }}
-              >
-                {submitting ? 'scanning...' : 'publish →'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div
-          className="text-sm font-mono mb-4 px-4 py-2 rounded-lg"
-          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
-        >
-          ERROR: {error}
-        </div>
-      )}
-
-      {/* ── Agents grid ── */}
-      {activeView === 'agents' && (
-        loading ? (
-          <div className="text-center py-20">
-            <div
-              className="inline-block text-sm font-mono animate-pulse"
-              style={{ color: '#a78bfa' }}
+          <div className="flex gap-1.5 items-center">
+            <Link
+              href={`/agents/${listing.id}`}
+              className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60"
             >
-                  loading agents...
-            </div>
+              profile
+            </Link>
+            <button
+              onClick={handleNegotiateClick}
+              className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg transition-all border border-dashed bg-monad-500/10 border-monad-500/30 text-monad-400 hover:bg-monad-500/20"
+            >
+              {listing.price === 0 ? 'get free' : 'negotiate'}
+            </button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-dashed border border-dashed border-white/10">
-            {listings.map((listing) => (
-              <AgentCard
-                key={listing.id}
-                listing={listing}
-                isAuthenticated={isAuthenticated}
-                onNegotiate={() => setNegotiatingListing(listing)}
-                onWalletAuth={handleWalletAuth}
-              />
-            ))}
-            {listings.length === 0 && (
-              <div className="col-span-3 text-center py-20">
-                <p
-                  className="text-sm font-mono"
-                  style={{ color: '#3f3f46' }}
-                >
-                  {'// No agents found. Be the first to publish yours.'}
-                </p>
-              </div>
-            )}
-          </div>
-        )
-      )}
+        </CardFooter>
+      </Card>
+    </>
+  );
+}
 
-      {/* ── Live Feed ── */}
-      {activeView === 'feed' && (
-        <div className="max-w-2xl mx-auto space-y-4">
-          {feed.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-sm font-mono" style={{ color: '#3f3f46' }}>
-                {'// No agent posts yet. Publish an agent and post an update!'}
-              </p>
-            </div>
-          ) : (
-            feed.map(post => (
-              <div
-                key={post.id}
-                className="rounded-xl p-4"
-                style={{ background: 'rgba(9,9,16,0.8)', border: '1px solid rgba(139,92,246,0.1)' }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Link href={`/agents/${post.listing.id}`} className="flex items-center gap-2 group">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
-                      style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}
-                    >
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-zinc-200 group-hover:text-monad-400 transition-colors">
-                        {post.listing.title}
-                      </p>
-                      <p className="text-xs text-zinc-500">by @{post.listing.seller.username || 'anon'}</p>
-                    </div>
-                  </Link>
-                  <div className="ml-auto flex items-center gap-2">
-                    <span className={`text-xs font-mono px-2 py-0.5 rounded border ${POST_TYPE_COLORS[post.postType] || POST_TYPE_COLORS.GENERAL}`}>
-                      {POST_TYPE_LABELS[post.postType]}
-                    </span>
-                    <span className="text-xs font-mono text-zinc-600">{timeAgo(post.createdAt)}</span>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-300">{post.content}</p>
-                {post.postType === 'PRICE_UPDATE' && post.price != null && (
-                  <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(250,204,21,0.15)' }}>
-                    <span className="text-monad-400 font-mono font-bold">{post.price} {post.currency}</span>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+// ── Main Page ──────────────────────────────────────────────────────────────────
+
+export default function MarketPage() {
+  return (
+    <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
+      <div className="max-w-4xl mx-auto px-4 pt-20 pb-16">
+        <div className="mb-10">
+          <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Bolty Market</p>
+          <h1 className="text-3xl font-black text-zinc-100 mb-2">Market</h1>
+          <p className="text-zinc-500 text-sm">Trade AI agents, bots, scripts and code repositories</p>
         </div>
-      )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* AI Agents */}
+          <a href="/market/agents" className="group rounded-2xl border p-6 flex flex-col gap-4 transition-all hover:border-monad-500/40"
+            style={{ background: '#0a0a12', borderColor: 'rgba(255,255,255,0.07)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}>
+              <svg className="w-6 h-6 text-monad-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1 1 .03 2.798-1.338 2.798H4.136c-1.368 0-2.338-1.798-1.338-2.798L4 15.3" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-zinc-100 mb-1 group-hover:text-monad-300 transition-colors">AI Agents</h2>
+              <p className="text-zinc-500 text-sm leading-relaxed">Browse autonomous bots, AI agents and scripts. Negotiate prices with AI-powered agents.</p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <a href="/market/agents" className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>marketplace →</a>
+              <a href="/market/agents?tab=mine" className="text-xs font-mono px-3 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all">my publications →</a>
+            </div>
+          </a>
+
+          {/* Repos */}
+          <a href="/market/repos" className="group rounded-2xl border p-6 flex flex-col gap-4 transition-all hover:border-monad-500/40"
+            style={{ background: '#0a0a12', borderColor: 'rgba(255,255,255,0.07)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.18)' }}>
+              <svg className="w-6 h-6 text-monad-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-bold text-zinc-100 mb-1 group-hover:text-monad-300 transition-colors">Repositories</h2>
+              <p className="text-zinc-500 text-sm leading-relaxed">Discover community code — public repos and locked paid access projects. Vote and download.</p>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <a href="/market/repos" className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>marketplace →</a>
+              <a href="/market/repos?tab=mine" className="text-xs font-mono px-3 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all">my publications →</a>
+            </div>
+          </a>
+        </div>
+      </div>
     </div>
   );
 }

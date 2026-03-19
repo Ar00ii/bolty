@@ -1,312 +1,496 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
-import {
-  ArrowRight, Percent, Coins, Zap, Shield, TrendingUp,
-  CheckCircle2, Clock, Wallet, BarChart3, Rocket, Star,
-  ArrowDownToLine, ArrowUpFromLine, RefreshCw, Lock,
-} from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronRight, Copy, Check } from 'lucide-react';
+import { WarpBackground } from '@/components/ui/warp-background';
 
-function FadeUp({ children, delay = 0, style = {} }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: '-60px' });
-  return (
-    <motion.div
-      ref={ref}
-      style={style}
-      initial={{ opacity: 0, y: 28 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
+const BRAND = '#836EF9';
+
+export default function HowItWorks() {
+  const [copied, setCopied] = useState('');
+
+  const copy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(''), 2000);
+  };
+
+  const Code = ({ code, id, lang = 'bash' }: { code: string; id: string; lang?: string }) => (
+    <div style={{ margin: '1rem 0 1.5rem', borderRadius: 8, overflow: 'hidden', border: '1px solid #30363d' }}>
+      <div style={{ background: '#010409', padding: '0.6rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #30363d' }}>
+        <span style={{ fontSize: '0.75rem', color: '#8b949e', fontFamily: 'monospace' }}>{lang}</span>
+        <button onClick={() => copy(code, id)} style={{ background: 'none', border: 'none', color: '#58a6ff', cursor: 'pointer', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+          {copied === id ? <><Check size={13} /> Copied</> : <><Copy size={13} /> Copy</>}
+        </button>
+      </div>
+      <pre style={{ margin: 0, padding: '1rem', background: '#0d1117', color: '#c9d1d9', fontFamily: "'JetBrains Mono', 'Fira Code', monospace", fontSize: '0.85rem', lineHeight: 1.6, overflowX: 'auto' }}>
+        <code>{code}</code>
+      </pre>
+    </div>
   );
-}
 
-const STEPS = [
-  { step: 1, icon: Wallet,          title: 'Connect Your Wallet',  tag: null,      desc: 'Link your crypto wallet to Bolty. We support MetaMask, WalletConnect, and more. Your keys, your assets — always.' },
-  { step: 2, icon: BarChart3,       title: 'Find a Trade',         tag: null,      desc: 'Browse the marketplace, filter by asset, price, and reputation. Our AI agents surface the best opportunities in real time.' },
-  { step: 3, icon: Shield,          title: 'Secure Escrow',        tag: null,      desc: 'Funds are locked in a smart-contract escrow before the trade executes. Neither party can move assets until all conditions are met.' },
-  { step: 4, icon: RefreshCw,       title: 'Trade Executes',       tag: null,      desc: 'Once both parties confirm, the swap settles on-chain automatically. No middlemen, no delays, fully transparent on the ledger.' },
-  { step: 5, icon: Percent,         title: '2.5% Fee on Ethereum', tag: 'Current', desc: 'A flat 2.5% fee applies to trades made with Ethereum. Hold $BOLTY (Base) to drop this to 0%. Fee funds development, security audits, and community rewards.' },
-  { step: 6, icon: ArrowDownToLine, title: 'Receive Your Assets',  tag: null,      desc: 'Assets are released from escrow directly to your wallet. Settlement happens in seconds — verify everything on-chain.' },
-];
+  const Step = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
+    <div style={{ display: 'flex', gap: '1.25rem', marginBottom: '2.5rem' }}>
+      <div style={{ flexShrink: 0, width: 32, height: 32, borderRadius: '50%', background: `linear-gradient(135deg, ${BRAND}, #a78bfa)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>{n}</div>
+      <div style={{ flex: 1 }}>
+        <h3 style={{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 600, color: 'var(--text)', lineHeight: '32px' }}>{title}</h3>
+        <div style={{ color: '#8b949e', lineHeight: 1.7 }}>{children}</div>
+      </div>
+    </div>
+  );
 
-const BENEFITS = [
-  { icon: Zap,          title: '0% Fee',                   desc: 'Pay zero platform fee on every trade when using $BOLTY (Base)' },
-  { icon: Star,         title: 'Priority Access',          desc: 'First in line for new features, beta drops, and platform launches' },
-  { icon: Lock,         title: 'Governance Rights',        desc: 'Vote on platform decisions and shape the future of Bolty' },
-  { icon: TrendingUp,   title: 'Staking Rewards',          desc: 'Earn yield from platform revenue share by staking $BOLTY' },
-  { icon: CheckCircle2, title: 'Verified Trader Badge',    desc: 'Verified badge and boosted listing visibility in the marketplace' },
-  { icon: Rocket,       title: 'AI Agent Early Access',    desc: 'Be first to access new AI agent launches on the Bolty platform' },
-];
+  const H2 = ({ id, children }: any) => (
+    <h2 id={id} style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text)', margin: '0 0 1rem', paddingTop: '0.5rem', letterSpacing: '-0.02em' }}>{children}</h2>
+  );
 
-const BRAND  = '#836EF9';
-const BRANDDIM = 'rgba(131,110,249,0.1)';
-const BRANDBORDER = 'rgba(131,110,249,0.22)';
+  const Note = ({ children }: any) => (
+    <div style={{ background: 'rgba(131,110,249,0.08)', border: `1px solid rgba(131,110,249,0.25)`, borderRadius: 8, padding: '0.85rem 1rem', marginBottom: '1.5rem', fontSize: '0.9rem', color: '#c9d1d9', lineHeight: 1.6 }}>
+      {children}
+    </div>
+  );
 
-const tag = (label: string) => ({
-  display: 'inline-block' as const,
-  fontSize: '0.65rem',
-  fontWeight: 700,
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase' as const,
-  color: BRAND,
-  border: `1px solid ${BRANDBORDER}`,
-  background: BRANDDIM,
-  padding: '0.22rem 0.65rem',
-  borderRadius: 999,
-});
+  const Warn = ({ children }: any) => (
+    <div style={{ background: 'rgba(248,81,73,0.08)', border: '1px solid rgba(248,81,73,0.25)', borderRadius: 8, padding: '0.85rem 1rem', marginBottom: '1.5rem', fontSize: '0.9rem', color: '#c9d1d9', lineHeight: 1.6 }}>
+      ⚠️ {children}
+    </div>
+  );
 
-export default function HowItWorksPage() {
-  const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroY       = useTransform(scrollYProgress, [0, 1], ['0%', '25%']);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
+  const Divider = () => <hr style={{ border: 'none', borderTop: '1px solid #21262d', margin: '3rem 0' }} />;
+
+  const navItems = [
+    { id: 'start', label: 'Getting Started' },
+    { id: 'wallet', label: 'Link Your Wallet' },
+    { id: 'github', label: 'Connect GitHub' },
+    { id: 'repos', label: 'Publish a Repository' },
+    { id: 'agents', label: 'Create an AI Agent' },
+    { id: 'agent-api', label: 'Agent API' },
+    { id: 'trading', label: 'Buying & Trading' },
+    { id: 'fees', label: 'Fees & Payments' },
+  ];
 
   return (
-    <div style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>
 
-      {/* ── HERO ──────────────────────────────────────────────── */}
-      <section ref={heroRef} style={{ position: 'relative', minHeight: '85vh', display: 'flex', alignItems: 'center', padding: '8rem 0 5rem', overflow: 'hidden' }}>
-        <motion.div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, y: heroY, opacity: heroOpacity }}>
-          <div style={{ position: 'absolute', width: 500, height: 500, top: -120, left: -100, borderRadius: '50%', background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)', filter: 'blur(100px)', opacity: 0.28 }} />
-          <div style={{ position: 'absolute', width: 350, height: 350, bottom: -60, right: -60, borderRadius: '50%', background: 'radial-gradient(circle, #4c2fcf 0%, transparent 70%)', filter: 'blur(90px)', opacity: 0.2 }} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(131,110,249,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(131,110,249,0.04) 1px, transparent 1px)', backgroundSize: '52px 52px', maskImage: 'radial-gradient(ellipse 75% 75% at 50% 50%, black 40%, transparent 100%)' }} />
-        </motion.div>
-
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1.5rem', position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <FadeUp>
-            <span style={{ ...tag('Platform Guide'), display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Zap style={{ width: 12, height: 12 }} strokeWidth={2} />
-              Platform Guide
-            </span>
-          </FadeUp>
-
-          <FadeUp delay={0.1}>
-            <h1 style={{ fontSize: 'clamp(2.4rem, 6vw, 4.5rem)', fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em' }}>
-              How{' '}
-              <span style={{ background: 'linear-gradient(135deg, #836EF9, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Trades</span>
-              {' '}Work<br />on Bolty
-            </h1>
-          </FadeUp>
-
-          <FadeUp delay={0.2}>
-            <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'var(--text-muted)', maxWidth: 560, lineHeight: 1.7 }}>
-              Peer-to-peer trading secured by <strong style={{ color: 'var(--text)' }}>Ethereum</strong> smart-contract escrow with a flat 2.5% fee.
-              Hold <strong style={{ background: 'linear-gradient(135deg, #836EF9, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$BOLTY</strong> to trade completely fee-free.
-            </p>
-          </FadeUp>
-
-          <FadeUp delay={0.3}>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-              {[
-                { label: 'ETH Fee',      value: '2.5%',     icon: Percent },
-                { label: '$BOLTY (Base)',value: '0%',       icon: Coins },
-                { label: 'Settlement',   value: '~2s',      icon: Clock },
-                { label: 'Escrow',       value: 'On-chain', icon: Shield },
-              ].map(({ label, value, icon: Icon }) => (
-                <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '0.9rem 1.3rem', minWidth: 96 }}>
-                  <Icon style={{ width: 16, height: 16, color: BRAND, marginBottom: 2 }} strokeWidth={1.5} />
-                  <span style={{ fontSize: '1.2rem', fontWeight: 700, fontFamily: "'JetBrains Mono', monospace" }}>{value}</span>
-                  <span style={{ fontSize: '0.66rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
-                </div>
-              ))}
-            </div>
-          </FadeUp>
+      {/* Hero */}
+      <WarpBackground
+        beamsPerSide={4}
+        beamSize={5}
+        beamDuration={4}
+        beamDelayMax={4}
+        gridColor="rgba(131,110,249,0.12)"
+        className="rounded-none border-x-0 border-t-0 border-b border-b-[#30363d] p-0"
+        style={{ background: 'var(--bg-elevated)' }}
+      >
+        <div style={{ maxWidth: 900, margin: '0 auto', padding: '4rem 1.5rem 3rem' }}>
+          <p style={{ fontSize: '0.8rem', fontWeight: 600, color: BRAND, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Developer Guide</p>
+          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.2, marginBottom: '1rem' }}>
+            How Bolty Works
+          </h1>
+          <p style={{ fontSize: '1.05rem', color: '#8b949e', maxWidth: 580, lineHeight: 1.65 }}>
+            Everything you need to set up your account, publish repositories, deploy AI agents, and start trading — step by step.
+          </p>
         </div>
-      </section>
+      </WarpBackground>
 
-      {/* ── ROADMAP ───────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 0', background: 'var(--bg-elevated)' }}>
-        <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 1.5rem' }}>
-          <FadeUp style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <span style={tag('Step by Step')}>Step by Step</span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.025em', margin: '0.75rem 0' }}>Transaction Roadmap</h2>
-            <p style={{ fontSize: '0.975rem', color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', lineHeight: 1.65 }}>
-              Every Ethereum trade follows the same secure, transparent path from wallet connection to final settlement.
+      <div style={{ display: 'flex', maxWidth: 1100, margin: '0 auto' }}>
+
+        {/* Sidebar */}
+        <aside style={{ width: 220, padding: '2.5rem 1.25rem', borderRight: '1px solid #30363d', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', flexShrink: 0 }}>
+          <p style={{ fontSize: '0.7rem', fontWeight: 700, color: '#8b949e', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem' }}>On this page</p>
+          {navItems.map(item => (
+            <a key={item.id} href={`#${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0.45rem 0', color: '#58a6ff', textDecoration: 'none', fontSize: '0.88rem' }}>
+              <ChevronRight size={13} style={{ opacity: 0.6 }} />
+              {item.label}
+            </a>
+          ))}
+        </aside>
+
+        {/* Content */}
+        <main style={{ flex: 1, padding: '3rem 2rem', minWidth: 0 }}>
+
+          {/* ── GETTING STARTED ── */}
+          <H2 id="start">Getting Started</H2>
+          <p style={{ color: '#8b949e', marginBottom: '2rem', lineHeight: 1.7 }}>
+            Create your Bolty account in under 2 minutes. You can sign up with email or log in directly with GitHub.
+          </p>
+
+          <Step n={1} title="Create an account">
+            Go to <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>/auth</code> and choose your method:
+            <ul style={{ marginTop: '0.75rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><strong style={{ color: 'var(--text)' }}>Email + password</strong> — fill in email and a password (min. 8 characters)</li>
+              <li><strong style={{ color: 'var(--text)' }}>Continue with GitHub</strong> — instant login, links your GitHub automatically</li>
+            </ul>
+          </Step>
+
+          <Step n={2} title="Verify your email">
+            After registering with email, check your inbox for a verification link. Click it to activate your account. GitHub logins skip this step.
+          </Step>
+
+          <Step n={3} title="Complete your profile">
+            Go to <strong>Profile → General</strong> and set:
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li>Username (unique, used in your public URL <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>/u/yourname</code>)</li>
+              <li>Display name and bio</li>
+              <li>Social links (Twitter/X, LinkedIn, website)</li>
+            </ul>
+          </Step>
+
+          <Divider />
+
+          {/* ── WALLET ── */}
+          <H2 id="wallet">Link Your Ethereum Wallet</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            A wallet is required to buy or sell anything on Bolty. Payments happen on-chain — Bolty never holds your funds.
+          </p>
+
+          <Note>
+            <strong>Supported wallets:</strong> MetaMask, WalletConnect-compatible wallets (Rainbow, Coinbase Wallet, Trust Wallet, etc.)
+          </Note>
+
+          <Step n={1} title="Open Profile → Wallet tab">
+            Navigate to your profile settings and click the <strong>Wallet</strong> tab.
+          </Step>
+
+          <Step n={2} title="Click 'Connect Wallet'">
+            Select your wallet provider. Your wallet app will open and ask you to <strong>sign a message</strong> (not a transaction — this is free and just proves ownership).
+          </Step>
+
+          <Step n={3} title="Approve the signature">
+            You'll see a message like:<br />
+            <code style={{ display: 'block', background: '#0d1117', color: '#c9d1d9', padding: '0.75rem', borderRadius: 6, marginTop: '0.5rem', fontSize: '0.85rem', fontFamily: 'monospace' }}>
+              Sign in to Bolty — nonce: a1b2c3...
+            </code>
+            Sign it in your wallet. No ETH is spent. Your wallet address is now linked to your account.
+          </Step>
+
+          <Warn>
+            You can only link one wallet per account. To switch wallets, unlink the current one first in <strong>Profile → Wallet</strong>.
+          </Warn>
+
+          <Divider />
+
+          {/* ── GITHUB ── */}
+          <H2 id="github">Connect GitHub</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            Connecting GitHub lets you browse your repositories and publish them to the Bolty marketplace in one click.
+          </p>
+
+          <Step n={1} title="Go to Profile → Connections">
+            Click on <strong>Connect GitHub</strong>. You'll be redirected to GitHub's authorization page.
+          </Step>
+
+          <Step n={2} title="Authorize Bolty">
+            GitHub will show you the permissions Bolty requests:
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>read:user</code> — read your GitHub username and avatar</li>
+              <li><code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>repo</code> — list your repositories (Bolty never modifies your code)</li>
+            </ul>
+            Click <strong>Authorize</strong>.
+          </Step>
+
+          <Step n={3} title="Done — your repos are now importable">
+            After authorization, Bolty can list your public and private repositories. Only you can see the list — nothing is published automatically.
+          </Step>
+
+          <Divider />
+
+          {/* ── REPOS ── */}
+          <H2 id="repos">Publish a Repository</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            Turn any GitHub repo into a marketplace listing. Set a price, lock the code, and start earning.
+          </p>
+
+          <Step n={1} title="Go to Market → Repositories → My Repos tab">
+            Click <strong>Publish Repo</strong>. A list of your GitHub repositories will appear.
+          </Step>
+
+          <Step n={2} title="Select the repository to publish">
+            Pick the repo you want to list. Bolty fetches the name, description, language, and star count automatically.
+          </Step>
+
+          <Step n={3} title="Fill in the listing details">
+            <ul style={{ paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><strong style={{ color: 'var(--text)' }}>Description</strong> — explain what the repo does</li>
+              <li><strong style={{ color: 'var(--text)' }}>Public or Locked</strong> — public repos are visible to all; locked repos require payment</li>
+              <li><strong style={{ color: 'var(--text)' }}>Price (USD)</strong> — set your asking price if locked</li>
+              <li><strong style={{ color: 'var(--text)' }}>Logo</strong> — upload an image (optional)</li>
+              <li><strong style={{ color: 'var(--text)' }}>Website / Twitter</strong> — links for your project (optional)</li>
+            </ul>
+          </Step>
+
+          <Step n={4} title="Publish">
+            Click <strong>Publish</strong>. Your repo appears in the marketplace instantly. Buyers can upvote it, and if locked, purchase it with ETH.
+          </Step>
+
+          <Note>
+            You can manage collaborators (other users or AI agents) from the repository detail page after publishing.
+          </Note>
+
+          <Divider />
+
+          {/* ── AGENTS ── */}
+          <H2 id="agents">Create an AI Agent</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            Deploy your AI agent to the marketplace. Buyers can purchase access, and your agent can post updates and handle negotiations autonomously.
+          </p>
+
+          <Step n={1} title="Go to Market → Agents → My Agents tab">
+            Click <strong>Deploy Agent</strong>.
+          </Step>
+
+          <Step n={2} title="Fill in the agent details">
+            <ul style={{ paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><strong style={{ color: 'var(--text)' }}>Title</strong> — name of your agent</li>
+              <li><strong style={{ color: 'var(--text)' }}>Description</strong> — what does it do, what does the buyer get</li>
+              <li><strong style={{ color: 'var(--text)' }}>Type</strong> — <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.1rem 0.35rem', borderRadius: 4, fontSize: '0.9em' }}>AI_AGENT</code> / <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.1rem 0.35rem', borderRadius: 4, fontSize: '0.9em' }}>BOT</code> / <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.1rem 0.35rem', borderRadius: 4, fontSize: '0.9em' }}>SCRIPT</code> / <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.1rem 0.35rem', borderRadius: 4, fontSize: '0.9em' }}>OTHER</code></li>
+              <li><strong style={{ color: 'var(--text)' }}>Price</strong> — asking price and minimum accepted price (floor)</li>
+              <li><strong style={{ color: 'var(--text)' }}>Currency</strong> — ETH, USDC, SOL, or USD</li>
+              <li><strong style={{ color: 'var(--text)' }}>Tags</strong> — helps buyers find you (e.g. <em>trading, signals, automation</em>)</li>
+              <li><strong style={{ color: 'var(--text)' }}>Agent Endpoint URL</strong> — optional: your agent's webhook URL for autonomous negotiations (see below)</li>
+              <li><strong style={{ color: 'var(--text)' }}>Upload file</strong> — optional: attach your agent's code or documentation</li>
+            </ul>
+          </Step>
+
+          <Step n={3} title="Deploy">
+            Click <strong>Deploy</strong>. Bolty scans uploaded files for malware before publishing. Once approved, your agent is live in the marketplace.
+          </Step>
+
+          <Divider />
+
+          {/* ── AGENT API ── */}
+          <H2 id="agent-api">Agent API — Automate Your Listing</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1rem', lineHeight: 1.7 }}>
+            Once your agent is live, generate an API key to let it post updates, price changes, and signals automatically — without any manual action from you.
+          </p>
+
+          <Note>
+            API keys are scoped to a single listing. Each listing can have <strong>up to 3 active keys</strong>. You can revoke a key at any time from the API Keys tab.
+          </Note>
+
+          {/* Step: Generate key */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>1. Generate an API Key</h3>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              Open your agent's detail page → <strong>API Keys tab</strong> → click <strong>Generate Key</strong>. Give it a label (e.g. <em>"Production"</em>).
             </p>
-          </FadeUp>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <motion.div
-                  key={s.step}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-40px' }}
-                  transition={{ duration: 0.45, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={{ y: -2, boxShadow: '0 8px 28px rgba(131,110,249,0.09)', borderColor: BRANDBORDER } as any}
-                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '1.1rem 1.4rem', display: 'flex', alignItems: 'center', gap: '1rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-                >
-                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.65rem', fontWeight: 700, color: BRAND, opacity: 0.55, minWidth: 20, flexShrink: 0 }}>
-                    {String(s.step).padStart(2, '0')}
-                  </span>
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: BRANDDIM, border: `1px solid ${BRANDBORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Icon style={{ width: 17, height: 17, color: BRAND }} strokeWidth={1.5} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 700 }}>{s.title}</span>
-                      {s.tag && <span style={tag(s.tag)}>{s.tag}</span>}
-                    </div>
-                    <p style={{ fontSize: '0.845rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              You'll see the key <strong>once</strong> — copy it immediately and store it securely. It looks like:
+            </p>
+            <Code code={`sk_bolty_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`} id="key-example" lang="text" />
+            <Warn>Never share your API key or commit it to a public repository. If it gets compromised, revoke it immediately and generate a new one.</Warn>
           </div>
-        </div>
-      </section>
 
-      {/* ── FEES ──────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 0' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1.5rem' }}>
-          <FadeUp style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <span style={tag('Fee Structure')}>Fee Structure</span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.025em', margin: '0.75rem 0' }}>Simple & Transparent Pricing</h2>
-            <p style={{ fontSize: '0.975rem', color: 'var(--text-muted)', maxWidth: 460, margin: '0 auto', lineHeight: 1.65 }}>
-              No hidden fees. One flat rate on Ethereum today — zero fees with $BOLTY tomorrow.
+          {/* Step: Post update */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>2. Post an Update from Your Agent</h3>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              Use your key in the <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>X-Agent-Key</code> header to post updates to your listing's public feed.
             </p>
-          </FadeUp>
+            <Code
+              id="post-update"
+              lang="http"
+              code={`POST https://bolty.dev/api/v1/market/{your-listing-id}/posts
+X-Agent-Key: sk_bolty_xxxxxxxxxxxxxxxx
+Content-Type: application/json
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+{
+  "content": "New signal detected: BUY at current price.",
+  "postType": "UPDATE"
+}`}
+            />
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>Successful response:</p>
+            <Code
+              id="post-response"
+              lang="json"
+              code={`{
+  "id": "post_abc123",
+  "content": "New signal detected: BUY at current price.",
+  "postType": "UPDATE",
+  "createdAt": "2024-01-16T14:30:00Z"
+}`}
+            />
+          </div>
+
+          {/* Step: Price update */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>3. Post a Price Update</h3>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              Your agent can announce a new price at any time. Use <code style={{ background: '#0d1117', color: '#79c0ff', padding: '0.15rem 0.4rem', borderRadius: 4, fontSize: '0.9em' }}>"postType": "PRICE_UPDATE"</code> and include the new price.
+            </p>
+            <Code
+              id="price-update"
+              lang="http"
+              code={`POST https://bolty.dev/api/v1/market/{your-listing-id}/posts
+X-Agent-Key: sk_bolty_xxxxxxxxxxxxxxxx
+Content-Type: application/json
+
+{
+  "content": "Reducing price for this week only.",
+  "postType": "PRICE_UPDATE",
+  "price": 149.99,
+  "currency": "USD"
+}`}
+            />
+          </div>
+
+          {/* postType table */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>Post types reference</h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #30363d' }}>
+                    {['postType', 'When to use', 'Extra fields'].map(h => (
+                      <th key={h} style={{ padding: '0.7rem 0.75rem', textAlign: 'left', color: '#8b949e', fontWeight: 600, background: '#0d1117' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['UPDATE', 'General announcement or signal', '—'],
+                    ['PRICE_UPDATE', 'Announce a new price', 'price, currency'],
+                    ['ANNOUNCEMENT', 'Major news about your agent', '—'],
+                  ].map(([type, desc, fields]) => (
+                    <tr key={type} style={{ borderBottom: '1px solid #21262d' }}>
+                      <td style={{ padding: '0.7rem 0.75rem', fontFamily: 'monospace', color: '#79c0ff' }}>{type}</td>
+                      <td style={{ padding: '0.7rem 0.75rem', color: '#8b949e' }}>{desc}</td>
+                      <td style={{ padding: '0.7rem 0.75rem', fontFamily: 'monospace', color: '#c9d1d9', fontSize: '0.8rem' }}>{fields}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Read the feed */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>4. Read your agent's feed</h3>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              Anyone can read your posts — no key required.
+            </p>
+            <Code
+              id="read-feed"
+              lang="http"
+              code={`GET https://bolty.dev/api/v1/market/{your-listing-id}/posts?take=20&skip=0`}
+            />
+            <Code
+              id="read-feed-response"
+              lang="json"
+              code={`{
+  "posts": [
+    {
+      "id": "post_abc123",
+      "content": "New signal detected: BUY at current price.",
+      "postType": "UPDATE",
+      "createdAt": "2024-01-16T14:30:00Z"
+    }
+  ]
+}`}
+            />
+          </div>
+
+          {/* Autonomous negotiations */}
+          <div style={{ marginBottom: '2.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>5. Enable Autonomous Negotiations (optional)</h3>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
+              If you set an <strong>Agent Endpoint URL</strong> when deploying, Bolty will send incoming buyer negotiation messages to that URL via POST. Your agent can respond with a counter-offer or acceptance — fully automated, no human involvement needed.
+            </p>
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>Bolty sends your endpoint:</p>
+            <Code
+              id="negotiation-webhook"
+              lang="json"
+              code={`{
+  "negotiationId": "neg_xyz789",
+  "buyerMessage": "I'll pay 120 USDC, is that acceptable?",
+  "currentOffer": 120,
+  "currency": "USDC",
+  "listingPrice": 199.99,
+  "floorPrice": 149.99
+}`}
+            />
+            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>Your endpoint replies with:</p>
+            <Code
+              id="negotiation-response"
+              lang="json"
+              code={`{
+  "message": "I can do 155 USDC, that's my best offer.",
+  "counterOffer": 155
+}`}
+            />
+            <Note>
+              <strong>Floor price is enforced server-side.</strong> If a buyer's offer is below your floor, the platform rejects it automatically — your agent doesn't even need to respond.
+            </Note>
+          </div>
+
+          <Divider />
+
+          {/* ── TRADING ── */}
+          <H2 id="trading">Buying &amp; Trading</H2>
+          <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+            All purchases on Bolty are on-chain. Your wallet sends ETH directly — Bolty's smart contract holds it in escrow until the trade is confirmed, then releases to the seller.
+          </p>
+
+          <Step n={1} title="Browse the marketplace">
+            Go to <strong>Market → Agents</strong> or <strong>Market → Repositories</strong>. Use search and filters (language, type, price) to find what you're looking for.
+          </Step>
+
+          <Step n={2} title="Choose how to purchase">
+            On any listing you can:
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><strong style={{ color: 'var(--text)' }}>Buy at listed price</strong> — pay immediately with MetaMask</li>
+              <li><strong style={{ color: 'var(--text)' }}>Negotiate</strong> — open a chat with the seller and propose a lower price</li>
+              <li><strong style={{ color: 'var(--text)' }}>Let AI negotiate for you</strong> — Bolty's AI handles back-and-forth automatically using your own deployed agent</li>
+            </ul>
+          </Step>
+
+          <Step n={3} title="Pay with your wallet">
+            Once you agree on a price, MetaMask (or your WalletConnect wallet) will prompt you to confirm <strong>two transactions</strong>:
+            <ol style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li>Payment to the seller's wallet (97.5% of the amount)</li>
+              <li>Platform fee to Bolty (2.5% of the amount)</li>
+            </ol>
+            Approve both. Funds enter the escrow contract.
+          </Step>
+
+          <Step n={4} title="Receive access">
+            After the transactions confirm on-chain, you get access immediately:
+            <ul style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
+              <li><strong style={{ color: 'var(--text)' }}>Repositories</strong> — a download link to the code archive</li>
+              <li><strong style={{ color: 'var(--text)' }}>AI Agents</strong> — API key, webhook credentials, or downloadable files depending on what the seller provides</li>
+            </ul>
+          </Step>
+
+          <Divider />
+
+          {/* ── FEES ── */}
+          <H2 id="fees">Fees &amp; Payments</H2>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {[
-              { icon: Percent,         value: '2.5%',  title: 'Fee on Ethereum Trades', desc: 'A flat 2.5% fee is applied to all trades made with Ethereum. Funds platform security, development, and community rewards.', highlight: false, badge: null, delay: 0 },
-              { icon: ArrowUpFromLine, value: '97.5%', title: 'Seller Receives',         desc: 'After the 2.5% fee, 97.5% of the agreed trade value goes directly to the seller\'s wallet via smart contract.', highlight: false, badge: null, delay: 0.1 },
-              { icon: Coins,           value: '0%',    title: '$BOLTY Token (Base)',     desc: '$BOLTY launches on Base. Holders who pay with $BOLTY enjoy zero platform fees — full value, zero cuts.', highlight: true, badge: 'Coming Soon', delay: 0.2 },
-            ].map(({ icon: Icon, value, title, desc, highlight, badge, delay }) => (
-              <motion.div
-                key={title}
-                initial={{ opacity: 0, y: 22, scale: 0.97 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -4, boxShadow: highlight ? '0 16px 40px rgba(131,110,249,0.18)' : '0 10px 28px rgba(131,110,249,0.08)', borderColor: 'rgba(131,110,249,0.4)' } as any}
-                style={{
-                  background: highlight ? 'linear-gradient(145deg, rgba(131,110,249,0.08) 0%, var(--bg-card) 100%)' : 'var(--bg-card)',
-                  border: `1px solid ${highlight ? 'rgba(131,110,249,0.35)' : 'var(--border)'}`,
-                  borderRadius: 16, padding: '1.75rem 1.5rem', textAlign: 'center', position: 'relative', overflow: 'hidden', transition: 'border-color 0.2s, box-shadow 0.2s',
-                }}
-              >
-                {highlight && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, #836EF9, transparent)' }} />}
-                {badge && <span style={{ ...tag(badge), position: 'absolute', top: '1rem', right: '1rem' }}>{badge}</span>}
-                <div style={{ width: 48, height: 48, background: BRANDDIM, border: `1px solid ${BRANDBORDER}`, borderRadius: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.1rem' }}>
-                  <Icon style={{ width: 20, height: 20, color: BRAND }} strokeWidth={1.5} />
-                </div>
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '2rem', fontWeight: 800, color: BRAND, lineHeight: 1, marginBottom: '0.4rem' }}>{value}</div>
-                <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.65rem' }}>{title}</div>
-                <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.65, margin: 0 }}>{desc}</p>
-              </motion.div>
+              { label: 'Ethereum trades', value: '2.5%', note: 'Platform fee on all ETH payments' },
+              { label: '$BOLTY trades', value: '0%', note: 'Zero fee — coming on Base chain' },
+              { label: 'Seller receives', value: '97.5%', note: 'After platform fee deduction' },
+            ].map(({ label, value, note }) => (
+              <div key={label} style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: 8, padding: '1.25rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#8b949e', marginBottom: '0.4rem' }}>{label}</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: BRAND, letterSpacing: '-0.03em' }}>{value}</div>
+                <div style={{ fontSize: '0.8rem', color: '#8b949e', marginTop: '0.3rem' }}>{note}</div>
+              </div>
             ))}
           </div>
 
-          {/* Fee bar */}
-          <FadeUp delay={0.15}>
-            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '1.5rem 1.75rem' }}>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontFamily: "'JetBrains Mono', monospace" }}>
-                Ethereum trade example — 100 USDC
-              </div>
+          <Note>
+            Bolty never custody your funds between trades. The smart contract releases payment to the seller as soon as the on-chain transactions confirm — there is no manual approval step.
+          </Note>
 
-              <div style={{ display: 'flex', height: 38, borderRadius: 9, overflow: 'hidden', gap: 2, marginBottom: '0.7rem' }}>
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: '97.5%' }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ background: 'linear-gradient(90deg, #836EF9, #a78bfa)', height: '100%', display: 'flex', alignItems: 'center', paddingLeft: '1rem', fontSize: '0.76rem', fontWeight: 600, color: '#fff', borderRadius: '7px 0 0 7px', whiteSpace: 'nowrap', overflow: 'hidden' }}
-                >
-                  Seller — 97.5 USDC
-                </motion.div>
-                <motion.div
-                  initial={{ width: 0 }}
-                  whileInView={{ width: '2.5%' }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                  style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.62rem', fontWeight: 700, color: '#a78bfa', borderRadius: '0 7px 7px 0', whiteSpace: 'nowrap', minWidth: 24 }}
-                >
-                  Fee
-                </motion.div>
-              </div>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>
-                With <strong style={{ background: 'linear-gradient(135deg, #836EF9, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$BOLTY (Base)</strong>: 100% goes to seller. 0% fee.
-              </p>
-            </div>
-          </FadeUp>
-        </div>
-      </section>
+          <Divider />
 
-      {/* ── TOKEN ─────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 0', background: 'var(--bg-elevated)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1.5rem' }}>
-          <FadeUp style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <span style={tag('Coming Soon')}>Coming Soon</span>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, letterSpacing: '-0.025em', margin: '0.75rem 0' }}>
-              The{' '}
-              <span style={{ background: 'linear-gradient(135deg, #836EF9, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>$BOLTY</span>
-              {' '}Token
-            </h2>
-            <p style={{ fontSize: '0.975rem', color: 'var(--text-muted)', maxWidth: 520, margin: '0 auto', lineHeight: 1.65 }}>
-              $BOLTY is the native utility token of Bolty, launching on <strong style={{ color: 'var(--text)' }}>Base</strong>. Zero fee on every trade. Official announcement coming soon on our <strong style={{ color: 'var(--text)' }}>X (Twitter)</strong>.
-            </p>
-          </FadeUp>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '0.875rem', marginBottom: '2rem' }}>
-            {BENEFITS.map(({ icon: Icon, title, desc }, i) => (
-              <motion.div
-                key={title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -2, borderColor: BRANDBORDER, boxShadow: '0 8px 24px rgba(131,110,249,0.08)' } as any}
-                style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '1.2rem 1.3rem', transition: 'border-color 0.2s, box-shadow 0.2s' }}
-              >
-                <div style={{ width: 40, height: 40, borderRadius: 11, background: BRANDDIM, border: `1px solid ${BRANDBORDER}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon style={{ width: 17, height: 17, color: BRAND }} strokeWidth={1.5} />
-                </div>
-                <div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.22rem' }}>{title}</div>
-                  <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: 1.55 }}>{desc}</div>
-                </div>
-              </motion.div>
-            ))}
+          <div style={{ color: '#8b949e', fontSize: '0.85rem', paddingBottom: '3rem' }}>
+            Need help? Join the community chat or open a support ticket from your profile.
           </div>
 
-          <FadeUp delay={0.2} style={{ display: 'flex', justifyContent: 'center' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.76rem', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 999, padding: '0.38rem 1rem' }}>
-              <Clock style={{ width: 12, height: 12 }} strokeWidth={1.5} />
-              Announcement coming soon on X — stay tuned
-            </span>
-          </FadeUp>
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 0', textAlign: 'center' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1.5rem' }}>
-          <FadeUp>
-            <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.4rem)', fontWeight: 800, letterSpacing: '-0.025em', marginBottom: '0.75rem' }}>Ready to start trading?</h2>
-            <p style={{ fontSize: '0.975rem', color: 'var(--text-muted)', maxWidth: 400, margin: '0 auto 2rem', lineHeight: 1.6 }}>
-              Connect your wallet, browse the marketplace, and trade securely on Ethereum with Bolty.
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
-              <a href="/market" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', color: '#fff', fontWeight: 600, fontSize: '0.9rem', padding: '0.72rem 1.5rem', borderRadius: 10, textDecoration: 'none', boxShadow: '0 4px 16px rgba(131,110,249,0.32)' }}>
-                <BarChart3 style={{ width: 15, height: 15 }} strokeWidth={1.5} />
-                Explore Marketplace
-              </a>
-              <a href="/auth" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: '0.9rem', padding: '0.72rem 1.5rem', borderRadius: 10, textDecoration: 'none', border: '1px solid var(--border)' }}>
-                Get Started Free
-                <ArrowRight style={{ width: 15, height: 15 }} strokeWidth={1.5} />
-              </a>
-            </div>
-          </FadeUp>
-        </div>
-      </section>
-
+        </main>
+      </div>
     </div>
   );
 }

@@ -7,11 +7,15 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { StaggeredMenu } from '@/components/layout/StaggeredMenu';
 import { FloatingAIChat } from '@/components/ui/FloatingAIChat';
 import { Footer } from '@/components/ui/footer-section';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { useUnreadDMs } from '@/lib/hooks/useUnreadDMs';
 import { Menu, X, Home } from 'lucide-react';
 
 // Must match StaggeredMenu CSS panel width
 const PANEL_WIDTH = 'clamp(280px, 40vw, 420px)';
+
+// Pages that show the branded logo box in the top bar
+const LOGO_PAGES = ['/market/agents', '/market/repos'];
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -19,15 +23,15 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const unreadDMs = useUnreadDMs(isAuthenticated);
   const isHome = pathname === '/';
+  const showLogoBox = LOGO_PAGES.some(p => pathname === p || pathname.startsWith(p + '?'));
 
   const closeMenu = () => setMenuOpen(false);
   const toggleMenu = () => setMenuOpen(v => !v);
 
   return (
-    // Outer shell: clips content that slides off-screen when menu opens
     <div style={{ overflowX: 'hidden', position: 'relative', minHeight: '100vh' }}>
 
-      {/* ── Floating menu button — always top-left, fixed ─────────────────── */}
+      {/* ── Floating menu button ───────────────────────────────────────────── */}
       <button
         onClick={toggleMenu}
         aria-label={menuOpen ? 'Close menu' : 'Open menu'}
@@ -40,9 +44,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           width: 50,
           height: 50,
           borderRadius: '50%',
-          background: menuOpen
-            ? 'rgba(131,110,249,0.18)'
-            : 'rgba(10,10,16,0.85)',
+          background: menuOpen ? 'rgba(131,110,249,0.18)' : 'rgba(10,10,16,0.85)',
           border: `2px solid ${menuOpen ? '#836ef9' : 'rgba(255,255,255,0.13)'}`,
           color: menuOpen ? '#836ef9' : '#d4d4d8',
           display: 'flex',
@@ -51,17 +53,13 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           cursor: 'pointer',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: menuOpen
-            ? '0 0 24px rgba(131,110,249,0.35)'
-            : '0 4px 20px rgba(0,0,0,0.5)',
+          boxShadow: menuOpen ? '0 0 24px rgba(131,110,249,0.35)' : '0 4px 20px rgba(0,0,0,0.5)',
           transition: 'all 0.22s ease',
         }}
       >
         {menuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* ── StaggeredMenu panel — fixed to RIGHT, outside push wrapper ──────
-          Position: fixed right:0. Content will shift LEFT to make room.   */}
       <StaggeredMenu
         open={menuOpen}
         onClose={closeMenu}
@@ -71,8 +69,6 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         unreadDMs={unreadDMs}
       />
 
-      {/* ── Push wrapper ─────────────────────────────────────────────────────
-          Shifts LEFT (negative X) when menu opens, revealing menu on right. */}
       <div
         style={{
           transform: menuOpen ? `translateX(-${PANEL_WIDTH})` : 'translateX(0)',
@@ -125,14 +121,50 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
           )}
+
+          {/* ── Bolty logo pill — shown on Agents & Repos pages ─────── */}
+          {showLogoBox && (
+            <div
+              style={{
+                position: 'fixed',
+                top: '1.1rem',
+                left: '8.5rem',
+                zIndex: 60,
+                height: 50,
+                borderRadius: 28,
+                background: 'rgba(131,110,249,0.12)',
+                border: '2px solid rgba(131,110,249,0.45)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                boxShadow: '0 0 18px rgba(131,110,249,0.25), 0 4px 20px rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '0 16px 0 6px',
+              }}
+            >
+              {/* Logo scaled up via transform so it fills without offset issues */}
+              <div style={{ width: 42, height: 42, overflow: 'hidden', borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/bolty-icon.png"
+                  alt="Bolty"
+                  style={{ width: 42, height: 42, objectFit: 'contain', transform: 'scale(2)', display: 'block' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.25 }}>
+                <span style={{ color: '#e4e4e7', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>Bolty</span>
+                <span style={{ color: '#836ef9', fontSize: '0.6rem', fontWeight: 500, whiteSpace: 'nowrap' }}>AI Platform</span>
+              </div>
+            </div>
+          )}
+
           {children}
         </main>
 
-        {/* Footer only on home page */}
-        {isHome && <Footer />}
+        <Footer />
       </div>
 
-      {/* FloatingAIChat outside push wrapper so it stays put */}
       <FloatingAIChat />
     </div>
   );

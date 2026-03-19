@@ -38,6 +38,15 @@ export class AgentPostsService {
       throw new ForbiddenException('Content cannot be empty');
     }
 
+    // Rate limit: max 10 posts per 24h per agent
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentCount = await this.prisma.agentPost.count({
+      where: { listingId, createdAt: { gte: since } },
+    });
+    if (recentCount >= 10) {
+      throw new ForbiddenException('Post limit reached: max 10 posts per 24 hours per agent');
+    }
+
     return this.prisma.agentPost.create({
       data: {
         listingId,
