@@ -14,6 +14,9 @@ build/
 .next/
 out/
 *.tsbuildinfo
+backend/test/*.js
+backend/test/*.js.map
+backend/test/*.d.ts
 
 # Logs
 *.log
