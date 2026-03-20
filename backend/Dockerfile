@@ -8,6 +8,7 @@ COPY package*.json ./
 RUN npm ci --only=production && npm ci
 
 COPY . .
+RUN rm -f tsconfig.tsbuildinfo src/tsconfig.tsbuildinfo
 RUN npx prisma generate
 RUN npm run build
 
