@@ -29,7 +29,7 @@ async function bootstrap() {
   app.useLogger(logger);
 
   const frontendUrl = configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
-  const port = configService.get<number>('PORT', 3001);
+  const port = parseInt(String(process.env.PORT || configService.get('PORT', '3001')), 10);
 
   // ── Security Headers ─────────────────────────────────────────────────────
   app.use(
