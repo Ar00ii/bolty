@@ -12,9 +12,10 @@ import { connectMetaMask } from '@/lib/wallet/ethereum';
 import {
   Bot, User, X, Key, Plus, Trash2, Copy, Eye, EyeOff,
   ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
-  AlertTriangle, Wallet,
+  AlertTriangle, Wallet, Users, Zap, Send,
 } from 'lucide-react';
 import { BackgroundBeams } from '@/components/ui/background-beams';
+import { io, Socket } from 'socket.io-client';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -57,6 +58,8 @@ interface Negotiation {
   id: string;
   status: 'ACTIVE' | 'AGREED' | 'REJECTED' | 'EXPIRED';
   agreedPrice?: number | null;
+  mode: 'AI_AI' | 'HUMAN';
+  humanSwitchRequestedBy?: string | null;
   listing: { id: string; title: string; price: number; currency: string; sellerId: string; agentEndpoint?: string | null; minPrice?: number | null };
   buyer: { id: string; username: string | null };
   messages: NegotiationMessage[];
@@ -109,6 +112,8 @@ function formatBytes(bytes: number) {
 
 // ── Negotiation Modal ──────────────────────────────────────────────────────────
 
+const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing; onClose: () => void; userId: string }) {
   const [neg, setNeg] = useState<Negotiation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -118,17 +123,57 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
   const [message, setMessage] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [error, setError] = useState('');
+  const [agentTyping, setAgentTyping] = useState<'buyer_agent' | 'seller_agent' | null>(null);
+  const [switchPending, setSwitchPending] = useState<{ requestedBy: string } | null>(null);
+  const [requestingSwitch, setRequestingSwitch] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
   const [consentData, setConsentData] = useState<{ sellerWallet: string; buyerAddress: string; sellerWei: bigint; platformWei: bigint; totalWei: bigint; negotiationId: string; amountWei: string; totalUsd: number } | null>(null);
 
+  // Start negotiation + setup WebSocket
   useEffect(() => {
     api.post<Negotiation>(`/market/${listing.id}/negotiate`, {})
-      .then(setNeg)
+      .then((n) => {
+        setNeg(n);
+        // Connect WebSocket once we have the negotiation id
+        const socket = io(`${SOCKET_URL}/negotiations`, { withCredentials: true, transports: ['websocket'] });
+        socketRef.current = socket;
+        socket.emit('join:negotiation', n.id);
+
+        socket.on('negotiation:message', (msg: NegotiationMessage) => {
+          setAgentTyping(null);
+          setNeg((prev) => prev ? { ...prev, messages: [...prev.messages.filter(m => m.id !== msg.id), msg] } : prev);
+        });
+
+        socket.on('negotiation:status', (data: { status: string; agreedPrice?: number | null }) => {
+          setNeg((prev) => prev ? { ...prev, status: data.status as Negotiation['status'], agreedPrice: data.agreedPrice ?? prev.agreedPrice } : prev);
+        });
+
+        socket.on('negotiation:agent-typing', ({ role }: { role: 'buyer_agent' | 'seller_agent' }) => {
+          setAgentTyping(role);
+          // Auto-clear after 5s as safety net
+          setTimeout(() => setAgentTyping(null), 5000);
+        });
+
+        socket.on('negotiation:human-switch-request', ({ requestedByUserId }: { requestedByUserId: string }) => {
+          setSwitchPending({ requestedBy: requestedByUserId });
+        });
+
+        socket.on('negotiation:human-switch-activated', () => {
+          setSwitchPending(null);
+          setNeg((prev) => prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev);
+        });
+      })
       .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to start negotiation'))
       .finally(() => setLoading(false));
+
+    return () => {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+    };
   }, [listing.id]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [neg?.messages.length]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [neg?.messages.length, agentTyping]);
 
   const send = async () => {
     if (!neg || !message.trim()) return;
@@ -151,6 +196,25 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
     catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to reject'); } finally { setSending(false); }
   };
 
+  const requestHumanSwitch = async () => {
+    if (!neg) return; setRequestingSwitch(true); setError('');
+    try {
+      await api.post(`/market/negotiations/${neg.id}/request-human`, {});
+      setNeg((prev) => prev ? { ...prev, humanSwitchRequestedBy: userId } : prev);
+    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to request switch'); }
+    finally { setRequestingSwitch(false); }
+  };
+
+  const acceptHumanSwitch = async () => {
+    if (!neg) return; setRequestingSwitch(true); setError('');
+    try {
+      await api.post(`/market/negotiations/${neg.id}/accept-human`, {});
+      setSwitchPending(null);
+      setNeg((prev) => prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev);
+    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to accept switch'); }
+    finally { setRequestingSwitch(false); }
+  };
+
   const payWithEth = async () => {
     if (!neg?.agreedPrice) return;
     setPaying(true); setError('');
@@ -162,10 +226,8 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
       if (!sellerWallet) { setError('Seller has no wallet linked'); setPaying(false); return; }
       let ethPrice = 2000;
       try { const p = await api.get<any>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch {}
-      const currency = neg.listing?.currency.toUpperCase();
-      let totalWei: bigint, totalUsd: number;
-      if (currency === 'ETH') { totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18)); totalUsd = neg.agreedPrice * ethPrice; }
-      else { totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18)); totalUsd = neg.agreedPrice * ethPrice; }
+      const totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
+      const totalUsd = neg.agreedPrice * ethPrice;
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
       const platformWei = totalWei - sellerWei;
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
@@ -198,99 +260,230 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
   };
 
   const isSeller = neg?.listing?.sellerId === userId;
+  const isAiMode = neg?.mode === 'AI_AI';
+  const iHaveRequestedSwitch = neg?.humanSwitchRequestedBy === userId;
+  const otherRequestedSwitch = switchPending && switchPending.requestedBy !== userId;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
-      <div className="w-full max-w-lg flex flex-col" style={{ maxHeight: '88vh', background: '#090910', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 16, boxShadow: '0 0 40px rgba(139,92,246,0.15)' }}>
-        <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}>
+      <div className="w-full max-w-lg flex flex-col" style={{ maxHeight: '88vh', background: '#07070f', border: '1px solid rgba(131,110,249,0.3)', borderRadius: 20, boxShadow: '0 0 60px rgba(131,110,249,0.12)' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse shrink-0" />
             <span className="text-monad-400 font-mono text-xs font-bold shrink-0">negotiate://</span>
             <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
             {neg && (
-              <span className={`text-xs font-mono font-bold ml-1 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}>[{neg.status.toLowerCase()}]</span>
+              <span className={`text-xs font-mono font-bold ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}>
+                [{neg.status.toLowerCase()}]
+              </span>
             )}
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 font-mono text-xs ml-2 shrink-0">[×]</button>
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 font-mono text-xs ml-2 shrink-0 transition-colors">[×]</button>
         </div>
-        {listing.agentEndpoint && (
-          <div className="px-4 py-2 border-b" style={{ borderColor: 'rgba(16,185,129,0.15)', background: 'rgba(16,185,129,0.04)' }}>
-            <p className="text-monad-400/80 text-xs font-mono flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse inline-block" />AI agent active — responses are automated</p>
+
+        {/* AI mode banner */}
+        {isAiMode && neg?.status === 'ACTIVE' && (
+          <div className="px-4 py-2.5 border-b shrink-0 flex items-center justify-between gap-3" style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}>
+            <div className="flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-monad-400 shrink-0" strokeWidth={1.5} />
+              <p className="text-monad-400 text-xs font-mono">AI agents negotiating automatically</p>
+            </div>
+            {!iHaveRequestedSwitch && !switchPending && (
+              <button onClick={requestHumanSwitch} disabled={requestingSwitch} className="text-xs font-mono text-zinc-500 hover:text-zinc-300 border rounded-lg px-2.5 py-1 transition-all shrink-0 disabled:opacity-40" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                {requestingSwitch ? '...' : 'take over'}
+              </button>
+            )}
+            {iHaveRequestedSwitch && (
+              <span className="text-xs font-mono text-zinc-500 shrink-0">waiting for other party...</span>
+            )}
           </div>
         )}
+
+        {/* Human switch request — Pokemon trade dialog */}
+        {otherRequestedSwitch && neg?.status === 'ACTIVE' && (
+          <div className="mx-4 mt-3 rounded-xl px-4 py-3 shrink-0 flex items-center justify-between gap-3" style={{ border: '1px solid rgba(250,204,21,0.25)', background: 'rgba(250,204,21,0.05)' }}>
+            <div className="flex items-center gap-2 min-w-0">
+              <Users className="w-3.5 h-3.5 text-yellow-400 shrink-0" strokeWidth={1.5} />
+              <p className="text-yellow-300 text-xs font-mono truncate">Other party wants to negotiate manually</p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button onClick={acceptHumanSwitch} disabled={requestingSwitch} className="text-xs font-mono px-3 py-1 rounded-lg transition-all disabled:opacity-40" style={{ background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.3)', color: '#fde68a' }}>
+                {requestingSwitch ? '...' : 'accept'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Floor price info */}
         {listing.minPrice != null && (
-          <div className="px-4 py-1.5 border-b" style={{ borderColor: 'rgba(250,204,21,0.1)', background: 'rgba(250,204,21,0.03)' }}>
-            <p className="text-zinc-500 text-xs font-mono">floor: {listing.minPrice} {listing.currency} — agent will not go below this</p>
+          <div className="px-4 py-1.5 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+            <p className="text-zinc-600 text-xs font-mono">floor price: {listing.minPrice} {listing.currency} — agents won't go below this</p>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
-          {loading && <p className="text-monad-400 text-xs font-mono animate-pulse text-center py-8">initializing negotiation protocol...</p>}
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
+          {loading && (
+            <div className="text-center py-12">
+              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto mb-3" />
+              <p className="text-monad-400 text-xs font-mono animate-pulse">initializing negotiation protocol...</p>
+            </div>
+          )}
+
           {neg?.messages.map((msg) => {
-            const isMine = msg.fromRole === 'buyer';
+            const isMine = msg.fromRole === 'buyer' && !isSeller;
             const isAgent = msg.fromRole === 'seller_agent' || msg.fromRole === 'buyer_agent';
+            const isSellerRole = msg.fromRole === 'seller' || msg.fromRole === 'seller_agent';
             return (
               <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs rounded-xl border px-3 py-2 text-xs font-mono ${ROLE_COLORS[msg.fromRole] || ROLE_COLORS.seller}`} style={{ boxShadow: isAgent ? '0 0 12px rgba(16,185,129,0.08)' : undefined }}>
-                  <div className="text-zinc-500 text-xs mb-1 flex items-center gap-1">
-                    {isAgent && <span className="w-1 h-1 rounded-full bg-monad-400 inline-block" />}
-                    {ROLE_LABELS[msg.fromRole]}
+                <div className={`max-w-[75%] rounded-2xl border px-3 py-2.5 text-xs font-mono ${ROLE_COLORS[msg.fromRole] || ROLE_COLORS.seller}`}
+                  style={{ boxShadow: isAgent ? '0 0 16px rgba(131,110,249,0.08)' : undefined }}>
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    {isAgent && <Zap className="w-2.5 h-2.5 text-monad-400" strokeWidth={2} />}
+                    <span className="text-zinc-500 text-[10px] uppercase tracking-wider">{ROLE_LABELS[msg.fromRole]}</span>
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                  {msg.proposedPrice != null && <div className="mt-1.5 pt-1.5 border-t border-current/20 font-bold">offer: {msg.proposedPrice} {neg.listing?.currency}</div>}
+                  {msg.proposedPrice != null && (
+                    <div className="mt-2 pt-2 border-t border-current/15 font-bold text-monad-300">
+                      ⬡ {msg.proposedPrice} {neg.listing?.currency}
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
+
+          {/* Typing indicator */}
+          {agentTyping && (
+            <div className="flex justify-start">
+              <div className="rounded-2xl border px-3 py-2.5 flex items-center gap-2" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'rgba(131,110,249,0.06)' }}>
+                <Zap className="w-3 h-3 text-monad-400" strokeWidth={2} />
+                <span className="text-xs font-mono text-monad-400/80">{agentTyping === 'seller_agent' ? 'seller' : 'buyer'} agent thinking</span>
+                <span className="flex gap-0.5">
+                  {[0, 1, 2].map(i => (
+                    <span key={i} className="w-1 h-1 rounded-full bg-monad-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                  ))}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* AGREED — pay or confirm */}
           {neg?.status === 'AGREED' && !paid && (
-            <div className="text-center py-3">
-              <div className="inline-block rounded-xl px-5 py-4" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}>
+            <div className="text-center py-2">
+              <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.04)' }}>
                 <p className="text-green-400 font-mono text-xs font-bold mb-1">✓ DEAL AGREED</p>
-                {neg.agreedPrice != null && <p className="text-green-300 font-mono text-xl font-black mb-3">{neg.agreedPrice} {neg.listing?.currency}</p>}
+                {neg.agreedPrice != null && (
+                  <p className="text-green-300 font-mono text-2xl font-black mb-3">⬡ {neg.agreedPrice} <span className="text-base font-normal text-green-500">{neg.listing?.currency}</span></p>
+                )}
                 {isSeller ? (
                   <div className="space-y-2">
-                    <p className="text-zinc-400 text-xs font-mono">Your agent agreed this price. Confirm to open DM with buyer.</p>
-                    <button onClick={accept} disabled={sending} className="block w-full text-xs font-mono font-bold py-2 px-4 rounded-lg disabled:opacity-40" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', color: '#4ade80' }}>{sending ? 'confirming...' : 'confirm deal + open DM chat'}</button>
+                    <p className="text-zinc-500 text-xs font-mono">Your agent agreed this price. Confirm to open DM with buyer.</p>
+                    <button onClick={accept} disabled={sending} className="w-full text-xs font-mono font-bold py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', color: '#4ade80' }}>
+                      {sending ? 'confirming...' : 'confirm deal + open DM chat'}
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-zinc-400 text-xs font-mono">Pay with MetaMask to complete the deal.</p>
-                    <button onClick={payWithEth} disabled={paying} className="block w-full text-xs font-mono font-bold py-2.5 px-4 rounded-lg disabled:opacity-40" style={{ background: 'linear-gradient(135deg,rgba(139,92,246,0.3),rgba(59,130,246,0.2))', border: '1px solid rgba(139,92,246,0.5)', color: '#c4b5fd' }}>{paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}</button>
+                    <p className="text-zinc-500 text-xs font-mono">Pay with MetaMask to complete the purchase.</p>
+                    <button onClick={payWithEth} disabled={paying} className="w-full text-xs font-mono font-bold py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)', color: 'white' }}>
+                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
+                    </button>
                   </div>
                 )}
               </div>
             </div>
           )}
+
           {paid && (
-            <div className="text-center py-3">
-              <div className="inline-block rounded-xl px-5 py-4" style={{ border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.08)' }}>
-                <p className="text-monad-300 font-mono text-sm font-bold mb-2">✓ PAYMENT SENT</p>
-                <p className="text-zinc-400 text-xs font-mono mb-3">Transaction recorded. Check your DMs to coordinate with the seller.</p>
-                <Link href="/dm" className="inline-block text-xs font-mono font-bold py-2 px-4 rounded-lg" style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', color: '#c4b5fd' }}>open messages →</Link>
+            <div className="text-center py-2">
+              <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(131,110,249,0.4)', background: 'rgba(131,110,249,0.07)' }}>
+                <p className="text-monad-300 font-mono text-sm font-bold mb-1">✓ PAYMENT SENT</p>
+                <p className="text-zinc-500 text-xs font-mono mb-3">Check your DMs to coordinate with the seller.</p>
+                <Link href="/dm" className="inline-block text-xs font-mono font-bold py-2 px-4 rounded-xl transition-all" style={{ background: 'rgba(131,110,249,0.2)', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}>open messages →</Link>
               </div>
             </div>
           )}
+
           {neg?.status === 'REJECTED' && (
-            <div className="text-center py-3">
-              <div className="inline-block border border-red-400/30 bg-red-400/5 rounded-xl px-4 py-3">
+            <div className="text-center py-2">
+              <div className="inline-block border border-red-400/25 bg-red-400/4 rounded-xl px-4 py-3">
                 <p className="text-red-400 font-mono text-xs font-bold">✗ NEGOTIATION REJECTED</p>
               </div>
             </div>
           )}
+
+          {neg?.status === 'EXPIRED' && (
+            <div className="text-center py-2">
+              <div className="inline-block border border-zinc-700/50 bg-zinc-800/20 rounded-xl px-4 py-3">
+                <p className="text-zinc-500 font-mono text-xs">Negotiation expired after max turns — no deal reached.</p>
+              </div>
+            </div>
+          )}
+
           <div ref={bottomRef} />
         </div>
-        {error && <p className="px-4 text-red-400 text-xs font-mono py-1">{error}</p>}
-        {neg?.status === 'ACTIVE' && (
-          <div className="border-t px-4 py-3 space-y-2" style={{ borderColor: 'rgba(139,92,246,0.2)' }}>
+        {error && <p className="px-4 text-red-400 text-xs font-mono py-1 shrink-0">{error}</p>}
+
+        {/* HUMAN mode footer — only visible when both parties agreed to manual negotiation */}
+        {neg?.status === 'ACTIVE' && neg.mode === 'HUMAN' && (
+          <div className="border-t px-4 py-3 space-y-2 shrink-0" style={{ borderColor: 'rgba(131,110,249,0.2)' }}>
+            <div className="flex items-center gap-1.5 mb-1">
+              <Users className="w-3 h-3 text-zinc-500" strokeWidth={1.5} />
+              <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wider">manual negotiation</span>
+            </div>
             <div className="flex gap-2">
-              <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()} placeholder="send a message..." className="flex-1 text-xs px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)', color: '#e4e4e7', outline: 'none' }} disabled={sending} />
-              <input type="number" value={offerPrice} onChange={(e) => setOfferPrice(e.target.value)} placeholder={`offer (${listing.currency})`} className="w-28 text-xs px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(139,92,246,0.05)', border: '1px solid rgba(139,92,246,0.2)', color: '#e4e4e7', outline: 'none' }} min="0" step="0.01" disabled={sending} />
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
+                placeholder="type your message..."
+                className="flex-1 text-xs px-3 py-2 rounded-xl font-mono transition-all"
+                style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.2)', color: '#e4e4e7', outline: 'none' }}
+                disabled={sending}
+              />
+              <input
+                type="number"
+                value={offerPrice}
+                onChange={(e) => setOfferPrice(e.target.value)}
+                placeholder={`offer (${listing.currency})`}
+                className="w-28 text-xs px-3 py-2 rounded-xl font-mono transition-all"
+                style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.2)', color: '#e4e4e7', outline: 'none' }}
+                min="0"
+                step="0.001"
+                disabled={sending}
+              />
             </div>
             <div className="flex gap-2 justify-between items-center">
               <div className="flex gap-2">
-                <button onClick={accept} disabled={sending} className="text-green-400 text-xs font-mono px-3 py-1 rounded-lg disabled:opacity-40" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}>[accept]</button>
-                <button onClick={reject} disabled={sending} className="text-red-400 text-xs font-mono px-3 py-1 rounded-lg disabled:opacity-40" style={{ border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)' }}>[reject]</button>
+                <button
+                  onClick={accept}
+                  disabled={sending}
+                  className="text-green-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-green-400/10"
+                  style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}
+                >
+                  accept deal
+                </button>
+                <button
+                  onClick={reject}
+                  disabled={sending}
+                  className="text-red-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-red-400/10"
+                  style={{ border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.04)' }}
+                >
+                  reject
+                </button>
               </div>
-              <button onClick={send} disabled={sending || !message.trim()} className="text-xs font-mono font-bold py-1.5 px-4 rounded-lg disabled:opacity-40" style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', color: '#c4b5fd' }}>{sending ? '...' : 'send →'}</button>
+              <button
+                onClick={send}
+                disabled={sending || !message.trim()}
+                className="flex items-center gap-1.5 text-xs font-mono font-bold py-1.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.3),rgba(131,110,249,0.15))', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}
+              >
+                {sending ? '...' : <><Send className="w-3 h-3" strokeWidth={2} /> send</>}
+              </button>
             </div>
           </div>
         )}
