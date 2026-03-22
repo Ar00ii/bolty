@@ -524,11 +524,16 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-0.5">
             <h3 className="text-sm font-semibold text-zinc-100 truncate">{listing.title}</h3>
-            {listing.agentEndpoint && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-mono"
+            {listing.agentEndpoint ? (
+              <span title="This seller has their own AI agent connected" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-mono cursor-default"
                 style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#c4b5fd' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse inline-block" />
-                live
+                own AI
+              </span>
+            ) : (
+              <span title="Uses Bolty's built-in AI fallback for negotiation" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-mono cursor-default"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#71717a' }}>
+                AI fallback
               </span>
             )}
           </div>

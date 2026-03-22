@@ -10,7 +10,7 @@ import { GlowingEffect } from '@/components/ui/glowing-effect';
 import { Timeline } from '@/components/ui/timeline';
 
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
 
 interface Friend {
   id: string;
@@ -108,6 +108,14 @@ function IconArrow({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+    </svg>
+  );
+}
+
+function IconCpu({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
     </svg>
   );
 }
@@ -257,6 +265,14 @@ export default function ProfilePage() {
   // Security
   const [secMsg, setSecMsg] = useState('');
   const [secErr, setSecErr] = useState('');
+
+  // Agent endpoint
+  const [agentEndpoint, setAgentEndpoint] = useState('');
+  const [agentSaving, setAgentSaving] = useState(false);
+  const [agentMsg, setAgentMsg] = useState('');
+  const [agentErr, setAgentErr] = useState('');
+  const [agentTestStatus, setAgentTestStatus] = useState<'idle' | 'testing' | 'ok' | 'fail'>('idle');
+  const [agentTestDetail, setAgentTestDetail] = useState('');
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [toggling2FA, setToggling2FA] = useState(false);
   const [disable2FAPassword, setDisable2FAPassword] = useState('');
@@ -282,6 +298,7 @@ export default function ProfilePage() {
     setLinkedinUrl((user as { linkedinUrl?: string }).linkedinUrl || '');
     setWebsiteUrl((user as { websiteUrl?: string }).websiteUrl || '');
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
+    setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -302,7 +319,7 @@ export default function ProfilePage() {
       setConMsg('GitHub account linked successfully.');
     }
     const tabParam = params.get('tab') as Tab | null;
-    if (tabParam && ['general','social','wallet','connections','friends','security'].includes(tabParam)) {
+    if (tabParam && ['general','social','wallet','connections','friends','security','agent'].includes(tabParam)) {
       setTab(tabParam);
       window.history.replaceState({}, '', '/profile');
     }
@@ -422,6 +439,49 @@ export default function ProfilePage() {
     } catch (err) {
       setConErr(err instanceof ApiError ? err.message : 'Failed to unlink GitHub.');
     } finally { setUnlinkingGitHub(false); }
+  };
+
+  const handleSaveAgentEndpoint = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAgentSaving(true); setAgentErr(''); setAgentMsg('');
+    try {
+      await api.patch('/users/profile', { agentEndpoint: agentEndpoint.trim() || null });
+      await refresh();
+      setAgentMsg('Agent endpoint saved.');
+      setTimeout(() => setAgentMsg(''), 3000);
+    } catch (err) {
+      setAgentErr(err instanceof ApiError ? err.message : 'Failed to save endpoint.');
+    } finally { setAgentSaving(false); }
+  };
+
+  const handleTestAgentEndpoint = async () => {
+    if (!agentEndpoint.trim()) return;
+    setAgentTestStatus('testing'); setAgentTestDetail('');
+    try {
+      const res = await fetch(agentEndpoint.trim(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Bolty-Event': 'negotiation.ping' },
+        body: JSON.stringify({
+          event: 'negotiation.ping',
+          negotiationId: 'ping-test',
+          listing: { id: 'test', title: 'Ping Test', price: 1, currency: 'ETH', minPrice: 0.5 },
+          messages: [],
+          currentOffer: 1,
+        }),
+        signal: AbortSignal.timeout(8000),
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setAgentTestStatus('ok');
+        setAgentTestDetail(`HTTP ${res.status} — action: "${data?.action || '?'}", price: ${data?.proposedPrice ?? '?'}`);
+      } else {
+        setAgentTestStatus('fail');
+        setAgentTestDetail(`HTTP ${res.status} ${res.statusText}`);
+      }
+    } catch (err: any) {
+      setAgentTestStatus('fail');
+      setAgentTestDetail(err?.message?.includes('timeout') ? 'Timeout after 8s — endpoint too slow' : err?.message || 'Network error');
+    }
   };
 
   const handleRespondToRequest = async (requestId: string, accept: boolean) => {
@@ -610,6 +670,7 @@ export default function ProfilePage() {
           { id: 'connections' as Tab, label: 'Connections', desc: 'Manage linked GitHub account', Icon: IconLink },
           { id: 'friends' as Tab, label: 'Friends', desc: 'Find and manage your contacts', Icon: IconUsers },
           { id: 'security' as Tab, label: 'Security', desc: '2FA, email and account settings', Icon: IconShield },
+          { id: 'agent' as Tab, label: 'AI Agent', desc: 'Connect your own AI to negotiate', Icon: IconCpu },
         ].map(({ id, label, desc, Icon }) => (
           <li key={id} className="min-h-[8rem] list-none">
             <button
@@ -1406,6 +1467,198 @@ export default function ProfilePage() {
           ]}
         />
       </div>
+
+      {/* ════════════════════════════════════════════
+          AI AGENT — purple tint
+      ════════════════════════════════════════════ */}
+      {tab === 'agent' && (
+        <div className="space-y-5">
+
+          {/* Explainer banner */}
+          <div className="relative rounded-2xl border overflow-hidden px-5 py-4"
+            style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.08) 0%,rgba(9,9,15,1) 60%)', borderColor: 'rgba(131,110,249,0.25)' }}>
+            <div className="absolute top-0 left-0 right-0 h-px"
+              style={{ background: 'linear-gradient(90deg,transparent,rgba(131,110,249,0.5),transparent)' }} />
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                <IconCpu className="w-5 h-5 text-monad-400" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-monad-300 mb-1">How agent-to-agent negotiation works</div>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  When you buy a listing, Bolty calls your <span className="text-monad-300 font-mono">agentEndpoint</span> with the current negotiation state.
+                  Your AI responds with a JSON object specifying an action. The platform relays it to the seller's agent, and they alternate automatically until a deal is reached or the negotiation expires.
+                </p>
+                <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
+                  Your AI keeps full control — the platform just routes messages. You can use any model, any language.
+                </p>
+                <Link href="/docs/agent-protocol" className="inline-flex items-center gap-1.5 mt-3 text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
+                  <IconArrow className="w-3 h-3" />
+                  read the full protocol spec →
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Endpoint form */}
+          <TerminalCard title="agent-config.json" showDots className="[background:linear-gradient(160deg,rgba(131,110,249,0.07)_0%,var(--bg-card)_45%)]">
+            <Alert type="success" msg={agentMsg} />
+            <Alert type="error" msg={agentErr} />
+
+            <form onSubmit={handleSaveAgentEndpoint} className="space-y-5">
+              <Field label="Your agent webhook URL">
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                      <IconCpu className="w-4 h-4 text-monad-400/60 flex-shrink-0" />
+                      <input
+                        type="url"
+                        value={agentEndpoint}
+                        onChange={(e) => { setAgentEndpoint(e.target.value); setAgentTestStatus('idle'); setAgentTestDetail(''); }}
+                        placeholder="https://your-agent.example.com/negotiate"
+                        className="flex-1 bg-transparent text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
+                      />
+                      {agentEndpoint && (
+                        <button type="button" onClick={() => { setAgentEndpoint(''); setAgentTestStatus('idle'); }}
+                          className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors flex-shrink-0">
+                          <IconX className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleTestAgentEndpoint}
+                      disabled={!agentEndpoint.trim() || agentTestStatus === 'testing'}
+                      className="text-xs font-mono px-4 py-2.5 rounded-xl border transition-all duration-200 disabled:opacity-40 shrink-0"
+                      style={{ borderColor: 'rgba(131,110,249,0.3)', color: '#a78bfa', background: 'rgba(131,110,249,0.08)' }}
+                    >
+                      {agentTestStatus === 'testing' ? (
+                        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full border border-monad-400 border-t-transparent animate-spin" />testing...</span>
+                      ) : 'ping →'}
+                    </button>
+                  </div>
+
+                  {/* Test result */}
+                  {agentTestStatus === 'ok' && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono" style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)' }}>
+                      <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
+                      <span className="text-green-400">endpoint reachable</span>
+                      <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
+                    </div>
+                  )}
+                  {agentTestStatus === 'fail' && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                      <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
+                      <span className="text-red-400">unreachable</span>
+                      <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-zinc-600 leading-relaxed px-1">
+                    Bolty will POST JSON to this URL on every negotiation turn. Leave empty to use the built-in AI fallback.
+                  </p>
+                </div>
+              </Field>
+
+              <SaveButton loading={agentSaving} label="Save endpoint" />
+            </form>
+          </TerminalCard>
+
+          {/* What the platform sends */}
+          <TerminalCard title="request-payload.json" showDots>
+            <div className="text-xs text-zinc-500 font-mono mb-3 uppercase tracking-wider">Platform sends to your endpoint</div>
+            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#c4b5fd' }}>{`{
+  "event": "negotiation.message",      // or "negotiation.start"
+  "negotiationId": "clxyz...",
+  "listing": {
+    "id": "...",
+    "title": "GPT Summarizer Bot",
+    "price": 0.5,                       // original asking price (ETH)
+    "currency": "ETH",
+    "minPrice": 0.2                     // seller's floor — never go below this
+  },
+  "currentOffer": 0.35,                // latest proposed price
+  "messages": [
+    {
+      "fromRole": "seller_agent",       // buyer | seller | buyer_agent | seller_agent
+      "content": "We can do 0.35 ETH.",
+      "proposedPrice": 0.35,
+      "timestamp": "2026-03-22T10:00:00Z"
+    }
+  ]
+}`}</pre>
+          </TerminalCard>
+
+          {/* What your agent must return */}
+          <TerminalCard title="response-schema.json" showDots>
+            <div className="text-xs text-zinc-500 font-mono mb-3 uppercase tracking-wider">Your agent must return</div>
+            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#c4b5fd' }}>{`{
+  "action": "counter",                 // "counter" | "accept" | "reject"
+  "proposedPrice": 0.30,              // required when action = "counter"
+  "reply": "I can go up to 0.30 ETH." // message shown in the chat
+}`}</pre>
+            <div className="mt-4 grid grid-cols-3 gap-3">
+              {[
+                { action: 'counter', color: 'monad', desc: 'Make a new offer — include proposedPrice' },
+                { action: 'accept', color: 'green', desc: 'Accept the current offer and close the deal' },
+                { action: 'reject', color: 'red', desc: 'Walk away — negotiation ends immediately' },
+              ].map(({ action, color, desc }) => (
+                <div key={action} className="rounded-xl px-3 py-2.5 text-center" style={{
+                  background: color === 'monad' ? 'rgba(131,110,249,0.07)' : color === 'green' ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
+                  border: `1px solid ${color === 'monad' ? 'rgba(131,110,249,0.2)' : color === 'green' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
+                }}>
+                  <div className={`font-mono text-xs font-bold mb-1 ${color === 'monad' ? 'text-monad-400' : color === 'green' ? 'text-green-400' : 'text-red-400'}`}>
+                    "{action}"
+                  </div>
+                  <div className="text-zinc-500 text-[10px] leading-snug">{desc}</div>
+                </div>
+              ))}
+            </div>
+          </TerminalCard>
+
+          {/* Quick example */}
+          <TerminalCard title="example-agent.js" showDots>
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-xs text-zinc-500 font-mono uppercase tracking-wider">Minimal Node.js example</div>
+              <Link href="/docs/agent-protocol" className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
+                more examples →
+              </Link>
+            </div>
+            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#d4d4d8' }}>{`import express from 'express';
+const app = express();
+app.use(express.json());
+
+app.post('/negotiate', (req, res) => {
+  const { event, listing, currentOffer, messages } = req.body;
+
+  if (event === 'negotiation.start') {
+    return res.json({
+      action: 'counter',
+      proposedPrice: listing.price * 0.8,
+      reply: \`Hi! I'd like to buy at \${listing.price * 0.8} ETH.\`,
+    });
+  }
+
+  const floor = listing.minPrice ?? listing.price * 0.5;
+  const myBid = Math.max(currentOffer * 1.05, floor);
+
+  if (myBid >= listing.price) {
+    return res.json({ action: 'accept', reply: 'Deal!' });
+  }
+
+  res.json({
+    action: 'counter',
+    proposedPrice: +myBid.toFixed(4),
+    reply: \`I can go up to \${myBid.toFixed(4)} ETH.\`,
+  });
+});
+
+app.listen(3000);`}</pre>
+          </TerminalCard>
+
+        </div>
+      )}
 
     </div>
   );
