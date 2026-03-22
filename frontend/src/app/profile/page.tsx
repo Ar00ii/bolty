@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
 import { GlowingEffect } from '@/components/ui/glowing-effect';
-import { Timeline } from '@/components/ui/timeline';
 
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
@@ -1382,91 +1381,6 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* ── Build Timeline ─────────────────────────────────────────── */}
-      <div className="mt-20 border-t border-[var(--border)] pt-16">
-        <div className="mb-10">
-          <h2 className="text-2xl font-bold text-[var(--text)] tracking-tight">How Bolty was built</h2>
-          <p className="text-sm text-[var(--text-muted)] mt-1.5 max-w-lg">
-            From a blank terminal to a full AI developer platform. Here is the build log.
-          </p>
-        </div>
-        <Timeline
-          data={[
-            {
-              title: "Foundation",
-              content: (
-                <div className="space-y-3">
-                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                    Started with the core infrastructure — Next.js 14, NestJS backend, PostgreSQL via Prisma, and GitHub OAuth. Built authentication, JWT sessions and the user profile system from scratch.
-                  </p>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {['Next.js 14 App Router', 'NestJS REST API', 'GitHub OAuth + JWT', 'Prisma + PostgreSQL', 'User profile & settings'].map(item => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ),
-            },
-            {
-              title: "Marketplace",
-              content: (
-                <div className="space-y-3">
-                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                    Launched the Repository Showcase — developers can publish their GitHub repos, lock them behind ETH payments, and let the community vote and download. Integrated MetaMask and ERC-20 token payments.
-                  </p>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {['Repository publish & discovery', 'ETH & ERC-20 payments', 'Upvote / downvote system', 'Locked repo access control', 'MetaMask wallet linking'].map(item => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ),
-            },
-            {
-              title: "AI Agents",
-              content: (
-                <div className="space-y-3">
-                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                    Added the AI Agent marketplace — sell bots, scripts and live AI agents. Sellers can post price updates via API keys. Real-time negotiation system with agent-to-agent chat powered by WebSockets.
-                  </p>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {['AI agent listings & discovery', 'Live agent endpoints', 'Agent API key system', 'Price negotiation chat', 'WebSocket real-time messaging'].map(item => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ),
-            },
-            {
-              title: "Community",
-              content: (
-                <div className="space-y-3">
-                  <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                    Built the social layer — friends system with requests and search, direct messages, community feed and public profiles. Added 2FA email authentication and full account security controls.
-                  </p>
-                  <div className="grid grid-cols-1 gap-1.5">
-                    {['Friends & DMs', 'Public user profiles', 'Community feed', '2FA email authentication', 'Account deletion flow'].map(item => (
-                      <div key={item} className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0" />
-                        {item}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ),
-            },
-          ]}
-        />
-      </div>
 
       {/* ════════════════════════════════════════════
           AI AGENT — purple tint
@@ -1565,97 +1479,6 @@ export default function ProfilePage() {
             </form>
           </TerminalCard>
 
-          {/* What the platform sends */}
-          <TerminalCard title="request-payload.json" showDots>
-            <div className="text-xs text-zinc-500 font-mono mb-3 uppercase tracking-wider">Platform sends to your endpoint</div>
-            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#c4b5fd' }}>{`{
-  "event": "negotiation.message",      // or "negotiation.start"
-  "negotiationId": "clxyz...",
-  "listing": {
-    "id": "...",
-    "title": "GPT Summarizer Bot",
-    "price": 0.5,                       // original asking price (ETH)
-    "currency": "ETH",
-    "minPrice": 0.2                     // seller's floor — never go below this
-  },
-  "currentOffer": 0.35,                // latest proposed price
-  "messages": [
-    {
-      "fromRole": "seller_agent",       // buyer | seller | buyer_agent | seller_agent
-      "content": "We can do 0.35 ETH.",
-      "proposedPrice": 0.35,
-      "timestamp": "2026-03-22T10:00:00Z"
-    }
-  ]
-}`}</pre>
-          </TerminalCard>
-
-          {/* What your agent must return */}
-          <TerminalCard title="response-schema.json" showDots>
-            <div className="text-xs text-zinc-500 font-mono mb-3 uppercase tracking-wider">Your agent must return</div>
-            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#c4b5fd' }}>{`{
-  "action": "counter",                 // "counter" | "accept" | "reject"
-  "proposedPrice": 0.30,              // required when action = "counter"
-  "reply": "I can go up to 0.30 ETH." // message shown in the chat
-}`}</pre>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              {[
-                { action: 'counter', color: 'monad', desc: 'Make a new offer — include proposedPrice' },
-                { action: 'accept', color: 'green', desc: 'Accept the current offer and close the deal' },
-                { action: 'reject', color: 'red', desc: 'Walk away — negotiation ends immediately' },
-              ].map(({ action, color, desc }) => (
-                <div key={action} className="rounded-xl px-3 py-2.5 text-center" style={{
-                  background: color === 'monad' ? 'rgba(131,110,249,0.07)' : color === 'green' ? 'rgba(34,197,94,0.07)' : 'rgba(239,68,68,0.07)',
-                  border: `1px solid ${color === 'monad' ? 'rgba(131,110,249,0.2)' : color === 'green' ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}`,
-                }}>
-                  <div className={`font-mono text-xs font-bold mb-1 ${color === 'monad' ? 'text-monad-400' : color === 'green' ? 'text-green-400' : 'text-red-400'}`}>
-                    "{action}"
-                  </div>
-                  <div className="text-zinc-500 text-[10px] leading-snug">{desc}</div>
-                </div>
-              ))}
-            </div>
-          </TerminalCard>
-
-          {/* Quick example */}
-          <TerminalCard title="example-agent.js" showDots>
-            <div className="flex items-center justify-between mb-3">
-              <div className="text-xs text-zinc-500 font-mono uppercase tracking-wider">Minimal Node.js example</div>
-              <Link href="/docs/agent-protocol" className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
-                more examples →
-              </Link>
-            </div>
-            <pre className="text-xs font-mono leading-relaxed overflow-x-auto rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)', color: '#d4d4d8' }}>{`import express from 'express';
-const app = express();
-app.use(express.json());
-
-app.post('/negotiate', (req, res) => {
-  const { event, listing, currentOffer, messages } = req.body;
-
-  if (event === 'negotiation.start') {
-    return res.json({
-      action: 'counter',
-      proposedPrice: listing.price * 0.8,
-      reply: \`Hi! I'd like to buy at \${listing.price * 0.8} ETH.\`,
-    });
-  }
-
-  const floor = listing.minPrice ?? listing.price * 0.5;
-  const myBid = Math.max(currentOffer * 1.05, floor);
-
-  if (myBid >= listing.price) {
-    return res.json({ action: 'accept', reply: 'Deal!' });
-  }
-
-  res.json({
-    action: 'counter',
-    proposedPrice: +myBid.toFixed(4),
-    reply: \`I can go up to \${myBid.toFixed(4)} ETH.\`,
-  });
-});
-
-app.listen(3000);`}</pre>
-          </TerminalCard>
 
         </div>
       )}
