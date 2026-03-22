@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
   Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
-  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, ShoppingCart, type LucideIcon,
+  UserPlus, Zap, Percent, Coins, Briefcase, Trophy, ShoppingCart, BookOpen, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
@@ -82,15 +82,25 @@ const NAV_ITEMS: NavItem[] = [
       { href: '/reputation/leaderboard', label: 'Leaderboard',    icon: Trophy },
     ],
   },
+  {
+    label: 'Docs',
+    href: '/docs/agent-protocol',
+    sub: [
+      { href: '/docs/agent-protocol', label: 'Agent Protocol',  icon: BookOpen },
+      { href: '/docs/agent-protocol#request',  label: 'Request Payload', icon: Code2 },
+      { href: '/docs/agent-protocol#examples', label: 'Code Examples',   icon: Package },
+    ],
+  },
 ];
 
 const PROFILE_ITEM: NavItem = {
   label: 'Profile',
   href: '/profile',
   sub: [
-    { href: '/profile',               label: 'My Profile', icon: UserIcon },
-    { href: '/profile?tab=settings',  label: 'Settings',   icon: Settings },
-    { href: '/profile?tab=wallet',    label: 'Wallet',     icon: Wallet },
+    { href: '/profile',              label: 'My Profile', icon: UserIcon },
+    { href: '/profile?tab=wallet',   label: 'Wallet',     icon: Wallet },
+    { href: '/profile?tab=agent',    label: 'AI Agent',   icon: Cpu },
+    { href: '/profile?tab=security', label: 'Security',   icon: Settings },
   ],
 };
 
