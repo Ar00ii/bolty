@@ -378,26 +378,39 @@ export default function ReposPage() {
     <div className="max-w-7xl mx-auto px-4 py-10">
       <DottedSurface />
 
-      <div className="mb-8">
-        <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-2">Repository Showcase</p>
-        <h1 className="text-2xl font-bold text-white mb-1">Explore repos</h1>
-        <p className="text-sm text-zinc-500">Community repositories — public &amp; locked. Discover, vote, download.</p>
+      <div className="mb-10">
+        <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Repository Showcase</p>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-black text-white mb-1">Explore Repos</h1>
+            <p className="text-sm text-zinc-500">Community repositories — public &amp; locked. Discover, vote, download.</p>
+          </div>
+          {isAuthenticated && (
+            <button onClick={loadGhRepos}
+              className="flex items-center gap-2 text-sm font-mono font-medium px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 shrink-0"
+              style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}>
+              <Upload className="w-4 h-4" /> Publish repo
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="border border-white/06 rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center"
-        style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <div className="border rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center"
+        style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
         <input
           type="text"
           placeholder="Search repositories..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 min-w-48 rounded-xl px-4 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-600 outline-none focus:border-monad-500/50 transition-colors"
+          className="flex-1 min-w-48 rounded-xl px-4 py-2 text-sm font-mono outline-none transition-colors"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}
         />
         <select
           value={language}
           onChange={e => setLanguage(e.target.value)}
-          className="rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white outline-none focus:border-monad-500/50 transition-colors appearance-none cursor-pointer"
+          className="rounded-xl px-3 py-2 text-sm font-mono outline-none appearance-none cursor-pointer transition-colors"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}
         >
           {LANGUAGES.map(l => (
             <option key={l} value={l === 'All' ? '' : l}>{l}</option>
@@ -406,21 +419,18 @@ export default function ReposPage() {
         <div className="flex gap-1 flex-wrap">
           {SORTS.map(s => (
             <button key={s.value} onClick={() => setSortBy(s.value as typeof sortBy)}
-              className={`px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors ${
                 sortBy === s.value
-                  ? 'bg-monad-500/15 text-monad-400 border border-monad-500/30'
-                  : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
-              }`}>
+                  ? 'text-monad-300'
+                  : 'text-zinc-600 hover:text-zinc-300'
+              }`}
+              style={sortBy === s.value
+                ? { background: 'rgba(131,110,249,0.12)', borderColor: 'rgba(131,110,249,0.35)' }
+                : { background: 'transparent', borderColor: 'rgba(255,255,255,0.08)' }}>
               {s.label}
             </button>
           ))}
         </div>
-        {isAuthenticated && (
-          <button onClick={loadGhRepos}
-            className="text-xs font-mono px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors">
-            + publish repo
-          </button>
-        )}
       </div>
 
       {/* Publish panel with ActionSearchBar */}
@@ -792,7 +802,9 @@ export default function ReposPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {repos.map(repo => (
-            <Card key={repo.id} className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a12] shadow-lg hover:border-monad-500/25 transition-colors duration-200">
+            <Card key={repo.id} className="group flex flex-col overflow-hidden rounded-2xl shadow-lg transition-all duration-200 hover:shadow-[0_0_32px_rgba(131,110,249,0.08)]" style={{ border: '1px solid rgba(255,255,255,0.07)', background: '#09090f' }}>
+              {/* Top accent */}
+              <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.1) 100%)' }} />
               {/* Cover banner */}
               <div className="relative h-20 w-full overflow-hidden">
                 {repo.logoUrl ? (
@@ -917,13 +929,15 @@ export default function ReposPage() {
                   )}
                   {repo.isLocked ? (
                     <button onClick={() => payAndUnlock(repo)}
-                      className="text-xs py-1.5 px-3 font-mono text-monad-400 border border-dashed border-monad-500/25 rounded-lg hover:bg-monad-500/10 transition-colors">
-                      Unlock — ${repo.lockedPriceUsd} USD
+                      className="text-xs py-1.5 px-3 font-mono font-medium text-white rounded-lg transition-all hover:opacity-90"
+                      style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}>
+                      Unlock — ${repo.lockedPriceUsd}
                     </button>
                   ) : (
                     <button onClick={() => download(repo.id, repo.githubUrl)}
-                      className="text-xs py-1.5 px-3 font-mono text-zinc-400 border border-dashed border-white/10 rounded-lg hover:bg-white/05 hover:text-zinc-300 transition-colors">
-                      download
+                      className="text-xs py-1.5 px-3 font-mono text-monad-400 border rounded-lg transition-all hover:bg-monad-500/10"
+                      style={{ borderColor: 'rgba(131,110,249,0.25)' }}>
+                      Download
                     </button>
                   )}
                   {/* Delete — only for the owner */}
@@ -959,8 +973,9 @@ export default function ReposPage() {
             </Card>
           ))}
           {repos.length === 0 && !loading && (
-            <div className="col-span-3 text-center py-20 text-zinc-600 font-mono text-sm">
-              No repositories found. Be the first to publish.
+            <div className="col-span-3 text-center py-20 border border-dashed rounded-2xl" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
+              <GitBranch className="w-10 h-10 text-monad-400/20 mx-auto mb-3" strokeWidth={1} />
+              <p className="text-zinc-600 font-mono text-sm">No repositories found. Be the first to publish.</p>
             </div>
           )}
         </div>
