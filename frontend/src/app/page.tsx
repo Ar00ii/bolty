@@ -12,6 +12,8 @@ import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import { HeroBento } from '@/components/ui/HeroBento';
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
+import { NumberTicker } from '@/components/ui/number-ticker';
 import { RetroGrid } from '@/components/ui/retro-grid';
 import dynamic from 'next/dynamic';
 const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
@@ -211,10 +213,10 @@ const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGPro
 
 // ── New data ───────────────────────────────────────────────────────────────────
 const STATS = [
-  { value: 'Beta', label: 'Current version' },
-  { value: '3', label: 'Planned releases' },
-  { value: 'ETH', label: 'On-chain payments' },
-  { value: '100%', label: 'Open to devs' },
+  { value: 'Beta', label: 'Current version', numeric: null },
+  { value: '3', label: 'Planned releases', numeric: 3 },
+  { value: 'ETH', label: 'On-chain payments', numeric: null },
+  { value: '100%', label: 'Open to devs', numeric: 100, suffix: '%' },
 ];
 
 const INTEGRATIONS = [
@@ -368,11 +370,10 @@ export default function HomePage() {
 
               {/* Left: text */}
               <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 mb-8 px-3 py-1.5 rounded-full border"
-                  style={{ borderColor: 'rgba(131,110,249,0.3)', background: 'rgba(131,110,249,0.06)' }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-                  <p className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</p>
-                </div>
+                <AnimatedGradientText className="mb-8">
+                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
+                  <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
+                </AnimatedGradientText>
                 <h1 className="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
                   <span className="block text-white">Publish.</span>
                   <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
@@ -428,7 +429,9 @@ export default function HomePage() {
                   <div className="px-8 py-7 bg-black hover:bg-monad-500/4 transition-colors">
                     <div className="text-4xl font-black mb-2 tabular-nums"
                       style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      {s.value}
+                      {s.numeric != null
+                        ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
+                        : s.value}
                     </div>
                     <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
                   </div>

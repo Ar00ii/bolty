@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { BentoGrid, BentoCard } from './bento-grid';
+import { BorderBeam } from './border-beam';
 import { Bot, Code2, Coins, Zap } from 'lucide-react';
 
 // ── Animated negotiation chat ─────────────────────────────────────────────────
@@ -171,7 +172,12 @@ export function HeroBento() {
         className="col-span-2 row-span-1"
         href="/docs/agent-protocol"
         cta="Read protocol"
-        background={<NegotiationChat />}
+        background={
+          <>
+            <NegotiationChat />
+            <BorderBeam duration={8} colorFrom="#836EF9" colorTo="#c4b5fd" />
+          </>
+        }
       />
 
       {/* 3 — Agent API (big card) */}
