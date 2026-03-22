@@ -7,9 +7,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { BGPattern } from '@/components/ui/bg-pattern';
 import { GeometricBg } from '@/components/ui/GeometricBg';
-import { Spotlight } from '@/components/ui/spotlight';
 import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
-import { SplineScene } from '@/components/ui/splite';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
@@ -18,7 +16,6 @@ import dynamic from 'next/dynamic';
 const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
 const CardSwap = dynamic(() => import('@/components/ui/CardSwap'), { ssr: false });
 import { Card } from '@/components/ui/CardSwap';
-const GridScan = dynamic(() => import('@/components/ui/GridScan').then(m => ({ default: m.GridScan })), { ssr: false });
 import {
   Code2,
   Bot,
@@ -50,7 +47,6 @@ import {
   Radio,
 } from 'lucide-react';
 const AnimatedShaderBackground = dynamic(() => import('@/components/ui/animated-shader-background'), { ssr: false });
-import DatabaseWithRestApi from '@/components/ui/database-with-rest-api';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -223,7 +219,7 @@ const STATS = [
 const INTEGRATIONS = [
   { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
   { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
-  { name: 'Solana', icon: Zap, desc: 'Multi-chain support' },
+  { name: 'BOLTY Token', icon: Zap, desc: '0 tax — pay with BOLTY' },
   { name: 'Any language', icon: Code2, desc: 'All stacks welcome' },
   { name: 'AI models', icon: Bot, desc: 'GPT, Claude & more' },
   { name: 'Terminal', icon: Terminal, desc: 'CLI toolkit coming soon' },
@@ -346,35 +342,105 @@ export default function HomePage() {
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative h-screen bg-black overflow-hidden">
-        <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
-        <div className="absolute inset-0 flex items-center pointer-events-none">
+        {/* Gradient orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-32 right-1/4 w-[700px] h-[700px] rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.9) 0%, transparent 65%)', filter: 'blur(80px)' }} />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-10"
+            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.7) 0%, transparent 70%)', filter: 'blur(100px)' }} />
+          <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] rounded-full opacity-8"
+            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+        </div>
+
+        {/* Dot grid */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(rgba(131,110,249,0.25) 1px, transparent 1px)', backgroundSize: '36px 36px', opacity: 0.5 }} />
+
+        {/* Vignette */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 20%, rgba(0,0,0,0.85) 100%)' }} />
+
+        {/* Content */}
+        <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-8 w-full">
-            <div className="relative z-10 flex flex-col max-w-lg pointer-events-auto">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
-                Built for developers
-              </p>
-              <h1 className="text-5xl md:text-7xl font-black bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight mb-6">
-                Publish.<br />Collaborate.<br />Earn.
-              </h1>
-              <p className="text-neutral-400 max-w-md text-base leading-relaxed mb-10">
-                Bolty brings together code, AI agents, and community in one developer-first platform.
-                Share your work and grow your audience.
-              </p>
-              {!isAuthenticated && (
-                <div>
-                  <Link href="/auth">
-                    <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                  </Link>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+              {/* Left: text */}
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 mb-8 px-3 py-1.5 rounded-full border"
+                  style={{ borderColor: 'rgba(131,110,249,0.3)', background: 'rgba(131,110,249,0.06)' }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
+                  <p className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</p>
                 </div>
-              )}
+                <h1 className="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
+                  <span className="block text-white">Publish.</span>
+                  <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
+                  <span className="block text-white">Earn.</span>
+                </h1>
+                <p className="text-zinc-400 max-w-md text-base leading-relaxed mb-10">
+                  Bolty brings together code, AI agents, and community in one developer-first platform.
+                  Share your work and grow your audience.
+                </p>
+                {!isAuthenticated && (
+                  <div className="flex items-center gap-5">
+                    <Link href="/auth">
+                      <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                    </Link>
+                    <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
+                      Learn more <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: geometric orbital visual */}
+              <div className="hidden lg:flex items-center justify-center relative h-[420px]">
+                {/* Outer ring */}
+                <div className="absolute w-[380px] h-[380px] rounded-full border border-monad-500/10 animate-spin"
+                  style={{ animationDuration: '30s' }} />
+                <div className="absolute w-[300px] h-[300px] rounded-full border border-monad-500/15 animate-spin"
+                  style={{ animationDuration: '20s', animationDirection: 'reverse' }} />
+                <div className="absolute w-[220px] h-[220px] rounded-full border border-monad-500/20"
+                  style={{ borderStyle: 'dashed' }} />
+
+                {/* Core orb */}
+                <div className="absolute w-[120px] h-[120px] rounded-full flex items-center justify-center z-10"
+                  style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0.05) 70%, transparent 100%)', boxShadow: '0 0 80px rgba(131,110,249,0.25), 0 0 160px rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.2)' }}>
+                  <span className="font-mono text-xs font-bold text-monad-400 tracking-widest">BOLTY</span>
+                </div>
+
+                {/* Orbiting dot 1 */}
+                <div className="absolute w-[300px] h-[300px] rounded-full animate-spin" style={{ animationDuration: '8s' }}>
+                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
+                    style={{ background: '#836EF9', boxShadow: '0 0 12px rgba(131,110,249,0.9), 0 0 24px rgba(131,110,249,0.4)' }} />
+                </div>
+                {/* Orbiting dot 2 */}
+                <div className="absolute w-[380px] h-[380px] rounded-full animate-spin" style={{ animationDuration: '14s', animationDirection: 'reverse' }}>
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
+                    style={{ background: '#c4b5fd', boxShadow: '0 0 8px rgba(196,181,253,0.8)' }} />
+                </div>
+
+                {/* Floating feature tags */}
+                <div className="absolute top-8 left-4 px-3 py-2 rounded-xl text-xs font-mono text-monad-400 z-10"
+                  style={{ border: '1px solid rgba(131,110,249,0.2)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
+                  ⟶ ETH Payments
+                </div>
+                <div className="absolute bottom-12 right-2 px-3 py-2 rounded-xl text-xs font-mono text-monad-400 z-10"
+                  style={{ border: '1px solid rgba(131,110,249,0.2)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
+                  ⟶ AI Agents
+                </div>
+                <div className="absolute top-1/3 right-0 px-3 py-2 rounded-xl text-xs font-mono text-zinc-500 z-10"
+                  style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
+                  ⟶ Code Repos
+                </div>
+                <div className="absolute bottom-1/4 left-0 px-3 py-2 rounded-xl text-xs font-mono text-zinc-500 z-10"
+                  style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
+                  ⟶ Community
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-        <div className="absolute right-0 top-0 w-1/2 h-full hidden md:block">
-          <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
-          />
         </div>
       </section>
 
@@ -449,61 +515,45 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── INTEGRATIONS — left text+tiles + right DatabaseWithRestApi ── */}
+      {/* ── INTEGRATIONS ── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <BGPattern variant="diagonal-stripes" mask="fade-edges" fill="rgba(131,110,249,0.08)" size={24} />
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left: title + description + integration tiles */}
-            <div>
-              <AnimatedContainer>
-                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                  Works with<br />your stack
-                </h2>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
-                  Bolty connects with the tools and chains you already use — no complicated setup required.
-                </p>
-              </AnimatedContainer>
-              <div className="grid grid-cols-2 gap-3">
-                {INTEGRATIONS.map((item, i) => (
-                  <AnimatedContainer key={item.name} delay={i * 0.07}>
-                    <div className="border rounded-xl p-4 flex items-center gap-3 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
-                      style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(131,110,249,0.1)' }}>
-                        <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-medium text-zinc-300">{item.name}</div>
-                        <div className="text-xs text-zinc-600">{item.desc}</div>
-                      </div>
-                    </div>
-                  </AnimatedContainer>
-                ))}
-              </div>
-              <AnimatedContainer delay={0.4} className="mt-6">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
-                  style={{ background: 'rgba(131,110,249,0.04)' }}>
-                  <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
+          <AnimatedContainer className="mb-12">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                Works with<br />your stack
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed max-w-sm md:text-right">
+                Bolty connects with the tools and chains you already use — no complicated setup required.
+              </p>
+            </div>
+          </AnimatedContainer>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+            {INTEGRATIONS.map((item, i) => (
+              <AnimatedContainer key={item.name} delay={i * 0.07}>
+                <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                    <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-zinc-200">{item.name}</div>
+                    <div className="text-xs text-zinc-600 mt-0.5">{item.desc}</div>
+                  </div>
                 </div>
               </AnimatedContainer>
-            </div>
-
-            {/* Right: DatabaseWithRestApi visual */}
-            <AnimatedContainer delay={0.2} className="flex items-center justify-center">
-              <div className="w-full max-w-md">
-                <DatabaseWithRestApi
-                  title="Bolty Platform API"
-                  circleText="ETH"
-                  badgeTexts={{ first: 'GET', second: 'POST', third: 'PUT', fourth: 'DELETE' }}
-                  buttonTexts={{ first: 'bolty.dev', second: 'beta_v1' }}
-                  lightColor="#836EF9"
-                />
-              </div>
-            </AnimatedContainer>
+            ))}
           </div>
+          <AnimatedContainer delay={0.4}>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
+              style={{ background: 'rgba(131,110,249,0.04)' }}>
+              <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
+              <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
+            </div>
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -1007,21 +1057,11 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* GridScan full-bleed background */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-          <GridScan
-            sensitivity={0.55}
-            lineThickness={1}
-            linesColor="#3b2060"
-            gridScale={0.1}
-            scanColor="#836EF9"
-            scanOpacity={0.4}
-            enablePost
-            bloomIntensity={0.6}
-            chromaticAberration={0.002}
-            noiseIntensity={0.01}
-          />
-        </div>
+        {/* Subtle background */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(rgba(131,110,249,0.12) 1px, transparent 1px)', backgroundSize: '48px 48px', opacity: 0.3 }} />
         <div className="max-w-7xl mx-auto px-4 relative" style={{ zIndex: 1 }}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>

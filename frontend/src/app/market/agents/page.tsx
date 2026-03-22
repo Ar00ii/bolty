@@ -165,7 +165,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
       const currency = neg.listing?.currency.toUpperCase();
       let totalWei: bigint, totalUsd: number;
       if (currency === 'ETH') { totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18)); totalUsd = neg.agreedPrice * ethPrice; }
-      else { totalUsd = currency === 'SOL' ? neg.agreedPrice * 150 : neg.agreedPrice; totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18)); }
+      else { totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18)); totalUsd = neg.agreedPrice * ethPrice; }
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
       const platformWei = totalWei - sellerWei;
       const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
@@ -595,7 +595,7 @@ function MyAgentCard({ listing, onDelete }: { listing: MarketListing; onDelete: 
 
 function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: MarketListing) => void; onCancel: () => void }) {
   const { refresh } = useAuth();
-  const [form, setForm] = useState({ title: '', description: '', type: 'AI_AGENT' as MarketListing['type'], price: '', minPrice: '', currency: 'SOL', tags: '', agentUrl: '', agentEndpoint: '' });
+  const [form, setForm] = useState({ title: '', description: '', type: 'AI_AGENT' as MarketListing['type'], price: '', minPrice: '', currency: 'ETH', tags: '', agentUrl: '', agentEndpoint: '' });
   const [uploading, setUploading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
@@ -658,7 +658,7 @@ function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: Marke
           <input type="number" placeholder="Price" value={form.price} onChange={e => field('price', e.target.value)} min="0" step="0.01" className="flex-1 text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
           <input type="number" placeholder="Floor price" value={form.minPrice} onChange={e => field('minPrice', e.target.value)} min="0" step="0.01" className="flex-1 text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
           <select value={form.currency} onChange={e => field('currency', e.target.value)} className="w-24 text-sm px-2 py-2 rounded-lg font-mono" style={{ background: '#0f0f18', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }}>
-            {['SOL', 'ETH', 'USDC', 'USD'].map(c => <option key={c} value={c}>{c}</option>)}
+            {['ETH', 'BOLTY'].map(c => <option key={c} value={c}>{c === 'BOLTY' ? 'BOLTY (0 tax)' : c}</option>)}
           </select>
         </div>
         <input type="text" placeholder="Tags (comma separated)" value={form.tags} onChange={e => field('tags', e.target.value)} className="w-full text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
