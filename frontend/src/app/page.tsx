@@ -11,6 +11,7 @@ import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
 import { BackgroundPaths } from '@/components/ui/background-paths';
 import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
+import { HeroBento } from '@/components/ui/HeroBento';
 import { RetroGrid } from '@/components/ui/retro-grid';
 import dynamic from 'next/dynamic';
 const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
@@ -393,50 +394,9 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Right: geometric orbital visual */}
-              <div className="hidden lg:flex items-center justify-center relative h-[420px]">
-                {/* Outer ring */}
-                <div className="absolute w-[380px] h-[380px] rounded-full border border-monad-500/10 animate-spin"
-                  style={{ animationDuration: '30s' }} />
-                <div className="absolute w-[300px] h-[300px] rounded-full border border-monad-500/15 animate-spin"
-                  style={{ animationDuration: '20s', animationDirection: 'reverse' }} />
-                <div className="absolute w-[220px] h-[220px] rounded-full border border-monad-500/20"
-                  style={{ borderStyle: 'dashed' }} />
-
-                {/* Core orb */}
-                <div className="absolute w-[120px] h-[120px] rounded-full flex items-center justify-center z-10"
-                  style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0.05) 70%, transparent 100%)', boxShadow: '0 0 80px rgba(131,110,249,0.25), 0 0 160px rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.2)' }}>
-                  <span className="font-mono text-xs font-bold text-monad-400 tracking-widest">BOLTY</span>
-                </div>
-
-                {/* Orbiting dot 1 */}
-                <div className="absolute w-[300px] h-[300px] rounded-full animate-spin" style={{ animationDuration: '8s' }}>
-                  <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full"
-                    style={{ background: '#836EF9', boxShadow: '0 0 12px rgba(131,110,249,0.9), 0 0 24px rgba(131,110,249,0.4)' }} />
-                </div>
-                {/* Orbiting dot 2 */}
-                <div className="absolute w-[380px] h-[380px] rounded-full animate-spin" style={{ animationDuration: '14s', animationDirection: 'reverse' }}>
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full"
-                    style={{ background: '#c4b5fd', boxShadow: '0 0 8px rgba(196,181,253,0.8)' }} />
-                </div>
-
-                {/* Floating feature tags */}
-                <div className="absolute top-8 left-4 px-3 py-2 rounded-xl text-xs font-mono text-monad-400 z-10"
-                  style={{ border: '1px solid rgba(131,110,249,0.2)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
-                  ⟶ ETH Payments
-                </div>
-                <div className="absolute bottom-12 right-2 px-3 py-2 rounded-xl text-xs font-mono text-monad-400 z-10"
-                  style={{ border: '1px solid rgba(131,110,249,0.2)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
-                  ⟶ AI Agents
-                </div>
-                <div className="absolute top-1/3 right-0 px-3 py-2 rounded-xl text-xs font-mono text-zinc-500 z-10"
-                  style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
-                  ⟶ Code Repos
-                </div>
-                <div className="absolute bottom-1/4 left-0 px-3 py-2 rounded-xl text-xs font-mono text-zinc-500 z-10"
-                  style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(8,8,16,0.85)', backdropFilter: 'blur(12px)' }}>
-                  ⟶ Community
-                </div>
+              {/* Right: bento grid */}
+              <div className="hidden lg:block h-[420px]">
+                <HeroBento />
               </div>
 
             </div>
