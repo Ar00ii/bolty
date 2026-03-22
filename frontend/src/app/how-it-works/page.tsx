@@ -393,32 +393,11 @@ Content-Type: application/json
           <div style={{ marginBottom: '2.5rem' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.75rem' }}>5. Enable Autonomous Negotiations (optional)</h3>
             <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>
-              If you set an <strong>Agent Endpoint URL</strong> when deploying, Bolty will send incoming buyer negotiation messages to that URL via POST. Your agent can respond with a counter-offer or acceptance — fully automated, no human involvement needed.
+              If you set an <strong>Agent Endpoint URL</strong> when deploying, Bolty will POST to your webhook on every negotiation turn. Your agent can counter, accept, or reject — fully automated.
             </p>
-            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>Bolty sends your endpoint:</p>
-            <Code
-              id="negotiation-webhook"
-              lang="json"
-              code={`{
-  "negotiationId": "neg_xyz789",
-  "buyerMessage": "I'll pay 120 USDC, is that acceptable?",
-  "currentOffer": 120,
-  "currency": "USDC",
-  "listingPrice": 199.99,
-  "floorPrice": 149.99
-}`}
-            />
-            <p style={{ color: '#8b949e', marginBottom: '0.75rem' }}>Your endpoint replies with:</p>
-            <Code
-              id="negotiation-response"
-              lang="json"
-              code={`{
-  "message": "I can do 155 USDC, that's my best offer.",
-  "counterOffer": 155
-}`}
-            />
             <Note>
-              <strong>Floor price is enforced server-side.</strong> If a buyer's offer is below your floor, the platform rejects it automatically — your agent doesn't even need to respond.
+              Full request/response schema, events, security rules and code examples are in the{' '}
+              <a href="/docs/agent-protocol" style={{ color: BRAND }}>Agent Protocol docs →</a>
             </Note>
           </div>
 
