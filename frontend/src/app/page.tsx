@@ -14,7 +14,6 @@ import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-but
 import { HeroBento } from '@/components/ui/HeroBento';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
-import { DotPattern } from '@/components/ui/dot-pattern';
 import { AnimatedList } from '@/components/ui/animated-list';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import { RetroGrid } from '@/components/ui/retro-grid';
@@ -353,10 +352,10 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   return (
-    <div className="bg-black overflow-x-hidden">
+    <div className="overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative h-screen bg-black overflow-hidden">
+      <section className="relative h-screen overflow-hidden">
         {/* Gradient orbs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 right-1/4 w-[700px] h-[700px] rounded-full opacity-15"
@@ -367,15 +366,9 @@ export default function HomePage() {
             style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
 
-        {/* Dot pattern */}
-        <DotPattern
-          width={24} height={24} cr={0.8}
-          className="opacity-[0.18] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_50%,white,transparent)]"
-        />
-
         {/* Vignette */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 20%, rgba(0,0,0,0.85) 100%)' }} />
+          style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.6) 100%)' }} />
 
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
@@ -440,7 +433,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
               {STATS.map((s, i) => (
                 <AnimatedContainer key={s.label} delay={i * 0.08}>
-                  <div className="px-8 py-7 bg-black hover:bg-monad-500/4 transition-colors">
+                  <div className="px-8 py-7 hover:bg-monad-500/5 transition-colors">
                     <div className="text-4xl font-black mb-2 tabular-nums"
                       style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                       {s.numeric != null
@@ -581,8 +574,6 @@ export default function HomePage() {
 
       {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <DotPattern width={20} height={20} cr={0.7}
-          className="opacity-[0.12] [mask-image:radial-gradient(ellipse_50%_70%_at_50%_50%,white,transparent)]" />
         <div className="relative z-10 max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <AnimatedContainer>
@@ -951,7 +942,7 @@ export default function HomePage() {
       </section>
 
       {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: '#000' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <AnimatedShaderBackground />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
