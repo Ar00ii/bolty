@@ -34,10 +34,10 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
       {/* ── Global dot pattern background ──────────────────────────────────── */}
       <DotPattern
-        width={20}
-        height={20}
-        cr={0.85}
-        className="fixed inset-0 z-0 opacity-[0.13] [mask-image:radial-gradient(ellipse_at_center,white_20%,transparent_80%)] pointer-events-none"
+        width={22}
+        height={22}
+        cr={1}
+        className="fixed inset-0 z-0 fill-zinc-600/50 opacity-40 pointer-events-none"
       />
 
       {/* ── Floating menu button ───────────────────────────────────────────── */}
