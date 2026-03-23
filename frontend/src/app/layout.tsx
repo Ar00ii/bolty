@@ -110,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="min-h-screen grid-bg">
+      <body className="min-h-screen">
         <ThemeProvider>
           <AuthProvider>
             <ClientShell>
