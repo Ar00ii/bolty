@@ -1071,7 +1071,7 @@ export default function HomePage() {
             {/* Features + CTA */}
             <div>
               <AnimatedContainer delay={0.3}
-                className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 divide-x-0 lg:divide-x lg:divide-y-0 divide-y divide-dashed border border-dashed border-white/10 text-left mb-6">
+                className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 divide-x-0 lg:divide-x lg:divide-y-0 divide-y divide-white/[0.06] border border-white/[0.06] rounded-xl overflow-hidden text-left mb-6">
                 {AI_FEATURES.map((item) => (
                   <FeatureCard key={item.title} feature={item} />
                 ))}
