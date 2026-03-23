@@ -5,22 +5,13 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
-import { BGPattern } from '@/components/ui/bg-pattern';
-import { GeometricBg } from '@/components/ui/GeometricBg';
-import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
-import { BackgroundPaths } from '@/components/ui/background-paths';
-import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
+import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import { HeroBento } from '@/components/ui/HeroBento';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
-import { RetroGrid } from '@/components/ui/retro-grid';
-import dynamic from 'next/dynamic';
-const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
-const CardSwap = dynamic(() => import('@/components/ui/CardSwap'), { ssr: false });
-import { Card } from '@/components/ui/CardSwap';
 import {
   Code2,
   Bot,
@@ -51,7 +42,6 @@ import {
   ArrowRight,
   Radio,
 } from 'lucide-react';
-const AnimatedShaderBackground = dynamic(() => import('@/components/ui/animated-shader-background'), { ssr: false });
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -326,23 +316,10 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
-// ── DashedCard: generic dashed-border + grid-pattern card ─────────────────────
+// ── DashedCard: generic card ───────────────────────────────────────────────────
 function DashedCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const squares = genRandomPattern();
   return (
-    <div className={`relative overflow-hidden border border-dashed border-white/10 p-5 ${className}`}>
-      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-          <GridPattern
-            width={20}
-            height={20}
-            x="-12"
-            y="4"
-            squares={squares}
-            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay"
-          />
-        </div>
-      </div>
+    <div className={`relative overflow-hidden border border-white/[0.07] p-5 ${className}`}>
       {children}
     </div>
   );
@@ -356,19 +333,6 @@ export default function HomePage() {
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative h-screen overflow-hidden">
-        {/* Gradient orbs */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-32 right-1/4 w-[700px] h-[700px] rounded-full opacity-15"
-            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.9) 0%, transparent 65%)', filter: 'blur(80px)' }} />
-          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-10"
-            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.7) 0%, transparent 70%)', filter: 'blur(100px)' }} />
-          <div className="absolute top-1/2 left-1/3 w-[300px] h-[300px] rounded-full opacity-8"
-            style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)', filter: 'blur(60px)' }} />
-        </div>
-
-        {/* Vignette */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 60% 50%, transparent 30%, rgba(0,0,0,0.6) 100%)' }} />
 
         {/* Content */}
         <div className="absolute inset-0 flex items-center">
@@ -414,11 +378,6 @@ export default function HomePage() {
 
       {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
       <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <RetroGrid className="opacity-70" angle={65} />
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 right-0 w-[400px] h-[300px] -translate-y-1/2"
-            style={{ background: 'radial-gradient(ellipse at right, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
-        </div>
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <AnimatedContainer>
@@ -451,10 +410,10 @@ export default function HomePage() {
 
       {/* ── FEATURES — feature list left + orbital right ──────────────── */}
       <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <BackgroundPaths />
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8 items-center">
-            <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-12 items-start">
+            {/* Left: text + feature list */}
+            <AnimatedContainer delay={0.1} className="lg:w-5/12 w-full flex flex-col">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
                 Everything you need to build
@@ -462,24 +421,31 @@ export default function HomePage() {
               <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
                 From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
               </p>
-              {PLATFORM_FEATURES.map((f, i) => {
-                const isCommunity = f.title === 'Community';
-                return (
-                  <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                    <div className={`relative overflow-hidden border border-dashed transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30 ${isCommunity ? 'border-monad-400/30' : 'border-white/20'}`}>
-                      {isCommunity && (
-                        <div className="absolute inset-0 opacity-30">
-                          <AnimatedShaderBackground />
-                        </div>
-                      )}
-                      <FeatureCard feature={f} className="border-0 relative z-10" />
-                    </div>
-                  </Link>
-                );
-              })}
+              {PLATFORM_FEATURES.map((f, i) => (
+                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
+                  <div className="border border-white/[0.07] transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/25">
+                    <FeatureCard feature={f} />
+                  </div>
+                </Link>
+              ))}
             </AnimatedContainer>
-            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
-              <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
+            {/* Right: clean orbital feature grid */}
+            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full">
+              <div className="grid grid-cols-2 gap-3">
+                {ORBITAL_DATA.map((item) => (
+                  <div key={item.label} className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.06] hover:border-monad-500/20 hover:bg-monad-500/3 transition-all duration-200"
+                    style={{ background: 'rgba(255,255,255,0.015)' }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
+                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-zinc-200 mb-0.5">{item.label}</div>
+                      <div className="text-xs text-zinc-500 leading-relaxed">{item.content}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </AnimatedContainer>
           </div>
         </div>
@@ -487,7 +453,6 @@ export default function HomePage() {
 
       {/* ── INTEGRATIONS ── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <BGPattern variant="diagonal-stripes" mask="fade-edges" fill="rgba(131,110,249,0.08)" size={24} />
         <div className="max-w-7xl mx-auto px-4">
           <AnimatedContainer className="mb-12">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
@@ -626,15 +591,7 @@ export default function HomePage() {
 
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="absolute inset-0 z-0">
-          <AnimatedShaderBackground />
-        </div>
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[400px]"
-            style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(131,110,249,0.06) 0%, transparent 60%)' }} />
-        </div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           {/* Header */}
           <div className="mb-16">
             <AnimatedContainer>
@@ -943,8 +900,7 @@ export default function HomePage() {
 
       {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <AnimatedShaderBackground />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
@@ -1001,11 +957,7 @@ export default function HomePage() {
 
       {/* ── AI SECTION — full header top, chat left + features right ──── */}
       <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
           {/* Header row — left aligned */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <AnimatedContainer>
@@ -1079,12 +1031,7 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* Subtle background */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at 50% 100%, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(rgba(131,110,249,0.12) 1px, transparent 1px)', backgroundSize: '48px 48px', opacity: 0.3 }} />
-        <div className="max-w-7xl mx-auto px-4 relative" style={{ zIndex: 1 }}>
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
@@ -1206,13 +1153,8 @@ export default function HomePage() {
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
       <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <GeometricBg />
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.12) 0%, transparent 65%)', animation: 'hero-glow-pulse 5s ease-in-out infinite' }} />
-        </div>
         <Section>
-          <div className="max-w-3xl mx-auto text-center relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-40"
