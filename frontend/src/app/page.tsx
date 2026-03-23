@@ -14,6 +14,9 @@ import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-but
 import { HeroBento } from '@/components/ui/HeroBento';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
+import { DotPattern } from '@/components/ui/dot-pattern';
+import { AnimatedList } from '@/components/ui/animated-list';
+import { AvatarCircles } from '@/components/ui/avatar-circles';
 import { RetroGrid } from '@/components/ui/retro-grid';
 import dynamic from 'next/dynamic';
 const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
@@ -219,6 +222,15 @@ const STATS = [
   { value: '100%', label: 'Open to devs', numeric: 100, suffix: '%' },
 ];
 
+const LIVE_NOTIFICATIONS = [
+  { title: 'Payment received',  desc: 'Solidity Auditor · 1.2 ETH',   time: '2m ago',  Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
+  { title: 'New sale',          desc: 'React Hooks Lib sold',          time: '5m ago',  Icon: ShoppingBag,  bg: 'rgba(131,110,249,0.08)', border: 'rgba(131,110,249,0.18)', iconColor: '#836ef9' },
+  { title: 'New message',       desc: 'Negotiation on NLP Pipeline',   time: '7m ago',  Icon: MessageSquare,bg: 'rgba(251,146,60,0.08)',  border: 'rgba(251,146,60,0.15)',  iconColor: '#fb923c' },
+  { title: 'New developer',     desc: 'Joined Bolty',                  time: '11m ago', Icon: UserPlus,     bg: 'rgba(96,165,250,0.08)',  border: 'rgba(96,165,250,0.15)',  iconColor: '#60a5fa' },
+  { title: 'Agent deployed',    desc: 'Price Predictor v2 live',       time: '14m ago', Icon: Bot,          bg: 'rgba(131,110,249,0.08)', border: 'rgba(131,110,249,0.18)', iconColor: '#836ef9' },
+  { title: 'Payment received',  desc: 'GPT Summarizer · 0.2 ETH',     time: '18m ago', Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
+];
+
 const INTEGRATIONS = [
   { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
   { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
@@ -355,9 +367,11 @@ export default function HomePage() {
             style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)', filter: 'blur(60px)' }} />
         </div>
 
-        {/* Dot grid */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(rgba(131,110,249,0.25) 1px, transparent 1px)', backgroundSize: '36px 36px', opacity: 0.5 }} />
+        {/* Dot pattern */}
+        <DotPattern
+          width={24} height={24} cr={0.8}
+          className="opacity-[0.18] [mask-image:radial-gradient(ellipse_70%_60%_at_60%_50%,white,transparent)]"
+        />
 
         {/* Vignette */}
         <div className="absolute inset-0 pointer-events-none"
@@ -396,7 +410,7 @@ export default function HomePage() {
               </div>
 
               {/* Right: bento grid */}
-              <div className="hidden lg:block h-[420px]">
+              <div className="hidden lg:block h-[480px]">
                 <HeroBento />
               </div>
 
@@ -561,6 +575,60 @@ export default function HomePage() {
                 </div>
               </AnimatedContainer>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <DotPattern width={20} height={20} cr={0.7}
+          className="opacity-[0.12] [mask-image:radial-gradient(ellipse_50%_70%_at_50%_50%,white,transparent)]" />
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Real-time platform</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                Live platform<br />activity
+              </h2>
+              <p className="text-zinc-500 text-sm leading-relaxed mb-8 max-w-sm">
+                Sales, messages, and sign-ups happening across the ecosystem in real time.
+              </p>
+              <AvatarCircles
+                numPeople={97}
+                avatarUrls={[
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/16860528' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/20110627' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/106103625' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/59228569' },
+                ]}
+              />
+              <p className="text-xs text-zinc-600 mt-2 font-mono">100+ developers already building</p>
+            </AnimatedContainer>
+            <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/[0.06]"
+              style={{ background: 'rgba(10,10,18,0.8)' }}>
+              <div className="absolute inset-x-0 top-0 h-12 z-10 pointer-events-none"
+                style={{ background: 'linear-gradient(to bottom, rgba(10,10,18,0.8), transparent)' }} />
+              <div className="absolute inset-x-0 bottom-0 h-24 z-10 pointer-events-none"
+                style={{ background: 'linear-gradient(to top, rgba(10,10,18,0.95), transparent)' }} />
+              <div className="p-4 pt-6">
+                <AnimatedList delay={1200}>
+                  {LIVE_NOTIFICATIONS.map((n, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl mb-0"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: n.bg, border: `1px solid ${n.border}` }}>
+                        <n.Icon className="w-3.5 h-3.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-zinc-200 truncate">{n.title}</div>
+                        <div className="text-[10px] text-zinc-600 truncate">{n.desc}</div>
+                      </div>
+                      <div className="text-[9px] font-mono text-zinc-700 flex-shrink-0">{n.time}</div>
+                    </div>
+                  ))}
+                </AnimatedList>
+              </div>
+            </div>
           </div>
         </div>
       </section>

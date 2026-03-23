@@ -298,7 +298,7 @@ export function StaggeredMenu({
                           transformOrigin: '50% 50%',
                         }}
                       >
-                        ›
+                        &gt;
                       </button>
                     </div>
 

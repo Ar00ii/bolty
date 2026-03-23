@@ -51,13 +51,13 @@ interface Repository {
 
 // Reputation rank helper
 function getReputationRank(points: number): { label: string; color: string; badge: string } {
-  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: '★' };
-  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: '◆' };
-  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: '▲' };
-  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: '●' };
-  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: '●' };
-  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: '●' };
-  return { label: 'Newcomer', color: '#71717a', badge: '○' };
+  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: 'LGD' };
+  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: 'DIA' };
+  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: 'PLT' };
+  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: 'GLD' };
+  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: 'SLV' };
+  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: 'BRZ' };
+  return { label: 'Newcomer', color: '#71717a', badge: 'NEW' };
 }
 
 interface GitHubRepo {

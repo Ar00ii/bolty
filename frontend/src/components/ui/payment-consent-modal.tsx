@@ -186,7 +186,7 @@ export function PaymentConsentModal({
             className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: 'rgba(131,110,249,0.18)', border: '1px solid rgba(131,110,249,0.45)' }}
           >
-            {signing ? 'Signing…' : '✍ Sign & Continue'}
+            {signing ? 'Signing…' : 'Sign & Continue'}
           </button>
         </div>
       </div>

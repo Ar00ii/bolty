@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { BentoGrid, BentoCard } from './bento-grid';
-import { BorderBeam } from './border-beam';
 import { Bot, Code2, Coins, Zap } from 'lucide-react';
 
 // ── Animated negotiation chat ─────────────────────────────────────────────────
@@ -11,7 +10,7 @@ const MESSAGES = [
   { role: 'seller', text: 'Best I can do is 0.42 ETH.', price: '0.42 ETH' },
   { role: 'buyer', text: 'Meet me at 0.34 ETH.', price: '0.34 ETH' },
   { role: 'seller', text: '0.38 ETH, final offer.', price: '0.38 ETH' },
-  { role: 'buyer', text: 'Deal at 0.38 ETH ✓', price: null },
+  { role: 'buyer', text: 'Deal at 0.38 ETH.', price: null },
 ];
 
 function NegotiationChat() {
@@ -33,10 +32,10 @@ function NegotiationChat() {
           <div className={`px-3 py-1.5 rounded-xl text-[10px] font-mono max-w-[75%] leading-snug ${
             m.role === 'buyer'
               ? 'bg-monad-500/15 border border-monad-500/25 text-monad-300'
-              : 'bg-zinc-800/80 border border-white/08 text-zinc-300'
+              : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
           }`}>
             <span className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-0.5">
-              {m.role === 'buyer' ? '🤖 buyer agent' : '🤖 seller agent'}
+              {m.role === 'buyer' ? 'buyer agent' : 'seller agent'}
             </span>
             {m.text}
             {m.price && (
@@ -47,8 +46,8 @@ function NegotiationChat() {
       ))}
       {visible >= MESSAGES.length && (
         <div className="flex justify-center mt-1">
-          <span className="text-[9px] font-mono text-green-400 border border-green-400/20 bg-green-400/05 px-2 py-0.5 rounded-full">
-            ✓ deal closed — payment on-chain
+          <span className="text-[9px] font-mono text-green-400 border border-green-400/20 bg-green-400/5 px-2 py-0.5 rounded-full">
+            deal closed — payment on-chain
           </span>
         </div>
       )}
@@ -56,14 +55,14 @@ function NegotiationChat() {
   );
 }
 
-// ── Animated marketplace listings marquee ─────────────────────────────────────
+// ── Animated marketplace listings ─────────────────────────────────────────────
 const LISTINGS = [
-  { name: 'Trading Signal Bot', price: '0.5 ETH', tag: 'AI_AGENT' },
-  { name: 'GPT Summarizer', price: '0.2 ETH', tag: 'BOT' },
-  { name: 'Solidity Auditor', price: '1.2 ETH', tag: 'AI_AGENT' },
-  { name: 'React Hooks Lib', price: '0.08 ETH', tag: 'SCRIPT' },
-  { name: 'Price Predictor', price: '0.6 ETH', tag: 'AI_AGENT' },
-  { name: 'NLP Pipeline', price: '0.35 ETH', tag: 'BOT' },
+  { name: 'Trading Signal Bot', price: '0.5 ETH', tag: 'AI Agent' },
+  { name: 'GPT Summarizer', price: '0.2 ETH', tag: 'Bot' },
+  { name: 'Solidity Auditor', price: '1.2 ETH', tag: 'AI Agent' },
+  { name: 'React Hooks Lib', price: '0.08 ETH', tag: 'Script' },
+  { name: 'Price Predictor', price: '0.6 ETH', tag: 'AI Agent' },
+  { name: 'NLP Pipeline', price: '0.35 ETH', tag: 'Bot' },
 ];
 
 function ListingsMarquee() {
@@ -75,7 +74,7 @@ function ListingsMarquee() {
             style={{ background: 'rgba(131,110,249,0.06)', border: '1px solid rgba(131,110,249,0.12)' }}>
             <div>
               <div className="text-[10px] font-semibold text-zinc-300">{l.name}</div>
-              <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag.toLowerCase().replace('_', ' ')}</div>
+              <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag}</div>
             </div>
             <div className="text-[10px] font-mono font-bold text-monad-400">{l.price}</div>
           </div>
@@ -89,7 +88,7 @@ function ListingsMarquee() {
 const API_LOGS = [
   { method: 'POST', path: '/market/abc/posts', status: 201, label: 'UPDATE' },
   { method: 'POST', path: '/market/abc/posts', status: 201, label: 'PRICE_UPDATE' },
-  { method: 'GET', path: '/market/abc/posts', status: 200, label: 'READ' },
+  { method: 'GET',  path: '/market/abc/posts', status: 200, label: 'READ' },
 ];
 
 function ApiAnimation() {
@@ -105,7 +104,10 @@ function ApiAnimation() {
       {API_LOGS.map((log, i) => (
         <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
           active === i ? 'opacity-100' : 'opacity-30'
-        }`} style={{ background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)', border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}` }}>
+        }`} style={{
+          background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
+          border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}`,
+        }}>
           <span className={`text-[9px] font-mono font-bold ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}>{log.method}</span>
           <span className="text-[9px] font-mono text-zinc-500 flex-1 truncate">{log.path}</span>
           <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${log.status === 201 ? 'bg-green-400/10 text-green-400' : 'bg-blue-400/10 text-blue-400'}`}>{log.status}</span>
@@ -129,7 +131,7 @@ function PaymentVisual() {
     return () => clearInterval(t);
   }, []);
 
-  const steps = ['Opening deal...', 'Signing tx...', 'Confirming on-chain...', '✓ Access granted'];
+  const steps = ['Opening deal...', 'Signing tx...', 'Confirming on-chain...', 'Access granted'];
 
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-start pt-5 px-4 [mask-image:linear-gradient(to_top,transparent_10%,#000_70%)]">
@@ -137,7 +139,10 @@ function PaymentVisual() {
         {steps.map((s, i) => (
           <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-500 ${
             i < step ? 'opacity-100' : i === step ? 'opacity-100' : 'opacity-20'
-          }`} style={{ background: i <= step ? 'rgba(131,110,249,0.06)' : 'transparent', border: `1px solid ${i <= step ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)'}` }}>
+          }`} style={{
+            background: i <= step ? 'rgba(131,110,249,0.06)' : 'transparent',
+            border: `1px solid ${i <= step ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)'}`,
+          }}>
             <span className={`w-3 h-3 rounded-full flex-shrink-0 transition-all duration-300 ${
               i < step ? 'bg-green-400' : i === step ? 'bg-monad-400 animate-pulse' : 'bg-zinc-700'
             }`} />
@@ -156,7 +161,7 @@ export function HeroBento() {
       {/* 1 — Marketplace listings */}
       <BentoCard
         name="Agent Marketplace"
-        description="Discover and buy AI agents, bots & scripts."
+        description="Discover and buy AI agents, bots and scripts."
         Icon={Bot}
         className="col-span-1 row-span-1"
         href="/market"
@@ -172,12 +177,7 @@ export function HeroBento() {
         className="col-span-2 row-span-1"
         href="/docs/agent-protocol"
         cta="Read protocol"
-        background={
-          <>
-            <NegotiationChat />
-            <BorderBeam duration={8} colorFrom="#836EF9" colorTo="#c4b5fd" />
-          </>
-        }
+        background={<NegotiationChat />}
       />
 
       {/* 3 — Agent API (big card) */}
