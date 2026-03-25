@@ -328,72 +328,110 @@ export default function HomePage() {
   return (
     <div className="overflow-x-hidden">
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative h-screen overflow-hidden">
+      {/* ── HERO — Monad layout: left top-aligned + right stats sidebar ── */}
+      <section className="flex h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
 
-        {/* Content */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-8 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* LEFT COLUMN: text at top, animation at bottom */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-              {/* Left: text */}
-              <div className="relative z-10">
-                <AnimatedGradientText className="mb-8">
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
-                  <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
-                </AnimatedGradientText>
-                <h1 className="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
-                  <span className="block text-white">Publish.</span>
-                  <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
-                  <span className="block text-white">Earn.</span>
-                </h1>
-                <p className="text-zinc-400 max-w-md text-base leading-relaxed mb-10">
-                  Bolty brings together code, AI agents, and community in one developer-first platform.
-                  Share your work and grow your audience.
-                </p>
-                {!isAuthenticated && (
-                  <div className="flex items-center gap-5">
-                    <Link href="/auth">
-                      <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                    </Link>
-                    <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
-                      Learn more <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                )}
+          {/* Text block — starts at the top */}
+          <div className="px-10 lg:px-16 pt-16 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <AnimatedGradientText className="mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
+              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
+            </AnimatedGradientText>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
+              <span className="block text-white">Publish.</span>
+              <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
+              <span className="block text-white">Earn.</span>
+            </h1>
+            <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
+              Bolty brings together code, AI agents, and community in one developer-first platform.
+              Share your work, grow your audience, and earn on-chain.
+            </p>
+            {!isAuthenticated && (
+              <div className="flex items-center gap-4">
+                <Link href="/auth">
+                  <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                </Link>
+                <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
+                  Learn more <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
-
-              {/* Right: Monad-style vertical stats */}
-              <div className="hidden lg:flex flex-col justify-center gap-0 border-l border-white/[0.07] pl-12">
-                {[
-                  { value: '500+', label: 'Developers' },
-                  { value: 'ETH', label: 'On-chain payments' },
-                  { value: '100%', label: 'EVM compatible' },
-                  { value: 'Base', label: 'Supported chain', isBase: true },
-                  { value: 'Beta', label: 'Current phase' },
-                ].map((stat, i) => (
-                  <div key={stat.label} className="py-8 border-b border-white/[0.07] last:border-b-0">
-                    <div className="flex items-center gap-3">
-                      {stat.isBase && (
-                        <svg width="36" height="36" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                          <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
-                          <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
-                        </svg>
-                      )}
-                      <div>
-                        <div className="text-5xl font-black tabular-nums text-white leading-none mb-1">
-                          {stat.value}
-                        </div>
-                        <div className="text-xs font-mono uppercase tracking-widest text-zinc-500">{stat.label}</div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
+            )}
           </div>
+
+          {/* Animation block — fills remaining height */}
+          <div className="flex-1 relative overflow-hidden">
+            <GridMotion
+              gradientColor="rgba(0,0,0,0.5)"
+              items={[
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              ]}
+            />
+          </div>
+
         </div>
+
+        {/* RIGHT COLUMN: stats sidebar — full height with left border */}
+        <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+          {[
+            { value: '500+', label: 'Developers' },
+            { value: 'ETH', label: 'On-chain payments' },
+            { value: '100%', label: 'EVM compatible' },
+            { value: 'Base', label: 'Supported chain', isBase: true },
+            { value: 'Beta', label: 'Current phase' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="flex-1 flex flex-col justify-center px-8"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <div className="flex items-center gap-3">
+                {stat.isBase && (
+                  <svg width="32" height="32" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                    <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
+                    <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                  </svg>
+                )}
+                <div>
+                  <div className="text-4xl xl:text-5xl font-black tabular-nums text-white leading-none mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mt-1">{stat.label}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
       </section>
 
       {/* ── ONCHAIN PAYMENTS — GridMotion fullscreen ───────────────────── */}
