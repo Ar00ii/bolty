@@ -7,7 +7,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
-import { HeroBento } from '@/components/ui/HeroBento';
+import GridMotion from '@/components/ui/GridMotion';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
@@ -217,13 +217,13 @@ const LIVE_NOTIFICATIONS = [
   { title: 'Payment received',  desc: 'GPT Summarizer · 0.2 ETH',     time: '18m ago', Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
 ];
 
-const INTEGRATIONS = [
+const INTEGRATIONS: Array<{ name: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null; desc: string; isBase?: boolean }> = [
   { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
   { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
+  { name: 'Base', icon: null, desc: 'Layer 2 by Coinbase', isBase: true },
   { name: 'BOLTY Token', icon: Zap, desc: '0 tax — pay with BOLTY' },
   { name: 'Any language', icon: Code2, desc: 'All stacks welcome' },
   { name: 'AI models', icon: Bot, desc: 'GPT, Claude & more' },
-  { name: 'Terminal', icon: Terminal, desc: 'CLI toolkit coming soon' },
 ];
 
 const COMMUNITY_STATS = [
@@ -363,12 +363,114 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Right: bento grid */}
-              <div className="hidden lg:block h-[480px]">
-                <HeroBento />
+              {/* Right: Monad-style vertical stats */}
+              <div className="hidden lg:flex flex-col justify-center gap-0 border-l border-white/[0.07] pl-12">
+                {[
+                  { value: '500+', label: 'Developers' },
+                  { value: 'ETH', label: 'On-chain payments' },
+                  { value: '100%', label: 'EVM compatible' },
+                  { value: 'Base', label: 'Supported chain', isBase: true },
+                  { value: 'Beta', label: 'Current phase' },
+                ].map((stat, i) => (
+                  <div key={stat.label} className="py-8 border-b border-white/[0.07] last:border-b-0">
+                    <div className="flex items-center gap-3">
+                      {stat.isBase && (
+                        <svg width="36" height="36" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                          <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
+                          <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                        </svg>
+                      )}
+                      <div>
+                        <div className="text-5xl font-black tabular-nums text-white leading-none mb-1">
+                          {stat.value}
+                        </div>
+                        <div className="text-xs font-mono uppercase tracking-widest text-zinc-500">{stat.label}</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── ONCHAIN PAYMENTS — GridMotion fullscreen ───────────────────── */}
+      <section className="relative h-screen overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* GridMotion background */}
+        <div className="absolute inset-0 z-0">
+          <GridMotion
+            gradientColor="rgba(0,0,0,0.7)"
+            items={[
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+            ]}
+          />
+        </div>
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 z-10 pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.85) 100%)' }} />
+        {/* Content overlay */}
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <div className="max-w-3xl mx-auto px-8 text-center">
+            <AnimatedContainer>
+              <p className="text-xs font-mono uppercase tracking-widest mb-6"
+                style={{ color: 'rgba(131,110,249,0.9)' }}>Onchain payments</p>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 leading-none">
+                Pay. Sell. Earn.<br />
+                <span style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#0052FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  On Base.
+                </span>
+              </h2>
+              <p className="text-zinc-400 text-base leading-relaxed mb-10 max-w-lg mx-auto">
+                Every transaction on Bolty is settled on-chain. No middlemen, no fees, no trust required.
+                Buy locked repos or AI agents and pay directly to the developer&apos;s wallet.
+              </p>
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
+                  <svg width="18" height="18" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
+                    <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                  </svg>
+                  <span className="text-sm text-zinc-300 font-mono">Base Network</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
+                  <Coins className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-sm text-zinc-300 font-mono">ETH payments</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
+                  <Shield className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-sm text-zinc-300 font-mono">Non-custodial</span>
+                </div>
+              </div>
+            </AnimatedContainer>
           </div>
         </div>
       </section>
@@ -467,9 +569,15 @@ export default function HomePage() {
               <AnimatedContainer key={item.name} delay={i * 0.07}>
                 <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
                   style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                    <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+                    style={{ background: item.isBase ? '#0052FF' : 'rgba(131,110,249,0.12)', border: item.isBase ? 'none' : '1px solid rgba(131,110,249,0.15)' }}>
+                    {item.isBase ? (
+                      <svg width="20" height="20" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                      </svg>
+                    ) : item.icon ? (
+                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                    ) : null}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-zinc-200">{item.name}</div>
