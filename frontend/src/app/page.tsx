@@ -5,20 +5,13 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
-import { BGPattern } from '@/components/ui/bg-pattern';
-import { GeometricBg } from '@/components/ui/GeometricBg';
-import { Spotlight } from '@/components/ui/spotlight';
-import RadialOrbitalTimeline from '@/components/ui/radial-orbital-timeline';
-import { SplineScene } from '@/components/ui/splite';
-import { BackgroundPaths } from '@/components/ui/background-paths';
-import { FeatureCard, GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
+import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
-import { RetroGrid } from '@/components/ui/retro-grid';
-import dynamic from 'next/dynamic';
-const Particles = dynamic(() => import('@/components/ui/Particles'), { ssr: false });
-const CardSwap = dynamic(() => import('@/components/ui/CardSwap'), { ssr: false });
-import { Card } from '@/components/ui/CardSwap';
-const GridScan = dynamic(() => import('@/components/ui/GridScan').then(m => ({ default: m.GridScan })), { ssr: false });
+import { HeroBento } from '@/components/ui/HeroBento';
+import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
+import { NumberTicker } from '@/components/ui/number-ticker';
+import { AnimatedList } from '@/components/ui/animated-list';
+import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
   Bot,
@@ -49,8 +42,6 @@ import {
   ArrowRight,
   Radio,
 } from 'lucide-react';
-const AnimatedShaderBackground = dynamic(() => import('@/components/ui/animated-shader-background'), { ssr: false });
-import DatabaseWithRestApi from '@/components/ui/database-with-rest-api';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
 function useReveal() {
@@ -214,16 +205,25 @@ const AI_FEATURES: Array<{ title: string; icon: React.ComponentType<React.SVGPro
 
 // ── New data ───────────────────────────────────────────────────────────────────
 const STATS = [
-  { value: 'Beta', label: 'Current version' },
-  { value: '3', label: 'Planned releases' },
-  { value: 'ETH', label: 'On-chain payments' },
-  { value: '100%', label: 'Open to devs' },
+  { value: 'Beta', label: 'Current version', numeric: null },
+  { value: '3', label: 'Planned releases', numeric: 3 },
+  { value: 'ETH', label: 'On-chain payments', numeric: null },
+  { value: '100%', label: 'Open to devs', numeric: 100, suffix: '%' },
+];
+
+const LIVE_NOTIFICATIONS = [
+  { title: 'Payment received',  desc: 'Solidity Auditor · 1.2 ETH',   time: '2m ago',  Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
+  { title: 'New sale',          desc: 'React Hooks Lib sold',          time: '5m ago',  Icon: ShoppingBag,  bg: 'rgba(131,110,249,0.08)', border: 'rgba(131,110,249,0.18)', iconColor: '#836ef9' },
+  { title: 'New message',       desc: 'Negotiation on NLP Pipeline',   time: '7m ago',  Icon: MessageSquare,bg: 'rgba(251,146,60,0.08)',  border: 'rgba(251,146,60,0.15)',  iconColor: '#fb923c' },
+  { title: 'New developer',     desc: 'Joined Bolty',                  time: '11m ago', Icon: UserPlus,     bg: 'rgba(96,165,250,0.08)',  border: 'rgba(96,165,250,0.15)',  iconColor: '#60a5fa' },
+  { title: 'Agent deployed',    desc: 'Price Predictor v2 live',       time: '14m ago', Icon: Bot,          bg: 'rgba(131,110,249,0.08)', border: 'rgba(131,110,249,0.18)', iconColor: '#836ef9' },
+  { title: 'Payment received',  desc: 'GPT Summarizer · 0.2 ETH',     time: '18m ago', Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
 ];
 
 const INTEGRATIONS = [
   { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
   { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
-  { name: 'Solana', icon: Zap, desc: 'Multi-chain support' },
+  { name: 'BOLTY Token', icon: Zap, desc: '0 tax — pay with BOLTY' },
   { name: 'Any language', icon: Code2, desc: 'All stacks welcome' },
   { name: 'AI models', icon: Bot, desc: 'GPT, Claude & more' },
   { name: 'Terminal', icon: Terminal, desc: 'CLI toolkit coming soon' },
@@ -316,23 +316,10 @@ function Section({ children, className = '' }: { children: React.ReactNode; clas
   );
 }
 
-// ── DashedCard: generic dashed-border + grid-pattern card ─────────────────────
+// ── DashedCard: generic card ───────────────────────────────────────────────────
 function DashedCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const squares = genRandomPattern();
   return (
-    <div className={`relative overflow-hidden border border-dashed border-white/10 p-5 ${className}`}>
-      <div className="pointer-events-none absolute top-0 left-1/2 -mt-2 -ml-20 h-full w-full [mask-image:linear-gradient(white,transparent)]">
-        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent [mask-image:radial-gradient(farthest-side_at_top,white,transparent)]">
-          <GridPattern
-            width={20}
-            height={20}
-            x="-12"
-            y="4"
-            squares={squares}
-            className="fill-white/5 stroke-white/10 absolute inset-0 h-full w-full mix-blend-overlay"
-          />
-        </div>
-      </div>
+    <div className={`relative overflow-hidden border border-white/[0.07] p-5 ${className}`}>
       {children}
     </div>
   );
@@ -342,49 +329,55 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   return (
-    <div className="bg-black overflow-x-hidden">
+    <div className="overflow-x-hidden">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative h-screen bg-black overflow-hidden">
-        <Spotlight className="-top-40 left-0 md:left-80 md:-top-20" fill="white" />
-        <div className="absolute inset-0 flex items-center pointer-events-none">
+      <section className="relative h-screen overflow-hidden">
+
+        {/* Content */}
+        <div className="absolute inset-0 flex items-center">
           <div className="max-w-7xl mx-auto px-8 w-full">
-            <div className="relative z-10 flex flex-col max-w-lg pointer-events-auto">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-6">
-                Built for developers
-              </p>
-              <h1 className="text-5xl md:text-7xl font-black bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 leading-tight mb-6">
-                Publish.<br />Collaborate.<br />Earn.
-              </h1>
-              <p className="text-neutral-400 max-w-md text-base leading-relaxed mb-10">
-                Bolty brings together code, AI agents, and community in one developer-first platform.
-                Share your work and grow your audience.
-              </p>
-              {!isAuthenticated && (
-                <div>
-                  <Link href="/auth">
-                    <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                  </Link>
-                </div>
-              )}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+              {/* Left: text */}
+              <div className="relative z-10">
+                <AnimatedGradientText className="mb-8">
+                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
+                  <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
+                </AnimatedGradientText>
+                <h1 className="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
+                  <span className="block text-white">Publish.</span>
+                  <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
+                  <span className="block text-white">Earn.</span>
+                </h1>
+                <p className="text-zinc-400 max-w-md text-base leading-relaxed mb-10">
+                  Bolty brings together code, AI agents, and community in one developer-first platform.
+                  Share your work and grow your audience.
+                </p>
+                {!isAuthenticated && (
+                  <div className="flex items-center gap-5">
+                    <Link href="/auth">
+                      <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                    </Link>
+                    <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
+                      Learn more <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: bento grid */}
+              <div className="hidden lg:block h-[480px]">
+                <HeroBento />
+              </div>
+
             </div>
           </div>
-        </div>
-        <div className="absolute right-0 top-0 w-1/2 h-full hidden md:block">
-          <SplineScene
-            scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-            className="w-full h-full"
-          />
         </div>
       </section>
 
       {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
       <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <RetroGrid className="opacity-70" angle={65} />
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 right-0 w-[400px] h-[300px] -translate-y-1/2"
-            style={{ background: 'radial-gradient(ellipse at right, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
-        </div>
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <AnimatedContainer>
@@ -399,10 +392,12 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
               {STATS.map((s, i) => (
                 <AnimatedContainer key={s.label} delay={i * 0.08}>
-                  <div className="px-8 py-7 bg-black hover:bg-monad-500/4 transition-colors">
+                  <div className="px-8 py-7 hover:bg-monad-500/5 transition-colors">
                     <div className="text-4xl font-black mb-2 tabular-nums"
                       style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      {s.value}
+                      {s.numeric != null
+                        ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
+                        : s.value}
                     </div>
                     <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
                   </div>
@@ -415,10 +410,10 @@ export default function HomePage() {
 
       {/* ── FEATURES — feature list left + orbital right ──────────────── */}
       <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <BackgroundPaths />
-        <div className="relative z-10 max-w-7xl mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-8 items-center">
-            <AnimatedContainer delay={0.3} className="lg:w-5/12 w-full flex flex-col">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col lg:flex-row gap-12 items-start">
+            {/* Left: text + feature list */}
+            <AnimatedContainer delay={0.1} className="lg:w-5/12 w-full flex flex-col">
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
                 Everything you need to build
@@ -426,84 +421,74 @@ export default function HomePage() {
               <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
                 From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
               </p>
-              {PLATFORM_FEATURES.map((f, i) => {
-                const isCommunity = f.title === 'Community';
-                return (
-                  <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                    <div className={`relative overflow-hidden border border-dashed transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/30 ${isCommunity ? 'border-monad-400/30' : 'border-white/20'}`}>
-                      {isCommunity && (
-                        <div className="absolute inset-0 opacity-30">
-                          <AnimatedShaderBackground />
-                        </div>
-                      )}
-                      <FeatureCard feature={f} className="border-0 relative z-10" />
-                    </div>
-                  </Link>
-                );
-              })}
+              {PLATFORM_FEATURES.map((f, i) => (
+                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
+                  <div className="border border-white/[0.07] transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/25">
+                    <FeatureCard feature={f} />
+                  </div>
+                </Link>
+              ))}
             </AnimatedContainer>
-            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full flex items-center justify-center">
-              <RadialOrbitalTimeline timelineData={ORBITAL_DATA} />
+            {/* Right: clean orbital feature grid */}
+            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full">
+              <div className="grid grid-cols-2 gap-3">
+                {ORBITAL_DATA.map((item) => (
+                  <div key={item.label} className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.06] hover:border-monad-500/20 hover:bg-monad-500/3 transition-all duration-200"
+                    style={{ background: 'rgba(255,255,255,0.015)' }}>
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
+                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-zinc-200 mb-0.5">{item.label}</div>
+                      <div className="text-xs text-zinc-500 leading-relaxed">{item.content}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </AnimatedContainer>
           </div>
         </div>
       </section>
 
-      {/* ── INTEGRATIONS — left text+tiles + right DatabaseWithRestApi ── */}
+      {/* ── INTEGRATIONS ── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <BGPattern variant="diagonal-stripes" mask="fade-edges" fill="rgba(131,110,249,0.08)" size={24} />
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left: title + description + integration tiles */}
-            <div>
-              <AnimatedContainer>
-                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                  Works with<br />your stack
-                </h2>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
-                  Bolty connects with the tools and chains you already use — no complicated setup required.
-                </p>
-              </AnimatedContainer>
-              <div className="grid grid-cols-2 gap-3">
-                {INTEGRATIONS.map((item, i) => (
-                  <AnimatedContainer key={item.name} delay={i * 0.07}>
-                    <div className="border rounded-xl p-4 flex items-center gap-3 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
-                      style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(131,110,249,0.1)' }}>
-                        <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-medium text-zinc-300">{item.name}</div>
-                        <div className="text-xs text-zinc-600">{item.desc}</div>
-                      </div>
-                    </div>
-                  </AnimatedContainer>
-                ))}
-              </div>
-              <AnimatedContainer delay={0.4} className="mt-6">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
-                  style={{ background: 'rgba(131,110,249,0.04)' }}>
-                  <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
-                  <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
+          <AnimatedContainer className="mb-12">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                Works with<br />your stack
+              </h2>
+              <p className="text-zinc-400 text-sm leading-relaxed max-w-sm md:text-right">
+                Bolty connects with the tools and chains you already use — no complicated setup required.
+              </p>
+            </div>
+          </AnimatedContainer>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+            {INTEGRATIONS.map((item, i) => (
+              <AnimatedContainer key={item.name} delay={i * 0.07}>
+                <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
+                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                    <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-zinc-200">{item.name}</div>
+                    <div className="text-xs text-zinc-600 mt-0.5">{item.desc}</div>
+                  </div>
                 </div>
               </AnimatedContainer>
-            </div>
-
-            {/* Right: DatabaseWithRestApi visual */}
-            <AnimatedContainer delay={0.2} className="flex items-center justify-center">
-              <div className="w-full max-w-md">
-                <DatabaseWithRestApi
-                  title="Bolty Platform API"
-                  circleText="ETH"
-                  badgeTexts={{ first: 'GET', second: 'POST', third: 'PUT', fourth: 'DELETE' }}
-                  buttonTexts={{ first: 'bolty.dev', second: 'beta_v1' }}
-                  lightColor="#836EF9"
-                />
-              </div>
-            </AnimatedContainer>
+            ))}
           </div>
+          <AnimatedContainer delay={0.4}>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
+              style={{ background: 'rgba(131,110,249,0.04)' }}>
+              <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
+              <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
+            </div>
+          </AnimatedContainer>
         </div>
       </section>
 
@@ -552,17 +537,61 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative z-10 max-w-6xl mx-auto px-4">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <AnimatedContainer>
+              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Real-time platform</p>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+                Live platform<br />activity
+              </h2>
+              <p className="text-zinc-500 text-sm leading-relaxed mb-8 max-w-sm">
+                Sales, messages, and sign-ups happening across the ecosystem in real time.
+              </p>
+              <AvatarCircles
+                numPeople={97}
+                avatarUrls={[
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/16860528' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/20110627' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/106103625' },
+                  { imageUrl: 'https://avatars.githubusercontent.com/u/59228569' },
+                ]}
+              />
+              <p className="text-xs text-zinc-600 mt-2 font-mono">100+ developers already building</p>
+            </AnimatedContainer>
+            <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/[0.06]"
+              style={{ background: 'rgba(10,10,18,0.8)' }}>
+              <div className="absolute inset-x-0 top-0 h-12 z-10 pointer-events-none"
+                style={{ background: 'linear-gradient(to bottom, rgba(10,10,18,0.8), transparent)' }} />
+              <div className="absolute inset-x-0 bottom-0 h-24 z-10 pointer-events-none"
+                style={{ background: 'linear-gradient(to top, rgba(10,10,18,0.95), transparent)' }} />
+              <div className="p-4 pt-6">
+                <AnimatedList delay={1200}>
+                  {LIVE_NOTIFICATIONS.map((n, i) => (
+                    <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl mb-0"
+                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: n.bg, border: `1px solid ${n.border}` }}>
+                        <n.Icon className="w-3.5 h-3.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-medium text-zinc-200 truncate">{n.title}</div>
+                        <div className="text-[10px] text-zinc-600 truncate">{n.desc}</div>
+                      </div>
+                      <div className="text-[9px] font-mono text-zinc-700 flex-shrink-0">{n.time}</div>
+                    </div>
+                  ))}
+                </AnimatedList>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="absolute inset-0 z-0">
-          <AnimatedShaderBackground />
-        </div>
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-[600px] h-[400px]"
-            style={{ background: 'radial-gradient(ellipse at 100% 0%, rgba(131,110,249,0.06) 0%, transparent 60%)' }} />
-        </div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4">
+        <div className="max-w-5xl mx-auto px-4">
           {/* Header */}
           <div className="mb-16">
             <AnimatedContainer>
@@ -870,9 +899,8 @@ export default function HomePage() {
       </section>
 
       {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: '#000' }}>
-        <AnimatedShaderBackground />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
@@ -929,11 +957,7 @@ export default function HomePage() {
 
       {/* ── AI SECTION — full header top, chat left + features right ──── */}
       <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[300px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
           {/* Header row — left aligned */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <AnimatedContainer>
@@ -990,7 +1014,7 @@ export default function HomePage() {
             {/* Features + CTA */}
             <div>
               <AnimatedContainer delay={0.3}
-                className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 divide-x-0 lg:divide-x lg:divide-y-0 divide-y divide-dashed border border-dashed border-white/10 text-left mb-6">
+                className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 divide-x-0 lg:divide-x lg:divide-y-0 divide-y divide-white/[0.06] border border-white/[0.06] rounded-xl overflow-hidden text-left mb-6">
                 {AI_FEATURES.map((item) => (
                   <FeatureCard key={item.title} feature={item} />
                 ))}
@@ -1007,22 +1031,7 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* GridScan full-bleed background */}
-        <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
-          <GridScan
-            sensitivity={0.55}
-            lineThickness={1}
-            linesColor="#3b2060"
-            gridScale={0.1}
-            scanColor="#836EF9"
-            scanOpacity={0.4}
-            enablePost
-            bloomIntensity={0.6}
-            chromaticAberration={0.002}
-            noiseIntensity={0.01}
-          />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 relative" style={{ zIndex: 1 }}>
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
@@ -1115,95 +1124,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-6xl mx-auto">
-          <Section>
-            <div className="flex flex-col lg:flex-row gap-16 items-start">
-              {/* Left: accordion */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14">
-                  <div>
-                    <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">FAQ</p>
-                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">Common questions</h2>
-                  </div>
-                  <p className="text-sm text-zinc-600 max-w-xs md:text-right">
-                    Can&apos;t find the answer? Chat with us in the community.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {EXTENDED_FAQ.map(item => (
-                    <FAQItem key={item.q} q={item.q} a={item.a} />
-                  ))}
-                </div>
-
-                <div className="mt-10 text-center">
-                  <p className="text-sm text-zinc-600 mb-4">Still have questions?</p>
-                  <Link href="/chat">
-                    <InteractiveHoverLinkInner text="Ask in community" className="text-sm" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* Right: CardSwap */}
-              <div className="hidden lg:block flex-shrink-0" style={{ width: 340, height: 520, position: 'relative' }}>
-                <CardSwap
-                  width={300}
-                  height={200}
-                  cardDistance={50}
-                  verticalDistance={60}
-                  delay={4000}
-                  pauseOnHover
-                  skewAmount={4}
-                  easing="elastic"
-                >
-                  <Card style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.12) 0%,rgba(4,4,8,0.98) 100%)', borderColor: 'rgba(131,110,249,0.35)', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Wallet className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                        <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">Payments</span>
-                      </div>
-                      <h3 className="text-base font-bold text-white leading-snug mb-2">No wallet? No problem.</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed">Sign up with email or GitHub and use all community features without a wallet. A wallet is only needed for on-chain transactions.</p>
-                    </div>
-                  </Card>
-                  <Card style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.12) 0%,rgba(4,4,8,0.98) 100%)', borderColor: 'rgba(131,110,249,0.35)', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Lock className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                        <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">Locked Repos</span>
-                      </div>
-                      <h3 className="text-base font-bold text-white leading-snug mb-2">Monetize your code.</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed">Set a price on any GitHub repo. Buyers pay in ETH to unlock full access — direct on-chain, no middleman.</p>
-                    </div>
-                  </Card>
-                  <Card style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.12) 0%,rgba(4,4,8,0.98) 100%)', borderColor: 'rgba(131,110,249,0.35)', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                        <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">AI Agents</span>
-                      </div>
-                      <h3 className="text-base font-bold text-white leading-snug mb-2">Deploy agents instantly.</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed">Upload your agent, set pricing, and it becomes discoverable. Buyers integrate it into their workflows in seconds.</p>
-                    </div>
-                  </Card>
-                  <Card style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.12) 0%,rgba(4,4,8,0.98) 100%)', borderColor: 'rgba(131,110,249,0.35)', padding: '28px 24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Code2 className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                        <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">Languages</span>
-                      </div>
-                      <h3 className="text-base font-bold text-white leading-snug mb-2">Any language, any stack.</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed">JS, Python, Rust, Go, Solidity — if it lives on GitHub, Bolty supports it. The AI assistant is fully language-agnostic.</p>
-                    </div>
-                  </Card>
-                </CardSwap>
-              </div>
-            </div>
-          </Section>
-        </div>
-      </section>
 
       {/* ── PLATFORM HIGHLIGHTS — horizontal strip ────────────────────── */}
       <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
@@ -1233,13 +1153,8 @@ export default function HomePage() {
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
       <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <GeometricBg />
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px]"
-            style={{ background: 'radial-gradient(ellipse, rgba(131,110,249,0.12) 0%, transparent 65%)', animation: 'hero-glow-pulse 5s ease-in-out infinite' }} />
-        </div>
         <Section>
-          <div className="max-w-3xl mx-auto text-center relative z-10">
+          <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-40"

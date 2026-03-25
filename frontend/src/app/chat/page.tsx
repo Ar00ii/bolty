@@ -359,7 +359,7 @@ export default function ChatPage() {
 
           {input.length === 0 && !showEmoji && (
             <div className="mt-2.5 flex flex-wrap gap-2">
-              {['Hello everyone 👋', 'Need help with my agent 🤖', 'Looking for collaborators 🤝'].map(q => (
+              {['Hello everyone', 'Need help with my agent', 'Looking for collaborators'].map(q => (
                 <button
                   key={q}
                   onClick={() => setInput(q)}

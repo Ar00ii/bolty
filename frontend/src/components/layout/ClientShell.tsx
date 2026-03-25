@@ -10,6 +10,7 @@ import { Footer } from '@/components/ui/footer-section';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { useUnreadDMs } from '@/lib/hooks/useUnreadDMs';
 import { Menu, X, Home } from 'lucide-react';
+import { DotPattern } from '@/components/ui/dot-pattern';
 
 // Must match StaggeredMenu CSS panel width
 const PANEL_WIDTH = 'clamp(280px, 40vw, 420px)';
@@ -30,6 +31,14 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div style={{ overflowX: 'hidden', position: 'relative', minHeight: '100vh' }}>
+
+      {/* ── Global dot pattern background ──────────────────────────────────── */}
+      <DotPattern
+        width={22}
+        height={22}
+        cr={1}
+        className="fixed inset-0 z-0 fill-zinc-600/50 opacity-40 pointer-events-none"
+      />
 
       {/* ── Floating menu button ───────────────────────────────────────────── */}
       <button

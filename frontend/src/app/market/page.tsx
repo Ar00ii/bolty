@@ -247,7 +247,7 @@ function NegotiationModal({
         totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
         totalUsd = neg.agreedPrice * ethPrice;
       } else {
-        totalUsd = currency === 'SOL' ? neg.agreedPrice * 150 : neg.agreedPrice;
+        totalUsd = neg.agreedPrice * ethPrice;
         totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
       }
 

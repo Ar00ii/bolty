@@ -47,7 +47,7 @@ module.exports = {
       },
       fontFamily: {
         mono: ['ui-monospace', 'SFMono-Regular', 'SF Mono', 'Menlo', 'Consolas', 'Liberation Mono', 'monospace'],
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Noto Sans', 'Helvetica', 'Arial', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       animation: {
         'spin-slow': 'spin 8s linear infinite',
@@ -58,8 +58,20 @@ module.exports = {
         'cursor-blink': 'blink 1s step-end infinite',
         'spotlight': 'spotlight 2s ease .75s 1 forwards',
         'grid': 'grid 15s linear infinite',
+        'border-beam': 'borderBeam calc(var(--duration)*1s) linear infinite',
+        'gradient-rotate': 'gradientRotate 4s linear infinite',
       },
       keyframes: {
+        borderBeam: {
+          '100%': { 'offset-distance': '100%' },
+        },
+        gradientRotate: {
+          '0%':   { background: 'linear-gradient(0deg,#836EF9,#c4b5fd,#836EF9)' },
+          '25%':  { background: 'linear-gradient(90deg,#836EF9,#c4b5fd,#836EF9)' },
+          '50%':  { background: 'linear-gradient(180deg,#836EF9,#c4b5fd,#836EF9)' },
+          '75%':  { background: 'linear-gradient(270deg,#836EF9,#c4b5fd,#836EF9)' },
+          '100%': { background: 'linear-gradient(360deg,#836EF9,#c4b5fd,#836EF9)' },
+        },
         grid: {
           '0%': { transform: 'translateY(-50%)' },
           '100%': { transform: 'translateY(0)' },

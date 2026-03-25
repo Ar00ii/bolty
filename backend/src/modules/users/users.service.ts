@@ -8,6 +8,7 @@ interface UpdateProfileData {
   twitterUrl?: string;
   linkedinUrl?: string;
   websiteUrl?: string;
+  agentEndpoint?: string | null;
 }
 
 @Injectable()
@@ -30,6 +31,7 @@ export class UsersService {
         twitterUrl: true,
         linkedinUrl: true,
         websiteUrl: true,
+        agentEndpoint: true,
         userTag: true,
         email: true,
         twoFactorEnabled: true,
@@ -79,6 +81,7 @@ export class UsersService {
         ...(data.twitterUrl !== undefined && { twitterUrl: data.twitterUrl || null }),
         ...(data.linkedinUrl !== undefined && { linkedinUrl: data.linkedinUrl || null }),
         ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl || null }),
+        ...(data.agentEndpoint !== undefined && { agentEndpoint: data.agentEndpoint || null }),
         profileSetup: true,
       },
       select: {
@@ -90,6 +93,7 @@ export class UsersService {
         twitterUrl: true,
         linkedinUrl: true,
         websiteUrl: true,
+        agentEndpoint: true,
         profileSetup: true,
       },
     });
