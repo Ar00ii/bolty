@@ -32,7 +32,7 @@ export class ReputationController {
   }
 
   @Get('me')
-  async getMyReputation(@CurrentUser('sub') userId: string) {
+  async getMyReputation(@CurrentUser('id') userId: string) {
     return this.reputationService.getUserReputation(userId);
   }
 

@@ -13,6 +13,7 @@ import {
   BadRequestException,
   Res,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import {
   IsString,
   IsOptional,
@@ -99,6 +100,7 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 3600000 } })
   @Post('upload-avatar')
   @UseInterceptors(
     FileInterceptor('file', {

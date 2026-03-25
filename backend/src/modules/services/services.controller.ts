@@ -38,7 +38,7 @@ export class ServicesController {
 
   @Post()
   createService(
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Body() dto: CreateServiceDto,
   ) {
     return this.servicesService.createService(userId, dto);
@@ -46,7 +46,7 @@ export class ServicesController {
 
   @Patch(':id')
   updateService(
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('id') id: string,
     @Body() dto: Partial<CreateServiceDto>,
   ) {
@@ -56,7 +56,7 @@ export class ServicesController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   deleteService(
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('id') id: string,
   ) {
     return this.servicesService.deleteService(userId, id);
@@ -64,7 +64,7 @@ export class ServicesController {
 
   @Patch(':id/toggle')
   toggleStatus(
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Param('id') id: string,
   ) {
     return this.servicesService.toggleStatus(userId, id);
