@@ -1,6 +1,6 @@
 'use client';
 
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, Eip1193Provider } from 'ethers';
 import { api } from '@/lib/api/client';
 
 interface EthereumProvider {
@@ -61,7 +61,7 @@ export async function connectMetaMask(): Promise<void> {
     throw new Error('MetaMask is not installed.');
   }
 
-  const provider = new BrowserProvider(mmProvider as Parameters<typeof BrowserProvider>[0]);
+  const provider = new BrowserProvider(mmProvider as Eip1193Provider);
 
   let accounts: string[];
   try {
