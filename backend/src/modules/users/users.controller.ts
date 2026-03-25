@@ -143,6 +143,8 @@ export class UsersController {
       res.status(404).json({ message: 'Not found' });
       return;
     }
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.sendFile(filePath);
   }
 
