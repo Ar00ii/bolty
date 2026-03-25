@@ -388,14 +388,15 @@ export default function ProfilePage() {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/users/upload-avatar`, {
+      const res = await fetch(`${API_URL}/users/upload-avatar`, {
         method: 'POST',
         body: form,
         credentials: 'include',
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || 'Upload failed');
+        const msg = Array.isArray(data.message) ? data.message[0] : (data.message || 'Upload failed');
+        throw new Error(String(msg));
       }
       await refresh();
       setAvatarMsg('Avatar updated.');
