@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
@@ -429,7 +430,7 @@ export default function ProfilePage() {
   const handleConnectWallet = async () => {
     setWalletLoading(true); setWalletErr(''); setWalletMsg('');
     try {
-      const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      const eth = getMetaMaskProvider();
       if (!eth) { setWalletErr('MetaMask not detected. Please install the MetaMask extension.'); return; }
       const accounts = await eth.request({ method: 'eth_requestAccounts' }) as string[];
       const address = accounts[0];
