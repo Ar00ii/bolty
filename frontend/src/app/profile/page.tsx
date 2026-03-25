@@ -754,8 +754,8 @@ export default function ProfilePage() {
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-[var(--text)] mb-0.5">Profile photo</div>
               <div className="text-xs text-[var(--text-muted)] mb-2">PNG, JPG or WebP · max 3 MB</div>
-              {avatarMsg && <div className="text-xs text-emerald-400">{avatarMsg}</div>}
-              {avatarErr && <div className="text-xs text-red-400">{avatarErr}</div>}
+              {avatarMsg && typeof avatarMsg === 'string' && <div className="text-xs text-emerald-400">{avatarMsg}</div>}
+              {avatarErr && typeof avatarErr === 'string' && <div className="text-xs text-red-400">{avatarErr}</div>}
               <button
                 type="button"
                 onClick={() => avatarInputRef.current?.click()}
