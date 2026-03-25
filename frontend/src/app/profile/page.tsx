@@ -264,6 +264,12 @@ export default function ProfilePage() {
   const [secMsg, setSecMsg] = useState('');
   const [secErr, setSecErr] = useState('');
 
+  // Avatar upload
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState('');
+  const [avatarErr, setAvatarErr] = useState('');
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   // Agent endpoint
   const [agentEndpoint, setAgentEndpoint] = useState('');
   const [agentSaving, setAgentSaving] = useState(false);
@@ -373,6 +379,33 @@ export default function ProfilePage() {
     } catch (err) {
       setGenErr(err instanceof ApiError ? err.message : 'Failed to save profile.');
     } finally { setGenSaving(false); }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true); setAvatarErr(''); setAvatarMsg('');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/v1/users/upload-avatar`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || 'Upload failed');
+      }
+      await refresh();
+      setAvatarMsg('Avatar updated.');
+      setTimeout(() => setAvatarMsg(''), 3000);
+    } catch (err) {
+      setAvatarErr(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
   };
 
   const handleSaveSocial = async (e: React.FormEvent) => {
@@ -676,6 +709,19 @@ export default function ProfilePage() {
               </button>
             ))}
           </nav>
+
+          {/* Leaderboard link */}
+          <Link href="/reputation/leaderboard"
+            className="flex items-center gap-3 px-3.5 py-3 rounded-2xl border border-[var(--border)] hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-150 group"
+            style={{ background: 'var(--bg-card)' }}>
+            <div className="w-6 h-6 rounded-md bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center flex-shrink-0 group-hover:border-monad-500/25 group-hover:bg-monad-500/10 transition-colors">
+              <svg className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+              </svg>
+            </div>
+            <span className="text-sm text-[var(--text)] group-hover:text-monad-300 transition-colors flex-1">Leaderboard</span>
+            <IconArrow className="w-3 h-3 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" />
+          </Link>
         </div>
 
         {/* ── Main content panel ───────────────────────────────────── */}
@@ -692,6 +738,34 @@ export default function ProfilePage() {
           />
           <Alert type="success" msg={genMsg} />
           <Alert type="error" msg={genErr} />
+
+          {/* Avatar upload */}
+          <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] mb-5">
+            <div className="relative group flex-shrink-0 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+              <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
+              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {avatarUploading
+                  ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  : <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                }
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-[var(--text)] mb-0.5">Profile photo</div>
+              <div className="text-xs text-[var(--text-muted)] mb-2">PNG, JPG or WebP · max 3 MB</div>
+              {avatarMsg && <div className="text-xs text-emerald-400">{avatarMsg}</div>}
+              {avatarErr && <div className="text-xs text-red-400">{avatarErr}</div>}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-monad-500/30 text-[var(--text-muted)] hover:text-monad-400 transition-all disabled:opacity-50"
+              >
+                {avatarUploading ? 'Uploading...' : 'Change photo'}
+              </button>
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleAvatarUpload} />
+          </div>
 
           <form onSubmit={handleSaveGeneral} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -2,11 +2,16 @@ import {
   Controller,
   Get,
   Patch,
+  Post,
   Param,
   Query,
   Body,
   UseGuards,
   ConflictException,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  Res,
 } from '@nestjs/common';
 import {
   IsString,
@@ -16,10 +21,19 @@ import {
   Matches,
   IsUrl,
 } from 'class-validator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
+import { Response } from 'express';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { UsersService } from './users.service';
+
+const AVATAR_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
+const ALLOWED_IMAGE_MIMETYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 class UpdateProfileDto {
   @IsOptional()
@@ -80,6 +94,56 @@ export class UsersController {
       }
       throw err;
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload-avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          if (!fs.existsSync(AVATAR_UPLOADS_DIR)) {
+            fs.mkdirSync(AVATAR_UPLOADS_DIR, { recursive: true });
+          }
+          cb(null, AVATAR_UPLOADS_DIR);
+        },
+        filename: (_req, _file, cb) => {
+          cb(null, crypto.randomUUID());
+        },
+      }),
+      limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB max
+      fileFilter: (_req, file, cb) => {
+        if (ALLOWED_IMAGE_MIMETYPES.has(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new BadRequestException('Only PNG, JPG or WebP images are allowed.'), false);
+        }
+      },
+    }),
+  )
+  async uploadAvatar(
+    @CurrentUser('id') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const avatarUrl = `/api/v1/users/avatars/${file.filename}`;
+    await this.usersService.updateProfile(userId, { avatarUrl });
+    return { avatarUrl };
+  }
+
+  @Public()
+  @Get('avatars/:key')
+  serveAvatar(@Param('key') key: string, @Res() res: Response) {
+    if (!/^[0-9a-f-]{36}$/.test(key)) {
+      res.status(400).json({ message: 'Invalid key' });
+      return;
+    }
+    const filePath = path.join(AVATAR_UPLOADS_DIR, key);
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ message: 'Not found' });
+      return;
+    }
+    res.sendFile(filePath);
   }
 
   @UseGuards(JwtAuthGuard)
