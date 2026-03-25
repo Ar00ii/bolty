@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
-import { GlowingEffect } from '@/components/ui/glowing-effect';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
@@ -141,9 +141,10 @@ function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
 
 function Avatar({ src, name, size = 'md' }: { src?: string | null; name?: string | null; size?: 'sm' | 'md' | 'lg' }) {
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-sm';
-  if (src)
+  if (src) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={src} alt="" className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`} />;
+  }
   return (
     <div className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-semibold flex-shrink-0`}>
       {(name || 'U')[0]?.toUpperCase()}
@@ -265,6 +266,12 @@ export default function ProfilePage() {
   const [secMsg, setSecMsg] = useState('');
   const [secErr, setSecErr] = useState('');
 
+  // Avatar upload
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarMsg, setAvatarMsg] = useState('');
+  const [avatarErr, setAvatarErr] = useState('');
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   // Agent endpoint
   const [agentEndpoint, setAgentEndpoint] = useState('');
   const [agentSaving, setAgentSaving] = useState(false);
@@ -376,6 +383,34 @@ export default function ProfilePage() {
     } finally { setGenSaving(false); }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setAvatarUploading(true); setAvatarErr(''); setAvatarMsg('');
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${API_URL}/users/upload-avatar`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = Array.isArray(data.message) ? data.message[0] : (data.message || 'Upload failed');
+        throw new Error(String(msg));
+      }
+      await refresh();
+      setAvatarMsg('Avatar updated.');
+      setTimeout(() => setAvatarMsg(''), 3000);
+    } catch (err) {
+      setAvatarErr(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+    }
+  };
+
   const handleSaveSocial = async (e: React.FormEvent) => {
     e.preventDefault();
     setSocSaving(true); setSocErr(''); setSocMsg('');
@@ -395,7 +430,7 @@ export default function ProfilePage() {
   const handleConnectWallet = async () => {
     setWalletLoading(true); setWalletErr(''); setWalletMsg('');
     try {
-      const eth = (window as unknown as { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      const eth = getMetaMaskProvider();
       if (!eth) { setWalletErr('MetaMask not detected. Please install the MetaMask extension.'); return; }
       const accounts = await eth.request({ method: 'eth_requestAccounts' }) as string[];
       const address = accounts[0];
@@ -599,116 +634,101 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
+    <div className="max-w-5xl mx-auto px-4 py-8 animate-[fade-in_0.4s_ease]">
+      <div className="flex gap-5 items-start">
 
-      {/* ── Hero header card ─────────────────────────────────────────── */}
-      <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"
-        style={{ background: 'linear-gradient(135deg, #18181b 0%, #1c1c1f 100%)' }}>
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.5), transparent)' }} />
-        {/* Subtle radial glow */}
-        <div className="absolute top-0 right-0 w-64 h-32 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.08) 0%, transparent 70%)' }} />
+        {/* ── Sidebar ──────────────────────────────────────────────── */}
+        <div className="w-56 flex-shrink-0 sticky top-24 space-y-3">
 
-        <div className="relative px-6 py-5 flex items-center gap-5">
-          <div className="relative">
-            <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
-            {/* Online indicator */}
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#18181b]" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-[var(--text)] font-semibold text-lg leading-tight">
-                {user?.displayName || user?.username || 'New User'}
-              </span>
-              {userTag && (
-                <span className="font-mono text-xs text-monad-400 bg-monad-500/10 border border-monad-500/20 px-2 py-0.5 rounded-md">
-                  #{userTag}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4 mt-1.5 flex-wrap">
-              {username && (
-                <span className="text-xs text-[var(--text-muted)] font-mono">@{username}</span>
-              )}
-              {githubLogin && (
-                <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                  <IconGitHub className="w-3 h-3" />
-                  <span>{githubLogin}</span>
+          {/* User card */}
+          <div className="rounded-2xl border border-[var(--border)] overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+            <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.35), transparent)' }} />
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex-shrink-0">
+                  <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="md" />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)]" />
                 </div>
-              )}
-              {walletAddress && (
-                <span className="text-xs font-mono text-[var(--text-muted)]">
-                  {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {profileUrl && (
-            <Link
-              href={profileUrl}
-              target="_blank"
-              className="flex items-center gap-1.5 text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-2 rounded-lg transition-all duration-200 shrink-0"
-            >
-              View profile
-              <IconArrow className="w-3 h-3" />
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* ── Settings Navigation Grid ─────────────────────────────── */}
-      <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-        {[
-          { id: 'general' as Tab, label: 'General', desc: 'Username, display name and bio', Icon: IconUser },
-          { id: 'social' as Tab, label: 'Social', desc: 'Link your X, LinkedIn and website', Icon: IconGlobe },
-          { id: 'wallet' as Tab, label: 'Wallet', desc: 'Connect MetaMask for payments', Icon: IconWallet },
-          { id: 'connections' as Tab, label: 'Connections', desc: 'Manage linked GitHub account', Icon: IconLink },
-          { id: 'friends' as Tab, label: 'Friends', desc: 'Find and manage your contacts', Icon: IconUsers },
-          { id: 'security' as Tab, label: 'Security', desc: '2FA, email and account settings', Icon: IconShield },
-          { id: 'agent' as Tab, label: 'AI Agent', desc: 'Connect your own AI to negotiate', Icon: IconCpu },
-        ].map(({ id, label, desc, Icon }) => (
-          <li key={id} className="min-h-[8rem] list-none">
-            <button
-              onClick={() => setTab(id)}
-              className="relative h-full w-full rounded-2xl border border-[var(--border)] p-2 text-left transition-all duration-200 hover:border-monad-500/30"
-              style={{
-                background: tab === id
-                  ? 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, var(--bg-card) 60%)'
-                  : 'var(--bg-card)',
-              }}
-            >
-              <GlowingEffect
-                spread={30}
-                glow={tab === id}
-                disabled={tab !== id}
-                proximity={48}
-                inactiveZone={0.01}
-                borderWidth={2}
-              />
-              <div className="relative flex h-full flex-col justify-between gap-3 overflow-hidden rounded-xl border border-[var(--border)] px-4 py-4"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <div className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${
-                  tab === id
-                    ? 'bg-monad-500/15 border-monad-500/30'
-                    : 'bg-[var(--bg-card)] border-[var(--border)]'
-                }`}>
-                  <Icon className={`w-4 h-4 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
-                </div>
-                <div>
-                  <div className={`text-sm font-semibold leading-tight tracking-tight ${tab === id ? 'text-monad-300' : 'text-[var(--text)]'}`}>
-                    {label}
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-[var(--text)] truncate leading-tight">
+                    {user?.displayName || user?.username || 'New User'}
                   </div>
-                  <div className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{desc}</div>
+                  {username && <div className="text-xs text-[var(--text-muted)] font-mono truncate">@{username}</div>}
+                  {userTag && <div className="text-xs font-mono text-monad-400/70 mt-0.5">#{userTag}</div>}
                 </div>
               </div>
-            </button>
-          </li>
-        ))}
-      </ul>
+
+              {/* Extra info pills */}
+              <div className="space-y-1.5">
+                {githubLogin && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
+                    <IconGitHub className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate font-mono">{githubLogin}</span>
+                  </div>
+                )}
+                {walletAddress && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/metamask.png" alt="" className="w-3 h-3 object-contain flex-shrink-0" />
+                    <span className="truncate font-mono">{walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}</span>
+                  </div>
+                )}
+              </div>
+
+              {profileUrl && (
+                <Link href={profileUrl} target="_blank"
+                  className="flex items-center justify-center gap-1.5 w-full text-xs text-[var(--text-muted)] hover:text-monad-400 border border-[var(--border)] hover:border-monad-500/30 px-3 py-2 rounded-xl transition-all duration-200">
+                  View profile <IconArrow className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Nav list */}
+          <nav className="rounded-2xl border border-[var(--border)] overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+            {([
+              { id: 'general' as Tab, label: 'General', Icon: IconUser },
+              { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
+              { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+              { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
+              { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
+              { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+              { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
+            ] as Array<{ id: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }>).map(({ id, label, Icon }, i, arr) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150 ${i < arr.length - 1 ? 'border-b border-[var(--border)]' : ''} ${
+                  tab === id ? 'bg-monad-500/10' : 'hover:bg-white/[0.025]'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                  tab === id ? 'bg-monad-500/20 border border-monad-500/25' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'
+                }`}>
+                  <Icon className={`w-3.5 h-3.5 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
+                </div>
+                <span className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-medium' : 'text-[var(--text)]'}`}>{label}</span>
+                {tab === id && <div className="w-1 h-4 rounded-full bg-monad-400 flex-shrink-0" />}
+              </button>
+            ))}
+          </nav>
+
+          {/* Leaderboard link */}
+          <Link href="/reputation/leaderboard"
+            className="flex items-center gap-3 px-3.5 py-3 rounded-2xl border border-[var(--border)] hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-150 group"
+            style={{ background: 'var(--bg-card)' }}>
+            <div className="w-6 h-6 rounded-md bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center flex-shrink-0 group-hover:border-monad-500/25 group-hover:bg-monad-500/10 transition-colors">
+              <svg className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0" />
+              </svg>
+            </div>
+            <span className="text-sm text-[var(--text)] group-hover:text-monad-300 transition-colors flex-1">Leaderboard</span>
+            <IconArrow className="w-3 h-3 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" />
+          </Link>
+        </div>
+
+        {/* ── Main content panel ───────────────────────────────────── */}
+        <div className="flex-1 min-w-0">
 
       {/* ════════════════════════════════════════════
           GENERAL  — monad purple tint
@@ -721,6 +741,34 @@ export default function ProfilePage() {
           />
           <Alert type="success" msg={genMsg} />
           <Alert type="error" msg={genErr} />
+
+          {/* Avatar upload */}
+          <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] mb-5">
+            <div className="relative group flex-shrink-0 cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+              <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
+              <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                {avatarUploading
+                  ? <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                  : <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                }
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium text-[var(--text)] mb-0.5">Profile photo</div>
+              <div className="text-xs text-[var(--text-muted)] mb-2">PNG, JPG or WebP · max 3 MB</div>
+              {avatarMsg && typeof avatarMsg === 'string' && <div className="text-xs text-emerald-400">{avatarMsg}</div>}
+              {avatarErr && typeof avatarErr === 'string' && <div className="text-xs text-red-400">{avatarErr}</div>}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={avatarUploading}
+                className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-monad-500/30 text-[var(--text-muted)] hover:text-monad-400 transition-all disabled:opacity-50"
+              >
+                {avatarUploading ? 'Uploading...' : 'Change photo'}
+              </button>
+            </div>
+            <input ref={avatarInputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleAvatarUpload} />
+          </div>
 
           <form onSubmit={handleSaveGeneral} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -881,14 +929,8 @@ export default function ProfilePage() {
             <div className="flex items-center gap-4 mb-5">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(251,146,60,0.05))', border: '1px solid rgba(251,146,60,0.2)' }}>
-                <svg className="w-6 h-6 text-orange-400" viewBox="0 0 318 239" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M298.9 0L176.6 89.3l22.4-52.7L298.9 0z" fill="#E2761B"/>
-                  <path d="M18.9 0l121.2 90.1-21.3-53.5L18.9 0z" fill="#E4761B"/>
-                  <path d="M255.8 172.7l-32.5 49.7 69.6 19.1 20-67.8-57.1-1zm-207.5 1 19.9 67.8 69.5-19.1-32.4-49.7-57 1z" fill="#E4761B"/>
-                  <path d="M134.5 102.9l-19.4 29.3 69.1 3.1-2.3-74.2-47.4 41.8zm48.8 0 48-42.6-2.6 74.9 69-3.1-19.3-29.2-95.1 0z" fill="#E4761B"/>
-                  <path d="M138.2 222.4l41.6-20.3-35.9-28-5.7 48.3zm0 0" fill="#D7C1B3"/>
-                  <path d="M180 222.4l-35.8-20.3 5.5 48.3 30.3-28z" fill="#C0AD9E"/>
-                </svg>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-[var(--text)]">MetaMask</div>
@@ -1483,6 +1525,8 @@ export default function ProfilePage() {
         </div>
       )}
 
+        </div>{/* end main content panel */}
+      </div>{/* end flex row */}
     </div>
   );
 }

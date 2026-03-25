@@ -8,8 +8,20 @@ const apiOrigin = new URL(apiUrl).origin;
 const wsOrigin  = new URL(wsUrl).origin;
 const wsOriginWs = wsOrigin.replace(/^http/, 'ws');
 
+// Backend base (without /api/v1) for the proxy rewrite
+const backendOrigin = apiOrigin;
+
 const nextConfig = {
   reactStrictMode: true,
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${backendOrigin}/api/v1/:path*`,
+      },
+    ];
+  },
 
   webpack: (config, { isServer }) => {
     // Ensure @/ path alias resolves to src/ (backup for tsconfig paths)
@@ -79,7 +91,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: blob:",
+              `img-src 'self' data: https: http: blob: ${apiOrigin}`,
               // Allow backend API (http or https) + WebSocket connections
               `connect-src 'self' ${apiOrigin} ${wsOrigin} ${wsOriginWs} https: wss:`,
               "frame-ancestors 'none'",
@@ -95,6 +107,8 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
       { protocol: 'https', hostname: 'github.com' },
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: new URL(apiUrl).hostname },
     ],
   },
 

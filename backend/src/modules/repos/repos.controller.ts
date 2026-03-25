@@ -271,6 +271,7 @@ export class ReposController {
   // ── Logo image upload (drag-and-drop, static images only) ────────────────
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 3600000 } })
   @Post('upload-logo')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -320,6 +321,8 @@ export class ReposController {
       res.status(404).json({ message: 'Logo not found' });
       return;
     }
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.sendFile(filePath, { headers: { 'Cache-Control': 'public, max-age=86400' } });
   }
 
@@ -335,7 +338,7 @@ export class ReposController {
   @Post(':id/collaborators')
   addCollaborator(
     @Param('id') repoId: string,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
     @Body() body: { targetUserId?: string; name?: string; type?: string; url?: string; role?: string },
   ) {
     return this.reposService.addCollaborator(userId, repoId, body);
@@ -355,7 +358,7 @@ export class ReposController {
   removeCollaborator(
     @Param('id') repoId: string,
     @Param('collaboratorId') collaboratorId: string,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser('id') userId: string,
   ) {
     return this.reposService.removeCollaborator(userId, repoId, collaboratorId);
   }

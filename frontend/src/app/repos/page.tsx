@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {
   id: string;
@@ -306,7 +307,7 @@ export default function ReposPage() {
       sellerWallet = (details as any).user?.walletAddress;
     } catch { setError('Could not fetch seller wallet'); return; }
     if (!sellerWallet) { setError('Seller has no Ethereum wallet linked'); return; }
-    const ethereum = (window as any).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
     let ethPrice = 2000;
     try {
@@ -329,7 +330,7 @@ export default function ReposPage() {
     if (!consentModal) return;
     const { repo, sellerWallet, buyerAddress, sellerWei, platformWei } = consentModal;
     setConsentModal(null);
-    const ethereum = (window as any).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
     try {

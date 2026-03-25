@@ -7,8 +7,22 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { IsString, IsOptional, MaxLength } from 'class-validator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { OrdersService } from './orders.service';
+
+class DeliverDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  deliveryNote?: string;
+}
+
+class SendMessageDto {
+  @IsString()
+  @MaxLength(5000)
+  content: string;
+}
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -56,7 +70,7 @@ export class OrdersController {
   markDelivered(
     @Param('id') id: string,
     @Request() req: any,
-    @Body() body: { deliveryNote?: string },
+    @Body() body: DeliverDto,
   ) {
     return this.ordersService.markDelivered(id, req.user.id, body.deliveryNote);
   }
@@ -78,7 +92,7 @@ export class OrdersController {
   sendMessage(
     @Param('id') id: string,
     @Request() req: any,
-    @Body() body: { content: string },
+    @Body() body: SendMessageDto,
   ) {
     return this.ordersService.sendMessage(id, req.user.id, body.content);
   }

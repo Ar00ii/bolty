@@ -9,6 +9,7 @@ interface UpdateProfileData {
   linkedinUrl?: string;
   websiteUrl?: string;
   agentEndpoint?: string | null;
+  avatarUrl?: string;
 }
 
 @Injectable()
@@ -82,6 +83,7 @@ export class UsersService {
         ...(data.linkedinUrl !== undefined && { linkedinUrl: data.linkedinUrl || null }),
         ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl || null }),
         ...(data.agentEndpoint !== undefined && { agentEndpoint: data.agentEndpoint || null }),
+        ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
         profileSetup: true,
       },
       select: {

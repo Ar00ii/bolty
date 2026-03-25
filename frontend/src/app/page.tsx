@@ -7,7 +7,14 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
-import { HeroBento } from '@/components/ui/HeroBento';
+import GridMotion from '@/components/ui/GridMotion';
+import TrueFocus from '@/components/ui/TrueFocus';
+import { LogoLoop } from '@/components/ui/LogoLoop';
+import {
+  SiReact, SiNextdotjs, SiTypescript, SiTailwindcss,
+  SiEthereum, SiSolana, SiGithub, SiSocketdotio,
+  SiThreedotjs, SiFramer, SiPrisma, SiPostgresql,
+} from 'react-icons/si';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
@@ -37,10 +44,7 @@ import {
   Cpu,
   Hash,
   Rocket,
-  FlaskConical,
-  Sparkles,
   ArrowRight,
-  Radio,
 } from 'lucide-react';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
@@ -220,13 +224,13 @@ const LIVE_NOTIFICATIONS = [
   { title: 'Payment received',  desc: 'GPT Summarizer · 0.2 ETH',     time: '18m ago', Icon: Coins,        bg: 'rgba(52,211,153,0.08)',  border: 'rgba(52,211,153,0.15)',  iconColor: '#34d399' },
 ];
 
-const INTEGRATIONS = [
+const INTEGRATIONS: Array<{ name: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>> | null; desc: string; isBase?: boolean }> = [
   { name: 'GitHub', icon: GitBranch, desc: 'Sync repos in one click' },
   { name: 'Ethereum', icon: Coins, desc: 'On-chain ETH payments' },
+  { name: 'Base', icon: null, desc: 'Layer 2 by Coinbase', isBase: true },
   { name: 'BOLTY Token', icon: Zap, desc: '0 tax — pay with BOLTY' },
   { name: 'Any language', icon: Code2, desc: 'All stacks welcome' },
   { name: 'AI models', icon: Bot, desc: 'GPT, Claude & more' },
-  { name: 'Terminal', icon: Terminal, desc: 'CLI toolkit coming soon' },
 ];
 
 const COMMUNITY_STATS = [
@@ -325,85 +329,205 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
   );
 }
 
+// ── Tech stack logos ──────────────────────────────────────────────────────────
+const TECH_LOGOS = [
+  { node: <SiReact />,      title: 'React',         href: 'https://react.dev',                color: '#61DAFB' },
+  { node: <SiNextdotjs />,  title: 'Next.js',       href: 'https://nextjs.org',               color: '#ffffff' },
+  { node: <SiTypescript />, title: 'TypeScript',    href: 'https://typescriptlang.org',       color: '#3178C6' },
+  { node: <SiTailwindcss />,title: 'Tailwind CSS',  href: 'https://tailwindcss.com',          color: '#06B6D4' },
+  { node: <SiEthereum />,   title: 'Ethereum',      href: 'https://ethereum.org',             color: '#627EEA' },
+  { node: <SiSolana />,     title: 'Solana',        href: 'https://solana.com',               color: '#9945FF' },
+  { node: <SiGithub />,     title: 'GitHub',        href: 'https://github.com',               color: '#ffffff' },
+  { node: <SiSocketdotio />,title: 'Socket.io',     href: 'https://socket.io',                color: '#ffffff' },
+  { node: <SiThreedotjs />, title: 'Three.js',      href: 'https://threejs.org',              color: '#ffffff' },
+  { node: <SiFramer />,     title: 'Framer Motion', href: 'https://www.framer.com/motion',    color: '#0055FF' },
+  { node: <SiPrisma />,     title: 'Prisma',        href: 'https://www.prisma.io',            color: '#2D3748' },
+  { node: <SiPostgresql />, title: 'PostgreSQL',    href: 'https://postgresql.org',           color: '#4169E1' },
+];
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   return (
     <div className="overflow-x-hidden">
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="relative h-screen overflow-hidden">
+      {/* ── HERO — Monad layout: left top-aligned + right stats sidebar ── */}
+      <section className="flex h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
 
-        {/* Content */}
-        <div className="absolute inset-0 flex items-center">
-          <div className="max-w-7xl mx-auto px-8 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        {/* LEFT COLUMN: text at top, animation at bottom */}
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-              {/* Left: text */}
-              <div className="relative z-10">
-                <AnimatedGradientText className="mb-8">
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
-                  <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
-                </AnimatedGradientText>
-                <h1 className="text-6xl md:text-8xl font-black leading-none mb-6 tracking-tight">
-                  <span className="block text-white">Publish.</span>
-                  <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
-                  <span className="block text-white">Earn.</span>
-                </h1>
-                <p className="text-zinc-400 max-w-md text-base leading-relaxed mb-10">
-                  Bolty brings together code, AI agents, and community in one developer-first platform.
-                  Share your work and grow your audience.
-                </p>
-                {!isAuthenticated && (
-                  <div className="flex items-center gap-5">
-                    <Link href="/auth">
-                      <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                    </Link>
-                    <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
-                      Learn more <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                )}
+          {/* Text block — starts at the top */}
+          <div className="px-10 lg:px-16 pt-16 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <AnimatedGradientText className="mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
+              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
+            </AnimatedGradientText>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
+              <span className="block text-white">Publish.</span>
+              <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
+              <span className="block text-white">Earn.</span>
+            </h1>
+            <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
+              Bolty brings together code, AI agents, and community in one developer-first platform.
+              Share your work, grow your audience, and earn on-chain.
+            </p>
+            {!isAuthenticated && (
+              <div className="flex items-center gap-4">
+                <Link href="/auth">
+                  <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                </Link>
+                <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
+                  Learn more <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
-
-              {/* Right: bento grid */}
-              <div className="hidden lg:block h-[480px]">
-                <HeroBento />
-              </div>
-
-            </div>
+            )}
           </div>
+
+          {/* Animation block — fills remaining height */}
+          <div className="flex-1 relative overflow-hidden">
+            <GridMotion
+              gradientColor="rgba(0,0,0,0.5)"
+              items={[
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              ]}
+            />
+          </div>
+
+        </div>
+
+        {/* RIGHT COLUMN: stats sidebar — full height with left border */}
+        <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+          {[
+            { value: '500+', label: 'Developers' },
+            { value: 'ETH', label: 'On-chain payments' },
+            { value: '100%', label: 'EVM compatible' },
+            { value: 'Base', label: 'Supported chain', isBase: true },
+            { value: 'Beta', label: 'Current phase' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="flex-1 flex flex-col justify-center px-8"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <div className="flex items-center gap-3">
+                {stat.isBase && (
+                  <svg width="32" height="32" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+                    <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
+                    <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                  </svg>
+                )}
+                <div>
+                  <div className="text-4xl xl:text-5xl font-black tabular-nums text-white leading-none mb-1">
+                    {stat.value}
+                  </div>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mt-1">{stat.label}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+      </section>
+
+      {/* ── TECH STACK LOOP ────────────────────────────────────────────── */}
+      <section className="py-10 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="mb-4 px-8">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 text-center">Built with</p>
+        </div>
+        <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }}>
+          <LogoLoop
+            logos={TECH_LOGOS.map(t => ({
+              node: <span style={{ color: t.color, fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {t.node}
+                <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{t.title}</span>
+              </span>,
+              title: t.title,
+              href: t.href,
+            }))}
+            speed={60}
+            direction="left"
+            logoHeight={40}
+            gap={56}
+            hoverSpeed={0}
+            scaleOnHover
+            fadeOut
+            fadeOutColor="#000000"
+            ariaLabel="Bolty tech stack"
+          />
         </div>
       </section>
 
-      {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
-      <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <AnimatedContainer>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform overview</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                The platform,<br />by the numbers
-              </h2>
-              <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
-                Bolty is launching in Beta. Three planned releases — Beta, Gamma, and Alpha — each expanding the platform with new capabilities.
-              </p>
-            </AnimatedContainer>
-            <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
-              {STATS.map((s, i) => (
-                <AnimatedContainer key={s.label} delay={i * 0.08}>
-                  <div className="px-8 py-7 hover:bg-monad-500/5 transition-colors">
-                    <div className="text-4xl font-black mb-2 tabular-nums"
-                      style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      {s.numeric != null
-                        ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
-                        : s.value}
-                    </div>
-                    <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
-                  </div>
-                </AnimatedContainer>
-              ))}
-            </div>
+      {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
+      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* Left: text block */}
+        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+          <AnimatedContainer>
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
+              Fast, open,<br />developer-first.
+            </h2>
+            <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
+              No high fees or slow deploys. Code on Bolty ships instantly, earns in ETH, and works with
+              the wallets and tools you already know and love.
+            </p>
+            <Link href="/repos" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 text-xs font-mono uppercase tracking-widest text-zinc-300 hover:border-monad-500/40 hover:text-white transition-colors">
+              Explore repos
+            </Link>
+          </AnimatedContainer>
+        </div>
+
+        {/* Right: visual panel with dotted grid + stats */}
+        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden">
+          {/* Dotted grid background */}
+          <div className="absolute inset-0"
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          {/* Corner decorations */}
+          <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 border-white/20" />
+          <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 border-white/20" />
+          <div className="absolute bottom-8 left-8 w-6 h-6 border-b-2 border-l-2 border-white/20" />
+          <div className="absolute bottom-8 right-8 w-6 h-6 border-b-2 border-r-2 border-white/20" />
+          {/* Counter label */}
+          <div className="absolute top-8 right-14 text-xs font-mono text-zinc-600">// 001</div>
+          {/* Stats grid */}
+          <div className="relative z-10 flex flex-col justify-center h-full px-16 gap-0 divide-y divide-white/[0.06]">
+            {STATS.map((s, i) => (
+              <div key={s.label} className="py-7">
+                <div className="text-5xl font-black tabular-nums mb-1"
+                  style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  {s.numeric != null
+                    ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
+                    : s.value}
+                </div>
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -470,9 +594,15 @@ export default function HomePage() {
               <AnimatedContainer key={item.name} delay={i * 0.07}>
                 <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
                   style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                    <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+                    style={{ background: item.isBase ? '#0052FF' : 'rgba(131,110,249,0.12)', border: item.isBase ? 'none' : '1px solid rgba(131,110,249,0.15)' }}>
+                    {item.isBase ? (
+                      <svg width="20" height="20" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
+                      </svg>
+                    ) : item.icon ? (
+                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                    ) : null}
                   </div>
                   <div>
                     <div className="text-sm font-medium text-zinc-200">{item.name}</div>

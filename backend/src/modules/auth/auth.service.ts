@@ -156,8 +156,13 @@ export class AuthService {
       const existing = await this.prisma.user.findUnique({ where: { userTag: tag } });
       if (!existing) return tag;
     }
-    // Fallback to 5 digits if pool is full
-    return String(randomInt(10000, 100000));
+    // Fallback to 5 digits if 4-digit pool is saturated
+    for (let i = 0; i < 10; i++) {
+      const tag = String(randomInt(10000, 100000));
+      const existing = await this.prisma.user.findUnique({ where: { userTag: tag } });
+      if (!existing) return tag;
+    }
+    throw new ConflictException('Unable to generate user tag — please try again');
   }
 
   // ── Email / Password Auth ─────────────────────────────────────────────────
@@ -172,18 +177,24 @@ export class AuthService {
     const email = data.email.toLowerCase().trim();
     const username = data.username.toLowerCase().trim();
 
-    const existingEmail = await this.prisma.user.findUnique({ where: { email } });
-    if (existingEmail) throw new ConflictException('Email already in use');
-
-    const existingUsername = await this.prisma.user.findUnique({ where: { username } });
-    if (existingUsername) throw new ConflictException('Username already taken');
-
     const passwordHash = await bcrypt.hash(data.password, 12);
     const userTag = await this.generateUserTag();
 
-    const user = await this.prisma.user.create({
-      data: { email, username, passwordHash, displayName: username, userTag, gender: data.gender, occupation: data.occupation },
-    });
+    let user: { id: string };
+    try {
+      user = await this.prisma.user.create({
+        data: { email, username, passwordHash, displayName: username, userTag, gender: data.gender, occupation: data.occupation },
+      });
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+        const target = (err as { meta?: { target?: string[] } }).meta?.target;
+        if (target?.includes('email')) throw new ConflictException('Email already in use');
+        if (target?.includes('username')) throw new ConflictException('Username already taken');
+        if (target?.includes('userTag')) throw new ConflictException('Please try again');
+        throw new ConflictException('Account already exists');
+      }
+      throw err;
+    }
 
     this.logger.log(`New email user registered: ${username}`);
 
@@ -275,7 +286,7 @@ export class AuthService {
     if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100000, 1000000).toString();
     await this.redis.set(`2fa_enable:${userId}`, code, 600); // 10 min
     try {
       await this.emailService.send2FAEnableCode(user.email, code);
@@ -328,7 +339,7 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({ where: { email } });
     if (existing) throw new ConflictException('This email is already in use');
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100000, 1000000).toString();
     await this.redis.set(`email_change:${userId}`, JSON.stringify({ newEmail: email, code }), 900); // 15 min
     await this.emailService.sendEmailChangeConfirmation(email, code);
     this.logger.log(`Email change requested for user ${userId} → ${email}`);
@@ -338,7 +349,13 @@ export class AuthService {
     const raw = await this.redis.get(`email_change:${userId}`);
     if (!raw) throw new BadRequestException('No email change pending or code expired');
 
-    const { newEmail, code: stored } = JSON.parse(raw) as { newEmail: string; code: string };
+    let parsed: { newEmail: string; code: string };
+    try {
+      parsed = JSON.parse(raw) as { newEmail: string; code: string };
+    } catch {
+      throw new BadRequestException('Invalid email change data — please request a new code');
+    }
+    const { newEmail, code: stored } = parsed;
     if (stored !== code) throw new UnauthorizedException('Invalid verification code');
 
     const existing = await this.prisma.user.findUnique({ where: { email: newEmail } });
@@ -356,7 +373,7 @@ export class AuthService {
     if (!user) throw new NotFoundException('User not found');
     if (!user.email) throw new BadRequestException('No email address on this account — contact support');
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100000, 1000000).toString();
     await this.redis.set(`delete_account:${userId}`, code, 600); // 10 min
     await this.emailService.sendDeleteAccountCode(user.email, code);
     this.logger.log(`Delete account code sent for user ${userId}`);
@@ -471,6 +488,10 @@ export class AuthService {
       });
 
       if (existingByUsername) {
+        // Only link if the account doesn't already have a different GitHub ID
+        if (existingByUsername.githubId && existingByUsername.githubId !== githubProfile.id) {
+          throw new ConflictException('This username is already linked to a different GitHub account');
+        }
         this.logger.log(`Linking GitHub to existing user: ${githubProfile.login}`);
         user = await this.prisma.user.update({
           where: { id: existingByUsername.id },
