@@ -79,7 +79,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: blob:",
+              `img-src 'self' data: https: http: blob: ${apiOrigin}`,
               // Allow backend API (http or https) + WebSocket connections
               `connect-src 'self' ${apiOrigin} ${wsOrigin} ${wsOriginWs} https: wss:`,
               "frame-ancestors 'none'",
@@ -95,6 +95,8 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
       { protocol: 'https', hostname: 'github.com' },
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https', hostname: new URL(apiUrl).hostname },
     ],
   },
 
