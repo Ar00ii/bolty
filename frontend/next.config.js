@@ -8,8 +8,20 @@ const apiOrigin = new URL(apiUrl).origin;
 const wsOrigin  = new URL(wsUrl).origin;
 const wsOriginWs = wsOrigin.replace(/^http/, 'ws');
 
+// Backend base (without /api/v1) for the proxy rewrite
+const backendOrigin = apiOrigin;
+
 const nextConfig = {
   reactStrictMode: true,
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${backendOrigin}/api/v1/:path*`,
+      },
+    ];
+  },
 
   webpack: (config, { isServer }) => {
     // Ensure @/ path alias resolves to src/ (backup for tsconfig paths)
