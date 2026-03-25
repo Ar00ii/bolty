@@ -12,7 +12,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   GitBranch, Lock, Globe, Star, Download, ArrowUp, ArrowDown,
-  Trash2, Plus, Users, Wallet, X, Upload,
+  Trash2, Plus, Users, Wallet, X, Upload, Search, CheckCircle2, Copy, Check,
 } from 'lucide-react';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -110,6 +110,22 @@ function LanguageDot({ lang }: { lang: string }) {
   );
 }
 
+function CopyInstallButton({ name }: { name: string }) {
+  const [copied, setCopied] = useState(false);
+  const cmd = `npm install ${name.toLowerCase()}`;
+  return (
+    <button
+      onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(cmd); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+      title={`Copy: ${cmd}`}
+      className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-mono transition-all"
+      style={{ background: 'rgba(131,110,249,0.07)', border: '1px solid rgba(131,110,249,0.15)', color: copied ? '#a78bfa' : '#6b7280' }}
+    >
+      {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+      {copied ? 'copied!' : 'npm i'}
+    </button>
+  );
+}
+
 function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
   repo: Repository; isAuthenticated: boolean; userId?: string;
   onVote: (id: string, v: 'UP' | 'DOWN') => void;
@@ -117,7 +133,8 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
   onUnlock: (repo: Repository) => void;
 }) {
   return (
-    <div className="flex flex-col bg-[#0d1117] border border-[#30363d] rounded-lg hover:border-[#58a6ff]/40 hover:shadow-[0_0_0_1px_rgba(88,166,255,0.08)] transition-all duration-200 overflow-hidden">
+    <div className="flex flex-col rounded-xl border transition-all duration-200 overflow-hidden hover:border-monad-500/30 hover:shadow-[0_0_20px_rgba(131,110,249,0.08)]"
+      style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.07)' }}>
       <div className="p-4 flex-1">
         {/* Repo header */}
         <div className="flex items-start gap-3 mb-3">
@@ -125,84 +142,91 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={repo.logoUrl.startsWith('/api') ? `${API_URL.replace('/api/v1', '')}${repo.logoUrl}` : repo.logoUrl}
-              alt={repo.name} className="w-9 h-9 rounded-md object-cover border border-[#30363d] shrink-0"
+              alt={repo.name} className="w-9 h-9 rounded-lg object-cover border border-white/10 shrink-0"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
           ) : (
-            <div className="w-9 h-9 rounded-md border border-[#30363d] bg-[#161b22] flex items-center justify-center shrink-0">
-              <GitBranch className="w-4 h-4 text-[#8b949e]" strokeWidth={1.5} />
+            <div className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center shrink-0"
+              style={{ background: 'rgba(131,110,249,0.1)' }}>
+              <GitBranch className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
             </div>
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 className="text-sm font-semibold text-[#58a6ff] hover:underline truncate">{repo.name}</h3>
+              <h3 className="text-sm font-semibold text-monad-300 hover:text-monad-200 truncate">{repo.name}</h3>
               <span className={`px-1.5 py-0.5 rounded-full text-[11px] border ${
                 repo.isLocked
-                  ? 'bg-[#388bfd]/10 border-[#388bfd]/30 text-[#58a6ff]'
-                  : 'bg-transparent border-[#30363d] text-[#8b949e]'
+                  ? 'bg-monad-500/10 border-monad-500/30 text-monad-400'
+                  : 'bg-transparent border-white/10 text-zinc-500'
               }`}>
                 {repo.isLocked ? 'Paid' : 'Public'}
               </span>
             </div>
-            <p className="text-xs text-[#8b949e]">@{repo.user.username || 'anon'}</p>
+            <div className="flex items-center gap-1">
+              <p className="text-xs text-zinc-500">@{repo.user.username || 'anon'}</p>
+              <CheckCircle2 className="w-3 h-3 text-monad-400" title="Verified developer" />
+            </div>
           </div>
         </div>
 
         {/* Description */}
-        <p className="text-xs text-[#8b949e] leading-relaxed line-clamp-2 mb-3 min-h-[2.5rem]">
-          {repo.description || <span className="italic text-[#6e7681]">No description</span>}
+        <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-3 min-h-[2.5rem]">
+          {repo.description || <span className="italic text-zinc-600">No description provided.</span>}
         </p>
 
         {/* Topics */}
         {repo.topics.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {repo.topics.slice(0, 4).map(t => (
-              <span key={t} className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#388bfd]/10 text-[#58a6ff] border border-[#388bfd]/20">
-                {t}
+              <span key={t} className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-monad-500/10 text-monad-400 border border-monad-500/20">
+                #{t}
               </span>
             ))}
           </div>
         )}
 
         {/* Stats row */}
-        <div className="flex items-center gap-4 text-xs text-[#8b949e]">
+        <div className="flex items-center gap-4 text-xs text-zinc-500">
           {repo.language && <LanguageDot lang={repo.language} />}
-          <span className="flex items-center gap-1"><Star className="w-3 h-3" />{repo.stars}</span>
-          <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" />{repo.forks}</span>
-          <span className="flex items-center gap-1"><Download className="w-3 h-3" />{repo.downloadCount}</span>
+          <span className="flex items-center gap-1" title="GitHub Stars"><Star className="w-3 h-3" />{repo.stars}</span>
+          <span className="flex items-center gap-1" title="Forks"><GitBranch className="w-3 h-3" />{repo.forks}</span>
+          <span className="flex items-center gap-1" title="Downloads"><Download className="w-3 h-3" />{repo.downloadCount}</span>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-[#21262d]">
+      <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
         <div className="flex items-center gap-1">
           <button
             onClick={() => isAuthenticated && onVote(repo.id, 'UP')}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-[#8b949e] hover:text-emerald-400 hover:bg-emerald-400/8 transition-all disabled:opacity-50"
-            disabled={!isAuthenticated}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-zinc-500 hover:text-monad-400 hover:bg-monad-400/8 transition-all disabled:opacity-50"
+            disabled={!isAuthenticated} title="Upvote"
           >
             <ArrowUp className="w-3.5 h-3.5" />{repo.upvotes}
           </button>
           <button
             onClick={() => isAuthenticated && onVote(repo.id, 'DOWN')}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs text-[#8b949e] hover:text-red-400 hover:bg-red-400/8 transition-all disabled:opacity-50"
-            disabled={!isAuthenticated}
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-zinc-500 hover:text-red-400 hover:bg-red-400/8 transition-all disabled:opacity-50"
+            disabled={!isAuthenticated} title="Downvote"
           >
             <ArrowDown className="w-3.5 h-3.5" />{repo.downvotes}
           </button>
+          <CopyInstallButton name={repo.name} />
         </div>
         <div>
           {repo.isLocked && repo.lockedPriceUsd ? (
             <button
               onClick={() => onUnlock(repo)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043] transition-all"
+              className="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:shadow-[0_0_12px_rgba(131,110,249,0.4)]"
+              style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: '1px solid rgba(131,110,249,0.4)' }}
             >
               Unlock — ${repo.lockedPriceUsd}
             </button>
           ) : (
             <button
               onClick={() => onDownload(repo.id, repo.githubUrl)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-[#e6edf3] bg-[#21262d] border border-[#30363d] hover:bg-[#30363d] transition-all"
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:border-monad-500/40"
+              style={{ background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.2)', color: '#c4b5fd' }}
             >
               Download
             </button>
@@ -257,7 +281,7 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
             <span className="flex items-center gap-3 flex-wrap">
               <span className="flex items-center gap-1"><Star className="w-2.5 h-2.5" />{repo.stars}</span>
               <span className="flex items-center gap-1"><Download className="w-2.5 h-2.5" />{repo.downloadCount}</span>
-              <span className="flex items-center gap-1"><ArrowUp className="w-2.5 h-2.5 text-green-500" />{repo.upvotes}</span>
+              <span className="flex items-center gap-1"><ArrowUp className="w-2.5 h-2.5 text-monad-400" />{repo.upvotes}</span>
               {(repo.collaborators?.length ?? 0) > 0 && <span className="flex items-center gap-1"><Users className="w-2.5 h-2.5" />{repo.collaborators?.length} collab{repo.collaborators!.length !== 1 ? 's' : ''}</span>}
             </span>
           </p>
@@ -423,6 +447,8 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
   const [logoUrl, setLogoUrl] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [twitterUrl, setTwitterUrl] = useState('');
+  const [license, setLicense] = useState('MIT');
+  const [tags, setTags] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [error, setError] = useState('');
@@ -499,6 +525,23 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
               </div>
             </div>
           )}
+          {/* License + Tags */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-xs text-zinc-500 font-mono block mb-1.5">License</label>
+              <select value={license} onChange={e => setLicense(e.target.value)} className="w-full text-xs px-3 py-2 rounded-lg font-mono outline-none" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}>
+                <option value="MIT">MIT</option>
+                <option value="Apache-2.0">Apache 2.0</option>
+                <option value="GPL-3.0">GPL 3.0</option>
+                <option value="BSD-3-Clause">BSD 3-Clause</option>
+                <option value="Proprietary">Proprietary</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-zinc-500 font-mono block mb-1.5">Tags <span className="text-zinc-700">(comma separated)</span></label>
+              <input type="text" value={tags} onChange={e => setTags(e.target.value)} placeholder="#nlp, #autonomous, #tool" className="w-full text-xs px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
+            </div>
+          </div>
           {/* Branding */}
           <div className="border-t pt-4 space-y-3" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
             <p className="text-xs font-mono text-zinc-600">Branding (optional)</p>
@@ -510,7 +553,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
                 ) : logoUrl ? (
                   <div className="flex items-center justify-center gap-3">
                     <img src={logoUrl.startsWith('/api') ? `${API_URL.replace('/api/v1', '')}${logoUrl}` : logoUrl} alt="logo" className="w-8 h-8 rounded-lg object-cover" />
-                    <p className="text-xs font-mono text-green-400">logo uploaded</p>
+                    <p className="text-xs font-mono text-monad-400">logo uploaded ✓</p>
                   </div>
                 ) : (
                   <p className="text-xs font-mono text-zinc-600 flex items-center justify-center gap-1.5"><Upload className="w-3 h-3" /> upload logo</p>
@@ -708,7 +751,8 @@ function ReposMarketPageContent() {
             {isAuthenticated && (
               <button
                 onClick={() => { switchTab('mine'); loadGhRepos(); }}
-                className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-md transition-all text-white bg-[#238636] border border-[#2ea043]/50 hover:bg-[#2ea043]"
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full transition-all text-white hover:shadow-[0_0_16px_rgba(131,110,249,0.4)]"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: '1px solid rgba(131,110,249,0.5)' }}
               >
                 <Plus className="w-4 h-4" /> Publish Repo
               </button>
@@ -724,8 +768,8 @@ function ReposMarketPageContent() {
               onClick={() => switchTab(id)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
                 activeTab === id
-                  ? 'border-[#f78166] text-[#e6edf3]'
-                  : 'border-transparent text-[#8b949e] hover:text-[#e6edf3]'
+                  ? 'border-monad-500 text-white'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-200'
               }`}
             >
               {icon}{label}
@@ -739,31 +783,49 @@ function ReposMarketPageContent() {
             {/* Search + filters */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <div className="relative flex-1 min-w-[220px]">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Search repositories..."
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full text-sm px-4 py-2 rounded-md bg-[#0d1117] border border-[#30363d] text-[#e6edf3] placeholder-[#8b949e] focus:border-[#58a6ff] focus:outline-none transition-colors"
+                  className="w-full text-sm pl-9 pr-4 py-2 rounded-full transition-all outline-none"
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}
+                  onFocus={e => (e.currentTarget.style.border = '1px solid rgba(131,110,249,0.5)')}
+                  onBlur={e => (e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)')}
                 />
               </div>
               <select
                 value={language}
                 onChange={e => setLanguage(e.target.value)}
-                className="text-sm px-3 py-2 rounded-md bg-[#161b22] border border-[#30363d] text-[#e6edf3] focus:border-[#58a6ff] focus:outline-none transition-colors"
+                className="text-xs px-3 py-2 rounded-full outline-none transition-all cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#a1a1aa' }}
               >
                 {LANGUAGES.map(l => <option key={l} value={l === 'All' ? '' : l}>{l}</option>)}
+              </select>
+              <select
+                className="text-xs px-3 py-2 rounded-full outline-none transition-all cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#a1a1aa' }}
+                defaultValue=""
+              >
+                <option value="">Framework</option>
+                <option value="nextjs">Next.js</option>
+                <option value="react">React</option>
+                <option value="nestjs">NestJS</option>
+                <option value="fastapi">FastAPI</option>
+                <option value="langchain">LangChain</option>
               </select>
               <div className="flex gap-1.5 flex-wrap">
                 {SORTS.map(s => (
                   <button
                     key={s.value}
                     onClick={() => setSortBy(s.value as typeof sortBy)}
-                    className={`text-xs px-3 py-1.5 rounded-md border transition-all ${
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
                       sortBy === s.value
-                        ? 'bg-[#388bfd]/15 border-[#388bfd]/40 text-[#58a6ff]'
-                        : 'bg-transparent border-[#30363d] text-[#8b949e] hover:border-[#8b949e] hover:text-[#e6edf3]'
+                        ? 'border-monad-500/40 text-monad-300'
+                        : 'border-white/10 text-zinc-500 hover:border-monad-500/30 hover:text-zinc-300'
                     }`}
+                    style={sortBy === s.value ? { background: 'rgba(131,110,249,0.12)' } : { background: 'rgba(255,255,255,0.02)' }}
                   >
                     {s.label}
                   </button>

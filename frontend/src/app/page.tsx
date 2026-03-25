@@ -12,7 +12,7 @@ import TrueFocus from '@/components/ui/TrueFocus';
 import { LogoLoop } from '@/components/ui/LogoLoop';
 import {
   SiReact, SiNextdotjs, SiTypescript, SiTailwindcss,
-  SiEthereum, SiSolana, SiGithub, SiSocketdotio,
+  SiEthereum, SiGithub, SiSocketdotio,
   SiThreedotjs, SiFramer, SiPrisma, SiPostgresql,
 } from 'react-icons/si';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
@@ -337,7 +337,6 @@ const TECH_LOGOS = [
   { node: <SiTypescript />, title: 'TypeScript',    href: 'https://typescriptlang.org',       color: '#3178C6' },
   { node: <SiTailwindcss />,title: 'Tailwind CSS',  href: 'https://tailwindcss.com',          color: '#06B6D4' },
   { node: <SiEthereum />,   title: 'Ethereum',      href: 'https://ethereum.org',             color: '#627EEA' },
-  { node: <SiSolana />,     title: 'Solana',        href: 'https://solana.com',               color: '#9945FF' },
   { node: <SiGithub />,     title: 'GitHub',        href: 'https://github.com',               color: '#ffffff' },
   { node: <SiSocketdotio />,title: 'Socket.io',     href: 'https://socket.io',                color: '#ffffff' },
   { node: <SiThreedotjs />, title: 'Three.js',      href: 'https://threejs.org',              color: '#ffffff' },
