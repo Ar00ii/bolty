@@ -15,6 +15,7 @@ import {
   Trash2, Plus, Users, Wallet, X, Upload,
 } from 'lucide-react';
 import { BackgroundBeams } from '@/components/ui/background-beams';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -646,7 +647,7 @@ function ReposMarketPageContent() {
       sellerWallet = details?.user?.walletAddress;
     } catch { setError('Could not fetch seller wallet'); return; }
     if (!sellerWallet) { setError('Seller has no wallet linked'); return; }
-    const ethereum = (window as any).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
     let ethPrice = 2000;
     try { const p = await api.get<any>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch {}
@@ -664,7 +665,7 @@ function ReposMarketPageContent() {
     if (!consentModal) return;
     const { repo, sellerWallet, buyerAddress, sellerWei, platformWei } = consentModal;
     setConsentModal(null);
-    const ethereum = (window as any).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
     try {

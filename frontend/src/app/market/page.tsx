@@ -11,7 +11,7 @@ import { Wallet, AlertTriangle, Bot, User, X, ShieldCheck, ShieldAlert } from 'l
 import { AnimatedDownload } from '@/components/ui/animated-download';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { connectMetaMask, isMetaMaskInstalled } from '@/lib/wallet/ethereum';
+import { connectMetaMask, isMetaMaskInstalled, getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -224,7 +224,7 @@ function NegotiationModal({
     setPaying(true);
     setError('');
     try {
-      const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      const ethereum = getMetaMaskProvider();
       if (!ethereum) { setError('MetaMask not found'); setPaying(false); return; }
 
       // Get seller wallet
@@ -285,7 +285,7 @@ function NegotiationModal({
     const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei } = consentData;
     setConsentData(null);
 
-    const ethereum = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
 
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;

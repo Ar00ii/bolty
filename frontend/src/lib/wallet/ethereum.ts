@@ -3,15 +3,42 @@
 import { BrowserProvider } from 'ethers';
 import { api } from '@/lib/api/client';
 
+interface EthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener: (event: string, handler: (...args: unknown[]) => void) => void;
+  isMetaMask?: boolean;
+  isPhantom?: boolean;
+  providers?: EthereumProvider[];
+}
+
 declare global {
   interface Window {
-    ethereum?: {
-      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-      on: (event: string, handler: (...args: unknown[]) => void) => void;
-      removeListener: (event: string, handler: (...args: unknown[]) => void) => void;
-      isMetaMask?: boolean;
-    };
+    ethereum?: EthereumProvider;
   }
+}
+
+/**
+ * Returns the MetaMask-specific provider, even when multiple wallets are installed.
+ * When Phantom + MetaMask coexist, both inject into window.ethereum. The EIP-5749
+ * multi-provider standard exposes them in window.ethereum.providers[].
+ * We pick the one that is MetaMask (isMetaMask=true) and NOT Phantom (isPhantom!=true).
+ */
+export function getMetaMaskProvider(): EthereumProvider | null {
+  if (typeof window === 'undefined' || !window.ethereum) return null;
+
+  const eth = window.ethereum;
+
+  // Multi-wallet scenario: providers array present (EIP-5749)
+  if (eth.providers && eth.providers.length > 0) {
+    const mm = eth.providers.find((p) => p.isMetaMask && !p.isPhantom);
+    return mm ?? null;
+  }
+
+  // Single wallet: ensure it's MetaMask and not Phantom masquerading
+  if (eth.isMetaMask && !eth.isPhantom) return eth;
+
+  return null;
 }
 
 function parseMetaMaskError(err: unknown): string {
@@ -29,11 +56,12 @@ function parseMetaMaskError(err: unknown): string {
 }
 
 export async function connectMetaMask(): Promise<void> {
-  if (!isMetaMaskInstalled()) {
+  const mmProvider = getMetaMaskProvider();
+  if (!mmProvider) {
     throw new Error('MetaMask is not installed.');
   }
 
-  const provider = new BrowserProvider(window.ethereum!);
+  const provider = new BrowserProvider(mmProvider as Parameters<typeof BrowserProvider>[0]);
 
   let accounts: string[];
   try {
@@ -78,5 +106,5 @@ export async function connectMetaMask(): Promise<void> {
 }
 
 export function isMetaMaskInstalled(): boolean {
-  return typeof window !== 'undefined' && !!window.ethereum?.isMetaMask;
+  return getMetaMaskProvider() !== null;
 }

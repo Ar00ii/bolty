@@ -8,7 +8,7 @@ import { api, ApiError } from '@/lib/api/client';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { connectMetaMask } from '@/lib/wallet/ethereum';
+import { connectMetaMask, getMetaMaskProvider } from '@/lib/wallet/ethereum';
 import {
   Bot, User, X, Key, Plus, Trash2, Copy, Eye, EyeOff,
   ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
@@ -219,7 +219,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
     if (!neg?.agreedPrice) return;
     setPaying(true); setError('');
     try {
-      const ethereum = (window as any).ethereum;
+      const ethereum = getMetaMaskProvider();
       if (!ethereum) { setError('MetaMask not found'); setPaying(false); return; }
       const sellerData = await api.get<any>(`/market/${listing.id}`);
       const sellerWallet = sellerData?.seller?.walletAddress;
@@ -242,7 +242,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
     if (!consentData) return;
     const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei } = consentData;
     setConsentData(null);
-    const ethereum = (window as any).ethereum;
+    const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
     try {

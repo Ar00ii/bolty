@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Shield, AlertTriangle, X } from 'lucide-react';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface PaymentConsentModalProps {
   listingTitle: string;
@@ -35,7 +36,7 @@ export function PaymentConsentModal({
     setError('');
 
     try {
-      const eth = (window as Window & { ethereum?: { request: (a: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum;
+      const eth = getMetaMaskProvider();
       if (!eth) throw new Error('MetaMask not found. Install it to continue.');
 
       const timestamp = new Date().toISOString();
