@@ -141,10 +141,8 @@ function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
 function Avatar({ src, name, size = 'md' }: { src?: string | null; name?: string | null; size?: 'sm' | 'md' | 'lg' }) {
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-sm';
   if (src) {
-    const backendBase = (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/api\/v1$/, '').replace(/\/$/, '');
-    const resolved = src.startsWith('/api') ? `${backendBase}${src}` : src;
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={resolved} alt="" className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`} />;
+    return <img src={src} alt="" className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`} />;
   }
   return (
     <div className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-semibold flex-shrink-0`}>
