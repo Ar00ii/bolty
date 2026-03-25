@@ -435,22 +435,6 @@ export default function HomePage() {
 
       </section>
 
-      {/* ── TRUEFOCUS — full-width centered tagline (Monad "A new benchmark") ── */}
-      <section className="py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <AnimatedContainer>
-          <TrueFocus
-            sentence="A new standard for dev tools."
-            manualMode={false}
-            blurAmount={6}
-            borderColor="#836EF9"
-            glowColor="rgba(131,110,249,0.6)"
-            animationDuration={0.5}
-            pauseBetweenAnimations={1.2}
-            className="text-4xl md:text-6xl lg:text-7xl font-black text-white px-8"
-          />
-        </AnimatedContainer>
-      </section>
-
       {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
       <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         {/* Left: text block */}
