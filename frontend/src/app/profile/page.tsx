@@ -881,14 +881,8 @@ export default function ProfilePage() {
             <div className="flex items-center gap-4 mb-5">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(251,146,60,0.05))', border: '1px solid rgba(251,146,60,0.2)' }}>
-                <svg className="w-6 h-6 text-orange-400" viewBox="0 0 318 239" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M298.9 0L176.6 89.3l22.4-52.7L298.9 0z" fill="#E2761B"/>
-                  <path d="M18.9 0l121.2 90.1-21.3-53.5L18.9 0z" fill="#E4761B"/>
-                  <path d="M255.8 172.7l-32.5 49.7 69.6 19.1 20-67.8-57.1-1zm-207.5 1 19.9 67.8 69.5-19.1-32.4-49.7-57 1z" fill="#E4761B"/>
-                  <path d="M134.5 102.9l-19.4 29.3 69.1 3.1-2.3-74.2-47.4 41.8zm48.8 0 48-42.6-2.6 74.9 69-3.1-19.3-29.2-95.1 0z" fill="#E4761B"/>
-                  <path d="M138.2 222.4l41.6-20.3-35.9-28-5.7 48.3zm0 0" fill="#D7C1B3"/>
-                  <path d="M180 222.4l-35.8-20.3 5.5 48.3 30.3-28z" fill="#C0AD9E"/>
-                </svg>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-[var(--text)]">MetaMask</div>
