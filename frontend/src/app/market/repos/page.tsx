@@ -164,7 +164,7 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
             </div>
             <div className="flex items-center gap-1">
               <p className="text-xs text-zinc-500">@{repo.user.username || 'anon'}</p>
-              <CheckCircle2 className="w-3 h-3 text-monad-400" title="Verified developer" />
+              <span title="Verified developer"><CheckCircle2 className="w-3 h-3 text-monad-400" /></span>
             </div>
           </div>
         </div>
