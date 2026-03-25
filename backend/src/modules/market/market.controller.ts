@@ -100,6 +100,10 @@ export class MarketController {
       throw new NotFoundException();
     }
     const filePath = path.join(UPLOADS_DIR, key);
+    // Ensure resolved path stays within uploads directory (path traversal protection)
+    if (!path.resolve(filePath).startsWith(path.resolve(UPLOADS_DIR))) {
+      throw new NotFoundException();
+    }
     if (!fs.existsSync(filePath)) throw new NotFoundException('File not found');
     const meta = await this.marketService.getListingByFileKey(key);
     res.setHeader('Content-Disposition', `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`);
