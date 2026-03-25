@@ -433,14 +433,14 @@ export default function HomePage() {
             <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full">
               <div className="grid grid-cols-2 gap-3">
                 {ORBITAL_DATA.map((item) => (
-                  <div key={item.label} className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.06] hover:border-monad-500/20 hover:bg-monad-500/3 transition-all duration-200"
+                  <div key={item.title} className="flex items-start gap-3 p-4 rounded-xl border border-white/[0.06] hover:border-monad-500/20 hover:bg-monad-500/3 transition-all duration-200"
                     style={{ background: 'rgba(255,255,255,0.015)' }}>
                     <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                       style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
                       <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-zinc-200 mb-0.5">{item.label}</div>
+                      <div className="text-sm font-medium text-zinc-200 mb-0.5">{item.title}</div>
                       <div className="text-xs text-zinc-500 leading-relaxed">{item.content}</div>
                     </div>
                   </div>
