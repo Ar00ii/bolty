@@ -320,6 +320,8 @@ export class ReposController {
       res.status(404).json({ message: 'Logo not found' });
       return;
     }
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.sendFile(filePath, { headers: { 'Cache-Control': 'public, max-age=86400' } });
   }
 
