@@ -1,0 +1,13 @@
+{
+  "name": "bolty-example-agent",
+  "version": "1.0.0",
+  "description": "Example AI negotiation agent for Bolty marketplace",
+  "main": "agent.js",
+  "scripts": {
+    "start": "node agent.js",
+    "dev": "node --watch agent.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
