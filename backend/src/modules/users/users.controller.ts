@@ -88,9 +88,11 @@ export class UsersController {
     try {
       return await this.usersService.updateProfile(userId, dto);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '';
-      if (msg.includes('Unique constraint') || msg.includes('username')) {
-        throw new ConflictException('Username already taken');
+      // Prisma unique constraint violation (P2002)
+      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+        const target = (err as { meta?: { target?: string[] } }).meta?.target;
+        if (target?.includes('username')) throw new ConflictException('Username already taken');
+        throw new ConflictException('This value is already in use');
       }
       throw err;
     }

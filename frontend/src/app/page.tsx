@@ -37,10 +37,7 @@ import {
   Cpu,
   Hash,
   Rocket,
-  FlaskConical,
-  Sparkles,
   ArrowRight,
-  Radio,
 } from 'lucide-react';
 
 // ── Scroll reveal ─────────────────────────────────────────────────────────────
