@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { TerminalCard } from '@/components/ui/TerminalCard';
-import { GlowingEffect } from '@/components/ui/glowing-effect';
 
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
@@ -599,116 +598,88 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 animate-[fade-in_0.4s_ease]">
+    <div className="max-w-5xl mx-auto px-4 py-8 animate-[fade-in_0.4s_ease]">
+      <div className="flex gap-5 items-start">
 
-      {/* ── Hero header card ─────────────────────────────────────────── */}
-      <div className="relative rounded-2xl overflow-hidden mb-7 border border-[var(--border)]"
-        style={{ background: 'linear-gradient(135deg, #18181b 0%, #1c1c1f 100%)' }}>
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-px"
-          style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.5), transparent)' }} />
-        {/* Subtle radial glow */}
-        <div className="absolute top-0 right-0 w-64 h-32 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.08) 0%, transparent 70%)' }} />
+        {/* ── Sidebar ──────────────────────────────────────────────── */}
+        <div className="w-56 flex-shrink-0 sticky top-24 space-y-3">
 
-        <div className="relative px-6 py-5 flex items-center gap-5">
-          <div className="relative">
-            <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="lg" />
-            {/* Online indicator */}
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#18181b]" />
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-[var(--text)] font-semibold text-lg leading-tight">
-                {user?.displayName || user?.username || 'New User'}
-              </span>
-              {userTag && (
-                <span className="font-mono text-xs text-monad-400 bg-monad-500/10 border border-monad-500/20 px-2 py-0.5 rounded-md">
-                  #{userTag}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4 mt-1.5 flex-wrap">
-              {username && (
-                <span className="text-xs text-[var(--text-muted)] font-mono">@{username}</span>
-              )}
-              {githubLogin && (
-                <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-                  <IconGitHub className="w-3 h-3" />
-                  <span>{githubLogin}</span>
+          {/* User card */}
+          <div className="rounded-2xl border border-[var(--border)] overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+            <div className="h-px w-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(131,110,249,0.35), transparent)' }} />
+            <div className="p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="relative flex-shrink-0">
+                  <Avatar src={user?.avatarUrl} name={user?.displayName || user?.username} size="md" />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)]" />
                 </div>
-              )}
-              {walletAddress && (
-                <span className="text-xs font-mono text-[var(--text-muted)]">
-                  {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {profileUrl && (
-            <Link
-              href={profileUrl}
-              target="_blank"
-              className="flex items-center gap-1.5 text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-2 rounded-lg transition-all duration-200 shrink-0"
-            >
-              View profile
-              <IconArrow className="w-3 h-3" />
-            </Link>
-          )}
-        </div>
-      </div>
-
-      {/* ── Settings Navigation Grid ─────────────────────────────── */}
-      <ul className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
-        {[
-          { id: 'general' as Tab, label: 'General', desc: 'Username, display name and bio', Icon: IconUser },
-          { id: 'social' as Tab, label: 'Social', desc: 'Link your X, LinkedIn and website', Icon: IconGlobe },
-          { id: 'wallet' as Tab, label: 'Wallet', desc: 'Connect MetaMask for payments', Icon: IconWallet },
-          { id: 'connections' as Tab, label: 'Connections', desc: 'Manage linked GitHub account', Icon: IconLink },
-          { id: 'friends' as Tab, label: 'Friends', desc: 'Find and manage your contacts', Icon: IconUsers },
-          { id: 'security' as Tab, label: 'Security', desc: '2FA, email and account settings', Icon: IconShield },
-          { id: 'agent' as Tab, label: 'AI Agent', desc: 'Connect your own AI to negotiate', Icon: IconCpu },
-        ].map(({ id, label, desc, Icon }) => (
-          <li key={id} className="min-h-[8rem] list-none">
-            <button
-              onClick={() => setTab(id)}
-              className="relative h-full w-full rounded-2xl border border-[var(--border)] p-2 text-left transition-all duration-200 hover:border-monad-500/30"
-              style={{
-                background: tab === id
-                  ? 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, var(--bg-card) 60%)'
-                  : 'var(--bg-card)',
-              }}
-            >
-              <GlowingEffect
-                spread={30}
-                glow={tab === id}
-                disabled={tab !== id}
-                proximity={48}
-                inactiveZone={0.01}
-                borderWidth={2}
-              />
-              <div className="relative flex h-full flex-col justify-between gap-3 overflow-hidden rounded-xl border border-[var(--border)] px-4 py-4"
-                style={{ background: 'var(--bg-elevated)' }}>
-                <div className={`w-8 h-8 rounded-lg border flex items-center justify-center transition-colors ${
-                  tab === id
-                    ? 'bg-monad-500/15 border-monad-500/30'
-                    : 'bg-[var(--bg-card)] border-[var(--border)]'
-                }`}>
-                  <Icon className={`w-4 h-4 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
-                </div>
-                <div>
-                  <div className={`text-sm font-semibold leading-tight tracking-tight ${tab === id ? 'text-monad-300' : 'text-[var(--text)]'}`}>
-                    {label}
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-[var(--text)] truncate leading-tight">
+                    {user?.displayName || user?.username || 'New User'}
                   </div>
-                  <div className="text-xs text-[var(--text-muted)] mt-1 leading-relaxed">{desc}</div>
+                  {username && <div className="text-xs text-[var(--text-muted)] font-mono truncate">@{username}</div>}
+                  {userTag && <div className="text-xs font-mono text-monad-400/70 mt-0.5">#{userTag}</div>}
                 </div>
               </div>
-            </button>
-          </li>
-        ))}
-      </ul>
+
+              {/* Extra info pills */}
+              <div className="space-y-1.5">
+                {githubLogin && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
+                    <IconGitHub className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate font-mono">{githubLogin}</span>
+                  </div>
+                )}
+                {walletAddress && (
+                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/metamask.png" alt="" className="w-3 h-3 object-contain flex-shrink-0" />
+                    <span className="truncate font-mono">{walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}</span>
+                  </div>
+                )}
+              </div>
+
+              {profileUrl && (
+                <Link href={profileUrl} target="_blank"
+                  className="flex items-center justify-center gap-1.5 w-full text-xs text-[var(--text-muted)] hover:text-monad-400 border border-[var(--border)] hover:border-monad-500/30 px-3 py-2 rounded-xl transition-all duration-200">
+                  View profile <IconArrow className="w-3 h-3" />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Nav list */}
+          <nav className="rounded-2xl border border-[var(--border)] overflow-hidden" style={{ background: 'var(--bg-card)' }}>
+            {([
+              { id: 'general' as Tab, label: 'General', Icon: IconUser },
+              { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
+              { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+              { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
+              { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
+              { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+              { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
+            ] as Array<{ id: Tab; label: string; Icon: React.ComponentType<{ className?: string }> }>).map(({ id, label, Icon }, i, arr) => (
+              <button
+                key={id}
+                onClick={() => setTab(id)}
+                className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150 ${i < arr.length - 1 ? 'border-b border-[var(--border)]' : ''} ${
+                  tab === id ? 'bg-monad-500/10' : 'hover:bg-white/[0.025]'
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                  tab === id ? 'bg-monad-500/20 border border-monad-500/25' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'
+                }`}>
+                  <Icon className={`w-3.5 h-3.5 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
+                </div>
+                <span className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-medium' : 'text-[var(--text)]'}`}>{label}</span>
+                {tab === id && <div className="w-1 h-4 rounded-full bg-monad-400 flex-shrink-0" />}
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        {/* ── Main content panel ───────────────────────────────────── */}
+        <div className="flex-1 min-w-0">
 
       {/* ════════════════════════════════════════════
           GENERAL  — monad purple tint
@@ -1477,6 +1448,8 @@ export default function ProfilePage() {
         </div>
       )}
 
+        </div>{/* end main content panel */}
+      </div>{/* end flex row */}
     </div>
   );
 }
