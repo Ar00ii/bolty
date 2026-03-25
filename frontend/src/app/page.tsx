@@ -9,6 +9,12 @@ import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import GridMotion from '@/components/ui/GridMotion';
 import TrueFocus from '@/components/ui/TrueFocus';
+import { LogoLoop } from '@/components/ui/LogoLoop';
+import {
+  SiReact, SiNextdotjs, SiTypescript, SiTailwindcss,
+  SiEthereum, SiSolana, SiGithub, SiSocketdotio,
+  SiThreedotjs, SiFramer, SiPrisma, SiPostgresql,
+} from 'react-icons/si';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
@@ -323,6 +329,22 @@ function DashedCard({ children, className = '' }: { children: React.ReactNode; c
   );
 }
 
+// ── Tech stack logos ──────────────────────────────────────────────────────────
+const TECH_LOGOS = [
+  { node: <SiReact />,      title: 'React',         href: 'https://react.dev',                color: '#61DAFB' },
+  { node: <SiNextdotjs />,  title: 'Next.js',       href: 'https://nextjs.org',               color: '#ffffff' },
+  { node: <SiTypescript />, title: 'TypeScript',    href: 'https://typescriptlang.org',       color: '#3178C6' },
+  { node: <SiTailwindcss />,title: 'Tailwind CSS',  href: 'https://tailwindcss.com',          color: '#06B6D4' },
+  { node: <SiEthereum />,   title: 'Ethereum',      href: 'https://ethereum.org',             color: '#627EEA' },
+  { node: <SiSolana />,     title: 'Solana',        href: 'https://solana.com',               color: '#9945FF' },
+  { node: <SiGithub />,     title: 'GitHub',        href: 'https://github.com',               color: '#ffffff' },
+  { node: <SiSocketdotio />,title: 'Socket.io',     href: 'https://socket.io',                color: '#ffffff' },
+  { node: <SiThreedotjs />, title: 'Three.js',      href: 'https://threejs.org',              color: '#ffffff' },
+  { node: <SiFramer />,     title: 'Framer Motion', href: 'https://www.framer.com/motion',    color: '#0055FF' },
+  { node: <SiPrisma />,     title: 'Prisma',        href: 'https://www.prisma.io',            color: '#2D3748' },
+  { node: <SiPostgresql />, title: 'PostgreSQL',    href: 'https://postgresql.org',           color: '#4169E1' },
+];
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
@@ -433,6 +455,34 @@ export default function HomePage() {
           ))}
         </div>
 
+      </section>
+
+      {/* ── TECH STACK LOOP ────────────────────────────────────────────── */}
+      <section className="py-10 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="mb-4 px-8">
+          <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 text-center">Built with</p>
+        </div>
+        <div style={{ height: '60px', position: 'relative', overflow: 'hidden' }}>
+          <LogoLoop
+            logos={TECH_LOGOS.map(t => ({
+              node: <span style={{ color: t.color, fontSize: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {t.node}
+                <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{t.title}</span>
+              </span>,
+              title: t.title,
+              href: t.href,
+            }))}
+            speed={60}
+            direction="left"
+            logoHeight={40}
+            gap={56}
+            hoverSpeed={0}
+            scaleOnHover
+            fadeOut
+            fadeOutColor="#000000"
+            ariaLabel="Bolty tech stack"
+          />
+        </div>
       </section>
 
       {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
