@@ -8,6 +8,7 @@ import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { FeatureCard } from '@/components/ui/grid-feature-cards';
 import { InteractiveHoverLinkInner } from '@/components/ui/interactive-hover-button';
 import GridMotion from '@/components/ui/GridMotion';
+import TrueFocus from '@/components/ui/TrueFocus';
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
@@ -434,113 +435,65 @@ export default function HomePage() {
 
       </section>
 
-      {/* ── ONCHAIN PAYMENTS — GridMotion fullscreen ───────────────────── */}
-      <section className="relative h-screen overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        {/* GridMotion background */}
-        <div className="absolute inset-0 z-0">
-          <GridMotion
-            gradientColor="rgba(0,0,0,0.7)"
-            items={[
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-            ]}
+      {/* ── TRUEFOCUS — full-width centered tagline (Monad "A new benchmark") ── */}
+      <section className="py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <AnimatedContainer>
+          <TrueFocus
+            sentence="A new standard for dev tools."
+            manualMode={false}
+            blurAmount={6}
+            borderColor="#836EF9"
+            glowColor="rgba(131,110,249,0.6)"
+            animationDuration={0.5}
+            pauseBetweenAnimations={1.2}
+            className="text-4xl md:text-6xl lg:text-7xl font-black text-white px-8"
           />
-        </div>
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 z-10 pointer-events-none"
-          style={{ background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.85) 100%)' }} />
-        {/* Content overlay */}
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="max-w-3xl mx-auto px-8 text-center">
-            <AnimatedContainer>
-              <p className="text-xs font-mono uppercase tracking-widest mb-6"
-                style={{ color: 'rgba(131,110,249,0.9)' }}>Onchain payments</p>
-              <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-6 leading-none">
-                Pay. Sell. Earn.<br />
-                <span style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#0052FF 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  On Base.
-                </span>
-              </h2>
-              <p className="text-zinc-400 text-base leading-relaxed mb-10 max-w-lg mx-auto">
-                Every transaction on Bolty is settled on-chain. No middlemen, no fees, no trust required.
-                Buy locked repos or AI agents and pay directly to the developer&apos;s wallet.
-              </p>
-              <div className="flex items-center justify-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
-                  <svg width="18" height="18" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
-                    <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
-                  </svg>
-                  <span className="text-sm text-zinc-300 font-mono">Base Network</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
-                  <Coins className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                  <span className="text-sm text-zinc-300 font-mono">ETH payments</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/5">
-                  <Shield className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                  <span className="text-sm text-zinc-300 font-mono">Non-custodial</span>
-                </div>
-              </div>
-            </AnimatedContainer>
-          </div>
-        </div>
+        </AnimatedContainer>
       </section>
 
-      {/* ── STATS — asymmetric left/right ──────────────────────────────── */}
-      <section className="py-20 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <AnimatedContainer>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform overview</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                The platform,<br />by the numbers
-              </h2>
-              <p className="text-zinc-500 text-sm leading-relaxed max-w-sm">
-                Bolty is launching in Beta. Three planned releases — Beta, Gamma, and Alpha — each expanding the platform with new capabilities.
-              </p>
-            </AnimatedContainer>
-            <div className="grid grid-cols-2 gap-px bg-white/06 border border-white/06">
-              {STATS.map((s, i) => (
-                <AnimatedContainer key={s.label} delay={i * 0.08}>
-                  <div className="px-8 py-7 hover:bg-monad-500/5 transition-colors">
-                    <div className="text-4xl font-black mb-2 tabular-nums"
-                      style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      {s.numeric != null
-                        ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
-                        : s.value}
-                    </div>
-                    <div className="text-xs text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
-                  </div>
-                </AnimatedContainer>
-              ))}
-            </div>
+      {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
+      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* Left: text block */}
+        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+          <AnimatedContainer>
+            <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
+              Fast, open,<br />developer-first.
+            </h2>
+            <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
+              No high fees or slow deploys. Code on Bolty ships instantly, earns in ETH, and works with
+              the wallets and tools you already know and love.
+            </p>
+            <Link href="/repos" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/15 text-xs font-mono uppercase tracking-widest text-zinc-300 hover:border-monad-500/40 hover:text-white transition-colors">
+              Explore repos
+            </Link>
+          </AnimatedContainer>
+        </div>
+
+        {/* Right: visual panel with dotted grid + stats */}
+        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden">
+          {/* Dotted grid background */}
+          <div className="absolute inset-0"
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          {/* Corner decorations */}
+          <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 border-white/20" />
+          <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 border-white/20" />
+          <div className="absolute bottom-8 left-8 w-6 h-6 border-b-2 border-l-2 border-white/20" />
+          <div className="absolute bottom-8 right-8 w-6 h-6 border-b-2 border-r-2 border-white/20" />
+          {/* Counter label */}
+          <div className="absolute top-8 right-14 text-xs font-mono text-zinc-600">// 001</div>
+          {/* Stats grid */}
+          <div className="relative z-10 flex flex-col justify-center h-full px-16 gap-0 divide-y divide-white/[0.06]">
+            {STATS.map((s, i) => (
+              <div key={s.label} className="py-7">
+                <div className="text-5xl font-black tabular-nums mb-1"
+                  style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  {s.numeric != null
+                    ? <NumberTicker value={s.numeric} suffix={s.suffix ?? ''} delay={i * 0.15} />
+                    : s.value}
+                </div>
+                <div className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
