@@ -21,6 +21,7 @@ import { AnimatedList } from '@/components/ui/animated-list';
 import { RetroGrid } from '@/components/ui/retro-grid';
 import { EvervaultCard } from '@/components/ui/evervault-card';
 import { BackgroundBeams } from '@/components/ui/background-beams';
+import DecryptedText from '@/components/ui/DecryptedText';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
@@ -709,38 +710,59 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 relative z-10">
           <AnimatedContainer className="mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white max-w-sm">
-              Up and running in minutes
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white max-w-lg leading-tight">
+              <DecryptedText
+                text="Up and running in minutes"
+                speed={35}
+                animateOn="view"
+                sequential
+                revealDirection="start"
+                className="text-white"
+                encryptedClassName="text-monad-400/40"
+              />
             </h2>
           </AnimatedContainer>
 
           <div className="space-y-0">
             {STEPS.map((step, i) => (
               <AnimatedContainer key={step.title} delay={0.15 * i}>
-                <div className="grid grid-cols-12 gap-6 py-10 border-b border-dashed border-white/08 group hover:bg-monad-500/2 transition-colors px-2">
+                <div className="grid grid-cols-12 gap-6 py-12 border-b border-white/10 group transition-colors px-2"
+                  style={{ background: 'rgba(255,255,255,0)', borderBottomColor: 'rgba(255,255,255,0.08)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(131,110,249,0.03)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0)')}>
                   {/* Big step number */}
                   <div className="col-span-2 flex items-start justify-end pt-1">
-                    <span className="text-6xl font-black tabular-nums leading-none select-none"
-                      style={{ color: 'rgba(131,110,249,0.12)', fontVariantNumeric: 'tabular-nums' }}>
+                    <span className="text-7xl font-black tabular-nums leading-none select-none"
+                      style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.35), rgba(131,110,249,0.08))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                       0{i + 1}
                     </span>
                   </div>
                   {/* Icon + content */}
                   <div className="col-span-8 md:col-span-7">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
-                        <step.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)' }}>
+                        <step.icon className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-base font-semibold text-zinc-200">{step.title}</h3>
+                      <h3 className="text-lg font-bold text-white">
+                        <DecryptedText
+                          text={step.title}
+                          speed={40}
+                          animateOn="view"
+                          sequential
+                          revealDirection="start"
+                          className="text-white"
+                          encryptedClassName="text-monad-400/50"
+                        />
+                      </h3>
                     </div>
-                    <p className="text-sm text-zinc-500 leading-relaxed max-w-md">{step.description}</p>
+                    <p className="text-sm text-zinc-300 leading-relaxed max-w-md">{step.description}</p>
                   </div>
                   {/* Metric */}
                   <div className="col-span-2 md:col-span-3 flex items-center justify-end">
-                    {i === 0 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">email · GitHub<br />or Web3 wallet</span>}
-                    {i === 1 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">{'< 5 min'}<br />to go live</span>}
-                    {i === 2 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">instant<br />ETH payout</span>}
+                    {i === 0 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">email · GitHub<br />or Web3 wallet</span>}
+                    {i === 1 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">{'< 5 min'}<br />to go live</span>}
+                    {i === 2 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">instant<br />ETH payout</span>}
                   </div>
                 </div>
               </AnimatedContainer>
