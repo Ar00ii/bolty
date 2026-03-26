@@ -406,7 +406,7 @@ export default function HomePage() {
         <div className="relative z-20 flex h-full">
 
           {/* LEFT: text content */}
-          <div className="flex-1 flex flex-col justify-center px-10 lg:px-16 min-w-0">
+          <div className="flex-1 flex flex-col justify-center px-16 lg:px-24 xl:px-32 min-w-0 pt-8">
             <AnimatedGradientText className="mb-6 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
               <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
