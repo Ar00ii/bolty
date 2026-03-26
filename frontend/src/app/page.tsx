@@ -353,43 +353,60 @@ export default function HomePage() {
   return (
     <div className="overflow-x-hidden">
 
-      {/* ── HERO — Monad layout: left top-aligned + right stats sidebar ── */}
-      <section className="flex h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── HERO ── */}
+      <section className="flex h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
 
-        {/* LEFT COLUMN: text at top, animation at bottom */}
+        {/* LEFT COLUMN */}
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
-          {/* Text block — starts at the top */}
-          <div className="px-10 lg:px-16 pt-16 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <AnimatedGradientText className="mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
-              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
-            </AnimatedGradientText>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
-              <span className="block text-white">Publish.</span>
-              <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
-              <span className="block text-white">Earn.</span>
-            </h1>
-            <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
-              Bolty brings together code, AI agents, and community in one developer-first platform.
-              Share your work, grow your audience, and earn on-chain.
-            </p>
-            {!isAuthenticated && (
-              <div className="flex items-center gap-4">
-                <Link href="/auth">
-                  <InteractiveHoverLinkInner text="Get started" className="text-sm" />
-                </Link>
-                <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
-                  Learn more <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            )}
+          {/* Text block — distinct elevated bg */}
+          <div
+            className="relative px-10 lg:px-16 pt-16 pb-12 overflow-hidden"
+            style={{
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              background: 'linear-gradient(135deg, #0d0b18 0%, #0a0812 60%, #0c0a16 100%)',
+            }}
+          >
+            {/* Subtle radial glow top-right */}
+            <div className="absolute top-0 right-0 w-96 h-64 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.08) 0%, transparent 70%)' }} />
+            {/* Dot grid */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+            <div className="relative z-10">
+              <AnimatedGradientText className="mb-6">
+                <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
+                <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
+              </AnimatedGradientText>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
+                <span className="block text-white">Publish.</span>
+                <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
+                <span className="block text-white">Earn.</span>
+              </h1>
+              <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
+                Bolty brings together code, AI agents, and community in one developer-first platform.
+                Share your work, grow your audience, and earn on-chain.
+              </p>
+              {!isAuthenticated && (
+                <div className="flex items-center gap-4">
+                  <Link href="/auth">
+                    <InteractiveHoverLinkInner text="Get started" className="text-sm" />
+                  </Link>
+                  <Link href="#features" className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors flex items-center gap-1.5">
+                    Learn more <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Animation block — fills remaining height */}
-          <div className="flex-1 relative overflow-hidden">
+          {/* Animation block — darker, pure black base */}
+          <div className="flex-1 relative overflow-hidden" style={{ background: '#030207' }}>
+            {/* Top fade overlay */}
+            <div className="absolute top-0 left-0 right-0 h-16 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, #030207, transparent)' }} />
             <GridMotion
-              gradientColor="rgba(0,0,0,0.5)"
+              gradientColor="rgba(3,2,7,0.6)"
               items={[
                 'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
                 'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
@@ -425,21 +442,34 @@ export default function HomePage() {
 
         </div>
 
-        {/* RIGHT COLUMN: stats sidebar — full height with left border */}
-        <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+        {/* RIGHT COLUMN: stats sidebar */}
+        <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80 relative" style={{ borderLeft: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Subtle purple glow behind sidebar */}
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(180deg, #0c0a18 0%, #080612 50%, #060410 100%)' }} />
           {[
-            { value: '500+', label: 'Developers' },
-            { value: 'ETH', label: 'On-chain payments' },
-            { value: '100%', label: 'EVM compatible' },
-            { value: 'Base', label: 'Supported chain', isBase: true },
-            { value: 'Beta', label: 'Current phase' },
-          ].map((stat) => (
+            { value: '500+', label: 'Developers', accent: false },
+            { value: 'ETH', label: 'On-chain payments', accent: false },
+            { value: '100%', label: 'EVM compatible', accent: true },
+            { value: 'Base', label: 'Supported chain', isBase: true, accent: false },
+            { value: 'Beta', label: 'Current phase', accent: false },
+          ].map((stat, idx) => (
             <div
               key={stat.label}
-              className="flex-1 flex flex-col justify-center px-8"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+              className="flex-1 flex flex-col justify-center px-8 relative"
+              style={{
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
+                background: stat.accent
+                  ? 'rgba(131,110,249,0.04)'
+                  : idx % 2 === 0
+                  ? 'rgba(255,255,255,0.01)'
+                  : 'transparent',
+              }}
             >
-              <div className="flex items-center gap-3">
+              {/* left accent bar on hover */}
+              <div className="absolute left-0 top-4 bottom-4 w-[2px] rounded-full"
+                style={{ background: stat.accent ? 'rgba(131,110,249,0.5)' : 'transparent' }} />
+              <div className="flex items-center gap-3 relative z-10">
                 {stat.isBase && (
                   <svg width="32" height="32" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
                     <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
@@ -447,7 +477,12 @@ export default function HomePage() {
                   </svg>
                 )}
                 <div>
-                  <div className="text-4xl xl:text-5xl font-black tabular-nums text-white leading-none mb-1">
+                  <div
+                    className="text-4xl xl:text-5xl font-black tabular-nums leading-none mb-1"
+                    style={stat.accent
+                      ? { background: 'linear-gradient(135deg,#836EF9,#c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
+                      : { color: 'white' }}
+                  >
                     {stat.value}
                   </div>
                   <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mt-1">{stat.label}</div>
