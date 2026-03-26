@@ -380,9 +380,9 @@ export default function HomePage() {
                 <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
               </AnimatedGradientText>
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
-                <span className="block text-white">Publish.</span>
-                <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
-                <span className="block text-white">Earn.</span>
+                <span className="block text-white"><DecryptedText text="Publish." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></span>
+                <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}><DecryptedText text="Collaborate." speed={30} animateOn="view" sequential className="text-monad-400" encryptedClassName="text-monad-400/40" /></span>
+                <span className="block text-white"><DecryptedText text="Earn." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></span>
               </h1>
               <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
                 Bolty brings together code, AI agents, and community in one developer-first platform.
@@ -535,7 +535,8 @@ export default function HomePage() {
           <div className="absolute bottom-0 left-0 w-80 h-80 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom left, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
           <AnimatedContainer>
             <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
-              Fast, open,<br />developer-first.
+              <DecryptedText text="Fast, open," speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+              <DecryptedText text="developer-first." speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
             </h2>
             <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
               No high fees or slow deploys. Code on Bolty ships instantly, earns in ETH, and works with
@@ -585,7 +586,7 @@ export default function HomePage() {
           <AnimatedContainer delay={0.1} className="mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-5">
-              Everything you need to build
+              <DecryptedText text="Everything you need to build" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
             </h2>
             <p className="text-zinc-400 text-base leading-relaxed max-w-lg">
               From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
@@ -661,7 +662,8 @@ export default function HomePage() {
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                Works with<br />your stack
+                <DecryptedText text="Works with" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                <DecryptedText text="your stack" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
               <p className="text-zinc-400 text-sm leading-relaxed max-w-sm md:text-right">
                 Bolty connects with the tools and chains you already use — no complicated setup required.
@@ -782,7 +784,8 @@ export default function HomePage() {
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Real-time platform</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                Live platform<br />activity
+                <DecryptedText text="Live platform" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                <DecryptedText text="activity" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
               <p className="text-zinc-500 text-sm leading-relaxed mb-8 max-w-sm">
                 Sales, messages, and sign-ups happening across the ecosystem in real time.
@@ -839,7 +842,7 @@ export default function HomePage() {
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Step by step</p>
               <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
-                Platform Roadmap
+                <DecryptedText text="Platform Roadmap" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
               <p className="text-sm text-zinc-500 max-w-md leading-relaxed">
                 Bolty is built in three phases. Each version expands the platform with new capabilities and deeper infrastructure.
@@ -872,7 +875,7 @@ export default function HomePage() {
                     <Code2 className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
                     <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.6), transparent)' }} />
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1">Code Repository Publishing</h3>
+                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="Code Repository Publishing" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
                   <p className="text-zinc-500 text-sm leading-relaxed max-w-xl mb-3">Publish and monetize code repositories directly on-chain. Set prices, manage access, and earn from every download.</p>
                   <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
@@ -894,7 +897,7 @@ export default function HomePage() {
                     <Bot className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
                     <div className="w-3/4 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.5), transparent)' }} />
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1">AI Assistant</h3>
+                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="AI Assistant" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
                   <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">An intelligent assistant built into the platform. Ask questions, get code suggestions, and navigate the ecosystem seamlessly.</p>
                   <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
@@ -918,7 +921,7 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-start justify-between gap-8">
                     <div>
-                      <h3 className="text-white font-bold text-lg mb-1">Global Community Chat</h3>
+                      <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="Global Community Chat" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
                       <p className="text-zinc-500 text-sm leading-relaxed max-w-md mb-3">Real-time community hub for builders. Connect, collaborate, and share with developers worldwide.</p>
                       <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                     </div>
@@ -942,7 +945,7 @@ export default function HomePage() {
                     <Wallet className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
                     <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.45), transparent)' }} />
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1">ETH On-chain Payments</h3>
+                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="ETH On-chain Payments" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
                   <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">Trustless payments settled directly on Ethereum. No intermediaries, no delays — your keys, your assets, always.</p>
                   <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
@@ -965,7 +968,7 @@ export default function HomePage() {
                     <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, #836EF9, rgba(131,110,249,0.2), transparent)' }} />
                     <span className="text-xs font-mono text-monad-400 shrink-0">Current</span>
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-1">Agent Marketplace</h3>
+                  <h3 className="text-white font-bold text-xl mb-1"><DecryptedText text="Agent Marketplace" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
                   <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-3">Publish AI agents with a price. Buyers&apos; agents negotiate autonomously. When they agree — confirm to open a DM and close the deal on-chain.</p>
                   <ArrowRight className="w-4 h-4 text-monad-400/70" strokeWidth={1.5} />
                 </div>
@@ -995,7 +998,7 @@ export default function HomePage() {
                     <Globe className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
                     <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.25), transparent)' }} />
                   </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Public REST API</h3>
+                  <h3 className="text-zinc-400 font-bold text-lg mb-1"><DecryptedText text="Public REST API" speed={40} animateOn="view" sequential className="text-zinc-400" encryptedClassName="text-zinc-600" /></h3>
                   <p className="text-zinc-600 text-sm leading-relaxed max-w-xl mb-3">Open Bolty infrastructure to third-party builders. Programmatic access to repositories, agents, and all platform data.</p>
                   <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
                 </div>
@@ -1017,7 +1020,7 @@ export default function HomePage() {
                     <Zap className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
                     <div className="w-1/2 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.2), transparent)' }} />
                   </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Developer SDK &amp; Webhooks</h3>
+                  <h3 className="text-zinc-400 font-bold text-lg mb-1"><DecryptedText text="Developer SDK & Webhooks" speed={40} animateOn="view" sequential className="text-zinc-400" encryptedClassName="text-zinc-600" /></h3>
                   <p className="text-zinc-600 text-sm leading-relaxed max-w-lg mb-3">First-class SDK for building on top of Bolty. Real-time webhooks, event subscriptions, and automation tooling.</p>
                   <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
                 </div>
@@ -1047,7 +1050,7 @@ export default function HomePage() {
                     <Shield className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
                     <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.12), transparent)' }} />
                   </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1">DAO Governance</h3>
+                  <h3 className="text-zinc-600 font-bold text-lg mb-1"><DecryptedText text="DAO Governance" speed={40} animateOn="view" sequential className="text-zinc-600" encryptedClassName="text-zinc-700" /></h3>
                   <p className="text-zinc-700 text-sm leading-relaxed max-w-xl mb-3">Community-driven decisions on platform direction, fees, and upgrades. Token holders vote on proposals on-chain.</p>
                   <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
                 </div>
@@ -1069,7 +1072,7 @@ export default function HomePage() {
                     <Hash className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
                     <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.1), transparent)' }} />
                   </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1">Open Protocol &amp; Native Token</h3>
+                  <h3 className="text-zinc-600 font-bold text-lg mb-1"><DecryptedText text="Open Protocol & Native Token" speed={40} animateOn="view" sequential className="text-zinc-600" encryptedClassName="text-zinc-700" /></h3>
                   <p className="text-zinc-700 text-sm leading-relaxed max-w-lg mb-3">Bolty becomes a fully open, decentralized protocol. Cross-chain support, on-chain reputation, and the native $BOLTY token at the core.</p>
                   <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
                 </div>
@@ -1119,7 +1122,7 @@ export default function HomePage() {
           <Section className="order-1 lg:order-2">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Code marketplace</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
-              Monetize your GitHub repositories
+              <DecryptedText text="Monetize your GitHub repositories" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
             </h2>
             <p className="text-base leading-relaxed mb-6 text-zinc-400">
               Publish any repository — public or private — with a free or paid price tag.
@@ -1157,7 +1160,8 @@ export default function HomePage() {
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-5">
-                Built by developers,<br />for developers
+                <DecryptedText text="Built by developers," speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                <DecryptedText text="for developers" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
               <p className="text-zinc-400 mb-8 leading-relaxed text-base">
                 Connect with a global community of developers, share your projects, collaborate
@@ -1221,7 +1225,7 @@ export default function HomePage() {
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Built-in AI</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                Ask, build, ship — faster
+                <DecryptedText text="Ask, build, ship — faster" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
             </AnimatedContainer>
             <AnimatedContainer delay={0.2}>
@@ -1298,7 +1302,7 @@ export default function HomePage() {
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                What developers say
+                <DecryptedText text="What developers say" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
             </AnimatedContainer>
             <AnimatedContainer delay={0.1}>
@@ -1434,7 +1438,7 @@ export default function HomePage() {
             </div>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
               <span style={{ background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 50%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                Start building today.
+                <DecryptedText text="Start building today." speed={30} animateOn="view" sequential className="text-monad-400" encryptedClassName="text-monad-400/50" />
               </span>
             </h2>
             <p className="text-lg mb-10 text-zinc-400">
