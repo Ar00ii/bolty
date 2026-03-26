@@ -22,6 +22,7 @@ import { RetroGrid } from '@/components/ui/retro-grid';
 import { EvervaultCard } from '@/components/ui/evervault-card';
 import { BackgroundBeams } from '@/components/ui/background-beams';
 import DecryptedText from '@/components/ui/DecryptedText';
+import FlipCard from '@/components/ui/FlipCard';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
@@ -651,143 +652,63 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── INTEGRATIONS ── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0b091a' }}>
-        {/* large dot grid */}
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        {/* top-left purple glow */}
-        <div className="absolute top-0 left-0 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <AnimatedContainer className="mb-12">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                <DecryptedText text="Works with" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
-                <DecryptedText text="your stack" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-sm md:text-right">
-                Bolty connects with the tools and chains you already use — no complicated setup required.
+      {/* ── INTEGRATIONS + LIVE ACTIVITY (unified) ─────────────────────── */}
+      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#080614' }}>
+        {/* cross grid pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
+        {/* large radial center glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(131,110,249,0.09) 0%, transparent 60%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 80% 60%, rgba(131,110,249,0.05) 0%, transparent 55%)' }} />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+
+          {/* — Header — */}
+          <AnimatedContainer className="mb-20">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform ecosystem</p>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">
+                  <DecryptedText text="Works with your stack." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+                </h2>
+              </div>
+              <p className="text-zinc-400 text-base leading-relaxed max-w-sm lg:text-right">
+                Bolty connects with every tool you already use — GitHub, Ethereum, AI models, and more.
               </p>
             </div>
           </AnimatedContainer>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-            {INTEGRATIONS.map((item, i) => (
-              <AnimatedContainer key={item.name} delay={i * 0.07}>
-                <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
-                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
-                    style={{ background: item.isBase ? '#0052FF' : 'rgba(131,110,249,0.12)', border: item.isBase ? 'none' : '1px solid rgba(131,110,249,0.15)' }}>
-                    {item.isBase ? (
-                      <svg width="20" height="20" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
-                      </svg>
-                    ) : item.icon ? (
-                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                    ) : null}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-zinc-200">{item.name}</div>
-                    <div className="text-xs text-zinc-600 mt-0.5">{item.desc}</div>
-                  </div>
-                </div>
+
+          {/* — FlipCards grid — */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20">
+            {[
+              { icon: <GitBranch className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'GitHub', subtitle: 'VCS', description: 'Sync your repositories with one click. Push commits and your Bolty profile updates automatically.', color: 'rgba(131,110,249,0.15)' },
+              { icon: <Coins className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'Ethereum', subtitle: 'Payments', description: 'On-chain ETH payments direct to your wallet. No middleman, no delays — trustless by design.', color: 'rgba(98,126,234,0.18)' },
+              { icon: <svg width="28" height="28" viewBox="0 0 111 111" fill="none"><circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/><path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/></svg>, title: 'Base L2', subtitle: 'Chain', description: 'Layer 2 by Coinbase. Fast finality, ultra-low fees, and full EVM compatibility for all transactions.', color: 'rgba(0,82,255,0.15)' },
+              { icon: <Zap className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'BOLTY Token', subtitle: 'Native', description: 'Zero tax token. Pay fees, unlock premium features, and participate in governance with $BOLTY.', color: 'rgba(131,110,249,0.15)' },
+              { icon: <Code2 className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'Any Language', subtitle: 'Universal', description: 'JavaScript, Python, Rust, Go, Solidity — all stacks are welcome. Bolty is language-agnostic.', color: 'rgba(52,211,153,0.12)' },
+              { icon: <Bot className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'AI Models', subtitle: 'Intelligence', description: 'GPT-4, Claude, and more. Plug any AI model into the assistant or deploy it as a marketplace agent.', color: 'rgba(251,146,60,0.12)' },
+            ].map((card, i) => (
+              <AnimatedContainer key={card.title} delay={i * 0.07}>
+                <FlipCard
+                  icon={card.icon}
+                  title={card.title}
+                  subtitle={card.subtitle}
+                  description={card.description}
+                  accentColor={card.color}
+                  rotate="y"
+                />
               </AnimatedContainer>
             ))}
           </div>
-          <AnimatedContainer delay={0.4}>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
-              style={{ background: 'rgba(131,110,249,0.04)' }}>
-              <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
-              <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
-            </div>
-          </AnimatedContainer>
-        </div>
-      </section>
 
-      {/* HOW IT WORKS — REMOVED */}
-      {false && <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#07050e' }}>
-        {/* vertical lines pattern */}
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 56px)' }} />
-        {/* right-side purple glow */}
-        <div className="absolute top-0 right-0 w-[500px] h-full pointer-events-none" style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.06) 0%, transparent 60%)' }} />
-        <div className="max-w-5xl mx-auto px-4 relative z-10">
-          <AnimatedContainer className="mb-16">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-white max-w-lg leading-tight">
-              <DecryptedText
-                text="Up and running in minutes"
-                speed={35}
-                animateOn="view"
-                sequential
-                revealDirection="start"
-                className="text-white"
-                encryptedClassName="text-monad-400/40"
-              />
-            </h2>
-          </AnimatedContainer>
-
-          <div className="space-y-0">
-            {STEPS.map((step, i) => (
-              <AnimatedContainer key={step.title} delay={0.15 * i}>
-                <div className="grid grid-cols-12 gap-6 py-12 border-b border-white/10 group transition-colors px-2"
-                  style={{ background: 'rgba(255,255,255,0)', borderBottomColor: 'rgba(255,255,255,0.08)' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(131,110,249,0.03)')}
-                  onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0)')}>
-                  {/* Big step number */}
-                  <div className="col-span-2 flex items-start justify-end pt-1">
-                    <span className="text-7xl font-black tabular-nums leading-none select-none"
-                      style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.35), rgba(131,110,249,0.08))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                      0{i + 1}
-                    </span>
-                  </div>
-                  {/* Icon + content */}
-                  <div className="col-span-8 md:col-span-7">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)' }}>
-                        <step.icon className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.5} />
-                      </div>
-                      <h3 className="text-lg font-bold text-white">
-                        <DecryptedText
-                          text={step.title}
-                          speed={40}
-                          animateOn="view"
-                          sequential
-                          revealDirection="start"
-                          className="text-white"
-                          encryptedClassName="text-monad-400/50"
-                        />
-                      </h3>
-                    </div>
-                    <p className="text-sm text-zinc-300 leading-relaxed max-w-md">{step.description}</p>
-                  </div>
-                  {/* Metric */}
-                  <div className="col-span-2 md:col-span-3 flex items-center justify-end">
-                    {i === 0 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">email · GitHub<br />or Web3 wallet</span>}
-                    {i === 1 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">{'< 5 min'}<br />to go live</span>}
-                    {i === 2 && <span className="text-xs font-mono text-monad-400 text-right hidden md:block leading-relaxed">instant<br />ETH payout</span>}
-                  </div>
-                </div>
-              </AnimatedContainer>
-            ))}
-          </div>
-        </div>
-      </section>}
-
-      {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0c0a1c' }}>
-        {/* diagonal dashes */}
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 20px)' }} />
-        {/* center-left glow */}
-        <div className="absolute inset-y-0 left-0 w-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center left, rgba(131,110,249,0.08) 0%, transparent 65%)' }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* — Live activity strip below — */}
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Real-time platform</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-5 leading-tight">
                 <DecryptedText text="Live platform" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
-                <DecryptedText text="activity" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+                <DecryptedText text="activity." speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
-              <p className="text-zinc-500 text-sm leading-relaxed mb-8 max-w-sm">
+              <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
                 Sales, messages, and sign-ups happening across the ecosystem in real time.
               </p>
               <AvatarCircles
@@ -799,33 +720,45 @@ export default function HomePage() {
                   { imageUrl: 'https://avatars.githubusercontent.com/u/59228569' },
                 ]}
               />
-              <p className="text-xs text-zinc-600 mt-2 font-mono">100+ developers already building</p>
+              <p className="text-sm text-zinc-500 mt-3 font-mono">100+ developers already building</p>
             </AnimatedContainer>
-            <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/[0.06]"
-              style={{ background: 'rgba(10,10,18,0.8)' }}>
-              <div className="absolute inset-x-0 top-0 h-12 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to bottom, rgba(10,10,18,0.8), transparent)' }} />
-              <div className="absolute inset-x-0 bottom-0 h-24 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to top, rgba(10,10,18,0.95), transparent)' }} />
-              <div className="p-4 pt-6">
-                <AnimatedList delay={1200}>
-                  {LIVE_NOTIFICATIONS.map((n, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl mb-0"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: n.bg, border: `1px solid ${n.border}` }}>
-                        <n.Icon className="w-3.5 h-3.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+
+            <AnimatedContainer delay={0.15}>
+              <div className="relative rounded-2xl overflow-hidden border border-white/[0.08]"
+                style={{ background: 'rgba(8,6,18,0.9)' }}>
+                {/* Header bar */}
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]"
+                  style={{ background: 'rgba(131,110,249,0.04)' }}>
+                  <Activity className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-xs font-mono text-zinc-300 font-semibold uppercase tracking-widest">Platform feed</span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs font-mono text-green-400">LIVE</span>
+                  </div>
+                </div>
+                {/* Fade bottom */}
+                <div className="absolute inset-x-0 bottom-0 h-20 z-10 pointer-events-none rounded-b-2xl"
+                  style={{ background: 'linear-gradient(to top, rgba(8,6,18,0.95), transparent)' }} />
+                <div className="p-5 max-h-[340px] overflow-hidden">
+                  <AnimatedList delay={800}>
+                    {LIVE_NOTIFICATIONS.map((n, i) => (
+                      <div key={i} className="flex items-center gap-4 px-4 py-3.5 rounded-xl mb-2 transition-colors"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: n.bg, border: `1px solid ${n.border}` }}>
+                          <n.Icon className="w-4.5 h-4.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-zinc-200 truncate">{n.title}</div>
+                          <div className="text-xs text-zinc-500 truncate mt-0.5">{n.desc}</div>
+                        </div>
+                        <div className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{n.time}</div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-zinc-200 truncate">{n.title}</div>
-                        <div className="text-[10px] text-zinc-600 truncate">{n.desc}</div>
-                      </div>
-                      <div className="text-[9px] font-mono text-zinc-700 flex-shrink-0">{n.time}</div>
-                    </div>
-                  ))}
-                </AnimatedList>
+                    ))}
+                  </AnimatedList>
+                </div>
               </div>
-            </div>
+            </AnimatedContainer>
           </div>
         </div>
       </section>
