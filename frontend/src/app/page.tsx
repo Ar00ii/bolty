@@ -437,8 +437,9 @@ export default function HomePage() {
             {/* sidebar bg overlay */}
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'linear-gradient(180deg, rgba(8,5,20,0.82) 0%, rgba(6,4,16,0.78) 100%)' }} />
+            {/* Empty spacer — keeps remaining stats in original positions */}
+            <div className="flex-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }} />
             {[
-              { value: '$BOLTY', label: 'Native token', accent: false },
               { value: '0%', label: 'Token tax', accent: false },
               { value: 'AI', label: 'Built-in assistant', accent: true },
               { value: 'Free', label: 'No cost to join', accent: false },
@@ -448,7 +449,7 @@ export default function HomePage() {
                 key={stat.label}
                 className="flex-1 flex flex-col justify-center px-8 relative"
                 style={{
-                  borderBottom: idx < 4 ? '1px solid rgba(255,255,255,0.07)' : undefined,
+                  borderBottom: idx < 3 ? '1px solid rgba(255,255,255,0.07)' : undefined,
                   background: stat.accent
                     ? 'rgba(131,110,249,0.06)'
                     : idx % 2 === 0
