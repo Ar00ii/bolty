@@ -532,47 +532,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURES — feature list left + orbital right ──────────────── */}
+      {/* ── FEATURES — feature list left ──────────────── */}
       <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <RetroGrid className="opacity-30" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
-            {/* Left: text + feature list */}
-            <AnimatedContainer delay={0.1} className="lg:w-5/12 w-full flex flex-col">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                Everything you need to build
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
-                From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
-              </p>
-              {PLATFORM_FEATURES.map((f, i) => (
-                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                  <div className="border border-white/[0.07] transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/25">
-                    <FeatureCard feature={f} />
-                  </div>
-                </Link>
-              ))}
-            </AnimatedContainer>
-            {/* Right: feature cards grid */}
-            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full">
-              <div className="grid grid-cols-2 gap-4">
-                {ORBITAL_DATA.map((item) => (
-                  <div key={item.title} className="flex flex-col gap-3 p-5 rounded-2xl border border-white/[0.07] hover:border-monad-500/25 hover:bg-monad-500/5 transition-all duration-200"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
-                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-zinc-100 mb-1">{item.title}</div>
-                      <div className="text-xs text-zinc-500 leading-relaxed">{item.content}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </AnimatedContainer>
+          <AnimatedContainer delay={0.1} className="max-w-xl">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+              Everything you need to build
+            </h2>
+            <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
+              From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
+            </p>
+          </AnimatedContainer>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {PLATFORM_FEATURES.map((f, i) => (
+              <Link key={f.href} href={f.href} className="block group">
+                <div className="border border-white/[0.07] rounded-xl transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/25">
+                  <FeatureCard feature={f} />
+                </div>
+              </Link>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── FEATURE CARDS MARQUEE ──────────────────────────────────────── */}
+      <section className="relative w-full py-12 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="relative z-10">
+          <AnimatedContainer className="text-center mb-8">
+            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Built with</p>
+          </AnimatedContainer>
+          <LogoLoop
+            logos={ORBITAL_DATA.map(item => ({
+              node: (
+                <span className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-white/[0.06] transition-all duration-200 hover:border-monad-500/25 hover:bg-monad-500/5"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
+                    <item.icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+                  </span>
+                  <span className="text-xs font-medium text-zinc-300 whitespace-nowrap">{item.title}</span>
+                </span>
+              ),
+              title: item.title,
+            }))}
+            speed={40}
+            gap={16}
+            logoHeight={44}
+            pauseOnHover
+          />
         </div>
       </section>
 
