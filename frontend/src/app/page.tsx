@@ -495,7 +495,9 @@ export default function HomePage() {
       </section>
 
       {/* ── TECH STACK LOOP ────────────────────────────────────────────── */}
-      <section className="py-10 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-10 overflow-hidden relative" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#060410' }}>
+        {/* diagonal stripe pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 38px)' }} />
         <div className="mb-4 px-8">
           <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 text-center">Built with</p>
         </div>
@@ -523,9 +525,13 @@ export default function HomePage() {
       </section>
 
       {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
-      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         {/* Left: text block */}
-        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20 relative" style={{ borderRight: '1px solid rgba(255,255,255,0.1)', background: '#08060e' }}>
+          {/* cross grid pattern */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+          {/* purple corner glow */}
+          <div className="absolute bottom-0 left-0 w-80 h-80 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom left, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
           <AnimatedContainer>
             <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
               Fast, open,<br />developer-first.
@@ -541,10 +547,12 @@ export default function HomePage() {
         </div>
 
         {/* Right: visual panel with dotted grid + stats */}
-        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden">
+        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden" style={{ background: '#0a0816' }}>
           {/* Dotted grid background */}
           <div className="absolute inset-0"
-            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          {/* purple radial center glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(131,110,249,0.06) 0%, transparent 65%)' }} />
           {/* Corner decorations */}
           <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 border-white/20" />
           <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 border-white/20" />
@@ -570,7 +578,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES — EvervaultCard style + BackgroundBeams ───────────── */}
-      <section className="relative w-full py-28 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="relative w-full py-28 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#000005' }}>
         <BackgroundBeams />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <AnimatedContainer delay={0.1} className="mb-16">
@@ -610,7 +618,11 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURE CARDS MARQUEE ──────────────────────────────────────── */}
-      <section className="relative w-full py-12 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+      <section className="relative w-full py-12 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#050310' }}>
+        {/* horizontal scan lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 28px)' }} />
+        {/* center radial fade */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
         <div className="relative z-10">
           <AnimatedContainer className="text-center mb-8">
             <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Built with</p>
@@ -638,8 +650,12 @@ export default function HomePage() {
       </section>
 
       {/* ── INTEGRATIONS ── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0b091a' }}>
+        {/* large dot grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* top-left purple glow */}
+        <div className="absolute top-0 left-0 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <AnimatedContainer className="mb-12">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -685,7 +701,11 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS — vertical numbered steps ────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#07050e' }}>
+        {/* vertical lines pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 56px)' }} />
+        {/* right-side purple glow */}
+        <div className="absolute top-0 right-0 w-[500px] h-full pointer-events-none" style={{ background: 'radial-gradient(ellipse at top right, rgba(131,110,249,0.06) 0%, transparent 60%)' }} />
         <div className="max-w-5xl mx-auto px-4 relative z-10">
           <AnimatedContainer className="mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
@@ -730,7 +750,11 @@ export default function HomePage() {
       </section>
 
       {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0c0a1c' }}>
+        {/* diagonal dashes */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 20px)' }} />
+        {/* center-left glow */}
+        <div className="absolute inset-y-0 left-0 w-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center left, rgba(131,110,249,0.08) 0%, transparent 65%)' }} />
         <div className="relative z-10 max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <AnimatedContainer>
@@ -782,8 +806,12 @@ export default function HomePage() {
       </section>
 
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
-      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto px-4">
+      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#060310' }}>
+        {/* opposite diagonal lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 44px)' }} />
+        {/* bottom-right glow */}
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom right, rgba(131,110,249,0.07) 0%, transparent 60%)' }} />
+        <div className="max-w-5xl mx-auto px-4 relative z-10">
           {/* Header */}
           <div className="mb-16">
             <AnimatedContainer>
@@ -1030,7 +1058,12 @@ export default function HomePage() {
       </section>
 
       {/* ── CODE SHOWCASE — code left, text right ─────────────────────── */}
-      <section className="py-24 max-w-7xl mx-auto px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#090716' }}>
+        {/* small cross grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        {/* center-right purple glow */}
+        <div className="absolute inset-y-0 right-0 w-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center right, rgba(131,110,249,0.08) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Code card first on desktop */}
           <Section className="order-2 lg:order-1 reveal-d2">
@@ -1088,11 +1121,16 @@ export default function HomePage() {
             </Link>
           </Section>
         </div>
+        </div>
       </section>
 
       {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0d0b1e' }}>
+        {/* radial rings pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, rgba(131,110,249,0.06) 0%, transparent 40%), radial-gradient(circle at center, rgba(131,110,249,0.03) 50%, transparent 80%)' }} />
+        {/* dot grid overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
@@ -1148,8 +1186,14 @@ export default function HomePage() {
       </section>
 
       {/* ── AI SECTION — full header top, chat left + features right ──── */}
-      <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#070514' }}>
+        {/* horizontal scan lines (sparse) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 44px)' }} />
+        {/* vertical scan lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 44px)' }} />
+        {/* bottom-center purple glow */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom center, rgba(131,110,249,0.09) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           {/* Header row — left aligned */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <AnimatedContainer>
@@ -1222,8 +1266,12 @@ export default function HomePage() {
       </section>
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0a0818' }}>
+        {/* anti-diagonal dashes */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(-60deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 30px)' }} />
+        {/* top-center glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top center, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
@@ -1318,8 +1366,10 @@ export default function HomePage() {
 
 
       {/* ── PLATFORM HIGHLIGHTS — horizontal strip ────────────────────── */}
-      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#05030c' }}>
+        {/* checkerboard-like cross hatch */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-dashed border border-dashed border-white/08">
             {[
               { icon: Shield, title: 'Security first', desc: 'End-to-end encrypted, OWASP compliant, 2FA supported. Your code and payments are safe.' },
@@ -1344,7 +1394,13 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#030208' }}>
+        {/* large dot grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        {/* deep purple radial burst from center */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.05) 35%, transparent 70%)' }} />
+        {/* secondary smaller burst */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(196,181,253,0.04) 0%, transparent 45%)' }} />
         <Section>
           <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
