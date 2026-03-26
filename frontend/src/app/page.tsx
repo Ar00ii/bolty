@@ -19,6 +19,10 @@ import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
 import { RetroGrid } from '@/components/ui/retro-grid';
+import { EvervaultCard } from '@/components/ui/evervault-card';
+import { BackgroundBeams } from '@/components/ui/background-beams';
+import DecryptedText from '@/components/ui/DecryptedText';
+import FlipCard from '@/components/ui/FlipCard';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
@@ -351,22 +355,66 @@ export default function HomePage() {
   return (
     <div className="overflow-x-hidden">
 
-      {/* ── HERO — Monad layout: left top-aligned + right stats sidebar ── */}
-      <section className="flex h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── HERO ── */}
+      <section className="relative h-screen overflow-hidden" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
 
-        {/* LEFT COLUMN: text at top, animation at bottom */}
-        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        {/* GridMotion as full-bleed background */}
+        <div className="absolute inset-0 z-0">
+          <GridMotion
+            gradientColor="rgba(3,2,7,0)"
+            items={[
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+              'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
+            ]}
+          />
+        </div>
 
-          {/* Text block — starts at the top */}
-          <div className="px-10 lg:px-16 pt-16 pb-10" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <AnimatedGradientText className="mb-6">
+        {/* Dark overlay — left heavy, fades right */}
+        <div className="absolute inset-0 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(105deg, rgba(5,3,14,0.96) 0%, rgba(5,3,14,0.88) 40%, rgba(5,3,14,0.55) 70%, rgba(5,3,14,0.2) 100%)' }} />
+        {/* Bottom fade to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, transparent, rgba(5,3,14,0.7))' }} />
+
+        {/* Content layout */}
+        <div className="relative z-20 flex h-full">
+
+          {/* LEFT: text content */}
+          <div className="flex-1 flex flex-col justify-center px-16 lg:px-24 xl:px-32 min-w-0 pt-8">
+            <AnimatedGradientText className="mb-6 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse mr-2" />
               <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Built for developers</span>
             </AnimatedGradientText>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-none mb-6 tracking-tight">
-              <span className="block text-white">Publish.</span>
-              <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Collaborate.</span>
-              <span className="block text-white">Earn.</span>
+              <span className="block text-white"><DecryptedText text="Publish." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></span>
+              <span className="block" style={{ background: 'linear-gradient(135deg,#836EF9 0%,#c4b5fd 50%,#836EF9 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}><DecryptedText text="Collaborate." speed={30} animateOn="view" sequential className="text-monad-400" encryptedClassName="text-monad-400/40" /></span>
+              <span className="block text-white"><DecryptedText text="Earn." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></span>
             </h1>
             <p className="text-zinc-400 max-w-lg text-base leading-relaxed mb-8">
               Bolty brings together code, AI agents, and community in one developer-first platform.
@@ -384,81 +432,55 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Animation block — fills remaining height */}
-          <div className="flex-1 relative overflow-hidden">
-            <GridMotion
-              gradientColor="rgba(0,0,0,0.5)"
-              items={[
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1748370987492-eb390a61dcda?q=80&w=3464&auto=format&fit=crop',
-              ]}
-            />
-          </div>
-
-        </div>
-
-        {/* RIGHT COLUMN: stats sidebar — full height with left border */}
-        <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
-          {[
-            { value: '500+', label: 'Developers' },
-            { value: 'ETH', label: 'On-chain payments' },
-            { value: '100%', label: 'EVM compatible' },
-            { value: 'Base', label: 'Supported chain', isBase: true },
-            { value: 'Beta', label: 'Current phase' },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex-1 flex flex-col justify-center px-8"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-            >
-              <div className="flex items-center gap-3">
-                {stat.isBase && (
-                  <svg width="32" height="32" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-                    <circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/>
-                    <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
-                  </svg>
-                )}
-                <div>
-                  <div className="text-4xl xl:text-5xl font-black tabular-nums text-white leading-none mb-1">
+          {/* RIGHT: stats sidebar */}
+          <div className="hidden lg:flex flex-col shrink-0 w-72 xl:w-80 relative" style={{ borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
+            {/* sidebar bg overlay */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(180deg, rgba(8,5,20,0.82) 0%, rgba(6,4,16,0.78) 100%)' }} />
+            {/* Empty spacer — keeps remaining stats in original positions */}
+            <div className="flex-1" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }} />
+            {[
+              { value: '0%', label: 'Token tax', accent: false },
+              { value: 'AI', label: 'Built-in assistant', accent: true },
+              { value: 'Free', label: 'No cost to join', accent: false },
+              { value: 'Open', label: 'Fully auditable', accent: false },
+            ].map((stat, idx) => (
+              <div
+                key={stat.label}
+                className="flex-1 flex flex-col justify-center px-8 relative"
+                style={{
+                  borderBottom: idx < 3 ? '1px solid rgba(255,255,255,0.07)' : undefined,
+                  background: stat.accent
+                    ? 'rgba(131,110,249,0.06)'
+                    : idx % 2 === 0
+                    ? 'rgba(255,255,255,0.01)'
+                    : 'transparent',
+                }}
+              >
+                <div className="absolute left-0 top-4 bottom-4 w-[2px] rounded-full"
+                  style={{ background: stat.accent ? 'rgba(131,110,249,0.5)' : 'transparent' }} />
+                <div className="relative z-10">
+                  <div
+                    className="text-4xl xl:text-5xl font-black tabular-nums leading-none mb-1"
+                    style={stat.accent
+                      ? { background: 'linear-gradient(135deg,#836EF9,#c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
+                      : { color: 'white' }}
+                  >
                     {stat.value}
                   </div>
                   <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 mt-1">{stat.label}</div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
+        </div>
       </section>
 
       {/* ── TECH STACK LOOP ────────────────────────────────────────────── */}
-      <section className="py-10 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-10 overflow-hidden relative" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#060410' }}>
+        {/* diagonal stripe pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 38px)' }} />
         <div className="mb-4 px-8">
           <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 text-center">Built with</p>
         </div>
@@ -486,12 +508,17 @@ export default function HomePage() {
       </section>
 
       {/* ── TWO-COLUMN — Monad "Fast, familiar, frictionless" style ────── */}
-      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="flex overflow-hidden min-h-[60vh]" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         {/* Left: text block */}
-        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20" style={{ borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="flex-1 flex flex-col justify-center px-12 lg:px-20 py-20 relative" style={{ borderRight: '1px solid rgba(255,255,255,0.1)', background: '#08060e' }}>
+          {/* cross grid pattern */}
+          <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+          {/* purple corner glow */}
+          <div className="absolute bottom-0 left-0 w-80 h-80 pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom left, rgba(131,110,249,0.07) 0%, transparent 70%)' }} />
           <AnimatedContainer>
             <h2 className="text-3xl md:text-5xl font-black text-white mb-5 leading-tight">
-              Fast, open,<br />developer-first.
+              <DecryptedText text="Fast, open," speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+              <DecryptedText text="developer-first." speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
             </h2>
             <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
               No high fees or slow deploys. Code on Bolty ships instantly, earns in ETH, and works with
@@ -504,10 +531,12 @@ export default function HomePage() {
         </div>
 
         {/* Right: visual panel with dotted grid + stats */}
-        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden">
+        <div className="hidden lg:flex flex-col flex-1 relative overflow-hidden" style={{ background: '#0a0816' }}>
           {/* Dotted grid background */}
           <div className="absolute inset-0"
-            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+            style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          {/* purple radial center glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 60% 50%, rgba(131,110,249,0.06) 0%, transparent 65%)' }} />
           {/* Corner decorations */}
           <div className="absolute top-8 left-8 w-6 h-6 border-t-2 border-l-2 border-white/20" />
           <div className="absolute top-8 right-8 w-6 h-6 border-t-2 border-r-2 border-white/20" />
@@ -532,152 +561,135 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURES — feature list left + orbital right ──────────────── */}
-      <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <RetroGrid className="opacity-30" />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
-            {/* Left: text + feature list */}
-            <AnimatedContainer delay={0.1} className="lg:w-5/12 w-full flex flex-col">
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                Everything you need to build
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
-                From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
-              </p>
-              {PLATFORM_FEATURES.map((f, i) => (
-                <Link key={f.href} href={f.href} className={`block group ${i > 0 ? '-mt-px' : ''}`}>
-                  <div className="border border-white/[0.07] transition-colors duration-200 hover:bg-monad-500/5 hover:border-monad-500/25">
-                    <FeatureCard feature={f} />
+      {/* ── FEATURES — EvervaultCard style + BackgroundBeams ───────────── */}
+      <section className="relative w-full py-28 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#000005' }}>
+        <BackgroundBeams />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <AnimatedContainer delay={0.1} className="mb-16">
+            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-5">
+              <DecryptedText text="Everything you need to build" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+            </h2>
+            <p className="text-zinc-400 text-base leading-relaxed max-w-lg">
+              From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
+            </p>
+          </AnimatedContainer>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {PLATFORM_FEATURES.map((f, i) => (
+              <AnimatedContainer key={f.href} delay={i * 0.08}>
+                <Link href={f.href} className="block group h-72">
+                  <div className="relative rounded-2xl border border-white/[0.08] h-full overflow-hidden"
+                    style={{ background: 'rgba(10,10,20,0.6)' }}>
+                    {/* Corner decorators */}
+                    <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-white/25 z-20" />
+                    <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-white/25 z-20" />
+                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-white/25 z-20" />
+                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-white/25 z-20" />
+                    <EvervaultCard className="rounded-2xl h-full">
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                        style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                        <f.icon className="w-7 h-7 text-monad-400" />
+                      </div>
+                      <p className="text-base font-semibold text-white text-center mb-2">{f.title}</p>
+                      <p className="text-sm text-zinc-400 text-center px-4 leading-relaxed">{f.description}</p>
+                    </EvervaultCard>
                   </div>
                 </Link>
-              ))}
-            </AnimatedContainer>
-            {/* Right: feature cards grid */}
-            <AnimatedContainer delay={0.2} className="lg:w-7/12 w-full">
-              <div className="grid grid-cols-2 gap-4">
-                {ORBITAL_DATA.map((item) => (
-                  <div key={item.title} className="flex flex-col gap-3 p-5 rounded-2xl border border-white/[0.07] hover:border-monad-500/25 hover:bg-monad-500/5 transition-all duration-200"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}>
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
-                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-zinc-100 mb-1">{item.title}</div>
-                      <div className="text-xs text-zinc-500 leading-relaxed">{item.content}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </AnimatedContainer>
+              </AnimatedContainer>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── INTEGRATIONS ── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
-          <AnimatedContainer className="mb-12">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Integrations</p>
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                Works with<br />your stack
-              </h2>
-              <p className="text-zinc-400 text-sm leading-relaxed max-w-sm md:text-right">
-                Bolty connects with the tools and chains you already use — no complicated setup required.
+      {/* ── FEATURE CARDS MARQUEE ──────────────────────────────────────── */}
+      <section className="relative w-full py-12 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#050310' }}>
+        {/* horizontal scan lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 28px)' }} />
+        {/* center radial fade */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.05) 0%, transparent 70%)' }} />
+        <div className="relative z-10">
+          <AnimatedContainer className="text-center mb-8">
+            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Built with</p>
+          </AnimatedContainer>
+          <LogoLoop
+            logos={ORBITAL_DATA.map(item => ({
+              node: (
+                <span className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-white/[0.06] transition-all duration-200 hover:border-monad-500/25 hover:bg-monad-500/5"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
+                    <item.icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+                  </span>
+                  <span className="text-xs font-medium text-zinc-300 whitespace-nowrap">{item.title}</span>
+                </span>
+              ),
+              title: item.title,
+            }))}
+            speed={40}
+            gap={16}
+            logoHeight={44}
+            pauseOnHover
+          />
+        </div>
+      </section>
+
+      {/* ── INTEGRATIONS + LIVE ACTIVITY (unified) ─────────────────────── */}
+      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#080614' }}>
+        {/* cross grid pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '52px 52px' }} />
+        {/* large radial center glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 30% 50%, rgba(131,110,249,0.09) 0%, transparent 60%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 80% 60%, rgba(131,110,249,0.05) 0%, transparent 55%)' }} />
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+
+          {/* — Header — */}
+          <AnimatedContainer className="mb-20">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+              <div>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform ecosystem</p>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">
+                  <DecryptedText text="Works with your stack." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+                </h2>
+              </div>
+              <p className="text-zinc-400 text-base leading-relaxed max-w-sm lg:text-right">
+                Bolty connects with every tool you already use — GitHub, Ethereum, AI models, and more.
               </p>
             </div>
           </AnimatedContainer>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-            {INTEGRATIONS.map((item, i) => (
-              <AnimatedContainer key={item.name} delay={i * 0.07}>
-                <div className="border rounded-xl p-5 flex items-center gap-4 hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-200 cursor-default"
-                  style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
-                    style={{ background: item.isBase ? '#0052FF' : 'rgba(131,110,249,0.12)', border: item.isBase ? 'none' : '1px solid rgba(131,110,249,0.15)' }}>
-                    {item.isBase ? (
-                      <svg width="20" height="20" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/>
-                      </svg>
-                    ) : item.icon ? (
-                      <item.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                    ) : null}
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-zinc-200">{item.name}</div>
-                    <div className="text-xs text-zinc-600 mt-0.5">{item.desc}</div>
-                  </div>
-                </div>
+
+          {/* — FlipCards grid — */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20">
+            {[
+              { icon: <GitBranch className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'GitHub', subtitle: 'VCS', description: 'Sync your repositories with one click. Push commits and your Bolty profile updates automatically.', color: 'rgba(131,110,249,0.15)' },
+              { icon: <Coins className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'Ethereum', subtitle: 'Payments', description: 'On-chain ETH payments direct to your wallet. No middleman, no delays — trustless by design.', color: 'rgba(98,126,234,0.18)' },
+              { icon: <svg width="28" height="28" viewBox="0 0 111 111" fill="none"><circle cx="55.5" cy="55.5" r="55.5" fill="#0052FF"/><path d="M55.7 82.7c15.1 0 27.3-12.2 27.3-27.3S70.8 28.1 55.7 28.1c-14.1 0-25.7 10.7-27.2 24.4h36v6.1h-36C30 72 41.6 82.7 55.7 82.7z" fill="white"/></svg>, title: 'Base L2', subtitle: 'Chain', description: 'Layer 2 by Coinbase. Fast finality, ultra-low fees, and full EVM compatibility for all transactions.', color: 'rgba(0,82,255,0.15)' },
+              { icon: <Zap className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'BOLTY Token', subtitle: 'Native', description: 'Zero tax token. Pay fees, unlock premium features, and participate in governance with $BOLTY.', color: 'rgba(131,110,249,0.15)' },
+              { icon: <Code2 className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'Any Language', subtitle: 'Universal', description: 'JavaScript, Python, Rust, Go, Solidity — all stacks are welcome. Bolty is language-agnostic.', color: 'rgba(52,211,153,0.12)' },
+              { icon: <Bot className="w-7 h-7 text-monad-400" strokeWidth={1.5} />, title: 'AI Models', subtitle: 'Intelligence', description: 'GPT-4, Claude, and more. Plug any AI model into the assistant or deploy it as a marketplace agent.', color: 'rgba(251,146,60,0.12)' },
+            ].map((card, i) => (
+              <AnimatedContainer key={card.title} delay={i * 0.07}>
+                <FlipCard
+                  icon={card.icon}
+                  title={card.title}
+                  subtitle={card.subtitle}
+                  description={card.description}
+                  accentColor={card.color}
+                  rotate="y"
+                />
               </AnimatedContainer>
             ))}
           </div>
-          <AnimatedContainer delay={0.4}>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-white/08"
-              style={{ background: 'rgba(131,110,249,0.04)' }}>
-              <Globe className="w-4 h-4 text-monad-400 flex-shrink-0" strokeWidth={1.5} />
-              <span className="text-xs text-zinc-500">Public API & more integrations coming in Gamma</span>
-            </div>
-          </AnimatedContainer>
-        </div>
-      </section>
 
-      {/* ── HOW IT WORKS — vertical numbered steps ────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto px-4 relative z-10">
-          <AnimatedContainer className="mb-16">
-            <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white max-w-sm">
-              Up and running in minutes
-            </h2>
-          </AnimatedContainer>
-
-          <div className="space-y-0">
-            {STEPS.map((step, i) => (
-              <AnimatedContainer key={step.title} delay={0.15 * i}>
-                <div className="grid grid-cols-12 gap-6 py-10 border-b border-dashed border-white/08 group hover:bg-monad-500/2 transition-colors px-2">
-                  {/* Big step number */}
-                  <div className="col-span-2 flex items-start justify-end pt-1">
-                    <span className="text-6xl font-black tabular-nums leading-none select-none"
-                      style={{ color: 'rgba(131,110,249,0.12)', fontVariantNumeric: 'tabular-nums' }}>
-                      0{i + 1}
-                    </span>
-                  </div>
-                  {/* Icon + content */}
-                  <div className="col-span-8 md:col-span-7">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
-                        <step.icon className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
-                      </div>
-                      <h3 className="text-base font-semibold text-zinc-200">{step.title}</h3>
-                    </div>
-                    <p className="text-sm text-zinc-500 leading-relaxed max-w-md">{step.description}</p>
-                  </div>
-                  {/* Metric */}
-                  <div className="col-span-2 md:col-span-3 flex items-center justify-end">
-                    {i === 0 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">email · GitHub<br />or Web3 wallet</span>}
-                    {i === 1 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">{'< 5 min'}<br />to go live</span>}
-                    {i === 2 && <span className="text-xs font-mono text-monad-400/60 text-right hidden md:block">instant<br />ETH payout</span>}
-                  </div>
-                </div>
-              </AnimatedContainer>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="relative z-10 max-w-6xl mx-auto px-4">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* — Live activity strip below — */}
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Real-time platform</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-                Live platform<br />activity
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-5 leading-tight">
+                <DecryptedText text="Live platform" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                <DecryptedText text="activity." speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
-              <p className="text-zinc-500 text-sm leading-relaxed mb-8 max-w-sm">
+              <p className="text-zinc-400 text-base leading-relaxed mb-8 max-w-md">
                 Sales, messages, and sign-ups happening across the ecosystem in real time.
               </p>
               <AvatarCircles
@@ -689,287 +701,205 @@ export default function HomePage() {
                   { imageUrl: 'https://avatars.githubusercontent.com/u/59228569' },
                 ]}
               />
-              <p className="text-xs text-zinc-600 mt-2 font-mono">100+ developers already building</p>
+              <p className="text-sm text-zinc-500 mt-3 font-mono">100+ developers already building</p>
             </AnimatedContainer>
-            <div className="relative h-[320px] overflow-hidden rounded-2xl border border-white/[0.06]"
-              style={{ background: 'rgba(10,10,18,0.8)' }}>
-              <div className="absolute inset-x-0 top-0 h-12 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to bottom, rgba(10,10,18,0.8), transparent)' }} />
-              <div className="absolute inset-x-0 bottom-0 h-24 z-10 pointer-events-none"
-                style={{ background: 'linear-gradient(to top, rgba(10,10,18,0.95), transparent)' }} />
-              <div className="p-4 pt-6">
-                <AnimatedList delay={1200}>
-                  {LIVE_NOTIFICATIONS.map((n, i) => (
-                    <div key={i} className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl mb-0"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{ background: n.bg, border: `1px solid ${n.border}` }}>
-                        <n.Icon className="w-3.5 h-3.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+
+            <AnimatedContainer delay={0.15}>
+              <div className="relative rounded-2xl overflow-hidden border border-white/[0.08]"
+                style={{ background: 'rgba(8,6,18,0.9)' }}>
+                {/* Header bar */}
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]"
+                  style={{ background: 'rgba(131,110,249,0.04)' }}>
+                  <Activity className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+                  <span className="text-xs font-mono text-zinc-300 font-semibold uppercase tracking-widest">Platform feed</span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs font-mono text-green-400">LIVE</span>
+                  </div>
+                </div>
+                {/* Fade bottom */}
+                <div className="absolute inset-x-0 bottom-0 h-20 z-10 pointer-events-none rounded-b-2xl"
+                  style={{ background: 'linear-gradient(to top, rgba(8,6,18,0.95), transparent)' }} />
+                <div className="p-5 max-h-[340px] overflow-hidden">
+                  <AnimatedList delay={800}>
+                    {LIVE_NOTIFICATIONS.map((n, i) => (
+                      <div key={i} className="flex items-center gap-4 px-4 py-3.5 rounded-xl mb-2 transition-colors"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: n.bg, border: `1px solid ${n.border}` }}>
+                          <n.Icon className="w-4.5 h-4.5" style={{ color: n.iconColor }} strokeWidth={1.5} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-semibold text-zinc-200 truncate">{n.title}</div>
+                          <div className="text-xs text-zinc-500 truncate mt-0.5">{n.desc}</div>
+                        </div>
+                        <div className="text-[10px] font-mono text-zinc-600 flex-shrink-0">{n.time}</div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-medium text-zinc-200 truncate">{n.title}</div>
-                        <div className="text-[10px] text-zinc-600 truncate">{n.desc}</div>
-                      </div>
-                      <div className="text-[9px] font-mono text-zinc-700 flex-shrink-0">{n.time}</div>
-                    </div>
-                  ))}
-                </AnimatedList>
+                    ))}
+                  </AnimatedList>
+                </div>
               </div>
-            </div>
+            </AnimatedContainer>
           </div>
         </div>
       </section>
 
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
-      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto px-4">
-          {/* Header */}
-          <div className="mb-16">
-            <AnimatedContainer>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Step by step</p>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
-                Platform Roadmap
-              </h2>
-              <p className="text-sm text-zinc-500 max-w-md leading-relaxed">
-                Bolty is built in three phases. Each version expands the platform with new capabilities and deeper infrastructure.
-              </p>
-            </AnimatedContainer>
-          </div>
+      {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
+      <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#060310' }}>
+        {/* opposite diagonal lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 44px)' }} />
+        {/* top-left glow */}
+        <div className="absolute top-0 left-0 w-[700px] h-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.09) 0%, transparent 60%)' }} />
 
-          {/* Phase label: Beta */}
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          {/* Header */}
           <AnimatedContainer>
-            <div className="flex items-center gap-3 mb-8">
-              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Version 1 — Beta</span>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.25)' }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-                <span className="text-xs font-mono text-monad-400">Current</span>
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-20">
+              <div>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Building in public</p>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">
+                  <DecryptedText text="Platform" speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                  <DecryptedText text="Roadmap." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+                </h2>
               </div>
+              <p className="text-zinc-500 text-sm leading-relaxed max-w-xs lg:text-right">
+                We ship fast and in public. Phase 1 is live now — everything you see below is already deployed or in active development.
+              </p>
             </div>
           </AnimatedContainer>
 
-          {/* Step 01 — full width */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5 }}
-            className="mb-0 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">01</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Code2 className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.6), transparent)' }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-1">Code Repository Publishing</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-xl mb-3">Publish and monetize code repositories directly on-chain. Set prices, manage access, and earn from every download.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
-                </div>
+          {/* ─── PHASE 1 — CURRENT ─── */}
+          <AnimatedContainer>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.3)' }}>
+                <span className="w-2 h-2 rounded-full bg-monad-400 animate-pulse" />
+                <span className="text-xs font-mono text-monad-400 font-semibold uppercase tracking-widest">Phase 01 — Live Now</span>
               </div>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.35), transparent)' }} />
             </div>
-          </motion.div>
+          </AnimatedContainer>
 
-          {/* Step 02 — indented */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t pl-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">02</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Bot className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="w-3/4 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.5), transparent)' }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-1">AI Assistant</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">An intelligent assistant built into the platform. Ask questions, get code suggestions, and navigate the ecosystem seamlessly.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Phase 1 cards grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20">
+            {[
+              { num: '01', icon: <Code2 className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Repo Publishing', desc: 'Publish and monetize code repositories directly on-chain. Set prices and earn from every access.' },
+              { num: '02', icon: <Bot className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'AI Assistant', desc: 'Built-in assistant for code review, architecture advice, and platform navigation.' },
+              { num: '03', icon: <MessageSquare className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Community Chat', desc: 'Real-time global chat for developers. Connect, collaborate, and ship together.' },
+              { num: '04', icon: <Wallet className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'ETH Payments', desc: 'Trustless on-chain payments direct to your wallet. No intermediaries, no delays.' },
+              { num: '05', icon: <ShoppingBag className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Agent Marketplace', desc: 'Publish AI agents with a price. Buyers negotiate autonomously, deals close on-chain.' },
+              { num: '06', icon: <Zap className="w-5 h-5 text-amber-400" strokeWidth={1.5} />, title: '$BOLTY Token Launch', desc: 'Zero-tax native token. Pay fees, unlock premium features, and participate in governance.', highlight: true },
+            ].map((item, i) => (
+              <motion.div
+                key={item.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: i * 0.07 }}
+              >
+                <div
+                  className="relative h-full rounded-2xl p-6 group transition-all duration-300"
+                  style={{
+                    background: item.highlight
+                      ? 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(8,6,18,0.95) 100%)'
+                      : 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(8,6,18,0.9) 100%)',
+                    border: item.highlight
+                      ? '1px solid rgba(131,110,249,0.35)'
+                      : '1px solid rgba(255,255,255,0.07)',
+                  }}
+                >
+                  {/* corner accents */}
+                  <div className="absolute top-3 left-3 w-3 h-3 border-t border-l" style={{ borderColor: item.highlight ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.12)' }} />
+                  <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r" style={{ borderColor: item.highlight ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.12)' }} />
 
-          {/* Step 03 — wide */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">03</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <MessageSquare className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.55), rgba(131,110,249,0.1), transparent)' }} />
-                  </div>
-                  <div className="flex items-start justify-between gap-8">
-                    <div>
-                      <h3 className="text-white font-bold text-lg mb-1">Global Community Chat</h3>
-                      <p className="text-zinc-500 text-sm leading-relaxed max-w-md mb-3">Real-time community hub for builders. Connect, collaborate, and share with developers worldwide.</p>
-                      <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
+                  {/* glow on highlight card */}
+                  {item.highlight && (
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.08) 0%, transparent 60%)' }} />
+                  )}
+
+                  {/* number + icon row */}
+                  <div className="flex items-center justify-between mb-5">
+                    <span className="font-mono text-[11px] font-bold tracking-widest" style={{ color: item.highlight ? 'rgba(131,110,249,0.7)' : 'rgba(255,255,255,0.2)' }}>{item.num}</span>
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: item.highlight ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)',
+                        border: item.highlight ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      {item.icon}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
 
-          {/* Step 04 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 }}
-            className="border-t pl-12" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">04</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Wallet className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.45), transparent)' }} />
+                  <h3 className="text-white font-bold text-base mb-2 leading-snug">{item.title}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+
+                  {/* status footer */}
+                  <div className="mt-5 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: item.highlight ? '#f59e0b' : '#836EF9' }} />
+                    <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: item.highlight ? '#f59e0b' : 'rgba(131,110,249,0.6)' }}>
+                      {item.highlight ? 'Launching' : 'Live'}
+                    </span>
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1">ETH On-chain Payments</h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">Trustless payments settled directly on Ethereum. No intermediaries, no delays — your keys, your assets, always.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
 
-          {/* Step 05 — current highlight */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.14 }}
-            className="border-t border-b" style={{ borderColor: 'rgba(131,110,249,0.2)' }}
-          >
-            <div className="py-7" style={{ background: 'rgba(131,110,249,0.03)' }}>
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">05</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <ShoppingBag className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, #836EF9, rgba(131,110,249,0.2), transparent)' }} />
-                    <span className="text-xs font-mono text-monad-400 shrink-0">Current</span>
-                  </div>
-                  <h3 className="text-white font-bold text-xl mb-1">Agent Marketplace</h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-3">Publish AI agents with a price. Buyers&apos; agents negotiate autonomously. When they agree — confirm to open a DM and close the deal on-chain.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/70" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase label: Gamma */}
+          {/* ─── NEXT PHASES — minimal teasers ─── */}
           <AnimatedContainer delay={0.1}>
-            <div className="flex items-center gap-3 mt-14 mb-8">
-              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Version 2 — Gamma</span>
-              <span className="text-xs font-mono text-zinc-600 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>Upcoming</span>
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">What comes next</span>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(255,255,255,0.06), transparent)' }} />
             </div>
           </AnimatedContainer>
 
-          {/* Step 06 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">06</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Globe className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.25), transparent)' }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { phase: '02', label: 'Phase 2', tag: 'Upcoming' },
+              { phase: '03', label: 'Phase 3', tag: 'Future' },
+            ].map((p, i) => (
+              <motion.div
+                key={p.phase}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+              >
+                <div
+                  className="relative rounded-2xl p-6 flex items-center justify-between overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  {/* blurred placeholder content */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <Lock className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-zinc-600 font-bold text-sm mb-1">{p.label}</div>
+                      <div className="flex gap-2">
+                        <div className="h-2 w-20 rounded-full bg-zinc-800" />
+                        <div className="h-2 w-12 rounded-full bg-zinc-800/60" />
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Public REST API</h3>
-                  <p className="text-zinc-600 text-sm leading-relaxed max-w-xl mb-3">Open Bolty infrastructure to third-party builders. Programmatic access to repositories, agents, and all platform data.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                  <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>{p.tag}</span>
+                  {/* big faded number */}
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-6xl text-zinc-900 pointer-events-none select-none leading-none">{p.phase}</span>
                 </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Step 07 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
-            className="border-t pl-8 opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">07</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Zap className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
-                    <div className="w-1/2 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.2), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1">Developer SDK &amp; Webhooks</h3>
-                  <p className="text-zinc-600 text-sm leading-relaxed max-w-lg mb-3">First-class SDK for building on top of Bolty. Real-time webhooks, event subscriptions, and automation tooling.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase label: Alpha */}
-          <AnimatedContainer delay={0.1}>
-            <div className="flex items-center gap-3 mt-14 mb-8">
-              <span className="text-xs font-mono text-zinc-700 uppercase tracking-widest">Version 3 — Alpha</span>
-              <span className="text-xs font-mono text-zinc-700 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>Future</span>
-            </div>
-          </AnimatedContainer>
-
-          {/* Step 08 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">08</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Shield className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.12), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1">DAO Governance</h3>
-                  <p className="text-zinc-700 text-sm leading-relaxed max-w-xl mb-3">Community-driven decisions on platform direction, fees, and upgrades. Token holders vote on proposals on-chain.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Step 09 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
-            className="border-t border-b opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">09</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Hash className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
-                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.1), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1">Open Protocol &amp; Native Token</h3>
-                  <p className="text-zinc-700 text-sm leading-relaxed max-w-lg mb-3">Bolty becomes a fully open, decentralized protocol. Cross-chain support, on-chain reputation, and the native $BOLTY token at the core.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── CODE SHOWCASE — code left, text right ─────────────────────── */}
-      <section className="py-24 max-w-7xl mx-auto px-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#090716' }}>
+        {/* small cross grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+        {/* center-right purple glow */}
+        <div className="absolute inset-y-0 right-0 w-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at center right, rgba(131,110,249,0.08) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Code card first on desktop */}
           <Section className="order-2 lg:order-1 reveal-d2">
@@ -1003,7 +933,7 @@ export default function HomePage() {
           <Section className="order-1 lg:order-2">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Code marketplace</p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-5 text-white">
-              Monetize your GitHub repositories
+              <DecryptedText text="Monetize your GitHub repositories" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
             </h2>
             <p className="text-base leading-relaxed mb-6 text-zinc-400">
               Publish any repository — public or private — with a free or paid price tag.
@@ -1027,16 +957,22 @@ export default function HomePage() {
             </Link>
           </Section>
         </div>
+        </div>
       </section>
 
       {/* ── COMMUNITY — 2-col text+stats / activity feed ──────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0d0b1e' }}>
+        {/* radial rings pattern */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, rgba(131,110,249,0.06) 0%, transparent 40%), radial-gradient(circle at center, rgba(131,110,249,0.03) 50%, transparent 80%)' }} />
+        {/* dot grid overlay */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Community</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-5">
-                Built by developers,<br />for developers
+                <DecryptedText text="Built by developers," speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                <DecryptedText text="for developers" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
               <p className="text-zinc-400 mb-8 leading-relaxed text-base">
                 Connect with a global community of developers, share your projects, collaborate
@@ -1087,14 +1023,20 @@ export default function HomePage() {
       </section>
 
       {/* ── AI SECTION — full header top, chat left + features right ──── */}
-      <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section id="ai" className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', borderBottom: '1px solid rgba(255,255,255,0.1)', background: '#070514' }}>
+        {/* horizontal scan lines (sparse) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 44px)' }} />
+        {/* vertical scan lines */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 44px)' }} />
+        {/* bottom-center purple glow */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom center, rgba(131,110,249,0.09) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           {/* Header row — left aligned */}
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-14">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Built-in AI</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                Ask, build, ship — faster
+                <DecryptedText text="Ask, build, ship — faster" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
             </AnimatedContainer>
             <AnimatedContainer delay={0.2}>
@@ -1161,13 +1103,17 @@ export default function HomePage() {
       </section>
 
       {/* ── TESTIMONIALS — featured large quote + 2 smaller ──────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0a0818' }}>
+        {/* anti-diagonal dashes */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(-60deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 30px)' }} />
+        {/* top-center glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top center, rgba(131,110,249,0.07) 0%, transparent 65%)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <AnimatedContainer>
               <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">From the community</p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                What developers say
+                <DecryptedText text="What developers say" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
               </h2>
             </AnimatedContainer>
             <AnimatedContainer delay={0.1}>
@@ -1257,8 +1203,10 @@ export default function HomePage() {
 
 
       {/* ── PLATFORM HIGHLIGHTS — horizontal strip ────────────────────── */}
-      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-16 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#05030c' }}>
+        {/* checkerboard-like cross hatch */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px), repeating-linear-gradient(-45deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 22px)' }} />
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-dashed border border-dashed border-white/08">
             {[
               { icon: Shield, title: 'Security first', desc: 'End-to-end encrypted, OWASP compliant, 2FA supported. Your code and payments are safe.' },
@@ -1283,7 +1231,13 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section className="py-28 px-4 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#030208' }}>
+        {/* large dot grid */}
+        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+        {/* deep purple radial burst from center */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.05) 35%, transparent 70%)' }} />
+        {/* secondary smaller burst */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, rgba(196,181,253,0.04) 0%, transparent 45%)' }} />
         <Section>
           <div className="max-w-3xl mx-auto text-center">
             <div className="flex justify-center mb-8">
@@ -1295,7 +1249,7 @@ export default function HomePage() {
             </div>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-5">
               <span style={{ background: 'linear-gradient(135deg, #836EF9 0%, #a78bfa 50%, #c4b5fd 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                Start building today.
+                <DecryptedText text="Start building today." speed={30} animateOn="view" sequential className="text-monad-400" encryptedClassName="text-monad-400/50" />
               </span>
             </h2>
             <p className="text-lg mb-10 text-zinc-400">

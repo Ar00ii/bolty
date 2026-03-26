@@ -47,12 +47,12 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         aria-expanded={menuOpen}
         style={{
           position: 'fixed',
-          top: '1.1rem',
-          left: '1.1rem',
+          top: '1.25rem',
+          left: '1.25rem',
           zIndex: 70,
-          width: 50,
-          height: 50,
-          borderRadius: '50%',
+          width: 72,
+          height: 72,
+          borderRadius: '18px',
           background: menuOpen ? 'rgba(131,110,249,0.18)' : 'rgba(10,10,16,0.85)',
           border: `2px solid ${menuOpen ? '#836ef9' : 'rgba(255,255,255,0.13)'}`,
           color: menuOpen ? '#836ef9' : '#d4d4d8',
@@ -62,11 +62,11 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
           cursor: 'pointer',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: menuOpen ? '0 0 24px rgba(131,110,249,0.35)' : '0 4px 20px rgba(0,0,0,0.5)',
+          boxShadow: menuOpen ? '0 0 32px rgba(131,110,249,0.4)' : '0 4px 24px rgba(0,0,0,0.6)',
           transition: 'all 0.22s ease',
         }}
       >
-        {menuOpen ? <X size={20} /> : <Menu size={20} />}
+        {menuOpen ? <X size={28} /> : <Menu size={28} />}
       </button>
 
       <StaggeredMenu
