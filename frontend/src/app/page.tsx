@@ -703,8 +703,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS — vertical numbered steps ────────────────────── */}
-      <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#07050e' }}>
+      {/* HOW IT WORKS — REMOVED */}
+      {false && <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#07050e' }}>
         {/* vertical lines pattern */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 56px)' }} />
         {/* right-side purple glow */}
@@ -771,7 +771,7 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* ── LIVE ACTIVITY ──────────────────────────────────────────────── */}
       <section className="py-24 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#0c0a1c' }}>
