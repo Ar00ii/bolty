@@ -20,6 +20,7 @@ import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
 import { RetroGrid } from '@/components/ui/retro-grid';
 import { EvervaultCard } from '@/components/ui/evervault-card';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
@@ -533,37 +534,37 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURES — EvervaultCard style ─────────────────────────────── */}
-      <section className="relative w-full py-24 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <RetroGrid className="opacity-30" />
-        <div className="max-w-7xl mx-auto px-4 relative z-10">
-          <AnimatedContainer delay={0.1} className="max-w-xl">
+      {/* ── FEATURES — EvervaultCard style + BackgroundBeams ───────────── */}
+      <section className="relative w-full py-28 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <BackgroundBeams />
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <AnimatedContainer delay={0.1} className="mb-16">
             <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Platform features</p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-5">
               Everything you need to build
             </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-8 max-w-sm">
+            <p className="text-zinc-400 text-base leading-relaxed max-w-lg">
               From AI assistance to code markets — Bolty brings together the tools developers reach for daily.
             </p>
           </AnimatedContainer>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PLATFORM_FEATURES.map((f, i) => (
               <AnimatedContainer key={f.href} delay={i * 0.08}>
-                <Link href={f.href} className="block group h-52">
+                <Link href={f.href} className="block group h-72">
                   <div className="relative rounded-2xl border border-white/[0.08] h-full overflow-hidden"
-                    style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    style={{ background: 'rgba(10,10,20,0.6)' }}>
                     {/* Corner decorators */}
-                    <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-white/20 z-20" />
-                    <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-white/20 z-20" />
-                    <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-white/20 z-20" />
-                    <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-white/20 z-20" />
+                    <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-white/25 z-20" />
+                    <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-white/25 z-20" />
+                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-white/25 z-20" />
+                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-white/25 z-20" />
                     <EvervaultCard className="rounded-2xl h-full">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-3"
+                      <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                         style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.25)' }}>
-                        <f.icon className="w-6 h-6 text-monad-400" />
+                        <f.icon className="w-7 h-7 text-monad-400" />
                       </div>
-                      <p className="text-sm font-semibold text-white text-center">{f.title}</p>
-                      <p className="text-[11px] text-zinc-500 text-center mt-1 px-3 leading-relaxed line-clamp-2">{f.description}</p>
+                      <p className="text-base font-semibold text-white text-center mb-2">{f.title}</p>
+                      <p className="text-sm text-zinc-400 text-center px-4 leading-relaxed">{f.description}</p>
                     </EvervaultCard>
                   </div>
                 </Link>
