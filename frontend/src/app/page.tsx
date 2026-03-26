@@ -764,254 +764,151 @@ export default function HomePage() {
       </section>
 
       {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
+      {/* ── ROADMAP ──────────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', background: '#060310' }}>
         {/* opposite diagonal lines */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(135deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 44px)' }} />
-        {/* bottom-right glow */}
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at bottom right, rgba(131,110,249,0.07) 0%, transparent 60%)' }} />
-        <div className="max-w-5xl mx-auto px-4 relative z-10">
-          {/* Header */}
-          <div className="mb-16">
-            <AnimatedContainer>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Step by step</p>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tight text-white mb-4">
-                <DecryptedText text="Platform Roadmap" speed={35} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
-              </h2>
-              <p className="text-sm text-zinc-500 max-w-md leading-relaxed">
-                Bolty is built in three phases. Each version expands the platform with new capabilities and deeper infrastructure.
-              </p>
-            </AnimatedContainer>
-          </div>
+        {/* top-left glow */}
+        <div className="absolute top-0 left-0 w-[700px] h-[500px] pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.09) 0%, transparent 60%)' }} />
 
-          {/* Phase label: Beta */}
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
+          {/* Header */}
           <AnimatedContainer>
-            <div className="flex items-center gap-3 mb-8">
-              <span className="text-xs font-mono text-monad-400 uppercase tracking-widest">Version 1 — Beta</span>
-              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.25)' }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-                <span className="text-xs font-mono text-monad-400">Current</span>
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-20">
+              <div>
+                <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-4">Building in public</p>
+                <h2 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-none">
+                  <DecryptedText text="Platform" speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /><br />
+                  <DecryptedText text="Roadmap." speed={30} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" />
+                </h2>
               </div>
+              <p className="text-zinc-500 text-sm leading-relaxed max-w-xs lg:text-right">
+                We ship fast and in public. Phase 1 is live now — everything you see below is already deployed or in active development.
+              </p>
             </div>
           </AnimatedContainer>
 
-          {/* Step 01 — full width */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5 }}
-            className="mb-0 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">01</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Code2 className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.6), transparent)' }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="Code Repository Publishing" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-xl mb-3">Publish and monetize code repositories directly on-chain. Set prices, manage access, and earn from every download.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
-                </div>
+          {/* ─── PHASE 1 — CURRENT ─── */}
+          <AnimatedContainer>
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.3)' }}>
+                <span className="w-2 h-2 rounded-full bg-monad-400 animate-pulse" />
+                <span className="text-xs font-mono text-monad-400 font-semibold uppercase tracking-widest">Phase 01 — Live Now</span>
               </div>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.35), transparent)' }} />
             </div>
-          </motion.div>
+          </AnimatedContainer>
 
-          {/* Step 02 — indented */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t pl-6" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">02</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Bot className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="w-3/4 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.5), transparent)' }} />
-                  </div>
-                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="AI Assistant" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">An intelligent assistant built into the platform. Ask questions, get code suggestions, and navigate the ecosystem seamlessly.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          {/* Phase 1 cards grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-20">
+            {[
+              { num: '01', icon: <Code2 className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Repo Publishing', desc: 'Publish and monetize code repositories directly on-chain. Set prices and earn from every access.' },
+              { num: '02', icon: <Bot className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'AI Assistant', desc: 'Built-in assistant for code review, architecture advice, and platform navigation.' },
+              { num: '03', icon: <MessageSquare className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Community Chat', desc: 'Real-time global chat for developers. Connect, collaborate, and ship together.' },
+              { num: '04', icon: <Wallet className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'ETH Payments', desc: 'Trustless on-chain payments direct to your wallet. No intermediaries, no delays.' },
+              { num: '05', icon: <ShoppingBag className="w-5 h-5 text-monad-400" strokeWidth={1.5} />, title: 'Agent Marketplace', desc: 'Publish AI agents with a price. Buyers negotiate autonomously, deals close on-chain.' },
+              { num: '06', icon: <Zap className="w-5 h-5 text-amber-400" strokeWidth={1.5} />, title: '$BOLTY Token Launch', desc: 'Zero-tax native token. Pay fees, unlock premium features, and participate in governance.', highlight: true },
+            ].map((item, i) => (
+              <motion.div
+                key={item.num}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.45, delay: i * 0.07 }}
+              >
+                <div
+                  className="relative h-full rounded-2xl p-6 group transition-all duration-300"
+                  style={{
+                    background: item.highlight
+                      ? 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(8,6,18,0.95) 100%)'
+                      : 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(8,6,18,0.9) 100%)',
+                    border: item.highlight
+                      ? '1px solid rgba(131,110,249,0.35)'
+                      : '1px solid rgba(255,255,255,0.07)',
+                  }}
+                >
+                  {/* corner accents */}
+                  <div className="absolute top-3 left-3 w-3 h-3 border-t border-l" style={{ borderColor: item.highlight ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.12)' }} />
+                  <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r" style={{ borderColor: item.highlight ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.12)' }} />
 
-          {/* Step 03 — wide */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">03</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <MessageSquare className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.55), rgba(131,110,249,0.1), transparent)' }} />
-                  </div>
-                  <div className="flex items-start justify-between gap-8">
-                    <div>
-                      <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="Global Community Chat" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
-                      <p className="text-zinc-500 text-sm leading-relaxed max-w-md mb-3">Real-time community hub for builders. Connect, collaborate, and share with developers worldwide.</p>
-                      <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
+                  {/* glow on highlight card */}
+                  {item.highlight && (
+                    <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ background: 'radial-gradient(ellipse at top left, rgba(131,110,249,0.08) 0%, transparent 60%)' }} />
+                  )}
+
+                  {/* number + icon row */}
+                  <div className="flex items-center justify-between mb-5">
+                    <span className="font-mono text-[11px] font-bold tracking-widest" style={{ color: item.highlight ? 'rgba(131,110,249,0.7)' : 'rgba(255,255,255,0.2)' }}>{item.num}</span>
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: item.highlight ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)',
+                        border: item.highlight ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      {item.icon}
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
 
-          {/* Step 04 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.12 }}
-            className="border-t pl-12" style={{ borderColor: 'rgba(255,255,255,0.07)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">04</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Wallet className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.45), transparent)' }} />
+                  <h3 className="text-white font-bold text-base mb-2 leading-snug">{item.title}</h3>
+                  <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+
+                  {/* status footer */}
+                  <div className="mt-5 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: item.highlight ? '#f59e0b' : '#836EF9' }} />
+                    <span className="text-[10px] font-mono uppercase tracking-widest" style={{ color: item.highlight ? '#f59e0b' : 'rgba(131,110,249,0.6)' }}>
+                      {item.highlight ? 'Launching' : 'Live'}
+                    </span>
                   </div>
-                  <h3 className="text-white font-bold text-lg mb-1"><DecryptedText text="ETH On-chain Payments" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
-                  <p className="text-zinc-500 text-sm leading-relaxed max-w-lg mb-3">Trustless payments settled directly on Ethereum. No intermediaries, no delays — your keys, your assets, always.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/50" strokeWidth={1.5} />
                 </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
 
-          {/* Step 05 — current highlight */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.14 }}
-            className="border-t border-b" style={{ borderColor: 'rgba(131,110,249,0.2)' }}
-          >
-            <div className="py-7" style={{ background: 'rgba(131,110,249,0.03)' }}>
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-monad-400 w-7 shrink-0 pt-1">05</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <ShoppingBag className="w-4 h-4 text-monad-400 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, #836EF9, rgba(131,110,249,0.2), transparent)' }} />
-                    <span className="text-xs font-mono text-monad-400 shrink-0">Current</span>
-                  </div>
-                  <h3 className="text-white font-bold text-xl mb-1"><DecryptedText text="Agent Marketplace" speed={40} animateOn="view" sequential className="text-white" encryptedClassName="text-monad-400/40" /></h3>
-                  <p className="text-zinc-400 text-sm leading-relaxed max-w-xl mb-3">Publish AI agents with a price. Buyers&apos; agents negotiate autonomously. When they agree — confirm to open a DM and close the deal on-chain.</p>
-                  <ArrowRight className="w-4 h-4 text-monad-400/70" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase label: Gamma */}
+          {/* ─── NEXT PHASES — minimal teasers ─── */}
           <AnimatedContainer delay={0.1}>
-            <div className="flex items-center gap-3 mt-14 mb-8">
-              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Version 2 — Gamma</span>
-              <span className="text-xs font-mono text-zinc-600 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>Upcoming</span>
+            <div className="flex items-center gap-4 mb-8">
+              <span className="text-xs font-mono text-zinc-600 uppercase tracking-widest">What comes next</span>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(255,255,255,0.06), transparent)' }} />
             </div>
           </AnimatedContainer>
 
-          {/* Step 06 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">06</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Globe className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.25), transparent)' }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              { phase: '02', label: 'Phase 2', tag: 'Upcoming' },
+              { phase: '03', label: 'Phase 3', tag: 'Future' },
+            ].map((p, i) => (
+              <motion.div
+                key={p.phase}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+              >
+                <div
+                  className="relative rounded-2xl p-6 flex items-center justify-between overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+                >
+                  {/* blurred placeholder content */}
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <Lock className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                    </div>
+                    <div>
+                      <div className="text-zinc-600 font-bold text-sm mb-1">{p.label}</div>
+                      <div className="flex gap-2">
+                        <div className="h-2 w-20 rounded-full bg-zinc-800" />
+                        <div className="h-2 w-12 rounded-full bg-zinc-800/60" />
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1"><DecryptedText text="Public REST API" speed={40} animateOn="view" sequential className="text-zinc-400" encryptedClassName="text-zinc-600" /></h3>
-                  <p className="text-zinc-600 text-sm leading-relaxed max-w-xl mb-3">Open Bolty infrastructure to third-party builders. Programmatic access to repositories, agents, and all platform data.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
+                  <span className="text-[10px] font-mono text-zinc-700 uppercase tracking-widest px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>{p.tag}</span>
+                  {/* big faded number */}
+                  <span className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-6xl text-zinc-900 pointer-events-none select-none leading-none">{p.phase}</span>
                 </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Step 07 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
-            className="border-t pl-8 opacity-50" style={{ borderColor: 'rgba(255,255,255,0.06)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-600 w-7 shrink-0 pt-1">07</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Zap className="w-4 h-4 text-zinc-600 shrink-0" strokeWidth={1.5} />
-                    <div className="w-1/2 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.2), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-400 font-bold text-lg mb-1"><DecryptedText text="Developer SDK & Webhooks" speed={40} animateOn="view" sequential className="text-zinc-400" encryptedClassName="text-zinc-600" /></h3>
-                  <p className="text-zinc-600 text-sm leading-relaxed max-w-lg mb-3">First-class SDK for building on top of Bolty. Real-time webhooks, event subscriptions, and automation tooling.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-700" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase label: Alpha */}
-          <AnimatedContainer delay={0.1}>
-            <div className="flex items-center gap-3 mt-14 mb-8">
-              <span className="text-xs font-mono text-zinc-700 uppercase tracking-widest">Version 3 — Alpha</span>
-              <span className="text-xs font-mono text-zinc-700 px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>Future</span>
-            </div>
-          </AnimatedContainer>
-
-          {/* Step 08 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.05 }}
-            className="border-t opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">08</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Shield className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.12), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1"><DecryptedText text="DAO Governance" speed={40} animateOn="view" sequential className="text-zinc-600" encryptedClassName="text-zinc-700" /></h3>
-                  <p className="text-zinc-700 text-sm leading-relaxed max-w-xl mb-3">Community-driven decisions on platform direction, fees, and upgrades. Token holders vote on proposals on-chain.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Step 09 */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}
-            className="border-t border-b opacity-25" style={{ borderColor: 'rgba(255,255,255,0.04)' }}
-          >
-            <div className="py-7">
-              <div className="flex items-start gap-5">
-                <span className="font-mono text-xs font-bold text-zinc-700 w-7 shrink-0 pt-1">09</span>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Hash className="w-4 h-4 text-zinc-700 shrink-0" strokeWidth={1.5} />
-                    <div className="w-2/3 h-px" style={{ background: 'linear-gradient(to right, rgba(131,110,249,0.1), transparent)' }} />
-                  </div>
-                  <h3 className="text-zinc-600 font-bold text-lg mb-1"><DecryptedText text="Open Protocol & Native Token" speed={40} animateOn="view" sequential className="text-zinc-600" encryptedClassName="text-zinc-700" /></h3>
-                  <p className="text-zinc-700 text-sm leading-relaxed max-w-lg mb-3">Bolty becomes a fully open, decentralized protocol. Cross-chain support, on-chain reputation, and the native $BOLTY token at the core.</p>
-                  <ArrowRight className="w-4 h-4 text-zinc-800" strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
