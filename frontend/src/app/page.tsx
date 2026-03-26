@@ -19,6 +19,7 @@ import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { NumberTicker } from '@/components/ui/number-ticker';
 import { AnimatedList } from '@/components/ui/animated-list';
 import { RetroGrid } from '@/components/ui/retro-grid';
+import { EvervaultCard } from '@/components/ui/evervault-card';
 import { AvatarCircles } from '@/components/ui/avatar-circles';
 import {
   Code2,
@@ -557,31 +558,39 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── FEATURE CARDS MARQUEE ──────────────────────────────────────── */}
-      <section className="relative w-full py-12 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-        <div className="relative z-10">
-          <AnimatedContainer className="text-center mb-8">
-            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-[0.3em]">Built with</p>
+      {/* ── FEATURE CARDS — horizontal EvervaultCard row ───────────────── */}
+      <section className="relative w-full py-20 overflow-hidden" style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
+          <AnimatedContainer className="flex flex-col items-center text-center mb-12">
+            <p className="text-[10px] font-mono text-monad-400 uppercase tracking-[0.3em] mb-3">Platform capabilities</p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">What you can do on Bolty</h2>
+            <p className="text-zinc-500 text-sm max-w-md">Everything you need to build, share, and earn — all in one place.</p>
           </AnimatedContainer>
-          <LogoLoop
-            logos={ORBITAL_DATA.map(item => ({
-              node: (
-                <span className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-white/[0.06] transition-all duration-200 hover:border-monad-500/25 hover:bg-monad-500/5"
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            {ORBITAL_DATA.map((item, i) => (
+              <AnimatedContainer key={item.id} delay={i * 0.06}>
+                <div className="relative rounded-2xl border border-white/[0.08] h-44 overflow-hidden group"
                   style={{ background: 'rgba(255,255,255,0.02)' }}>
-                  <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
-                    <item.icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
-                  </span>
-                  <span className="text-xs font-medium text-zinc-300 whitespace-nowrap">{item.title}</span>
-                </span>
-              ),
-              title: item.title,
-            }))}
-            speed={40}
-            gap={16}
-            logoHeight={44}
-            pauseOnHover
-          />
+                  {/* Corner decorators */}
+                  <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-white/20 z-20" />
+                  <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-white/20 z-20" />
+                  <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-white/20 z-20" />
+                  <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-white/20 z-20" />
+                  <EvervaultCard className="rounded-2xl h-full">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-2"
+                      style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                      <item.icon className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
+                    </div>
+                    <p className="text-xs font-semibold text-white text-center">{item.title}</p>
+                    <span className="text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full mt-1"
+                      style={{ background: 'rgba(131,110,249,0.1)', color: '#836ef9', border: '1px solid rgba(131,110,249,0.2)' }}>
+                      {item.date}
+                    </span>
+                  </EvervaultCard>
+                </div>
+              </AnimatedContainer>
+            ))}
+          </div>
         </div>
       </section>
 
