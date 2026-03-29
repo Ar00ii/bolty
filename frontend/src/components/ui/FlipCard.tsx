@@ -18,7 +18,6 @@ export default function FlipCard({
   rotate = 'y',
   accentColor = 'rgba(131,110,249,0.15)',
   className,
-  ...props
 }: FlipCardProps) {
   const rotationClass = {
     x: ['group-hover:[transform:rotateX(180deg)]', '[transform:rotateX(180deg)]'],
@@ -27,7 +26,7 @@ export default function FlipCard({
   const self = rotationClass[rotate];
 
   return (
-    <div className={cn('group h-72 w-full [perspective:1000px]', className)} {...props}>
+    <div className={cn('group h-72 w-full [perspective:1000px] cursor-default select-none', className)}>
       <div
         className={cn(
           'relative h-full rounded-2xl transition-all duration-700 [transform-style:preserve-3d]',
