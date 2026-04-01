@@ -14,7 +14,6 @@ import {
   GitBranch, Lock, Globe, Star, Download, ArrowUp, ArrowDown,
   Trash2, Plus, Users, Wallet, X, Upload, Search, CheckCircle2, Copy, Check,
 } from 'lucide-react';
-import { BackgroundBeams } from '@/components/ui/background-beams';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -732,171 +731,146 @@ function ReposMarketPageContent() {
   }));
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
-      <BackgroundBeams className="opacity-40" />
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
-
-        {/* Header */}
-        <div className="mb-8 pb-6 border-b border-[#21262d]">
-          <div className="flex items-center gap-2 text-xs text-[#8b949e] mb-4">
-            <Link href="/market" className="hover:text-[#58a6ff] transition-colors">Market</Link>
-            <span className="text-[#30363d]">/</span>
-            <span className="text-[#e6edf3]">Repositories</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-2xl font-bold text-[#e6edf3] mb-1">Repositories</h1>
-              <p className="text-[#8b949e] text-sm">Discover, vote on, and download community code repositories.</p>
-            </div>
-            {isAuthenticated && (
-              <button
-                onClick={() => { switchTab('mine'); loadGhRepos(); }}
-                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full transition-all text-white hover:shadow-[0_0_16px_rgba(131,110,249,0.4)]"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: '1px solid rgba(131,110,249,0.5)' }}
-              >
-                <Plus className="w-4 h-4" /> Publish Repo
-              </button>
-            )}
-          </div>
+    <div className="page-container py-8">
+      {/* Header */}
+      <div className="page-header">
+        <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
+          <Link href="/market" className="hover:text-zinc-400 transition-colors">Market</Link>
+          <span>/</span>
+          <span className="text-zinc-400">Repositories</span>
         </div>
-
-        {/* Tabs */}
-        <div className="flex gap-0 mb-6 border-b border-[#21262d]">
-          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Repos', <GitBranch key="b" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Repositories</h1>
+            <p className="text-sm text-zinc-500 mt-1">Discover, vote on, and download community code repositories.</p>
+          </div>
+          {isAuthenticated && (
             <button
-              key={id}
-              onClick={() => switchTab(id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-                activeTab === id
-                  ? 'border-monad-500 text-white'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-200'
-              }`}
+              onClick={() => { switchTab('mine'); loadGhRepos(); }}
+              className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2"
             >
-              {icon}{label}
+              <Plus className="w-4 h-4" /> Publish Repo
             </button>
-          ))}
+          )}
         </div>
+      </div>
 
-        {/* ── Marketplace tab ── */}
-        {activeTab === 'market' && (
-          <>
-            {/* Search + filters */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search repositories..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full text-sm pl-9 pr-4 py-2 rounded-full transition-all outline-none"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}
-                  onFocus={e => (e.currentTarget.style.border = '1px solid rgba(131,110,249,0.5)')}
-                  onBlur={e => (e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)')}
-                />
-              </div>
-              <select
-                value={language}
-                onChange={e => setLanguage(e.target.value)}
-                className="text-xs px-3 py-2 rounded-full outline-none transition-all cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#a1a1aa' }}
-              >
-                {LANGUAGES.map(l => <option key={l} value={l === 'All' ? '' : l}>{l}</option>)}
-              </select>
-              <select
-                className="text-xs px-3 py-2 rounded-full outline-none transition-all cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#a1a1aa' }}
-                defaultValue=""
-              >
-                <option value="">Framework</option>
-                <option value="nextjs">Next.js</option>
-                <option value="react">React</option>
-                <option value="nestjs">NestJS</option>
-                <option value="fastapi">FastAPI</option>
-                <option value="langchain">LangChain</option>
-              </select>
-              <div className="flex gap-1.5 flex-wrap">
-                {SORTS.map(s => (
-                  <button
-                    key={s.value}
-                    onClick={() => setSortBy(s.value as typeof sortBy)}
-                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                      sortBy === s.value
-                        ? 'border-monad-500/40 text-monad-300'
-                        : 'border-white/10 text-zinc-500 hover:border-monad-500/30 hover:text-zinc-300'
-                    }`}
-                    style={sortBy === s.value ? { background: 'rgba(131,110,249,0.12)' } : { background: 'rgba(255,255,255,0.02)' }}
-                  >
-                    {s.label}
-                  </button>
-                ))}
-              </div>
+      {/* Tabs */}
+      <div className="tab-group mb-6">
+        {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Repos', <GitBranch key="b" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+          <button
+            key={id}
+            onClick={() => switchTab(id)}
+            className={`tab-item ${activeTab === id ? 'active' : ''}`}
+          >
+            {icon}{label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Marketplace tab ── */}
+      {activeTab === 'market' && (
+        <>
+          {/* Search + filters */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="relative flex-1 min-w-[220px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search repositories..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="input w-full pl-9"
+              />
             </div>
-            {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => <div key={i} className="rounded-lg border border-[#21262d] bg-[#0d1117] h-56 animate-pulse" />)}
-              </div>
-            ) : repos.length === 0 ? (
-              <div className="text-center py-20 border border-dashed border-[#30363d] rounded-lg">
-                <GitBranch className="w-10 h-10 text-[#30363d] mx-auto mb-3" strokeWidth={1} />
-                <p className="text-[#8b949e] text-sm">No repositories found matching your search.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {repos.map(r => <RepoCard key={r.id} repo={r} isAuthenticated={isAuthenticated} userId={user?.id} onVote={vote} onDownload={download} onUnlock={unlock} />)}
-              </div>
-            )}
-          </>
-        )}
+            <select
+              value={language}
+              onChange={e => setLanguage(e.target.value)}
+              className="input text-xs px-3 py-2 cursor-pointer"
+            >
+              {LANGUAGES.map(l => <option key={l} value={l === 'All' ? '' : l}>{l}</option>)}
+            </select>
+            <div className="flex gap-1.5 flex-wrap">
+              {SORTS.map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => setSortBy(s.value as typeof sortBy)}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+                    sortBy === s.value
+                      ? 'text-monad-300 bg-monad-500/10 border-monad-500/30'
+                      : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 bg-transparent'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton h-56 rounded-xl" />)}
+            </div>
+          ) : repos.length === 0 ? (
+            <div className="card text-center py-16">
+              <GitBranch className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
+              <p className="text-zinc-500 text-sm">No repositories found matching your search.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {repos.map(r => <RepoCard key={r.id} repo={r} isAuthenticated={isAuthenticated} userId={user?.id} onVote={vote} onDownload={download} onUnlock={unlock} />)}
+            </div>
+          )}
+        </>
+      )}
 
-        {/* ── My Publications tab ── */}
-        {activeTab === 'mine' && (
-          <>
-            {!isAuthenticated ? (
-              <div className="text-center py-20">
-                <p className="text-zinc-500 font-mono text-sm mb-4">sign in to manage your repos</p>
-                <Link href="/auth" className="text-xs font-mono px-4 py-2 rounded-xl" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>sign in</Link>
+      {/* ── My Publications tab ── */}
+      {activeTab === 'mine' && (
+        <>
+          {!isAuthenticated ? (
+            <div className="card text-center py-16">
+              <p className="text-zinc-500 text-sm mb-4">Sign in to manage your repos</p>
+              <Link href="/auth" className="btn-primary text-sm px-4 py-2 inline-flex">Sign in</Link>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-zinc-500">{myRepos.length} repo{myRepos.length !== 1 ? 's' : ''} published</p>
+                <button onClick={() => { setShowPublishPanel(p => !p); if (!showPublishPanel) loadGhRepos(); }} className={`text-xs px-3 py-1.5 flex items-center gap-1.5 ${showPublishPanel ? 'btn-secondary' : 'btn-primary'}`}>
+                  <Plus className="w-3 h-3" /> {showPublishPanel ? 'Close' : 'Publish new'}
+                </button>
               </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-zinc-500 font-mono">{myRepos.length} repo{myRepos.length !== 1 ? 's' : ''} published</p>
-                  <button onClick={() => { setShowPublishPanel(p => !p); if (!showPublishPanel) loadGhRepos(); }} className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-lg transition-all" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>
-                    <Plus className="w-3 h-3" /> {showPublishPanel ? 'close' : 'publish new'}
-                  </button>
-                </div>
 
-                {/* GitHub repos panel */}
-                {showPublishPanel && (
-                  <div className="mb-5 rounded-2xl border p-4" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-sm font-mono text-zinc-400">Your GitHub repositories</p>
-                      <button onClick={() => setShowPublishPanel(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">close</button>
+              {/* GitHub repos panel */}
+              {showPublishPanel && (
+                <div className="mb-5 card p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-medium text-zinc-300">Your GitHub repositories</p>
+                    <button onClick={() => setShowPublishPanel(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">Close</button>
+                  </div>
+                  {ghNeedsConnect && (
+                    <div className="p-4 rounded-xl border border-monad-500/20 bg-monad-500/5 text-center mb-3">
+                      <p className="text-sm text-zinc-400 mb-3">Connect GitHub to publish repos</p>
+                      {process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ? (
+                        <a href={GITHUB_OAUTH_URL} className="btn-primary text-xs px-4 py-2 inline-flex">Connect GitHub</a>
+                      ) : (
+                        <p className="text-xs text-zinc-600">GitHub OAuth not configured — set NEXT_PUBLIC_GITHUB_CLIENT_ID</p>
+                      )}
                     </div>
-                    {ghNeedsConnect && (
-                      <div className="p-4 rounded-xl border text-center mb-3" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'rgba(131,110,249,0.05)' }}>
-                        <p className="text-sm text-zinc-400 mb-3">Connect GitHub to publish repos</p>
-                        {process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ? (
-                          <a href={GITHUB_OAUTH_URL} className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">Connect GitHub</a>
-                        ) : (
-                          <p className="text-xs font-mono text-zinc-600">GitHub OAuth not configured — set NEXT_PUBLIC_GITHUB_CLIENT_ID</p>
-                        )}
-                      </div>
-                    )}
-                    {ghNeedsReauth && (
-                      <div className="p-4 rounded-xl border text-center mb-3" style={{ borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                        <p className="text-sm text-zinc-400 mb-1">GitHub token expired</p>
-                        <a href={GITHUB_OAUTH_URL} className="inline-block mt-2 px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors">Reconnect GitHub</a>
-                      </div>
-                    )}
-                    {ghLoading && <p className="text-zinc-600 font-mono text-xs animate-pulse py-2">loading your repos...</p>}
-                    {!ghNeedsConnect && !ghNeedsReauth && !ghLoading && (
-                      <ActionSearchBar
-                        actions={ghActions}
-                        placeholder="Search your repos..."
-                        label="Select a repo to publish"
-                        onSelect={(action) => { const r = ghRepos.find(x => String(x.id) === action.id); if (r) setPublishingRepo(r); }}
+                  )}
+                  {ghNeedsReauth && (
+                    <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/50 text-center mb-3">
+                      <p className="text-sm text-zinc-400 mb-1">GitHub token expired</p>
+                      <a href={GITHUB_OAUTH_URL} className="btn-primary text-xs px-4 py-2 inline-flex mt-2">Reconnect GitHub</a>
+                    </div>
+                  )}
+                  {ghLoading && <p className="text-zinc-600 text-xs animate-pulse py-2">Loading your repos...</p>}
+                  {!ghNeedsConnect && !ghNeedsReauth && !ghLoading && (
+                    <ActionSearchBar
+                      actions={ghActions}
+                      placeholder="Search your repos..."
+                      label="Select a repo to publish"
+                      onSelect={(action) => { const r = ghRepos.find(x => String(x.id) === action.id); if (r) setPublishingRepo(r); }}
                       />
                     )}
                   </div>
@@ -904,13 +878,15 @@ function ReposMarketPageContent() {
 
                 {myLoading ? (
                   <div className="space-y-3">
-                    {Array.from({ length: 3 }).map((_, i) => <div key={i} className="rounded-xl border border-white/[0.06] bg-[#0a0a12] h-20 animate-pulse" />)}
+                    {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
                   </div>
                 ) : myRepos.length === 0 ? (
-                  <div className="text-center py-16 rounded-2xl border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                  <div className="card text-center py-16">
                     <GitBranch className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-                    <p className="text-zinc-600 font-mono text-sm mb-2">no repos published yet</p>
-                    <button onClick={() => { setShowPublishPanel(true); loadGhRepos(); }} className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">publish your first repo →</button>
+                    <p className="text-zinc-600 text-sm mb-3">No repos published yet</p>
+                    <button onClick={() => { setShowPublishPanel(true); loadGhRepos(); }} className="btn-primary text-xs px-4 py-2 inline-flex items-center gap-1.5">
+                      <Plus className="w-3 h-3" /> Publish your first repo
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -943,7 +919,6 @@ function ReposMarketPageContent() {
             onCancel={() => setConsentModal(null)}
           />
         )}
-      </div>
     </div>
   );
 }
