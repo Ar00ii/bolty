@@ -14,7 +14,6 @@ import {
   ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
   AlertTriangle, Wallet, Users, Zap, Send,
 } from 'lucide-react';
-import { BackgroundBeams } from '@/components/ui/background-beams';
 import { io, Socket } from 'socket.io-client';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -509,95 +508,75 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
 function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
   return (
-    <div className="group flex flex-col rounded-2xl border overflow-hidden h-full transition-all duration-200 hover:border-monad-500/40 hover:shadow-[0_0_32px_rgba(131,110,249,0.08)]"
-      style={{ borderColor: 'rgba(255,255,255,0.07)', background: '#09090f' }}>
-
-      {/* Top accent bar */}
-      <div className="h-0.5 w-full" style={{ background: 'linear-gradient(90deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.1) 100%)' }} />
-
-      {/* Card header */}
-      <div className="flex items-start gap-3 p-4 pb-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)' }}>
-          <Bot className="w-5 h-5 text-monad-400" strokeWidth={1.5} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            <h3 className="text-sm font-semibold text-zinc-100 truncate">{listing.title}</h3>
-            {listing.agentEndpoint ? (
-              <span title="This seller has their own AI agent connected" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-mono cursor-default"
-                style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#c4b5fd' }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse inline-block" />
-                own AI
-              </span>
-            ) : (
-              <span title="Uses Bolty's built-in AI fallback for negotiation" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[11px] font-mono cursor-default"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#71717a' }}>
-                AI fallback
-              </span>
-            )}
+    <div className="card-interactive flex flex-col h-full group">
+      {/* Header row */}
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+            <Bot className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.75} />
           </div>
-          <div className="flex items-center gap-1.5">
-            {listing.seller.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={listing.seller.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
-            ) : (
-              <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center"
-                style={{ background: 'rgba(131,110,249,0.2)' }}>
-                <span className="text-[8px] font-bold text-monad-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
-              </div>
-            )}
-            <span className="text-xs text-zinc-600 font-mono">@{listing.seller.username || 'anonymous'}</span>
+          <div className="min-w-0">
+            <h3 className="text-[13px] font-semibold text-white truncate leading-tight">{listing.title}</h3>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {listing.seller.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={listing.seller.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+              ) : (
+                <div className="w-3.5 h-3.5 rounded-full bg-monad-500/20 flex items-center justify-center">
+                  <span className="text-[7px] font-bold text-monad-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
+                </div>
+              )}
+              <span className="text-[11px] text-zinc-500">@{listing.seller.username || 'anon'}</span>
+            </div>
           </div>
         </div>
-        <span className={`shrink-0 px-2 py-0.5 rounded-full text-[11px] font-mono border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
-          {listing.type.toLowerCase().replace('_', ' ')}
-        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          {listing.agentEndpoint && (
+            <span title="Has own AI agent" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
+              <span className="w-1 h-1 rounded-full bg-monad-400 animate-pulse inline-block" />AI
+            </span>
+          )}
+          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
+            {listing.type.toLowerCase().replace('_', ' ')}
+          </span>
+        </div>
       </div>
 
       {/* Description */}
-      <div className="px-4 pb-3 flex-1">
-        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-2 min-h-[2.5rem]">
-          {listing.description || 'No description provided.'}
-        </p>
-        {listing.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2.5">
-            {listing.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="px-2 py-0.5 rounded-full text-[11px] font-mono"
-                style={{ background: 'rgba(131,110,249,0.06)', border: '1px solid rgba(131,110,249,0.12)', color: '#a78bfa' }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-3 flex-1">
+        {listing.description || 'No description provided.'}
+      </p>
+
+      {/* Tags */}
+      {listing.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {listing.tags.slice(0, 4).map(tag => (
+            <span key={tag} className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between px-4 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+      <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
         <div>
           {listing.price === 0 ? (
-            <span className="text-sm font-bold font-mono text-monad-400">Free</span>
+            <span className="text-sm font-semibold text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-bold font-mono text-zinc-100">
-              {listing.price} <span className="text-xs font-normal text-zinc-500">{listing.currency}</span>
-            </span>
+            <span className="text-sm font-semibold text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
           )}
           {listing.minPrice != null && (
-            <p className="text-[11px] text-zinc-600 font-mono">floor: {listing.minPrice} {listing.currency}</p>
+            <p className="text-[10px] text-zinc-600 mt-0.5">Floor: {listing.minPrice} {listing.currency}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Link href={`/agents/${listing.id}`}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-500 border transition-all hover:text-zinc-300"
-            style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-            View
-          </Link>
+        <div className="flex items-center gap-1.5">
+          <Link href={`/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">View</Link>
           <button
             onClick={() => { if (!isAuthenticated) { window.location.href = '/auth'; return; } onNegotiate(); }}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-white transition-all hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}
+            className="btn-primary text-xs py-1 px-3"
           >
-            {listing.price === 0 ? 'Deploy' : 'Negotiate'}
+            {listing.price === 0 ? 'Get free' : 'Negotiate'}
           </button>
         </div>
       </div>
@@ -965,168 +944,152 @@ function AgentsPageContent() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
-      <BackgroundBeams className="opacity-40" />
-      <div className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16">
-
-        {/* Header */}
-        <div className="mb-8 pb-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          <div className="flex items-center gap-2 text-xs font-mono mb-4">
-            <Link href="/market" className="text-zinc-600 hover:text-monad-400 transition-colors">Market</Link>
-            <span className="text-zinc-800">/</span>
-            <span className="text-zinc-400">AI Agents</span>
-          </div>
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-2">Marketplace</p>
-              <h1 className="text-3xl font-black text-white mb-1">AI Agents</h1>
-              <p className="text-zinc-500 text-sm">Discover autonomous agents, bots, and automation tools built by the community.</p>
-            </div>
-            {isAuthenticated && (
-              <button
-                onClick={() => { switchTab('mine'); setShowCreate(true); }}
-                className="flex items-center gap-2 text-sm font-mono font-medium px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}
-              >
-                <Plus className="w-4 h-4" /> Deploy Agent
-              </button>
-            )}
-          </div>
+    <div className="page-container py-8">
+      {/* Header */}
+      <div className="page-header">
+        <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
+          <Link href="/market" className="hover:text-zinc-400 transition-colors">Market</Link>
+          <span>/</span>
+          <span className="text-zinc-400">AI Agents</span>
         </div>
-
-        {/* Tabs */}
-        <div className="flex gap-0 mb-6 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-          {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">AI Agents</h1>
+            <p className="text-sm text-zinc-500 mt-1">Discover autonomous agents, bots, and automation tools built by the community.</p>
+          </div>
+          {isAuthenticated && (
             <button
-              key={id}
-              onClick={() => switchTab(id)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-mono font-medium transition-all border-b-2 -mb-px ${
-                activeTab === id
-                  ? 'border-monad-400 text-monad-300'
-                  : 'border-transparent text-zinc-600 hover:text-zinc-300'
-              }`}
+              onClick={() => { switchTab('mine'); setShowCreate(true); }}
+              className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2"
             >
-              {icon}{label}
+              <Plus className="w-4 h-4" /> Deploy Agent
             </button>
-          ))}
+          )}
         </div>
+      </div>
 
-        {/* ── Marketplace tab ── */}
-        {activeTab === 'market' && (
-          <>
-            {/* Search + filter bar */}
-            <div className="flex flex-wrap items-center gap-3 mb-6">
-              <div className="relative flex-1 min-w-[220px]">
-                <input
-                  type="text"
-                  placeholder="Search agents..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="w-full text-sm px-4 py-2 rounded-xl font-mono outline-none transition-colors"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7' }}
-                  onFocus={e => (e.target.style.borderColor = 'rgba(131,110,249,0.5)')}
-                  onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.08)')}
-                />
-              </div>
-              <div className="flex gap-1.5 flex-wrap">
-                {TYPES.map(t => (
-                  <button
-                    key={t}
-                    onClick={() => setType(t)}
-                    className={`text-xs px-3 py-1.5 rounded-lg font-mono border transition-all ${
-                      type === t
-                        ? 'text-monad-300'
-                        : 'text-zinc-600 hover:text-zinc-300'
-                    }`}
-                    style={type === t
-                      ? { background: 'rgba(131,110,249,0.12)', borderColor: 'rgba(131,110,249,0.35)' }
-                      : { background: 'transparent', borderColor: 'rgba(255,255,255,0.08)' }}
-                  >
-                    {TYPE_LABELS[t]}
-                  </button>
-                ))}
-              </div>
+      {/* Tabs */}
+      <div className="tab-group mb-6">
+        {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+          <button
+            key={id}
+            onClick={() => switchTab(id)}
+            className={`tab-item ${activeTab === id ? 'active' : ''}`}
+          >
+            {icon}{label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Marketplace tab ── */}
+      {activeTab === 'market' && (
+        <>
+          {/* Search + filter bar */}
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="relative flex-1 min-w-[220px]">
+              <input
+                type="text"
+                placeholder="Search agents..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="input w-full"
+              />
             </div>
-            {error && <p className="text-red-400 text-sm mb-4 font-mono">{error}</p>}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl border h-52 animate-pulse"
-                    style={{ borderColor: 'rgba(255,255,255,0.06)', background: '#09090f' }} />
-                ))}
-              </div>
-            ) : listings.length === 0 ? (
-              <div className="text-center py-20 border border-dashed rounded-2xl" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
-                <Bot className="w-10 h-10 text-monad-400/20 mx-auto mb-3" strokeWidth={1} />
-                <p className="text-zinc-600 text-sm font-mono">No agents found matching your search.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {listings.map(l => (
-                  <AgentCard key={l.id} listing={l} isAuthenticated={isAuthenticated} onNegotiate={() => setNegotiatingListing(l)} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
+            <div className="flex gap-1.5 flex-wrap">
+              {TYPES.map(t => (
+                <button
+                  key={t}
+                  onClick={() => setType(t)}
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+                    type === t
+                      ? 'text-monad-300 bg-monad-500/10 border-monad-500/30'
+                      : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 bg-transparent'
+                  }`}
+                >
+                  {TYPE_LABELS[t]}
+                </button>
+              ))}
+            </div>
+          </div>
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="skeleton h-52 rounded-xl" />
+              ))}
+            </div>
+          ) : listings.length === 0 ? (
+            <div className="card text-center py-16">
+              <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
+              <p className="text-zinc-500 text-sm">No agents found matching your search.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {listings.map(l => (
+                <AgentCard key={l.id} listing={l} isAuthenticated={isAuthenticated} onNegotiate={() => setNegotiatingListing(l)} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
 
-        {/* ── My Publications tab ── */}
-        {activeTab === 'mine' && (
-          <>
-            {!isAuthenticated ? (
-              <div className="text-center py-20">
-                <p className="text-zinc-500 font-mono text-sm mb-4">sign in to manage your agents</p>
-                <Link href="/auth" className="text-xs font-mono px-4 py-2 rounded-xl" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>sign in</Link>
+      {/* ── My Publications tab ── */}
+      {activeTab === 'mine' && (
+        <>
+          {!isAuthenticated ? (
+            <div className="card text-center py-16">
+              <p className="text-zinc-500 text-sm mb-4">Sign in to manage your agents</p>
+              <Link href="/auth" className="btn-primary text-sm px-4 py-2 inline-flex">Sign in</Link>
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-zinc-500">{myListings.length} agent{myListings.length !== 1 ? 's' : ''} published</p>
+                <button
+                  onClick={() => setShowCreate(p => !p)}
+                  className={showCreate ? 'btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5' : 'btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5'}
+                >
+                  <Plus className="w-3 h-3" /> {showCreate ? 'Cancel' : 'Deploy new'}
+                </button>
               </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-zinc-500 font-mono">{myListings.length} agent{myListings.length !== 1 ? 's' : ''} published</p>
-                  <button
-                    onClick={() => setShowCreate(p => !p)}
-                    className="flex items-center gap-1.5 text-xs font-mono px-3 py-2 rounded-lg transition-all"
-                    style={{ background: showCreate ? 'rgba(131,110,249,0.2)' : 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}
-                  >
-                    <Plus className="w-3 h-3" /> {showCreate ? 'cancel' : 'deploy new'}
+
+              {showCreate && (
+                <div className="mb-6">
+                  <CreateListingForm
+                    onCreated={(l) => { setMyListings(p => [l, ...p]); setShowCreate(false); }}
+                    onCancel={() => setShowCreate(false)}
+                  />
+                </div>
+              )}
+
+              {myLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
+                </div>
+              ) : myListings.length === 0 ? (
+                <div className="card text-center py-16">
+                  <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
+                  <p className="text-zinc-600 text-sm mb-3">No agents deployed yet</p>
+                  <button onClick={() => setShowCreate(true)} className="btn-primary text-xs px-4 py-2 inline-flex items-center gap-1.5">
+                    <Plus className="w-3 h-3" /> Deploy your first agent
                   </button>
                 </div>
+              ) : (
+                <div className="space-y-3">
+                  {myListings.map(l => (
+                    <MyAgentCard key={l.id} listing={l} onDelete={(id) => setMyListings(p => p.filter(x => x.id !== id))} />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
 
-                {showCreate && (
-                  <div className="mb-6">
-                    <CreateListingForm
-                      onCreated={(l) => { setMyListings(p => [l, ...p]); setShowCreate(false); }}
-                      onCancel={() => setShowCreate(false)}
-                    />
-                  </div>
-                )}
-
-                {myLoading ? (
-                  <div className="space-y-3">
-                    {Array.from({ length: 3 }).map((_, i) => <div key={i} className="rounded-xl border border-white/[0.06] bg-[#0a0a12] h-20 animate-pulse" />)}
-                  </div>
-                ) : myListings.length === 0 ? (
-                  <div className="text-center py-16 rounded-2xl border border-dashed" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                    <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-                    <p className="text-zinc-600 font-mono text-sm mb-2">no agents deployed yet</p>
-                    <button onClick={() => setShowCreate(true)} className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">deploy your first agent →</button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {myListings.map(l => (
-                      <MyAgentCard key={l.id} listing={l} onDelete={(id) => setMyListings(p => p.filter(x => x.id !== id))} />
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        )}
-
-        {/* Negotiation modal */}
-        {negotiatingListing && user && (
-          <NegotiationModal listing={negotiatingListing} onClose={() => setNegotiatingListing(null)} userId={user.id} />
-        )}
-      </div>
+      {/* Negotiation modal */}
+      {negotiatingListing && user && (
+        <NegotiationModal listing={negotiatingListing} onClose={() => setNegotiatingListing(null)} userId={user.id} />
+      )}
     </div>
   );
 }
