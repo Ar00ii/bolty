@@ -8,7 +8,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import {
   Bot, Code2, Users, GitBranch, ArrowRight, Shield,
   Zap, Globe, Key, Terminal, Star, TrendingUp, ChevronRight,
-  Cpu, Lock, Coins, CheckCircle, MessageSquare,
+  Cpu, Lock, Coins, CheckCircle, MessageSquare, UserPlus, Upload, Rocket,
 } from 'lucide-react';
 
 // ── Scroll reveal ──────────────────────────────────────────────────
@@ -84,9 +84,9 @@ const STATS = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or a Web3 wallet. Your profile is your developer identity.' },
-  { step: '02', title: 'Publish your work', desc: 'Connect GitHub to sync repos, or upload AI agents and automation tools to the marketplace.' },
-  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate with buyers, build reputation, and grow your developer brand.' },
+  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or a Web3 wallet. Your profile is your developer identity.', icon: UserPlus },
+  { step: '02', title: 'Publish your work', desc: 'Connect GitHub to sync repos, or upload AI agents and automation tools to the marketplace.', icon: Upload },
+  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate with buyers, build reputation, and grow your developer brand.', icon: Rocket },
 ];
 
 const INTEGRATIONS = [
@@ -190,15 +190,15 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Everything you need to build and sell</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {FEATURES.map((f) => {
                 const Icon = f.icon;
                 return (
-                  <Link key={f.href} href={f.href} className="group card-interactive p-5">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                  <Link key={f.href} href={f.href} className="group feature-card">
+                    <div className="feature-icon-wrap">
                       <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
                     </div>
-                    <h3 className="text-[15px] font-semibold text-white mb-1.5 group-hover:text-monad-300 transition-colors">{f.title}</h3>
+                    <h3 className="text-[15px] font-semibold text-white mb-2 group-hover:text-monad-300 transition-colors">{f.title}</h3>
                     <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
                   </Link>
                 );
@@ -217,14 +217,22 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Three steps to get started</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {HOW_IT_WORKS.map((s) => (
-                <div key={s.step} className="relative">
-                  <span className="text-5xl font-bold text-monad-500/10">{s.step}</span>
-                  <h3 className="text-base font-semibold text-white mt-2 mb-2">{s.title}</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {HOW_IT_WORKS.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <div key={s.step} className="step-card">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="step-number">{s.step}</div>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                        <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
+                      </div>
+                    </div>
+                    <h3 className="text-base font-semibold text-white mb-2">{s.title}</h3>
+                    <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -239,10 +247,10 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Works with your stack</h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {INTEGRATIONS.map((i) => (
-                <div key={i.name} className="card text-center py-5 px-3">
-                  <p className="text-sm font-semibold text-white mb-1">{i.name}</p>
+                <div key={i.name} className="card-elevated text-center py-6 px-4">
+                  <p className="text-sm font-semibold text-white mb-1.5">{i.name}</p>
                   <p className="text-xs text-zinc-500">{i.desc}</p>
                 </div>
               ))}
@@ -260,13 +268,16 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">What developers are saying</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="card p-5">
-                  <p className="text-sm text-zinc-300 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                  <div>
+                <div key={t.name} className="card-elevated p-6">
+                  <div className="flex gap-1 mb-4">
+                    {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />)}
+                  </div>
+                  <p className="text-sm text-zinc-300 leading-relaxed mb-5">&ldquo;{t.text}&rdquo;</p>
+                  <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
                     <p className="text-sm font-medium text-white">{t.name}</p>
-                    <p className="text-xs text-zinc-500">{t.role}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{t.role}</p>
                   </div>
                 </div>
               ))}

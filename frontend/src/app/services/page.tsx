@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
-import { DottedSurface } from '@/components/ui/dotted-surface';
 import { ReputationBadge } from '@/components/ui/reputation-badge';
 import {
   Plus, X, Search, MessageCircle, Star, Clock, DollarSign,
@@ -168,72 +167,71 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <DottedSurface />
+    <div className="page-container py-8">
 
       {/* Header */}
-      <div className="mb-8">
-        <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-2">Hire & Collaborate</p>
-        <h1 className="text-2xl font-bold text-white mb-1">Developer Services</h1>
-        <p className="text-sm text-zinc-500">
+      <div className="page-header">
+        <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-2">Hire & Collaborate</p>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Developer Services</h1>
+        <p className="text-sm text-zinc-500 mt-1">
           Find skilled developers for your project — or list your own services for others to discover.
         </p>
       </div>
 
       {/* Feedback */}
       {success && (
-        <div className="mb-4 px-4 py-3 rounded-xl text-xs font-mono text-emerald-400 border border-emerald-500/25" style={{ background: 'rgba(52,211,153,0.06)' }}>
+        <div className="mb-4 px-4 py-3 rounded-lg text-xs text-emerald-400 border border-emerald-500/25 bg-emerald-500/[0.06]">
           {success}
         </div>
       )}
       {error && (
-        <div className="mb-4 px-4 py-3 rounded-xl text-xs font-mono text-red-400 border border-red-500/20" style={{ background: 'rgba(248,113,113,0.06)' }}>
+        <div className="mb-4 px-4 py-3 rounded-lg text-xs text-red-400 border border-red-500/20 bg-red-500/[0.06] flex items-center justify-between">
           {error}
-          <button onClick={() => setError('')} className="ml-2 opacity-60 hover:opacity-100"><X className="w-3 h-3 inline" /></button>
+          <button onClick={() => setError('')} className="ml-2 opacity-60 hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
         </div>
       )}
 
       {/* Controls */}
-      <div className="border border-white/06 rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center"
-        style={{ background: 'rgba(255,255,255,0.02)' }}>
-        <div className="flex-1 min-w-48 flex items-center gap-2 rounded-xl px-3 py-2 border border-zinc-800 bg-zinc-900/70 focus-within:border-monad-500/50 transition-colors">
-          <Search className="w-4 h-4 text-zinc-600 flex-shrink-0" strokeWidth={1.5} />
-          <input
-            type="text"
-            placeholder="Search services, skills..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="flex-1 bg-transparent text-white text-sm placeholder:text-zinc-600 outline-none"
-          />
-        </div>
+      <div className="card p-4 mb-6">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex-1 min-w-48 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search services, skills..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="input w-full pl-9"
+            />
+          </div>
 
-        {/* Category pills */}
-        <div className="flex gap-1.5 flex-wrap">
-          {CATEGORIES.slice(0, 5).map(cat => (
+          {/* Category pills */}
+          <div className="flex gap-1.5 flex-wrap">
+            {CATEGORIES.slice(0, 5).map(cat => (
+              <button
+                key={cat.value}
+                onClick={() => setCategory(cat.value)}
+                className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+                  category === cat.value
+                    ? 'text-monad-300 bg-monad-500/12 border-monad-500/30 shadow-[0_0_8px_rgba(131,110,249,0.1)]'
+                    : 'text-zinc-500 bg-transparent border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {isAuthenticated && (
             <button
-              key={cat.value}
-              onClick={() => setCategory(cat.value)}
-              className="px-3 py-1.5 text-xs font-mono rounded-lg transition-colors"
-              style={{
-                background: category === cat.value ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.03)',
-                color: category === cat.value ? '#836ef9' : 'rgba(161,161,170,0.5)',
-                border: category === cat.value ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.06)',
-              }}
+              onClick={() => setShowCreate(v => !v)}
+              className="btn-primary text-xs px-4 py-2 flex items-center gap-1.5"
             >
-              {cat.label}
+              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+              List Your Services
             </button>
-          ))}
+          )}
         </div>
-
-        {isAuthenticated && (
-          <button
-            onClick={() => setShowCreate(v => !v)}
-            className="flex items-center gap-1.5 text-xs font-mono px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-            List Your Services
-          </button>
-        )}
       </div>
 
       {/* More categories */}
@@ -242,12 +240,11 @@ export default function ServicesPage() {
           <button
             key={cat.value}
             onClick={() => setCategory(cat.value)}
-            className="px-3 py-1.5 text-xs font-mono rounded-lg transition-colors"
-            style={{
-              background: category === cat.value ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.02)',
-              color: category === cat.value ? '#836ef9' : 'rgba(161,161,170,0.4)',
-              border: category === cat.value ? '1px solid rgba(131,110,249,0.3)' : '1px solid rgba(255,255,255,0.05)',
-            }}
+            className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 ${
+              category === cat.value
+                ? 'text-monad-300 bg-monad-500/12 border-monad-500/30 shadow-[0_0_8px_rgba(131,110,249,0.1)]'
+                : 'text-zinc-500 bg-transparent border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
+            }`}
           >
             {cat.label}
           </button>
@@ -256,105 +253,56 @@ export default function ServicesPage() {
 
       {/* Create Service Form */}
       {showCreate && (
-        <div className="border border-monad-500/20 rounded-2xl p-6 mb-8" style={{ background: 'rgba(131,110,249,0.03)' }}>
+        <div className="card-elevated p-6 mb-8" style={{ borderColor: 'rgba(131,110,249,0.2)' }}>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-monad-300 font-mono">Create Service Listing</h2>
-            <button onClick={() => setShowCreate(false)} className="text-zinc-600 hover:text-zinc-400 transition-colors">
+            <h2 className="text-sm font-semibold text-white">Create Service Listing</h2>
+            <button onClick={() => setShowCreate(false)} className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 rounded-lg hover:bg-white/5">
               <X className="w-4 h-4" />
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Title */}
             <div className="md:col-span-2">
               <label className="text-xs text-zinc-500 block mb-1.5">Service Title *</label>
-              <input
-                type="text"
-                placeholder="e.g. I will build a custom AI trading bot for Solana"
-                value={form.title}
-                onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                maxLength={120}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
-              />
+              <input type="text" placeholder="e.g. I will build a custom AI trading bot for Solana" value={form.title}
+                onChange={e => setForm(f => ({ ...f, title: e.target.value }))} maxLength={120} className="input" />
             </div>
-
-            {/* Category */}
             <div>
               <label className="text-xs text-zinc-500 block mb-1.5">Category *</label>
-              <select
-                value={form.category}
-                onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white outline-none focus:border-monad-500/50 transition-colors appearance-none cursor-pointer"
-              >
+              <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
+                className="input appearance-none cursor-pointer">
                 {CATEGORIES.filter(c => c.value).map(cat => (
                   <option key={cat.value} value={cat.value}>{cat.label}</option>
                 ))}
               </select>
             </div>
-
-            {/* Delivery */}
             <div>
               <label className="text-xs text-zinc-500 block mb-1.5">Estimated Delivery (days)</label>
-              <input
-                type="number"
-                min="1"
-                max="365"
-                placeholder="e.g. 7"
-                value={form.deliveryDays}
-                onChange={e => setForm(f => ({ ...f, deliveryDays: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
-              />
+              <input type="number" min="1" max="365" placeholder="e.g. 7" value={form.deliveryDays}
+                onChange={e => setForm(f => ({ ...f, deliveryDays: e.target.value }))} className="input" />
             </div>
-
-            {/* Budget range */}
             <div>
               <label className="text-xs text-zinc-500 block mb-1.5">Min Budget (USD)</label>
-              <input
-                type="number"
-                min="0"
-                placeholder="e.g. 100"
-                value={form.minBudget}
-                onChange={e => setForm(f => ({ ...f, minBudget: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
-              />
+              <input type="number" min="0" placeholder="e.g. 100" value={form.minBudget}
+                onChange={e => setForm(f => ({ ...f, minBudget: e.target.value }))} className="input" />
             </div>
-
             <div>
               <label className="text-xs text-zinc-500 block mb-1.5">Max Budget (USD)</label>
-              <input
-                type="number"
-                min="0"
-                placeholder="e.g. 1000"
-                value={form.maxBudget}
-                onChange={e => setForm(f => ({ ...f, maxBudget: e.target.value }))}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
-              />
+              <input type="number" min="0" placeholder="e.g. 1000" value={form.maxBudget}
+                onChange={e => setForm(f => ({ ...f, maxBudget: e.target.value }))} className="input" />
             </div>
-
-            {/* Skills */}
             <div className="md:col-span-2">
               <label className="text-xs text-zinc-500 block mb-1.5">Skills & Technologies</label>
               <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  placeholder="e.g. TypeScript, Solidity, Next.js..."
-                  value={form.skillInput}
+                <input type="text" placeholder="e.g. TypeScript, Solidity, Next.js..." value={form.skillInput}
                   onChange={e => setForm(f => ({ ...f, skillInput: e.target.value }))}
-                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }}
-                  className="flex-1 rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
-                />
-                <button
-                  onClick={addSkill}
-                  className="px-4 py-2 rounded-xl text-xs font-mono border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors"
-                >
-                  Add
-                </button>
+                  onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(); } }} className="input flex-1" />
+                <button onClick={addSkill} className="btn-secondary text-xs px-4">Add</button>
               </div>
               {form.skills.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {form.skills.map(s => (
-                    <span key={s} className="flex items-center gap-1 px-2.5 py-1 text-xs font-mono rounded-lg"
-                      style={{ background: 'rgba(131,110,249,0.1)', color: '#836ef9', border: '1px solid rgba(131,110,249,0.2)' }}>
+                    <span key={s} className="badge flex items-center gap-1.5">
                       {s}
                       <button onClick={() => removeSkill(s)} className="opacity-60 hover:opacity-100 transition-opacity">
                         <X className="w-2.5 h-2.5" />
@@ -364,35 +312,18 @@ export default function ServicesPage() {
                 </div>
               )}
             </div>
-
-            {/* Description */}
             <div className="md:col-span-2">
               <label className="text-xs text-zinc-500 block mb-1.5">Description *</label>
-              <textarea
-                placeholder="Describe your service in detail. What do you offer? What technologies do you use? What's included? What do you need from the client?"
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                maxLength={3000}
-                rows={5}
-                className="w-full rounded-xl px-3 py-2.5 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors resize-none"
-              />
-              <div className="text-right text-xs text-zinc-700 mt-1">{form.description.length}/3000</div>
+              <textarea placeholder="Describe your service in detail..." value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))} maxLength={3000} rows={5}
+                className="input resize-none" />
+              <div className="text-right text-xs text-zinc-600 mt-1">{form.description.length}/3000</div>
             </div>
           </div>
 
           <div className="flex gap-3 mt-4 justify-end">
-            <button
-              onClick={() => setShowCreate(false)}
-              className="px-4 py-2.5 rounded-xl text-xs font-mono text-zinc-500 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300 transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={createService}
-              disabled={creating}
-              className="px-6 py-2.5 rounded-xl text-xs font-mono text-white transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)' }}
-            >
+            <button onClick={() => setShowCreate(false)} className="btn-secondary text-xs px-4 py-2">Cancel</button>
+            <button onClick={createService} disabled={creating} className="btn-primary text-xs px-6 py-2 disabled:opacity-50">
               {creating ? 'Publishing...' : 'Publish Service'}
             </button>
           </div>
@@ -401,58 +332,52 @@ export default function ServicesPage() {
 
       {/* Services Grid */}
       {loading ? (
-        <div className="text-center py-20">
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton h-64 rounded-xl" />)}
         </div>
       ) : services.length === 0 ? (
-        <div className="text-center py-20 border border-dashed border-white/06 rounded-2xl">
-          <Briefcase className="w-8 h-8 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-          <p className="text-zinc-600 font-mono text-sm mb-1">No services found.</p>
-          <p className="text-zinc-700 text-xs">
-            {isAuthenticated ? 'Be the first to list your services.' : 'Sign in to list your services.'}
+        <div className="empty-state">
+          <div className="empty-state-icon mx-auto">
+            <Briefcase className="w-6 h-6 text-monad-400" strokeWidth={1.5} />
+          </div>
+          <h3 className="text-base font-semibold text-white mb-2">No services found</h3>
+          <p className="text-sm text-zinc-500 mb-1 max-w-sm mx-auto">
+            {isAuthenticated
+              ? 'Be the first to list your developer services and get discovered by the community.'
+              : 'Sign in to list your services and start collaborating with other developers.'}
           </p>
-          {isAuthenticated && (
-            <button
-              onClick={() => setShowCreate(true)}
-              className="mt-4 px-4 py-2 rounded-xl text-xs font-mono border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors"
-            >
-              + List Your Services
+          {isAuthenticated ? (
+            <button onClick={() => setShowCreate(true)} className="btn-primary text-sm px-5 py-2 mt-5 inline-flex items-center gap-2">
+              <Plus className="w-4 h-4" /> List Your Services
             </button>
+          ) : (
+            <Link href="/auth" className="btn-primary text-sm px-5 py-2 mt-5 inline-flex items-center gap-2">
+              Sign in to get started
+            </Link>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {services.map(service => {
             const catColor = CATEGORY_COLORS[service.category] || '#71717a';
             const isExpanded = expandedCard === service.id;
 
             return (
-              <div
-                key={service.id}
-                className="flex flex-col rounded-2xl overflow-hidden transition-all duration-200 hover:translate-y-[-1px]"
-                style={{
-                  background: '#0e0e12',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  boxShadow: '0 2px 20px rgba(0,0,0,0.3)',
-                }}
-              >
+              <div key={service.id} className="card-elevated flex flex-col overflow-hidden p-0">
                 {/* Category accent bar */}
-                <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${catColor}, transparent)` }} />
+                <div className="h-[2px] w-full" style={{ background: `linear-gradient(90deg, ${catColor}, transparent 80%)` }} />
 
                 <div className="p-5 flex-1 flex flex-col">
                   {/* Header */}
                   <div className="flex items-start gap-3 mb-3">
-                    {/* Avatar */}
-                    <Link href={`/u/${service.user.username}`} className="flex-shrink-0">
+                    <Link href={`/u/${service.user.username}`} className="flex-shrink-0 group">
                       {service.user.avatarUrl ? (
-                        <img
-                          src={service.user.avatarUrl}
-                          alt={service.user.username || ''}
-                          className="w-10 h-10 rounded-xl object-cover border border-white/08"
-                        />
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={service.user.avatarUrl} alt={service.user.username || ''}
+                          className="w-10 h-10 rounded-xl object-cover border border-zinc-800 group-hover:border-monad-500/30 transition-colors" />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm"
-                          style={{ background: `${catColor}18`, border: `1px solid ${catColor}30`, color: catColor }}>
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-colors group-hover:border-monad-500/30"
+                          style={{ background: `${catColor}12`, border: `1px solid ${catColor}20`, color: catColor }}>
                           {(service.user.displayName || service.user.username || 'U')[0].toUpperCase()}
                         </div>
                       )}
@@ -460,7 +385,7 @@ export default function ServicesPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <Link href={`/u/${service.user.username}`} className="text-xs text-zinc-400 hover:text-monad-400 transition-colors truncate">
+                        <Link href={`/u/${service.user.username}`} className="text-xs text-zinc-400 hover:text-monad-400 transition-colors truncate font-medium">
                           {service.user.displayName || service.user.username}
                         </Link>
                         <ReputationBadge points={service.user.reputationPoints} size="sm" />
@@ -470,31 +395,25 @@ export default function ServicesPage() {
                       )}
                     </div>
 
-                    {/* Category badge */}
-                    <span className="text-xs font-mono px-1.5 py-0.5 rounded-lg flex-shrink-0"
-                      style={{ background: `${catColor}12`, color: catColor, border: `1px solid ${catColor}25`, fontSize: '0.6rem' }}>
+                    <span className="badge-secondary text-[10px] flex-shrink-0" style={{ color: catColor }}>
                       {CATEGORY_LABEL[service.category] || service.category}
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-white mb-2 leading-snug">
-                    {service.title}
-                  </h3>
+                  <h3 className="text-sm font-semibold text-white mb-2 leading-snug">{service.title}</h3>
 
                   {/* Description */}
-                  <p className="text-xs text-zinc-500 leading-relaxed mb-3"
+                  <p className="text-xs text-zinc-400 leading-relaxed mb-3"
                     style={{ display: '-webkit-box', WebkitLineClamp: isExpanded ? undefined : 3, WebkitBoxOrient: 'vertical', overflow: isExpanded ? 'visible' : 'hidden' } as React.CSSProperties}>
                     {service.description}
                   </p>
 
                   {service.description.length > 150 && (
-                    <button
-                      onClick={() => setExpandedCard(isExpanded ? null : service.id)}
-                      className="flex items-center gap-1 text-xs text-monad-400/60 hover:text-monad-400 transition-colors mb-3 self-start"
-                    >
+                    <button onClick={() => setExpandedCard(isExpanded ? null : service.id)}
+                      className="flex items-center gap-1 text-xs text-monad-400/70 hover:text-monad-400 transition-colors mb-3 self-start">
                       {isExpanded ? 'Show less' : 'Read more'}
-                      <ChevronDown className={`w-3 h-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
                     </button>
                   )}
 
@@ -502,55 +421,41 @@ export default function ServicesPage() {
                   {service.skills.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-3">
                       {service.skills.slice(0, 5).map(s => (
-                        <span key={s} className="text-xs px-1.5 py-0.5 rounded font-mono"
-                          style={{ background: 'rgba(255,255,255,0.04)', color: 'rgba(161,161,170,0.6)', border: '1px solid rgba(255,255,255,0.07)', fontSize: '0.65rem' }}>
-                          {s}
-                        </span>
+                        <span key={s} className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">{s}</span>
                       ))}
                       {service.skills.length > 5 && (
-                        <span className="text-xs px-1.5 py-0.5 rounded font-mono"
-                          style={{ color: 'rgba(161,161,170,0.4)', fontSize: '0.65rem' }}>
-                          +{service.skills.length - 5} more
-                        </span>
+                        <span className="text-[10px] px-1.5 py-0.5 text-zinc-600">+{service.skills.length - 5}</span>
                       )}
                     </div>
                   )}
 
-                  {/* Meta: budget + delivery */}
-                  <div className="flex items-center gap-3 text-xs font-mono mt-auto pt-3 border-t border-white/05">
-                    <span className="flex items-center gap-1 text-emerald-400/80">
+                  {/* Meta */}
+                  <div className="flex items-center gap-4 text-xs mt-auto pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                    <span className="flex items-center gap-1 text-emerald-400">
                       <DollarSign className="w-3 h-3" strokeWidth={1.5} />
                       {formatBudget(service)}
                     </span>
                     {service.deliveryDays && (
                       <span className="flex items-center gap-1 text-zinc-500">
                         <Clock className="w-3 h-3" strokeWidth={1.5} />
-                        {service.deliveryDays}d delivery
+                        {service.deliveryDays}d
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Footer: Contact CTA */}
-                <div className="px-5 pb-4">
+                {/* Footer */}
+                <div className="px-5 pb-5">
                   {isAuthenticated && service.user.username !== user?.username ? (
-                    <Link
-                      href={`/dm?user=${service.user.username}&context=service&serviceId=${service.id}`}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-mono text-white transition-all hover:opacity-90"
-                      style={{ background: 'linear-gradient(135deg, #836EF9, #6b4fe0)' }}
-                    >
+                    <Link href={`/dm?user=${service.user.username}&context=service&serviceId=${service.id}`}
+                      className="btn-primary w-full justify-center gap-2 text-xs py-2.5">
                       <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
                       Contact Developer
                     </Link>
                   ) : isAuthenticated && service.user.username === user?.username ? (
-                    <div className="flex items-center justify-center py-2 text-xs font-mono text-zinc-600 border border-dashed border-white/06 rounded-xl">
-                      Your listing
-                    </div>
+                    <div className="card text-center py-2 text-xs text-zinc-600">Your listing</div>
                   ) : (
-                    <Link
-                      href="/auth"
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-mono border border-monad-500/30 text-monad-400 hover:bg-monad-500/10 transition-colors"
-                    >
+                    <Link href="/auth" className="btn-secondary w-full justify-center gap-2 text-xs py-2.5">
                       Sign in to contact
                     </Link>
                   )}
@@ -562,22 +467,28 @@ export default function ServicesPage() {
       )}
 
       {/* How it works */}
-      <div className="mt-16 border border-white/06 rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.01)' }}>
-        <h2 className="text-sm font-semibold text-white mb-4 font-mono">How Hire & Collaborate Works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-16">
+        <h2 className="text-base font-semibold text-white mb-5">How Hire & Collaborate Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
-            { step: '01', title: 'Browse Services', desc: 'Explore services from verified developers. Filter by category, skills, or budget.' },
-            { step: '02', title: 'Contact via DM', desc: 'Send a direct message to the developer. Discuss your project scope, timeline and requirements.' },
-            { step: '03', title: 'Collaborate & Build', desc: 'Work together using the platform\'s tools. Build reputation through successful collaborations.' },
-          ].map(item => (
-            <div key={item.step} className="flex gap-3">
-              <span className="text-2xl font-bold text-monad-400/20 font-mono flex-shrink-0">{item.step}</span>
-              <div>
-                <h3 className="text-xs font-semibold text-white mb-1">{item.title}</h3>
-                <p className="text-xs text-zinc-600 leading-relaxed">{item.desc}</p>
+            { step: '01', title: 'Browse Services', desc: 'Explore services from verified developers. Filter by category, skills, or budget.', icon: Search },
+            { step: '02', title: 'Contact via DM', desc: 'Send a direct message to the developer. Discuss your project scope, timeline and requirements.', icon: MessageCircle },
+            { step: '03', title: 'Collaborate & Build', desc: 'Work together using the platform\'s tools. Build reputation through successful collaborations.', icon: Star },
+          ].map(item => {
+            const Icon = item.icon;
+            return (
+              <div key={item.step} className="step-card">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="step-number">{item.step}</div>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                    <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
+                  </div>
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
