@@ -8,7 +8,7 @@ import {
   Users, Briefcase, BookOpen, User, Key, Settings, LogOut,
   Trophy, Mail, Wallet, UserPlus, Globe, TrendingUp,
 } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BoltyBrandBadge } from '@/components/ui/BoltyLogo';
 import type { User as UserType } from '@/lib/auth/AuthProvider';
 
 interface SidebarProps {
@@ -76,11 +76,9 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
       }}
     >
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: 'var(--border)' }}>
-        <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
-          <BoltyLogo size={32} color="#836EF9" className="transition-transform group-hover:scale-105" />
-          <span className="text-white font-semibold text-[15px] tracking-tight">Bolty</span>
-          <span className="badge text-[10px] px-1.5 py-0">beta</span>
+      <div className="h-16 flex items-center px-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <Link href="/" className="group transition-transform hover:scale-[1.02]" onClick={onClose}>
+          <BoltyBrandBadge />
         </Link>
       </div>
 

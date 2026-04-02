@@ -9,7 +9,7 @@ import {
   Search, Sun, Moon, Bell, ChevronDown, LogOut, User, Settings,
   Key, ShoppingBag, Menu, X,
 } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+
 
 interface NavbarProps {
   menuOpen: boolean;
