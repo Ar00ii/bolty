@@ -76,8 +76,8 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
       }}
     >
       {/* Logo */}
-      <div className="h-16 flex items-center px-3 border-b" style={{ borderColor: 'var(--border)' }}>
-        <Link href="/" className="group transition-transform hover:scale-[1.02]" onClick={onClose}>
+      <div className="flex items-center justify-center py-4 px-3 border-b" style={{ borderColor: 'var(--border)' }}>
+        <Link href="/" className="transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]" onClick={onClose}>
           <BoltyBrandBadge />
         </Link>
       </div>
