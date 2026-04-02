@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BoltyBrandBadge } from '@/components/ui/BoltyLogo';
 import { Navbar } from '@/components/layout/Navbar';
 import {
   Bot, Code2, Users, GitBranch, ArrowRight, Shield,
@@ -114,9 +114,8 @@ export default function HomePage() {
       {/* Homepage Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(10,10,11,0.9)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
-          <Link href="/" className="flex items-center gap-2.5">
-            <BoltyLogo size={32} color="#836EF9" />
-            <span className="text-white font-semibold text-[15px] tracking-tight">Bolty</span>
+          <Link href="/" className="transition-transform hover:scale-[1.02]">
+            <BoltyBrandBadge />
           </Link>
           <div className="flex-1" />
           <div className="hidden md:flex items-center gap-6 mr-6">
