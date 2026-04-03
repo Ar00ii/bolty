@@ -1,15 +1,11 @@
-import React from 'react';
+'use client';
 
-interface BoltyLogoProps {
-  className?: string;
-  size?: number;
-  style?: React.CSSProperties;
-  /** @deprecated – kept for backward compat, has no effect */
-  color?: string;
-}
+import React, { useEffect, useState } from 'react';
 
-/** SVG logo — lightning bolt inside rounded square, always crisp */
-function BoltyLogoSVG({ size = 40, className = '' }: { size?: number; className?: string }) {
+/** SVG logo — lightning bolt inside rounded square */
+export function BoltyLogoSVG({ size = 40, className = '', color = '#836EF9', opacity = 1 }: {
+  size?: number; className?: string; color?: string; opacity?: number;
+}) {
   return (
     <svg
       width={size}
@@ -18,23 +14,29 @@ function BoltyLogoSVG({ size = 40, className = '' }: { size?: number; className?
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
+      style={{ opacity }}
     >
-      {/* Rounded square outline */}
       <rect x="8" y="8" width="84" height="84" rx="22" ry="22"
-        stroke="#836EF9" strokeWidth="5" fill="none" />
-      {/* Lightning bolt */}
+        stroke={color} strokeWidth="5" fill="none" />
       <path
         d="M56 16 L36 52 L48 52 L42 84 L68 44 L54 44 L62 16 Z"
-        fill="#836EF9"
+        fill={color}
       />
     </svg>
   );
 }
 
-export function BoltyLogo({ className = '', size = 40, style }: BoltyLogoProps) {
+interface BoltyLogoProps {
+  className?: string;
+  size?: number;
+  style?: React.CSSProperties;
+  color?: string;
+}
+
+export function BoltyLogo({ className = '', size = 40, style, color }: BoltyLogoProps) {
   return (
     <div className={className} style={{ width: size, height: size, display: 'inline-flex', ...style }}>
-      <BoltyLogoSVG size={size} />
+      <BoltyLogoSVG size={size} color={color} />
     </div>
   );
 }
@@ -52,36 +54,51 @@ export function BoltyLogoGlow({ size = 40 }: { size?: number }) {
   );
 }
 
-/** Badge-style logo — icon + BoltyNetwork text */
-export function BoltyBrandBadge({ className = '' }: { className?: string }) {
+/** Floating background logos that fade in/out at random positions */
+export function BoltyFloatingLogos() {
+  const [logos, setLogos] = useState<Array<{
+    id: number; x: number; y: number; size: number; delay: number; duration: number;
+  }>>([]);
+
+  useEffect(() => {
+    const items = Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      x: 5 + Math.random() * 85,
+      y: 5 + Math.random() * 85,
+      size: 40 + Math.random() * 60,
+      delay: Math.random() * 6,
+      duration: 4 + Math.random() * 4,
+    }));
+    setLogos(items);
+  }, []);
+
+  if (logos.length === 0) return null;
+
   return (
-    <div className={`inline-flex items-center gap-3 px-4 py-2.5 rounded-xl ${className}`}
-      style={{
-        background: 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(107,79,224,0.05) 100%)',
-        border: '1px solid rgba(131,110,249,0.3)',
-        boxShadow: '0 0 20px rgba(131,110,249,0.1), inset 0 1px 0 rgba(255,255,255,0.05)',
-      }}
-    >
-      {/* Logo icon with glow */}
-      <div className="relative flex-shrink-0">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+      {logos.map((l) => (
         <div
-          className="absolute -inset-1.5 rounded-xl blur-md opacity-40"
-          style={{ background: 'rgba(131,110,249,0.7)' }}
-        />
-        <BoltyLogoSVG size={32} className="relative z-10 drop-shadow-[0_0_8px_rgba(131,110,249,0.5)]" />
-      </div>
-      {/* Brand text */}
-      <span
-        className="text-[15px] font-bold tracking-tight"
-        style={{
-          background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          filter: 'drop-shadow(0 0 8px rgba(131,110,249,0.3))',
-        }}
-      >
-        BoltyNetwork
-      </span>
+          key={l.id}
+          className="absolute"
+          style={{
+            left: `${l.x}%`,
+            top: `${l.y}%`,
+            animation: `bolty-float-fade ${l.duration}s ease-in-out ${l.delay}s infinite`,
+            opacity: 0,
+          }}
+        >
+          <BoltyLogoSVG
+            size={l.size}
+            color="rgba(131,110,249,0.06)"
+          />
+        </div>
+      ))}
+      <style>{`
+        @keyframes bolty-float-fade {
+          0%, 100% { opacity: 0; transform: translateY(8px) scale(0.95); }
+          30%, 70% { opacity: 1; transform: translateY(-4px) scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
