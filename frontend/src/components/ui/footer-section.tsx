@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BoltyBrandBadge } from '@/components/ui/BoltyLogo';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 
 interface FooterLink {
   title: string;
@@ -61,8 +61,13 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
-            <div className="mb-3">
-              <BoltyBrandBadge />
+            <div className="flex items-center gap-2.5 mb-3">
+              <BoltyLogoSVG size={24} />
+              <span className="text-sm font-bold tracking-tight" style={{
+                background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>BoltyNetwork</span>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
               The developer platform for publishing code, deploying AI agents, and earning from your work.

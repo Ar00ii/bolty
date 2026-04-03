@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyBrandBadge } from '@/components/ui/BoltyLogo';
+import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
 import { Navbar } from '@/components/layout/Navbar';
 import {
   Bot, Code2, Users, GitBranch, ArrowRight, Shield,
@@ -114,8 +114,13 @@ export default function HomePage() {
       {/* Homepage Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(10,10,11,0.9)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
-          <Link href="/" className="transition-transform hover:scale-[1.02]">
-            <BoltyBrandBadge />
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <BoltyLogoSVG size={28} className="transition-transform duration-200 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(131,110,249,0.4)]" />
+            <span className="text-[15px] font-bold tracking-tight" style={{
+              background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>BoltyNetwork</span>
           </Link>
           <div className="flex-1" />
           <div className="hidden md:flex items-center gap-6 mr-6">
@@ -135,8 +140,9 @@ export default function HomePage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+        <BoltyFloatingLogos />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-monad-500/20 bg-monad-500/5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
             <span className="text-xs font-medium text-monad-400">Now in Beta — Open for developers</span>
