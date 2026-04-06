@@ -64,7 +64,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
     <nav
       className="fixed top-0 left-0 right-0 z-40 transition-all duration-200 lg:left-[var(--sidebar-width)]"
       style={{
-        background: scrolled ? 'color-mix(in srgb, var(--bg) 95%, transparent)' : 'var(--bg)',
+        background: 'var(--bg)',
         backdropFilter: scrolled ? 'blur(12px)' : 'none',
         borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'transparent'}`,
       }}

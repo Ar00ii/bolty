@@ -112,7 +112,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Homepage Navbar */}
-      <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'color-mix(in srgb, var(--bg) 90%, transparent)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
+      <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', opacity: 1, backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
           <Link href="/" className="flex items-center gap-2.5 group">
             <BoltyLogoSVG size={28} className="transition-transform duration-200 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(131,110,249,0.4)]" />
