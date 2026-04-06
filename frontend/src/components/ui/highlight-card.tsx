@@ -26,7 +26,7 @@ export function HighlightCard({
     <Card
       className={cn(
         'group relative overflow-hidden border transition-all duration-200 ease-out',
-        'border-[var(--border)] bg-[var(--bg-card)]',
+        'border-[var(--border)] bg-[var(--bg-card)] text-[var(--text)] shadow-none',
         'hover:-translate-y-[3px] hover:shadow-lg',
         className,
       )}
