@@ -337,13 +337,6 @@ body {
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  :root[data-theme='light'] .hero-gradient {
-    background: linear-gradient(135deg, #5b3fd4 0%, #6b4fe0 50%, #836EF9 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
   /* ── Utility text/bg/border classes ── */
   .text-terminal-muted    { color: var(--text-muted); }
   .text-terminal-text     { color: var(--text); }
@@ -542,114 +535,115 @@ body {
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Light mode overrides for hardcoded dark colors in components
+   (Flattened selectors — no CSS nesting, PostCSS/Tailwind compatible)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-:root[data-theme='light'] {
-  /* ── Fix hardcoded text-white on content elements ── */
-  .page-header h1,
-  .step-card h3,
-  .feature-card h3,
-  h1.text-white,
-  h2.text-white,
-  h3.text-white,
-  .card-elevated .text-white,
-  .card-interactive .text-white,
-  .step-card .text-white,
-  .feature-card .text-white,
-  .stat-card .text-white,
-  .empty-state .text-white,
-  .security-panel .text-white { color: var(--text) !important; }
-
-  /* Fix zinc text colors used as body/secondary text */
-  .text-zinc-200,
-  .text-zinc-300 { color: var(--text-secondary) !important; }
-  .text-zinc-400,
-  .text-zinc-500 { color: var(--text-muted) !important; }
-
-  /* Fix hardcoded dark backgrounds */
-  .bg-zinc-800,
-  .bg-zinc-800\/30,
-  .bg-zinc-800\/50,
-  .bg-zinc-800\/80,
-  .bg-zinc-900,
-  .bg-zinc-900\/40,
-  .bg-zinc-900\/60,
-  .bg-zinc-900\/70 {
-    background-color: var(--bg-elevated) !important;
-  }
-  .bg-black\/40 { background-color: var(--bg-card2) !important; }
-
-  /* Fix hardcoded dark borders */
-  .border-zinc-600\/30,
-  .border-zinc-700,
-  .border-zinc-700\/30,
-  .border-zinc-700\/50,
-  .border-zinc-800,
-  .border-zinc-800\/80 {
-    border-color: var(--border) !important;
-  }
-
-  /* Fix hover states */
-  .hover\:border-zinc-600:hover,
-  .hover\:border-zinc-700:hover {
-    border-color: var(--border-hover) !important;
-  }
-  .hover\:text-white:hover {
-    color: var(--text) !important;
-  }
-
-  /* Fix cards that use rgba(0,0,0) shadows — lighter in light mode */
-  .card-interactive:hover { box-shadow: var(--card-hover-shadow); }
-  .card-elevated:hover    { box-shadow: var(--card-hover-shadow); }
-
-  /* Fix placeholder colors */
-  .placeholder\:text-zinc-600::placeholder,
-  .placeholder\:text-zinc-700::placeholder {
-    color: var(--text-muted) !important;
-    opacity: 0.6;
-  }
-
-  /* Navbar glass effect for light */
-  .nav-glass {
-    background: rgba(248,249,250,0.9) !important;
-    border-color: var(--border) !important;
-  }
-
-  /* Modal overlays stay dark in both modes but slightly lighter in light */
-  /* Inputs that use text-white */
-  input.text-white,
-  textarea.text-white,
-  select.text-white {
-    color: var(--text) !important;
-  }
-
-  /* Code blocks */
-  code.text-white {
-    color: var(--text) !important;
-    background: var(--bg-elevated) !important;
-  }
-
-  /* Progress bars / pills that use bg-zinc-800 as empty state */
-  .bg-zinc-800.rounded-full,
-  .bg-zinc-800.h-1 {
-    background-color: var(--border) !important;
-  }
-
-  /* Fix bg-white/5 hover states — invisible on white bg */
-  .hover\:bg-white\/5:hover,
-  .hover\:bg-white\/\[0\.04\]:hover,
-  .hover\:bg-white\/\[0\.08\]:hover,
-  .bg-white\/\[0\.08\] {
-    background-color: var(--bg-elevated) !important;
-  }
-
-  /* Fix the Navbar dropdown */
-  [class*="profileOpen"] > div,
-  .rounded-xl[style*="rgba(10,10"] {
-    background: var(--bg-card) !important;
-    border-color: var(--border) !important;
-  }
+/* Hero gradient — deeper purple for light backgrounds */
+:root[data-theme='light'] .hero-gradient {
+  background: linear-gradient(135deg, #5b3fd4 0%, #6b4fe0 50%, #836EF9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+
+/* Fix hardcoded text-white on content headings */
+:root[data-theme='light'] .page-header h1,
+:root[data-theme='light'] .step-card h3,
+:root[data-theme='light'] .feature-card h3,
+:root[data-theme='light'] h1.text-white,
+:root[data-theme='light'] h2.text-white,
+:root[data-theme='light'] h3.text-white,
+:root[data-theme='light'] .card-elevated .text-white,
+:root[data-theme='light'] .card-interactive .text-white,
+:root[data-theme='light'] .step-card .text-white,
+:root[data-theme='light'] .feature-card .text-white,
+:root[data-theme='light'] .stat-card .text-white,
+:root[data-theme='light'] .empty-state .text-white,
+:root[data-theme='light'] .security-panel .text-white { color: var(--text) !important; }
+
+/* Fix zinc text colors used as body/secondary text */
+:root[data-theme='light'] .text-zinc-200,
+:root[data-theme='light'] .text-zinc-300 { color: var(--text-secondary) !important; }
+:root[data-theme='light'] .text-zinc-400,
+:root[data-theme='light'] .text-zinc-500 { color: var(--text-muted) !important; }
+
+/* Fix hardcoded dark backgrounds */
+:root[data-theme='light'] .bg-zinc-800,
+:root[data-theme='light'] .bg-zinc-800\/30,
+:root[data-theme='light'] .bg-zinc-800\/50,
+:root[data-theme='light'] .bg-zinc-800\/80,
+:root[data-theme='light'] .bg-zinc-900,
+:root[data-theme='light'] .bg-zinc-900\/40,
+:root[data-theme='light'] .bg-zinc-900\/60,
+:root[data-theme='light'] .bg-zinc-900\/70 {
+  background-color: var(--bg-elevated) !important;
+}
+:root[data-theme='light'] .bg-black\/40 { background-color: var(--bg-card2) !important; }
+
+/* Fix hardcoded dark borders */
+:root[data-theme='light'] .border-zinc-600\/30,
+:root[data-theme='light'] .border-zinc-700,
+:root[data-theme='light'] .border-zinc-700\/30,
+:root[data-theme='light'] .border-zinc-700\/50,
+:root[data-theme='light'] .border-zinc-800,
+:root[data-theme='light'] .border-zinc-800\/80 {
+  border-color: var(--border) !important;
+}
+
+/* Fix hover states */
+:root[data-theme='light'] .hover\:border-zinc-600:hover,
+:root[data-theme='light'] .hover\:border-zinc-700:hover {
+  border-color: var(--border-hover) !important;
+}
+:root[data-theme='light'] .hover\:text-white:hover {
+  color: var(--text) !important;
+}
+
+/* Fix cards — lighter shadows in light mode */
+:root[data-theme='light'] .card-interactive:hover { box-shadow: var(--card-hover-shadow); }
+:root[data-theme='light'] .card-elevated:hover    { box-shadow: var(--card-hover-shadow); }
+
+/* Fix placeholder colors */
+:root[data-theme='light'] .placeholder\:text-zinc-600::placeholder,
+:root[data-theme='light'] .placeholder\:text-zinc-700::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.6;
+}
+
+/* Navbar glass effect for light */
+:root[data-theme='light'] .nav-glass {
+  background: rgba(248,249,250,0.9) !important;
+  border-color: var(--border) !important;
+}
+
+/* Inputs that use text-white */
+:root[data-theme='light'] input.text-white,
+:root[data-theme='light'] textarea.text-white,
+:root[data-theme='light'] select.text-white {
+  color: var(--text) !important;
+}
+
+/* Code blocks */
+:root[data-theme='light'] code.text-white {
+  color: var(--text) !important;
+  background: var(--bg-elevated) !important;
+}
+
+/* Progress bars that use bg-zinc-800 as empty state */
+:root[data-theme='light'] .bg-zinc-800.rounded-full,
+:root[data-theme='light'] .bg-zinc-800.h-1 {
+  background-color: var(--border) !important;
+}
+
+/* Fix bg-white/5 hover states — invisible on white bg */
+:root[data-theme='light'] .hover\:bg-white\/5:hover,
+:root[data-theme='light'] .hover\:bg-white\/\[0\.04\]:hover,
+:root[data-theme='light'] .hover\:bg-white\/\[0\.08\]:hover,
+:root[data-theme='light'] .bg-white\/\[0\.08\] {
+  background-color: var(--bg-elevated) !important;
+}
+
+/* Selection in light mode — see also line ~86 */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Hero background grid
