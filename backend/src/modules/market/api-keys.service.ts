@@ -64,6 +64,19 @@ export class ApiKeysService {
   }
 
   /**
+   * Delete an API key directly (no verification, for users without email)
+   */
+  async deleteApiKey(keyId: string, userId: string) {
+    await this.prisma.userApiKey.deleteMany({
+      where: {
+        id: keyId,
+        userId,
+      },
+    });
+    return { success: true, message: 'API key revoked successfully' };
+  }
+
+  /**
    * Request a verification code to delete an API key
    */
   async requestDeleteVerification(userId: string, keyId: string, userEmail: string) {

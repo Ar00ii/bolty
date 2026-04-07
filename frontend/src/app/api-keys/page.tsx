@@ -91,19 +91,24 @@ export default function ApiKeysPage() {
     setDeletingId(id);
     setError('');
     try {
-      // Step 1: Request verification code
-      await api.post(`/market/api-keys/${id}/request-delete-verification`, {});
-
-      // Step 2: Prompt user for code
-      const code = prompt('A verification code has been sent to your email. Enter it below:');
-      if (!code) {
-        setError('Verification cancelled');
-        setDeletingId(null);
-        return;
+      // Try verification flow first (for users with email)
+      try {
+        await api.post(`/market/api-keys/${id}/request-delete-verification`, {});
+        const code = prompt('A verification code has been sent to your email. Enter it below:');
+        if (!code) {
+          setError('Verification cancelled');
+          setDeletingId(null);
+          return;
+        }
+        await api.delete(`/market/api-keys/${id}`, { code });
+      } catch (verifyErr) {
+        // If verification fails (no email), delete directly
+        if (verifyErr instanceof ApiError && verifyErr.status === 400) {
+          await api.delete(`/market/api-keys/${id}`);
+        } else {
+          throw verifyErr;
+        }
       }
-
-      // Step 3: Verify and delete
-      await api.delete(`/market/api-keys/${id}`, { code });
       setKeys(prev => prev.filter(k => k.id !== id));
       if (newlyCreatedKey) setNewlyCreatedKey(null);
     } catch (err) {
