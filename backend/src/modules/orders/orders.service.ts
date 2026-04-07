@@ -81,29 +81,55 @@ export class OrdersService {
     });
   }
 
-  /** Buyer marks order as completed */
-  async markCompleted(orderId: string, userId: string) {
+  /**
+   * Buyer marks order as completed.
+   * If escrow is active, the frontend must call the escrow contract's release()
+   * function BEFORE calling this endpoint and pass the release tx hash.
+   */
+  async markCompleted(orderId: string, userId: string, escrowReleaseTx?: string) {
     const order = await this.getOrder(orderId, userId);
     if (order.buyerId !== userId) throw new ForbiddenException('Only buyer can mark as completed');
     if (order.status !== 'DELIVERED') {
       throw new BadRequestException('Order must be DELIVERED before completing');
     }
+
+    // If this order uses escrow, require release tx proof
+    const data: any = { status: 'COMPLETED', completedAt: new Date() };
+    if (order.escrowStatus === 'FUNDED') {
+      if (!escrowReleaseTx) {
+        throw new BadRequestException('Escrow release transaction hash required. Release funds from escrow first.');
+      }
+      data.escrowReleaseTx = escrowReleaseTx;
+      data.escrowStatus = 'RELEASED';
+      data.escrowResolvedAt = new Date();
+    }
+
     return this.prisma.marketPurchase.update({
       where: { id: orderId },
-      data: { status: 'COMPLETED', completedAt: new Date() },
+      data,
       include: ORDER_INCLUDE,
     });
   }
 
-  /** Either party can open a dispute */
+  /**
+   * Either party can open a dispute.
+   * If escrow is active, the frontend should also call dispute() on the contract.
+   */
   async dispute(orderId: string, userId: string) {
     const order = await this.getOrder(orderId, userId);
     if (order.status === 'COMPLETED' || order.status === 'DISPUTED') {
       throw new BadRequestException('Cannot dispute this order');
     }
+
+    const data: any = { status: 'DISPUTED' };
+    if (order.escrowStatus === 'FUNDED') {
+      data.escrowStatus = 'DISPUTED';
+      data.escrowDisputedAt = new Date();
+    }
+
     return this.prisma.marketPurchase.update({
       where: { id: orderId },
-      data: { status: 'DISPUTED' },
+      data,
       include: ORDER_INCLUDE,
     });
   }
