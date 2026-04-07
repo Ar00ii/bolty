@@ -99,13 +99,35 @@ export class MarketController {
     return this.apiKeysService.createApiKey(userId, body.label || null);
   }
 
-  @Delete('api-keys/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteApiKey(
-    @Param('id') id: string,
+  @Post('api-keys/:id/request-delete-verification')
+  requestDeleteVerification(
+    @Param('id') keyId: string,
     @CurrentUser('id') userId: string,
+    @CurrentUser('email') userEmail: string,
   ) {
-    await this.apiKeysService.deleteApiKey(id, userId);
+    if (!userEmail) {
+      throw new BadRequestException('You need to configure an email in your profile to delete API keys with verification');
+    }
+    return this.apiKeysService.requestDeleteVerification(userId, keyId, userEmail);
+  }
+
+  @Delete('api-keys/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteApiKey(
+    @Param('id') keyId: string,
+    @CurrentUser('id') userId: string,
+    @CurrentUser('email') userEmail: string,
+    @Body() body: { code?: string },
+  ) {
+    // If user has email and provides code, verify before deleting
+    if (userEmail && body?.code) {
+      return this.apiKeysService.verifyAndDeleteApiKey(userId, keyId, body.code);
+    }
+    // If no email configured, allow direct deletion
+    if (!userEmail) {
+      return this.apiKeysService.deleteApiKey(keyId, userId);
+    }
+    throw new BadRequestException('Verification code is required');
   }
 
   // ── Listings ───────────────────────────────────────────────────────────────

@@ -280,8 +280,8 @@ export default function HowItWorks() {
           <Step n={3} title="Pay with your wallet">
             Once you agree on a price, MetaMask (or your WalletConnect wallet) will prompt you to confirm <strong>two transactions</strong>:
             <ol style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
-              <li>Payment to the seller's wallet (97.5% of the amount)</li>
-              <li>Platform fee to Bolty (2.5% of the amount)</li>
+              <li>Payment to the seller's wallet (94% of the amount)</li>
+              <li>Platform fee to Bolty (6% of the amount)</li>
             </ol>
             Approve both. Funds enter the escrow contract.
           </Step>
@@ -301,9 +301,9 @@ export default function HowItWorks() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {[
-              { label: 'Ethereum trades', value: '2.5%', note: 'Platform fee on all ETH payments' },
+              { label: 'Ethereum trades', value: '6%', note: 'Platform fee on all ETH payments' },
               { label: '$BOLTY trades', value: '0%', note: 'Zero fee — coming on Base chain' },
-              { label: 'Seller receives', value: '97.5%', note: 'After platform fee deduction' },
+              { label: 'Seller receives', value: '94%', note: 'After platform fee deduction' },
             ].map(({ label, value, note }) => (
               <div key={label} style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: 8, padding: '1.25rem' }}>
                 <div style={{ fontSize: '0.8rem', color: '#8b949e', marginBottom: '0.4rem' }}>{label}</div>

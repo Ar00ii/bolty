@@ -3,13 +3,13 @@ const path = require('path');
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 const wsUrl  = process.env.NEXT_PUBLIC_WS_URL  || 'http://localhost:3001';
 
+// Backend origin for proxy rewrite (separate from public API URL)
+const backendOrigin = process.env.BACKEND_ORIGIN || new URL(apiUrl).origin;
+
 // Extract origin (protocol + host) from URL for CSP
 const apiOrigin = new URL(apiUrl).origin;
 const wsOrigin  = new URL(wsUrl).origin;
 const wsOriginWs = wsOrigin.replace(/^http/, 'ws');
-
-// Backend base (without /api/v1) for the proxy rewrite
-const backendOrigin = apiOrigin;
 
 const nextConfig = {
   reactStrictMode: true,

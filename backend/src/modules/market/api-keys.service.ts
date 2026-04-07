@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -13,6 +13,13 @@ export class ApiKeysService {
   private generateKey(): string {
     const random = crypto.randomBytes(24).toString('hex');
     return `blt_${random}`;
+  }
+
+  /**
+   * Generate a 6-digit verification code
+   */
+  private generateVerificationCode(): string {
+    return crypto.randomInt(100000, 999999).toString();
   }
 
   /**
@@ -57,15 +64,132 @@ export class ApiKeysService {
   }
 
   /**
-   * Delete an API key (revoke it)
+   * Delete an API key directly (no verification, for users without email)
    */
   async deleteApiKey(keyId: string, userId: string) {
     await this.prisma.userApiKey.deleteMany({
       where: {
         id: keyId,
-        userId, // Ensure user can only delete their own keys
+        userId,
       },
     });
+    return { success: true, message: 'API key revoked successfully' };
+  }
+
+  /**
+   * Request a verification code to delete an API key
+   */
+  async requestDeleteVerification(userId: string, keyId: string, userEmail: string) {
+    // Verify that the key belongs to the user
+    const apiKey = await this.prisma.userApiKey.findUnique({
+      where: { id: keyId },
+    });
+
+    if (!apiKey || apiKey.userId !== userId) {
+      throw new BadRequestException('API key not found or does not belong to you');
+    }
+
+    // Generate verification code
+    const code = this.generateVerificationCode();
+
+    // Delete old codes for this purpose/email/key
+    await this.prisma.verificationCode.deleteMany({
+      where: {
+        email: userEmail,
+        purpose: 'DELETE_API_KEY',
+        data: { path: ['keyId'], equals: keyId },
+      },
+    });
+
+    // Create new verification code (valid for 10 minutes)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await this.prisma.verificationCode.create({
+      data: {
+        email: userEmail,
+        code,
+        purpose: 'DELETE_API_KEY',
+        data: { keyId },
+        expiresAt,
+      },
+    });
+
+    // In production, send email here
+    // For now, return code (remove in production)
+    return {
+      success: true,
+      message: 'Verification code sent to your email',
+      // REMOVE IN PRODUCTION: code (for testing only)
+    };
+  }
+
+  /**
+   * Verify code and delete API key
+   */
+  async verifyAndDeleteApiKey(userId: string, keyId: string, code: string) {
+    // Get user email
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+
+    if (!user?.email) {
+      throw new BadRequestException('User email not found');
+    }
+
+    // Find verification code
+    const verificationCode = await this.prisma.verificationCode.findUnique({
+      where: { code },
+    });
+
+    if (!verificationCode) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    // Check if code has expired
+    if (verificationCode.expiresAt < new Date()) {
+      throw new BadRequestException('Verification code has expired');
+    }
+
+    // Check if code has been attempted too many times
+    if (verificationCode.attempts >= verificationCode.maxAttempts) {
+      throw new BadRequestException('Too many failed attempts. Request a new code.');
+    }
+
+    // Check if code matches and belongs to this user
+    if (
+      verificationCode.email !== user.email ||
+      (verificationCode.data as any)?.keyId !== keyId ||
+      verificationCode.purpose !== 'DELETE_API_KEY'
+    ) {
+      // Increment attempts
+      await this.prisma.verificationCode.update({
+        where: { id: verificationCode.id },
+        data: { attempts: { increment: 1 } },
+      });
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    // Verify the key belongs to user
+    const apiKey = await this.prisma.userApiKey.findUnique({
+      where: { id: keyId },
+    });
+
+    if (!apiKey || apiKey.userId !== userId) {
+      throw new BadRequestException('API key not found or does not belong to you');
+    }
+
+    // Delete the key
+    await this.prisma.userApiKey.delete({
+      where: { id: keyId },
+    });
+
+    // Mark code as verified and delete it
+    await this.prisma.verificationCode.delete({
+      where: { id: verificationCode.id },
+    });
+
+    return { success: true, message: 'API key revoked successfully' };
   }
 
   /**
