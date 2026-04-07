@@ -86,6 +86,7 @@ model User {
   repoCollaborations     RepoCollaborator[]
   serviceListings        ServiceListing[]
   certifications         UserCertification[]
+  apiKeys                UserApiKey[]
 
   @@map("users")
 }
@@ -688,4 +689,21 @@ model UserCertification {
   @@unique([userId, certId])
   @@index([userId])
   @@map("user_certifications")
+}
+
+// ─── User API Keys ────────────────────────────────────────────────────────────
+
+model UserApiKey {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+
+  keyHash     String        @unique    // bcrypt hash of the actual key
+  label       String?                 // optional label (e.g., "Production", "CI/CD")
+  lastUsedAt  DateTime?
+
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_api_keys")
 }
