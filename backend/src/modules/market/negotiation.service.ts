@@ -653,11 +653,10 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         const seller = await this.prisma.user.findUnique({ where: { id: neg.listing.sellerId }, select: { email: true, username: true } });
         const buyer = await this.prisma.user.findUnique({ where: { id: neg.buyerId }, select: { username: true } });
         if (seller?.email) {
-          const appUrl = this.config.get<string>('APP_URL') || 'https://bolty.dev';
           await this.emailService.sendAgentDealEmail(
             seller.email, seller.username || 'seller',
             neg.listing.title, agreedPrice, neg.listing.currency,
-            buyer?.username || 'buyer', negId, appUrl,
+            buyer?.username || 'buyer', negId,
           ).catch((err) => this.logger.error('Deal email failed', err));
         }
       } catch (err) { this.logger.error('Failed to send deal email', err); }

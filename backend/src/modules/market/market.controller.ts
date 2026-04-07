@@ -99,13 +99,23 @@ export class MarketController {
     return this.apiKeysService.createApiKey(userId, body.label || null);
   }
 
-  @Delete('api-keys/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteApiKey(
-    @Param('id') id: string,
+  @Post('api-keys/:id/request-delete-verification')
+  requestDeleteVerification(
+    @Param('id') keyId: string,
     @CurrentUser('id') userId: string,
+    @CurrentUser('email') userEmail: string,
   ) {
-    await this.apiKeysService.deleteApiKey(id, userId);
+    return this.apiKeysService.requestDeleteVerification(userId, keyId, userEmail);
+  }
+
+  @Delete('api-keys/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteApiKey(
+    @Param('id') keyId: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { code: string },
+  ) {
+    return this.apiKeysService.verifyAndDeleteApiKey(userId, keyId, body.code);
   }
 
   // ── Listings ───────────────────────────────────────────────────────────────
