@@ -18,6 +18,12 @@ class DeliverDto {
   deliveryNote?: string;
 }
 
+class CompleteDto {
+  @IsOptional()
+  @IsString()
+  escrowReleaseTx?: string;
+}
+
 class SendMessageDto {
   @IsString()
   @MaxLength(5000)
@@ -77,8 +83,12 @@ export class OrdersController {
 
   /** POST /orders/:id/complete */
   @Post(':id/complete')
-  markCompleted(@Param('id') id: string, @Request() req: any) {
-    return this.ordersService.markCompleted(id, req.user.id);
+  markCompleted(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() body: CompleteDto,
+  ) {
+    return this.ordersService.markCompleted(id, req.user.id, body.escrowReleaseTx);
   }
 
   /** POST /orders/:id/dispute */

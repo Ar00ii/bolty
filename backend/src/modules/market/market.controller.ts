@@ -53,6 +53,7 @@ interface PurchaseListingBody {
   platformFeeTxHash?: string;
   consentSignature?: string;
   consentMessage?: string;
+  escrowContract?: string;
 }
 
 interface SendMessageBody {
@@ -189,6 +190,7 @@ export class MarketController {
     return this.marketService.purchaseListing(
       id, buyerId, body.txHash, body.amountWei || '0', body.negotiationId,
       body.platformFeeTxHash, body.consentSignature, body.consentMessage,
+      body.escrowContract,
     );
   }
 
