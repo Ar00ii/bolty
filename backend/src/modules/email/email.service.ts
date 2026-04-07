@@ -344,4 +344,26 @@ export class EmailService {
     const text = `Your Bolty account deletion code: ${code}\n\nExpires in 10 minutes. This is PERMANENT.`;
     await this.send(to, subject, html, text);
   }
+
+  // ── API Key deletion verification ────────────────────────────────────────
+
+  async sendApiKeyDeleteCode(to: string, code: string): Promise<void> {
+    const subject = `${code} — revoke your Bolty API key`;
+    const html = shell(subject, `Confirm API key revocation: ${code}`, bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Revoke API Key</h1>
+      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
+        You requested to revoke an API key on your Bolty account.
+        Enter this code to confirm. Expires in <strong style="color:#18181b;">10 minutes</strong>.
+      </p>
+      ${otpBlock(code)}
+      <div style="background:#fef2f2;border:1px solid #fee2e2;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#7c2d12;">
+          <strong>Once revoked, this API key will no longer work.</strong> Any applications or scripts using it will fail to authenticate.
+          If you didn't request this, change your password immediately.
+        </p>
+      </div>
+    `));
+    const text = `Your Bolty API key revocation code: ${code}\n\nExpires in 10 minutes.`;
+    await this.send(to, subject, html, text);
+  }
 }
