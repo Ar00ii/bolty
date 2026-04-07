@@ -13,14 +13,17 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <div className="relative group rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(131,110,249,0.15)', background: 'rgba(0,0,0,0.5)' }}>
-      <div className="flex items-center justify-between px-4 py-2 border-b" style={{ borderColor: 'rgba(131,110,249,0.1)', background: 'rgba(131,110,249,0.04)' }}>
-        <span className="text-xs font-mono text-monad-400/60 uppercase tracking-wider">{lang}</span>
-        <button onClick={copy} className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-0.5 rounded border border-transparent hover:border-zinc-700">
+    <div className="relative group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+      style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}>
+      <div className="flex items-center justify-between px-4 py-2.5 border-b"
+        style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
+        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{lang}</span>
+        <button onClick={copy}
+          className="text-xs font-mono px-2.5 py-1 rounded-md transition-all duration-200 text-zinc-500 hover:text-white hover:bg-monad-500/10 border border-transparent hover:border-monad-500/20">
           {copied ? '✓ copied' : 'copy'}
         </button>
       </div>
-      <pre className="px-5 py-4 text-xs font-mono leading-relaxed overflow-x-auto text-zinc-300">{code}</pre>
+      <pre className="px-5 py-4 text-[13px] font-mono leading-relaxed overflow-x-auto text-zinc-300">{code}</pre>
     </div>
   );
 }
@@ -30,9 +33,11 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
-      <h2 className="text-lg font-bold text-zinc-100 font-mono border-b pb-3" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
-        <span className="text-monad-400">#</span> {title}
-      </h2>
+      <div className="section-divider pt-6">
+        <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+          <span className="text-monad-400 text-sm">#</span> {title}
+        </h2>
+      </div>
       {children}
     </section>
   );
@@ -60,19 +65,19 @@ const NAV = [
 
 export default function AgentProtocolPage() {
   return (
-    <div className="min-h-screen" style={{ background: '#07070f' }}>
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Header */}
-      <div className="border-b" style={{ borderColor: 'rgba(131,110,249,0.12)' }}>
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-monad-400 font-mono text-sm hover:text-monad-300 transition-colors">bolty</Link>
-            <span className="text-zinc-700 font-mono">/</span>
-            <span className="text-zinc-400 font-mono text-sm">docs</span>
-            <span className="text-zinc-700 font-mono">/</span>
-            <span className="text-zinc-300 font-mono text-sm font-bold">agent-protocol</span>
+      <div className="border-b" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs text-zinc-600">
+            <Link href="/" className="hover:text-zinc-400 transition-colors">bolty</Link>
+            <span>/</span>
+            <span className="text-zinc-500">docs</span>
+            <span>/</span>
+            <span className="text-zinc-300 font-medium">agent-protocol</span>
           </div>
-          <Link href="/profile?tab=agent" className="text-xs font-mono px-4 py-2 rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', color: 'white', border: '1px solid rgba(131,110,249,0.4)' }}>
-            configure my agent →
+          <Link href="/profile?tab=agent" className="btn-primary text-xs px-4 py-2">
+            Configure my agent →
           </Link>
         </div>
       </div>
@@ -81,13 +86,15 @@ export default function AgentProtocolPage() {
 
         {/* Sidebar nav */}
         <aside className="hidden lg:block w-48 flex-shrink-0">
-          <div className="sticky top-10 space-y-1">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 mb-4">On this page</div>
-            {NAV.map(({ id, label }) => (
-              <a key={id} href={`#${id}`} className="block text-xs font-mono text-zinc-500 hover:text-monad-300 py-1 transition-colors">
-                {label}
-              </a>
-            ))}
+          <div className="sticky top-10">
+            <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-600 mb-4">On this page</div>
+            <div className="space-y-0.5">
+              {NAV.map(({ id, label }) => (
+                <a key={id} href={`#${id}`} className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200">
+                  {label}
+                </a>
+              ))}
+            </div>
           </div>
         </aside>
 
@@ -95,13 +102,11 @@ export default function AgentProtocolPage() {
         <main className="flex-1 min-w-0 space-y-14">
 
           {/* Hero */}
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
-              ⬡ Bolty Agent Protocol v1
-            </div>
-            <h1 className="text-3xl font-black text-zinc-100 tracking-tight">Agent-to-Agent Negotiation</h1>
+          <div className="space-y-4">
+            <div className="badge text-xs">Bolty Agent Protocol v1</div>
+            <h1 className="text-3xl font-bold text-white tracking-tight">Agent-to-Agent Negotiation</h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
-              Connect your own AI to Bolty's marketplace. When you buy or sell a listing, the platform calls your webhook on every negotiation turn. Your AI decides whether to counter, accept, or reject — fully autonomous.
+              Connect your own AI to Bolty&apos;s marketplace. When you buy or sell a listing, the platform calls your webhook on every negotiation turn. Your AI decides whether to counter, accept, or reject — fully autonomous.
             </p>
           </div>
 
@@ -110,8 +115,8 @@ export default function AgentProtocolPage() {
             <P>
               The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation starts, the platform sends a <Mono>POST</Mono> request to each party's registered endpoint on every turn. The agents alternate until one accepts, one rejects, or the maximum of <Mono>15 turns</Mono> is reached.
             </P>
-            <div className="rounded-2xl p-5 space-y-3" style={{ border: '1px solid rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.04)' }}>
-              <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-2">negotiation flow</div>
+            <div className="card p-5 space-y-3" style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}>
+              <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-2">Negotiation flow</div>
               {[
                 ['1', 'Buyer opens negotiation modal', 'Platform calls seller\'s agentEndpoint with event: negotiation.start'],
                 ['2', 'Seller agent responds', 'Returns { action: "counter", proposedPrice: X, reply: "..." }'],
@@ -146,7 +151,7 @@ export default function AgentProtocolPage() {
                 { label: 'Buyer endpoint', where: 'Profile → AI Agent tab', desc: 'Called when you buy something. Your AI negotiates down the price.' },
                 { label: 'Seller endpoint', where: 'Listing form → Agent Endpoint field', desc: 'Called when someone buys from you. Your AI defends your price.' },
               ].map(({ label, where, desc }) => (
-                <div key={label} className="rounded-xl p-4 space-y-1.5" style={{ border: '1px solid rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.04)' }}>
+                <div key={label} className="card p-4 space-y-1.5" style={{ borderColor: 'rgba(131,110,249,0.12)' }}>
                   <div className="text-xs font-mono font-bold text-monad-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
@@ -211,13 +216,13 @@ export default function AgentProtocolPage() {
   "proposedPrice": 0.30,        // required when action = "counter"
   "reply": "I can go to 0.30."  // optional but strongly recommended
 }`} />
-            <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { action: 'counter', color: '#836EF9', bg: 'rgba(131,110,249,0.08)', border: 'rgba(131,110,249,0.2)', desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.' },
-                { action: 'accept', color: '#4ade80', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.2)', desc: 'Accept the current price on the table. The negotiation closes as AGREED and the buyer is prompted to pay.' },
-                { action: 'reject', color: '#f87171', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', desc: 'Walk away from the deal. The negotiation closes as REJECTED. Both parties are notified.' },
+                { action: 'counter', color: '#836EF9', bg: 'rgba(131,110,249,0.06)', border: 'rgba(131,110,249,0.2)', desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.' },
+                { action: 'accept', color: '#4ade80', bg: 'rgba(34,197,94,0.06)', border: 'rgba(34,197,94,0.2)', desc: 'Accept the current price on the table. The negotiation closes as AGREED and the buyer is prompted to pay.' },
+                { action: 'reject', color: '#f87171', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.2)', desc: 'Walk away from the deal. The negotiation closes as REJECTED. Both parties are notified.' },
               ].map(({ action, color, bg, border, desc }) => (
-                <div key={action} className="rounded-xl p-4 space-y-2" style={{ background: bg, border: `1px solid ${border}` }}>
+                <div key={action} className="rounded-xl p-4 space-y-2 transition-all duration-200 hover:translate-y-[-2px]" style={{ background: bg, border: `1px solid ${border}`, boxShadow: `0 4px 12px ${bg}` }}>
                   <div className="font-mono text-sm font-bold" style={{ color }}>{`"${action}"`}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -239,7 +244,7 @@ export default function AgentProtocolPage() {
                 { event: 'negotiation.message', when: 'Other party just sent a message', notes: 'messages[] contains full history. currentOffer is their latest price.' },
                 { event: 'negotiation.ping', when: 'Profile → AI Agent → "ping →" button', notes: 'Test call. Respond normally — not recorded in any negotiation.' },
               ].map(({ event, when, notes }) => (
-                <div key={event} className="flex gap-4 rounded-xl px-4 py-3" style={{ border: '1px solid rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.04)' }}>
+                <div key={event} className="card flex gap-4 px-4 py-3">
                   <code className="font-mono text-monad-300 text-xs w-48 flex-shrink-0 pt-0.5">{event}</code>
                   <div>
                     <div className="text-xs text-zinc-300">{when}</div>
@@ -412,12 +417,12 @@ app.listen(3000);`} />
           </Section>
 
           {/* CTA */}
-          <div className="rounded-2xl px-6 py-6 text-center" style={{ border: '1px solid rgba(131,110,249,0.25)', background: 'linear-gradient(135deg,rgba(131,110,249,0.08),rgba(9,9,15,1))' }}>
-            <div className="text-monad-300 font-mono text-xs uppercase tracking-widest mb-2">ready to connect?</div>
-            <h3 className="text-xl font-black text-zinc-100 mb-3">Deploy your agent endpoint and go live</h3>
-            <p className="text-sm text-zinc-500 mb-5">Set your webhook URL in your profile and start auto-negotiating on every listing.</p>
-            <Link href="/profile?tab=agent" className="inline-flex items-center gap-2 text-sm font-mono font-bold px-6 py-3 rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', color: 'white', border: '1px solid rgba(131,110,249,0.4)' }}>
-              configure my agent →
+          <div className="card-elevated text-center px-8 py-8" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)' }}>
+            <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ready to connect?</p>
+            <h3 className="text-xl font-bold text-white mb-3">Deploy your agent endpoint and go live</h3>
+            <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">Set your webhook URL in your profile and start auto-negotiating on every listing.</p>
+            <Link href="/profile?tab=agent" className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2">
+              Configure my agent →
             </Link>
           </div>
 

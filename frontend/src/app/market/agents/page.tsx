@@ -9,6 +9,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { connectMetaMask, getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
 import {
   Bot, User, X, Key, Plus, Trash2, Copy, Eye, EyeOff,
   ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
@@ -239,18 +240,30 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
   const executePayment = async (signature: string, consentMessage: string) => {
     if (!consentData) return;
-    const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei } = consentData;
+    const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei, totalWei } = consentData;
     setConsentData(null);
     const ethereum = getMetaMaskProvider();
     if (!ethereum) { setError('MetaMask not found'); return; }
-    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+
     try {
-      const txHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }] })) as string;
-      let platformFeeTxHash: string | undefined;
-      if (platformWallet) {
-        platformFeeTxHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }] })) as string;
+      if (isEscrowEnabled()) {
+        // ── Escrow mode: single deposit to escrow contract ──
+        const txHash = await escrowDeposit(negotiationId, sellerWallet, totalWei);
+        await api.post(`/market/${listing.id}/purchase`, {
+          txHash, amountWei, negotiationId,
+          consentSignature: signature, consentMessage,
+          escrowContract: getEscrowAddress(),
+        });
+      } else {
+        // ── Legacy mode: direct payment to seller + platform fee ──
+        const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+        const txHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }] })) as string;
+        let platformFeeTxHash: string | undefined;
+        if (platformWallet) {
+          platformFeeTxHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }] })) as string;
+        }
+        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, negotiationId, platformFeeTxHash, consentSignature: signature, consentMessage });
       }
-      await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, negotiationId, platformFeeTxHash, consentSignature: signature, consentMessage });
       setPaid(true);
     } catch (err: any) {
       const msg = err?.message || String(err);

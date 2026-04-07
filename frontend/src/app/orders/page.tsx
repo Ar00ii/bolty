@@ -6,17 +6,21 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { API_URL } from '@/lib/api/client';
 import {
   ShoppingBag, Package, Clock, CheckCircle2, AlertTriangle,
-  Truck, ArrowRight, BarChart3, TrendingUp,
+  Truck, ArrowRight, BarChart3, TrendingUp, Lock,
 } from 'lucide-react';
 
 const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 
+type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
+
 interface Order {
   id: string;
   createdAt: string;
   status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  escrowContract: string | null;
   amountWei: string;
   txHash: string;
   listing: { id: string; title: string; type: string; price: number; currency: string };
@@ -72,6 +76,11 @@ function OrderCard({ order, isSeller, onClick }: { order: Order; isSeller: boole
         <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span className="font-semibold text-sm text-white truncate">{order.listing.title}</span>
           <StatusBadge status={order.status} />
+          {order.escrowStatus && order.escrowStatus !== 'NONE' && (
+            <span className="badge-success flex items-center gap-1 text-[10px]">
+              <Lock className="w-2.5 h-2.5" /> Escrow
+            </span>
+          )}
         </div>
         <div className="text-xs text-zinc-500">
           {isSeller ? 'Buyer' : 'Seller'}: <span className="text-zinc-300 font-medium">@{peer?.username || 'Unknown'}</span>

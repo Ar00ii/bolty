@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
-import { Navbar } from '@/components/layout/Navbar';
+import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
+import { HighlightCard } from '@/components/ui/highlight-card';
 import {
-  Bot, Code2, Users, GitBranch, ArrowRight, Shield,
-  Zap, Globe, Key, Terminal, Star, TrendingUp, ChevronRight,
-  Cpu, Lock, Coins, CheckCircle, MessageSquare,
+  Bot, GitBranch, ArrowRight, Shield,
+  Key, Star, TrendingUp,
+  MessageSquare, UserPlus, Upload, Rocket,
 } from 'lucide-react';
 
 // ── Scroll reveal ──────────────────────────────────────────────────
@@ -84,9 +84,9 @@ const STATS = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or a Web3 wallet. Your profile is your developer identity.' },
-  { step: '02', title: 'Publish your work', desc: 'Connect GitHub to sync repos, or upload AI agents and automation tools to the marketplace.' },
-  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate with buyers, build reputation, and grow your developer brand.' },
+  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or a Web3 wallet. Your profile is your developer identity.', icon: UserPlus },
+  { step: '02', title: 'Publish your work', desc: 'Connect GitHub to sync repos, or upload AI agents and automation tools to the marketplace.', icon: Upload },
+  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate with buyers, build reputation, and grow your developer brand.', icon: Rocket },
 ];
 
 const INTEGRATIONS = [
@@ -112,21 +112,25 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Homepage Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'rgba(10,10,11,0.9)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
+      <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', opacity: 1, backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
-          <Link href="/" className="flex items-center gap-2.5">
-            <BoltyLogo size={32} color="#836EF9" />
-            <span className="text-white font-semibold text-[15px] tracking-tight">Bolty</span>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <BoltyLogoSVG size={28} className="transition-transform duration-200 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(131,110,249,0.4)]" />
+            <span className="text-[15px] font-bold tracking-tight" style={{
+              background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>BoltyNetwork</span>
           </Link>
           <div className="flex-1" />
           <div className="hidden md:flex items-center gap-6 mr-6">
-            <Link href="/market" className="text-[13px] text-zinc-400 hover:text-white transition-colors">Marketplace</Link>
-            <Link href="/docs/agent-protocol" className="text-[13px] text-zinc-400 hover:text-white transition-colors">Docs</Link>
-            <Link href="/how-it-works" className="text-[13px] text-zinc-400 hover:text-white transition-colors">How It Works</Link>
+            <Link href="/market" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>Marketplace</Link>
+            <Link href="/docs/agent-protocol" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>Docs</Link>
+            <Link href="/how-it-works" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>How It Works</Link>
           </div>
           {!isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <Link href="/auth" className="text-[13px] text-zinc-400 hover:text-white px-3 py-1.5 transition-colors">Sign in</Link>
+              <Link href="/auth" className="text-[13px] px-3 py-1.5 transition-colors" style={{ color: 'var(--text-muted)' }}>Sign in</Link>
               <Link href="/auth?tab=register" className="btn-primary text-[13px] px-4 py-1.5">Get started</Link>
             </div>
           ) : (
@@ -136,19 +140,31 @@ export default function HomePage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+        {/* Subtle grid background */}
+        <div className="hero-grid-bg">
+          <svg width="100%" height="100%">
+            <defs>
+              <pattern id="hero-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--brand)" strokeWidth="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-grid)" />
+          </svg>
+        </div>
+        <BoltyFloatingLogos />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-monad-500/20 bg-monad-500/5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
             <span className="text-xs font-medium text-monad-400">Now in Beta — Open for developers</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1] mb-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6" style={{ color: 'var(--text)' }}>
             Build, ship, and earn<br />
             <span className="hero-gradient">with AI agents</span>
           </h1>
 
-          <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg max-w-2xl mx-auto mb-8 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             The developer platform for publishing code, deploying AI agents,
             and earning from your work. Connect your stack, reach buyers, get paid in ETH.
           </p>
@@ -174,8 +190,8 @@ export default function HomePage() {
           <div className="flex items-center justify-center gap-8 mt-12 pt-8 border-t" style={{ borderColor: 'var(--border)' }}>
             {STATS.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-xl font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-zinc-500 mt-0.5">{stat.label}</div>
+                <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{stat.value}</div>
+                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</div>
               </div>
             ))}
           </div>
@@ -188,22 +204,19 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Platform Features</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Everything you need to build and sell</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Everything you need to build and sell</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {FEATURES.map((f) => {
-                const Icon = f.icon;
-                return (
-                  <Link key={f.href} href={f.href} className="group card-interactive p-5">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                      <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
-                    </div>
-                    <h3 className="text-[15px] font-semibold text-white mb-1.5 group-hover:text-monad-300 transition-colors">{f.title}</h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed">{f.description}</p>
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {FEATURES.map((f) => (
+                <HighlightCard
+                  key={f.href}
+                  icon={f.icon}
+                  title={f.title}
+                  description={f.description}
+                  href={f.href}
+                />
+              ))}
             </div>
           </div>
         </section>
@@ -215,17 +228,25 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Getting Started</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Three steps to get started</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Three steps to get started</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {HOW_IT_WORKS.map((s) => (
-                <div key={s.step} className="relative">
-                  <span className="text-5xl font-bold text-monad-500/10">{s.step}</span>
-                  <h3 className="text-base font-semibold text-white mt-2 mb-2">{s.title}</h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">{s.desc}</p>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {HOW_IT_WORKS.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <div key={s.step} className="step-card">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="step-number">{s.step}</div>
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+                        <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
+                      </div>
+                    </div>
+                    <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text)' }}>{s.title}</h3>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{s.desc}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -237,14 +258,14 @@ export default function HomePage() {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ecosystem</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Works with your stack</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Works with your stack</h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {INTEGRATIONS.map((i) => (
-                <div key={i.name} className="card text-center py-5 px-3">
-                  <p className="text-sm font-semibold text-white mb-1">{i.name}</p>
-                  <p className="text-xs text-zinc-500">{i.desc}</p>
+                <div key={i.name} className="card-elevated text-center py-6 px-4">
+                  <p className="text-sm font-semibold mb-1.5" style={{ color: 'var(--text)' }}>{i.name}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{i.desc}</p>
                 </div>
               ))}
             </div>
@@ -258,16 +279,19 @@ export default function HomePage() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Developers</p>
-              <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight">What developers are saying</h2>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>What developers are saying</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="card p-5">
-                  <p className="text-sm text-zinc-300 leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-                  <div>
-                    <p className="text-sm font-medium text-white">{t.name}</p>
-                    <p className="text-xs text-zinc-500">{t.role}</p>
+                <div key={t.name} className="card-elevated p-6">
+                  <div className="flex gap-1 mb-4">
+                    {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />)}
+                  </div>
+                  <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-secondary)' }}>&ldquo;{t.text}&rdquo;</p>
+                  <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t.name}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t.role}</p>
                   </div>
                 </div>
               ))}
@@ -280,8 +304,8 @@ export default function HomePage() {
       <Section>
         <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4">Ready to start building?</h2>
-            <p className="text-zinc-400 mb-8 max-w-lg mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" style={{ color: 'var(--text)' }}>Ready to start building?</h2>
+            <p className="mb-8 max-w-lg mx-auto" style={{ color: 'var(--text-muted)' }}>
               Join the developer platform where code meets commerce. Publish, sell, and earn — all in one place.
             </p>
             {!isAuthenticated ? (

@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { Shield, AlertTriangle, X } from 'lucide-react';
+import { Shield, AlertTriangle, Lock, X } from 'lucide-react';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import { isEscrowEnabled } from '@/lib/wallet/escrow';
 
 interface PaymentConsentModalProps {
   listingTitle: string;
@@ -30,6 +31,8 @@ export function PaymentConsentModal({
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
 
+  const escrow = isEscrowEnabled();
+
   const handleSign = async () => {
     if (!checked) { setError('You must accept the terms first'); return; }
     setSigning(true);
@@ -40,13 +43,36 @@ export function PaymentConsentModal({
       if (!eth) throw new Error('MetaMask not found. Install it to continue.');
 
       const timestamp = new Date().toISOString();
+      const escrowTerms = escrow
+        ? [
+            '1. Funds will be deposited into the Bolty Escrow smart contract.',
+            '2. The seller will NOT receive payment until I confirm delivery.',
+            '3. I can open a dispute if the seller does not deliver.',
+            '4. After 14 days without dispute, funds auto-release to the seller.',
+            '5. Disputes are resolved by the Bolty admin.',
+            '6. Smart contract interactions require gas fees.',
+            '7. This cryptographic signature constitutes irrevocable proof of my consent.',
+            '8. I have the technical knowledge required to conduct this transaction.',
+          ]
+        : [
+            '1. This is a voluntary peer-to-peer transaction on the Ethereum blockchain.',
+            '2. Blockchain transactions are FINAL and IRREVERSIBLE once confirmed.',
+            '3. Bolty Platform is NOT a custodian and does NOT hold or escrow funds.',
+            '4. Bolty Platform bears NO liability for disputes, fraud, or losses.',
+            '5. I have independently verified the seller and listing before paying.',
+            '6. I accept FULL personal responsibility for this transaction.',
+            '7. This cryptographic signature constitutes irrevocable proof of my consent.',
+            '8. I have the technical knowledge required to conduct this transaction.',
+          ];
+
       const message = [
-        '=== BOLTY PLATFORM — PAYMENT CONSENT DOCUMENT ===',
+        `=== BOLTY PLATFORM — PAYMENT CONSENT DOCUMENT${escrow ? ' (ESCROW)' : ''} ===`,
         '',
         `Date: ${timestamp}`,
         `Buyer wallet:  ${buyerAddress}`,
         `Seller wallet: ${sellerAddress}`,
         `Listing: ${listingTitle}`,
+        escrow ? `Mode: ESCROW (funds held until delivery confirmed)` : `Mode: DIRECT PAYMENT`,
         '',
         'PAYMENT BREAKDOWN:',
         `  To seller:        ${sellerAmountETH} ETH  (97.5%)`,
@@ -54,14 +80,7 @@ export function PaymentConsentModal({
         `  Total:            ${totalETH} ETH`,
         '',
         'BY SIGNING THIS DOCUMENT I CONFIRM:',
-        '1. This is a voluntary peer-to-peer transaction on the Ethereum blockchain.',
-        '2. Blockchain transactions are FINAL and IRREVERSIBLE once confirmed.',
-        '3. Bolty Platform is NOT a custodian and does NOT hold or escrow funds.',
-        '4. Bolty Platform bears NO liability for disputes, fraud, or losses.',
-        '5. I have independently verified the seller and listing before paying.',
-        '6. I accept FULL personal responsibility for this transaction.',
-        '7. This cryptographic signature constitutes irrevocable proof of my consent.',
-        '8. I have the technical knowledge required to conduct this transaction.',
+        ...escrowTerms,
         '',
         'This document is stored as proof of informed consent.',
       ].join('\n');
@@ -110,13 +129,22 @@ export function PaymentConsentModal({
           </button>
         </div>
 
-        {/* Warning */}
-        <div className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
-          <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-yellow-300/80 leading-relaxed">
-            <strong>Peer-to-peer blockchain transaction.</strong> Payments are irreversible. Bolty is not responsible for disputes or losses.
-          </p>
-        </div>
+        {/* Warning / Info */}
+        {escrow ? (
+          <div className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+            <Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-green-300/80 leading-relaxed">
+              <strong>Escrow protected.</strong> Funds are held in a smart contract until you confirm delivery. You can dispute if the seller doesn&apos;t deliver.
+            </p>
+          </div>
+        ) : (
+          <div className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+            <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-yellow-300/80 leading-relaxed">
+              <strong>Peer-to-peer blockchain transaction.</strong> Payments are irreversible. Bolty is not responsible for disputes or losses.
+            </p>
+          </div>
+        )}
 
         {/* Breakdown */}
         <div className="mx-5 mt-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.07)' }}>
@@ -131,7 +159,7 @@ export function PaymentConsentModal({
               <span className="text-white font-mono">{platformFeeETH} ETH</span>
             </div>
             <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-              <span className="text-zinc-200 font-semibold">Total (2 transactions)</span>
+              <span className="text-zinc-200 font-semibold">Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}</span>
               <div className="text-right">
                 <span className="text-monad-300 font-mono font-bold">{totalETH} ETH</span>
                 <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
@@ -146,15 +174,26 @@ export function PaymentConsentModal({
           style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.04)' }}
         >
           <p className="text-zinc-400 font-semibold">By signing you confirm:</p>
-          <ol className="list-decimal list-inside space-y-0.5 mt-1">
-            <li>All blockchain transactions are final and irreversible.</li>
-            <li>Bolty Platform does not hold, escrow, or guarantee any funds.</li>
-            <li>You have independently verified the seller and listing.</li>
-            <li>Bolty Platform bears no liability for disputes, fraud, or losses.</li>
-            <li>You accept full personal responsibility for this transaction.</li>
-            <li>This cryptographic signature is irrevocable proof of consent.</li>
-            <li>You possess sufficient technical knowledge to conduct this transaction.</li>
-          </ol>
+          {escrow ? (
+            <ol className="list-decimal list-inside space-y-0.5 mt-1">
+              <li>Funds will be deposited into the Bolty Escrow smart contract.</li>
+              <li>The seller will NOT receive payment until I confirm delivery.</li>
+              <li>I can dispute within 14 days if the seller does not deliver.</li>
+              <li>After 14 days without dispute, funds auto-release to the seller.</li>
+              <li>Disputes are resolved by Bolty admin.</li>
+              <li>This cryptographic signature is irrevocable proof of consent.</li>
+            </ol>
+          ) : (
+            <ol className="list-decimal list-inside space-y-0.5 mt-1">
+              <li>All blockchain transactions are final and irreversible.</li>
+              <li>Bolty Platform does not hold, escrow, or guarantee any funds.</li>
+              <li>You have independently verified the seller and listing.</li>
+              <li>Bolty Platform bears no liability for disputes, fraud, or losses.</li>
+              <li>You accept full personal responsibility for this transaction.</li>
+              <li>This cryptographic signature is irrevocable proof of consent.</li>
+              <li>You possess sufficient technical knowledge to conduct this transaction.</li>
+            </ol>
+          )}
         </div>
 
         {/* Checkbox */}
