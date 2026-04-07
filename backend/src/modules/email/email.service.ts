@@ -2,60 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
-// ── Shared email shell ─────────────────────────────────────────────────────
-
-function shell(title: string, preheader: string, body: string): string {
-  const year = new Date().getFullYear();
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${title}</title>
-</head>
-<body style="margin:0;padding:0;background:#f0f0f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-  <div style="display:none;font-size:1px;line-height:1px;max-height:0;overflow:hidden;opacity:0;">${preheader}&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;</div>
-  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-    <tr>
-      <td align="center" style="padding:40px 16px;">
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:520px;margin:0 auto;">
-
-          <!-- Logo -->
-          <tr>
-            <td align="center" style="padding-bottom:28px;">
-              <a href="https://bolty-neon.vercel.app" style="text-decoration:none;">
-                <img src="https://bolty-neon.vercel.app/bolty-icon.png" alt="Bolty" width="96" height="96" style="display:block;border:0;outline:none;" />
-              </a>
-            </td>
-          </tr>
-
-          <!-- Card -->
-          <tr>
-            <td style="background:#ffffff;border-radius:16px;border:1px solid #e4e4e7;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
-              ${body}
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td align="center" style="padding:28px 0 8px;">
-              <p style="margin:0;color:#a1a1aa;font-size:12px;line-height:1.6;">
-                You received this because an action was initiated on your Bolty account.<br/>
-                If you didn't request this, you can safely ignore this email.
-              </p>
-              <p style="margin:10px 0 0;color:#d4d4d8;font-size:11px;">
-                &copy; ${year} Bolty &middot; <a href="https://bolty.dev" style="color:#a1a1aa;text-decoration:none;">bolty.dev</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-}
+// ── Shared email utilities ─────────────────────────────────────────────────
 
 function otpBlock(code: string): string {
   return `
@@ -82,10 +29,14 @@ export class EmailService {
   private resend: Resend | null = null;
   private from: string;
   private devMode: boolean;
+  private appUrl: string;
+  private logoUrl: string;
 
   constructor(private readonly config: ConfigService) {
     const apiKey = config.get<string>('RESEND_API_KEY', '');
     this.from = config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
+    this.appUrl = config.get<string>('APP_URL', 'https://bolty.dev');
+    this.logoUrl = `${this.appUrl}/bolty-icon.png`;
 
     if (apiKey) {
       this.resend = new Resend(apiKey);
@@ -97,6 +48,59 @@ export class EmailService {
         'RESEND_API_KEY not set. Emails will be printed to the console.',
       );
     }
+  }
+
+  private shell(title: string, preheader: string, body: string): string {
+    const year = new Date().getFullYear();
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>${title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f0f0f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="display:none;font-size:1px;line-height:1px;max-height:0;overflow:hidden;opacity:0;">${preheader}&nbsp;&#8204;&nbsp;&#8204;&nbsp;&#8204;</div>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:520px;margin:0 auto;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:28px;">
+              <a href="${this.appUrl}" style="text-decoration:none;">
+                <img src="${this.logoUrl}" alt="Bolty" width="96" height="96" style="display:block;border:0;outline:none;" />
+              </a>
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td style="background:#ffffff;border-radius:16px;border:1px solid #e4e4e7;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.06);">
+              ${body}
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:28px 0 8px;">
+              <p style="margin:0;color:#a1a1aa;font-size:12px;line-height:1.6;">
+                You received this because an action was initiated on your Bolty account.<br/>
+                If you didn't request this, you can safely ignore this email.
+              </p>
+              <p style="margin:10px 0 0;color:#d4d4d8;font-size:11px;">
+                &copy; ${year} Bolty &middot; <a href="${this.appUrl}" style="color:#a1a1aa;text-decoration:none;">bolty.dev</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
   }
 
   private async send(to: string, subject: string, html: string, text: string): Promise<void> {
@@ -135,7 +139,7 @@ export class EmailService {
 
   async sendWelcomeEmail(to: string, username: string): Promise<void> {
     const subject = 'Welcome to Bolty';
-    const html = shell(subject, `Welcome to Bolty, ${username}!`, bodyWrap(`
+    const html = this.shell(subject, `Welcome to Bolty, ${username}!`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Welcome to Bolty</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Hi <strong style="color:#18181b;">@${username}</strong>, your account is ready.
@@ -163,11 +167,11 @@ export class EmailService {
         </tr>
       </table>
 
-      <a href="https://bolty.dev" style="display:inline-block;background:#836EF9;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:12px 28px;">
+      <a href="${this.appUrl}" style="display:inline-block;background:#836EF9;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:12px 28px;">
         Start exploring &rarr;
       </a>
     `));
-    const text = `Welcome to Bolty, @${username}!\n\nYour account is ready. Start exploring at https://bolty.dev`;
+    const text = `Welcome to Bolty, @${username}!\n\nYour account is ready. Start exploring at ${this.appUrl}`;
     await this.send(to, subject, html, text);
   }
 
@@ -175,7 +179,7 @@ export class EmailService {
 
   async send2FACode(to: string, code: string): Promise<void> {
     const subject = `${code} — your Bolty sign-in code`;
-    const html = shell(subject, `Your Bolty sign-in code is ${code}`, bodyWrap(`
+    const html = this.shell(subject, `Your Bolty sign-in code is ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Complete Your Sign-In</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Here's your 6-digit verification code to complete your Bolty sign-in.
@@ -200,7 +204,7 @@ export class EmailService {
 
   async sendEmailChangeConfirmation(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm your new Bolty email`;
-    const html = shell(subject, `Confirm your email change with code ${code}`, bodyWrap(`
+    const html = this.shell(subject, `Confirm your email change with code ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Confirm Email Change</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to change your Bolty email address to this one.
@@ -225,7 +229,7 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
     const subject = 'Reset your Bolty password';
-    const html = shell(subject, 'Reset your Bolty password', bodyWrap(`
+    const html = this.shell(subject, 'Reset your Bolty password', bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Password Reset</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         We received a request to reset your Bolty password.
@@ -258,7 +262,7 @@ export class EmailService {
 
   async send2FAEnableCode(to: string, code: string): Promise<void> {
     const subject = `${code} — enable two-factor authentication`;
-    const html = shell(subject, `Confirm 2FA activation: ${code}`, bodyWrap(`
+    const html = this.shell(subject, `Confirm 2FA activation: ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Authentication</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to enable two-factor authentication (2FA) on your Bolty account.
@@ -290,11 +294,10 @@ export class EmailService {
     currency: string,
     buyerUsername: string,
     negotiationId: string,
-    appUrl = 'https://bolty.dev',
   ): Promise<void> {
     const subject = `🤖 Your agent agreed a deal — ${agreedPrice} ${currency}`;
-    const dealUrl = `${appUrl}/market?neg=${negotiationId}`;
-    const html = shell(subject, `Your agent agreed a deal for ${listingTitle}`, bodyWrap(`
+    const dealUrl = `${this.appUrl}/market?neg=${negotiationId}`;
+    const html = this.shell(subject, `Your agent agreed a deal for ${listingTitle}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Agent Deal Alert</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Hi <strong style="color:#18181b;">@${sellerUsername}</strong>,<br/>
@@ -338,7 +341,7 @@ export class EmailService {
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm account deletion`;
-    const html = shell(subject, `Confirm account deletion: ${code}`, bodyWrap(`
+    const html = this.shell(subject, `Confirm account deletion: ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">⚠️ Account Deletion Request</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to permanently delete your Bolty account.
@@ -372,7 +375,7 @@ export class EmailService {
 
   async sendApiKeyDeleteCode(to: string, code: string): Promise<void> {
     const subject = `${code} — revoke your Bolty API key`;
-    const html = shell(subject, `Confirm API key revocation: ${code}`, bodyWrap(`
+    const html = this.shell(subject, `Confirm API key revocation: ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Revoke API Key</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to revoke an API key on your Bolty account.
