@@ -1,130 +1,209 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
-import { X, Menu, UserPlus } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import {
+  Search, Sun, Moon, Bell, ChevronDown, LogOut, User, Settings,
+  Key, ShoppingBag, Menu, X,
+} from 'lucide-react';
+
 
 interface NavbarProps {
   menuOpen: boolean;
   setMenuOpen: (v: boolean) => void;
+  sidebarCollapsed?: boolean;
 }
 
-function SunIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="5" />
-      <path strokeLinecap="round" strokeLinejoin="round"
-        d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </svg>
-  );
-}
-function MoonIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-    </svg>
-  );
-}
+const NAV_LINKS = [
+  { href: '/market', label: 'Marketplace' },
+  { href: '/market/agents', label: 'Agents' },
+  { href: '/market/repos', label: 'Repos' },
+  { href: '/services', label: 'Services' },
+  { href: '/docs/agent-protocol', label: 'Docs' },
+];
 
-export function Navbar({ menuOpen, setMenuOpen }: NavbarProps) {
+export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const displayLabel = user?.displayName || user?.username || user?.githubLogin || 'user';
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 30);
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchRef.current) searchRef.current.focus();
+  }, [searchOpen]);
+
+  useEffect(() => { setProfileOpen(false); }, [pathname]);
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? 'bg-black/92 backdrop-blur-md border-b border-white/[0.06]' : ''
-      }`}
+      className="fixed top-0 left-0 right-0 z-40 transition-all duration-200 lg:left-[var(--sidebar-width)]"
+      style={{
+        background: 'var(--bg)',
+        backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        borderBottom: `1px solid ${scrolled ? 'var(--border)' : 'transparent'}`,
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="h-14 px-4 lg:px-6 flex items-center gap-4">
+        {/* Mobile menu toggle */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
 
-          {/* Left: Menu toggle + Logo */}
-          <div className="flex items-center gap-4">
+        {/* Nav links - desktop */}
+        <div className="hidden lg:flex items-center gap-1">
+          {NAV_LINKS.map((link) => {
+            const isActive = pathname === link.href || (link.href !== '/market' && pathname.startsWith(link.href));
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+                  isActive
+                    ? 'text-white bg-white/[0.08]'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* Search */}
+        <div className="relative">
+          {searchOpen ? (
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search agents, repos..."
+                  className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-monad-400/50 transition-colors"
+                  onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false); }}
+                />
+              </div>
+              <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="text-zinc-500 hover:text-zinc-300 p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
             <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`flex items-center justify-center w-9 h-9 rounded-lg border transition-all duration-200 ${
-                menuOpen
-                  ? 'border-monad-400/60 bg-monad-500/15 text-monad-400'
-                  : 'border-zinc-700 bg-white/5 text-zinc-300 hover:border-monad-400/50 hover:bg-monad-500/10 hover:text-monad-400'
-              }`}
-              aria-label="Toggle menu"
-              aria-expanded={menuOpen}
-              aria-controls="bolty-nav-panel"
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 text-xs transition-all"
             >
-              {menuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+              <Search className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Search</span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700">/</kbd>
+            </button>
+          )}
+        </div>
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        {isAuthenticated ? (
+          <>
+            <button className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all relative">
+              <Bell className="w-4 h-4" />
             </button>
 
-            <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="relative flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                <div className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-60 blur-md transition-opacity duration-300"
-                  style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.5) 0%, transparent 70%)' }} />
-                <BoltyLogo size={44} color="#836EF9" className="relative z-10" />
-              </div>
-              <span className="text-white font-bold text-base tracking-tight group-hover:text-monad-300 transition-colors">Bolty</span>
-              <span className="hidden sm:block text-xs text-zinc-600 font-mono">—</span>
-              <span className="hidden sm:block text-xs text-zinc-500 font-mono">AI Developer Platform</span>
+            <div ref={profileRef} className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-all"
+              >
+                {user?.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.avatarUrl} alt={displayLabel} className="w-7 h-7 rounded-full border border-zinc-700" />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-semibold">
+                    {displayLabel[0]?.toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">{displayLabel}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {profileOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50" style={{ background: 'var(--bg-card)' }}>
+                  <div className="p-3 border-b border-zinc-700/50">
+                    <p className="text-sm font-medium text-white truncate">{displayLabel}</p>
+                    <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
+                  </div>
+                  <div className="py-1">
+                    <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                      <User className="w-4 h-4" /> Profile
+                    </Link>
+                    <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                      <ShoppingBag className="w-4 h-4" /> Orders
+                    </Link>
+                    <Link href="/api-keys" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                      <Key className="w-4 h-4" /> API Keys
+                    </Link>
+                    <Link href="/profile?tab=security" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                      <Settings className="w-4 h-4" /> Settings
+                    </Link>
+                  </div>
+                  <div className="py-1 border-t border-zinc-700/50">
+                    <button onClick={logout} className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left">
+                      <LogOut className="w-4 h-4" /> Sign out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Link href="/auth" className="text-sm text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+              Sign in
+            </Link>
+            <Link href="/auth?tab=register" className="btn-primary text-sm px-3.5 py-1.5">
+              Get started
             </Link>
           </div>
-
-          {/* Right side */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleTheme}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-all duration-150"
-              aria-label="Toggle theme"
-            >
-              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-            </button>
-
-            {isAuthenticated ? (
-              <>
-                <Link href="/profile" className="flex items-center gap-2 group px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all">
-                  {user?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={user.avatarUrl} alt={displayLabel} className="w-6 h-6 rounded-full border border-zinc-700 group-hover:border-monad-400/50 transition-colors" />
-                  ) : (
-                    <div className="w-6 h-6 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-bold">
-                      {displayLabel[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <span className="text-zinc-400 text-sm hidden sm:block group-hover:text-zinc-200 transition-colors">{displayLabel}</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth?tab=register"
-                  className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 px-3 py-1.5 rounded-lg border border-zinc-800 hover:border-zinc-600 transition-all"
-                >
-                  <UserPlus className="w-3.5 h-3.5" />
-                  Register
-                </Link>
-                <Link href="/auth" className="flex items-center gap-1.5 btn-primary text-sm px-3 py-2 rounded-lg">
-                  Sign in
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </nav>
   );

@@ -1,15 +1,12 @@
 'use client';
+
 import React from 'react';
-import type { ComponentProps, ReactNode } from 'react';
 import Link from 'next/link';
-import { motion, useReducedMotion } from 'framer-motion';
-import { TwitterIcon, GithubIcon, MessageSquareIcon } from 'lucide-react';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 
 interface FooterLink {
   title: string;
   href: string;
-  icon?: React.ComponentType<{ className?: string }>;
   external?: boolean;
 }
 
@@ -22,121 +19,101 @@ const footerLinks: FooterSection[] = [
   {
     label: 'Product',
     links: [
-      { title: 'Community', href: '/chat' },
       { title: 'Marketplace', href: '/market' },
-      { title: 'Repositories', href: '/repos' },
-      { title: 'AI Assistant', href: '/ai' },
+      { title: 'AI Agents', href: '/market/agents' },
+      { title: 'Repositories', href: '/market/repos' },
+      { title: 'Services', href: '/services' },
     ],
   },
   {
-    label: 'Account',
+    label: 'Developers',
     links: [
-      { title: 'Sign In', href: '/auth' },
-      { title: 'Register', href: '/auth?tab=register' },
-      { title: 'Profile', href: '/profile' },
-      { title: 'Messages', href: '/dm' },
+      { title: 'Documentation', href: '/docs/agent-protocol' },
+      { title: 'API Keys', href: '/api-keys' },
+      { title: 'How It Works', href: '/how-it-works' },
+      { title: 'Agent Protocol', href: '/docs/agent-protocol' },
+    ],
+  },
+  {
+    label: 'Community',
+    links: [
+      { title: 'Global Chat', href: '/chat' },
+      { title: 'Leaderboard', href: '/reputation/leaderboard' },
+      { title: 'GitHub', href: 'https://github.com/boltynetwork', external: true },
+      { title: 'Twitter', href: 'https://x.com/boltynetwork', external: true },
     ],
   },
   {
     label: 'Company',
     links: [
-      { title: 'About Bolty', href: '/' },
-      { title: 'Privacy Policy', href: '/privacy' },
-      { title: 'Terms of Service', href: '/terms' },
+      { title: 'About', href: '/' },
+      { title: 'Privacy', href: '/privacy' },
+      { title: 'Terms', href: '/terms' },
       { title: 'Contact', href: '/chat' },
-    ],
-  },
-  {
-    label: 'Social',
-    links: [
-      { title: '@boltynetwork', href: 'https://x.com/boltynetwork', icon: TwitterIcon, external: true },
     ],
   },
 ];
 
 export function Footer() {
   return (
-    <footer className="relative w-full border-t px-6 py-12 lg:py-16" style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.98)' }}>
-      {/* Top gradient line */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-px w-1/3 rounded-full blur-sm" style={{ background: 'rgba(131,110,249,0.4)' }} />
-
-      <div className="max-w-6xl mx-auto grid w-full gap-8 xl:grid-cols-3 xl:gap-8">
-        {/* Brand column */}
-        <AnimatedContainer className="space-y-4">
-          <div className="flex items-center gap-2.5">
-            <BoltyLogo size={44} color="#836EF9" />
-            <span className="text-white font-bold text-base tracking-tight">Bolty</span>
+    <footer className="border-t px-6 py-10" style={{ borderColor: 'var(--border)', background: 'var(--bg)' }}>
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          {/* Brand */}
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2.5 mb-3">
+              <BoltyLogoSVG size={24} />
+              <span className="text-sm font-bold tracking-tight" style={{
+                background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>BoltyNetwork</span>
+            </div>
+            <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
+              The developer platform for publishing code, deploying AI agents, and earning from your work.
+            </p>
           </div>
-          <p className="text-sm leading-relaxed max-w-xs" style={{ color: '#71717a' }}>
-            The developer platform for publishing code, deploying AI agents, and growing your audience.
-          </p>
-          <p className="text-xs" style={{ color: '#52525b' }}>
-            © 2026 Bolty Network. All rights reserved.
-          </p>
-        </AnimatedContainer>
 
-        {/* Links grid */}
-        <div className="mt-10 grid grid-cols-2 gap-8 md:grid-cols-4 xl:col-span-2 xl:mt-0">
-          {footerLinks.map((section, index) => (
-            <AnimatedContainer key={section.label} delay={0.1 + index * 0.08}>
-              <div>
-                <h3 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#836EF9' }}>
-                  {section.label}
-                </h3>
-                <ul className="space-y-2.5 text-sm">
-                  {section.links.map((link) => (
-                    <li key={link.title}>
-                      {link.external ? (
-                        <a
-                          href={link.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-white"
-                          style={{ color: '#71717a' }}
-                        >
-                          {link.icon && <link.icon className="w-3.5 h-3.5 flex-shrink-0" />}
-                          {link.title}
-                        </a>
-                      ) : (
-                        <Link
-                          href={link.href}
-                          className="inline-flex items-center gap-1.5 transition-colors duration-200 hover:text-white"
-                          style={{ color: '#71717a' }}
-                        >
-                          {link.icon && <link.icon className="w-3.5 h-3.5 flex-shrink-0" />}
-                          {link.title}
-                        </Link>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </AnimatedContainer>
+          {/* Links */}
+          {footerLinks.map((section) => (
+            <div key={section.label}>
+              <h3 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">{section.label}</h3>
+              <ul className="space-y-1.5">
+                {section.links.map((link) => (
+                  <li key={link.title}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        {link.title}
+                      </a>
+                    ) : (
+                      <Link href={link.href} className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+                        {link.title}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
+        </div>
+
+        <div className="mt-8 pt-6 border-t flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+          <p className="text-xs text-zinc-600">&copy; {new Date().getFullYear()} Bolty Network. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="https://x.com/boltynetwork" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+              Twitter
+            </a>
+            <a href="https://github.com/boltynetwork" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+              GitHub
+            </a>
+          </div>
         </div>
       </div>
     </footer>
-  );
-}
-
-type ViewAnimationProps = {
-  delay?: number;
-  className?: ComponentProps<typeof motion.div>['className'];
-  children: ReactNode;
-};
-
-function AnimatedContainer({ className, delay = 0.1, children }: ViewAnimationProps) {
-  const shouldReduceMotion = useReducedMotion();
-  if (shouldReduceMotion) return <>{children}</>;
-  return (
-    <motion.div
-      initial={{ filter: 'blur(4px)', translateY: -8, opacity: 0 }}
-      whileInView={{ filter: 'blur(0px)', translateY: 0, opacity: 1 }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 0.8 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
   );
 }

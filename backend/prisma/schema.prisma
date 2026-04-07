@@ -86,6 +86,7 @@ model User {
   repoCollaborations     RepoCollaborator[]
   serviceListings        ServiceListing[]
   certifications         UserCertification[]
+  apiKeys                UserApiKey[]
 
   @@map("users")
 }
@@ -193,7 +194,7 @@ model MarketPurchase {
   id            String        @id @default(cuid())
   createdAt     DateTime      @default(now())
 
-  txHash        String        @unique       // seller payment tx (97.5%)
+  txHash        String        @unique       // escrow deposit tx (or legacy direct payment)
   amountWei     String        @default("0")
   verified      Boolean       @default(false)
 
@@ -204,6 +205,13 @@ model MarketPurchase {
   // Consent document (EIP-191 signed)
   consentSignature  String?   @db.Text
   consentMessage    String?   @db.Text
+
+  // Escrow fields
+  escrowContract    String?               // escrow contract address used
+  escrowStatus      EscrowStatus @default(NONE)
+  escrowReleaseTx   String?               // tx hash of release/refund
+  escrowDisputedAt  DateTime?
+  escrowResolvedAt  DateTime?
 
   // Order lifecycle
   status        OrderStatus   @default(PENDING_DELIVERY)
@@ -227,6 +235,15 @@ model MarketPurchase {
   @@index([buyerId, listingId])
   @@index([sellerId, status])
   @@map("market_purchases")
+}
+
+enum EscrowStatus {
+  NONE       // legacy direct payment (no escrow)
+  FUNDED     // ETH locked in escrow contract
+  RELEASED   // funds released to seller
+  DISPUTED   // dispute opened
+  RESOLVED   // admin resolved dispute (seller paid)
+  REFUNDED   // admin resolved dispute (buyer refunded)
 }
 
 enum OrderStatus {
@@ -672,4 +689,21 @@ model UserCertification {
   @@unique([userId, certId])
   @@index([userId])
   @@map("user_certifications")
+}
+
+// ─── User API Keys ────────────────────────────────────────────────────────────
+
+model UserApiKey {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+
+  keyHash     String        @unique    // bcrypt hash of the actual key
+  label       String?                 // optional label (e.g., "Production", "CI/CD")
+  lastUsedAt  DateTime?
+
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_api_keys")
 }

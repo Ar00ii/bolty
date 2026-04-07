@@ -4,20 +4,23 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { API_URL } from '@/lib/api/client';
-import { motion } from 'framer-motion';
 import {
   ShoppingBag, Package, Clock, CheckCircle2, AlertTriangle,
-  Truck, ArrowRight, BarChart3, TrendingUp, Users,
+  Truck, ArrowRight, BarChart3, TrendingUp, Lock,
 } from 'lucide-react';
 
 const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 
+type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
+
 interface Order {
   id: string;
   createdAt: string;
   status: OrderStatus;
+  escrowStatus: EscrowStatus;
+  escrowContract: string | null;
   amountWei: string;
   txHash: string;
   listing: { id: string; title: string; type: string; price: number; currency: string };
@@ -30,20 +33,20 @@ interface SellerStats {
   delivered: number; completed: number; disputed: number;
 }
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string; bg: string; icon: React.ElementType }> = {
-  PENDING_DELIVERY: { label: 'Pending',    color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  icon: Clock },
-  IN_PROGRESS:      { label: 'In Progress',color: '#836EF9', bg: 'rgba(131,110,249,0.1)', icon: Package },
-  DELIVERED:        { label: 'Delivered',  color: '#34d399', bg: 'rgba(52,211,153,0.1)',  icon: Truck },
-  COMPLETED:        { label: 'Completed',  color: '#71717a', bg: 'rgba(113,113,122,0.1)', icon: CheckCircle2 },
-  DISPUTED:         { label: 'Disputed',   color: '#f87171', bg: 'rgba(248,113,113,0.1)', icon: AlertTriangle },
+const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string; icon: React.ElementType }> = {
+  PENDING_DELIVERY: { label: 'Pending',     className: 'badge-warning', icon: Clock },
+  IN_PROGRESS:      { label: 'In Progress', className: 'badge',         icon: Package },
+  DELIVERED:        { label: 'Delivered',   className: 'badge-success', icon: Truck },
+  COMPLETED:        { label: 'Completed',   className: 'badge-secondary', icon: CheckCircle2 },
+  DISPUTED:         { label: 'Disputed',    className: 'badge-error',   icon: AlertTriangle },
 };
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const cfg = STATUS_CONFIG[status];
   const Icon = cfg.icon;
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.color}30`, padding: '0.2rem 0.6rem', borderRadius: 999 }}>
-      <Icon style={{ width: 11, height: 11 }} strokeWidth={2} />
+    <span className={`badge ${cfg.className} flex items-center gap-1`}>
+      <Icon className="w-3 h-3" strokeWidth={2} />
       {cfg.label}
     </span>
   );
@@ -54,68 +57,65 @@ function OrderCard({ order, isSeller, onClick }: { order: Order; isSeller: boole
   const ethAmount = order.amountWei ? (parseFloat(order.amountWei) / 1e18).toFixed(4) : '—';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -2, borderColor: 'rgba(131,110,249,0.35)', boxShadow: '0 8px 28px rgba(131,110,249,0.08)' } as any}
+    <div
       onClick={onClick}
-      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 14, padding: '1.2rem 1.4rem', cursor: 'pointer', transition: 'border-color 0.2s, box-shadow 0.2s', display: 'flex', alignItems: 'center', gap: '1rem' }}
+      className="card-interactive flex items-center gap-4 p-4 cursor-pointer"
     >
       {/* Avatar */}
-      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+      <div className="w-10 h-10 rounded-full bg-monad-500/15 border border-monad-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
         {peer?.avatarUrl ? (
-          <img src={peer.avatarUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <span style={{ fontSize: '1rem', color: '#836EF9' }}>{(peer?.username || '?')[0].toUpperCase()}</span>
+          <span className="text-base text-monad-400">{(peer?.username || '?')[0].toUpperCase()}</span>
         )}
       </div>
 
       {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-          <span style={{ fontWeight: 700, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {order.listing.title}
-          </span>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
+          <span className="font-semibold text-sm text-white truncate">{order.listing.title}</span>
           <StatusBadge status={order.status} />
+          {order.escrowStatus && order.escrowStatus !== 'NONE' && (
+            <span className="badge-success flex items-center gap-1 text-[10px]">
+              <Lock className="w-2.5 h-2.5" /> Escrow
+            </span>
+          )}
         </div>
-        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-          {isSeller ? 'Buyer' : 'Seller'}: <strong style={{ color: 'var(--text)' }}>@{peer?.username || 'Unknown'}</strong>
-          <span style={{ margin: '0 0.4rem', opacity: 0.4 }}>·</span>
+        <div className="text-xs text-zinc-500">
+          {isSeller ? 'Buyer' : 'Seller'}: <span className="text-zinc-300 font-medium">@{peer?.username || 'Unknown'}</span>
+          <span className="mx-1 opacity-40">·</span>
           {new Date(order.createdAt).toLocaleDateString()}
         </div>
       </div>
 
       {/* Amount */}
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '0.9rem', color: '#836EF9' }}>
-          {ethAmount} ETH
-        </div>
-        <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          {order.listing.type}
-        </div>
+      <div className="text-right flex-shrink-0">
+        <div className="font-mono font-bold text-sm text-monad-400">{ethAmount} ETH</div>
+        <div className="text-[10px] text-zinc-600 uppercase tracking-wide mt-0.5">{order.listing.type}</div>
       </div>
 
-      <ArrowRight style={{ width: 15, height: 15, color: 'var(--text-muted)', flexShrink: 0 }} strokeWidth={1.5} />
-    </motion.div>
+      <ArrowRight className="w-4 h-4 text-zinc-600 flex-shrink-0" strokeWidth={1.5} />
+    </div>
   );
 }
 
 export default function OrdersPage() {
   const { user } = useAuth();
   const router   = useRouter();
-  const [tab, setTab]               = useState<'buying' | 'selling'>('buying');
+  const [tab, setTab] = useState<'buying' | 'selling'>('buying');
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
-  const [stats, setStats]           = useState<SellerStats | null>(null);
-  const [loading, setLoading]       = useState(true);
+  const [stats, setStats] = useState<SellerStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
     setLoading(true);
     try {
       const [buyRes, sellRes, statsRes] = await Promise.all([
-        fetch(`${API}/orders`,          { credentials: 'include' }),
-        fetch(`${API}/orders/selling`,  { credentials: 'include' }),
+        fetch(`${API}/orders`,              { credentials: 'include' }),
+        fetch(`${API}/orders/selling`,      { credentials: 'include' }),
         fetch(`${API}/orders/seller/stats`, { credentials: 'include' }),
       ]);
       if (buyRes.ok)   setBuyerOrders(await buyRes.json());
@@ -130,9 +130,9 @@ export default function OrdersPage() {
 
   if (!user) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem' }}>
-        <ShoppingBag style={{ width: 40, height: 40, color: 'var(--text-muted)' }} strokeWidth={1} />
-        <p style={{ color: 'var(--text-muted)' }}>Sign in to view your orders</p>
+      <div className="min-h-[60vh] flex items-center justify-center flex-col gap-3">
+        <ShoppingBag className="w-10 h-10 text-zinc-600" strokeWidth={1} />
+        <p className="text-zinc-500">Sign in to view your orders</p>
       </div>
     );
   }
@@ -140,88 +140,73 @@ export default function OrdersPage() {
   const orders = tab === 'buying' ? buyerOrders : sellerOrders;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', paddingTop: '5rem', paddingBottom: '4rem' }}>
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '0 1.5rem' }}>
+    <div className="page-container py-8">
+      {/* Header */}
+      <div className="page-header">
+        <h1 className="text-2xl font-bold text-white tracking-tight">Orders</h1>
+        <p className="text-sm text-zinc-500 mt-1">Track all your purchases and sales in one place.</p>
+      </div>
 
-        {/* Header */}
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.4rem)', fontWeight: 800, letterSpacing: '-0.025em', marginBottom: '0.4rem' }}>Orders</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Track all your purchases and sales in one place.</p>
-        </div>
-
-        {/* Seller Stats (when on selling tab) */}
-        {tab === 'selling' && stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '0.75rem', marginBottom: '2rem' }}>
-            {[
-              { label: 'Total',       value: stats.total,      icon: BarChart3 },
-              { label: 'Pending',     value: stats.pending,    icon: Clock },
-              { label: 'In Progress', value: stats.inProgress, icon: Package },
-              { label: 'Delivered',   value: stats.delivered,  icon: Truck },
-              { label: 'Completed',   value: stats.completed,  icon: CheckCircle2 },
-              { label: 'Disputed',    value: stats.disputed,   icon: AlertTriangle },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: '1rem', textAlign: 'center' }}>
-                <Icon style={{ width: 16, height: 16, color: '#836EF9', margin: '0 auto 0.4rem' }} strokeWidth={1.5} />
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.4rem', color: '#836EF9' }}>{value}</div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', background: 'var(--bg-elevated)', borderRadius: 10, padding: '0.25rem', border: '1px solid var(--border)', width: 'fit-content' }}>
-          {(['buying', 'selling'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              style={{ padding: '0.5rem 1.1rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', transition: 'all 0.15s', background: tab === t ? '#836EF9' : 'transparent', color: tab === t ? '#fff' : 'var(--text-muted)' }}
-            >
-              {t === 'buying' ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <ShoppingBag style={{ width: 13, height: 13 }} strokeWidth={2} /> Buying ({buyerOrders.length})
-                </span>
-              ) : (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <TrendingUp style={{ width: 13, height: 13 }} strokeWidth={2} /> Selling ({sellerOrders.length})
-                </span>
-              )}
-            </button>
+      {/* Seller Stats */}
+      {tab === 'selling' && stats && (
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+          {[
+            { label: 'Total',       value: stats.total,      icon: BarChart3 },
+            { label: 'Pending',     value: stats.pending,    icon: Clock },
+            { label: 'In Progress', value: stats.inProgress, icon: Package },
+            { label: 'Delivered',   value: stats.delivered,  icon: Truck },
+            { label: 'Completed',   value: stats.completed,  icon: CheckCircle2 },
+            { label: 'Disputed',    value: stats.disputed,   icon: AlertTriangle },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="card p-4 text-center">
+              <Icon className="w-4 h-4 text-monad-400 mx-auto mb-2" strokeWidth={1.5} />
+              <div className="font-mono font-bold text-xl text-monad-400">{value}</div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wider mt-1">{label}</div>
+            </div>
           ))}
         </div>
+      )}
 
-        {/* Orders list */}
-        {loading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} style={{ height: 76, background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', opacity: 0.5 }} />
-            ))}
-          </div>
-        ) : orders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 2rem', background: 'var(--bg-card)', borderRadius: 16, border: '1px solid var(--border)' }}>
-            <ShoppingBag style={{ width: 36, height: 36, color: 'var(--text-muted)', margin: '0 auto 1rem' }} strokeWidth={1} />
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-              {tab === 'buying' ? 'No purchases yet. Browse the marketplace!' : 'No sales yet. Create a listing!'}
-            </p>
-            <a href="/market" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '1.25rem', background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', color: '#fff', fontWeight: 600, fontSize: '0.85rem', padding: '0.6rem 1.2rem', borderRadius: 9, textDecoration: 'none' }}>
-              <BarChart3 style={{ width: 14, height: 14 }} strokeWidth={2} />
-              {tab === 'buying' ? 'Explore Marketplace' : 'Create Listing'}
-            </a>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {orders.map((order, i) => (
-              <motion.div key={order.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                <OrderCard
-                  order={order}
-                  isSeller={tab === 'selling'}
-                  onClick={() => router.push(`/orders/${order.id}`)}
-                />
-              </motion.div>
-            ))}
-          </div>
-        )}
+      {/* Tabs */}
+      <div className="tab-group mb-6">
+        <button onClick={() => setTab('buying')} className={`tab-item ${tab === 'buying' ? 'active' : ''}`}>
+          <ShoppingBag className="w-3.5 h-3.5" /> Buying ({buyerOrders.length})
+        </button>
+        <button onClick={() => setTab('selling')} className={`tab-item ${tab === 'selling' ? 'active' : ''}`}>
+          <TrendingUp className="w-3.5 h-3.5" /> Selling ({sellerOrders.length})
+        </button>
       </div>
+
+      {/* Orders list */}
+      {loading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="skeleton h-[76px] rounded-xl" />
+          ))}
+        </div>
+      ) : orders.length === 0 ? (
+        <div className="card text-center py-16 px-6">
+          <ShoppingBag className="w-10 h-10 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
+          <p className="text-zinc-500 text-sm mb-6">
+            {tab === 'buying' ? 'No purchases yet. Browse the marketplace!' : 'No sales yet. Create a listing!'}
+          </p>
+          <a href="/market" className="btn-primary text-sm px-5 py-2 inline-flex items-center gap-2">
+            <BarChart3 className="w-4 h-4" />
+            {tab === 'buying' ? 'Explore Marketplace' : 'Create Listing'}
+          </a>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {orders.map((order) => (
+            <OrderCard
+              key={order.id}
+              order={order}
+              isSeller={tab === 'selling'}
+              onClick={() => router.push(`/orders/${order.id}`)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

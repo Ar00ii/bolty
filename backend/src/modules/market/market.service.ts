@@ -230,6 +230,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     platformFeeTxHash?: string,
     consentSignature?: string,
     consentMessage?: string,
+    escrowContract?: string,
   ) {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
@@ -248,6 +249,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
+    const configuredEscrow = this.config.get<string>('ESCROW_CONTRACT', '');
     const sellerWallet = listing.seller.walletAddress;
 
     if (!sellerWallet) {
@@ -271,7 +273,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       }
     }
 
-    // ── On-chain verification (seller payment) ───────────────────────────
+    const useEscrow = !!(escrowContract && configuredEscrow);
     let verifiedAmountWei = amountWei;
     let platformFeeWei = '0';
 
@@ -279,38 +281,50 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       const provider = new ethers.JsonRpcProvider(rpcUrl);
       const receipt = await provider.getTransactionReceipt(txHash);
       if (!receipt || receipt.status !== 1) {
-        throw new BadRequestException('Seller payment transaction failed or not found');
+        throw new BadRequestException('Transaction failed or not found');
       }
       const tx = await provider.getTransaction(txHash);
       if (!tx) throw new BadRequestException('Transaction not found');
-      if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
-        throw new BadRequestException('Transaction recipient does not match seller wallet');
+
+      if (useEscrow) {
+        // ── Escrow mode: verify deposit was sent to the escrow contract ──
+        if (escrowContract.toLowerCase() !== configuredEscrow.toLowerCase()) {
+          throw new BadRequestException('Escrow contract address mismatch');
+        }
+        if (tx.to?.toLowerCase() !== escrowContract.toLowerCase()) {
+          throw new BadRequestException('Transaction was not sent to escrow contract');
+        }
+        verifiedAmountWei = tx.value.toString();
+      } else {
+        // ── Legacy direct mode: verify payment to seller ─────────────────
+        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
+          throw new BadRequestException('Transaction recipient does not match seller wallet');
+        }
+        verifiedAmountWei = tx.value.toString();
+
+        // Verify platform commission (legacy only — escrow handles split automatically)
+        if (platformWallet && platformFeeTxHash) {
+          try {
+            const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
+            const feeTx = await provider.getTransaction(platformFeeTxHash);
+            if (!feeReceipt || feeReceipt.status !== 1) {
+              throw new BadRequestException('Platform fee transaction failed or not found');
+            }
+            if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
+              throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
+            }
+            platformFeeWei = feeTx.value.toString();
+          } catch (err) {
+            if (err instanceof BadRequestException) throw err;
+            this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
+            throw new BadRequestException('Could not verify platform fee transaction');
+          }
+        }
       }
-      verifiedAmountWei = tx.value.toString();
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
-      this.logger.error(`Market seller tx verification error: ${err instanceof Error ? err.message : err}`);
-      throw new BadRequestException('Could not verify seller payment on-chain');
-    }
-
-    // ── Platform commission verification (2.5%) ──────────────────────────
-    if (platformWallet && platformFeeTxHash) {
-      try {
-        const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
-        const feeTx = await provider.getTransaction(platformFeeTxHash);
-        if (!feeReceipt || feeReceipt.status !== 1) {
-          throw new BadRequestException('Platform fee transaction failed or not found');
-        }
-        if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
-          throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
-        }
-        platformFeeWei = feeTx.value.toString();
-      } catch (err) {
-        if (err instanceof BadRequestException) throw err;
-        this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
-        throw new BadRequestException('Could not verify platform fee transaction');
-      }
+      this.logger.error(`Tx verification error: ${err instanceof Error ? err.message : err}`);
+      throw new BadRequestException('Could not verify transaction on-chain');
     }
 
     const purchase = await this.prisma.marketPurchase.create({
@@ -323,27 +337,32 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         negotiationId: negotiationId || null,
         verified: true,
         status: 'PENDING_DELIVERY',
-        platformFeeTxHash: platformFeeTxHash || null,
-        platformFeeWei: platformFeeWei || null,
+        platformFeeTxHash: useEscrow ? null : (platformFeeTxHash || null),
+        platformFeeWei: useEscrow ? null : (platformFeeWei || null),
         consentSignature: consentSignature || null,
         consentMessage: consentMessage || null,
+        escrowContract: useEscrow ? escrowContract : null,
+        escrowStatus: useEscrow ? 'FUNDED' : 'NONE',
       },
     });
 
     // Auto-create welcome message in order chat
     try {
+      const escrowNote = useEscrow
+        ? ' Funds are held in escrow and will be released when you confirm delivery.'
+        : '';
       await this.prisma.orderMessage.create({
         data: {
           orderId: purchase.id,
           senderId: listing.sellerId,
-          content: `👋 Order created! Payment confirmed on-chain. Hi, I'm ready to fulfill your order for "${listing.title}". Feel free to message me here with any questions.`,
+          content: `Order created! Payment confirmed on-chain.${escrowNote} I'm ready to fulfill your order for "${listing.title}". Feel free to message me here with any questions.`,
         },
       });
     } catch (err) {
       this.logger.error('Failed to create order welcome message', err);
     }
 
-    return { success: true, purchase, orderId: purchase.id };
+    return { success: true, purchase, orderId: purchase.id, escrow: useEscrow };
   }
 
   async deleteListing(id: string, userId: string) {

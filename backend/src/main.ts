@@ -7,6 +7,8 @@ import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { WinstonLogger } from './common/logger/winston.logger';
 
+// API Key generation fix - rebuild trigger
+
 const REQUIRED_ENV_VARS = [
   'JWT_SECRET',
   'DATABASE_URL',
