@@ -1,11 +1,15 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import { PrismaService } from '@/database/prisma.service';
+import { EmailService } from '../email/email.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 @Injectable()
 export class ApiKeysService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly email: EmailService,
+  ) {}
 
   /**
    * Generate a new API key with the prefix "blt_"
@@ -64,6 +68,19 @@ export class ApiKeysService {
   }
 
   /**
+   * Delete an API key (revoke it)
+   */
+  async deleteApiKey(keyId: string, userId: string) {
+    await this.prisma.userApiKey.deleteMany({
+      where: {
+        id: keyId,
+        userId, // Ensure user can only delete their own keys
+      },
+    });
+    return { success: true, message: 'API key revoked successfully' };
+  }
+
+  /**
    * Request a verification code to delete an API key
    */
   async requestDeleteVerification(userId: string, keyId: string, userEmail: string) {
@@ -101,12 +118,12 @@ export class ApiKeysService {
       },
     });
 
-    // In production, send email here
-    // For now, return code (remove in production)
+    // Send verification code email
+    await this.email.sendApiKeyDeleteCode(userEmail, code);
+
     return {
       success: true,
       message: 'Verification code sent to your email',
-      // REMOVE IN PRODUCTION: code (for testing only)
     };
   }
 
