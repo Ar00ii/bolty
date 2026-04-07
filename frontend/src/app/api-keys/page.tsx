@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import {
   Key, Plus, Trash2, Copy, Check, Eye, EyeOff, AlertTriangle,
-  Shield, Clock, MoreHorizontal,
+  Shield, X, Mail,
 } from 'lucide-react';
 
 interface ApiKeyInfo {
   id: string;
   label: string | null;
-  key?: string; // Only present on creation
+  key?: string;
   createdAt: string;
   lastUsedAt: string | null;
 }
@@ -37,6 +37,115 @@ function timeAgo(d: string): string {
   return formatDate(d);
 }
 
+// ── Confirm Modal ──────────────────────────────────────────────────────────────
+function ConfirmDeleteModal({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-sm rounded-2xl border p-6" style={{ background: 'var(--bg-card)', borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <Trash2 className="w-5 h-5 text-red-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Revoke API Key</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">This action cannot be undone</p>
+          </div>
+          <button onClick={onCancel} className="ml-auto text-zinc-600 hover:text-zinc-300 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+          Are you sure you want to revoke this API key? Any applications using it will lose access immediately.
+        </p>
+        <div className="flex gap-2">
+          <button onClick={onCancel} className="flex-1 py-2 rounded-xl text-sm text-zinc-400 border border-zinc-800 hover:border-zinc-600 transition-all">
+            Cancel
+          </button>
+          <button onClick={onConfirm} className="flex-1 py-2 rounded-xl text-sm font-semibold text-white transition-all" style={{ background: 'rgba(239,68,68,0.8)', border: '1px solid rgba(239,68,68,0.4)' }}>
+            Revoke Key
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Verification Code Modal ────────────────────────────────────────────────────
+function VerifyCodeModal({
+  onSubmit,
+  onCancel,
+  loading,
+  error,
+}: {
+  onSubmit: (code: string) => void;
+  onCancel: () => void;
+  loading: boolean;
+  error: string;
+}) {
+  const [code, setCode] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-sm rounded-2xl border p-6" style={{ background: 'var(--bg-card)', borderColor: 'rgba(255,255,255,0.08)' }}>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}>
+            <Mail className="w-5 h-5 text-monad-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Email Verification</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">Check your inbox for the code</p>
+          </div>
+          <button onClick={onCancel} className="ml-auto text-zinc-600 hover:text-zinc-300 transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
+          A 6-digit verification code has been sent to your email. Enter it below to confirm the deletion.
+        </p>
+
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          maxLength={6}
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+          onKeyDown={(e) => { if (e.key === 'Enter' && code.length === 6) onSubmit(code); }}
+          placeholder="000000"
+          className="input w-full text-center text-2xl font-mono tracking-[0.5em] mb-3"
+          style={{ letterSpacing: '0.5em' }}
+        />
+
+        {error && (
+          <div className="flex items-center gap-2 p-2.5 rounded-lg mb-3 text-xs text-red-400" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+            {error}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <button onClick={onCancel} className="flex-1 py-2 rounded-xl text-sm text-zinc-400 border border-zinc-800 hover:border-zinc-600 transition-all">
+            Cancel
+          </button>
+          <button
+            onClick={() => onSubmit(code)}
+            disabled={code.length !== 6 || loading}
+            className="flex-1 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-40"
+            style={{ background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}
+          >
+            {loading ? <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Confirm'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
 export default function ApiKeysPage() {
   const { user } = useAuth();
   const [keys, setKeys] = useState<ApiKeyInfo[]>([]);
@@ -49,6 +158,13 @@ export default function ApiKeysPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
+
+  // Modal state
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const pendingDeleteId = useRef<string | null>(null);
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -86,36 +202,58 @@ export default function ApiKeysPage() {
     }
   };
 
-  const deleteKey = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) return;
+  // Step 1: Show confirm modal
+  const handleDeleteClick = (id: string) => {
+    setConfirmDeleteId(id);
+  };
+
+  // Step 2: After confirm, request verification code
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId!;
+    setConfirmDeleteId(null);
     setDeletingId(id);
     setError('');
+
     try {
-      // Try verification flow first (for users with email)
-      try {
-        await api.post(`/market/api-keys/${id}/request-delete-verification`, {});
-        const code = prompt('A verification code has been sent to your email. Enter it below:');
-        if (!code) {
-          setError('Verification cancelled');
-          setDeletingId(null);
-          return;
-        }
-        await api.delete(`/market/api-keys/${id}`, { code });
-      } catch (verifyErr) {
-        // If verification fails (no email), delete directly
-        if (verifyErr instanceof ApiError && verifyErr.status === 400) {
-          await api.delete(`/market/api-keys/${id}`);
-        } else {
-          throw verifyErr;
-        }
-      }
-      setKeys(prev => prev.filter(k => k.id !== id));
-      if (newlyCreatedKey) setNewlyCreatedKey(null);
+      await api.post(`/market/api-keys/${id}/request-delete-verification`, {});
+      pendingDeleteId.current = id;
+      setShowVerifyModal(true);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
-    } finally {
+      if (err instanceof ApiError && err.status === 400) {
+        // No email — delete directly
+        await api.delete(`/market/api-keys/${id}`);
+        setKeys(prev => prev.filter(k => k.id !== id));
+        if (newlyCreatedKey) setNewlyCreatedKey(null);
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
+      }
       setDeletingId(null);
     }
+  };
+
+  // Step 3: Verify code and delete
+  const handleVerifyCode = async (code: string) => {
+    const id = pendingDeleteId.current!;
+    setVerifying(true);
+    setVerifyError('');
+    try {
+      await api.delete(`/market/api-keys/${id}`, { code });
+      setKeys(prev => prev.filter(k => k.id !== id));
+      if (newlyCreatedKey) setNewlyCreatedKey(null);
+      setShowVerifyModal(false);
+    } catch (err) {
+      setVerifyError(err instanceof ApiError ? err.message : 'Invalid code');
+    } finally {
+      setVerifying(false);
+      setDeletingId(null);
+    }
+  };
+
+  const handleCancelVerify = () => {
+    setShowVerifyModal(false);
+    setVerifyError('');
+    setDeletingId(null);
+    pendingDeleteId.current = null;
   };
 
   const copyToClipboard = (text: string, id: string) => {
@@ -135,6 +273,22 @@ export default function ApiKeysPage() {
 
   return (
     <div className="page-container py-8">
+      {/* Modals */}
+      {confirmDeleteId && (
+        <ConfirmDeleteModal
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
+      {showVerifyModal && (
+        <VerifyCodeModal
+          onSubmit={handleVerifyCode}
+          onCancel={handleCancelVerify}
+          loading={verifying}
+          error={verifyError}
+        />
+      )}
+
       {/* Header */}
       <div className="page-header flex items-start justify-between">
         <div>
@@ -245,7 +399,6 @@ export default function ApiKeysPage() {
         </div>
       ) : (
         <div className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-          {/* Table header */}
           <div className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider border-b" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
             <span>Name</span>
             <span>Key</span>
@@ -254,7 +407,6 @@ export default function ApiKeysPage() {
             <span className="text-right">Actions</span>
           </div>
 
-          {/* Table rows */}
           {keys.map((k) => (
             <div
               key={k.id}
@@ -275,7 +427,6 @@ export default function ApiKeysPage() {
                     return s;
                   })}
                   className="text-zinc-600 hover:text-zinc-400 flex-shrink-0"
-                  title={revealedKeys.has(k.id) ? 'Hide' : 'Reveal'}
                 >
                   {revealedKeys.has(k.id) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                 </button>
@@ -289,16 +440,14 @@ export default function ApiKeysPage() {
                   <button
                     onClick={() => copyToClipboard(k.key!, k.id)}
                     className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
-                    title="Copy key"
                   >
                     {copiedId === k.id ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 )}
                 <button
-                  onClick={() => deleteKey(k.id)}
+                  onClick={() => handleDeleteClick(k.id)}
                   disabled={deletingId === k.id}
                   className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
-                  title="Revoke key"
                 >
                   {deletingId === k.id ? (
                     <span className="w-3.5 h-3.5 border-2 border-zinc-500/30 border-t-zinc-500 rounded-full animate-spin" />
