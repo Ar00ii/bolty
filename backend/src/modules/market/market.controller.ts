@@ -24,6 +24,7 @@ import * as crypto from 'crypto';
 import { MarketService } from './market.service';
 import { NegotiationService } from './negotiation.service';
 import { AgentScanService } from './agent-scan.service';
+import { ApiKeysService } from './api-keys.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
@@ -79,7 +80,33 @@ export class MarketController {
     private readonly marketService: MarketService,
     private readonly negotiationService: NegotiationService,
     private readonly agentScanService: AgentScanService,
+    private readonly apiKeysService: ApiKeysService,
   ) {}
+
+  // ── API Keys ───────────────────────────────────────────────────────────────
+
+  @Get('api-keys')
+  getApiKeys(@CurrentUser('id') userId: string) {
+    return this.apiKeysService.getUserApiKeys(userId);
+  }
+
+  @Post('api-keys')
+  @HttpCode(HttpStatus.CREATED)
+  createApiKey(
+    @CurrentUser('id') userId: string,
+    @Body() body: { label?: string | null },
+  ) {
+    return this.apiKeysService.createApiKey(userId, body.label || null);
+  }
+
+  @Delete('api-keys/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteApiKey(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+  ) {
+    await this.apiKeysService.deleteApiKey(id, userId);
+  }
 
   // ── Listings ───────────────────────────────────────────────────────────────
 
