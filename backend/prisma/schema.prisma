@@ -707,3 +707,29 @@ model UserApiKey {
   @@index([userId])
   @@map("user_api_keys")
 }
+
+// ─── Verification Codes (OTP for email verification) ─────────────────────────
+
+model VerificationCode {
+  id          String        @id @default(cuid())
+  createdAt   DateTime      @default(now())
+  expiresAt   DateTime
+
+  email       String
+  code        String        @unique    // 6-digit code
+  purpose     VerificationPurpose      // what this code is for (e.g., delete_api_key)
+  data        Json?                    // store context (e.g., keyId to delete)
+
+  attempts    Int           @default(0)
+  maxAttempts Int           @default(5)
+  verified    Boolean       @default(false)
+
+  @@index([email, purpose])
+  @@map("verification_codes")
+}
+
+enum VerificationPurpose {
+  DELETE_API_KEY
+  SETUP_2FA
+  CHANGE_EMAIL
+}
