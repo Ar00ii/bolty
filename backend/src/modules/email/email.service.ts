@@ -176,16 +176,19 @@ export class EmailService {
   async send2FACode(to: string, code: string): Promise<void> {
     const subject = `${code} — your Bolty sign-in code`;
     const html = shell(subject, `Your Bolty sign-in code is ${code}`, bodyWrap(`
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Two-Factor Sign-In</h1>
-      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
-        Enter this code to complete your Bolty sign-in.
-        It expires in <strong style="color:#18181b;">10 minutes</strong>.
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Complete Your Sign-In</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        Here's your 6-digit verification code to complete your Bolty sign-in.
+        This code expires in <strong style="color:#18181b;">10 minutes</strong>.
       </p>
       ${otpBlock(code)}
-      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;">
-        <p style="margin:0;font-size:13px;color:#92400e;">
-          <strong>Never share this code.</strong> Bolty will never ask for it by phone or chat.
-          If you didn't sign in, change your password immediately.
+      <p style="margin:0 0 20px;color:#71717a;font-size:14px;line-height:1.6;text-align:center;">
+        Enter the code above to verify your identity
+      </p>
+      <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#3730a3;">
+          <strong>Security tip:</strong> Never share this code with anyone. Bolty will never ask for it by phone or email.
+          If you didn't request this sign-in, you can safely ignore this email.
         </p>
       </div>
     `));
@@ -199,14 +202,18 @@ export class EmailService {
     const subject = `${code} — confirm your new Bolty email`;
     const html = shell(subject, `Confirm your email change with code ${code}`, bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Confirm Email Change</h1>
-      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
-        You requested to change your Bolty email to this address.
-        Enter the code below to confirm. Expires in <strong style="color:#18181b;">15 minutes</strong>.
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        You requested to change your Bolty email address to this one.
+        Enter the 6-digit code below to confirm the change.
+        This code expires in <strong style="color:#18181b;">15 minutes</strong>.
       </p>
       ${otpBlock(code)}
-      <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;">
-        <p style="margin:0;font-size:13px;color:#9f1239;">
-          <strong>Didn't request this?</strong> Sign in and change your password immediately.
+      <p style="margin:0 0 20px;color:#71717a;font-size:14px;line-height:1.6;text-align:center;">
+        Enter the code above to complete your email change
+      </p>
+      <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;padding:14px 18px;">
+        <p style="margin:0;font-size:13px;color:#92400e;">
+          <strong>Didn't request this?</strong> Your email won't change unless you enter the code. If this wasn't you, sign in and change your password immediately.
         </p>
       </div>
     `));
@@ -250,17 +257,22 @@ export class EmailService {
   // ── Enable 2FA confirmation ───────────────────────────────────────────────
 
   async send2FAEnableCode(to: string, code: string): Promise<void> {
-    const subject = `${code} — confirm two-factor authentication`;
+    const subject = `${code} — enable two-factor authentication`;
     const html = shell(subject, `Confirm 2FA activation: ${code}`, bodyWrap(`
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Auth</h1>
-      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
-        You requested to enable two-factor authentication on your Bolty account.
-        Enter this code to confirm. Expires in <strong style="color:#18181b;">10 minutes</strong>.
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Authentication</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        You requested to enable two-factor authentication (2FA) on your Bolty account.
+        This adds an extra layer of security to protect your account.
+        Enter the 6-digit code below to confirm. This code expires in <strong style="color:#18181b;">10 minutes</strong>.
       </p>
       ${otpBlock(code)}
+      <p style="margin:0 0 20px;color:#71717a;font-size:14px;line-height:1.6;text-align:center;">
+        Enter the code above to enable 2FA on your account
+      </p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;">
         <p style="margin:0;font-size:13px;color:#166534;">
-          <strong>Didn't request this?</strong> Your account is safe — just ignore this email.
+          <strong>🔒 Enhancing security:</strong> Two-factor authentication requires a second verification code when you sign in, making your account much more secure.
+          If you didn't request this, you can safely ignore this email.
         </p>
       </div>
     `));
@@ -325,23 +337,34 @@ export class EmailService {
   // ── Delete account ───────────────────────────────────────────────────────
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {
-    const subject = `${code} — Bolty account deletion confirmation`;
+    const subject = `${code} — confirm account deletion`;
     const html = shell(subject, `Confirm account deletion: ${code}`, bodyWrap(`
-      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Account Deletion Request</h1>
-      <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">⚠️ Account Deletion Request</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to permanently delete your Bolty account.
-        Enter this code to confirm. This action <strong style="color:#18181b;">cannot be undone</strong>.
-        Expires in <strong style="color:#18181b;">10 minutes</strong>.
+        This action <strong style="color:#18181b;">cannot be undone</strong>.
+        Enter the 6-digit code below to confirm. This code expires in <strong style="color:#18181b;">10 minutes</strong>.
       </p>
       ${otpBlock(code)}
-      <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:14px 18px;">
-        <p style="margin:0;font-size:13px;color:#9f1239;">
-          <strong>This will permanently delete your account, all data, repositories and listings.</strong>
-          If you didn't request this, change your password immediately.
+      <p style="margin:0 0 20px;color:#71717a;font-size:14px;line-height:1.6;text-align:center;">
+        Enter the code above to permanently delete your account
+      </p>
+      <div style="background:#fef2f2;border:2px solid #fecdd3;border-radius:10px;padding:16px 20px;">
+        <p style="margin:0 0 8px;font-size:13px;color:#9f1239;font-weight:700;">
+          ⚠️ Warning: This will permanently delete:
+        </p>
+        <ul style="margin:8px 0 0 0;padding-left:20px;color:#9f1239;font-size:13px;">
+          <li>Your entire Bolty account and profile</li>
+          <li>All your API keys and tokens</li>
+          <li>All your listings and agent posts</li>
+          <li>All your data and activity history</li>
+        </ul>
+        <p style="margin:8px 0 0;font-size:13px;color:#9f1239;">
+          <strong>If you didn't request this, change your password immediately.</strong>
         </p>
       </div>
     `));
-    const text = `Your Bolty account deletion code: ${code}\n\nExpires in 10 minutes. This is PERMANENT.`;
+    const text = `Your Bolty account deletion code: ${code}\n\nExpires in 10 minutes. This is PERMANENT and will delete all your data.`;
     await this.send(to, subject, html, text);
   }
 
