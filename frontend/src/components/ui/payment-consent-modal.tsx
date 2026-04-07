@@ -7,8 +7,8 @@ import { isEscrowEnabled } from '@/lib/wallet/escrow';
 interface PaymentConsentModalProps {
   listingTitle: string;
   sellerAddress: string;
-  sellerAmountETH: string;   // 97.5% of total
-  platformFeeETH: string;    // 2.5% of total
+  sellerAmountETH: string;   // 94% of total
+  platformFeeETH: string;    // 6% of total
   totalETH: string;
   totalUsd: string;          // total in USD
   buyerAddress: string;
@@ -75,8 +75,8 @@ export function PaymentConsentModal({
         escrow ? `Mode: ESCROW (funds held until delivery confirmed)` : `Mode: DIRECT PAYMENT`,
         '',
         'PAYMENT BREAKDOWN:',
-        `  To seller:        ${sellerAmountETH} ETH  (97.5%)`,
-        `  Platform fee:     ${platformFeeETH} ETH   (2.5%)`,
+        `  To seller:        ${sellerAmountETH} ETH  (94%)`,
+        `  Platform fee:     ${platformFeeETH} ETH   (6%)`,
         `  Total:            ${totalETH} ETH`,
         '',
         'BY SIGNING THIS DOCUMENT I CONFIRM:',
@@ -151,11 +151,11 @@ export function PaymentConsentModal({
           <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-3">Transaction breakdown</p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-zinc-400">To seller <span className="text-zinc-600 font-mono text-xs">(97.5%)</span></span>
+              <span className="text-zinc-400">To seller <span className="text-zinc-600 font-mono text-xs">(94%)</span></span>
               <span className="text-white font-mono">{sellerAmountETH} ETH</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-400">Platform fee <span className="text-zinc-600 font-mono text-xs">(2.5%)</span></span>
+              <span className="text-zinc-400">Platform fee <span className="text-zinc-600 font-mono text-xs">(6%)</span></span>
               <span className="text-white font-mono">{platformFeeETH} ETH</span>
             </div>
             <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>

@@ -37,7 +37,7 @@ const NAV_ITEMS: NavItem[] = [
     href: '/how-it-works',
     sub: [
       { href: '/how-it-works#roadmap',     label: 'Trade Roadmap', icon: Zap },
-      { href: '/how-it-works#fees',        label: '2.5% Fee Info', icon: Percent },
+      { href: '/how-it-works#fees',        label: '6% Fee Info', icon: Percent },
       { href: '/how-it-works#bolty-token', label: '$BOLTY Token',  icon: Coins },
     ],
   },

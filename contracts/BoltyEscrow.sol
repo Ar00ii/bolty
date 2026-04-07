@@ -16,7 +16,7 @@ contract BoltyEscrow {
     // ─── State ──────────────────────────────────────────────────────────
     address public admin;
     address public platformWallet;
-    uint256 public constant PLATFORM_FEE_BPS = 250; // 2.5 %
+    uint256 public constant PLATFORM_FEE_BPS = 600; // 6%
     uint256 public constant RELEASE_TIMEOUT  = 14 days;
 
     enum Status { NONE, FUNDED, RELEASED, DISPUTED, RESOLVED, REFUNDED }
