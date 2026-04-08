@@ -373,7 +373,7 @@ function ListingCard({ listing, isAuthenticated, onNegotiate }: { listing: Marke
           {listing.price === 0 ? (
             <span className="text-sm font-light text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
+            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-light">{listing.currency}</span></span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
@@ -550,12 +550,12 @@ export default function MarketPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
-                          <span className="text-xs font-medium text-zinc-300 truncate">@{post.listing.seller.username || 'anon'}</span>
+                          <span className="text-xs font-light text-zinc-300 truncate">@{post.listing.seller.username || 'anon'}</span>
                           <span className="text-[10px] text-zinc-600">{timeAgo(post.createdAt)}</span>
                         </div>
                         <p className="text-xs text-zinc-400 line-clamp-2">{post.content}</p>
                         {post.price && (
-                          <p className="text-xs text-monad-400 mt-1 font-medium">{post.price} {post.currency}</p>
+                          <p className="text-xs text-monad-400 mt-1 font-light">{post.price} {post.currency}</p>
                         )}
                       </div>
                     </div>

@@ -224,7 +224,7 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
           ) : (
             <button
               onClick={() => onDownload(repo.id, repo.githubUrl)}
-              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all hover:border-monad-500/40"
+              className="px-3 py-1.5 rounded-full text-xs font-light transition-all hover:border-monad-500/40"
               style={{ background: 'rgba(131,110,249,0.08)', border: '1px solid rgba(131,110,249,0.2)', color: '#c4b5fd' }}
             >
               Download
@@ -511,7 +511,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
             {([['public', 'Public — Free', 'Anyone can see and download', <Globe key="g" className="w-4 h-4" />], ['locked', 'Locked — Paid Access', 'Users pay to unlock download', <Lock key="l" className="w-4 h-4" />]] as const).map(([val, label, desc, icon]) => (
               <button key={val} onClick={() => setLockType(val)} className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${lockType === val ? 'border-monad-500/40' : 'border-white/06 hover:border-white/12'}`} style={{ background: lockType === val ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)' }}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${lockType === val ? 'bg-monad-500/20 text-monad-400' : 'bg-white/04 text-zinc-600'}`}>{icon}</div>
-                <div><p className={`text-sm font-medium ${lockType === val ? 'text-monad-300' : 'text-zinc-400'}`}>{label}</p><p className="text-xs text-zinc-600">{desc}</p></div>
+                <div><p className={`text-sm font-light ${lockType === val ? 'text-monad-300' : 'text-zinc-400'}`}>{label}</p><p className="text-xs text-zinc-600">{desc}</p></div>
               </button>
             ))}
           </div>
@@ -845,7 +845,7 @@ function ReposMarketPageContent() {
               {showPublishPanel && (
                 <div className="mb-5 card p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium text-zinc-300">Your GitHub repositories</p>
+                    <p className="text-sm font-light text-zinc-300">Your GitHub repositories</p>
                     <button onClick={() => setShowPublishPanel(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">Close</button>
                   </div>
                   {ghNeedsConnect && (
