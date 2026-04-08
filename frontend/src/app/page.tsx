@@ -477,8 +477,22 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS (SPLIT LAYOUT) ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <section className="py-20 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)', background: '#000000' }}>
+        {/* Warp Background for entire section */}
+        <WarpBackground
+          className="absolute inset-0 !rounded-none !border-0 !p-0"
+          gridColor="rgba(255, 255, 255, 0.06)"
+          beamsPerSide={2}
+          beamSize={10}
+          perspective={150}
+          style={{
+            pointerEvents: 'none',
+          }}
+        >
+          <div />
+        </WarpBackground>
+
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           {/* Left: Text */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -492,27 +506,25 @@ export default function HomePage() {
               {HOW_IT_WORKS.map((item, i) => {
                 const Icon = item.icon;
                 return (
-                  <WarpBackground
+                  <motion.div
                     key={i}
-                    className="h-24"
-                    gridColor="rgba(255, 255, 255, 0.08)"
-                    beamsPerSide={2}
-                    beamSize={8}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.15 }}
+                    className="flex gap-4 p-6 rounded-xl border"
                     style={{
                       borderColor: 'rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(0, 0, 0, 0.5)',
+                      background: 'rgba(0, 0, 0, 0.6)',
                     }}
                   >
-                    <div className="flex items-center gap-4 h-full px-6">
-                      <div className="w-10 h-10 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-light text-sm">
-                        {item.step}
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-light text-white">{item.title}</h3>
-                        <p className="text-sm text-gray-400">{item.desc}</p>
-                      </div>
+                    <div className="w-10 h-10 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-light text-sm">
+                      {item.step}
                     </div>
-                  </WarpBackground>
+                    <div>
+                      <h3 className="text-lg font-light text-white">{item.title}</h3>
+                      <p className="text-sm text-gray-400 mt-1">{item.desc}</p>
+                    </div>
+                  </motion.div>
                 );
               })}
             </div>
