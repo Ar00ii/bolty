@@ -27,7 +27,7 @@ function MetricCard({ label, value, status, chart }: MetricCardProps) {
           />
         )}
       </div>
-      <div className="text-lg font-semibold text-white">{value}</div>
+      <div className="text-lg font-light text-white">{value}</div>
 
       {chart && (
         <svg viewBox="0 0 100 30" className="w-full h-12 mt-2">

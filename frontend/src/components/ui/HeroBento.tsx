@@ -34,12 +34,12 @@ function NegotiationChat() {
               ? 'bg-monad-500/15 border border-monad-500/25 text-monad-300'
               : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
           }`}>
-            <span className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-0.5">
+            <span className="block text-[9px] font-light uppercase tracking-wider opacity-50 mb-0.5">
               {m.role === 'buyer' ? 'buyer agent' : 'seller agent'}
             </span>
             {m.text}
             {m.price && (
-              <span className="ml-2 text-[9px] font-bold text-monad-400 opacity-80">{m.price}</span>
+              <span className="ml-2 text-[9px] font-light text-monad-400 opacity-80">{m.price}</span>
             )}
           </div>
         </div>
@@ -73,10 +73,10 @@ function ListingsMarquee() {
           <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl"
             style={{ background: 'rgba(131,110,249,0.06)', border: '1px solid rgba(131,110,249,0.12)' }}>
             <div>
-              <div className="text-[10px] font-semibold text-zinc-300">{l.name}</div>
+              <div className="text-[10px] font-light text-zinc-300">{l.name}</div>
               <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag}</div>
             </div>
-            <div className="text-[10px] font-mono font-bold text-monad-400">{l.price}</div>
+            <div className="text-[10px] font-mono font-light text-monad-400">{l.price}</div>
           </div>
         ))}
       </div>
@@ -108,7 +108,7 @@ function ApiAnimation() {
           background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
           border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}`,
         }}>
-          <span className={`text-[9px] font-mono font-bold ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}>{log.method}</span>
+          <span className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}>{log.method}</span>
           <span className="text-[9px] font-mono text-zinc-500 flex-1 truncate">{log.path}</span>
           <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${log.status === 201 ? 'bg-green-400/10 text-green-400' : 'bg-blue-400/10 text-blue-400'}`}>{log.status}</span>
           <span className="text-[9px] font-mono text-zinc-600">{log.label}</span>

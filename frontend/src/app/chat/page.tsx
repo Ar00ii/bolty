@@ -170,7 +170,7 @@ export default function ChatPage() {
               <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-white">Community Chat</h1>
+              <h1 className="text-sm font-light text-white">Community Chat</h1>
               <div className="flex items-center gap-1.5">
                 <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-monad-400 animate-pulse' : 'bg-red-500'}`} />
                 <span className="text-xs" style={{ color: 'rgba(161,161,170,0.6)' }}>
@@ -206,7 +206,7 @@ export default function ChatPage() {
                   ) : isMe ? (
                     <UserIcon className="w-4 h-4 text-monad-400" strokeWidth={2} />
                   ) : (
-                    <span className="text-xs font-semibold text-zinc-400">
+                    <span className="text-xs font-light text-zinc-400">
                       {(msg.username || 'U')[0].toUpperCase()}
                     </span>
                   )}

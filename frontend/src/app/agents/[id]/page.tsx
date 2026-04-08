@@ -93,7 +93,7 @@ function PostCard({ post }: { post: AgentPost }) {
       </p>
       {post.postType === 'PRICE_UPDATE' && post.price != null && (
         <div className="mt-2 pt-2 border-t border-yellow-400/20">
-          <span className="text-yellow-400 font-mono font-bold text-sm">
+          <span className="text-yellow-400 font-mono font-light text-sm">
             {post.price} {post.currency || ''}
           </span>
         </div>
@@ -225,7 +225,7 @@ export default function AgentDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h1 className="text-xl font-bold" style={{ color: 'var(--text)' }}>{agent.title}</h1>
+                <h1 className="text-xl font-light" style={{ color: 'var(--text)' }}>{agent.title}</h1>
                 <span className={`text-xs font-mono px-2 py-0.5 rounded border ${TYPE_COLORS[agent.type] || TYPE_COLORS.OTHER}`}>
                   {agent.type.toLowerCase().replace('_', ' ')}
                 </span>
@@ -243,7 +243,7 @@ export default function AgentDetailPage() {
 
           {/* Price + action */}
           <div className="flex flex-col items-end gap-2">
-            <div className="text-lg font-mono font-bold">
+            <div className="text-lg font-mono font-light">
               {agent.price === 0
                 ? <span className="text-green-400">Free</span>
                 : <span className="text-monad-400">{agent.price} {agent.currency}</span>
@@ -360,7 +360,7 @@ export default function AgentDetailPage() {
       {activeTab === 'about' && (
         <div className="space-y-4">
           <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <h3 className="text-sm font-semibold mb-3" style={{ color: 'var(--text)' }}>Description</h3>
+            <h3 className="text-sm font-light mb-3" style={{ color: 'var(--text)' }}>Description</h3>
             <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-muted)' }}>
               {agent.description}
             </p>
@@ -401,7 +401,7 @@ export default function AgentDetailPage() {
         <div className="space-y-4">
           {/* Info box */}
           <div className="rounded-xl p-4 text-sm" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
-            <p className="font-semibold mb-1" style={{ color: 'var(--text)' }}>API Keys for automated posting</p>
+            <p className="font-light mb-1" style={{ color: 'var(--text)' }}>API Keys for automated posting</p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               Your agent or script can post updates automatically using an API key.
               Call <code className="text-monad-400 bg-monad-400/10 px-1 rounded">POST {API_URL}/market/{agent.id}/posts</code> with
@@ -425,7 +425,7 @@ export default function AgentDetailPage() {
           {/* New key shown once */}
           {newKey && (
             <div className="rounded-xl p-4" style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.05)' }}>
-              <p className="text-green-400 text-xs font-semibold mb-2">API key generated — save it now, it won&apos;t be shown again:</p>
+              <p className="text-green-400 text-xs font-light mb-2">API key generated — save it now, it won&apos;t be shown again:</p>
               <code className="text-sm font-mono text-green-300 break-all">{newKey}</code>
             </div>
           )}

@@ -47,7 +47,7 @@ export function BentoCard({
           style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.18)' }}>
           <Icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
         </div>
-        <div className="text-[13px] font-semibold text-zinc-200 mb-0.5 leading-tight">{name}</div>
+        <div className="text-[13px] font-light text-zinc-200 mb-0.5 leading-tight">{name}</div>
         <div className="text-[11px] text-zinc-500 leading-relaxed">{description}</div>
         {href && cta && (
           <a href={href} className="inline-flex items-center gap-1 mt-2 text-[11px] font-medium text-monad-400 hover:text-monad-300 transition-colors opacity-0 group-hover:opacity-100">

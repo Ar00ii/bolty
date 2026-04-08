@@ -172,7 +172,7 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="page-header">
         <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-2">Hire & Collaborate</p>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Developer Services</h1>
+        <h1 className="text-2xl font-light text-white tracking-tight">Developer Services</h1>
         <p className="text-sm text-zinc-500 mt-1">
           Find skilled developers for your project — or list your own services for others to discover.
         </p>
@@ -255,7 +255,7 @@ export default function ServicesPage() {
       {showCreate && (
         <div className="card-elevated p-6 mb-8" style={{ borderColor: 'rgba(131,110,249,0.2)' }}>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-sm font-semibold text-white">Create Service Listing</h2>
+            <h2 className="text-sm font-light text-white">Create Service Listing</h2>
             <button onClick={() => setShowCreate(false)} className="text-zinc-600 hover:text-zinc-300 transition-colors p-1 rounded-lg hover:bg-white/5">
               <X className="w-4 h-4" />
             </button>
@@ -340,7 +340,7 @@ export default function ServicesPage() {
           <div className="empty-state-icon mx-auto">
             <Briefcase className="w-6 h-6 text-monad-400" strokeWidth={1.5} />
           </div>
-          <h3 className="text-base font-semibold text-white mb-2">No services found</h3>
+          <h3 className="text-base font-light text-white mb-2">No services found</h3>
           <p className="text-sm text-zinc-500 mb-1 max-w-sm mx-auto">
             {isAuthenticated
               ? 'Be the first to list your developer services and get discovered by the community.'
@@ -376,7 +376,7 @@ export default function ServicesPage() {
                         <img src={service.user.avatarUrl} alt={service.user.username || ''}
                           className="w-10 h-10 rounded-xl object-cover border border-zinc-800 group-hover:border-monad-500/30 transition-colors" />
                       ) : (
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm transition-colors group-hover:border-monad-500/30"
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center font-light text-sm transition-colors group-hover:border-monad-500/30"
                           style={{ background: `${catColor}12`, border: `1px solid ${catColor}20`, color: catColor }}>
                           {(service.user.displayName || service.user.username || 'U')[0].toUpperCase()}
                         </div>
@@ -401,7 +401,7 @@ export default function ServicesPage() {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-white mb-2 leading-snug">{service.title}</h3>
+                  <h3 className="text-sm font-light text-white mb-2 leading-snug">{service.title}</h3>
 
                   {/* Description */}
                   <p className="text-xs text-zinc-400 leading-relaxed mb-3"
@@ -468,7 +468,7 @@ export default function ServicesPage() {
 
       {/* How it works */}
       <div className="mt-16">
-        <h2 className="text-base font-semibold text-white mb-5">How Hire & Collaborate Works</h2>
+        <h2 className="text-base font-light text-white mb-5">How Hire & Collaborate Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {[
             { step: '01', title: 'Browse Services', desc: 'Explore services from verified developers. Filter by category, skills, or budget.', icon: Search },
@@ -484,7 +484,7 @@ export default function ServicesPage() {
                     <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
                   </div>
                 </div>
-                <h3 className="text-sm font-semibold text-white mb-2">{item.title}</h3>
+                <h3 className="text-sm font-light text-white mb-2">{item.title}</h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             );

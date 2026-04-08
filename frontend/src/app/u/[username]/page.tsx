@@ -131,7 +131,7 @@ export default function PublicProfilePage() {
               className="w-24 h-24 rounded-2xl border-2 border-zinc-700"
             />
           ) : (
-            <div className="w-24 h-24 rounded-2xl bg-monad-500/20 border-2 border-monad-500/30 flex items-center justify-center text-monad-400 text-4xl font-bold">
+            <div className="w-24 h-24 rounded-2xl bg-monad-500/20 border-2 border-monad-500/30 flex items-center justify-center text-monad-400 text-4xl font-light">
               {displayName?.[0]?.toUpperCase()}
             </div>
           )}
@@ -141,7 +141,7 @@ export default function PublicProfilePage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between flex-wrap gap-2 mb-1">
             <div>
-              <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+              <h1 className="text-2xl font-light text-white">{displayName}</h1>
               <p className="text-zinc-500 font-mono text-sm">@{profile.username}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -251,7 +251,7 @@ export default function PublicProfilePage() {
 
       {/* Repositories */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4 font-mono">
+        <h2 className="text-lg font-light text-white mb-4 font-mono">
           Repositories <span className="text-zinc-600 font-normal text-sm">({profile._count.repositories})</span>
         </h2>
 
@@ -270,13 +270,13 @@ export default function PublicProfilePage() {
                   <div className="flex items-center gap-1.5 min-w-0">
                     {repo.isLocked && <span className="text-yellow-400 shrink-0">🔒</span>}
                     {repo.isLocked ? (
-                      <span className="text-yellow-400 font-mono font-semibold text-sm truncate">{repo.name}</span>
+                      <span className="text-yellow-400 font-mono font-light text-sm truncate">{repo.name}</span>
                     ) : (
                       <a
                         href={repo.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-monad-400 font-mono font-semibold text-sm truncate hover:text-monad-300"
+                        className="text-monad-400 font-mono font-light text-sm truncate hover:text-monad-300"
                       >
                         {repo.name}
                       </a>

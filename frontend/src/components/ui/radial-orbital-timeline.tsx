@@ -204,7 +204,7 @@ export default function RadialOrbitalTimeline({
 
                 {/* Label */}
                 <div
-                  className={`absolute top-12 whitespace-nowrap text-xs font-semibold tracking-wider transition-all duration-300 ${isExpanded ? "text-monad-300 scale-125" : "text-white/70"}`}
+                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? "text-monad-300 scale-125" : "text-white/70"}`}
                   style={{ left: "50%", transform: `translateX(-50%) ${isExpanded ? "scale(1.25)" : ""}` }}
                 >
                   {item.title}

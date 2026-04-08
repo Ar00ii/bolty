@@ -108,7 +108,7 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
                             />
                           )}
                         </div>
-                        <h3 className="text-lg font-bold text-white leading-snug mb-3">{q}</h3>
+                        <h3 className="text-lg font-light text-white leading-snug mb-3">{q}</h3>
                       </div>
 
                       <motion.p

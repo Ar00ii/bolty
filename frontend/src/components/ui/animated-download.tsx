@@ -151,13 +151,13 @@ export function AnimatedDownload({
             className="absolute top-1/2 left-0 transform -translate-y-1/2 w-1/2 fill-foreground" preserveAspectRatio="none">
             <path d="M0.445312 0.5H106.103V8.017L99.2813 14.838H0.445312V0.5Z" />
           </svg>
-          <div className="relative px-4 py-1.5 font-mono font-bold text-sm text-black">
+          <div className="relative px-4 py-1.5 font-mono font-light text-sm text-black">
             <div className="flex items-center">
-              <div className="flex font-mono font-bold text-black">
+              <div className="flex font-mono font-light text-black">
                 {displayText.map((letter, i) => (
                   <motion.span
                     key={`${targetText}-${i}`}
-                    className={cn("font-mono dark:text-black text-white font-bold", letter === " " ? "w-3" : "")}
+                    className={cn("font-mono dark:text-black text-white font-light", letter === " " ? "w-3" : "")}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 3 }}

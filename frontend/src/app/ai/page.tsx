@@ -9,14 +9,14 @@ export default function AiPage() {
     <div className="max-w-3xl mx-auto px-4 py-16">
       <TerminalCard className="text-center py-16 px-8">
         <div className="text-yellow-400 font-mono text-4xl mb-6">&#9888;</div>
-        <h1 className="text-monad-400 font-mono font-bold text-2xl mb-3 tracking-widest">
+        <h1 className="text-monad-400 font-mono font-light text-2xl mb-3 tracking-widest">
           BOLTY_AI TERMINAL
         </h1>
         <div
           className="inline-block rounded-xl px-5 py-3 mb-6"
           style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)' }}
         >
-          <p className="text-yellow-400 font-mono text-sm font-bold">
+          <p className="text-yellow-400 font-mono text-sm font-light">
             // STATUS: INACTIVE — MAINTENANCE
           </p>
         </div>

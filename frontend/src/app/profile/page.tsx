@@ -146,7 +146,7 @@ function Avatar({ src, name, size = 'md' }: { src?: string | null; name?: string
     return <img src={src} alt="" className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`} />;
   }
   return (
-    <div className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-semibold flex-shrink-0`}>
+    <div className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-light flex-shrink-0`}>
       {(name || 'U')[0]?.toUpperCase()}
     </div>
   );
@@ -155,7 +155,7 @@ function Avatar({ src, name, size = 'md' }: { src?: string | null; name?: string
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-6">
-      <h2 className="text-base font-semibold text-[var(--text)] tracking-tight">{title}</h2>
+      <h2 className="text-base font-light text-[var(--text)] tracking-tight">{title}</h2>
       {subtitle && <p className="text-xs text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
     </div>
   );
@@ -193,7 +193,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-xl text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="btn-primary w-full py-3 rounded-xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
     >
       {loading ? (
         <>
@@ -650,7 +650,7 @@ export default function ProfilePage() {
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)]" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-[var(--text)] truncate leading-tight">
+                  <div className="text-sm font-light text-[var(--text)] truncate leading-tight">
                     {user?.displayName || user?.username || 'New User'}
                   </div>
                   {username && <div className="text-xs text-[var(--text-muted)] font-mono truncate">@{username}</div>}
@@ -812,7 +812,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between bg-monad-500/5 border border-monad-500/15 rounded-xl px-4 py-3">
                 <div>
                   <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">User ID</div>
-                  <div className="font-mono text-monad-400 font-semibold">#{userTag}</div>
+                  <div className="font-mono text-monad-400 font-light">#{userTag}</div>
                 </div>
                 <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
                   Others can find you<br />by searching #{userTag}
@@ -933,7 +933,7 @@ export default function ProfilePage() {
                 <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-[var(--text)]">MetaMask</div>
+                <div className="text-sm font-light text-[var(--text)]">MetaMask</div>
                 {walletAddress ? (
                   <div className="text-xs font-mono text-[var(--text-muted)] mt-0.5 truncate">{walletAddress}</div>
                 ) : (
@@ -964,7 +964,7 @@ export default function ProfilePage() {
               <button
                 onClick={handleConnectWallet}
                 disabled={walletLoading}
-                className="w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2.5"
+                className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2.5"
                 style={{
                   background: 'linear-gradient(135deg, rgba(251,146,60,0.18), rgba(251,146,60,0.08))',
                   border: '1px solid rgba(251,146,60,0.25)',
@@ -1322,7 +1322,7 @@ export default function ProfilePage() {
                 <Input type="password" value={emailPassword} onChange={(e) => setEmailPassword(e.target.value)} placeholder="Current password" />
                 <div className="flex gap-2">
                   <button type="submit" disabled={emailLoading || !newEmail}
-                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2">
                     {emailLoading ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Sending...</> : 'Send verification code'}
                   </button>
                   <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }}
@@ -1345,7 +1345,7 @@ export default function ProfilePage() {
                 />
                 <div className="flex gap-2">
                   <button type="submit" disabled={emailLoading || emailOtp.length !== 6}
-                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50 flex items-center justify-center gap-2">
+                    className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2">
                     {emailLoading ? <><div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" /> Verifying...</> : 'Confirm change'}
                   </button>
                   <button type="button" onClick={() => { setEmailStep('idle'); setSecErr(''); setSecMsg(''); }}
@@ -1409,7 +1409,7 @@ export default function ProfilePage() {
                   />
                   <div className="flex gap-2">
                     <button type="submit" disabled={deleting || deleteOtp.length !== 6}
-                      className="flex-1 py-2.5 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 disabled:opacity-50">
+                      className="flex-1 py-2.5 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-light transition-all duration-200 disabled:opacity-50">
                       {deleting ? 'Deleting...' : 'Permanently delete my account'}
                     </button>
                     <button type="button" onClick={() => { setDeleteStep('idle'); setDeleteOtp(''); setSecErr(''); }}
@@ -1441,7 +1441,7 @@ export default function ProfilePage() {
                 <IconCpu className="w-5 h-5 text-monad-400" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold text-monad-300 mb-1">How agent-to-agent negotiation works</div>
+                <div className="text-sm font-light text-monad-300 mb-1">How agent-to-agent negotiation works</div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
                   When you buy a listing, Bolty calls your <span className="text-monad-300 font-mono">agentEndpoint</span> with the current negotiation state.
                   Your AI responds with a JSON object specifying an action. The platform relays it to the seller's agent, and they alternate automatically until a deal is reached or the negotiation expires.

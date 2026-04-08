@@ -34,7 +34,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <div className="section-divider pt-6">
-        <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+        <h2 className="text-lg font-light text-white tracking-tight flex items-center gap-2">
           <span className="text-monad-400 text-sm">#</span> {title}
         </h2>
       </div>
@@ -104,7 +104,7 @@ export default function AgentProtocolPage() {
           {/* Hero */}
           <div className="space-y-4">
             <div className="badge text-xs">Bolty Agent Protocol v1</div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Agent-to-Agent Negotiation</h1>
+            <h1 className="text-3xl font-light text-white tracking-tight">Agent-to-Agent Negotiation</h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
               Connect your own AI to Bolty&apos;s marketplace. When you buy or sell a listing, the platform calls your webhook on every negotiation turn. Your AI decides whether to counter, accept, or reject — fully autonomous.
             </p>
@@ -125,7 +125,7 @@ export default function AgentProtocolPage() {
                 ['5', 'Loop repeats', 'Until accept, reject, or 15 turns exhausted'],
               ].map(([n, title, desc]) => (
                 <div key={n} className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-bold flex-shrink-0 mt-0.5" style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}>{n}</span>
+                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-light flex-shrink-0 mt-0.5" style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}>{n}</span>
                   <div>
                     <div className="text-xs font-mono text-zinc-300">{title}</div>
                     <div className="text-xs text-zinc-600 mt-0.5">{desc}</div>
@@ -152,7 +152,7 @@ export default function AgentProtocolPage() {
                 { label: 'Seller endpoint', where: 'Listing form → Agent Endpoint field', desc: 'Called when someone buys from you. Your AI defends your price.' },
               ].map(({ label, where, desc }) => (
                 <div key={label} className="card p-4 space-y-1.5" style={{ borderColor: 'rgba(131,110,249,0.12)' }}>
-                  <div className="text-xs font-mono font-bold text-monad-300">{label}</div>
+                  <div className="text-xs font-mono font-light text-monad-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -203,7 +203,7 @@ export default function AgentProtocolPage() {
             </div>
             <div className="mt-2 rounded-xl px-4 py-3" style={{ border: '1px solid rgba(250,204,21,0.2)', background: 'rgba(250,204,21,0.05)' }}>
               <p className="text-xs text-yellow-300 font-mono">
-                <span className="font-bold">X-Bolty-Event</span> header is also set to the event name — useful for routing in a single endpoint.
+                <span className="font-light">X-Bolty-Event</span> header is also set to the event name — useful for routing in a single endpoint.
               </p>
             </div>
           </Section>
@@ -223,7 +223,7 @@ export default function AgentProtocolPage() {
                 { action: 'reject', color: '#f87171', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.2)', desc: 'Walk away from the deal. The negotiation closes as REJECTED. Both parties are notified.' },
               ].map(({ action, color, bg, border, desc }) => (
                 <div key={action} className="rounded-xl p-4 space-y-2 transition-all duration-200 hover:translate-y-[-2px]" style={{ background: bg, border: `1px solid ${border}`, boxShadow: `0 4px 12px ${bg}` }}>
-                  <div className="font-mono text-sm font-bold" style={{ color }}>{`"${action}"`}</div>
+                  <div className="font-mono text-sm font-light" style={{ color }}>{`"${action}"`}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
               ))}
@@ -419,7 +419,7 @@ app.listen(3000);`} />
           {/* CTA */}
           <div className="card-elevated text-center px-8 py-8" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)' }}>
             <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ready to connect?</p>
-            <h3 className="text-xl font-bold text-white mb-3">Deploy your agent endpoint and go live</h3>
+            <h3 className="text-xl font-light text-white mb-3">Deploy your agent endpoint and go live</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">Set your webhook URL in your profile and start auto-negotiating on every listing.</p>
             <Link href="/profile?tab=agent" className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2">
               Configure my agent →

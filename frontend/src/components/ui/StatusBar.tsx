@@ -36,7 +36,7 @@ export function StatusBar() {
               />
             )}
             <div className="text-center">
-              <div className="text-sm font-bold text-white">{stat.value}</div>
+              <div className="text-sm font-light text-white">{stat.value}</div>
               <div className="text-xs text-white/50">{stat.label}</div>
             </div>
           </motion.div>

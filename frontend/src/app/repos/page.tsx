@@ -488,7 +488,7 @@ export default function ReposPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
           <div className="w-full max-w-sm rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
             style={{ background: '#1a1a1f', border: '1px solid rgba(131,110,249,0.2)' }}>
-            <h3 className="font-semibold text-monad-400 mb-1 font-mono">Publish Options</h3>
+            <h3 className="font-light text-monad-400 mb-1 font-mono">Publish Options</h3>
             <p className="text-zinc-500 text-xs mb-5">
               {lockModal.repo.name}{lockModal.repo.private ? ' · private repo' : ''}
             </p>
@@ -640,7 +640,7 @@ export default function ReposPage() {
                       {c.avatarUrl ? (
                         <img src={c.avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
                       ) : (
-                        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-light"
                           style={{ background: 'rgba(131,110,249,0.2)', color: '#836ef9' }}>
                           {c.name.charAt(0).toUpperCase()}
                         </div>
@@ -718,7 +718,7 @@ export default function ReposPage() {
                                 {u.avatarUrl ? (
                                   <img src={u.avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover flex-shrink-0" />
                                 ) : (
-                                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                                  <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-light"
                                     style={{ background: 'rgba(131,110,249,0.2)', color: '#836ef9' }}>
                                     {(u.username || 'U')[0].toUpperCase()}
                                   </div>
@@ -836,7 +836,7 @@ export default function ReposPage() {
                     <img src={repo.user.avatarUrl} alt={repo.user.username || ''} className="w-5 h-5 rounded-full border border-white/20 object-cover" />
                   ) : (
                     <div className="w-5 h-5 rounded-full bg-monad-500/20 border border-monad-500/20 flex items-center justify-center">
-                      <span className="text-monad-400 font-bold" style={{ fontSize: '0.5rem' }}>
+                      <span className="text-monad-400 font-light" style={{ fontSize: '0.5rem' }}>
                         {(repo.user.username || 'U').charAt(0).toUpperCase()}
                       </span>
                     </div>
@@ -851,7 +851,7 @@ export default function ReposPage() {
                           {c.user?.avatarUrl ? (
                             <img src={c.user.avatarUrl} alt={c.name} className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-monad-400 font-bold" style={{ fontSize: '0.45rem' }}>{c.name.charAt(0).toUpperCase()}</span>
+                            <span className="text-monad-400 font-light" style={{ fontSize: '0.45rem' }}>{c.name.charAt(0).toUpperCase()}</span>
                           )}
                         </div>
                       ))}
@@ -877,7 +877,7 @@ export default function ReposPage() {
                     href={repo.isLocked ? '#' : repo.githubUrl}
                     target={repo.isLocked ? undefined : '_blank'}
                     rel="noopener noreferrer"
-                    className="font-mono font-bold text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
+                    className="font-mono font-light text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
                   >
                     {repo.name}
                   </a>
