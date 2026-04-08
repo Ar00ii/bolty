@@ -59,7 +59,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   beamDelayMax = 3,
   beamDelayMin = 0,
   beamDuration = 3,
-  gridColor = "var(--border)",
+  gridColor = "rgba(255, 255, 255, 0.1)",
   ...props
 }) => {
   const generateBeams = useCallback(() => {
@@ -81,7 +81,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   const leftBeams = useMemo(() => generateBeams(), [generateBeams])
 
   return (
-    <div className={cn("relative rounded border p-20", className)} {...props}>
+    <div className={cn("relative rounded-xl border overflow-hidden", className)} {...props}>
+      {/* Warp background - behind everything */}
       <div
         style={
           {
@@ -90,9 +91,10 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             "--beam-size": `${beamSize}%`,
           } as React.CSSProperties
         }
-        className="@container-[size] pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
+        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
         style={{
           perspective: `${perspective}px`,
+          zIndex: 1,
         }}
       >
         {/* top side */}
@@ -192,7 +194,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
         </div>
       </div>
 
-      <div className="relative z-40">{children}</div>
+      {/* Content - on top of warp background with its own background */}
+      <div className="relative z-10 bg-black/60 backdrop-blur-sm">{children}</div>
     </div>
   )
 }
