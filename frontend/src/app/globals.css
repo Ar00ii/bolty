@@ -860,3 +860,178 @@ p, span, a, li, button, input, textarea {
     0%   { background-position: -1000px 0; }
     100% { background-position: 1000px 0; }
   }
+
+  /* ── Enhanced Card Hover Effects ── */
+  .card,
+  .card-elevated,
+  .card-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(131, 110, 249, 0.15);
+    border-color: rgba(131, 110, 249, 0.3);
+  }
+
+  .card-elevated:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(131, 110, 249, 0.1);
+  }
+
+  /* ── Button Micro-interactions ── */
+  button, a.btn-primary, a.btn-secondary {
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:active, a.btn-primary:active, a.btn-secondary:active {
+    transform: scale(0.97);
+  }
+
+  /* Ripple effect for buttons */
+  button::before, a.btn-primary::before, a.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  /* ── Input Focus Animation ── */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    animation: input-focus 0.3s ease;
+  }
+
+  @keyframes input-focus {
+    0% { transform: scale(0.99); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Smooth Page Transitions ── */
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pageExit {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(10px); }
+  }
+
+  /* ── Loading Skeleton Animation ── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-card) 0%,
+      var(--bg-card2) 50%,
+      var(--bg-card) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Success Check Animation ── */
+  @keyframes check-bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* ── Color Contrast Improvements ── */
+  .text-contrast-high {
+    color: #ffffff;
+  }
+
+  .text-contrast-medium {
+    color: #e4e4e7;
+  }
+
+  .text-contrast-low {
+    color: #a1a1aa;
+  }
+
+  /* ── Accessibility: Reduced Motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── Mobile Responsive Touch Targets ── */
+  @media (max-width: 768px) {
+    button, a, input[type="checkbox"], input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Better spacing on mobile */
+    .page-container {
+      padding: 1rem;
+    }
+
+    .gap-4 {
+      gap: 1rem;
+    }
+
+    /* Touch-friendly card layouts */
+    .card {
+      padding: 1.25rem;
+    }
+
+    /* Collapse hamburger menu properly */
+    .sm-toggle {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+    }
+  }
+
+  /* ── Filter Pills Animation ── */
+  .filter-pill {
+    transition: all 0.2s ease;
+  }
+
+  .filter-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(131, 110, 249, 0.15);
+  }
+
+  /* ── Data Table Row Hover ── */
+  table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(131, 110, 249, 0.05);
+  }
+
+  /* ── Pagination Button States ── */
+  .pagination-btn {
+    transition: all 0.2s ease;
+  }
+
+  .pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .pagination-btn:not(:disabled):hover {
+    background-color: rgba(131, 110, 249, 0.1);
+    border-color: rgba(131, 110, 249, 0.3);
+  }
