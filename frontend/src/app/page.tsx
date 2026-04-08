@@ -80,32 +80,25 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
-      {/* Navbar - Render.com Style */}
+      {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: '#000000', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
         <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
-            <BoltyLogoSVG size={24} className="transition-transform group-hover:scale-110" />
-            <span className="text-white font-semibold text-sm tracking-tight">Bolty</span>
-          </Link>
-
-          {/* Center Links - Hidden on mobile */}
-          <div className="hidden lg:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
-            <Link href="/market" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Product</Link>
-            <Link href="#pricing" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Pricing</Link>
-            <Link href="#testimonials" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Customers</Link>
-            <Link href="/docs/agent-protocol" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Docs</Link>
-            <a href="#" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Changelog</a>
-            <a href="#" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Community</a>
+          {/* Left Links */}
+          <div className="flex items-center gap-8">
+            <Link href="/market" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Marketplace</Link>
+            <Link href="/docs/agent-protocol" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Docs</Link>
+            <a href="#how-it-works" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">How It Works</a>
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-6 flex-shrink-0">
-            <Link href="/contact" className="hidden sm:block text-gray-300 text-sm font-normal hover:text-white transition-colors">Contact</Link>
+          <div className="flex items-center gap-4">
             {!isAuthenticated ? (
-              <Link href="/auth?tab=register" className="text-white text-sm font-normal px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded transition-colors border border-gray-700">Dashboard</Link>
+              <>
+                <Link href="/auth" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
+                <Link href="/auth?tab=register" className="text-white text-sm font-normal px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-colors">Get started</Link>
+              </>
             ) : (
-              <Link href="/market" className="text-white text-sm font-normal px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded transition-colors border border-gray-700">Dashboard</Link>
+              <Link href="/market" className="text-white text-sm font-normal px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-colors">Dashboard</Link>
             )}
           </div>
         </div>
