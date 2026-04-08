@@ -509,6 +509,11 @@ export default function HomePage() {
 
             {/* Right: Big container with all service boxes */}
             <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+              {/* Title in container */}
+              <div className="p-8 lg:p-12 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+                <h2 className="text-2xl lg:text-3xl font-light text-white">Getting started</h2>
+              </div>
+
               {/* Top: 2 boxes side by side */}
               <div className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
                 {[
