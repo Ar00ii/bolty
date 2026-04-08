@@ -10,6 +10,7 @@ interface RenderHeroProps {
 
 export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
   const [phase, setPhase] = useState<'idle' | 'pressed' | 'deploying' | 'done'>('idle');
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('pressed'), 1200);
@@ -18,12 +19,18 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, []);
 
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const showDashboard = phase === 'deploying' || phase === 'done';
 
   return (
     <div className="relative min-h-screen pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a0033 50%, #0a0015 100%)' }}>
-      {/* Grid overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-40">
+      {/* Grid overlay with parallax */}
+      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ transform: `translateY(${scrollY * 0.5}px)` }}>
         <svg width="100%" height="100%">
           <defs>
             <pattern id="render-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
@@ -34,7 +41,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         </svg>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="relative z-10 max-w-7xl mx-auto" style={{ transform: `translateY(${scrollY * 0.3}px)` }}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start pt-20">
           {/* LEFT */}
           <motion.div

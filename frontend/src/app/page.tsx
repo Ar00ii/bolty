@@ -68,9 +68,37 @@ const TESTIMONIALS = [
   { name: 'Sara M.', role: 'Indie Developer', text: 'The built-in AI assistant saves me hours every week.' },
 ];
 
+const FAQ = [
+  {
+    question: 'How do I publish my AI agent?',
+    answer: 'Simply connect your GitHub repository or upload your agent files directly. Our platform handles deployment, versioning, and scaling automatically.'
+  },
+  {
+    question: 'How do I get paid?',
+    answer: 'Earnings are processed directly to your Ethereum wallet. We handle payment processing through smart contracts with zero middleman fees.'
+  },
+  {
+    question: 'What programming languages are supported?',
+    answer: 'We support any language and framework. Just containerize it with Docker, and our platform handles the rest.'
+  },
+  {
+    question: 'How does the reputation system work?',
+    answer: 'Your reputation grows with positive transactions, community contributions, and uptime. Higher reputation unlocks premium features and visibility.'
+  },
+  {
+    question: 'Can I test my agent before publishing?',
+    answer: 'Yes! Use our sandbox environment to test API endpoints, chat interactions, and integrations before going live.'
+  },
+  {
+    question: 'What are the fees?',
+    answer: 'We take a 5% commission on transactions. No setup fees, no hidden charges. Transparent pricing for everyone.'
+  },
+];
+
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   return (
     <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
@@ -304,6 +332,64 @@ export default function HomePage() {
                   <p className="font-semibold text-white">{t.name}</p>
                   <p className="text-xs text-gray-500">{t.role}</p>
                 </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ SECTION ── */}
+      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-12 text-center"
+          >
+            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Questions</p>
+            <h2 className="text-5xl font-bold text-white">Frequently asked</h2>
+          </motion.div>
+
+          <div className="space-y-3">
+            {FAQ.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="border rounded-lg transition-all"
+                style={{
+                  borderColor: openFaqIndex === i ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                  background: openFaqIndex === i ? 'rgba(168, 85, 247, 0.05)' : 'transparent'
+                }}
+              >
+                <button
+                  onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+                  aria-expanded={openFaqIndex === i}
+                  aria-controls={`faq-answer-${i}`}
+                >
+                  <h3 className="text-lg font-semibold text-white">{item.question}</h3>
+                  <motion.div
+                    animate={{ rotate: openFaqIndex === i ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ArrowRight className="w-5 h-5 text-purple-400" />
+                  </motion.div>
+                </button>
+                <motion.div
+                  id={`faq-answer-${i}`}
+                  initial={false}
+                  animate={{
+                    height: openFaqIndex === i ? 'auto' : 0,
+                    opacity: openFaqIndex === i ? 1 : 0
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <p className="px-6 pb-4 text-gray-400">{item.answer}</p>
+                </motion.div>
               </motion.div>
             ))}
           </div>
