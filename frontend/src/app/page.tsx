@@ -494,7 +494,7 @@ export default function HomePage() {
             </motion.div>
 
             {/* Top: 2 boxes side by side */}
-            <div className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+            <div className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               {[
                 { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
                 { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
@@ -502,7 +502,7 @@ export default function HomePage() {
                 <WarpBackground
                   key={i}
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
-                  style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
                   beamSize={5}
                   gridColor="rgba(200, 200, 200, 0.2)"
@@ -511,7 +511,11 @@ export default function HomePage() {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    className="bg-black border-4 border-gray-800 rounded p-8 lg:p-12 max-w-lg mx-6"
+                    className="bg-black rounded p-8 lg:p-12 max-w-lg mx-6"
+                    style={{
+                      border: '3px solid',
+                      borderColor: i === 1 ? '#06B6D4' : '#836EF9'
+                    }}
                   >
                     <div className="flex items-start gap-4 mb-4">
                       <CheckCircle2 className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
@@ -532,7 +536,7 @@ export default function HomePage() {
             </div>
 
             {/* Bottom: 3 boxes */}
-            <div className="grid grid-cols-3 gap-0">
+            <div className="grid grid-cols-3 gap-0" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               {[
                 { name: 'Database', desc: 'Managed PostgreSQL & Redis', details: 'High-availability database cluster with automatic backups and failover.' },
                 { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
@@ -541,7 +545,7 @@ export default function HomePage() {
                 <WarpBackground
                   key={i}
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
-                  style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
                   beamSize={5}
                   gridColor="rgba(200, 200, 200, 0.2)"
@@ -550,7 +554,11 @@ export default function HomePage() {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: (i + 2) * 0.1 }}
-                    className="bg-black border-4 border-gray-800 rounded p-8 lg:p-12 max-w-lg mx-6"
+                    className="bg-black rounded p-8 lg:p-12 max-w-lg mx-6"
+                    style={{
+                      border: '3px solid',
+                      borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i]
+                    }}
                   >
                     <div className="flex items-start gap-4 mb-4">
                       <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
