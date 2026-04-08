@@ -133,7 +133,7 @@ function ActionSearchBar({
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         <span className="text-monad-400 flex-shrink-0">{action.icon}</span>
-                        <span className="text-sm font-medium text-zinc-200 truncate">{action.label}</span>
+                        <span className="text-sm font-light text-zinc-200 truncate">{action.label}</span>
                         {action.description && (
                           <span className="text-xs text-zinc-600 truncate hidden sm:block">{action.description}</span>
                         )}

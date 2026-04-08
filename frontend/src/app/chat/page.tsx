@@ -217,11 +217,11 @@ export default function ChatPage() {
                   <div className="flex items-center gap-2 mb-1">
                     {!isMe && (
                       msg.username ? (
-                        <Link href={`/u/${msg.username}`} className="text-xs font-medium text-monad-400 hover:text-monad-300 transition-colors">
+                        <Link href={`/u/${msg.username}`} className="text-xs font-light text-monad-400 hover:text-monad-300 transition-colors">
                           {msg.username}
                         </Link>
                       ) : (
-                        <span className="text-xs font-medium" style={{ color: 'rgba(161,161,170,0.5)' }}>anonymous</span>
+                        <span className="text-xs font-light" style={{ color: 'rgba(161,161,170,0.5)' }}>anonymous</span>
                       )
                     )}
                     <span className="text-xs" style={{ color: 'rgba(161,161,170,0.35)' }}>{formatTime(msg.createdAt)}</span>

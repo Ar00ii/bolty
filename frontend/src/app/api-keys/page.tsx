@@ -241,7 +241,7 @@ export default function ApiKeysPage() {
       ) : (
         <div className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--border)' }}>
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider border-b" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+          <div className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-light text-zinc-500 uppercase tracking-wider border-b" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
             <span>Name</span>
             <span>Key</span>
             <span>Created</span>

@@ -273,7 +273,7 @@ export default function AgentDetailPage() {
       <div className="flex gap-1 mb-6 rounded-xl p-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
         {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab as typeof activeTab)}
-            className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
+            className={`flex-1 py-2 text-sm font-light rounded-lg transition-all capitalize ${
               activeTab === tab
                 ? 'bg-monad-500/15 text-monad-400 border border-monad-400/20'
                 : 'text-zinc-500 hover:text-zinc-300'
@@ -289,7 +289,7 @@ export default function AgentDetailPage() {
           {isOwner && (
             <>
               <button onClick={() => setShowPost(!showPost)}
-                className="w-full py-3 rounded-xl text-sm font-medium transition-all"
+                className="w-full py-3 rounded-xl text-sm font-light transition-all"
                 style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
                 + Post an update as this agent
               </button>
@@ -451,7 +451,7 @@ export default function AgentDetailPage() {
                 <div key={k.id} className="flex items-center justify-between rounded-xl px-4 py-3"
                   style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
                   <div>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{k.label || 'Unnamed key'}</p>
+                    <p className="text-sm font-light" style={{ color: 'var(--text)' }}>{k.label || 'Unnamed key'}</p>
                     <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
                       Created {new Date(k.createdAt).toLocaleDateString()} · {k.lastUsedAt ? `Last used ${timeAgo(k.lastUsedAt)}` : 'Never used'}
                     </p>

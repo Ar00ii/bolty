@@ -67,7 +67,7 @@ export function FloatingAIChat() {
                 style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)' }}>
                 <Bot className="w-5 h-5 text-yellow-400" strokeWidth={1.5} />
               </div>
-              <p className="text-sm font-medium text-white mb-1">AI Assistant</p>
+              <p className="text-sm font-light text-white mb-1">AI Assistant</p>
               <div className="rounded-lg px-3 py-2 mb-2"
                 style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}>
                 <p className="text-xs text-yellow-400 font-mono font-light">INACTIVE — MAINTENANCE</p>

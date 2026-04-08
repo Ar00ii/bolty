@@ -244,7 +244,7 @@ export default function RadialOrbitalTimeline({
                         <div className="mt-4 pt-3 border-t border-white/10">
                           <div className="flex items-center mb-2">
                             <Link size={10} className="text-monad-400 mr-1" />
-                            <h4 className="text-xs uppercase tracking-wider font-medium text-white/70">
+                            <h4 className="text-xs uppercase tracking-wider font-light text-white/70">
                               Connected to
                             </h4>
                           </div>

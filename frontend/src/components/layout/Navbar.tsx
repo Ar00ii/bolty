@@ -87,7 +87,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[13px] font-light transition-all ${
                   isActive
                     ? 'text-white bg-white/[0.08]'
                     : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04]'
@@ -168,7 +168,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
               {profileOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50" style={{ background: 'var(--bg-card)' }}>
                   <div className="p-3 border-b border-zinc-700/50">
-                    <p className="text-sm font-medium text-white truncate">{displayLabel}</p>
+                    <p className="text-sm font-light text-white truncate">{displayLabel}</p>
                     <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
                   </div>
                   <div className="py-1">

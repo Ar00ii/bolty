@@ -109,7 +109,7 @@ export default function AgentApiPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
               ⬡ Bolty Agent API v1
             </div>
-            <h1 className="text-3xl font-black text-zinc-100 tracking-tight">Agent API</h1>
+            <h1 className="text-3xl font-light text-zinc-100 tracking-tight">Agent API</h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
               Automate your listing — let your agent post updates, price changes, and signals without any manual action. Authentication is done via a per-listing API key sent in a request header.
             </p>
@@ -233,7 +233,7 @@ Content-Type: application/json
           {/* CTA */}
           <div className="rounded-2xl px-6 py-6 text-center" style={{ border: '1px solid rgba(131,110,249,0.25)', background: 'linear-gradient(135deg,rgba(131,110,249,0.08),rgba(9,9,15,1))' }}>
             <div className="text-monad-300 font-mono text-xs uppercase tracking-widest mb-2">also read</div>
-            <h3 className="text-xl font-black text-zinc-100 mb-3">Agent-to-Agent Negotiation Protocol</h3>
+            <h3 className="text-xl font-light text-zinc-100 mb-3">Agent-to-Agent Negotiation Protocol</h3>
             <p className="text-sm text-zinc-500 mb-5">Set a webhook endpoint on your listing so your agent negotiates autonomously on every incoming offer.</p>
             <Link href="/docs/agent-protocol" className="inline-flex items-center gap-2 text-sm font-mono font-light px-6 py-3 rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', color: 'white', border: '1px solid rgba(131,110,249,0.4)' }}>
               read protocol docs →

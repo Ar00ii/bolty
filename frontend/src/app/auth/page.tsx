@@ -89,7 +89,7 @@ function PasswordStrengthMeter({ password }: { password: string }) {
           <div key={n} className={`h-1 flex-1 rounded-full transition-colors duration-300 ${n <= str ? meta.color : 'bg-zinc-800'}`} />
         ))}
         {meta.label && (
-          <span className={`text-xs ml-1 font-medium ${str === 1 ? 'text-red-400' : str === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
+          <span className={`text-xs ml-1 font-light ${str === 1 ? 'text-red-400' : str === 2 ? 'text-yellow-400' : 'text-green-400'}`}>
             {meta.label}
           </span>
         )}
@@ -120,7 +120,7 @@ function Field({ label, type, value, onChange, placeholder, autoComplete, showTo
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5">
-        <label className="block text-xs font-medium text-zinc-400">{label}</label>
+        <label className="block text-xs font-light text-zinc-400">{label}</label>
         {hint && <span className="text-xs text-zinc-600">{hint}</span>}
       </div>
       <div className="relative">
@@ -229,7 +229,7 @@ function BrandPanel() {
             style={{ background: 'rgba(131,110,249,0.15)' }}>
             {BRAND_TESTIMONIAL.name.charAt(0)}
           </div>
-          <span className="text-[10px] font-medium text-zinc-300">{BRAND_TESTIMONIAL.name}</span>
+          <span className="text-[10px] font-light text-zinc-300">{BRAND_TESTIMONIAL.name}</span>
           <span className="text-[10px] text-zinc-600">{BRAND_TESTIMONIAL.role}</span>
           <CheckCircle className="w-3 h-3 text-monad-400/50 ml-auto" strokeWidth={1.5} />
         </div>
@@ -271,7 +271,7 @@ function RegisterProgress({ step }: { step: 1 | 2 }) {
                 : s
               }
             </div>
-            <span className={`text-xs ${s === step ? 'text-zinc-300 font-medium' : 'text-zinc-600'}`}>
+            <span className={`text-xs ${s === step ? 'text-zinc-300 font-light' : 'text-zinc-600'}`}>
               {s === 1 ? 'Account' : 'Profile'}
             </span>
           </div>
@@ -489,7 +489,7 @@ export default function AuthPage() {
                 <button
                   key={t}
                   onClick={() => { setTab(t); if (t === 'register') setRegStep(1); clearMessages(); }}
-                  className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`flex-1 py-2 text-sm font-light rounded-lg transition-all duration-200 ${
                     tab === t
                       ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30'
                       : 'text-zinc-500 hover:text-zinc-300'
@@ -516,14 +516,14 @@ export default function AuthPage() {
                   <span>
                     {"Don't have an account? "}
                     <button onClick={() => { setTab('register'); setRegStep(1); clearMessages(); }}
-                      className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign up</button>
+                      className="text-monad-400 hover:text-monad-300 font-light transition-colors">Sign up</button>
                   </span>
                 )
                 : tab === 'register' && regStep === 1 ? (
                   <span>
                     {'Already have an account? '}
                     <button onClick={() => { setTab('login'); clearMessages(); }}
-                      className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button>
+                      className="text-monad-400 hover:text-monad-300 font-light transition-colors">Sign in</button>
                   </span>
                 )
                 : tab === 'register' && regStep === 2 ? 'Step 2 of 2 — Optional profile details'
@@ -531,7 +531,7 @@ export default function AuthPage() {
                   <span>
                     {'Remember it? '}
                     <button onClick={() => { setTab('login'); clearMessages(); }}
-                      className="text-monad-400 hover:text-monad-300 font-medium transition-colors">Sign in</button>
+                      className="text-monad-400 hover:text-monad-300 font-light transition-colors">Sign in</button>
                   </span>
                 )
                 : 'We sent a password reset link to your inbox.'}
@@ -558,7 +558,7 @@ export default function AuthPage() {
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Verification code</label>
+                <label className="block text-xs font-light text-zinc-400 mb-1.5">Verification code</label>
                 <input
                   type="text" inputMode="numeric" maxLength={6}
                   value={twoFactorCode}
@@ -636,7 +636,7 @@ export default function AuthPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <p className="text-green-400 text-sm font-medium">Reset link sent</p>
+                  <p className="text-green-400 text-sm font-light">Reset link sent</p>
                   <p className="text-zinc-400 text-xs mt-0.5">If an account with that email exists, you will receive a link within a few minutes. Check your spam folder too.</p>
                 </div>
               </div>
@@ -682,7 +682,7 @@ export default function AuthPage() {
                 </p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-zinc-400 mb-1.5">Gender <span className="text-red-500">*</span></label>
+                <label className="block text-xs font-light text-zinc-400 mb-1.5">Gender <span className="text-red-500">*</span></label>
                 <select
                   value={regGender}
                   onChange={e => setRegGender(e.target.value)}
@@ -703,7 +703,7 @@ export default function AuthPage() {
 
               <div className="rounded-xl border border-monad-500/15 p-4"
                 style={{ background: 'rgba(131,110,249,0.04)' }}>
-                <p className="text-xs font-medium text-monad-400 mb-2">You&apos;re about to unlock:</p>
+                <p className="text-xs font-light text-monad-400 mb-2">You&apos;re about to unlock:</p>
                 <div className="space-y-1.5">
                   {[
                     'Publish and monetize code repos',

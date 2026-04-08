@@ -383,12 +383,12 @@ export default function ReposPage() {
         <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">Repository Showcase</p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-3xl font-black text-white mb-1">Explore Repos</h1>
+            <h1 className="text-3xl font-light text-white mb-1">Explore Repos</h1>
             <p className="text-sm text-zinc-500">Community repositories — public &amp; locked. Discover, vote, download.</p>
           </div>
           {isAuthenticated && (
             <button onClick={loadGhRepos}
-              className="flex items-center gap-2 text-sm font-mono font-medium px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 shrink-0"
+              className="flex items-center gap-2 text-sm font-mono font-light px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90 shrink-0"
               style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}>
               <Upload className="w-4 h-4" /> Publish repo
             </button>
@@ -439,7 +439,7 @@ export default function ReposPage() {
         <div className="border border-white/08 rounded-2xl p-5 mb-6"
           style={{ background: 'rgba(255,255,255,0.02)' }}>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-medium text-zinc-300">Your GitHub repositories</p>
+            <p className="text-sm font-light text-zinc-300">Your GitHub repositories</p>
             <button onClick={() => setShowPublish(false)} className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors">close</button>
           </div>
           {/* Wallet not linked warning */}
@@ -502,7 +502,7 @@ export default function ReposPage() {
                   <Globe className={`w-4 h-4 ${lockType === 'public' ? 'text-monad-400' : 'text-zinc-500'}`} strokeWidth={1.5} />
                 </div>
                 <div className="text-left">
-                  <div className={`text-sm font-medium ${lockType === 'public' ? 'text-monad-300' : 'text-zinc-400'}`}>Public — Free</div>
+                  <div className={`text-sm font-light ${lockType === 'public' ? 'text-monad-300' : 'text-zinc-400'}`}>Public — Free</div>
                   <div className="text-xs text-zinc-600">Anyone can see and download</div>
                 </div>
               </button>
@@ -514,7 +514,7 @@ export default function ReposPage() {
                   <Lock className={`w-4 h-4 ${lockType === 'locked' ? 'text-monad-400' : 'text-zinc-500'}`} strokeWidth={1.5} />
                 </div>
                 <div className="text-left">
-                  <div className={`text-sm font-medium ${lockType === 'locked' ? 'text-monad-300' : 'text-zinc-400'}`}>Locked — Paid Access</div>
+                  <div className={`text-sm font-light ${lockType === 'locked' ? 'text-monad-300' : 'text-zinc-400'}`}>Locked — Paid Access</div>
                   <div className="text-xs text-zinc-600">Users pay to unlock download</div>
                 </div>
               </button>
@@ -930,7 +930,7 @@ export default function ReposPage() {
                   )}
                   {repo.isLocked ? (
                     <button onClick={() => payAndUnlock(repo)}
-                      className="text-xs py-1.5 px-3 font-mono font-medium text-white rounded-lg transition-all hover:opacity-90"
+                      className="text-xs py-1.5 px-3 font-mono font-light text-white rounded-lg transition-all hover:opacity-90"
                       style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)' }}>
                       Unlock — ${repo.lockedPriceUsd}
                     </button>

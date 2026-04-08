@@ -166,7 +166,7 @@ export default function LeaderboardPage() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <Link href={`/u/${entry.username}`} className="text-sm font-medium text-zinc-200 hover:text-white transition-colors truncate">
+                  <Link href={`/u/${entry.username}`} className="text-sm font-light text-zinc-200 hover:text-white transition-colors truncate">
                     {entry.displayName || entry.username}
                   </Link>
                   <ReputationBadge points={entry.reputationPoints} size="sm" showLabel />
