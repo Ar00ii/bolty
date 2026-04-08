@@ -478,7 +478,7 @@ export default function HomePage() {
 
       {/* ── HOW IT WORKS (SERVICES GRID) ── */}
       <section className="py-24 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full mx-auto">
           {/* ONE Unified Container with all content */}
           <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
             {/* Title section - full width */}
@@ -504,7 +504,7 @@ export default function HomePage() {
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
-                  beamSize={15}
+                  beamSize={35}
                   gridColor="rgba(200, 200, 200, 0.35)"
                 >
                   <motion.div
@@ -547,7 +547,7 @@ export default function HomePage() {
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
-                  beamSize={15}
+                  beamSize={35}
                   gridColor="rgba(200, 200, 200, 0.35)"
                 >
                   <motion.div
