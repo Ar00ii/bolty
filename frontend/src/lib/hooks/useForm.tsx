@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useCallback } from 'react';
 import { ValidationError, validateForm } from '@/lib/utils/validation';
 
