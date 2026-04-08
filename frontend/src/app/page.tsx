@@ -3,10 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { HighlightCard } from '@/components/ui/highlight-card';
-import { GradientMeshBackground } from '@/components/ui/GradientMeshBackground';
-import { FloatingElements } from '@/components/ui/FloatingElements';
 import { DashboardPreview } from '@/components/ui/DashboardPreview';
 import { StepShowcase } from '@/components/ui/StepShowcase';
 import { IntegrationsShowcase } from '@/components/ui/IntegrationsShowcase';
@@ -117,7 +115,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
-      <GradientMeshBackground />
       {/* Homepage Navbar */}
       <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', opacity: 1, backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
@@ -148,57 +145,46 @@ export default function HomePage() {
 
       {/* ── HERO ── */}
       <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        {/* Animated floating elements */}
-        <FloatingElements />
-        {/* Subtle grid background */}
-        <div className="hero-grid-bg">
-          <svg width="100%" height="100%">
-            <defs>
-              <pattern id="hero-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--brand)" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-grid)" />
-          </svg>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left side - Text */}
+          <div className="space-y-6 relative z-10">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight" style={{ color: 'var(--text)' }}>
+              Build, ship, and earn<br />
+              <span className="hero-gradient">with AI agents</span>
+            </h1>
+
+            <p className="text-base md:text-lg" style={{ color: 'var(--text-muted)' }}>
+              The developer platform for publishing code, deploying AI agents,
+              and earning from your work. Connect your stack, reach buyers, get paid in ETH.
+            </p>
+
+            <div className="flex items-center gap-3 pt-4">
+              {!isAuthenticated ? (
+                <>
+                  <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
+                    Start building <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link href="/market" className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
+                    Explore marketplace
+                  </Link>
+                </>
+              ) : (
+                <Link href="/market" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
+                  Go to dashboard <ArrowRight className="w-4 h-4" />
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Right side - Dashboard Preview */}
+          <div className="relative z-10">
+            <DashboardPreview />
+          </div>
         </div>
-        <BoltyFloatingLogos />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-monad-500/20 bg-monad-500/5 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-            <span className="text-xs font-medium text-monad-400">Now in Beta — Open for developers</span>
-          </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 animate-text-glow" style={{ color: 'var(--text)' }}>
-            Build, ship, and earn<br />
-            <span className="hero-gradient">with AI agents</span>
-          </h1>
-
-          <p className="text-lg max-w-2xl mx-auto mb-12 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            The developer platform for publishing code, deploying AI agents,
-            and earning from your work. Connect your stack, reach buyers, get paid in ETH.
-          </p>
-
-          <div className="flex items-center justify-center gap-3">
-            {!isAuthenticated ? (
-              <>
-                <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                  Start building <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href="/market" className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
-                  Explore marketplace
-                </Link>
-              </>
-            ) : (
-              <Link href="/market" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                Go to dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
-          </div>
-
-          {/* Mini stats */}
-          <div className="mt-12 pt-8">
-            <StatusBar />
-          </div>
+        {/* Stats bar below */}
+        <div className="max-w-7xl mx-auto mt-16">
+          <StatusBar />
         </div>
       </section>
 
