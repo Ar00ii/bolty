@@ -7,7 +7,9 @@ import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
 import { HighlightCard } from '@/components/ui/highlight-card';
 import { GradientMeshBackground } from '@/components/ui/GradientMeshBackground';
 import { FloatingElements } from '@/components/ui/FloatingElements';
-import { TerminalDemo } from '@/components/ui/TerminalDemo';
+import { DashboardPreview } from '@/components/ui/DashboardPreview';
+import { StepShowcase } from '@/components/ui/StepShowcase';
+import { IntegrationsShowcase } from '@/components/ui/IntegrationsShowcase';
 import { StatusBar } from '@/components/ui/StatusBar';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -176,9 +178,7 @@ export default function HomePage() {
             and earning from your work. Connect your stack, reach buyers, get paid in ETH.
           </p>
 
-          <TerminalDemo />
-
-          <div className="flex items-center justify-center gap-3 mt-8">
+          <div className="flex items-center justify-center gap-3">
             {!isAuthenticated ? (
               <>
                 <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
@@ -230,29 +230,15 @@ export default function HomePage() {
       {/* ── HOW IT WORKS ── */}
       <Section>
         <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Getting Started</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Three steps to get started</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {HOW_IT_WORKS.map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <div key={s.step} className="step-card" style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${i * 0.15}s` }}>
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="step-number">{s.step}</div>
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                        <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
-                      </div>
-                    </div>
-                    <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text)' }}>{s.title}</h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{s.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="max-w-6xl mx-auto">
+            <StepShowcase
+              title="Three steps to get started"
+              steps={HOW_IT_WORKS.map((s) => ({
+                number: s.step,
+                title: s.title,
+                description: s.desc,
+              }))}
+            />
           </div>
         </section>
       </Section>
@@ -260,20 +246,18 @@ export default function HomePage() {
       {/* ── INTEGRATIONS ── */}
       <Section>
         <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ecosystem</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Works with your stack</h2>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {INTEGRATIONS.map((i, idx) => (
-                <div key={i.name} className="card-elevated text-center py-6 px-4" style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${idx * 0.08}s` }}>
-                  <p className="text-sm font-semibold mb-1.5" style={{ color: 'var(--text)' }}>{i.name}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{i.desc}</p>
-                </div>
-              ))}
-            </div>
+          <div className="max-w-6xl mx-auto">
+            <IntegrationsShowcase
+              title="Works with your stack"
+              integrations={[
+                { name: 'GitHub', icon: GitBranch },
+                { name: 'Ethereum', icon: Shield },
+                { name: 'Claude AI', icon: Bot },
+                { name: 'WebSockets', icon: MessageSquare },
+                { name: 'PostgreSQL', icon: Key },
+                { name: 'Any Language', icon: TrendingUp },
+              ]}
+            />
           </div>
         </section>
       </Section>
