@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface RenderHeroProps {
   isAuthenticated?: boolean;
@@ -12,25 +12,25 @@ interface RenderHeroProps {
 
 export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
   const [isDeploying, setIsDeploying] = useState(false);
-  const [deployComplete, setDeployComplete] = useState(false);
-  const deployButtonRef = useRef<HTMLButtonElement>(null);
-  const dashboardRef = useRef<HTMLDivElement>(null);
+  const [showDashboard, setShowDashboard] = useState(false);
 
-  const handleDeploy = async () => {
-    if (isDeploying) return;
-    setIsDeploying(true);
+  // Auto-start animation on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsDeploying(true);
+      // Show dashboard after arrow animation completes (1.5s)
+      const dashboardTimer = setTimeout(() => {
+        setShowDashboard(true);
+        // Stop deploying animation after dashboard loads
+        setTimeout(() => {
+          setIsDeploying(false);
+        }, 2000);
+      }, 1500);
+      return () => clearTimeout(dashboardTimer);
+    }, 1000); // Start after 1 second
 
-    // Simulate deployment
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setDeployComplete(true);
-    setIsDeploying(false);
-
-    // Reset after 3 seconds
-    setTimeout(() => {
-      setDeployComplete(false);
-    }, 3000);
-  };
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="relative min-h-screen pt-32 pb-20 px-4 overflow-hidden">
@@ -122,28 +122,15 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="relative"
         >
           {/* Deploy Button with Arrow */}
-          <div className="absolute -top-16 right-4 flex flex-col items-center gap-2">
-            {/* Arrow SVG */}
+          <div className="absolute -top-20 right-4 flex flex-col items-center">
+            {/* Arrow SVG - L shaped */}
             <svg
-              width="2"
-              height="40"
-              viewBox="0 0 2 40"
-              className="absolute top-12"
+              width="60"
+              height="120"
+              viewBox="0 0 60 120"
+              className="absolute top-16"
               preserveAspectRatio="none"
             >
-              <motion.line
-                x1="1"
-                y1="0"
-                x2="1"
-                y2="40"
-                stroke="url(#arrowGradient)"
-                strokeWidth="2"
-                initial={{ strokeDasharray: 40, strokeDashoffset: 40 }}
-                animate={
-                  isDeploying ? { strokeDashoffset: 0 } : { strokeDashoffset: 40 }
-                }
-                transition={{ duration: 1.5 }}
-              />
               <defs>
                 <linearGradient
                   id="arrowGradient"
@@ -156,42 +143,64 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   <stop offset="100%" stopColor="#ec4899" />
                 </linearGradient>
               </defs>
+              {/* Vertical line */}
+              <motion.line
+                x1="30"
+                y1="0"
+                x2="30"
+                y2="80"
+                stroke="url(#arrowGradient)"
+                strokeWidth="3"
+                initial={{ strokeDasharray: 80, strokeDashoffset: 80 }}
+                animate={isDeploying ? { strokeDashoffset: 0 } : { strokeDashoffset: 80 }}
+                transition={{ duration: 1 }}
+              />
+              {/* Horizontal line */}
+              <motion.line
+                x1="30"
+                y1="80"
+                x2="0"
+                y2="80"
+                stroke="url(#arrowGradient)"
+                strokeWidth="3"
+                initial={{ strokeDasharray: 30, strokeDashoffset: 30 }}
+                animate={isDeploying ? { strokeDashoffset: 0 } : { strokeDashoffset: 30 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+              />
+              {/* Arrow head */}
+              <motion.polygon
+                points="0,80 8,76 8,84"
+                fill="#ec4899"
+                initial={{ opacity: 0 }}
+                animate={isDeploying ? { opacity: 1 } : { opacity: 0 }}
+                transition={{ delay: 1.2 }}
+              />
             </svg>
 
-            {/* Deploy Button */}
-            <motion.button
-              ref={deployButtonRef}
-              onClick={handleDeploy}
-              disabled={isDeploying}
+            {/* Deploy Button (non-interactive) */}
+            <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className={`px-6 py-2 rounded font-mono text-sm font-medium transition-all ${
-                isDeploying
-                  ? 'bg-purple-600 text-white'
-                  : deployComplete
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 text-black hover:bg-gray-300'
-              } disabled:opacity-75`}
+              className="px-6 py-2 rounded font-mono text-sm font-medium bg-gray-200 text-black cursor-default"
             >
-              {isDeploying ? '⚙️ Deploying...' : deployComplete ? '✓ Deployed' : 'deploy'}
-            </motion.button>
+              $ git push
+            </motion.div>
           </div>
 
-          {/* Dashboard container */}
-          <div
-            ref={dashboardRef}
+          {/* Dashboard container - only shows after arrow animation */}
+          {showDashboard && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="rounded-lg border border-white/20 p-6 transition-all"
             style={{
               background: isDeploying
                 ? 'rgba(168, 85, 247, 0.15)'
-                : deployComplete
-                ? 'rgba(34, 197, 94, 0.1)'
                 : 'rgba(0, 0, 0, 0.4)',
               borderColor: isDeploying
                 ? 'rgba(168, 85, 247, 0.4)'
-                : deployComplete
-                ? 'rgba(34, 197, 94, 0.3)'
                 : 'rgba(255, 255, 255, 0.2)',
             }}
           >
@@ -388,7 +397,8 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 </div>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
+          )}
         </motion.div>
       </div>
     </div>
