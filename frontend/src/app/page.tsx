@@ -60,15 +60,6 @@ const HOW_IT_WORKS = [
   { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate, build reputation, grow your brand.', icon: Rocket },
 ];
 
-const INTEGRATIONS = [
-  { name: 'GitHub', icon: GitBranch },
-  { name: 'Ethereum', icon: Shield },
-  { name: 'Claude AI', icon: Bot },
-  { name: 'WebSockets', icon: MessageSquare },
-  { name: 'PostgreSQL', icon: Key },
-  { name: 'Any Language', icon: TrendingUp },
-];
-
 const TESTIMONIALS = [
   { name: 'Alex R.', role: 'Senior Full-Stack Dev', text: 'Published three repos in my first week and earned ETH without crypto complexity.' },
   { name: 'Yuki T.', role: 'AI/ML Engineer', text: 'The AI agent marketplace is exactly what I needed. Deployed my toolkit and it has buyers.' },
@@ -250,48 +241,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── INTEGRATIONS (SPLIT) ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Stack</p>
-            <h2 className="text-5xl font-bold text-white">Works with your stack</h2>
-          </motion.div>
-
-          <motion.div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-            {INTEGRATIONS.map((item, i) => {
-              const Icon = item.icon;
-              return (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="group"
-                >
-                  <div
-                    className="aspect-square rounded-lg border p-4 flex items-center justify-center transition-all duration-300 group-hover:border-purple-500/40"
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(168, 85, 247, 0.05)',
-                    }}
-                  >
-                    <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                  </div>
-                  <p className="text-xs text-center text-gray-500 mt-2 group-hover:text-gray-400">{item.name}</p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── TESTIMONIALS ── */}
+{/* ── TESTIMONIALS ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
