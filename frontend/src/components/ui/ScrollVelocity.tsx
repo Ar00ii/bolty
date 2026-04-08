@@ -20,13 +20,13 @@ export function ScrollVelocityRow({
       initial={{ x: 0 }}
       animate={{ x: direction === 1 ? -1000 : 1000 }}
       transition={{
-        duration: 40 / baseVelocity,
+        duration: 100 / baseVelocity,
         repeat: Infinity,
         repeatType: 'loop',
         ease: 'linear',
       }}
     >
-      {[0, 1, 2].map((i) => (
+      {[0, 1, 2, 3].map((i) => (
         <div key={i} className="flex gap-8 flex-shrink-0">
           {children}
         </div>
