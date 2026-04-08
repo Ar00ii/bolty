@@ -287,21 +287,8 @@ export default function HomePage() {
         background: 'linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(20,10,40,0.3) 50%, rgba(0,0,0,1) 100%)'
       }}>
         {/* Hexagon Pattern Background */}
-        <div className="absolute inset-0 pointer-events-none opacity-40">
-          <HexagonPattern
-            hexagons={[
-              [1, 1],
-              [4, 4],
-              [2, 2],
-              [3, 4],
-              [5, 4],
-              [8, 2],
-              [6, 3],
-              [8, 5],
-              [10, 10],
-            ]}
-            className="inset-0 skew-y-6"
-          />
+        <div className="absolute inset-0 pointer-events-none">
+          <HexagonPattern className="w-full h-full" />
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
