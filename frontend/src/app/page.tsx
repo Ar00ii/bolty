@@ -133,6 +133,14 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Simple nav for unauthenticated users
+  const simpleNavLinks = [
+    { href: '/market', label: 'Marketplace' },
+    { href: '/docs/agent-protocol', label: 'Docs' },
+    { href: '#how-it-works', label: 'How It Works', isHash: true },
+  ];
+
+  // Organized sections for authenticated users
   const navSections = {
     OVERVIEW: [
       { href: '/market', label: 'Marketplace', icon: Bot },
@@ -201,53 +209,71 @@ export default function HomePage() {
 
           {/* Left Links - Main Nav Menu - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-1">
-            <div ref={docsRef} className="relative">
-              <motion.button
-                onClick={() => setDocsOpen(!docsOpen)}
-                className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white flex items-center gap-1"
-                title="Navigation"
-              >
-                Navigation
-                <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </motion.div>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
-              </motion.button>
-
-              <AnimatePresence>
-                {docsOpen && (
-                  <motion.div
-                    initial={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
-                    animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
-                    exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full mt-2 w-80 rounded-lg border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
-                  >
-                    {Object.entries(navSections).map(([section, items]) => (
-                      <div key={section}>
-                        <div className="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold bg-black/40">
-                          {section}
-                        </div>
-                        {items.map((item) => {
-                          const IconComponent = item.icon;
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              onClick={() => setDocsOpen(false)}
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                            >
-                              <IconComponent className="w-4 h-4 flex-shrink-0" />
-                              {item.label}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    ))}
+            {isAuthenticated ? (
+              // Authenticated: Show organized sections
+              <div ref={docsRef} className="relative">
+                <motion.button
+                  onClick={() => setDocsOpen(!docsOpen)}
+                  className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white flex items-center gap-1"
+                  title="Navigation"
+                >
+                  Navigation
+                  <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    <ChevronDown className="w-3.5 h-3.5" />
                   </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
+                </motion.button>
+
+                <AnimatePresence>
+                  {docsOpen && (
+                    <motion.div
+                      initial={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                      animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                      exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                      transition={{ duration: 0.2 }}
+                      className="absolute top-full mt-2 w-80 rounded-lg border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900 max-h-96 overflow-y-auto"
+                    >
+                      {Object.entries(navSections).map(([section, items]) => (
+                        <div key={section}>
+                          <div className="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold bg-black/40">
+                            {section}
+                          </div>
+                          {items.map((item) => {
+                            const IconComponent = item.icon;
+                            return (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => setDocsOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                              >
+                                <IconComponent className="w-4 h-4 flex-shrink-0" />
+                                {item.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              // Unauthenticated: Show simple nav links
+              <>
+                {simpleNavLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white"
+                    title={link.label}
+                  >
+                    {link.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
+                  </Link>
+                ))}
+              </>
+            )}
           </div>
 
           {/* Mobile Logo - Only visible on mobile */}
@@ -465,47 +491,72 @@ export default function HomePage() {
               animate={!prefersReducedMotion ? { opacity: 1, height: 'auto' } : {}}
               exit={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
               transition={{ duration: 0.3 }}
-              className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm overflow-hidden max-h-96 overflow-y-auto"
+              className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm overflow-hidden"
             >
               <div className="px-4 py-4">
-                {Object.entries(navSections).map(([section, items], sectionIdx) => (
-                  <div key={section} className={sectionIdx > 0 ? 'mt-4' : ''}>
-                    <motion.div
-                      initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
-                      animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                      transition={{ delay: sectionIdx * 0.05 }}
-                      className="px-3 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold"
-                    >
-                      {section}
-                    </motion.div>
-                    {items.map((item, itemIdx) => {
-                      const IconComponent = item.icon;
-                      return (
+                {isAuthenticated ? (
+                  // Authenticated: Show organized sections
+                  <>
+                    {Object.entries(navSections).map(([section, items], sectionIdx) => (
+                      <div key={section} className={sectionIdx > 0 ? 'mt-4' : ''}>
                         <motion.div
-                          key={item.href}
                           initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
                           animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                          transition={{ delay: (sectionIdx * 0.05) + (itemIdx * 0.02) }}
+                          transition={{ delay: sectionIdx * 0.05 }}
+                          className="px-3 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold"
                         >
-                          <Link
-                            href={item.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
-                          >
-                            <IconComponent className="w-4 h-4 flex-shrink-0" />
-                            {item.label}
-                          </Link>
+                          {section}
                         </motion.div>
-                      );
-                    })}
-                  </div>
-                ))}
+                        {items.map((item, itemIdx) => {
+                          const IconComponent = item.icon;
+                          return (
+                            <motion.div
+                              key={item.href}
+                              initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                              animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                              transition={{ delay: (sectionIdx * 0.05) + (itemIdx * 0.02) }}
+                            >
+                              <Link
+                                href={item.href}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                              >
+                                <IconComponent className="w-4 h-4 flex-shrink-0" />
+                                {item.label}
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  // Unauthenticated: Show simple nav links
+                  <>
+                    {simpleNavLinks.map((link, i) => (
+                      <motion.div
+                        key={link.href}
+                        initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                        animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                        transition={{ delay: i * 0.05 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                        >
+                          {link.label}
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </>
+                )}
 
                 {!isAuthenticated && (
                   <motion.div
                     initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
                     animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.15 }}
                     className="mt-4 pt-4 border-t border-zinc-700/50"
                   >
                     <Link
