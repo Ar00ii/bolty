@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { useTheme } from '@/lib/theme/ThemeContext';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
@@ -12,7 +11,6 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
-  Sun, Moon,
 } from 'lucide-react';
 
 // Data
@@ -97,7 +95,6 @@ const FAQ = [
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   return (
@@ -123,16 +120,6 @@ export default function HomePage() {
 
           {/* Right Side */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Dark mode toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
-              aria-label="Toggle dark mode"
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-
             {!isAuthenticated ? (
               <>
                 <Link href="/auth" className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
