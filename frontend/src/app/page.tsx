@@ -295,72 +295,81 @@ export default function HomePage() {
             </h2>
           </motion.div>
 
-          {/* Feature Grid - 2 columns on desktop, 1 on mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 auto-rows-max">
-            {FEATURES.map((f, i) => {
-              const Icon = f.icon;
-              const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
-              const accentColor = accentColors[i % accentColors.length];
+          {/* Main Container with Grid Background */}
+          <div className="relative">
+            {/* Background grid layer for entire container */}
+            <div
+              className="absolute inset-0 rounded-lg pointer-events-none"
+              style={{
+                background: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent)',
+                backgroundSize: '40px 40px',
+              }}
+            />
 
-              return (
-                <motion.div
-                  key={f.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className={`group relative ${f.featured ? 'lg:col-span-2' : ''}`}
-                >
-                  {/* Background grid layer */}
-                  <div
-                    className="absolute inset-0 rounded-lg pointer-events-none"
-                    style={{
-                      backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent)',
-                      backgroundSize: '40px 40px',
-                      background: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent)',
-                      backgroundSize: '40px 40px',
-                    }}
-                  />
+            {/* Relief shadow layer - offset slightly */}
+            <div
+              className="absolute inset-0 rounded-lg pointer-events-none"
+              style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                transform: 'translate(3px, 3px)',
+                zIndex: 0,
+              }}
+            />
 
-                  {/* Relief shadow layer - offset slightly */}
-                  <div
-                    className="absolute inset-0 rounded-lg pointer-events-none"
-                    style={{
-                      background: 'rgba(0, 0, 0, 0.2)',
-                      transform: 'translate(2px, 2px)',
-                      zIndex: 0,
-                    }}
-                  />
+            {/* Main container box - on top */}
+            <div
+              className="relative z-10 rounded-lg border backdrop-blur-sm overflow-hidden p-8 md:p-12"
+              style={{
+                borderColor: 'rgba(168, 85, 247, 0.3)',
+                background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(168, 85, 247, 0.1) 100%)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              {/* Feature Grid - 2 columns on desktop, 1 on mobile */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {FEATURES.map((f, i) => {
+                  const Icon = f.icon;
+                  const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
+                  const accentColor = accentColors[i % accentColors.length];
 
-                  {/* Main card - on top */}
-                  <div
-                    className="relative z-10 rounded-lg border backdrop-blur-sm transition-all duration-300 overflow-hidden hover:translate-y-[-2px] cursor-pointer"
-                    style={{
-                      borderColor: 'rgba(168, 85, 247, 0.2)',
-                      background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(168, 85, 247, 0.08) 100%)',
-                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.05)',
-                    }}
-                  >
-                    <div className="p-8 md:p-12">
-                      <div className="flex items-start gap-6 mb-6">
-                        <div
-                          className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${accentColor}`}
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.08))',
-                            boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 8px 20px rgba(168, 85, 247, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
-                          }}
-                        >
-                          <Icon className="w-7 h-7" />
-                        </div>
-                        <div>
-                          <h3 className="text-2xl font-light text-white mb-2">{f.title}</h3>
+                  return (
+                    <motion.div
+                      key={f.href}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: i * 0.1 }}
+                      className={`group ${f.featured ? 'lg:col-span-2' : ''}`}
+                    >
+                      {/* Individual card */}
+                      <div
+                        className="rounded-lg border backdrop-blur-sm transition-all duration-300 overflow-hidden hover:translate-y-[-2px] cursor-pointer h-full"
+                        style={{
+                          borderColor: 'rgba(168, 85, 247, 0.2)',
+                          background: 'linear-gradient(135deg, rgba(20, 20, 30, 0.8) 0%, rgba(168, 85, 247, 0.05) 100%)',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08)',
+                        }}
+                      >
+                        <div className="p-6 md:p-8">
+                          <div className="flex items-start gap-4 mb-4">
+                            <div
+                              className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${accentColor}`}
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.08))',
+                                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 6px 16px rgba(168, 85, 247, 0.15)',
+                              }}
+                            >
+                              <Icon className="w-6 h-6" />
+                            </div>
+                            <h3 className="text-xl font-light text-white">{f.title}</h3>
+                          </div>
+                          <p className="text-gray-300 text-sm leading-relaxed font-light">{f.description}</p>
                         </div>
                       </div>
-                      <p className="text-gray-300 text-base leading-relaxed font-light">{f.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </section>
