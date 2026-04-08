@@ -163,7 +163,7 @@ export default function HomePage() {
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
           ].map((icon) => (
-            <div key={icon.alt} className="w-24 flex items-center justify-center flex-shrink-0">
+            <div key={icon.alt} className="w-28 flex items-center justify-center flex-shrink-0">
               <img
                 src={icon.src}
                 alt={icon.alt}
