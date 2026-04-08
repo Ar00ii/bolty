@@ -17,16 +17,16 @@ export function ScrollVelocityRow({
   return (
     <motion.div
       className="flex whitespace-nowrap gap-8"
-      initial={{ x: 0 }}
-      animate={{ x: direction === 1 ? -1000 : 1000 }}
+      initial={{ x: direction === 1 ? 0 : 0 }}
+      animate={{ x: direction === 1 ? -2000 : 2000 }}
       transition={{
-        duration: 100 / baseVelocity,
+        duration: 80 / baseVelocity,
         repeat: Infinity,
         repeatType: 'loop',
         ease: 'linear',
       }}
     >
-      {[0, 1, 2, 3].map((i) => (
+      {[0, 1, 2, 3, 4].map((i) => (
         <div key={i} className="flex gap-8 flex-shrink-0">
           {children}
         </div>
@@ -45,8 +45,9 @@ export function ScrollVelocityContainer({
   className = '',
 }: ScrollVelocityContainerProps) {
   return (
-    <div className={`flex flex-col gap-4 overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-6 overflow-hidden ${className}`}>
       {children}
     </div>
   );
 }
+

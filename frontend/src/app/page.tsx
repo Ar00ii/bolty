@@ -129,98 +129,107 @@ export default function HomePage() {
 
           <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em] relative">
             {/* Row 1 - Left to right */}
-            <ScrollVelocityRow baseVelocity={15} direction={1}>
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#f0db4f' }}>
-                    <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9.23.383.645.643 1.11.576.473-.06.879-.324 1.07-.65.148-.253.457-.465.576-.907.117-.462-.021-.69-.467-.933-.547-.338-1.668-.52-2.231-.278-.559.242-1.19.622-1.346 1.468-.156.847.051 1.718.707 2.338.653.614 1.86.886 2.042 2.265.046.383-.086.945-.664 1.185-.597.245-1.522.142-1.917-.932l-.715.714c.712 1.627 2.213 2.156 3.938 1.753 1.438-.35 2.486-1.236 2.582-2.181.052-.467-.037-.9-.337-1.335z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">JavaScript</span>
+            <ScrollVelocityRow baseVelocity={12} direction={1}>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">JavaScript</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#3178c6' }}>
-                    <path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.294a3.601 3.601 0 0 0-.616-.305 3.901 3.901 0 0 0-.278-.045A3.6 3.6 0 0 0 19.5 9.75h-2.633A3.63 3.63 0 0 0 13.04 6.724a3.63 3.63 0 0 0-3.69 3.876c0 1.036.335 2.001.954 2.844.685.968 1.888 1.594 3.877 1.594.868 0 1.533-.127 2.329-.779v2.294c-.779.601-2.171 1.271-3.654 1.271a5.141 5.141 0 0 1-4.663-2.513c-.822-1.316-1.233-2.845-1.233-4.779 0-2.15.674-4.167 2.013-5.74C6.954 4.402 8.74 3.424 10.777 3.424c2.035 0 3.763.922 4.882 2.023.333.229.603.632.796 1.297z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">TypeScript</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" alt="TypeScript" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">TypeScript</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#06B6D4' }}>
-                    <path d="M12.001,4.8c-3.976,0-7.185,2.946-8.257,6.9c-.331,1.263-.408,2.608-.229,3.996c.468,3.632,2.973,6.788,6.479,7.824 c1.686.46,3.477.489,5.11.089c3.02-.731,5.634-2.904,6.923-5.839c.333-.823.589-1.746.745-2.724c.096-.603.148-1.22.148-1.847 C20.186,7.746,16.977,4.8,12.001,4.8z M12.001,6.968c-2.211,0-4.004,1.793-4.004,4.004c0,2.211,1.793,4.004,4.004,4.004 c2.211,0,4.004-1.793,4.004-4.004C16.005,8.761,14.212,6.968,12.001,6.968z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">React</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">React</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#000000' }}>
-                    <path d="M18.5 9.51a4.22 4.22 0 0 1 1.91-1.34A5.77 5.77 0 0 0 12 2a5.77 5.77 0 0 0-8.41 8.51 4.22 4.22 0 0 1 1.91 1.34A5.77 5.77 0 0 1 12 4.77a5.77 5.77 0 0 1 6.5 4.74z M2 12a5.77 5.77 0 0 0 8.41 5.49 4.22 4.22 0 0 1-1.91-1.34A5.77 5.77 0 0 1 12 19.23a5.77 5.77 0 0 1-6.5-4.74 4.22 4.22 0 0 1-1.91-1.34A5.77 5.77 0 0 0 2 12zm10 5.77a5.77 5.77 0 0 0 8.41-5.49 4.22 4.22 0 0 1-1.91 1.34A5.77 5.77 0 0 1 12 19.23zm8.41-8.51A5.77 5.77 0 0 0 12 2a5.77 5.77 0 0 0-8.41 8.51 4.22 4.22 0 0 1 1.91-1.34A5.77 5.77 0 0 1 12 4.77a5.77 5.77 0 0 1 6.5 4.74 4.22 4.22 0 0 1 1.91 1.34z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">Next.js</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" alt="Next.js" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Next.js</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#336791' }}>
-                    <path d="M15.898 4.045c-7.969 0-15.75 3.082-15.75 10.744 0 2.098.661 4.063 1.964 5.735.553 1.487 1.98 3.268 4.1 5.279 1.331 1.301 1.assertions 2.556 1.902 3.676.349 1.038.649 1.945.649 2.783 0 .968.471 1.47 1.315 1.47.794 0 1.927-.369 4.105-2.packages.427-.288.749-.484 1.058-.484.468 0 .703.299 1.058.484 2.178 2.053 3.311 2.package 4.105 2.package.844 0 1.315-.502 1.315-1.47 0-.838.3-1.745.649-2.783.533-1.12.571-2.375 1.902-3.676 2.12-2.011 3.547-3.792 4.1-5.279 1.303-1.672 1.964-3.637 1.964-5.735 0-7.662-7.781-10.744-15.75-10.744z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">PostgreSQL</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" alt="Node.js" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Node.js</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Python</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">PostgreSQL</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg" alt="Redis" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Redis</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Docker</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" alt="Git" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Git</span>
               </div>
             </ScrollVelocityRow>
 
             {/* Row 2 - Right to left */}
-            <ScrollVelocityRow baseVelocity={12} direction={-1}>
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#627EEA' }}>
-                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 1.8c5.597 0 10.2 4.603 10.2 10.2s-4.603 10.2-10.2 10.2S1.8 17.597 1.8 12 6.403 1.8 12 1.8zm0 3.6c-3.656 0-6.6 2.944-6.6 6.6s2.944 6.6 6.6 6.6 6.6-2.944 6.6-6.6-2.944-6.6-6.6-6.6z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">Ethereum</span>
+            <ScrollVelocityRow baseVelocity={10} direction={-1}>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="TailwindCSS" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">TailwindCSS</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#181717' }}>
-                    <path d="M12 0c6.627 0 12 5.373 12 12 0 5.302-3.438 9.8-8.207 11.387-.599.111-.793-.261-.793-.577v-2.234c3.338.726 4.033-1.416 4.033-1.416.546-1.387 1.333-1.756 1.333-1.756 1.089-.745.083-.729-.083-.729-1.205.084-1.839 1.237-1.839 1.237-1.07 1.834-2.807 1.304-3.495.997-.107-.775-.418-1.305-.762-1.604 2.665-.305 5.467-1.334 5.467-5.931 0-1.311-.469-2.381-1.236-3.221.124-.303.535-1.524-.117-3.176 0 0-1.008-.322-3.301 1.23-.957-.266-1.983-.399-3.003-.404-1.02.005-2.047.138-3.006.404-2.291-1.552-3.297-1.23-3.297-1.23-.653 1.653-.242 2.874-.118 3.176-.77.84-1.235 1.911-1.235 3.221 0 4.609 2.807 5.624 5.479 5.921-.342.297-.646.966-.756 1.81-.68.305-2.466.998-3.552-1.215 0 0-.646-1.17-1.87-1.25 0 0-1.19-.015-.083.742 0 0 .798.6 1.35 1.788 0 0 .711 2.328 4.171 1.881v2.947c0 .319-.192.694-.801.576C3.437 21.794 0 17.295 0 12c0-6.627 5.373-12 12-12z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">GitHub</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" alt="GitHub" className="w-5 h-5 invert" />
+                <span className="text-white font-medium text-sm">GitHub</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#00D9FF' }}>
-                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm6.6 9.6c0 .6 0 1.2-.6 1.8 0 0-.6 2.4-3.6 4.2v1.8c0 .6-.6 1.2-1.2 1.2h-.6c-.6 0-1.2-.6-1.2-1.2v-1.2l-.6.6c-.6.6-1.8 1.2-2.4 1.2-2.4 0-4.2-2.4-4.2-4.8 0-2.4 1.8-4.8 4.2-4.8.6 0 1.8.6 2.4 1.2l.6.6v-1.2c0-.6.6-1.2 1.2-1.2h.6c.6 0 1.2.6 1.2 1.2v1.8c3 1.8 3.6 4.2 3.6 4.2.6.6.6 1.2.6 1.8z" />
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ color: '#627EEA' }} className="w-5 h-5">
+                    <path d="M11.944 17.97H4.58v-4.55h7.364c.879 0 1.434.574 1.434 1.39v1.77c0 .816-.555 1.39-1.434 1.39zm6.56-9.73H4.58V3.68h13.924v4.56z"/>
                   </svg>
                 </div>
-                <span className="text-white font-medium">Claude AI</span>
+                <span className="text-white font-medium text-sm">Ethereum</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#236192' }}>
-                    <path d="M5.8 0h12.4c3.2 0 5.8 2.6 5.8 5.8v12.4c0 3.2-2.6 5.8-5.8 5.8H5.8C2.6 24 0 21.4 0 18.2V5.8C0 2.6 2.6 0 5.8 0zm6.6 4.8c-3.1 0-5.6 2.5-5.6 5.6s2.5 5.6 5.6 5.6 5.6-2.5 5.6-5.6-2.5-5.6-5.6-5.6zm6.6-.4c-.7 0-1.3.6-1.3 1.3s.6 1.3 1.3 1.3 1.3-.6 1.3-1.3-.6-1.3-1.3-1.3z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">WebSockets</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/prisma/prisma-original.svg" alt="Prisma" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Prisma</span>
               </div>
 
-              <div className="flex items-center gap-4 px-4">
-                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#3776ab' }}>
-                    <path d="M12 0c6.627 0 12 5.373 12 12s-5.373 12-12 12S0 18.627 0 12 5.373 0 12 0zm-1.5 4.8h3c.828 0 1.5.672 1.5 1.5v9c0 .828-.672 1.5-1.5 1.5h-3c-.828 0-1.5-.672-1.5-1.5v-9c0-.828.672-1.5 1.5-1.5zm-6 0h3c.828 0 1.5.672 1.5 1.5v5.4c0 .828-.672 1.5-1.5 1.5h-3c-.828 0-1.5-.672-1.5-1.5v-5.4c0-.828.672-1.5 1.5-1.5zm12 0h3c.828 0 1.5.672 1.5 1.5v5.4c0 .828-.672 1.5-1.5 1.5h-3c-.828 0-1.5-.672-1.5-1.5v-5.4c0-.828.672-1.5 1.5-1.5z" />
-                  </svg>
-                </div>
-                <span className="text-white font-medium">Python</span>
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" alt="Express" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Express</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg" alt="FastAPI" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">FastAPI</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" alt="MongoDB" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">MongoDB</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/framermotion/framermotion-original.svg" alt="Framer Motion" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Framer</span>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg" alt="Kubernetes" className="w-5 h-5" />
+                <span className="text-white font-medium text-sm">Kubernetes</span>
               </div>
             </ScrollVelocityRow>
           </ScrollVelocityContainer>
