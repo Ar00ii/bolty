@@ -284,7 +284,7 @@ export default function HomePage() {
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
       <section className="py-24 px-4 border-t relative overflow-hidden" style={{
         borderColor: 'var(--border)',
-        background: 'linear-gradient(180deg, rgba(0,0,0,1) 0%, rgba(20,10,40,0.3) 50%, rgba(0,0,0,1) 100%)'
+        background: '#000000'
       }}>
         {/* Hexagon Pattern Background */}
         <div className="absolute inset-0 pointer-events-none">
@@ -366,7 +366,7 @@ export default function HomePage() {
                     <div
                       className="relative h-full backdrop-blur-sm overflow-hidden p-8 md:p-12"
                       style={{
-                        background: `linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, ${accentBgMap[accentColor]} 100%)`,
+                        background: 'rgba(0, 0, 0, 0.6)',
                         boxShadow: `inset 0 1px 1px ${accentBorderMap[accentColor]}, inset 0 -1px 1px rgba(0, 0, 0, 0.3)`,
                         minHeight: isReputationCard ? 'auto' : 'auto',
                       }}
