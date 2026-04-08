@@ -504,8 +504,8 @@ export default function HomePage() {
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
-                  beamSize={5}
-                  gridColor="rgba(200, 200, 200, 0.2)"
+                  beamSize={15}
+                  gridColor="rgba(200, 200, 200, 0.35)"
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -547,8 +547,8 @@ export default function HomePage() {
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={2}
-                  beamSize={5}
-                  gridColor="rgba(200, 200, 200, 0.2)"
+                  beamSize={15}
+                  gridColor="rgba(200, 200, 200, 0.35)"
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
