@@ -342,7 +342,7 @@ export default function HomePage() {
                       style={{
                         background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(100, 50, 150, 0.08) 100%)',
                         boxShadow: 'inset 0 1px 1px rgba(168, 85, 247, 0.1), inset 0 -1px 1px rgba(0, 0, 0, 0.5)',
-                        minHeight: isReputationCard ? '400px' : 'auto',
+                        minHeight: isReputationCard ? 'auto' : 'auto',
                       }}
                     >
                       <div className="relative z-10">
