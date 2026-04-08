@@ -51,10 +51,6 @@ img {
   display: block;
 }
 
-/* Reduce repaints with contain */
-section {
-  contain: layout style paint;
-}
 
 /* Optimize animations with GPU acceleration */
 .animate-scroll {
