@@ -494,14 +494,14 @@ export default function HomePage() {
             </motion.div>
 
             {/* Top: 2 boxes side by side */}
-            <div className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div className="grid grid-cols-2 gap-8" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               {[
                 { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
                 { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
+                  className="!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center"
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={4}
                   beamSize={3}
@@ -538,7 +538,7 @@ export default function HomePage() {
             </div>
 
             {/* Bottom: 3 boxes */}
-            <div className="grid grid-cols-3 gap-0" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div className="grid grid-cols-3 gap-8 pt-8" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
               {[
                 { name: 'Database', desc: 'Managed PostgreSQL & Redis', details: 'High-availability database cluster with automatic backups and failover.' },
                 { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
