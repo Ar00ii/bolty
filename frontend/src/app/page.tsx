@@ -323,8 +323,28 @@ export default function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
               {FEATURES.map((f, i) => {
                 const Icon = f.icon;
-                const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
+                const accentColors = ['cyan', 'emerald', 'pink', 'yellow', 'blue', 'purple'];
                 const accentColor = accentColors[i % accentColors.length];
+                const accentTextColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
+                const accentTextColor = accentTextColors[i % accentTextColors.length];
+
+                const accentBgMap: { [key: string]: string } = {
+                  cyan: 'rgba(34, 211, 238, 0.1)',
+                  emerald: 'rgba(16, 185, 129, 0.1)',
+                  pink: 'rgba(236, 72, 153, 0.1)',
+                  yellow: 'rgba(234, 179, 8, 0.1)',
+                  blue: 'rgba(59, 130, 246, 0.1)',
+                  purple: 'rgba(168, 85, 247, 0.1)',
+                };
+
+                const accentBorderMap: { [key: string]: string } = {
+                  cyan: 'rgba(34, 211, 238, 0.2)',
+                  emerald: 'rgba(16, 185, 129, 0.2)',
+                  pink: 'rgba(236, 72, 153, 0.2)',
+                  yellow: 'rgba(234, 179, 8, 0.2)',
+                  blue: 'rgba(59, 130, 246, 0.2)',
+                  purple: 'rgba(168, 85, 247, 0.2)',
+                };
 
                 // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
                 const isReputationCard = i === 5;
@@ -338,26 +358,26 @@ export default function HomePage() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className={`group relative ${gridClass}`}
                     style={{
-                      borderRight: i % 2 === 0 && !f.featured && !isReputationCard ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
-                      borderBottom: i < FEATURES.length - 1 ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
+                      borderRight: i % 2 === 0 && !f.featured && !isReputationCard ? `1px solid ${accentBorderMap[accentColor]}` : 'none',
+                      borderBottom: i < FEATURES.length - 1 ? `1px solid ${accentBorderMap[accentColor]}` : 'none',
                     }}
                   >
                     {/* Card Background with Gradient */}
                     <div
-                      className="relative h-full backdrop-blur-md overflow-hidden p-8 md:p-12"
+                      className="relative h-full backdrop-blur-sm overflow-hidden p-8 md:p-12"
                       style={{
-                        background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(100, 50, 150, 0.08) 100%)',
-                        boxShadow: 'inset 0 1px 1px rgba(168, 85, 247, 0.1), inset 0 -1px 1px rgba(0, 0, 0, 0.5)',
+                        background: `linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, ${accentBgMap[accentColor]} 100%)`,
+                        boxShadow: `inset 0 1px 1px ${accentBorderMap[accentColor]}, inset 0 -1px 1px rgba(0, 0, 0, 0.3)`,
                         minHeight: isReputationCard ? 'auto' : 'auto',
                       }}
                     >
                       <div className="relative z-10">
                         <div className="flex items-start gap-4 mb-6">
                           <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentColor}`}
+                            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
                             style={{
-                              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(168, 85, 247, 0.08))',
-                              boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(168, 85, 247, 0.15)',
+                              background: accentBgMap[accentColor],
+                              boxShadow: `inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px ${accentBorderMap[accentColor]}`,
                             }}
                           >
                             <Icon className="w-6 h-6" />
