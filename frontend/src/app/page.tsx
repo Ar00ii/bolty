@@ -503,17 +503,18 @@ export default function HomePage() {
                   key={i}
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-                  beamsPerSide={2}
-                  beamSize={35}
-                  gridColor="rgba(200, 200, 200, 0.35)"
+                  beamsPerSide={4}
+                  beamSize={8}
+                  gridColor="rgba(255, 255, 255, 0.25)"
+                  perspective={200}
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    className="bg-black rounded p-8 lg:p-12 max-w-lg mx-6"
+                    className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
                     style={{
-                      border: '3px solid',
+                      border: '2px solid',
                       borderColor: i === 1 ? '#06B6D4' : '#836EF9'
                     }}
                   >
@@ -546,17 +547,18 @@ export default function HomePage() {
                   key={i}
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-                  beamsPerSide={2}
-                  beamSize={35}
-                  gridColor="rgba(200, 200, 200, 0.35)"
+                  beamsPerSide={4}
+                  beamSize={8}
+                  gridColor="rgba(255, 255, 255, 0.25)"
+                  perspective={200}
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: (i + 2) * 0.1 }}
-                    className="bg-black rounded p-8 lg:p-12 max-w-lg mx-6"
+                    className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
                     style={{
-                      border: '3px solid',
+                      border: '2px solid',
                       borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i]
                     }}
                   >
