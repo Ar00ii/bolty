@@ -505,7 +505,7 @@ export default function HomePage() {
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={4}
                   beamSize={12}
-                  gridColor="rgba(255, 255, 255, 0.3)"
+                  gridColor="rgba(255, 255, 255, 0.6)"
                   perspective={200}
                   beamDuration={4}
                 >
@@ -550,7 +550,7 @@ export default function HomePage() {
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={4}
                   beamSize={12}
-                  gridColor="rgba(255, 255, 255, 0.3)"
+                  gridColor="rgba(255, 255, 255, 0.6)"
                   perspective={200}
                   beamDuration={4}
                 >
