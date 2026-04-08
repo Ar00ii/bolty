@@ -80,7 +80,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
       {/* Navbar - Render.com Style */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: '#000000', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: '#000000', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
         <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
@@ -102,9 +102,9 @@ export default function HomePage() {
           <div className="flex items-center gap-6 flex-shrink-0">
             <Link href="/contact" className="hidden sm:block text-gray-300 text-sm font-normal hover:text-white transition-colors">Contact</Link>
             {!isAuthenticated ? (
-              <Link href="/auth?tab=register" className="text-white text-sm font-normal px-5 py-2 bg-white/95 hover:bg-white rounded transition-colors">Dashboard</Link>
+              <Link href="/auth?tab=register" className="text-white text-sm font-normal px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded transition-colors border border-gray-700">Dashboard</Link>
             ) : (
-              <Link href="/market" className="text-white text-sm font-normal px-5 py-2 bg-white/95 hover:bg-white rounded transition-colors">Dashboard</Link>
+              <Link href="/market" className="text-white text-sm font-normal px-5 py-2 bg-gray-800 hover:bg-gray-700 rounded transition-colors border border-gray-700">Dashboard</Link>
             )}
           </div>
         </div>
