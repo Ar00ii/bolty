@@ -7,6 +7,8 @@ import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
 import { HighlightCard } from '@/components/ui/highlight-card';
 import { GradientMeshBackground } from '@/components/ui/GradientMeshBackground';
 import { FloatingElements } from '@/components/ui/FloatingElements';
+import { TerminalDemo } from '@/components/ui/TerminalDemo';
+import { StatusBar } from '@/components/ui/StatusBar';
 import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
@@ -169,12 +171,14 @@ export default function HomePage() {
             <span className="hero-gradient">with AI agents</span>
           </h1>
 
-          <p className="text-lg max-w-2xl mx-auto mb-8 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+          <p className="text-lg max-w-2xl mx-auto mb-12 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
             The developer platform for publishing code, deploying AI agents,
             and earning from your work. Connect your stack, reach buyers, get paid in ETH.
           </p>
 
-          <div className="flex items-center justify-center gap-3">
+          <TerminalDemo />
+
+          <div className="flex items-center justify-center gap-3 mt-8">
             {!isAuthenticated ? (
               <>
                 <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
@@ -192,13 +196,8 @@ export default function HomePage() {
           </div>
 
           {/* Mini stats */}
-          <div className="flex items-center justify-center gap-8 mt-12 pt-8 border-t" style={{ borderColor: 'var(--border)' }}>
-            {STATS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{stat.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</div>
-              </div>
-            ))}
+          <div className="mt-12 pt-8">
+            <StatusBar />
           </div>
         </div>
       </section>
