@@ -77,23 +77,28 @@ export default function HomePage() {
         borderColor: 'rgba(255, 255, 255, 0.2)',
         backdropFilter: 'blur(10px)'
       }}>
-        <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
-          {/* Left Links */}
-          <div className="flex items-center gap-8">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          {/* Left Links - Hidden on mobile */}
+          <div className="hidden md:flex items-center gap-8">
             <Link href="/market" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Marketplace</Link>
             <Link href="/docs/agent-protocol" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Docs</Link>
             <a href="#how-it-works" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">How It Works</a>
           </div>
 
+          {/* Mobile Logo - Only visible on mobile */}
+          <div className="md:hidden">
+            <span className="text-white font-semibold text-sm">Bolty</span>
+          </div>
+
           {/* Right Side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             {!isAuthenticated ? (
               <>
-                <Link href="/auth" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
-                <Link href="/auth?tab=register" className="text-white text-sm font-normal px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-colors">Get started</Link>
+                <Link href="/auth" className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
+                <Link href="/auth?tab=register" className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-colors shadow-lg hover:shadow-xl">Get started</Link>
               </>
             ) : (
-              <Link href="/market" className="text-white text-sm font-normal px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-colors">Dashboard</Link>
+              <Link href="/market" className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-colors shadow-lg hover:shadow-xl">Dashboard</Link>
             )}
           </div>
         </div>
@@ -324,18 +329,18 @@ export default function HomePage() {
             <p className="text-lg text-gray-400 mb-8">
               Join the platform where code meets commerce. Publish, sell, and earn — all in one place.
             </p>
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!isAuthenticated ? (
                 <>
-                  <Link href="/auth?tab=register" className="btn-primary text-sm px-8 py-3 rounded-lg flex items-center gap-2">
+                  <Link href="/auth?tab=register" className="text-white text-sm px-8 py-3 rounded-lg flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
                     Create free account <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <Link href="/docs/agent-protocol" className="btn-secondary text-sm px-8 py-3 rounded-lg">
+                  <Link href="/docs/agent-protocol" className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all">
                     Read the docs
                   </Link>
                 </>
               ) : (
-                <Link href="/market" className="btn-primary text-sm px-8 py-3 rounded-lg inline-flex items-center gap-2">
+                <Link href="/market" className="text-white text-sm px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
                   Go to dashboard <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
