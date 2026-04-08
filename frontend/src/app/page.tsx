@@ -293,31 +293,31 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Main Container with Corner Brackets */}
-          <div className="relative overflow-visible rounded-lg p-10 md:p-14" style={{ background: 'rgba(0, 0, 0, 0.6)' }}>
-            {/* Corner Brackets */}
+          {/* Corner Brackets wrapper */}
+          <div className="relative overflow-visible">
             <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
             <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
             <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
             <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-16"
-            >
-              <h2 className="text-5xl md:text-6xl font-light text-white leading-tight">
-                Deploy apps and agents<br />with <GradientText gradient="purple" animated={false}>zero ops</GradientText>
-              </h2>
-            </motion.div>
-
-            {/* Grid Layout with Dividers */}
+            {/* Main box with border and black background */}
             <div
-              className="relative overflow-visible rounded-lg"
+              className="relative rounded-lg overflow-hidden"
               style={{
                 border: '1px solid rgba(255, 255, 255, 0.2)',
+                background: 'rgba(0, 0, 0, 0.6)',
               }}
             >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="p-10 md:p-14 pb-0"
+              >
+                <h2 className="text-5xl md:text-6xl font-light text-white leading-tight mb-16">
+                  Deploy apps and agents<br />with <GradientText gradient="purple" animated={false}>zero ops</GradientText>
+                </h2>
+              </motion.div>
               {/* Noise texture overlay */}
               <div
                 className="absolute inset-0 pointer-events-none opacity-20"
