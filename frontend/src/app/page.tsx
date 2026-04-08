@@ -501,12 +501,11 @@ export default function HomePage() {
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className="!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center"
-                  style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-                  beamsPerSide={4}
+                  className="flex items-center justify-center"
+                  beamsPerSide={3}
                   beamSize={8}
-                  gridColor="rgba(255, 255, 255, 0.35)"
-                  perspective={200}
+                  gridColor="rgba(255, 255, 255, 0.15)"
+                  perspective={150}
                   beamDuration={4}
                 >
                   <motion.div
