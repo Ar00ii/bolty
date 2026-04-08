@@ -27,7 +27,14 @@ const Beam = ({
   delay: number
   duration: number
 }) => {
-  const hue = Math.floor(Math.random() * 360)
+  const colors = [
+    '#836EF9', // monad purple
+    '#06B6D4', // cyan
+    '#EC4899', // pink
+    '#8B5CF6', // violet
+    '#3B82F6', // blue
+  ]
+  const color = colors[Math.floor(Math.random() * colors.length)]
   const ar = Math.floor(Math.random() * 10) + 1
 
   return (
@@ -37,7 +44,7 @@ const Beam = ({
           "--x": `${x}`,
           "--width": `${width}`,
           "--aspect-ratio": `${ar}`,
-          "--background": `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
+          "--background": `linear-gradient(${color}, transparent)`,
         } as React.CSSProperties
       }
       className={`absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]`}
