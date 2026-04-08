@@ -11,7 +11,7 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
-  Code2, Database, Container, GitHub, Cpu, Zap,
+  Code2, Database, Container, Github, Cpu, Zap,
 } from 'lucide-react';
 
 // Data
@@ -127,7 +127,7 @@ export default function HomePage() {
             { Icon: Zap, name: 'Fast API' },
             { Icon: Cpu, name: 'Performance' },
             { Icon: Shield, name: 'Security' },
-            { Icon: GitHub, name: 'GitHub' },
+            { Icon: Github, name: 'GitHub' },
             { Icon: MessageSquare, name: 'WebSocket' },
           ].map(({ Icon, name }) => (
             <Icon
