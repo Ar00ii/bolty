@@ -418,6 +418,127 @@ addToast('Success', 'success');
 
 ---
 
+## Animation & Interaction Components
+
+### Animated Counter
+
+Display animated statistics with smooth counting:
+
+```tsx
+import { AnimatedCounter, CountUp } from '@/components/ui/AnimatedCounter';
+
+// Animates on scroll into viewport
+<AnimatedCounter value={2847} />
+
+// With suffix and formatting
+<AnimatedCounter value={243} suffix="K ETH" />
+
+// Always animates on mount
+<CountUp value={98.7} suffix="%" decimals={1} duration={2.5} />
+```
+
+### Scroll Reveal Animations
+
+Animate elements as they come into view:
+
+```tsx
+import { ScrollReveal, ScrollStagger, ScrollItem } from '@/components/ui/ScrollReveal';
+
+// Single element
+<ScrollReveal direction="up" delay={0.1}>
+  <div>Content slides in from bottom</div>
+</ScrollReveal>
+
+// Multiple elements with stagger
+<ScrollStagger staggerDelay={0.1}>
+  <ScrollItem direction="left">Item 1</ScrollItem>
+  <ScrollItem direction="left">Item 2</ScrollItem>
+  <ScrollItem direction="left">Item 3</ScrollItem>
+</ScrollStagger>
+```
+
+### Ripple Button
+
+Interactive button with ripple effect:
+
+```tsx
+import { RippleButton } from '@/components/ui/RippleButton';
+
+<RippleButton variant="primary" size="md" loading={isLoading}>
+  Click me
+</RippleButton>
+
+// With icon
+<RippleButton variant="secondary" icon={<Heart />}>
+  Add to favorites
+</RippleButton>
+```
+
+**Variants:** primary, secondary, outline, ghost
+**Sizes:** sm, md, lg
+
+### Animated Heading
+
+Beautiful heading animations with gradient text:
+
+```tsx
+import { AnimatedHeading, WordReveal, CharReveal } from '@/components/ui/AnimatedHeading';
+
+// Gradient heading
+<AnimatedHeading 
+  gradient 
+  gradientFrom="#a78bfa" 
+  gradientTo="#06b6d4"
+>
+  Welcome to Bolty
+</AnimatedHeading>
+
+// Word-by-word reveal
+<WordReveal 
+  text="Build, deploy, and earn" 
+  highlightWords={["deploy"]}
+/>
+
+// Character-by-character
+<CharReveal text="Amazing" duration={0.05} />
+```
+
+### Progress Bar
+
+Loading indicator that appears during route transitions:
+
+```tsx
+import { ProgressBar } from '@/components/ui/ProgressBar';
+
+<ProgressBar isLoading={isLoading} duration={3} color="from-purple-500 to-cyan-400" />
+```
+
+### Enhanced Tooltip
+
+Contextual help with smooth animations:
+
+```tsx
+import { EnhancedTooltip } from '@/components/ui/EnhancedTooltip';
+
+<EnhancedTooltip content="API keys manage your agent access" side="top">
+  <button>API Keys</button>
+</EnhancedTooltip>
+```
+
+**Sides:** top, bottom, left, right
+
+### Stats Showcase
+
+Display platform statistics with animated counters:
+
+```tsx
+import { StatsShowcase } from '@/components/sections/StatsShowcase';
+
+<StatsShowcase />
+```
+
+---
+
 ## Best Practices
 
 1. **Always use Toast for feedback** instead of native alerts
@@ -428,4 +549,8 @@ addToast('Success', 'success');
 6. **Use Breadcrumbs** for nested navigation
 7. **Make all tables sortable** for data discovery
 8. **Use Pagination** for large datasets
+9. **Wrap content with ScrollReveal** for entrance animations
+10. **Use AnimatedCounter** for stats and metrics
+11. **Use RippleButton** for primary CTAs
+12. **Use AnimatedHeading** for section titles
 
