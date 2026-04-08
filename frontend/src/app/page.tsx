@@ -499,16 +499,7 @@ export default function HomePage() {
                 { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
                 { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
               ].map((service, i) => (
-                <WarpBackground
-                  key={i}
-                  className="flex items-center justify-center"
-                  beamsPerSide={3}
-                  beamSize={8}
-                  gridColor="rgba(255, 255, 255, 0.15)"
-                  perspective={150}
-                  beamDuration={4}
-                >
-                  <motion.div
+                <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
@@ -532,7 +523,6 @@ export default function HomePage() {
                     </div>
                     <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
                   </motion.div>
-                </WarpBackground>
               ))}
             </div>
 
@@ -572,7 +562,6 @@ export default function HomePage() {
                     </div>
                     <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
                   </motion.div>
-                </WarpBackground>
               ))}
             </div>
           </div>
