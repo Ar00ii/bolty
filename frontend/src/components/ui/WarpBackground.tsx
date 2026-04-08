@@ -28,14 +28,15 @@ const Beam = ({
   duration: number
 }) => {
   const colors = [
-    '#836EF9', // monad purple
-    '#06B6D4', // cyan
-    '#EC4899', // pink
-    '#8B5CF6', // violet
-    '#3B82F6', // blue
+    'rgba(131, 110, 249, 0.6)', // monad purple
+    'rgba(6, 182, 212, 0.6)', // cyan
+    'rgba(236, 72, 153, 0.6)', // pink
+    'rgba(139, 92, 246, 0.6)', // violet
+    'rgba(59, 130, 246, 0.6)', // blue
+    'rgba(34, 197, 94, 0.6)', // green
   ]
   const color = colors[Math.floor(Math.random() * colors.length)]
-  const ar = Math.floor(Math.random() * 10) + 1
+  const ar = Math.floor(Math.random() * 15) + 3
 
   return (
     <motion.div
