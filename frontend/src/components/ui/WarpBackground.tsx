@@ -117,17 +117,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        >
-          {topBeams.map((beam, index) => (
-            <Beam
-              key={`top-${index}`}
-              width={`${beamSize}%`}
-              x={`${beam.x * beamSize}%`}
-              delay={beam.delay}
-              duration={beamDuration}
-            />
-          ))}
-        </div>
+        />
+
         {/* bottom side */}
         <div className="@container absolute top-full z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
@@ -139,17 +130,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        >
-          {bottomBeams.map((beam, index) => (
-            <Beam
-              key={`bottom-${index}`}
-              width={`${beamSize}%`}
-              x={`${beam.x * beamSize}%`}
-              delay={beam.delay}
-              duration={beamDuration}
-            />
-          ))}
-        </div>
+        />
         {/* left side */}
         <div className="@container absolute top-0 left-0 z-20 h-[100cqmax] w-[100cqh] origin-[0%_0%] overflow-hidden"
           style={{
@@ -161,17 +142,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        >
-          {leftBeams.map((beam, index) => (
-            <Beam
-              key={`left-${index}`}
-              width={`${beamSize}%`}
-              x={`${beam.x * beamSize}%`}
-              delay={beam.delay}
-              duration={beamDuration}
-            />
-          ))}
-        </div>
+        />
         {/* right side */}
         <div className="@container absolute top-0 right-0 z-20 h-[100cqmax] w-[100cqh] origin-[100%_0%] overflow-hidden"
           style={{
@@ -183,17 +154,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        >
-          {rightBeams.map((beam, index) => (
-            <Beam
-              key={`right-${index}`}
-              width={`${beamSize}%`}
-              x={`${beam.x * beamSize}%`}
-              delay={beam.delay}
-              duration={beamDuration}
-            />
-          ))}
-        </div>
+        />
       </div>
       <div className="relative z-10">{children}</div>
     </div>
