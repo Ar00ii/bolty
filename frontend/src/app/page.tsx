@@ -493,85 +493,79 @@ export default function HomePage() {
         </WarpBackground>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          {/* Title */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-16"
-          >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
-            <h2 className="text-5xl lg:text-6xl font-light">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
-          </motion.div>
+          {/* Main Grid: Title left, Big container right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+            {/* Left: Title */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col justify-center p-8 lg:p-12 lg:border-r"
+              style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+            >
+              <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
+              <h2 className="text-4xl lg:text-5xl font-light">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
+            </motion.div>
 
-          {/* Services Grid Layout: Title on left, 2 boxes top-right, 3 boxes bottom */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Title area (hidden on mobile, takes up space on desktop) */}
-            <div className="hidden lg:block" />
-
-            {/* Top Right: 2 service boxes stacked */}
-            <div className="lg:col-span-2 space-y-6">
-              {[
-                { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
-                { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
-              ].map((service, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="rounded-xl border p-8"
-                  style={{
-                    borderColor: service.active ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.15)',
-                    background: '#000000',
-                    boxShadow: service.active ? '0 0 24px rgba(34, 197, 94, 0.1)' : 'none',
-                  }}
-                >
-                  <div className="flex items-start gap-4 mb-3">
-                    <CheckCircle2 className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className={`text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
-                        {service.active && (
-                          <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-1">Live</span>
-                        )}
+            {/* Right: Big container with all service boxes */}
+            <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+              {/* Top: 2 boxes side by side */}
+              <div className="grid grid-cols-2 gap-0 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
+                {[
+                  { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
+                  { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
+                ].map((service, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    className={`p-6 lg:p-8 ${i === 0 ? 'border-r' : ''}`}
+                    style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className={`text-base lg:text-lg font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
+                          {service.active && (
+                            <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                          )}
+                        </div>
+                        <p className="text-xs lg:text-sm text-gray-400">{service.desc}</p>
                       </div>
-                      <p className="text-sm text-gray-400">{service.desc}</p>
                     </div>
-                  </div>
-                  <p className="text-sm text-gray-300 ml-10">{service.details}</p>
-                </motion.div>
-              ))}
-            </div>
+                    <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
+                  </motion.div>
+                ))}
+              </div>
 
-            {/* Bottom: 3 service boxes in a row */}
-            <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { name: 'Database', desc: 'Managed PostgreSQL & Redis', details: 'High-availability database cluster with automatic backups and failover.' },
-                { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
-                { name: 'Cache Layer', desc: 'Edge caching for low latency', details: 'Global edge network with intelligent cache invalidation.' },
-              ].map((service, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: (i + 2) * 0.1 }}
-                  className="rounded-xl border p-6"
-                  style={{
-                    borderColor: 'rgba(255, 255, 255, 0.15)',
-                    background: '#000000',
-                  }}
-                >
-                  <div className="flex items-start gap-3 mb-3">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-gray-600" />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-light text-white">{service.name}</h3>
-                      <p className="text-xs text-gray-400 mt-0.5">{service.desc}</p>
+              {/* Bottom: 3 boxes */}
+              <div className="grid grid-cols-3 gap-0">
+                {[
+                  { name: 'Database', desc: 'Managed PostgreSQL & Redis', details: 'High-availability database cluster with automatic backups and failover.' },
+                  { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
+                  { name: 'Cache Layer', desc: 'Edge caching for low latency', details: 'Global edge network with intelligent cache invalidation.' },
+                ].map((service, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: (i + 2) * 0.1 }}
+                    className={`p-6 lg:p-8 ${i < 2 ? 'border-r' : ''}`}
+                    style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-gray-600" />
+                      <div className="flex-1">
+                        <h3 className="text-base lg:text-lg font-light text-white">{service.name}</h3>
+                        <p className="text-xs lg:text-sm text-gray-400 mt-0.5">{service.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-sm text-gray-300 ml-8">{service.details}</p>
-                </motion.div>
-              ))}
+                    <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
+                  </motion.div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
