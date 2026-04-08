@@ -52,11 +52,11 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           >
             <div>
               <h1 className="text-5xl lg:text-6xl font-light leading-tight text-white mb-6">
-                Your fastest path to
+                Build, ship, and earn
                 <br />
-                production for
+                with
                 <br />
-                <span style={{ color: '#a855f7' }}>AI agents & apps</span>
+                <span style={{ color: '#a855f7' }}>AI agents</span>
               </h1>
               <p className="text-lg text-gray-400 leading-relaxed max-w-lg">
                 Deploy AI agents and applications at scale. Ship faster, earn directly, reach global markets with zero friction.
