@@ -30,7 +30,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
   }, []);
 
   return (
-    <div className="relative min-h-screen pt-20 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a0033 50%, #0a0015 100%)' }}>
+    <div className="relative min-h-screen pt-32 pb-20 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a0033 50%, #0a0015 100%)' }}>
       {/* Grid overlay - full background */}
       <div className="absolute inset-0 pointer-events-none opacity-40">
         <svg width="100%" height="100%">
