@@ -83,7 +83,7 @@ function OrderCard({ order, isSeller, onClick }: { order: Order; isSeller: boole
           )}
         </div>
         <div className="text-xs text-zinc-500">
-          {isSeller ? 'Buyer' : 'Seller'}: <span className="text-zinc-300 font-medium">@{peer?.username || 'Unknown'}</span>
+          {isSeller ? 'Buyer' : 'Seller'}: <span className="text-zinc-300 font-light">@{peer?.username || 'Unknown'}</span>
           <span className="mx-1 opacity-40">·</span>
           {new Date(order.createdAt).toLocaleDateString()}
         </div>

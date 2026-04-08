@@ -209,7 +209,7 @@ p, span, a, li, button, input, textarea {
 
   /* ── Buttons ── */
   .btn-primary {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            text-white cursor-pointer rounded-lg px-4 py-2;
     background: var(--brand);
     transition: all 0.2s ease;
@@ -223,7 +223,7 @@ p, span, a, li, button, input, textarea {
   .btn-primary:active { transform: translateY(0) scale(0.98); }
 
   .btn-secondary {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            cursor-pointer rounded-lg px-4 py-2;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -239,7 +239,7 @@ p, span, a, li, button, input, textarea {
   .btn-secondary:active { transform: translateY(0); }
 
   .btn-ghost {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            cursor-pointer rounded-lg px-3 py-1.5;
     color: var(--text-muted);
     transition: all 0.2s ease;
@@ -250,7 +250,7 @@ p, span, a, li, button, input, textarea {
   }
 
   .btn-danger {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            text-white cursor-pointer rounded-lg px-4 py-2;
     background: var(--error);
     transition: all 0.2s ease;
@@ -294,31 +294,31 @@ p, span, a, li, button, input, textarea {
 
   /* ── Badges ── */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: var(--brand-dim);
     color: var(--brand);
     border: 1px solid rgba(131,110,249,0.15);
   }
   .badge-secondary {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: var(--bg-elevated);
     color: var(--text-muted);
     border: 1px solid var(--border);
   }
   .badge-success {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(34,197,94,0.1);
     color: var(--success);
     border: 1px solid rgba(34,197,94,0.2);
   }
   .badge-warning {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(245,158,11,0.1);
     color: var(--warning);
     border: 1px solid rgba(245,158,11,0.2);
   }
   .badge-error {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(239,68,68,0.1);
     color: var(--error);
     border: 1px solid rgba(239,68,68,0.2);
@@ -367,7 +367,7 @@ p, span, a, li, button, input, textarea {
 
   /* ── Neon / branded buttons ── */
   .btn-neon {
-    @apply relative px-4 py-2 text-sm font-medium
+    @apply relative px-4 py-2 text-sm font-light
            text-monad-400 border border-monad-400/30 rounded-lg
            transition-all duration-200 cursor-pointer
            hover:border-monad-400/60 hover:text-white hover:bg-monad-400/10;
@@ -375,7 +375,7 @@ p, span, a, li, button, input, textarea {
   .btn-neon:hover { box-shadow: 0 0 16px rgba(131,110,249,0.15); }
 
   .btn-neon-solid {
-    @apply relative px-4 py-2 text-sm font-medium text-white rounded-lg
+    @apply relative px-4 py-2 text-sm font-light text-white rounded-lg
            transition-all duration-200 cursor-pointer;
     background: var(--brand);
     box-shadow: var(--shadow-sm);
@@ -421,13 +421,13 @@ p, span, a, li, button, input, textarea {
     padding: 16px;
   }
   .security-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     border: 1px solid var(--border);
     color: var(--text-muted);
     background: var(--bg-elevated);
   }
   .terminal-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light
            border border-monad-400/20 text-monad-400 bg-monad-500/5;
   }
 

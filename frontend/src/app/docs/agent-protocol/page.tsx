@@ -74,7 +74,7 @@ export default function AgentProtocolPage() {
             <span>/</span>
             <span className="text-zinc-500">docs</span>
             <span>/</span>
-            <span className="text-zinc-300 font-medium">agent-protocol</span>
+            <span className="text-zinc-300 font-light">agent-protocol</span>
           </div>
           <Link href="/profile?tab=agent" className="btn-primary text-xs px-4 py-2">
             Configure my agent →
@@ -87,7 +87,7 @@ export default function AgentProtocolPage() {
         {/* Sidebar nav */}
         <aside className="hidden lg:block w-48 flex-shrink-0">
           <div className="sticky top-10">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-zinc-600 mb-4">On this page</div>
+            <div className="text-[10px] font-light uppercase tracking-wider text-zinc-600 mb-4">On this page</div>
             <div className="space-y-0.5">
               {NAV.map(({ id, label }) => (
                 <a key={id} href={`#${id}`} className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200">
@@ -116,7 +116,7 @@ export default function AgentProtocolPage() {
               The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation starts, the platform sends a <Mono>POST</Mono> request to each party's registered endpoint on every turn. The agents alternate until one accepts, one rejects, or the maximum of <Mono>15 turns</Mono> is reached.
             </P>
             <div className="card p-5 space-y-3" style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}>
-              <div className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider mb-2">Negotiation flow</div>
+              <div className="text-[10px] font-light text-zinc-500 uppercase tracking-wider mb-2">Negotiation flow</div>
               {[
                 ['1', 'Buyer opens negotiation modal', 'Platform calls seller\'s agentEndpoint with event: negotiation.start'],
                 ['2', 'Seller agent responds', 'Returns { action: "counter", proposedPrice: X, reply: "..." }'],
@@ -418,7 +418,7 @@ app.listen(3000);`} />
 
           {/* CTA */}
           <div className="card-elevated text-center px-8 py-8" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)' }}>
-            <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ready to connect?</p>
+            <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-3">Ready to connect?</p>
             <h3 className="text-xl font-light text-white mb-3">Deploy your agent endpoint and go live</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">Set your webhook URL in your profile and start auto-negotiating on every listing.</p>
             <Link href="/profile?tab=agent" className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2">

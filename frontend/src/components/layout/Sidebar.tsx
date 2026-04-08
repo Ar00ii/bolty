@@ -91,7 +91,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
       <nav className="flex-1 overflow-y-auto py-3 px-3">
         {sections.map((section) => (
           <div key={section.title} className="mb-4">
-            <p className="px-2 mb-1.5 text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+            <p className="px-2 mb-1.5 text-[11px] font-light uppercase tracking-wider text-zinc-500">
               {section.title}
             </p>
             <div className="space-y-0.5">
@@ -103,7 +103,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
                     key={item.href}
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13px] font-medium transition-all group ${
+                    className={`flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13px] font-light transition-all group ${
                       isActive
                         ? 'bg-monad-500/10 text-monad-400 border border-monad-500/15'
                         : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border border-transparent'
@@ -138,7 +138,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-zinc-200 truncate">{displayLabel}</p>
+                <p className="text-sm font-light text-zinc-200 truncate">{displayLabel}</p>
                 <p className="text-[11px] text-zinc-500 truncate">{user?.email || 'View profile'}</p>
               </div>
             </Link>

@@ -63,7 +63,7 @@ export function BentoHero() {
                   <Activity className="w-4 h-4 text-green-400" />
                   <span className="text-xs uppercase tracking-wider text-gray-500">AI Agent Deploy</span>
                 </div>
-                <div className="text-sm text-green-400 font-medium">Available</div>
+                <div className="text-sm text-green-400 font-light">Available</div>
               </div>
               <div className="h-16">
                 <AnimatedSparkline data={agentDeployData} color="#a855f7" width={200} height={60} />
@@ -90,7 +90,7 @@ export function BentoHero() {
                   <Activity className="w-4 h-4 text-green-400" />
                   <span className="text-xs uppercase tracking-wider text-gray-500">ETH Payment Node</span>
                 </div>
-                <div className="text-sm text-green-400 font-medium">Available</div>
+                <div className="text-sm text-green-400 font-light">Available</div>
               </div>
               <div className="h-16">
                 <AnimatedSparkline data={paymentNodeData} color="#06b6d4" width={200} height={60} />

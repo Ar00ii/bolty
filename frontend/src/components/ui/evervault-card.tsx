@@ -54,7 +54,7 @@ export const EvervaultCard = ({
         />
         <div className="relative z-10 flex flex-col items-center justify-center gap-3">
           {children ? children : (
-            <p className="text-sm font-medium text-white text-center">{text}</p>
+            <p className="text-sm font-light text-white text-center">{text}</p>
           )}
         </div>
       </div>

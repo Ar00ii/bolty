@@ -164,7 +164,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">{label}</label>
+      <label className="block text-xs font-light text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">{label}</label>
       {children}
     </div>
   );
@@ -707,7 +707,7 @@ export default function ProfilePage() {
                 }`}>
                   <Icon className={`w-3.5 h-3.5 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`} />
                 </div>
-                <span className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-medium' : 'text-[var(--text)]'}`}>{label}</span>
+                <span className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-light' : 'text-[var(--text)]'}`}>{label}</span>
                 {tab === id && <div className="w-1 h-4 rounded-full bg-monad-400 flex-shrink-0" />}
               </button>
             ))}
@@ -754,7 +754,7 @@ export default function ProfilePage() {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm font-medium text-[var(--text)] mb-0.5">Profile photo</div>
+              <div className="text-sm font-light text-[var(--text)] mb-0.5">Profile photo</div>
               <div className="text-xs text-[var(--text-muted)] mb-2">PNG, JPG or WebP · max 3 MB</div>
               {avatarMsg && typeof avatarMsg === 'string' && <div className="text-xs text-emerald-400">{avatarMsg}</div>}
               {avatarErr && typeof avatarErr === 'string' && <div className="text-xs text-red-400">{avatarErr}</div>}
@@ -914,7 +914,7 @@ export default function ProfilePage() {
                 <IconWallet className="w-4.5 h-4.5 text-orange-400 w-5 h-5" />
               </div>
               <div>
-                <div className="text-sm font-medium text-[var(--text)] mb-0.5">Payment Wallet</div>
+                <div className="text-sm font-light text-[var(--text)] mb-0.5">Payment Wallet</div>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                   Your Bolty account uses GitHub or email for authentication. Link MetaMask separately to buy and sell on the marketplace. Linking only requires a message signature — <span className="text-[var(--text)]">no blockchain transaction is made</span>.
                 </p>
@@ -955,7 +955,7 @@ export default function ProfilePage() {
                 <button
                   onClick={handleDisconnectWallet}
                   disabled={walletLoading}
-                  className="w-full py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/8 hover:border-red-500/40 text-sm font-medium transition-all duration-200 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/8 hover:border-red-500/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
                 >
                   {walletLoading ? 'Removing...' : 'Remove wallet'}
                 </button>
@@ -1001,7 +1001,7 @@ export default function ProfilePage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[var(--text)]">GitHub</span>
+                  <span className="text-sm font-light text-[var(--text)]">GitHub</span>
                   {githubLogin && <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">Linked</span>}
                 </div>
                 {githubLogin
@@ -1071,7 +1071,7 @@ export default function ProfilePage() {
                   >
                     <Avatar src={u.avatarUrl} name={u.displayName || u.username} size="sm" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-[var(--text)] truncate">{u.displayName || u.username}</div>
+                      <div className="text-sm font-light text-[var(--text)] truncate">{u.displayName || u.username}</div>
                       <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                         {u.username && <span>@{u.username}</span>}
                         {u.userTag && <span className="text-monad-400/70">#{u.userTag}</span>}
@@ -1121,7 +1121,7 @@ export default function ProfilePage() {
                           <Avatar src={req.from.avatarUrl} name={req.from.displayName || req.from.username} size="sm" />
                           <div className="flex-1 min-w-0">
                             <Link href={`/u/${req.from.username}`}
-                              className="text-sm font-medium text-[var(--text)] hover:text-monad-300 transition-colors">
+                              className="text-sm font-light text-[var(--text)] hover:text-monad-300 transition-colors">
                               {req.from.displayName || req.from.username}
                             </Link>
                             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
@@ -1167,7 +1167,7 @@ export default function ProfilePage() {
                           <Avatar src={f.friend.avatarUrl} name={f.friend.displayName || f.friend.username} size="sm" />
                           <div className="flex-1 min-w-0">
                             <Link href={`/u/${f.friend.username}`}
-                              className="text-xs font-medium text-[var(--text)] hover:text-monad-300 transition-colors truncate block">
+                              className="text-xs font-light text-[var(--text)] hover:text-monad-300 transition-colors truncate block">
                               {f.friend.displayName || f.friend.username}
                             </Link>
                             <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
@@ -1217,7 +1217,7 @@ export default function ProfilePage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <div className="text-sm font-medium text-[var(--text)]">Two-Factor Authentication</div>
+                    <div className="text-sm font-light text-[var(--text)]">Two-Factor Authentication</div>
                     <div className="text-xs text-[var(--text-muted)] mt-0.5">
                       {twoFAEnabled
                         ? 'Active — a code will be emailed to you at every login.'
@@ -1303,7 +1303,7 @@ export default function ProfilePage() {
           <TerminalCard title="email-address" showDots className="[background:linear-gradient(160deg,rgba(59,130,246,0.06)_0%,var(--bg-card)_45%)]">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <div className="text-sm font-medium text-[var(--text)]">Email Address</div>
+                <div className="text-sm font-light text-[var(--text)]">Email Address</div>
                 <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">{userEmail || 'Not set'}</div>
               </div>
               {emailStep === 'idle' && (
@@ -1363,7 +1363,7 @@ export default function ProfilePage() {
             <div className="p-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-red-400">Delete Account</div>
+                  <div className="text-sm font-light text-red-400">Delete Account</div>
                   <div className="text-xs text-[var(--text-muted)] mt-0.5">Permanently remove your account and all associated data.</div>
                 </div>
                 {deleteStep === 'idle' && (
@@ -1385,7 +1385,7 @@ export default function ProfilePage() {
                     <button
                       onClick={handleRequestDeleteAccount}
                       disabled={requestingDelete}
-                      className="flex-1 py-2.5 rounded-xl border border-red-500/25 text-red-400 hover:bg-red-500/10 hover:border-red-400/40 text-sm font-medium transition-all duration-200 disabled:opacity-50"
+                      className="flex-1 py-2.5 rounded-xl border border-red-500/25 text-red-400 hover:bg-red-500/10 hover:border-red-400/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
                     >
                       {requestingDelete ? 'Sending code...' : 'Send confirmation code'}
                     </button>

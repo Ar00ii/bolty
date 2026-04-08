@@ -50,7 +50,7 @@ export function BentoCard({
         <div className="text-[13px] font-light text-zinc-200 mb-0.5 leading-tight">{name}</div>
         <div className="text-[11px] text-zinc-500 leading-relaxed">{description}</div>
         {href && cta && (
-          <a href={href} className="inline-flex items-center gap-1 mt-2 text-[11px] font-medium text-monad-400 hover:text-monad-300 transition-colors opacity-0 group-hover:opacity-100">
+          <a href={href} className="inline-flex items-center gap-1 mt-2 text-[11px] font-light text-monad-400 hover:text-monad-300 transition-colors opacity-0 group-hover:opacity-100">
             {cta}
             <ArrowRight className="w-3 h-3" />
           </a>

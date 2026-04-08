@@ -66,15 +66,15 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             <div className="flex gap-4">
               {!isAuthenticated ? (
                 <>
-                  <Link href="/auth?tab=register" className="px-8 py-3 bg-white text-black font-medium rounded hover:bg-gray-100 transition-colors flex items-center gap-2">
+                  <Link href="/auth?tab=register" className="px-8 py-3 bg-white text-black font-light rounded hover:bg-gray-100 transition-colors flex items-center gap-2">
                     Start building <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <Link href="/contact" className="px-8 py-3 border border-white text-white font-medium rounded hover:bg-white/10 transition-colors">
+                  <Link href="/contact" className="px-8 py-3 border border-white text-white font-light rounded hover:bg-white/10 transition-colors">
                     Get in touch
                   </Link>
                 </>
               ) : (
-                <Link href="/market" className="px-8 py-3 bg-white text-black font-medium rounded hover:bg-gray-100 transition-colors flex items-center gap-2">
+                <Link href="/market" className="px-8 py-3 bg-white text-black font-light rounded hover:bg-gray-100 transition-colors flex items-center gap-2">
                   Go to dashboard <ArrowRight className="w-4 h-4" />
                 </Link>
               )}
@@ -178,7 +178,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                         <Activity className={`w-3.5 h-3.5 text-${card.color}-400`} />
                         <span className="text-[10px] text-gray-500 uppercase tracking-wide">{card.name}</span>
                       </div>
-                      <div className={`${card.statusColor} text-xs font-medium mb-3 flex items-center gap-1`}>
+                      <div className={`${card.statusColor} text-xs font-light mb-3 flex items-center gap-1`}>
                         {card.status === 'Live' || card.status === 'Active' ? <CheckCircle2 className="w-3 h-3" /> : null}
                         {card.status}
                       </div>

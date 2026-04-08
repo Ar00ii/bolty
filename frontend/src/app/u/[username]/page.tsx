@@ -252,7 +252,7 @@ export default function PublicProfilePage() {
       {/* Repositories */}
       <div>
         <h2 className="text-lg font-light text-white mb-4 font-mono">
-          Repositories <span className="text-zinc-600 font-normal text-sm">({profile._count.repositories})</span>
+          Repositories <span className="text-zinc-600 font-light text-sm">({profile._count.repositories})</span>
         </h2>
 
         {profile.repositories.length === 0 ? (
