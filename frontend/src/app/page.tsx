@@ -138,7 +138,6 @@ export default function HomePage() {
               title={icon.alt}
             />
           ))}
-          <div className="w-32 flex-shrink-0" />
         </ScrollVelocityRow>
 
         {/* Fade edges */}
