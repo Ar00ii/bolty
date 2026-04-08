@@ -30,21 +30,23 @@ export const HexagonPattern = React.forwardRef<
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Hexagon settings - much larger
-    const hexSize = 80;
-    const gap = 15;
-    const hexWidth = hexSize * 2;
-    const hexHeight = hexSize * Math.sqrt(3);
+    // Hexagon settings - proper proportions
+    const hexRadius = 50;
+    const gap = 8;
+
+    // Proper hexagon spacing for honeycomb pattern
+    const hexWidth = hexRadius * 2;
+    const hexHeight = hexRadius * Math.sqrt(3);
 
     // Draw hexagons in a grid pattern
-    for (let col = -2; col < Math.ceil(width / hexWidth) + 2; col++) {
+    for (let col = -2; col < Math.ceil(width / (hexWidth * 0.75)) + 2; col++) {
       for (let row = -2; row < Math.ceil(height / hexHeight) + 2; row++) {
-        // Offset every other row for honeycomb pattern
-        const xOffset = row % 2 === 0 ? 0 : hexWidth / 2;
-        const x = col * (hexWidth + gap) + xOffset;
-        const y = row * (hexHeight + gap);
+        // Honeycomb offset pattern
+        const xOffset = row % 2 === 0 ? 0 : hexWidth * 0.75;
+        const x = col * (hexWidth * 0.75) + xOffset + 50;
+        const y = row * (hexHeight * 0.75) + 50;
 
-        drawHexagon(ctx, x, y, hexSize);
+        drawHexagon(ctx, x, y, hexRadius);
       }
     }
 
