@@ -207,7 +207,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
         <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: 'var(--border)' }}>
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse" />
-            <span className="text-sm font-semibold text-white truncate">{listing.title}</span>
+            <span className="text-sm font-light text-white truncate">{listing.title}</span>
             {neg && (
               <span className={`badge text-xs ml-1 ${neg.status === 'AGREED' ? 'badge-success' : neg.status === 'REJECTED' ? 'badge-error' : ''}`}>
                 {neg.status.toLowerCase()}
@@ -255,7 +255,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
           {neg?.status === 'AGREED' && !paid && (
             <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 text-center">
-              <p className="text-green-400 font-semibold text-sm mb-1">Deal agreed</p>
+              <p className="text-green-400 font-light text-sm mb-1">Deal agreed</p>
               {neg.agreedPrice != null && <p className="text-2xl font-bold text-white mb-3">{neg.agreedPrice} <span className="text-sm text-zinc-400">{neg.listing?.currency}</span></p>}
               {isSeller ? (
                 <button onClick={accept} disabled={sending} className="btn-primary w-full py-2 text-sm disabled:opacity-50">
@@ -271,7 +271,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
           {paid && (
             <div className="rounded-xl border border-monad-500/20 bg-monad-500/5 p-4 text-center">
-              <p className="text-monad-400 font-semibold text-sm mb-2">Payment sent!</p>
+              <p className="text-monad-400 font-light text-sm mb-2">Payment sent!</p>
               <Link href="/dm" className="btn-secondary text-xs px-4 py-2 inline-flex">Open messages →</Link>
             </div>
           )}
@@ -342,7 +342,7 @@ function ListingCard({ listing, isAuthenticated, onNegotiate }: { listing: Marke
             {listing.type === 'REPO' ? <GitBranch className="w-4 h-4 text-monad-400" strokeWidth={1.75} /> : <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.75} />}
           </div>
           <div className="min-w-0">
-            <h3 className="text-[13px] font-semibold text-white truncate">{listing.title}</h3>
+            <h3 className="text-[13px] font-light text-white truncate">{listing.title}</h3>
             <p className="text-xs text-zinc-500">@{listing.seller.username || 'anon'}</p>
           </div>
         </div>
@@ -371,9 +371,9 @@ function ListingCard({ listing, isAuthenticated, onNegotiate }: { listing: Marke
       <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
         <div>
           {listing.price === 0 ? (
-            <span className="text-sm font-semibold text-green-400">Free</span>
+            <span className="text-sm font-light text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-semibold text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
+            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
@@ -451,7 +451,7 @@ export default function MarketPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-base font-semibold text-white group-hover:text-monad-300 transition-colors">AI Agents</h2>
+                  <h2 className="text-base font-light text-white group-hover:text-monad-300 transition-colors">AI Agents</h2>
                   <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-monad-400 transition-colors" />
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">Discover and buy autonomous AI bots, scripts, and automation agents. Negotiate with AI-powered pricing.</p>
@@ -470,7 +470,7 @@ export default function MarketPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-base font-semibold text-white group-hover:text-blue-300 transition-colors">Repositories</h2>
+                  <h2 className="text-base font-light text-white group-hover:text-blue-300 transition-colors">Repositories</h2>
                   <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-blue-400 transition-colors" />
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">Browse community code — public repos and paid locked projects. Vote, download, and unlock with ETH.</p>
@@ -491,7 +491,7 @@ export default function MarketPage() {
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <Star className="w-4 h-4 text-yellow-400" strokeWidth={1.75} />
-                  <h2 className="text-sm font-semibold text-white">Featured</h2>
+                  <h2 className="text-sm font-light text-white">Featured</h2>
                   <span className="badge text-xs">AI agents</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -507,7 +507,7 @@ export default function MarketPage() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-zinc-400" strokeWidth={1.75} />
-                  <h2 className="text-sm font-semibold text-white">Recent listings</h2>
+                  <h2 className="text-sm font-light text-white">Recent listings</h2>
                 </div>
                 <Link href="/market/agents" className="text-xs text-monad-400 hover:text-monad-300 transition-colors">View all →</Link>
               </div>
@@ -534,7 +534,7 @@ export default function MarketPage() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-4 h-4 text-zinc-400" strokeWidth={1.75} />
-              <h2 className="text-sm font-semibold text-white">Activity</h2>
+              <h2 className="text-sm font-light text-white">Activity</h2>
             </div>
             <div className="space-y-2">
               {feedPosts.length === 0 ? (
