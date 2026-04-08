@@ -1,7 +1,7 @@
 'use client'
 
 import React, { HTMLAttributes, useCallback, useMemo } from "react"
-import { motion } from "framer-motion"
+import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
@@ -27,14 +27,17 @@ const Beam = ({
   delay: number
   duration: number
 }) => {
+  const hue = Math.floor(Math.random() * 360)
+  const ar = Math.floor(Math.random() * 10) + 1
+
   return (
     <motion.div
       style={
         {
           "--x": `${x}`,
           "--width": `${width}`,
-          "--aspect-ratio": "6",
-          "--background": `linear-gradient(rgba(255, 255, 255, 0.6), transparent)`,
+          "--aspect-ratio": `${ar}`,
+          "--background": `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
         } as React.CSSProperties
       }
       className={`absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]`}
@@ -59,7 +62,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   beamDelayMax = 3,
   beamDelayMin = 0,
   beamDuration = 3,
-  gridColor = "rgba(255, 255, 255, 0.1)",
+  gridColor = "var(--border)",
   ...props
 }) => {
   const generateBeams = useCallback(() => {
@@ -81,8 +84,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   const leftBeams = useMemo(() => generateBeams(), [generateBeams])
 
   return (
-    <div className={cn("relative rounded-xl border overflow-hidden", className)} {...props}>
-      {/* Warp background - behind everything */}
+    <div className={cn("relative rounded border p-6", className)} {...props}>
       <div
         style={
           {
@@ -94,12 +96,10 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
         className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
         style={{
           perspective: `${perspective}px`,
-          zIndex: 1,
         }}
       >
         {/* top side */}
-        <div
-          className="@container absolute z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
+        <div className="@container absolute z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
             transform: "rotateX(-90deg)",
             backgroundImage: `
@@ -120,10 +120,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             />
           ))}
         </div>
-
         {/* bottom side */}
-        <div
-          className="@container absolute top-full z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
+        <div className="@container absolute top-full z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
             transform: "rotateX(-90deg)",
             backgroundImage: `
@@ -144,10 +142,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             />
           ))}
         </div>
-
         {/* left side */}
-        <div
-          className="@container absolute top-0 left-0 z-20 h-[100cqmax] w-[100cqh] origin-[0%_0%] overflow-hidden"
+        <div className="@container absolute top-0 left-0 z-20 h-[100cqmax] w-[100cqh] origin-[0%_0%] overflow-hidden"
           style={{
             transform: "rotate(90deg) rotateX(-90deg)",
             backgroundImage: `
@@ -168,10 +164,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             />
           ))}
         </div>
-
         {/* right side */}
-        <div
-          className="@container absolute top-0 right-0 z-20 h-[100cqmax] w-[100cqh] origin-[100%_0%] overflow-hidden"
+        <div className="@container absolute top-0 right-0 z-20 h-[100cqmax] w-[100cqh] origin-[100%_0%] overflow-hidden"
           style={{
             transform: "rotate(-90deg) rotateX(-90deg)",
             backgroundImage: `
@@ -193,9 +187,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
           ))}
         </div>
       </div>
-
-      {/* Content - on top of warp background with its own background */}
-      <div className="relative z-10 bg-black/60 backdrop-blur-sm">{children}</div>
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }

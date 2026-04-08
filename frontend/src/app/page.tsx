@@ -499,28 +499,34 @@ export default function HomePage() {
                 { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
                 { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
               ].map((service, i) => (
-                <motion.div
+                <WarpBackground
                   key={i}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className={`p-6 lg:p-8 ${i === 0 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  beamsPerSide={1}
+                  beamSize={20}
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3 className={`text-base lg:text-lg font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
-                        {service.active && (
-                          <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
-                        )}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="p-6 lg:p-8"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className={`text-base lg:text-lg font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
+                          {service.active && (
+                            <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                          )}
+                        </div>
+                        <p className="text-xs lg:text-sm text-gray-400">{service.desc}</p>
                       </div>
-                      <p className="text-xs lg:text-sm text-gray-400">{service.desc}</p>
                     </div>
-                  </div>
-                  <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
-                </motion.div>
+                    <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
+                  </motion.div>
+                </WarpBackground>
               ))}
             </div>
 
@@ -531,23 +537,29 @@ export default function HomePage() {
                 { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
                 { name: 'Cache Layer', desc: 'Edge caching for low latency', details: 'Global edge network with intelligent cache invalidation.' },
               ].map((service, i) => (
-                <motion.div
+                <WarpBackground
                   key={i}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: (i + 2) * 0.1 }}
-                  className={`p-6 lg:p-8 ${i < 2 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
+                  beamsPerSide={1}
+                  beamSize={20}
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-gray-600" />
-                    <div className="flex-1">
-                      <h3 className="text-base lg:text-lg font-light text-white">{service.name}</h3>
-                      <p className="text-xs lg:text-sm text-gray-400 mt-0.5">{service.desc}</p>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: (i + 2) * 0.1 }}
+                    className="p-6 lg:p-8"
+                  >
+                    <div className="flex items-start gap-3 mb-3">
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-gray-600" />
+                      <div className="flex-1">
+                        <h3 className="text-base lg:text-lg font-light text-white">{service.name}</h3>
+                        <p className="text-xs lg:text-sm text-gray-400 mt-0.5">{service.desc}</p>
+                      </div>
                     </div>
-                  </div>
-                  <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
-                </motion.div>
+                    <p className="text-xs lg:text-sm text-gray-300 ml-8">{service.details}</p>
+                  </motion.div>
+                </WarpBackground>
               ))}
             </div>
           </div>
