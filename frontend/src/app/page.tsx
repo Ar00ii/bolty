@@ -280,14 +280,8 @@ export default function HomePage() {
         <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
       </section>
 
-      {/* ── FEATURES (ENHANCED GRID) ── */}
+      {/* ── FEATURES (LAYERED DESIGN WITH RELIEF) ── */}
       <section className="py-24 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 pointer-events-none opacity-30" style={{
-          backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(168, 85, 247, 0.05) 25%, rgba(168, 85, 247, 0.05) 26%, transparent 27%, transparent 74%, rgba(168, 85, 247, 0.05) 75%, rgba(168, 85, 247, 0.05) 76%, transparent 77%, transparent)',
-          backgroundSize: '50px 50px'
-        }} />
-
         <div className="max-w-6xl mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -302,7 +296,7 @@ export default function HomePage() {
           </motion.div>
 
           {/* Feature Grid - 2 columns on desktop, 1 on mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 auto-rows-max">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 auto-rows-max">
             {FEATURES.map((f, i) => {
               const Icon = f.icon;
               const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
@@ -314,28 +308,55 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className={`group rounded-lg border backdrop-blur-sm transition-all duration-300 overflow-hidden ${
-                    f.featured ? 'lg:col-span-2' : ''
-                  }`}
-                  style={{
-                    borderColor: 'rgba(168, 85, 247, 0.2)',
-                    background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(168, 85, 247, 0.05) 100%)',
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-                  }}
+                  className={`group relative ${f.featured ? 'lg:col-span-2' : ''}`}
                 >
-                  <div className="p-8 md:p-12">
-                    <div className="flex items-start gap-6 mb-6">
-                      <div className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${accentColor}`} style={{
-                        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05))',
-                        boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(168, 85, 247, 0.15)'
-                      }}>
-                        <Icon className="w-7 h-7" />
+                  {/* Background grid layer */}
+                  <div
+                    className="absolute inset-0 rounded-lg pointer-events-none"
+                    style={{
+                      backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent)',
+                      backgroundSize: '40px 40px',
+                      background: 'linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, 0.15) 25%, rgba(255, 255, 255, 0.15) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, 0.15) 75%, rgba(255, 255, 255, 0.15) 76%, transparent 77%, transparent)',
+                      backgroundSize: '40px 40px',
+                    }}
+                  />
+
+                  {/* Relief shadow layer - offset slightly */}
+                  <div
+                    className="absolute inset-0 rounded-lg pointer-events-none"
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      transform: 'translate(2px, 2px)',
+                      zIndex: 0,
+                    }}
+                  />
+
+                  {/* Main card - on top */}
+                  <div
+                    className="relative z-10 rounded-lg border backdrop-blur-sm transition-all duration-300 overflow-hidden hover:translate-y-[-2px] cursor-pointer"
+                    style={{
+                      borderColor: 'rgba(168, 85, 247, 0.2)',
+                      background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(168, 85, 247, 0.08) 100%)',
+                      boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1), -2px -2px 4px rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    <div className="p-8 md:p-12">
+                      <div className="flex items-start gap-6 mb-6">
+                        <div
+                          className={`w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${accentColor}`}
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.08))',
+                            boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.15), 0 8px 20px rgba(168, 85, 247, 0.2), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                          }}
+                        >
+                          <Icon className="w-7 h-7" />
+                        </div>
+                        <div>
+                          <h3 className="text-2xl font-light text-white mb-2">{f.title}</h3>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-2xl font-light text-white mb-2">{f.title}</h3>
-                      </div>
+                      <p className="text-gray-300 text-base leading-relaxed font-light">{f.description}</p>
                     </div>
-                    <p className="text-gray-300 text-base leading-relaxed font-light">{f.description}</p>
                   </div>
                 </motion.div>
               );
