@@ -27,16 +27,8 @@ const Beam = ({
   delay: number
   duration: number
 }) => {
-  const colors = [
-    'rgba(131, 110, 249, 0.6)', // monad purple
-    'rgba(6, 182, 212, 0.6)', // cyan
-    'rgba(236, 72, 153, 0.6)', // pink
-    'rgba(139, 92, 246, 0.6)', // violet
-    'rgba(59, 130, 246, 0.6)', // blue
-    'rgba(34, 197, 94, 0.6)', // green
-  ]
-  const color = colors[Math.floor(Math.random() * colors.length)]
-  const ar = Math.floor(Math.random() * 15) + 3
+  const hue = Math.floor(Math.random() * 360)
+  const ar = Math.floor(Math.random() * 10) + 1
 
   return (
     <motion.div
@@ -45,7 +37,7 @@ const Beam = ({
           "--x": `${x}`,
           "--width": `${width}`,
           "--aspect-ratio": `${ar}`,
-          "--background": `linear-gradient(${color}, transparent)`,
+          "--background": `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
         } as React.CSSProperties
       }
       className={`absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]`}
@@ -70,7 +62,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   beamDelayMax = 3,
   beamDelayMin = 0,
   beamDuration = 3,
-  gridColor = "var(--border)",
+  gridColor = "rgba(255, 255, 255, 0.2)",
   ...props
 }) => {
   const generateBeams = useCallback(() => {
@@ -92,7 +84,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   const leftBeams = useMemo(() => generateBeams(), [generateBeams])
 
   return (
-    <div className={cn("relative rounded border p-6", className)} {...props}>
+    <div className={cn("relative overflow-hidden", className)} {...props}>
       <div
         style={
           {
@@ -117,8 +109,17 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        />
-
+        >
+          {topBeams.map((beam, index) => (
+            <Beam
+              key={`top-${index}`}
+              width={`${beamSize}%`}
+              x={`${beam.x * beamSize}%`}
+              delay={beam.delay}
+              duration={beamDuration}
+            />
+          ))}
+        </div>
         {/* bottom side */}
         <div className="@container absolute top-full z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
@@ -130,7 +131,17 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        />
+        >
+          {bottomBeams.map((beam, index) => (
+            <Beam
+              key={`bottom-${index}`}
+              width={`${beamSize}%`}
+              x={`${beam.x * beamSize}%`}
+              delay={beam.delay}
+              duration={beamDuration}
+            />
+          ))}
+        </div>
         {/* left side */}
         <div className="@container absolute top-0 left-0 z-20 h-[100cqmax] w-[100cqh] origin-[0%_0%] overflow-hidden"
           style={{
@@ -142,7 +153,17 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        />
+        >
+          {leftBeams.map((beam, index) => (
+            <Beam
+              key={`left-${index}`}
+              width={`${beamSize}%`}
+              x={`${beam.x * beamSize}%`}
+              delay={beam.delay}
+              duration={beamDuration}
+            />
+          ))}
+        </div>
         {/* right side */}
         <div className="@container absolute top-0 right-0 z-20 h-[100cqmax] w-[100cqh] origin-[100%_0%] overflow-hidden"
           style={{
@@ -154,7 +175,17 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             backgroundSize: `${beamSize}% ${beamSize}%`,
             backgroundPosition: "50% -0.5px",
           }}
-        />
+        >
+          {rightBeams.map((beam, index) => (
+            <Beam
+              key={`right-${index}`}
+              width={`${beamSize}%`}
+              x={`${beam.x * beamSize}%`}
+              delay={beam.delay}
+              duration={beamDuration}
+            />
+          ))}
+        </div>
       </div>
       <div className="relative z-10">{children}</div>
     </div>
