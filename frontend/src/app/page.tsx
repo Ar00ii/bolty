@@ -292,43 +292,34 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Main Container with Corner Brackets */}
-          {/* Corner Brackets wrapper */}
-          <div className="relative overflow-visible">
-            <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
-            <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
-            <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
-            <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
+          {/* Big box: border + black bg + corner brackets inside + title + cards */}
+          <div
+            className="relative rounded-lg overflow-hidden"
+            style={{
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              background: 'rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            {/* Corner Brackets - inside the big box */}
+            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none z-20" />
 
-            {/* Main box with border and black background */}
-            <div
-              className="relative rounded-lg overflow-hidden"
-              style={{
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                background: 'rgba(0, 0, 0, 0.6)',
-              }}
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="p-10 md:p-14 pb-8"
             >
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="p-10 md:p-14 pb-0"
-              >
-                <h2 className="text-5xl md:text-6xl font-light text-white leading-tight mb-16">
-                  Deploy apps and agents<br />with <GradientText gradient="purple" animated={false}>zero ops</GradientText>
-                </h2>
-              </motion.div>
-              {/* Noise texture overlay */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-20"
-                style={{
-                  backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /%3E%3C/filter%3E%3Crect width="400" height="400" filter="url(%23noiseFilter)" opacity="0.15"/%3E%3C/svg%3E")',
-                  backgroundSize: '200px 200px',
-                }}
-              />
+              <h2 className="text-5xl md:text-6xl font-light text-white leading-tight">
+                Deploy apps and agents<br />with <GradientText gradient="purple" animated={false}>zero ops</GradientText>
+              </h2>
+            </motion.div>
 
-              {/* Grid Container */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
+            {/* Feature cards grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
               {FEATURES.map((f, i) => {
                 const Icon = f.icon;
                 const accentColors = ['cyan', 'emerald', 'pink', 'yellow', 'blue', 'purple'];
@@ -479,7 +470,6 @@ export default function HomePage() {
                 );
               })}
             </div>
-          </div>
           </div>
         </div>
       </section>
