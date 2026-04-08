@@ -154,6 +154,8 @@ export default function HomePage() {
           <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="Next.js">
             <path d="M11.572 0c-.176.001-.215.227-.007.306l5.14 2.89a.3.3 0 01.158.259v5.62a.3.3 0 01-.462.252L13.5 7.67v4.58a.3.3 0 01-.459.254L5.143 8.202a.3.3 0 01-.143-.256V2.556a.3.3 0 01.455-.257L8.37 4.03v-.274a.3.3 0 01.148-.259L11.572 0zM5 9.586v5.16a.3.3 0 00.146.258l7.898 4.63a.3.3 0 00.457-.254V14.8l2.898 1.696a.3.3 0 00.459-.254V10.2L19 11.47v5.088a.3.3 0 01-.455.257L5 9.586z"/>
           </svg>
+          {/* Spacer for loop transition */}
+          <div className="w-6 h-6 flex-shrink-0" />
         </ScrollVelocityRow>
 
         {/* Fade edges */}
