@@ -30,10 +30,36 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
-/* Smooth transitions */
+/* Smooth transitions with will-change for performance */
 * {
   transition-property: color, background-color, border-color, box-shadow, opacity;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Performance optimizations */
+body {
+  font-display: swap;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize images for CLS (Cumulative Layout Shift) */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Reduce repaints with contain */
+section {
+  contain: layout style paint;
+}
+
+/* Optimize animations with GPU acceleration */
+.animate-scroll {
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
