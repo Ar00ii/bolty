@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
 import { HighlightCard } from '@/components/ui/highlight-card';
+import { GradientMeshBackground } from '@/components/ui/GradientMeshBackground';
+import { FloatingElements } from '@/components/ui/FloatingElements';
 import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
@@ -110,7 +112,8 @@ export default function HomePage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
+      <GradientMeshBackground />
       {/* Homepage Navbar */}
       <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', opacity: 1, backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
@@ -141,6 +144,8 @@ export default function HomePage() {
 
       {/* ── HERO ── */}
       <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+        {/* Animated floating elements */}
+        <FloatingElements />
         {/* Subtle grid background */}
         <div className="hero-grid-bg">
           <svg width="100%" height="100%">
@@ -159,7 +164,7 @@ export default function HomePage() {
             <span className="text-xs font-medium text-monad-400">Now in Beta — Open for developers</span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6" style={{ color: 'var(--text)' }}>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 animate-text-glow" style={{ color: 'var(--text)' }}>
             Build, ship, and earn<br />
             <span className="hero-gradient">with AI agents</span>
           </h1>
@@ -208,14 +213,15 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {FEATURES.map((f) => (
-                <HighlightCard
-                  key={f.href}
-                  icon={f.icon}
-                  title={f.title}
-                  description={f.description}
-                  href={f.href}
-                />
+              {FEATURES.map((f, i) => (
+                <div key={f.href} style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${i * 0.1}s` }}>
+                  <HighlightCard
+                    icon={f.icon}
+                    title={f.title}
+                    description={f.description}
+                    href={f.href}
+                  />
+                </div>
               ))}
             </div>
           </div>
@@ -232,10 +238,10 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {HOW_IT_WORKS.map((s) => {
+              {HOW_IT_WORKS.map((s, i) => {
                 const Icon = s.icon;
                 return (
-                  <div key={s.step} className="step-card">
+                  <div key={s.step} className="step-card" style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${i * 0.15}s` }}>
                     <div className="flex items-center gap-3 mb-4">
                       <div className="step-number">{s.step}</div>
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
@@ -262,8 +268,8 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {INTEGRATIONS.map((i) => (
-                <div key={i.name} className="card-elevated text-center py-6 px-4">
+              {INTEGRATIONS.map((i, idx) => (
+                <div key={i.name} className="card-elevated text-center py-6 px-4" style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${idx * 0.08}s` }}>
                   <p className="text-sm font-semibold mb-1.5" style={{ color: 'var(--text)' }}>{i.name}</p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{i.desc}</p>
                 </div>
@@ -283,8 +289,8 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="card-elevated p-6">
+              {TESTIMONIALS.map((t, idx) => (
+                <div key={t.name} className="card-elevated p-6" style={{ animation: `card-stagger 0.6s ease-out forwards`, animationDelay: `${idx * 0.15}s` }}>
                   <div className="flex gap-1 mb-4">
                     {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />)}
                   </div>
