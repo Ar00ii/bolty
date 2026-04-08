@@ -1039,11 +1039,11 @@ p, span, a, li, button, input, textarea {
   /* ── Sidebar Styling ── */
   aside {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+    scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
   }
 
   aside::-webkit-scrollbar {
-    width: 4px;
+    width: 6px;
   }
 
   aside::-webkit-scrollbar-track {
@@ -1051,18 +1051,48 @@ p, span, a, li, button, input, textarea {
   }
 
   aside::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+    background: rgba(168, 85, 247, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s;
   }
 
   aside::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(168, 85, 247, 0.4);
+  }
+
+  /* Sidebar link/button base styles */
+  aside a,
+  aside button {
+    position: relative;
+  }
+
+  /* Smooth transitions for sidebar items */
+  aside a::before,
+  aside button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(168, 85, 247, 0.05);
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  aside a:hover::before,
+  aside button:hover::before {
+    opacity: 1;
+  }
+
+  /* Active indicator animation */
+  [data-role="sidebar-item"][data-active="true"] {
+    position: relative;
   }
 
   /* ── Mobile Sidebar ── */
   @media (max-width: 1023px) {
     aside {
-      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -4px 0 16px rgba(131, 110, 249, 0.1);
     }
 
     /* Touch-friendly spacing on mobile */
@@ -1074,6 +1104,38 @@ p, span, a, li, button, input, textarea {
   /* ── Focus Visible for Accessibility ── */
   aside button:focus-visible,
   aside a:focus-visible {
-    outline: 1px solid rgba(255, 255, 255, 0.3);
-    outline-offset: -1px;
+    outline: 2px solid rgba(168, 85, 247, 0.6);
+    outline-offset: -2px;
+  }
+
+  /* ── Sidebar Header Animation ── */
+  aside > div:first-child {
+    animation: slideDown 0.4s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Gradient text for active items ── */
+  aside a[data-active="true"],
+  aside button[data-active="true"] {
+    position: relative;
+  }
+
+  aside a[data-active="true"]::after,
+  aside button[data-active="true"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(131, 110, 249, 0.05));
+    border-radius: inherit;
+    pointer-events: none;
   }
