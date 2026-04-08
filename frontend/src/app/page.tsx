@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { HighlightCard } from '@/components/ui/highlight-card';
-import { DashboardPreview } from '@/components/ui/DashboardPreview';
+import { BentoHero } from '@/components/ui/BentoHero';
 import { StepShowcase } from '@/components/ui/StepShowcase';
 import { IntegrationsShowcase } from '@/components/ui/IntegrationsShowcase';
 import { StatusBar } from '@/components/ui/StatusBar';
@@ -145,47 +145,7 @@ export default function HomePage() {
 
       {/* ── HERO ── */}
       <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left side - Text */}
-          <div className="space-y-6 relative z-10">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight" style={{ color: 'var(--text)' }}>
-              Build, ship, and earn<br />
-              <span className="hero-gradient">with AI agents</span>
-            </h1>
-
-            <p className="text-base md:text-lg" style={{ color: 'var(--text-muted)' }}>
-              The developer platform for publishing code, deploying AI agents,
-              and earning from your work. Connect your stack, reach buyers, get paid in ETH.
-            </p>
-
-            <div className="flex items-center gap-3 pt-4">
-              {!isAuthenticated ? (
-                <>
-                  <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                    Start building <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link href="/market" className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
-                    Explore marketplace
-                  </Link>
-                </>
-              ) : (
-                <Link href="/market" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                  Go to dashboard <ArrowRight className="w-4 h-4" />
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Right side - Dashboard Preview */}
-          <div className="relative z-10">
-            <DashboardPreview />
-          </div>
-        </div>
-
-        {/* Stats bar below */}
-        <div className="max-w-7xl mx-auto mt-16">
-          <StatusBar />
-        </div>
+        <BentoHero />
       </section>
 
       {/* ── FEATURES ── */}
