@@ -115,21 +115,21 @@ export default function HomePage() {
       <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── TECHNOLOGIES (SCROLL VELOCITY) ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-32 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-12 text-center"
+            className="mb-16 text-center"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Technology Stack</p>
             <h2 className="text-4xl font-bold text-white">Built with modern tools</h2>
           </motion.div>
 
-          <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em]">
+          <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em] relative">
             {/* Row 1 - Left to right */}
-            <ScrollVelocityRow baseVelocity={25} direction={1}>
+            <ScrollVelocityRow baseVelocity={15} direction={1}>
               <div className="flex items-center gap-4 px-4">
                 <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
                   <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#f0db4f' }}>
@@ -177,7 +177,7 @@ export default function HomePage() {
             </ScrollVelocityRow>
 
             {/* Row 2 - Right to left */}
-            <ScrollVelocityRow baseVelocity={20} direction={-1}>
+            <ScrollVelocityRow baseVelocity={12} direction={-1}>
               <div className="flex items-center gap-4 px-4">
                 <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-white/10">
                   <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#627EEA' }}>
