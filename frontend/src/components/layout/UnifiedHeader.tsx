@@ -17,15 +17,11 @@ const NAV_LINKS = [
 ];
 
 export function UnifiedHeader() {
-  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-
-  // Don't show header on home page
-  const isHome = pathname === '/';
-  if (isHome) return null;
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

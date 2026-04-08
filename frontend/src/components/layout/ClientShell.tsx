@@ -12,7 +12,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <UnifiedHeader />
+      {!isHome && !isAuth && <UnifiedHeader />}
 
       <div className={!isHome && !isAuth ? 'pt-16' : ''}>
         <main className="flex-1 relative min-h-[calc(100vh-56px)]">
