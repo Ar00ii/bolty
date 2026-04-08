@@ -3,14 +3,13 @@
 import React, { useEffect, useRef } from 'react';
 
 interface HexagonPatternProps {
-  hexagons?: [number, number][];
   className?: string;
 }
 
 export const HexagonPattern = React.forwardRef<
   HTMLCanvasElement,
   HexagonPatternProps & React.HTMLAttributes<HTMLCanvasElement>
->(({ hexagons = [], className = '', ...props }, ref) => {
+>(({ className = '', ...props }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -29,25 +28,30 @@ export const HexagonPattern = React.forwardRef<
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
     // Clear canvas
-    ctx.fillStyle = 'transparent';
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
 
-    // Hexagon settings
-    const hexSize = 40;
-    const gap = 10;
+    // Hexagon settings - much larger
+    const hexSize = 80;
+    const gap = 15;
+    const hexWidth = hexSize * 2;
+    const hexHeight = hexSize * Math.sqrt(3);
 
-    // Draw hexagons
-    hexagons.forEach(([col, row]) => {
-      const x = col * (hexSize * 1.5 + gap) + hexSize + 50;
-      const y = row * (hexSize * Math.sqrt(3) + gap) + hexSize + 50;
+    // Draw hexagons in a grid pattern
+    for (let col = -2; col < Math.ceil(width / hexWidth) + 2; col++) {
+      for (let row = -2; row < Math.ceil(height / hexHeight) + 2; row++) {
+        // Offset every other row for honeycomb pattern
+        const xOffset = row % 2 === 0 ? 0 : hexWidth / 2;
+        const x = col * (hexWidth + gap) + xOffset;
+        const y = row * (hexHeight + gap);
 
-      drawHexagon(ctx, x, y, hexSize);
-    });
+        drawHexagon(ctx, x, y, hexSize);
+      }
+    }
 
     function drawHexagon(
       context: CanvasRenderingContext2D,
-      centerX: number,
-      centerY: number,
+      x: number,
+      y: number,
       size: number
     ) {
       context.beginPath();
@@ -58,18 +62,18 @@ export const HexagonPattern = React.forwardRef<
         const yOffset = Math.sin(angle) * size;
 
         if (i === 0) {
-          context.moveTo(centerX + xOffset, centerY + yOffset);
+          context.moveTo(x + xOffset, y + yOffset);
         } else {
-          context.lineTo(centerX + xOffset, centerY + yOffset);
+          context.lineTo(x + xOffset, y + yOffset);
         }
       }
 
       context.closePath();
-      context.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+      context.strokeStyle = 'rgba(200, 200, 210, 0.2)';
       context.lineWidth = 1;
       context.stroke();
     }
-  }, [hexagons]);
+  }, []);
 
   return (
     <canvas
