@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { Footer } from '@/components/ui/footer-section';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 
@@ -26,6 +27,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <ProgressBar isLoading={isLoading} />
+      <FloatingTopBar />
       {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
 
