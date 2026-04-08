@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
+import ScrollFloat from '@/components/ui/ScrollFloat';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -581,7 +582,7 @@ export default function HomePage() {
             className="mb-16"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Platform Features</p>
-            <h2 className="text-5xl font-bold text-white">Everything you need</h2>
+            <ScrollFloat textClassName="text-white">Everything you need</ScrollFloat>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
@@ -637,7 +638,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">Three steps to get started</h2>
+            <ScrollFloat textClassName="text-white mb-8">Three steps to get started</ScrollFloat>
 
             <div className="space-y-6">
               {HOW_IT_WORKS.map((item, i) => {
@@ -697,7 +698,7 @@ export default function HomePage() {
             className="mb-12"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Developers</p>
-            <h2 className="text-5xl font-bold text-white">What developers say</h2>
+            <ScrollFloat textClassName="text-white">What developers say</ScrollFloat>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -739,7 +740,7 @@ export default function HomePage() {
             className="mb-12 text-center"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Questions</p>
-            <h2 className="text-5xl font-bold text-white">Frequently asked</h2>
+            <ScrollFloat textClassName="text-white">Frequently asked</ScrollFloat>
           </motion.div>
 
           <div className="space-y-3">
@@ -795,7 +796,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-white mb-2">Stay updated</h2>
+            <ScrollFloat textClassName="text-white mb-2">Stay updated</ScrollFloat>
             <p className="text-gray-400 mb-8">Get the latest news about new agents, features, and opportunities.</p>
             <div className="flex gap-2 max-w-md mx-auto">
               <input
@@ -820,7 +821,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-bold text-white mb-4">Ready to start building?</h2>
+            <ScrollFloat textClassName="text-white mb-4">Ready to start building?</ScrollFloat>
             <p className="text-lg text-gray-400 mb-8">
               Join the platform where code meets commerce. Publish, sell, and earn — all in one place.
             </p>
