@@ -307,7 +307,7 @@ export default function HomePage() {
           <div
             className="relative overflow-hidden rounded-lg"
             style={{
-              border: '1px solid rgba(168, 85, 247, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
             {/* Noise texture overlay */}
@@ -338,12 +338,12 @@ export default function HomePage() {
                 };
 
                 const accentBorderMap: { [key: string]: string } = {
-                  cyan: 'rgba(34, 211, 238, 0.2)',
-                  emerald: 'rgba(16, 185, 129, 0.2)',
-                  pink: 'rgba(236, 72, 153, 0.2)',
-                  yellow: 'rgba(234, 179, 8, 0.2)',
-                  blue: 'rgba(59, 130, 246, 0.2)',
-                  purple: 'rgba(168, 85, 247, 0.2)',
+                  cyan: 'rgba(255, 255, 255, 0.2)',
+                  emerald: 'rgba(255, 255, 255, 0.2)',
+                  pink: 'rgba(255, 255, 255, 0.2)',
+                  yellow: 'rgba(255, 255, 255, 0.2)',
+                  blue: 'rgba(255, 255, 255, 0.2)',
+                  purple: 'rgba(255, 255, 255, 0.2)',
                 };
 
                 // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
@@ -371,20 +371,100 @@ export default function HomePage() {
                         minHeight: isReputationCard ? 'auto' : 'auto',
                       }}
                     >
-                      <div className="relative z-10">
-                        <div className="flex items-start gap-4 mb-6">
-                          <div
-                            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
-                            style={{
-                              background: accentBgMap[accentColor],
-                              boxShadow: `inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px ${accentBorderMap[accentColor]}`,
-                            }}
-                          >
-                            <Icon className="w-6 h-6" />
+                      <div className="relative z-10 h-full flex flex-col justify-between">
+                        {/* Header with Icon */}
+                        <div>
+                          <div className="flex items-start gap-4 mb-6">
+                            <div
+                              className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
+                              style={{
+                                background: accentBgMap[accentColor],
+                                boxShadow: `inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(255, 255, 255, 0.1)`,
+                              }}
+                            >
+                              <Icon className="w-6 h-6" />
+                            </div>
                           </div>
+                          <h3 className="text-xl font-light text-white mb-4 leading-snug">{f.title}</h3>
+                          <p className="text-gray-300 text-sm leading-relaxed font-light">{f.description}</p>
                         </div>
-                        <h3 className="text-xl font-light text-white mb-4 leading-snug">{f.title}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed font-light">{f.description}</p>
+
+                        {/* Visual Content - Different for each card */}
+                        {i === 0 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Active Agents</span>
+                              <span className="text-cyan-400 font-semibold">2,847</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Total Revenue</span>
+                              <span className="text-cyan-400 font-semibold">$243K ETH</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Success Rate</span>
+                              <span className="text-cyan-400 font-semibold">98.7%</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 2 && (
+                          <div className="mt-6 pt-6 border-t border-white/10">
+                            <div className="space-y-2">
+                              {['Production', 'Development', 'Testing'].map((env, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full" style={{
+                                    background: ['#06b6d4', '#10b981', '#f97316'][idx]
+                                  }} />
+                                  <span className="text-xs text-gray-400">{env}</span>
+                                  <div className="flex-1 h-1 bg-white/5 rounded-full ml-2">
+                                    <div className="h-full rounded-full" style={{
+                                      width: ['65%', '42%', '28%'][idx],
+                                      background: ['#06b6d4', '#10b981', '#f97316'][idx],
+                                      opacity: 0.6
+                                    }} />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 4 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-2">
+                            <div className="flex gap-2">
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">A</div>
+                              <div className="flex-1 bg-white/5 rounded-lg p-2 text-xs text-gray-300">
+                                Connected to WebSocket
+                              </div>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <div className="flex-1 max-w-xs bg-blue-500/20 rounded-lg p-2 text-xs text-blue-300 text-right">
+                                Real-time sync enabled
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">U</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 5 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-gray-400">Your Rank</span>
+                                <span className="text-purple-400 font-semibold">#342</span>
+                              </div>
+                              <div className="flex gap-1 mt-3">
+                                {[...Array(7)].map((_, idx) => (
+                                  <div key={idx} className="flex-1 h-8 bg-white/5 rounded-sm overflow-hidden">
+                                    <div className="h-full bg-purple-500/40" style={{
+                                      height: `${[45, 60, 70, 85, 75, 65, 55][idx]}%`
+                                    }} />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
