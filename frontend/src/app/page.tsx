@@ -70,9 +70,13 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
-      {/* Navbar */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: '#000000', borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+    <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
+      {/* Navbar - Sticky with scroll effect */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300" style={{
+        background: '#000000',
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(10px)'
+      }}>
         <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
           {/* Left Links */}
           <div className="flex items-center gap-8">
@@ -283,6 +287,31 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── NEWSLETTER SIGNUP ── */}
+      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-2xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl font-bold text-white mb-2">Stay updated</h2>
+            <p className="text-gray-400 mb-8">Get the latest news about new agents, features, and opportunities.</p>
+            <div className="flex gap-2 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                aria-label="Email address for newsletter"
+              />
+              <button className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors">
+                Subscribe
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ── CTA FINAL ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-4xl mx-auto text-center">
@@ -314,6 +343,67 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t px-4 py-12" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <BoltyLogoSVG size={24} />
+                <span className="text-white font-semibold">Bolty</span>
+              </div>
+              <p className="text-sm text-gray-500">The fastest path to production for AI agents and apps.</p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/market" className="text-gray-400 hover:text-white transition-colors">Marketplace</Link></li>
+                <li><Link href="/market/agents" className="text-gray-400 hover:text-white transition-colors">Agents</Link></li>
+                <li><Link href="/market/repos" className="text-gray-400 hover:text-white transition-colors">Repositories</Link></li>
+                <li><Link href="#how-it-works" className="text-gray-400 hover:text-white transition-colors">How It Works</Link></li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="/docs/agent-protocol" className="text-gray-400 hover:text-white transition-colors">Documentation</Link></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API Reference</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Community</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <ul className="space-y-2 text-sm">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom */}
+          <div className="border-t pt-8" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-500">© 2026 Bolty. All rights reserved.</p>
+              <div className="flex gap-6 mt-4 md:mt-0">
+                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="GitHub">GitHub</a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="Twitter">Twitter</a>
+                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="Discord">Discord</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
