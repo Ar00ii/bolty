@@ -163,13 +163,13 @@ export default function HomePage() {
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
           ].map((icon) => (
-            <div key={icon.alt} className="w-28 flex items-center justify-center flex-shrink-0">
+            <div key={icon.alt} className="w-28 flex items-center justify-start pl-2 flex-shrink-0">
               <img
                 src={icon.src}
                 alt={icon.alt}
                 loading="lazy"
                 className="w-14 h-14 opacity-50 hover:opacity-100 transition-opacity"
-                style={{ objectFit: 'contain', objectPosition: 'center' }}
+                style={{ objectFit: 'contain', objectPosition: 'left' }}
                 title={icon.alt}
               />
             </div>
