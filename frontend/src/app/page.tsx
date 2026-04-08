@@ -115,52 +115,72 @@ export default function HomePage() {
       <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
-      <section className="py-10 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-        <ScrollVelocityRow duration={40}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {[
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-plain.svg', alt: 'TypeScript' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-plain.svg', alt: 'Docker' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-plain.svg', alt: 'PostgreSQL' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-plain.svg', alt: 'Redis' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-plain.svg', alt: 'Git' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg', alt: 'TailwindCSS' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-plain.svg', alt: 'MongoDB' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/graphql/graphql-plain.svg', alt: 'GraphQL' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/rust/rust-original.svg', alt: 'Rust' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original-wordmark.svg', alt: 'Go' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/solidity/solidity-plain.svg', alt: 'Solidity' },
-          ].map((icon) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={icon.alt}
-              src={icon.src}
-              alt={icon.alt}
-              className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity grayscale hover:grayscale-0 flex-shrink-0"
-              title={icon.alt}
-            />
-          ))}
-          {/* Base chain */}
-          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Base">
-            <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H0C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" fill="white"/>
+      <section className="py-12 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+        <ScrollVelocityRow duration={50}>
+          {/* React */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="11" r="2" fill="#61dafb" opacity="0.4"/>
+            <path d="M19.03 6.72c-1.82-3.15-5.48-5.16-9.03-5.16-3.55 0-7.21 2.01-9.03 5.16-.37.64-.7 1.31-.98 2-1.15 2.98-1.49 6.4-.95 9.62.54 3.21 2.26 6.07 4.83 8.04 2.57 1.97 5.98 3.09 9.13 3.09 3.15 0 6.56-1.12 9.13-3.09 2.57-1.97 4.29-4.83 4.83-8.04.54-3.22.2-6.64-.95-9.62-.28-.69-.61-1.36-.98-2z" fill="none" stroke="#61dafb" stroke-width="1.5" opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          {/* TypeScript */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#3178c6" opacity="0.4">
+            <rect width="24" height="24" rx="2"/>
+            <path d="M8 12l2-3 2 3m0 3h3m-6 0h3" stroke="white" stroke-width="1.5" fill="none"/>
+          </svg>
+          {/* Python */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" opacity="0.4">
+            <defs><linearGradient id="py"><stop offset="0%" style={{stopColor:'#366994'}}/><stop offset="100%" style={{stopColor:'#ffd43b'}}/></linearGradient></defs>
+            <circle cx="12" cy="12" r="10" fill="url(#py)"/>
+            <path d="M8.5 8c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5S7 15.5 7 14.5v-5C7 8.5 7.5 8 8.5 8z" fill="white" opacity="0.6"/>
+          </svg>
+          {/* Node.js */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#339933" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M10 10l2 1.5 2-1.5M10 13l2 1.5 2-1.5" stroke="white" stroke-width="1" fill="none"/>
+          </svg>
+          {/* Docker */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#2496ed" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <rect x="8" y="10" width="1" height="2" fill="white"/>
+            <rect x="10" y="10" width="1" height="2" fill="white"/>
+            <rect x="12" y="10" width="1" height="2" fill="white"/>
+            <rect x="14" y="10" width="1" height="2" fill="white"/>
+          </svg>
+          {/* PostgreSQL */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#336791" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M10 9h4M11 13h2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          {/* Git */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#f34f29" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9 12l2 1.5 4-3" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+          {/* Tailwind */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#06b6d4" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 14l2-2 2 2m2-4l1.5-1.5 1.5 1.5" stroke="white" stroke-width="1" fill="none" stroke-linecap="round"/>
+          </svg>
+          {/* Base */}
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M8 12h8M10 10l1 1 2-3" stroke="white" stroke-width="1" fill="none" stroke-linecap="round"/>
           </svg>
           {/* GitHub */}
-          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9 14c0 .5.5 1 1 1s1-.5 1-1-.5-1-1-1-1 .5-1 1zm4 0c0 .5.5 1 1 1s1-.5 1-1-.5-1-1-1-1 .5-1 1z" fill="white"/>
           </svg>
           {/* Next.js */}
-          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="Next.js">
-            <path d="M11.572 0c-.176.001-.215.227-.007.306l5.14 2.89a.3.3 0 01.158.259v5.62a.3.3 0 01-.462.252L13.5 7.67v4.58a.3.3 0 01-.459.254L5.143 8.202a.3.3 0 01-.143-.256V2.556a.3.3 0 01.455-.257L8.37 4.03v-.274a.3.3 0 01.148-.259L11.572 0zM5 9.586v5.16a.3.3 0 00.146.258l7.898 4.63a.3.3 0 00.457-.254V14.8l2.898 1.696a.3.3 0 00.459-.254V10.2L19 11.47v5.088a.3.3 0 01-.455.257L5 9.586z"/>
+          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M10 10h4m-4 2h3m-3 2h2" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
           </svg>
-          {/* Spacer for loop transition */}
-          <div className="w-6 h-6 flex-shrink-0" />
         </ScrollVelocityRow>
 
         {/* Fade edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
       </section>
 
       {/* ── FEATURES (BENTO GRID) ── */}

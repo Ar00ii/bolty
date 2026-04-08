@@ -1,7 +1,5 @@
-'use client';
-
-import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle2, Activity, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { CheckCircle2, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -105,7 +103,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   : 'bg-purple-600 text-white'
               }`}
             >
-              {phase === 'deploying' && <Loader2 className="w-4 h-4 animate-spin" />}
+              {phase === 'deploying' && <CheckCircle2 className="w-4 h-4 animate-spin" />}
               {phase === 'done' && <CheckCircle2 className="w-4 h-4" />}
               {phase === 'idle' || phase === 'pressed' ? 'Deploy' : phase === 'deploying' ? 'Deploying...' : 'Deployed'}
             </motion.div>
@@ -130,72 +128,70 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             </svg>
 
             {/* Dashboard */}
-            <AnimatePresence>
-              {showDashboard && (
-                <motion.div
-                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="border border-white/15 rounded-xl p-8 pt-24"
-                  style={{ background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(20px)' }}
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="text-xs uppercase tracking-widest text-gray-500">Bolty Dashboard</div>
-                    {phase === 'done' && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex items-center gap-1.5 text-xs text-green-400"
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                        All systems live
-                      </motion.div>
-                    )}
-                  </div>
+            {showDashboard && (
+              <motion.div
+                initial={{ opacity: 0, y: 60, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="border border-white/15 rounded-xl p-8 pt-24"
+                style={{ background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(20px)' }}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="text-xs uppercase tracking-widest text-gray-500">Bolty Dashboard</div>
+                  {phase === 'done' && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex items-center gap-1.5 text-xs text-green-400"
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      All systems live
+                    </motion.div>
+                  )}
+                </div>
 
-                  <div className="grid grid-cols-3 gap-6">
-                    {[
-                      { name: 'AI Agent', metric: 'Requests', color: 'purple', bars: [0.3, 0.5, 0.4, 0.7, 0.6, 0.8], status: phase === 'done' ? 'Live' : 'Deploying', statusColor: phase === 'done' ? 'text-green-400' : 'text-yellow-400' },
-                      { name: 'Marketplace', metric: 'Sales', color: 'cyan', bars: [0.4, 0.45, 0.5, 0.48, 0.55, 0.6], status: 'Live', statusColor: 'text-green-400' },
-                      { name: 'ETH Payments', metric: 'Volume', color: 'pink', bars: [0.5, 0.55, 0.52, 0.58, 0.62, 0.7], status: 'Active', statusColor: 'text-green-400' },
-                      { name: 'Repos', metric: 'Commits', color: 'purple', bars: [0.4, 0.5, 0.45, 0.55, 0.48, 0.6], status: '24 synced', statusColor: 'text-green-400' },
-                      { name: 'Users', metric: 'Growth', color: 'cyan', bars: [0.35, 0.48, 0.52, 0.56, 0.6, 0.65], status: '1.2k', statusColor: 'text-green-400' },
-                      { name: 'Uptime', metric: 'Status', color: 'green', bars: [0.88, 0.9, 0.92, 0.91, 0.93, 0.95], status: '99.9%', statusColor: 'text-green-400' },
-                    ].map((card, i) => (
-                      <motion.div
-                        key={card.name}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.15 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="border border-white/10 rounded-lg p-4"
-                        style={{ background: 'rgba(0, 0, 0, 0.4)' }}
-                      >
-                        <div className="flex items-center gap-2 mb-2">
-                          <Activity className={`w-3.5 h-3.5 text-${card.color}-400`} />
-                          <span className="text-[10px] text-gray-500 uppercase tracking-wide">{card.name}</span>
-                        </div>
-                        <div className={`${card.statusColor} text-xs font-medium mb-3 flex items-center gap-1`}>
-                          {card.status === 'Live' || card.status === 'Active' ? <CheckCircle2 className="w-3 h-3" /> : null}
-                          {card.status}
-                        </div>
-                        <div className="text-[10px] text-gray-600 mb-1">{card.metric}</div>
-                        <div className="flex gap-0.5 h-7 items-end">
-                          {card.bars.map((h, j) => (
-                            <motion.div
-                              key={j}
-                              initial={{ height: 0 }}
-                              animate={{ height: `${h * 100}%` }}
-                              transition={{ delay: 0.15 * i + 0.05 * j, duration: 0.4 }}
-                              className={`flex-1 bg-${card.color}-500/50 rounded-sm`}
-                            />
-                          ))}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                <div className="grid grid-cols-3 gap-6">
+                  {[
+                    { name: 'AI Agent', metric: 'Requests', color: 'purple', bars: [0.3, 0.5, 0.4, 0.7, 0.6, 0.8], status: phase === 'done' ? 'Live' : 'Deploying', statusColor: phase === 'done' ? 'text-green-400' : 'text-yellow-400' },
+                    { name: 'Marketplace', metric: 'Sales', color: 'cyan', bars: [0.4, 0.45, 0.5, 0.48, 0.55, 0.6], status: 'Live', statusColor: 'text-green-400' },
+                    { name: 'ETH Payments', metric: 'Volume', color: 'pink', bars: [0.5, 0.55, 0.52, 0.58, 0.62, 0.7], status: 'Active', statusColor: 'text-green-400' },
+                    { name: 'Repos', metric: 'Commits', color: 'purple', bars: [0.4, 0.5, 0.45, 0.55, 0.48, 0.6], status: '24 synced', statusColor: 'text-green-400' },
+                    { name: 'Users', metric: 'Growth', color: 'cyan', bars: [0.35, 0.48, 0.52, 0.56, 0.6, 0.65], status: '1.2k', statusColor: 'text-green-400' },
+                    { name: 'Uptime', metric: 'Status', color: 'green', bars: [0.88, 0.9, 0.92, 0.91, 0.93, 0.95], status: '99.9%', statusColor: 'text-green-400' },
+                  ].map((card, i) => (
+                    <motion.div
+                      key={card.name}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      className="border border-white/10 rounded-lg p-4"
+                      style={{ background: 'rgba(0, 0, 0, 0.4)' }}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Activity className={`w-3.5 h-3.5 text-${card.color}-400`} />
+                        <span className="text-[10px] text-gray-500 uppercase tracking-wide">{card.name}</span>
+                      </div>
+                      <div className={`${card.statusColor} text-xs font-medium mb-3 flex items-center gap-1`}>
+                        {card.status === 'Live' || card.status === 'Active' ? <CheckCircle2 className="w-3 h-3" /> : null}
+                        {card.status}
+                      </div>
+                      <div className="text-[10px] text-gray-600 mb-1">{card.metric}</div>
+                      <div className="flex gap-0.5 h-7 items-end">
+                        {card.bars.map((h, j) => (
+                          <motion.div
+                            key={j}
+                            initial={{ height: 0 }}
+                            animate={{ height: `${h * 100}%` }}
+                            transition={{ delay: 0.15 * i + 0.05 * j, duration: 0.4 }}
+                            className={`flex-1 bg-${card.color}-500/50 rounded-sm`}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         </div>
       </div>
