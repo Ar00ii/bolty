@@ -501,10 +501,10 @@ export default function HomePage() {
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none ${i === 0 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none overflow-hidden ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
                   beamsPerSide={1}
-                  beamSize={20}
+                  beamSize={30}
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -539,10 +539,10 @@ export default function HomePage() {
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none ${i < 2 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none overflow-hidden ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
                   beamsPerSide={1}
-                  beamSize={20}
+                  beamSize={30}
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
