@@ -14,7 +14,7 @@ export function ScrollVelocityRow({
   return (
     <div className="flex overflow-hidden w-full">
       <div
-        className="flex gap-32 flex-shrink-0 animate-scroll"
+        className="flex flex-shrink-0 animate-scroll"
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`
@@ -23,7 +23,7 @@ export function ScrollVelocityRow({
         {children}
       </div>
       <div
-        className="flex gap-32 flex-shrink-0 animate-scroll"
+        className="flex flex-shrink-0 animate-scroll"
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`

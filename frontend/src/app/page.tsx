@@ -134,7 +134,7 @@ export default function HomePage() {
               src={icon.src}
               alt={icon.alt}
               className="w-14 h-14 flex-shrink-0 flex-grow-0 opacity-50 hover:opacity-100 transition-opacity"
-              style={{ objectFit: 'contain', objectPosition: 'center' }}
+              style={{ objectFit: 'contain', objectPosition: 'center', marginRight: '32px' }}
               title={icon.alt}
             />
           ))}
