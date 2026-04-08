@@ -154,7 +154,7 @@ export function Sidebar() {
       {/* Mobile Menu Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-[4.5rem] left-4 lg:hidden z-50 p-2.5 rounded-lg bg-monad-500/10 border border-monad-500/20 hover:bg-monad-500/20 hover:border-monad-500/30 text-monad-400 transition-all"
+        className="fixed top-4 left-4 lg:hidden z-50 p-2.5 rounded-lg bg-monad-500/10 border border-monad-500/20 hover:bg-monad-500/20 hover:border-monad-500/30 text-monad-400 transition-all"
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
       >
         {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -180,14 +180,14 @@ export function Sidebar() {
         initial={isMobile ? 'closed' : 'open'}
         animate={isOpen || !isMobile ? 'open' : 'closed'}
         transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed lg:relative top-16 left-0 h-[calc(100vh-4rem)] lg:top-0 lg:h-screen w-64 bg-gradient-to-b from-zinc-900 via-zinc-900 to-black border-r border-zinc-800/50 overflow-y-auto z-40 shadow-xl lg:shadow-none transition-all ${
+        className={`fixed lg:relative top-0 left-0 h-screen w-64 bg-gradient-to-b from-zinc-900 via-zinc-900 to-black border-r border-zinc-800/50 overflow-y-auto z-40 shadow-xl lg:shadow-none transition-all ${
           isCollapsed && !isMobile ? 'lg:w-20' : ''
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Header with Logo/Brand (Desktop) */}
+          {/* Desktop Collapse Toggle */}
           {!isMobile && (
-            <div className="h-16 lg:h-12 flex items-center justify-between px-4 border-b border-zinc-800/30 bg-gradient-to-r from-monad-500/5 to-transparent">
+            <div className="h-12 flex items-center justify-between px-4 border-b border-zinc-800/30 bg-gradient-to-r from-monad-500/5 to-transparent">
               {!isCollapsed && (
                 <div className="flex items-center gap-2">
                   <Zap className="w-5 h-5 text-monad-400" />
@@ -196,7 +196,7 @@ export function Sidebar() {
               )}
               <button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="p-1.5 rounded-lg hover:bg-zinc-800 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-zinc-800 transition-colors ml-auto"
                 title={isCollapsed ? 'Expand' : 'Collapse'}
               >
                 <ChevronRight
