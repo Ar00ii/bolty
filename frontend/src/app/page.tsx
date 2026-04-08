@@ -320,9 +320,9 @@ export default function HomePage() {
                 const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
                 const accentColor = accentColors[i % accentColors.length];
 
-                // Reputation System (index 5) spans 2 rows on left
+                // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
                 const isReputationCard = i === 5;
-                const gridClass = isReputationCard ? 'lg:row-span-2' : f.featured ? 'lg:col-span-2' : '';
+                const gridClass = isReputationCard ? 'lg:col-span-2 lg:row-span-2' : f.featured ? 'lg:col-span-2' : '';
 
                 return (
                   <motion.div
@@ -332,7 +332,7 @@ export default function HomePage() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className={`group relative ${gridClass}`}
                     style={{
-                      borderRight: i % 2 === 0 && !f.featured ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
+                      borderRight: i % 2 === 0 && !f.featured && !isReputationCard ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
                       borderBottom: i < FEATURES.length - 1 ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
                     }}
                   >
