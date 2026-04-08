@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
   Search, Menu, X, ChevronDown, LogOut, Settings, User as UserIcon,
+  Bell, Code2, Zap, Plus, Circle,
 } from 'lucide-react';
 
 // Data
@@ -96,37 +98,90 @@ const FAQ = [
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
+  const pathname = usePathname();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrollY, setScrollY] = useState(0);
+  const [docsOpen, setDocsOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const docsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+      if (docsRef.current && !docsRef.current.contains(e.target as Node)) {
+        setDocsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const navLinks = [
     { href: '/market', label: 'Marketplace' },
-    { href: '/docs/agent-protocol', label: 'Docs' },
     { href: '#how-it-works', label: 'How It Works', isHash: true },
   ];
+
+  const docsMenu = [
+    { href: '/docs/agent-protocol', label: 'Agent Protocol' },
+    { href: '/docs/api', label: 'API Reference' },
+    { href: '/docs/guide', label: 'Getting Started' },
+  ];
+
+  const isScrolled = scrollY > 20;
+  const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   return (
     <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
       {/* Navbar - Sticky with scroll effect */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300" style={{
-        background: '#000000',
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(10px)'
-      }}>
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300"
+        style={{
+          background: isScrolled ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.5)',
+          borderColor: isScrolled ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+          boxShadow: isScrolled ? '0 4px 12px rgba(0, 0, 0, 0.3)' : 'none',
+          backdropFilter: isScrolled ? 'blur(12px)' : 'blur(8px)',
+        }}
+      >
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
           {/* Mobile menu toggle */}
-          <button
+          <motion.button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
             aria-label="Toggle menu"
+            whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+            whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={mobileMenuOpen ? 'close' : 'menu'}
+                initial={!prefersReducedMotion ? { rotate: -90, opacity: 0 } : {}}
+                animate={!prefersReducedMotion ? { rotate: 0, opacity: 1 } : {}}
+                exit={!prefersReducedMotion ? { rotate: 90, opacity: 0 } : {}}
+                transition={{ duration: 0.2 }}
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </motion.div>
+            </AnimatePresence>
+          </motion.button>
+
+          {/* Logo - Desktop */}
+          <div className="hidden md:flex items-center gap-3 mr-auto">
+            <BoltyLogoSVG size={28} />
+            <span className="text-white font-bold text-lg">Bolty</span>
+          </div>
 
           {/* Left Links - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-1">
@@ -135,120 +190,231 @@ export default function HomePage() {
                 key={link.href}
                 href={link.href}
                 className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white"
+                title={link.label}
               >
                 {link.label}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
               </Link>
             ))}
+
+            {/* Docs Submenu */}
+            <div ref={docsRef} className="relative">
+              <motion.button
+                onClick={() => setDocsOpen(!docsOpen)}
+                className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white flex items-center gap-1"
+                title="Documentation"
+              >
+                Docs
+                <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </motion.div>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
+              </motion.button>
+
+              <AnimatePresence>
+                {docsOpen && (
+                  <motion.div
+                    initial={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                    animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                    exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full mt-2 w-48 rounded-lg border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
+                  >
+                    {docsMenu.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setDocsOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Code2 className="w-3.5 h-3.5" />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Mobile Logo - Only visible on mobile */}
           <div className="md:hidden">
-            <span className="text-white font-semibold text-sm">Bolty</span>
+            <BoltyLogoSVG size={24} />
           </div>
 
           {/* Right Side */}
-          <div className="flex items-center gap-2 md:gap-4">
+          <div className="flex items-center gap-2 md:gap-3 ml-auto">
+            {/* Quick Actions - Authenticated only */}
+            {isAuthenticated && (
+              <motion.button
+                whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+                whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
+                className="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-all"
+                title="Create new agent"
+              >
+                <Plus className="w-4 h-4" />
+              </motion.button>
+            )}
+
             {/* Search */}
             <div className="relative hidden sm:flex">
-              {searchOpen ? (
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                    <input
-                      ref={searchRef}
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search..."
-                      className="w-48 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-purple-500/50 transition-colors"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Escape') setSearchOpen(false);
-                      }}
-                      autoFocus
-                    />
-                  </div>
-                  <button
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setSearchQuery('');
-                    }}
-                    className="text-zinc-500 hover:text-zinc-300 p-1"
+              <AnimatePresence mode="wait">
+                {searchOpen ? (
+                  <motion.div
+                    key="search-open"
+                    initial={!prefersReducedMotion ? { opacity: 0, width: 0 } : {}}
+                    animate={!prefersReducedMotion ? { opacity: 1, width: 'auto' } : {}}
+                    exit={!prefersReducedMotion ? { opacity: 0, width: 0 } : {}}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center gap-2"
                   >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setSearchOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 text-xs transition-all"
-                >
-                  <Search className="w-3.5 h-3.5" />
-                  <span>Search</span>
-                </button>
-              )}
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                      <input
+                        ref={searchRef}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search agents, repos..."
+                        className="w-48 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-purple-500/50 transition-colors"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') setSearchOpen(false);
+                        }}
+                      />
+                    </div>
+                    <motion.button
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                      }}
+                      className="text-zinc-500 hover:text-zinc-300 p-1"
+                      whileHover={!prefersReducedMotion ? { rotate: 90 } : {}}
+                    >
+                      <X className="w-4 h-4" />
+                    </motion.button>
+                  </motion.div>
+                ) : (
+                  <motion.button
+                    key="search-closed"
+                    onClick={() => setSearchOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 text-xs transition-all group"
+                    whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+                    title="Search"
+                  >
+                    <Search className="w-3.5 h-3.5" />
+                    <span>Search</span>
+                  </motion.button>
+                )}
+              </AnimatePresence>
             </div>
+
+            {/* Notifications - Authenticated only */}
+            {isAuthenticated && (
+              <motion.button
+                whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+                whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
+                className="relative w-9 h-9 flex items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                title="Notifications"
+              >
+                <Bell className="w-4 h-4" />
+                <motion.span
+                  className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"
+                  animate={!prefersReducedMotion ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                />
+              </motion.button>
+            )}
 
             {isAuthenticated ? (
               <>
+                {/* Status Indicator */}
+                <div className="hidden sm:flex items-center gap-2 px-2 py-1 rounded-lg text-xs text-green-400 bg-green-500/10">
+                  <motion.div
+                    className="w-1.5 h-1.5 bg-green-400 rounded-full"
+                    animate={!prefersReducedMotion ? { opacity: [1, 0.5, 1] } : {}}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  />
+                  Online
+                </div>
+
                 {/* Profile dropdown */}
                 <div ref={profileRef} className="relative">
-                  <button
+                  <motion.button
                     onClick={() => setProfileOpen(!profileOpen)}
                     className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-all"
+                    whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+                    title="Open profile menu"
                   >
-                    {user?.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt={user?.displayName || user?.username || 'user'}
-                        className="w-7 h-7 rounded-full border border-zinc-700"
-                      />
-                    ) : (
-                      <div className="w-7 h-7 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-semibold">
-                        {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
-                      </div>
-                    )}
+                    <motion.div
+                      animate={!prefersReducedMotion ? { scale: [1, 1.05, 1] } : {}}
+                      transition={{ repeat: profileOpen ? Infinity : 0, duration: 2 }}
+                    >
+                      {user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt={user?.displayName || user?.username || 'user'}
+                          className="w-7 h-7 rounded-full border border-zinc-700 hover:border-purple-500/50 transition-colors"
+                        />
+                      ) : (
+                        <div className="w-7 h-7 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-semibold hover:bg-purple-500/30 transition-colors">
+                          {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
+                        </div>
+                      )}
+                    </motion.div>
                     <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">
                       {user?.displayName || user?.username || 'User'}
                     </span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
-                  </button>
+                    <motion.div animate={{ rotate: profileOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                    </motion.div>
+                  </motion.button>
 
-                  {profileOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900">
-                      <div className="p-3 border-b border-zinc-700/50">
-                        <p className="text-sm font-medium text-white truncate">{user?.displayName || user?.username || 'User'}</p>
-                        <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
-                      </div>
-                      <div className="py-1">
-                        <Link
-                          href="/profile"
-                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                        >
-                          <UserIcon className="w-4 h-4" /> Profile
-                        </Link>
-                        <Link
-                          href="/api-keys"
-                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                        >
-                          <Key className="w-4 h-4" /> API Keys
-                        </Link>
-                        <Link
-                          href="/profile?tab=security"
-                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                        >
-                          <Settings className="w-4 h-4" /> Settings
-                        </Link>
-                      </div>
-                      <div className="py-1 border-t border-zinc-700/50">
-                        <button
-                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
-                        >
-                          <LogOut className="w-4 h-4" /> Sign out
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <motion.div
+                        initial={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                        animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
+                        exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
+                      >
+                        <div className="p-3 border-b border-zinc-700/50">
+                          <p className="text-sm font-medium text-white truncate">{user?.displayName || user?.username || 'User'}</p>
+                          <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
+                        </div>
+                        <div className="py-1">
+                          <Link
+                            href="/profile"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <UserIcon className="w-4 h-4" /> Profile
+                          </Link>
+                          <Link
+                            href="/api-keys"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <Key className="w-4 h-4" /> API Keys
+                          </Link>
+                          <Link
+                            href="/profile?tab=security"
+                            onClick={() => setProfileOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                          >
+                            <Settings className="w-4 h-4" /> Settings
+                          </Link>
+                        </div>
+                        <div className="py-1 border-t border-zinc-700/50">
+                          <button
+                            className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
+                          >
+                            <LogOut className="w-4 h-4" /> Sign out
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </>
             ) : (
@@ -256,46 +422,116 @@ export default function HomePage() {
                 <Link
                   href="/auth"
                   className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors"
+                  title="Sign in to your account"
                 >
                   Sign in
                 </Link>
-                <Link
-                  href="/auth?tab=register"
-                  className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-all shadow-lg hover:shadow-xl"
-                >
-                  Get started
-                </Link>
+                <motion.div whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}} whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}>
+                  <Link
+                    href="/auth?tab=register"
+                    className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Get started
+                  </Link>
+                </motion.div>
               </>
             )}
           </div>
         </div>
 
         {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm">
-            <div className="px-4 py-4 space-y-3">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
+              animate={!prefersReducedMotion ? { opacity: 1, height: 'auto' } : {}}
+              exit={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm overflow-hidden"
+            >
+              <div className="px-4 py-4 space-y-3">
+                {navLinks.map((link, i) => (
+                  <motion.div
+                    key={link.href}
+                    initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                    animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Link
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block px-3 py-2 rounded-lg transition-all text-sm font-medium ${
+                        pathname === link.href
+                          ? 'text-white bg-purple-500/10 border-l-2 border-purple-500'
+                          : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
+
+                {/* Mobile Docs Menu */}
+                <motion.div
+                  initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                  animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: 0.1 }}
                 >
-                  {link.label}
-                </Link>
-              ))}
-              {!isAuthenticated && (
-                <Link
-                  href="/auth"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
-                >
-                  Sign in
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
+                  <button
+                    onClick={() => setDocsOpen(!docsOpen)}
+                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                  >
+                    Docs
+                    <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                      <ChevronDown className="w-4 h-4" />
+                    </motion.div>
+                  </button>
+                  <AnimatePresence>
+                    {docsOpen && (
+                      <motion.div
+                        initial={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
+                        animate={!prefersReducedMotion ? { opacity: 1, height: 'auto' } : {}}
+                        exit={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        {docsMenu.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => {
+                              setDocsOpen(false);
+                              setMobileMenuOpen(false);
+                            }}
+                            className="block px-6 py-2 text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm"
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {!isAuthenticated && (
+                  <motion.div
+                    initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                    animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                    transition={{ delay: 0.15 }}
+                  >
+                    <Link
+                      href="/auth"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                    >
+                      Sign in
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       {/* ── HERO (RENDER STYLE) ── */}
