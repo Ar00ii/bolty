@@ -501,30 +501,31 @@ export default function HomePage() {
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none overflow-hidden ${i === 0 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i === 0 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
                   beamsPerSide={1}
-                  beamSize={30}
+                  beamSize={40}
+                  gridColor="rgba(200, 200, 200, 0.15)"
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    className="p-10 lg:p-16 min-h-64"
+                    className="bg-white/95 backdrop-blur rounded-lg p-8 lg:p-10 m-6 lg:m-8 max-w-sm"
                   >
-                    <div className="flex items-start gap-4 mb-4">
-                      <CheckCircle2 className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                    <div className="flex items-start gap-3 mb-4">
+                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-500' : 'text-gray-400'}`} />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h3 className={`text-lg lg:text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
+                          <h3 className={`text-base lg:text-lg font-semibold ${service.active ? 'text-green-600' : 'text-gray-900'}`}>{service.name}</h3>
                           {service.active && (
-                            <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                            <span className="text-xs text-green-600 border border-green-300 rounded-full px-2 py-0.5">Live</span>
                           )}
                         </div>
-                        <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
+                        <p className="text-sm text-gray-600 mt-1">{service.desc}</p>
                       </div>
                     </div>
-                    <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
+                    <p className="text-sm text-gray-700 ml-8">{service.details}</p>
                   </motion.div>
                 </WarpBackground>
               ))}
@@ -539,25 +540,26 @@ export default function HomePage() {
               ].map((service, i) => (
                 <WarpBackground
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none overflow-hidden ${i < 2 ? 'border-r' : ''}`}
+                  className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
                   beamsPerSide={1}
-                  beamSize={30}
+                  beamSize={40}
+                  gridColor="rgba(200, 200, 200, 0.15)"
                 >
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: (i + 2) * 0.1 }}
-                    className="p-10 lg:p-16 min-h-64"
+                    className="bg-white/95 backdrop-blur rounded-lg p-8 lg:p-10 m-6 lg:m-8 max-w-sm"
                   >
-                    <div className="flex items-start gap-4 mb-4">
-                      <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
+                    <div className="flex items-start gap-3 mb-4">
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0 text-gray-400" />
                       <div className="flex-1">
-                        <h3 className="text-lg lg:text-xl font-light text-white">{service.name}</h3>
-                        <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
+                        <h3 className="text-base lg:text-lg font-semibold text-gray-900">{service.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{service.desc}</p>
                       </div>
                     </div>
-                    <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
+                    <p className="text-sm text-gray-700 ml-8">{service.details}</p>
                   </motion.div>
                 </WarpBackground>
               ))}
