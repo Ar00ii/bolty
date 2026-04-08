@@ -51,7 +51,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             className="space-y-8"
           >
             <div>
-              <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white mb-6">
+              <h1 className="text-5xl lg:text-6xl font-light leading-tight text-white mb-6">
                 Your fastest path to
                 <br />
                 production for
