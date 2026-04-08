@@ -133,11 +133,13 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Simple nav for unauthenticated users
+  // Simple nav for unauthenticated users (landing page)
   const simpleNavLinks = [
     { href: '/market', label: 'Marketplace' },
+    { href: '/market/agents', label: 'Agents' },
+    { href: '/market/repos', label: 'Repos' },
+    { href: '/services', label: 'Services' },
     { href: '/docs/agent-protocol', label: 'Docs' },
-    { href: '#how-it-works', label: 'How It Works', isHash: true },
   ];
 
   // Organized sections for authenticated users
@@ -208,9 +210,8 @@ export default function HomePage() {
           </div>
 
           {/* Left Links - Main Nav Menu - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-1">
-            {isAuthenticated ? (
-              // Authenticated: Show organized sections
+          {isAuthenticated ? (
+            <div className="hidden md:flex items-center gap-1">
               <div ref={docsRef} className="relative">
                 <motion.button
                   onClick={() => setDocsOpen(!docsOpen)}
@@ -258,23 +259,22 @@ export default function HomePage() {
                   )}
                 </AnimatePresence>
               </div>
-            ) : (
-              // Unauthenticated: Show simple nav links
-              <>
-                {simpleNavLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white"
-                    title={link.label}
-                  >
-                    {link.label}
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
-                  </Link>
-                ))}
-              </>
-            )}
-          </div>
+            </div>
+          ) : (
+            // Unauthenticated: Show nav links directly
+            <div className="hidden md:flex items-center gap-6">
+              {simpleNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium transition-all text-gray-400 hover:text-white"
+                  title={link.label}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {/* Mobile Logo - Only visible on mobile */}
           <div className="md:hidden">
