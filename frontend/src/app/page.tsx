@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
-import { BentoHero } from '@/components/ui/BentoHero';
+import { RenderHero } from '@/components/ui/RenderHero';
 import { motion } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -109,10 +109,8 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* ── HERO (BENTO GRID) ── */}
-      <section className="pt-32 pb-12 px-4 relative overflow-hidden">
-        <BentoHero />
-      </section>
+      {/* ── HERO (RENDER STYLE) ── */}
+      <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── FEATURES (BENTO GRID) ── */}
       <section className="py-20 px-4 border-t relative" style={{ borderColor: 'var(--border)' }}>
