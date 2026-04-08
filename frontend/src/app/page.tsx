@@ -533,26 +533,17 @@ export default function HomePage() {
                 { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
                 { name: 'Cache Layer', desc: 'Edge caching for low latency', details: 'Global edge network with intelligent cache invalidation.' },
               ].map((service, i) => (
-                <WarpBackground
+                <motion.div
                   key={i}
-                  className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
-                  style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-                  beamsPerSide={4}
-                  beamSize={8}
-                  gridColor="rgba(255, 255, 255, 0.35)"
-                  perspective={200}
-                  beamDuration={4}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: (i + 2) * 0.1 }}
+                  className="bg-black rounded p-6 lg:p-8"
+                  style={{
+                    border: '2px solid',
+                    borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i]
+                  }}
                 >
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ delay: (i + 2) * 0.1 }}
-                    className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
-                    style={{
-                      border: '2px solid',
-                      borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i]
-                    }}
-                  >
                     <div className="flex items-start gap-4 mb-4">
                       <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
                       <div className="flex-1">
