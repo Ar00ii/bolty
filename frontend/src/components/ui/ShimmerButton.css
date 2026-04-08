@@ -1,0 +1,50 @@
+.shimmer-button {
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shimmer-button-content {
+  position: relative;
+  z-index: 1;
+  mix-blend-mode: normal;
+}
+
+.shimmer-button-shimmer {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer-slide 2.5s infinite;
+  z-index: 0;
+}
+
+@keyframes shimmer-slide {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.shimmer-button:hover .shimmer-button-shimmer {
+  animation: shimmer-slide 1s infinite;
+}
+
+.shimmer-button:active {
+  transform: scale(0.98);
+}
