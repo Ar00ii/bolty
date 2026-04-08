@@ -12,6 +12,7 @@ import { GradientText } from '@/components/ui/GradientText';
 import { Spotlight } from '@/components/ui/Spotlight';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
+import { StaticWarpBackground } from '@/components/ui/StaticWarpBackground';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -510,83 +511,45 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Right: Visual (List of services) with warp grid background */}
+          {/* Right: Visual (List of services) */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative rounded-2xl overflow-hidden border"
-            style={{
-              borderColor: 'rgba(255, 255, 255, 0.08)',
-              background: '#0a0a0a',
-            }}
+            className="space-y-3 w-full"
           >
-            {/* Static warp perspective grid background */}
-            <div className="absolute inset-0 pointer-events-none" style={{ perspective: '300px' }}>
-              <div
-                className="absolute inset-0"
+            {[
+              { name: 'Web service', desc: 'Frontend & backend hosting', active: false },
+              { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', active: true },
+              { name: 'Database', desc: 'Managed PostgreSQL & Redis', active: false },
+              { name: 'Queue Worker', desc: 'Background jobs & async tasks', active: false },
+              { name: 'Cache Layer', desc: 'Edge caching for low latency', active: false },
+              { name: 'Auth Service', desc: 'OAuth, JWT & Web3 wallets', active: false },
+            ].map((service, i) => (
+              <StaticWarpBackground
+                key={i}
+                className="h-20"
+                gridColor="rgba(255, 255, 255, 0.06)"
                 style={{
-                  transform: 'rotateX(45deg) translateZ(0)',
-                  transformOrigin: 'center center',
-                  backgroundImage: `
-                    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '40px 40px',
+                  borderColor: service.active ? 'rgba(34, 197, 94, 0.4)' : 'rgba(255, 255, 255, 0.08)',
+                  background: service.active ? 'rgba(34, 197, 94, 0.03)' : 'rgba(0, 0, 0, 0.5)',
+                  boxShadow: service.active ? '0 0 24px rgba(34, 197, 94, 0.08)' : 'none',
                 }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  transform: 'rotateX(-45deg) translateZ(0)',
-                  transformOrigin: 'center center',
-                  backgroundImage: `
-                    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '40px 40px',
-                }}
-              />
-              {/* Fade edges */}
-              <div className="absolute inset-0" style={{
-                background: 'radial-gradient(ellipse at center, transparent 30%, #0a0a0a 75%)',
-              }} />
-            </div>
-
-            {/* Service cards */}
-            <div className="relative z-10 p-6 space-y-3 flex flex-col items-center">
-              {[
-                { name: 'Web service', desc: 'Frontend & backend hosting', active: false },
-                { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', active: true },
-                { name: 'Database', desc: 'Managed PostgreSQL & Redis', active: false },
-                { name: 'Queue Worker', desc: 'Background jobs & async tasks', active: false },
-                { name: 'Cache Layer', desc: 'Edge caching for low latency', active: false },
-                { name: 'Auth Service', desc: 'OAuth, JWT & Web3 wallets', active: false },
-              ].map((service, i) => (
-                <div
-                  key={i}
-                  className="w-full max-w-sm rounded-xl border px-5 py-4 backdrop-blur-sm"
-                  style={{
-                    borderColor: service.active ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.1)',
-                    background: service.active ? 'rgba(34, 197, 94, 0.08)' : 'rgba(10, 10, 10, 0.85)',
-                    boxShadow: service.active ? '0 0 24px rgba(34, 197, 94, 0.12)' : '0 2px 8px rgba(0,0,0,0.3)',
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
-                      <div>
-                        <span className={`block text-sm ${service.active ? 'text-green-400' : 'text-gray-200'}`}>{service.name}</span>
-                        <span className="block text-xs text-gray-500 mt-0.5">{service.desc}</span>
-                      </div>
+              >
+                <div className="flex items-center justify-between h-full px-5">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                    <div>
+                      <span className={`block text-sm ${service.active ? 'text-green-400' : 'text-gray-200'}`}>{service.name}</span>
+                      <span className="block text-xs text-gray-500">{service.desc}</span>
                     </div>
-                    {service.active && (
-                      <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
-                    )}
                   </div>
+                  {service.active && (
+                    <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                  )}
                 </div>
-              ))}
-            </div>
+              </StaticWarpBackground>
+            ))}
           </motion.div>
         </div>
       </section>
