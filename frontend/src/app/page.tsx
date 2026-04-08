@@ -282,16 +282,23 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
-      <section className="py-24 px-4 border-t relative overflow-hidden" style={{
+      <section className="py-24 px-4 border-t relative overflow-visible" style={{
         borderColor: 'var(--border)',
-        background: '#000000'
       }}>
-        {/* Hexagon Pattern Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <HexagonPattern className="w-full h-full" />
-        </div>
+        {/* Black background container with corner brackets */}
+        <div className="relative" style={{ background: '#000000' }}>
+          {/* Corner Brackets */}
+          <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
+          <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
+          <div className="absolute -bottom-4 -left-4 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
+          <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
 
-        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Hexagon Pattern Background */}
+          <div className="absolute inset-0 pointer-events-none">
+            <HexagonPattern className="w-full h-full" />
+          </div>
+
+          <div className="max-w-6xl mx-auto relative z-10 py-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -310,11 +317,6 @@ export default function HomePage() {
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
-            {/* Corner Brackets */}
-            <div className="absolute -top-3 -left-3 w-6 h-6 border-t border-l border-white/30 pointer-events-none" />
-            <div className="absolute -top-3 -right-3 w-6 h-6 border-t border-r border-white/30 pointer-events-none" />
-            <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b border-l border-white/30 pointer-events-none" />
-            <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b border-r border-white/30 pointer-events-none" />
             {/* Noise texture overlay */}
             <div
               className="absolute inset-0 pointer-events-none opacity-20"
@@ -476,6 +478,7 @@ export default function HomePage() {
                 );
               })}
             </div>
+          </div>
           </div>
         </div>
       </section>
