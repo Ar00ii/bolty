@@ -174,6 +174,7 @@ export default function HomePage() {
               />
             </div>
           ))}
+          <div className="flex-shrink-0" style={{ width: '48px' }} />
         </ScrollVelocityRow>
 
         {/* Fade edges */}
