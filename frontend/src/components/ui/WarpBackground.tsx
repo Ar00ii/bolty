@@ -33,11 +33,12 @@ const Beam = ({
         {
           "--x": `${x}`,
           "--width": `${width}`,
-          "--background": `linear-gradient(rgba(255, 255, 255, 0.8), transparent)`,
+          "--aspect-ratio": "6",
+          "--background": `linear-gradient(rgba(255, 255, 255, 0.6), transparent)`,
         } as React.CSSProperties
       }
-      className={`absolute top-0 left-[var(--x)] w-[var(--width)] h-32 [background:var(--background)]`}
-      initial={{ y: "100%", x: "-50%" }}
+      className={`absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]`}
+      initial={{ y: "100cqmax", x: "-50%" }}
       animate={{ y: "-100%", x: "-50%" }}
       transition={{
         duration,
@@ -58,7 +59,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   beamDelayMax = 3,
   beamDelayMin = 0,
   beamDuration = 3,
-  gridColor = "rgba(255, 255, 255, 0.1)",
+  gridColor = "var(--border)",
   ...props
 }) => {
   const generateBeams = useCallback(() => {
@@ -80,7 +81,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   const leftBeams = useMemo(() => generateBeams(), [generateBeams])
 
   return (
-    <div className={cn("relative rounded-xl border overflow-hidden p-6", className)} {...props}>
+    <div className={cn("relative rounded border p-20", className)} {...props}>
       <div
         style={
           {
@@ -89,14 +90,14 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             "--beam-size": `${beamSize}%`,
           } as React.CSSProperties
         }
-        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
+        className="@container-[size] pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
         style={{
           perspective: `${perspective}px`,
         }}
       >
         {/* top side */}
         <div
-          className="absolute z-20 h-full w-full origin-[50%_0%] overflow-hidden"
+          className="@container absolute z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
             transform: "rotateX(-90deg)",
             backgroundImage: `
@@ -104,7 +105,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               linear-gradient(90deg, ${gridColor} 0 1px, transparent 1px)
             `,
             backgroundSize: `${beamSize}% ${beamSize}%`,
-            backgroundPosition: "center",
+            backgroundPosition: "50% -0.5px",
           }}
         >
           {topBeams.map((beam, index) => (
@@ -120,7 +121,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
 
         {/* bottom side */}
         <div
-          className="absolute top-full z-10 h-full w-full origin-[50%_0%] overflow-hidden"
+          className="@container absolute top-full z-20 h-[100cqmax] w-[100cqi] origin-[50%_0%] overflow-hidden"
           style={{
             transform: "rotateX(-90deg)",
             backgroundImage: `
@@ -128,8 +129,7 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               linear-gradient(90deg, ${gridColor} 0 1px, transparent 1px)
             `,
             backgroundSize: `${beamSize}% ${beamSize}%`,
-            backgroundPosition: "center",
-            opacity: 0.5,
+            backgroundPosition: "50% -0.5px",
           }}
         >
           {bottomBeams.map((beam, index) => (
@@ -145,16 +145,15 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
 
         {/* left side */}
         <div
-          className="absolute top-0 left-0 z-20 h-full w-full origin-[0%_0%] overflow-hidden"
+          className="@container absolute top-0 left-0 z-20 h-[100cqmax] w-[100cqh] origin-[0%_0%] overflow-hidden"
           style={{
-            transform: "rotateY(90deg)",
+            transform: "rotate(90deg) rotateX(-90deg)",
             backgroundImage: `
               linear-gradient(${gridColor} 0 1px, transparent 1px),
               linear-gradient(90deg, ${gridColor} 0 1px, transparent 1px)
             `,
             backgroundSize: `${beamSize}% ${beamSize}%`,
-            backgroundPosition: "center",
-            opacity: 0.6,
+            backgroundPosition: "50% -0.5px",
           }}
         >
           {leftBeams.map((beam, index) => (
@@ -170,16 +169,15 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
 
         {/* right side */}
         <div
-          className="absolute top-0 right-0 z-20 h-full w-full origin-[100%_0%] overflow-hidden"
+          className="@container absolute top-0 right-0 z-20 h-[100cqmax] w-[100cqh] origin-[100%_0%] overflow-hidden"
           style={{
-            transform: "rotateY(-90deg)",
+            transform: "rotate(-90deg) rotateX(-90deg)",
             backgroundImage: `
               linear-gradient(${gridColor} 0 1px, transparent 1px),
               linear-gradient(90deg, ${gridColor} 0 1px, transparent 1px)
             `,
             backgroundSize: `${beamSize}% ${beamSize}%`,
-            backgroundPosition: "center",
-            opacity: 0.6,
+            backgroundPosition: "50% -0.5px",
           }}
         >
           {rightBeams.map((beam, index) => (
@@ -192,14 +190,6 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
             />
           ))}
         </div>
-
-        {/* Fade effect */}
-        <div
-          className="absolute inset-0 z-30 pointer-events-none"
-          style={{
-            background: "radial-gradient(ellipse at center, transparent 40%, rgba(10, 10, 10, 0.8) 100%)",
-          }}
-        />
       </div>
 
       <div className="relative z-40">{children}</div>
