@@ -138,20 +138,20 @@ export default function HomePage() {
               key={icon.alt}
               src={icon.src}
               alt={icon.alt}
-              className="w-8 h-8 opacity-50 hover:opacity-100 transition-opacity brightness-0 invert flex-shrink-0"
+              className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity grayscale hover:grayscale-0 flex-shrink-0"
               title={icon.alt}
             />
           ))}
           {/* Base chain */}
-          <svg className="w-8 h-8 opacity-50 hover:opacity-100 transition-opacity flex-shrink-0" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Base">
+          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Base">
             <path d="M54.921 110.034C85.359 110.034 110.034 85.402 110.034 55.017C110.034 24.6319 85.359 0 54.921 0C26.0432 0 2.35281 22.1714 0 50.3923H72.8467V59.6416H0C2.35281 87.8625 26.0432 110.034 54.921 110.034Z" fill="white"/>
           </svg>
           {/* GitHub */}
-          <svg className="w-8 h-8 opacity-50 hover:opacity-100 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub">
+          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub">
             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
           </svg>
           {/* Next.js */}
-          <svg className="w-8 h-8 opacity-50 hover:opacity-100 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="Next.js">
+          <svg className="w-12 h-12 opacity-40 hover:opacity-80 transition-opacity flex-shrink-0" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-label="Next.js">
             <path d="M11.572 0c-.176.001-.215.227-.007.306l5.14 2.89a.3.3 0 01.158.259v5.62a.3.3 0 01-.462.252L13.5 7.67v4.58a.3.3 0 01-.459.254L5.143 8.202a.3.3 0 01-.143-.256V2.556a.3.3 0 01.455-.257L8.37 4.03v-.274a.3.3 0 01.148-.259L11.572 0zM5 9.586v5.16a.3.3 0 00.146.258l7.898 4.63a.3.3 0 00.457-.254V14.8l2.898 1.696a.3.3 0 00.459-.254V10.2L19 11.47v5.088a.3.3 0 01-.455.257L5 9.586z"/>
           </svg>
         </ScrollVelocityRow>
