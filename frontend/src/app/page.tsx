@@ -305,11 +305,16 @@ export default function HomePage() {
 
           {/* Main Container - Grid Layout with Purple Dividers */}
           <div
-            className="relative overflow-hidden rounded-lg"
+            className="relative overflow-visible rounded-lg"
             style={{
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
+            {/* Corner Brackets */}
+            <div className="absolute -top-3 -left-3 w-6 h-6 border-t border-l border-white/30 pointer-events-none" />
+            <div className="absolute -top-3 -right-3 w-6 h-6 border-t border-r border-white/30 pointer-events-none" />
+            <div className="absolute -bottom-3 -left-3 w-6 h-6 border-b border-l border-white/30 pointer-events-none" />
+            <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b border-r border-white/30 pointer-events-none" />
             {/* Noise texture overlay */}
             <div
               className="absolute inset-0 pointer-events-none opacity-20"
