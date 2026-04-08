@@ -125,6 +125,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: 'Inter', 'Geist', system-ui, -apple-system, sans-serif;
+  font-weight: 300;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -133,7 +134,12 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
   letter-spacing: -0.02em;
+}
+
+p, span, a, li, button, input, textarea {
+  font-weight: 300;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }

@@ -160,7 +160,7 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <BoltyLogoSVG size={24} />
-            <span className="text-white font-bold text-sm md:text-base hidden sm:inline">BoltyNetwork</span>
+            <span className="text-white font-light text-sm md:text-base hidden sm:inline">BoltyNetwork</span>
           </div>
 
           {/* Desktop Nav */}
@@ -210,7 +210,7 @@ export default function HomePage() {
                         className="w-8 h-8 rounded-full"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-bold">
+                      <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-light">
                         {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
                       </div>
                     )}
@@ -220,7 +220,7 @@ export default function HomePage() {
                   {profileOpen && (
                     <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
                       <div className="p-3 border-b border-zinc-700">
-                        <p className="text-sm font-medium text-white">{user?.displayName || user?.username}</p>
+                        <p className="text-sm font-light text-white">{user?.displayName || user?.username}</p>
                         <p className="text-xs text-zinc-400">{user?.email}</p>
                       </div>
                       <Link href="/profile" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50">
@@ -485,7 +485,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
-            <h2 className="text-4xl lg:text-5xl font-bold mb-8">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
+            <h2 className="text-4xl lg:text-5xl font-light mb-8">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
 
             <div className="space-y-6">
               {HOW_IT_WORKS.map((item, i) => {
@@ -498,11 +498,11 @@ export default function HomePage() {
                     transition={{ delay: i * 0.15 }}
                     className="flex gap-4"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-bold">
+                    <div className="w-8 h-8 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-light">
                       {item.step}
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                      <h3 className="text-lg font-light text-white">{item.title}</h3>
                       <p className="text-sm text-gray-400 mt-1">{item.desc}</p>
                     </div>
                   </motion.div>
@@ -528,7 +528,7 @@ export default function HomePage() {
                 }}
               >
                 <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${i === 1 ? 'text-green-400' : 'text-gray-500'}`} />
-                <span className={i === 1 ? 'text-green-400 font-medium' : 'text-gray-300'}>{service}</span>
+                <span className={i === 1 ? 'text-green-400 font-light' : 'text-gray-300'}>{service}</span>
               </div>
             ))}
           </motion.div>
@@ -545,7 +545,7 @@ export default function HomePage() {
             className="mb-12"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Developers</p>
-            <h2 className="text-5xl font-bold text-white">What developers say</h2>
+            <h2 className="text-5xl font-light text-white">What developers say</h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -568,7 +568,7 @@ export default function HomePage() {
                 </div>
                 <p className="text-gray-300 mb-4">"{t.text}"</p>
                 <div className="pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                  <p className="font-semibold text-white">{t.name}</p>
+                  <p className="font-light text-white">{t.name}</p>
                   <p className="text-xs text-gray-500">{t.role}</p>
                 </div>
               </motion.div>
@@ -587,7 +587,7 @@ export default function HomePage() {
             className="mb-12 text-center"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Questions</p>
-            <h2 className="text-5xl font-bold text-white">Frequently asked</h2>
+            <h2 className="text-5xl font-light text-white">Frequently asked</h2>
           </motion.div>
 
           <div className="space-y-3">
@@ -609,7 +609,7 @@ export default function HomePage() {
                   aria-expanded={openFaqIndex === i}
                   aria-controls={`faq-answer-${i}`}
                 >
-                  <h3 className="text-lg font-semibold text-white">{item.question}</h3>
+                  <h3 className="text-lg font-light text-white">{item.question}</h3>
                   <motion.div
                     animate={{ rotate: openFaqIndex === i ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
@@ -643,7 +643,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl font-bold text-white mb-2">Stay updated</h2>
+            <h2 className="text-3xl font-light text-white mb-2">Stay updated</h2>
             <p className="text-gray-400 mb-8">Get the latest news about new agents, features, and opportunities.</p>
             <div className="flex gap-2 max-w-md mx-auto">
               <input
@@ -652,7 +652,7 @@ export default function HomePage() {
                 className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
                 aria-label="Email address for newsletter"
               />
-              <button className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors">
+              <button className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-light transition-colors">
                 Subscribe
               </button>
             </div>
@@ -668,7 +668,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-bold mb-4">Ready to <GradientText gradient="purple">start building</GradientText>?</h2>
+            <h2 className="text-5xl font-light mb-4">Ready to <GradientText gradient="purple">start building</GradientText>?</h2>
             <p className="text-lg text-gray-400 mb-8">
               Join the platform where code meets commerce. Publish, sell, and earn — all in one place.
             </p>
@@ -708,14 +708,14 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <BoltyLogoSVG size={24} />
-                <span className="text-white font-semibold">Bolty</span>
+                <span className="text-white font-light">Bolty</span>
               </div>
               <p className="text-sm text-gray-500">The fastest path to production for AI agents and apps.</p>
             </div>
 
             {/* Product */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <h3 className="text-white font-light mb-4">Product</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/market" className="text-gray-400 hover:text-white transition-colors">Marketplace</Link></li>
                 <li><Link href="/market/agents" className="text-gray-400 hover:text-white transition-colors">Agents</Link></li>
@@ -726,7 +726,7 @@ export default function HomePage() {
 
             {/* Resources */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Resources</h3>
+              <h3 className="text-white font-light mb-4">Resources</h3>
               <ul className="space-y-2 text-sm">
                 <li><Link href="/docs/agent-protocol" className="text-gray-400 hover:text-white transition-colors">Documentation</Link></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API Reference</a></li>
@@ -737,7 +737,7 @@ export default function HomePage() {
 
             {/* Company */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Company</h3>
+              <h3 className="text-white font-light mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
