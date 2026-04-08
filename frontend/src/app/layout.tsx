@@ -3,6 +3,8 @@ import './globals.css';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ClientShell } from '@/components/layout/ClientShell';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
+import { ToastProvider } from '@/lib/hooks/useToast';
+import { ToastContainer } from '@/components/ui/Toast';
 
 const BASE_URL = 'https://boltynetwork.xyz';
 
@@ -112,11 +114,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen">
         <ThemeProvider>
-          <AuthProvider>
-            <ClientShell>
-              {children}
-            </ClientShell>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ClientShell>
+                {children}
+              </ClientShell>
+            </AuthProvider>
+            <ToastContainer />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>
