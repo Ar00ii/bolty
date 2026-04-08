@@ -21,10 +21,10 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
       // Show dashboard after arrow animation completes (1.5s)
       const dashboardTimer = setTimeout(() => {
         setShowDashboard(true);
-        // Stop deploying animation after dashboard loads
+        // Stop deploying animation after all boxes have loaded
         setTimeout(() => {
           setIsDeploying(false);
-        }, 2000);
+        }, 3000);
       }, 1500);
       return () => clearTimeout(dashboardTimer);
     }, 1000); // Start after 1 second
@@ -184,7 +184,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               transition={{ delay: 0.4 }}
               className="px-6 py-2 rounded font-mono text-sm font-medium bg-gray-200 text-black cursor-default"
             >
-              $ git push
+              deploy
             </motion.div>
           </div>
 
@@ -227,7 +227,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     : '0 0 0px rgba(168, 85, 247, 0)',
                 }}
                 transition={{
-                  delay: 0.5,
+                  delay: 0.2,
                   scale: isDeploying ? { duration: 0.5, repeat: Infinity } : { duration: 0.3 },
                   boxShadow: isDeploying ? { duration: 0.8, repeat: Infinity } : { duration: 0.3 },
                 }}
@@ -266,7 +266,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     : '0 0 0px rgba(6, 182, 212, 0)',
                 }}
                 transition={{
-                  delay: 0.6,
+                  delay: 0.4,
                   scale: isDeploying ? { duration: 0.6, repeat: Infinity } : { duration: 0.3 },
                   boxShadow: isDeploying ? { duration: 0.9, repeat: Infinity } : { duration: 0.3 },
                 }}
@@ -307,7 +307,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     : '0 0 0px rgba(236, 72, 153, 0)',
                 }}
                 transition={{
-                  delay: 0.7,
+                  delay: 0.6,
                   scale: isDeploying ? { duration: 0.7, repeat: Infinity } : { duration: 0.3 },
                   boxShadow: isDeploying ? { duration: 1, repeat: Infinity } : { duration: 0.3 },
                 }}
@@ -378,7 +378,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.9 }}
+              transition={{ delay: 1.0 }}
               className="border border-white/10 rounded p-4"
               style={{ background: 'rgba(0, 0, 0, 0.5)' }}
             >
