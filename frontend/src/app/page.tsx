@@ -115,7 +115,7 @@ export default function HomePage() {
       <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── TECHNOLOGIES (SCROLL VELOCITY) ── */}
-      <section className="py-32 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-16 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -127,7 +127,7 @@ export default function HomePage() {
             <h2 className="text-4xl font-bold text-white">Built with modern tools</h2>
           </motion.div>
 
-          <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em] relative">
+          <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em] relative gap-4">
             {/* Row 1 - Left to right */}
             <ScrollVelocityRow baseVelocity={12} direction={1}>
               <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
