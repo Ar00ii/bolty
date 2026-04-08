@@ -707,6 +707,13 @@ h1, h2, h3, h4, h5, h6 {
     from { transform: translateY(0); }
     to   { transform: translateY(-50%); }
   }
+  @keyframes scroll-x {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
+  }
+  .animate-scroll {
+    animation: scroll-x linear infinite;
+  }
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }

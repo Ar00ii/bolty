@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
-import { ScrollVelocityContainer, ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
+import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { motion } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -114,125 +114,42 @@ export default function HomePage() {
       {/* ── HERO (RENDER STYLE) ── */}
       <RenderHero isAuthenticated={isAuthenticated} />
 
-      {/* ── TECHNOLOGIES (SCROLL VELOCITY) ── */}
-      <section className="py-16 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-16 text-center"
-          >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Technology Stack</p>
-            <h2 className="text-4xl font-bold text-white">Built with modern tools</h2>
-          </motion.div>
+      {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
+      <section className="py-10 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+        <ScrollVelocityRow duration={40}>
+          {[
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg', alt: 'JavaScript' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg', alt: 'Next.js' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg', alt: 'Node.js' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg', alt: 'PostgreSQL' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', alt: 'Docker' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', alt: 'Git' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg', alt: 'TailwindCSS' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg', alt: 'GitHub' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/prisma/prisma-original.svg', alt: 'Prisma' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg', alt: 'Express' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg', alt: 'FastAPI' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg', alt: 'Kubernetes' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ethereum/ethereum-original.svg', alt: 'Ethereum' },
+          ].map((icon) => (
+            <img
+              key={icon.alt}
+              src={icon.src}
+              alt={icon.alt}
+              className="w-8 h-8 opacity-60 hover:opacity-100 transition-opacity brightness-0 invert flex-shrink-0"
+              title={icon.alt}
+            />
+          ))}
+        </ScrollVelocityRow>
 
-          <ScrollVelocityContainer className="text-2xl font-semibold tracking-[-0.02em] relative gap-4">
-            {/* Row 1 - Left to right */}
-            <ScrollVelocityRow baseVelocity={12} direction={1}>
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" alt="JavaScript" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">JavaScript</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" alt="TypeScript" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">TypeScript</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" alt="React" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">React</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" alt="Next.js" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Next.js</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" alt="Node.js" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Node.js</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" alt="Python" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Python</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" alt="PostgreSQL" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">PostgreSQL</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg" alt="Redis" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Redis</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" alt="Docker" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Docker</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" alt="Git" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Git</span>
-              </div>
-            </ScrollVelocityRow>
-
-            {/* Row 2 - Right to left */}
-            <ScrollVelocityRow baseVelocity={10} direction={-1}>
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" alt="TailwindCSS" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">TailwindCSS</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" alt="GitHub" className="w-5 h-5 invert" />
-                <span className="text-white font-medium text-sm">GitHub</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ethereum/ethereum-original.svg" alt="Ethereum" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Ethereum</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/prisma/prisma-original.svg" alt="Prisma" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Prisma</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/express/express-original.svg" alt="Express" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Express</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/fastapi/fastapi-original.svg" alt="FastAPI" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">FastAPI</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" alt="MongoDB" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">MongoDB</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/framermotion/framermotion-original.svg" alt="Framer Motion" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Framer</span>
-              </div>
-
-              <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/kubernetes/kubernetes-original.svg" alt="Kubernetes" className="w-5 h-5" />
-                <span className="text-white font-medium text-sm">Kubernetes</span>
-              </div>
-            </ScrollVelocityRow>
-          </ScrollVelocityContainer>
-
-          <div className="from-background pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }}></div>
-          <div className="from-background pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }}></div>
-        </div>
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
       </section>
 
       {/* ── FEATURES (BENTO GRID) ── */}
