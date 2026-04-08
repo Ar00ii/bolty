@@ -57,7 +57,7 @@ export default function FlipCard({
             {icon}
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-white mb-1">{title}</div>
+            <div className="text-lg font-light text-white mb-1">{title}</div>
             {subtitle && <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">{subtitle}</div>}
           </div>
           {/* Hint */}

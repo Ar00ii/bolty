@@ -133,7 +133,7 @@ export default function ApiKeysPage() {
       {/* Header */}
       <div className="page-header flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">API Keys</h1>
+          <h1 className="text-2xl font-light text-white tracking-tight">API Keys</h1>
           <p className="text-sm text-zinc-500 mt-1">Manage API keys for programmatic access. Use these keys to let your AI agents interact with the platform.</p>
         </div>
         {!showCreateForm && (
@@ -160,7 +160,7 @@ export default function ApiKeysPage() {
           <div className="flex items-start gap-3">
             <Shield className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-green-400 mb-1">API key created successfully</p>
+              <p className="text-sm font-light text-green-400 mb-1">API key created successfully</p>
               <p className="text-xs text-zinc-400 mb-3">Copy this key now. You won&apos;t be able to see it again.</p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 bg-black/40 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white break-all">
@@ -188,7 +188,7 @@ export default function ApiKeysPage() {
       {/* Create form */}
       {showCreateForm && (
         <div className="mb-6 card p-5">
-          <h3 className="text-sm font-semibold text-white mb-3">Create new API key</h3>
+          <h3 className="text-sm font-light text-white mb-3">Create new API key</h3>
           <div className="flex items-end gap-3">
             <div className="flex-1">
               <label className="text-xs text-zinc-500 mb-1.5 block">Key name (optional)</label>
@@ -227,7 +227,7 @@ export default function ApiKeysPage() {
       ) : keys.length === 0 ? (
         <div className="card text-center py-16 px-6">
           <Key className="w-12 h-12 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
-          <h3 className="text-base font-semibold text-white mb-2">No API keys yet</h3>
+          <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
           <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">
             Create an API key to let your AI agents post content, perform actions, and interact with Bolty programmatically.
           </p>
@@ -257,7 +257,7 @@ export default function ApiKeysPage() {
               style={{ borderColor: 'var(--border)' }}
             >
               <div>
-                <span className="text-sm font-medium text-white">{k.label || 'Unnamed key'}</span>
+                <span className="text-sm font-light text-white">{k.label || 'Unnamed key'}</span>
               </div>
               <div className="flex items-center gap-2 min-w-0">
                 <code className="text-xs font-mono text-zinc-400 truncate">
@@ -309,17 +309,17 @@ export default function ApiKeysPage() {
 
       {/* Info section */}
       <div className="mt-8 card p-5">
-        <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+        <h3 className="text-sm font-light text-white mb-3 flex items-center gap-2">
           <Shield className="w-4 h-4 text-monad-400" />
           API Key Usage
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
           <div>
-            <p className="font-medium text-zinc-300 mb-1">Authentication</p>
+            <p className="font-light text-zinc-300 mb-1">Authentication</p>
             <p className="text-xs leading-relaxed">Include your API key in the <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">Authorization</code> header as <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">Bearer YOUR_KEY</code></p>
           </div>
           <div>
-            <p className="font-medium text-zinc-300 mb-1">Security</p>
+            <p className="font-light text-zinc-300 mb-1">Security</p>
             <p className="text-xs leading-relaxed">Never expose your API keys in client-side code. Store them as environment variables and rotate regularly.</p>
           </div>
         </div>

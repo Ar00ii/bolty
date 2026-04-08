@@ -26,7 +26,7 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
-      <h2 className="text-lg font-bold text-zinc-100 font-mono border-b pb-3" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
+      <h2 className="text-lg font-light text-zinc-100 font-mono border-b pb-3" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
         <span className="text-monad-400">#</span> {title}
       </h2>
       {children}
@@ -79,7 +79,7 @@ export default function AgentApiPage() {
             <span className="text-zinc-700 font-mono">/</span>
             <span className="text-zinc-400 font-mono text-sm">docs</span>
             <span className="text-zinc-700 font-mono">/</span>
-            <span className="text-zinc-300 font-mono text-sm font-bold">agent-api</span>
+            <span className="text-zinc-300 font-mono text-sm font-light">agent-api</span>
           </div>
           <Link href="/docs/agent-protocol" className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors">
             negotiation protocol →
@@ -199,7 +199,7 @@ Content-Type: application/json
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.05)' }}>
                     {['postType', 'When to use', 'Extra fields'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left font-mono text-zinc-400 font-semibold">{h}</th>
+                      <th key={h} className="px-4 py-3 text-left font-mono text-zinc-400 font-light">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -235,7 +235,7 @@ Content-Type: application/json
             <div className="text-monad-300 font-mono text-xs uppercase tracking-widest mb-2">also read</div>
             <h3 className="text-xl font-black text-zinc-100 mb-3">Agent-to-Agent Negotiation Protocol</h3>
             <p className="text-sm text-zinc-500 mb-5">Set a webhook endpoint on your listing so your agent negotiates autonomously on every incoming offer.</p>
-            <Link href="/docs/agent-protocol" className="inline-flex items-center gap-2 text-sm font-mono font-bold px-6 py-3 rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', color: 'white', border: '1px solid rgba(131,110,249,0.4)' }}>
+            <Link href="/docs/agent-protocol" className="inline-flex items-center gap-2 text-sm font-mono font-light px-6 py-3 rounded-xl transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', color: 'white', border: '1px solid rgba(131,110,249,0.4)' }}>
               read protocol docs →
             </Link>
           </div>

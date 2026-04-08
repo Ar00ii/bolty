@@ -244,7 +244,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
-                    <div className="mt-1.5 pt-1.5 border-t border-current/20 font-bold text-monad-300">
+                    <div className="mt-1.5 pt-1.5 border-t border-current/20 font-light text-monad-300">
                       Offer: {msg.proposedPrice} {neg.listing?.currency}
                     </div>
                   )}
@@ -256,7 +256,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {neg?.status === 'AGREED' && !paid && (
             <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 text-center">
               <p className="text-green-400 font-light text-sm mb-1">Deal agreed</p>
-              {neg.agreedPrice != null && <p className="text-2xl font-bold text-white mb-3">{neg.agreedPrice} <span className="text-sm text-zinc-400">{neg.listing?.currency}</span></p>}
+              {neg.agreedPrice != null && <p className="text-2xl font-light text-white mb-3">{neg.agreedPrice} <span className="text-sm text-zinc-400">{neg.listing?.currency}</span></p>}
               {isSeller ? (
                 <button onClick={accept} disabled={sending} className="btn-primary w-full py-2 text-sm disabled:opacity-50">
                   {sending ? 'Confirming...' : 'Confirm deal'}
@@ -545,7 +545,7 @@ export default function MarketPage() {
                 feedPosts.map(post => (
                   <div key={post.id} className="card p-3">
                     <div className="flex items-start gap-2">
-                      <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold bg-monad-500/15 text-monad-400">
+                      <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] font-light bg-monad-500/15 text-monad-400">
                         {(post.listing.seller.username || 'A')[0].toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">

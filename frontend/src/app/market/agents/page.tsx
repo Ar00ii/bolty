@@ -284,10 +284,10 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
         <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse shrink-0" />
-            <span className="text-monad-400 font-mono text-xs font-bold shrink-0">negotiate://</span>
+            <span className="text-monad-400 font-mono text-xs font-light shrink-0">negotiate://</span>
             <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
             {neg && (
-              <span className={`text-xs font-mono font-bold ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}>
+              <span className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}>
                 [{neg.status.toLowerCase()}]
               </span>
             )}
@@ -358,7 +358,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
-                    <div className="mt-2 pt-2 border-t border-current/15 font-bold text-monad-300">
+                    <div className="mt-2 pt-2 border-t border-current/15 font-light text-monad-300">
                       ⬡ {msg.proposedPrice} {neg.listing?.currency}
                     </div>
                   )}
@@ -386,21 +386,21 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {neg?.status === 'AGREED' && !paid && (
             <div className="text-center py-2">
               <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.04)' }}>
-                <p className="text-green-400 font-mono text-xs font-bold mb-1">✓ DEAL AGREED</p>
+                <p className="text-green-400 font-mono text-xs font-light mb-1">✓ DEAL AGREED</p>
                 {neg.agreedPrice != null && (
                   <p className="text-green-300 font-mono text-2xl font-black mb-3">⬡ {neg.agreedPrice} <span className="text-base font-normal text-green-500">{neg.listing?.currency}</span></p>
                 )}
                 {isSeller ? (
                   <div className="space-y-2">
                     <p className="text-zinc-500 text-xs font-mono">Your agent agreed this price. Confirm to open DM with buyer.</p>
-                    <button onClick={accept} disabled={sending} className="w-full text-xs font-mono font-bold py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', color: '#4ade80' }}>
+                    <button onClick={accept} disabled={sending} className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', color: '#4ade80' }}>
                       {sending ? 'confirming...' : 'confirm deal + open DM chat'}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
                     <p className="text-zinc-500 text-xs font-mono">Pay with MetaMask to complete the purchase.</p>
-                    <button onClick={payWithEth} disabled={paying} className="w-full text-xs font-mono font-bold py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)', color: 'white' }}>
+                    <button onClick={payWithEth} disabled={paying} className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)', color: 'white' }}>
                       {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
                     </button>
                   </div>
@@ -412,9 +412,9 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {paid && (
             <div className="text-center py-2">
               <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(131,110,249,0.4)', background: 'rgba(131,110,249,0.07)' }}>
-                <p className="text-monad-300 font-mono text-sm font-bold mb-1">✓ PAYMENT SENT</p>
+                <p className="text-monad-300 font-mono text-sm font-light mb-1">✓ PAYMENT SENT</p>
                 <p className="text-zinc-500 text-xs font-mono mb-3">Check your DMs to coordinate with the seller.</p>
-                <Link href="/dm" className="inline-block text-xs font-mono font-bold py-2 px-4 rounded-xl transition-all" style={{ background: 'rgba(131,110,249,0.2)', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}>open messages →</Link>
+                <Link href="/dm" className="inline-block text-xs font-mono font-light py-2 px-4 rounded-xl transition-all" style={{ background: 'rgba(131,110,249,0.2)', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}>open messages →</Link>
               </div>
             </div>
           )}
@@ -422,7 +422,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {neg?.status === 'REJECTED' && (
             <div className="text-center py-2">
               <div className="inline-block border border-red-400/25 bg-red-400/4 rounded-xl px-4 py-3">
-                <p className="text-red-400 font-mono text-xs font-bold">✗ NEGOTIATION REJECTED</p>
+                <p className="text-red-400 font-mono text-xs font-light">✗ NEGOTIATION REJECTED</p>
               </div>
             </div>
           )}
@@ -491,7 +491,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
               <button
                 onClick={send}
                 disabled={sending || !message.trim()}
-                className="flex items-center gap-1.5 text-xs font-mono font-bold py-1.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
+                className="flex items-center gap-1.5 text-xs font-mono font-light py-1.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
                 style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.3),rgba(131,110,249,0.15))', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}
               >
                 {sending ? '...' : <><Send className="w-3 h-3" strokeWidth={2} /> send</>}
@@ -536,7 +536,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
                 <img src={listing.seller.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
               ) : (
                 <div className="w-3.5 h-3.5 rounded-full bg-monad-500/20 flex items-center justify-center">
-                  <span className="text-[7px] font-bold text-monad-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
+                  <span className="text-[7px] font-light text-monad-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
                 </div>
               )}
               <span className="text-[11px] text-zinc-500">@{listing.seller.username || 'anon'}</span>
@@ -650,14 +650,14 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
     <div className="mt-3 rounded-xl border" style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}>
       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'rgba(131,110,249,0.1)' }}>
         <Key className="w-3 h-3 text-monad-400" />
-        <span className="text-monad-400 font-mono text-xs font-bold">API Keys</span>
+        <span className="text-monad-400 font-mono text-xs font-light">API Keys</span>
         <span className="text-zinc-600 font-mono text-xs ml-auto">{keys.length}/3</span>
       </div>
 
       {/* Revealed key banner */}
       {revealedKey && (
         <div className="mx-3 mt-3 rounded-lg p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
-          <p className="text-green-400 font-mono text-xs font-bold mb-1">✓ New key generated — save it now, it won&apos;t be shown again</p>
+          <p className="text-green-400 font-mono text-xs font-light mb-1">✓ New key generated — save it now, it won&apos;t be shown again</p>
           <div className="flex items-center gap-2 mt-1">
             <code className="text-green-300 font-mono text-xs flex-1 break-all">{revealedKey}</code>
             <button onClick={() => copyKey(revealedKey)} className="text-xs font-mono px-2 py-1 rounded shrink-0 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: copied ? '#4ade80' : '#86efac' }}>
@@ -748,13 +748,13 @@ function MyAgentCard({ listing, onDelete }: { listing: MarketListing; onDelete: 
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold text-zinc-100 truncate">{listing.title}</h3>
+            <h3 className="text-sm font-light text-zinc-100 truncate">{listing.title}</h3>
             <Badge className={`rounded-full border border-dashed px-2 py-0 text-xs font-mono ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>{listing.type.toLowerCase().replace('_', ' ')}</Badge>
             {listing.agentEndpoint && <Badge className="rounded-full bg-monad-500/15 border border-monad-500/25 px-2 py-0 text-xs font-mono text-monad-400">AI endpoint</Badge>}
             {listing.fileKey && <Badge className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0 text-xs font-mono text-zinc-500">file uploaded</Badge>}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
-            <span className="font-mono font-bold text-monad-300">{listing.price} {listing.currency}</span>
+            <span className="font-mono font-light text-monad-300">{listing.price} {listing.currency}</span>
             {listing.minPrice != null && <span className="text-zinc-600"> · floor: {listing.minPrice}</span>}
             <span className="text-zinc-700"> · {timeAgo(listing.createdAt)}</span>
           </p>
@@ -831,7 +831,7 @@ function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: Marke
   return (
     <div className="rounded-2xl border p-5" style={{ background: '#0a0a12', borderColor: 'rgba(131,110,249,0.2)' }}>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-bold text-zinc-100">Deploy New Agent</h2>
+        <h2 className="text-base font-light text-zinc-100">Deploy New Agent</h2>
         <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300"><X className="w-4 h-4" /></button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -883,7 +883,7 @@ function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: Marke
           </div>
         )}
         {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
-        <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl font-mono font-bold text-sm disabled:opacity-40 transition-all" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))', border: '1px solid rgba(131,110,249,0.4)', color: '#e2d9ff' }}>
+        <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))', border: '1px solid rgba(131,110,249,0.4)', color: '#e2d9ff' }}>
           {submitting ? 'deploying...' : 'deploy agent →'}
         </button>
       </form>
@@ -967,7 +967,7 @@ function AgentsPageContent() {
         </div>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">AI Agents</h1>
+            <h1 className="text-2xl font-light text-white tracking-tight">AI Agents</h1>
             <p className="text-sm text-zinc-500 mt-1">Discover autonomous agents, bots, and automation tools built by the community.</p>
           </div>
           {isAuthenticated && (

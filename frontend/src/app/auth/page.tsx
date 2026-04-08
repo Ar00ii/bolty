@@ -193,7 +193,7 @@ function BrandPanel() {
             <div className="flex items-center justify-center mb-0.5">
               <s.icon className="w-3 h-3 text-monad-400" strokeWidth={1.5} />
             </div>
-            <div className="text-sm font-bold text-monad-400 leading-none mb-0.5">{s.value}</div>
+            <div className="text-sm font-light text-monad-400 leading-none mb-0.5">{s.value}</div>
             <div className="text-[10px] text-zinc-600">{s.label}</div>
           </div>
         ))}
@@ -208,7 +208,7 @@ function BrandPanel() {
               <f.icon className="w-3 h-3 text-monad-400" strokeWidth={1.5} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold text-zinc-300">{f.title}</div>
+              <div className="text-[11px] font-light text-zinc-300">{f.title}</div>
               <div className="text-[10px] text-zinc-600 mt-0.5">{f.desc}</div>
             </div>
           </div>
@@ -225,7 +225,7 @@ function BrandPanel() {
         </div>
         <p className="text-[10px] text-zinc-400 leading-relaxed mb-2">&ldquo;{BRAND_TESTIMONIAL.text}&rdquo;</p>
         <div className="flex items-center gap-1.5">
-          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-monad-400 flex-shrink-0"
+          <div className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-light text-monad-400 flex-shrink-0"
             style={{ background: 'rgba(131,110,249,0.15)' }}>
             {BRAND_TESTIMONIAL.name.charAt(0)}
           </div>
@@ -259,7 +259,7 @@ function RegisterProgress({ step }: { step: 1 | 2 }) {
       {[1, 2].map(s => (
         <React.Fragment key={s}>
           <div className="flex items-center gap-1.5">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-light transition-all ${
               s < step
                 ? 'bg-monad-500 text-white'
                 : s === step
@@ -479,7 +479,7 @@ export default function AuthPage() {
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-7 lg:hidden">
             <BoltyLogo size={56} />
-            <span className="text-sm font-semibold text-zinc-300">Bolty</span>
+            <span className="text-sm font-light text-zinc-300">Bolty</span>
           </div>
 
           {/* Tab switcher */}
@@ -503,7 +503,7 @@ export default function AuthPage() {
 
           {/* Heading */}
           <div className="mb-5">
-            <h1 className="text-xl font-bold text-white tracking-tight mb-1">
+            <h1 className="text-xl font-light text-white tracking-tight mb-1">
               {twoFactorPending ? 'Two-factor verification'
                 : tab === 'login' ? 'Sign in to Bolty'
                 : tab === 'register' ? (regStep === 1 ? 'Create your account' : 'Tell us about yourself')

@@ -45,7 +45,7 @@ export function FloatingAIChat() {
                   <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <span className="text-sm font-semibold text-white">AI Assistant</span>
+                  <span className="text-sm font-light text-white">AI Assistant</span>
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
                     <span className="text-xs text-yellow-400/70">Maintenance</span>
@@ -70,7 +70,7 @@ export function FloatingAIChat() {
               <p className="text-sm font-medium text-white mb-1">AI Assistant</p>
               <div className="rounded-lg px-3 py-2 mb-2"
                 style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}>
-                <p className="text-xs text-yellow-400 font-mono font-bold">INACTIVE — MAINTENANCE</p>
+                <p className="text-xs text-yellow-400 font-mono font-light">INACTIVE — MAINTENANCE</p>
               </div>
               <p className="text-xs leading-relaxed" style={{ color: 'rgba(161,161,170,0.6)' }}>
                 The AI assistant is temporarily offline for maintenance. We&apos;ll be back soon.

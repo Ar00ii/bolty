@@ -43,19 +43,19 @@ const POINTS_INFO = [
 
 function PositionBadge({ idx }: { idx: number }) {
   if (idx === 0) return (
-    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono"
+    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
       style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', color: '#f59e0b' }}>
       1
     </span>
   );
   if (idx === 1) return (
-    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono"
+    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
       style={{ background: 'rgba(156,163,175,0.12)', border: '1px solid rgba(156,163,175,0.25)', color: '#9ca3af' }}>
       2
     </span>
   );
   if (idx === 2) return (
-    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono"
+    <span className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
       style={{ background: 'rgba(205,127,50,0.12)', border: '1px solid rgba(205,127,50,0.25)', color: '#cd7f32' }}>
       3
     </span>
@@ -91,7 +91,7 @@ export default function LeaderboardPage() {
           </div>
           <p className="text-xs font-mono text-monad-400 uppercase tracking-widest">Hall of Fame</p>
         </div>
-        <h1 className="text-2xl font-bold text-white mb-1.5">Reputation Leaderboard</h1>
+        <h1 className="text-2xl font-light text-white mb-1.5">Reputation Leaderboard</h1>
         <p className="text-sm text-zinc-500 max-w-lg">
           The most trusted and respected developers in the Bolty ecosystem.
         </p>
@@ -106,7 +106,7 @@ export default function LeaderboardPage() {
               style={{ background: `${r.color}08`, border: `1px solid ${r.color}20` }}>
               <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: r.color }} />
               <div>
-                <p className="text-xs font-semibold leading-none mb-0.5" style={{ color: r.color }}>{r.label}</p>
+                <p className="text-xs font-light leading-none mb-0.5" style={{ color: r.color }}>{r.label}</p>
                 <p className="font-mono" style={{ color: 'rgba(161,161,170,0.4)', fontSize: '0.6rem' }}>
                   {r.threshold >= 1000 ? `${(r.threshold / 1000).toFixed(0)}k` : r.threshold}+ pts
                 </p>
@@ -124,7 +124,7 @@ export default function LeaderboardPage() {
             <div key={p.reason} className="flex items-center justify-between px-3 py-2 rounded-lg"
               style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
               <span className="text-xs text-zinc-400">{p.label}</span>
-              <span className="text-xs font-mono font-semibold text-monad-400 ml-4 flex-shrink-0">+{p.points} pts</span>
+              <span className="text-xs font-mono font-light text-monad-400 ml-4 flex-shrink-0">+{p.points} pts</span>
             </div>
           ))}
         </div>
@@ -156,7 +156,7 @@ export default function LeaderboardPage() {
                 {entry.avatarUrl ? (
                   <img src={entry.avatarUrl} alt="" className="w-8 h-8 rounded-xl object-cover border border-white/[0.08]" />
                 ) : (
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs"
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-light text-xs"
                     style={{ background: `${entry.rankMeta.color}15`, border: `1px solid ${entry.rankMeta.color}25`, color: entry.rankMeta.color }}>
                     {(entry.displayName || entry.username || 'U')[0].toUpperCase()}
                   </div>
@@ -190,7 +190,7 @@ export default function LeaderboardPage() {
 
               {/* Points */}
               <div className="flex-shrink-0 text-right">
-                <div className="text-sm font-semibold font-mono" style={{ color: entry.rankMeta.color }}>
+                <div className="text-sm font-light font-mono" style={{ color: entry.rankMeta.color }}>
                   {entry.reputationPoints.toLocaleString()}
                 </div>
                 <div className="text-[10px] text-zinc-700 font-mono">pts</div>

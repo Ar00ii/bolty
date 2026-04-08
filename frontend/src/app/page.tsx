@@ -395,15 +395,15 @@ export default function HomePage() {
                           <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Active Agents</span>
-                              <span className="text-cyan-400 font-semibold">2,847</span>
+                              <span className="text-cyan-400 font-light">2,847</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Total Revenue</span>
-                              <span className="text-cyan-400 font-semibold">$243K ETH</span>
+                              <span className="text-cyan-400 font-light">$243K ETH</span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Success Rate</span>
-                              <span className="text-cyan-400 font-semibold">98.7%</span>
+                              <span className="text-cyan-400 font-light">98.7%</span>
                             </div>
                           </div>
                         )}
@@ -452,7 +452,7 @@ export default function HomePage() {
                             <div className="space-y-2">
                               <div className="flex justify-between text-xs">
                                 <span className="text-gray-400">Your Rank</span>
-                                <span className="text-purple-400 font-semibold">#342</span>
+                                <span className="text-purple-400 font-light">#342</span>
                               </div>
                               <div className="flex gap-1 mt-3">
                                 {[...Array(7)].map((_, idx) => (
@@ -514,7 +514,7 @@ export default function HomePage() {
                       <CheckCircle2 className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <h3 className={`text-lg lg:text-xl font-semibold ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
+                          <h3 className={`text-lg lg:text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
                           {service.active && (
                             <span className="text-xs text-green-400 border border-green-500 rounded-full px-2 py-0.5">Live</span>
                           )}
@@ -548,7 +548,7 @@ export default function HomePage() {
                     <div className="flex items-start gap-4 mb-4">
                       <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
                       <div className="flex-1">
-                        <h3 className="text-lg lg:text-xl font-semibold text-white">{service.name}</h3>
+                        <h3 className="text-lg lg:text-xl font-light text-white">{service.name}</h3>
                         <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
                       </div>
                     </div>

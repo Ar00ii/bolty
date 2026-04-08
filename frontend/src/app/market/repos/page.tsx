@@ -272,7 +272,7 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-sm font-bold text-zinc-100 truncate">{repo.name}</h3>
+            <h3 className="text-sm font-light text-zinc-100 truncate">{repo.name}</h3>
             {repo.isLocked && <Badge className="rounded-full px-2 py-0 text-xs font-mono" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)', color: '#a78bfa' }}>locked ${repo.lockedPriceUsd}</Badge>}
             {repo.isPrivate && <Badge className="rounded-full bg-zinc-800/50 border border-white/06 px-2 py-0 text-xs font-mono text-zinc-600">private</Badge>}
           </div>
@@ -361,7 +361,7 @@ function CollaboratorsPanel({ repoId, collaborators: initial }: { repoId: string
     <div className="mx-3 mb-3 rounded-xl border" style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.02)' }}>
       <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'rgba(131,110,249,0.08)' }}>
         <Users className="w-3 h-3 text-monad-400" />
-        <span className="text-monad-400 font-mono text-xs font-bold">Collaborators</span>
+        <span className="text-monad-400 font-mono text-xs font-light">Collaborators</span>
       </div>
       <div className="px-3 py-2 space-y-2">
         {collabs.length === 0 && <p className="text-zinc-600 font-mono text-xs py-1">no collaborators</p>}
@@ -495,7 +495,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
       <div className="w-full max-w-sm rounded-2xl overflow-y-auto" style={{ maxHeight: '90vh', background: '#0e0e18', border: '1px solid rgba(131,110,249,0.2)' }}>
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <div>
-            <h3 className="font-bold text-zinc-100 text-sm">Publish Repository</h3>
+            <h3 className="font-light text-zinc-100 text-sm">Publish Repository</h3>
             <p className="text-zinc-600 font-mono text-xs mt-0.5">{ghRepo.name}{ghRepo.private ? ' · private' : ''}</p>
           </div>
           <button onClick={onClose} className="text-zinc-600 hover:text-zinc-300 transition-colors"><X className="w-4 h-4" /></button>
@@ -570,7 +570,7 @@ function PublishRepoModal({ ghRepo, onPublished, onClose }: {
             </div>
           )}
           {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
-          <button onClick={handlePublish} disabled={publishing} className="w-full py-2.5 rounded-xl font-mono font-bold text-sm disabled:opacity-40 transition-all" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))', border: '1px solid rgba(131,110,249,0.4)', color: '#e2d9ff' }}>
+          <button onClick={handlePublish} disabled={publishing} className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))', border: '1px solid rgba(131,110,249,0.4)', color: '#e2d9ff' }}>
             {publishing ? 'publishing...' : 'publish →'}
           </button>
         </div>
@@ -741,7 +741,7 @@ function ReposMarketPageContent() {
         </div>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Repositories</h1>
+            <h1 className="text-2xl font-light text-white tracking-tight">Repositories</h1>
             <p className="text-sm text-zinc-500 mt-1">Discover, vote on, and download community code repositories.</p>
           </div>
           {isAuthenticated && (

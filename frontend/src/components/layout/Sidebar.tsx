@@ -79,7 +79,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
       <div className="h-14 flex items-center px-4 border-b" style={{ borderColor: 'var(--border)' }}>
         <Link href="/" className="flex items-center gap-2.5 group" onClick={onClose}>
           <BoltyLogoSVG size={28} className="transition-transform duration-200 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(131,110,249,0.4)]" />
-          <span className="text-[15px] font-bold tracking-tight" style={{
+          <span className="text-[15px] font-light tracking-tight" style={{
             background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
@@ -112,7 +112,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
                     <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-monad-400' : 'text-zinc-500 group-hover:text-zinc-400'}`} strokeWidth={1.75} />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.badge && item.badge > 0 && (
-                      <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-monad-500 text-white text-[10px] font-bold px-1">
+                      <span className="min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-monad-500 text-white text-[10px] font-light px-1">
                         {item.badge > 99 ? '99+' : item.badge}
                       </span>
                     )}
@@ -133,7 +133,7 @@ export function Sidebar({ open, onClose, isAuthenticated, user, logout, unreadDM
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={user.avatarUrl} alt="" className="w-7 h-7 rounded-full border border-zinc-700" />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-[11px] font-semibold">
+                <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-[11px] font-light">
                   {displayLabel[0]?.toUpperCase()}
                 </div>
               )}

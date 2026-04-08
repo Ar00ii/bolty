@@ -102,7 +102,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   : '0 0 0px rgba(168, 85, 247, 0)',
               }}
               transition={{ delay: phase === 'idle' ? 0.4 : 0, duration: 0.3 }}
-              className={`absolute -top-12 right-4 z-20 px-6 py-2.5 rounded-lg text-sm font-semibold cursor-default flex items-center gap-2 transition-colors duration-300 ${
+              className={`absolute -top-12 right-4 z-20 px-6 py-2.5 rounded-lg text-sm font-light cursor-default flex items-center gap-2 transition-colors duration-300 ${
                 phase === 'done'
                   ? 'bg-green-600 text-white'
                   : phase === 'deploying'

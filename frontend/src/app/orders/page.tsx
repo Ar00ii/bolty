@@ -74,7 +74,7 @@ function OrderCard({ order, isSeller, onClick }: { order: Order; isSeller: boole
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <span className="font-semibold text-sm text-white truncate">{order.listing.title}</span>
+          <span className="font-light text-sm text-white truncate">{order.listing.title}</span>
           <StatusBadge status={order.status} />
           {order.escrowStatus && order.escrowStatus !== 'NONE' && (
             <span className="badge-success flex items-center gap-1 text-[10px]">
@@ -91,7 +91,7 @@ function OrderCard({ order, isSeller, onClick }: { order: Order; isSeller: boole
 
       {/* Amount */}
       <div className="text-right flex-shrink-0">
-        <div className="font-mono font-bold text-sm text-monad-400">{ethAmount} ETH</div>
+        <div className="font-mono font-light text-sm text-monad-400">{ethAmount} ETH</div>
         <div className="text-[10px] text-zinc-600 uppercase tracking-wide mt-0.5">{order.listing.type}</div>
       </div>
 
@@ -143,7 +143,7 @@ export default function OrdersPage() {
     <div className="page-container py-8">
       {/* Header */}
       <div className="page-header">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Orders</h1>
+        <h1 className="text-2xl font-light text-white tracking-tight">Orders</h1>
         <p className="text-sm text-zinc-500 mt-1">Track all your purchases and sales in one place.</p>
       </div>
 
@@ -160,7 +160,7 @@ export default function OrdersPage() {
           ].map(({ label, value, icon: Icon }) => (
             <div key={label} className="card p-4 text-center">
               <Icon className="w-4 h-4 text-monad-400 mx-auto mb-2" strokeWidth={1.5} />
-              <div className="font-mono font-bold text-xl text-monad-400">{value}</div>
+              <div className="font-mono font-light text-xl text-monad-400">{value}</div>
               <div className="text-[10px] text-zinc-600 uppercase tracking-wider mt-1">{label}</div>
             </div>
           ))}

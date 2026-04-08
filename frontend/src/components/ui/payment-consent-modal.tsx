@@ -121,7 +121,7 @@ export function PaymentConsentModal({
         <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2.5">
             <Shield className="w-4 h-4 text-monad-400" />
-            <span className="font-bold text-white text-sm">Payment Consent</span>
+            <span className="font-light text-white text-sm">Payment Consent</span>
             <span className="text-[10px] font-mono text-monad-400/60 border border-monad-400/20 px-1.5 py-0.5 rounded">BETA</span>
           </div>
           <button onClick={onCancel} className="text-zinc-600 hover:text-zinc-300 transition-colors">
@@ -159,9 +159,9 @@ export function PaymentConsentModal({
               <span className="text-white font-mono">{platformFeeETH} ETH</span>
             </div>
             <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-              <span className="text-zinc-200 font-semibold">Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}</span>
+              <span className="text-zinc-200 font-light">Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}</span>
               <div className="text-right">
-                <span className="text-monad-300 font-mono font-bold">{totalETH} ETH</span>
+                <span className="text-monad-300 font-mono font-light">{totalETH} ETH</span>
                 <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
               </div>
             </div>
@@ -173,7 +173,7 @@ export function PaymentConsentModal({
           className="mx-5 mt-4 max-h-36 overflow-y-auto p-4 rounded-xl text-[11px] text-zinc-500 leading-relaxed font-mono space-y-1"
           style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.04)' }}
         >
-          <p className="text-zinc-400 font-semibold">By signing you confirm:</p>
+          <p className="text-zinc-400 font-light">By signing you confirm:</p>
           {escrow ? (
             <ol className="list-decimal list-inside space-y-0.5 mt-1">
               <li>Funds will be deposited into the Bolty Escrow smart contract.</li>
@@ -223,7 +223,7 @@ export function PaymentConsentModal({
           <button
             onClick={handleSign}
             disabled={!checked || signing}
-            className="flex-1 py-2.5 text-sm font-semibold text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex-1 py-2.5 text-sm font-light text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: 'rgba(131,110,249,0.18)', border: '1px solid rgba(131,110,249,0.45)' }}
           >
             {signing ? 'Signing…' : 'Sign & Continue'}

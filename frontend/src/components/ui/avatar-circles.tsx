@@ -40,7 +40,7 @@ export function AvatarCircles({
       ))}
       {numPeople > 0 && (
         <div className="w-8 h-8 rounded-full border-2 border-black bg-zinc-900 flex items-center justify-center">
-          <span className="text-[9px] font-mono font-semibold text-zinc-400">+{numPeople}</span>
+          <span className="text-[9px] font-mono font-light text-zinc-400">+{numPeople}</span>
         </div>
       )}
     </div>

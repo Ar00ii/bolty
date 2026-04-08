@@ -157,7 +157,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={user.avatarUrl} alt={displayLabel} className="w-7 h-7 rounded-full border border-zinc-700" />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-semibold">
+                  <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-light">
                     {displayLabel[0]?.toUpperCase()}
                   </div>
                 )}

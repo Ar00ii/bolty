@@ -85,7 +85,7 @@ export function CardPattern({
         className="absolute inset-0 rounded-2xl opacity-0 mix-blend-overlay group-hover/card:opacity-100"
         style={style}
       >
-        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-bold transition duration-500 leading-tight p-2 opacity-40">
+        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-light transition duration-500 leading-tight p-2 opacity-40">
           {randomString}
         </p>
       </motion.div>

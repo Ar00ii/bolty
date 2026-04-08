@@ -88,7 +88,7 @@ export function HighlightCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold leading-tight text-[var(--text)]">
+          <h3 className="text-sm font-light leading-tight text-[var(--text)]">
             {title}
           </h3>
           <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">

@@ -29,7 +29,7 @@ function Avatar({ name, url, size = 8 }: { name?: string | null; url?: string | 
   const sz = `w-${size} h-${size}`;
   if (url) return <img src={url} alt={name || ''} className={`${sz} rounded-full object-cover flex-shrink-0`} />;
   return (
-    <div className={`${sz} rounded-full flex-shrink-0 flex items-center justify-center text-monad-400 font-semibold text-xs`}
+    <div className={`${sz} rounded-full flex-shrink-0 flex items-center justify-center text-monad-400 font-light text-xs`}
       style={{ background: 'var(--brand-dim, rgba(131,110,249,0.12))', border: '1px solid rgba(131,110,249,0.2)' }}>
       {(name || '?')[0].toUpperCase()}
     </div>
@@ -184,7 +184,7 @@ export default function DmPage() {
           {/* Header */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Messages</span>
+              <span className="text-sm font-light" style={{ color: 'var(--text)' }}>Messages</span>
               <div className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-green-400' : 'bg-zinc-600'}`} />
             </div>
             <button
@@ -242,11 +242,11 @@ export default function DmPage() {
                 <Avatar name={c.user.username} url={c.user.avatarUrl} size={8} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold truncate" style={{ color: 'var(--text)' }}>
+                    <span className="text-xs font-light truncate" style={{ color: 'var(--text)' }}>
                       @{c.user.username || c.user.id.slice(0, 8)}
                     </span>
                     {c.unread > 0 && (
-                      <span className="text-xs bg-monad-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-bold flex-shrink-0">
+                      <span className="text-xs bg-monad-500 text-white rounded-full w-4 h-4 flex items-center justify-center font-light flex-shrink-0">
                         {c.unread}
                       </span>
                     )}
@@ -275,7 +275,7 @@ export default function DmPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
                 </svg>
               </div>
-              <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>Direct Messages</h3>
+              <h3 className="text-sm font-light mb-1" style={{ color: 'var(--text)' }}>Direct Messages</h3>
               <p className="text-xs mb-5" style={{ color: 'var(--text-muted)' }}>
                 Select a conversation or start a new one
               </p>
@@ -291,11 +291,11 @@ export default function DmPage() {
                 <Avatar name={activePeer.username} url={activePeer.avatarUrl} size={8} />
                 <div>
                   {activePeer.username ? (
-                    <Link href={`/u/${activePeer.username}`} className="text-sm font-semibold hover:underline" style={{ color: 'var(--text)' }}>
+                    <Link href={`/u/${activePeer.username}`} className="text-sm font-light hover:underline" style={{ color: 'var(--text)' }}>
                       @{activePeer.username}
                     </Link>
                   ) : (
-                    <p className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                    <p className="text-sm font-light" style={{ color: 'var(--text)' }}>
                       {activePeer.id.slice(0, 8)}
                     </p>
                   )}
