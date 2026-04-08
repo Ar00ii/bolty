@@ -293,7 +293,7 @@ export default function HomePage() {
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Main Container with Corner Brackets */}
-          <div className="relative overflow-visible">
+          <div className="relative overflow-visible rounded-lg p-10 md:p-14" style={{ background: 'rgba(0, 0, 0, 0.6)' }}>
             {/* Corner Brackets */}
             <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
             <div className="absolute -top-4 -right-4 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none" style={{ zIndex: 20 }} />
