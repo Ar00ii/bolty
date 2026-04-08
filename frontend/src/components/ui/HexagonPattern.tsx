@@ -48,6 +48,15 @@ export const HexagonPattern = React.forwardRef<
       }
     }
 
+    // Apply diagonal fade gradient from top-left to bottom-right
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)'); // Transparent at top-left
+    gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.3)'); // Middle
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 1)'); // Opaque at bottom-right
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
     function drawHexagon(
       context: CanvasRenderingContext2D,
       x: number,
