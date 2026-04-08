@@ -105,9 +105,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="absolute -top-12 right-4 z-20 px-6 py-2 rounded font-mono text-sm font-medium bg-gray-300 text-black cursor-default"
+              className="absolute -top-12 right-4 z-20 px-6 py-2 rounded-lg text-sm font-semibold bg-purple-600 text-white cursor-default"
             >
-              $ git push
+              Deploy
             </motion.div>
 
             {/* Arrow line */}
@@ -135,11 +135,11 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 style={{ background: 'rgba(0, 0, 0, 0.5)' }}
               >
                 {/* Header */}
-                <div className="text-xs uppercase tracking-widest text-gray-500 mb-6">Production</div>
+                <div className="text-xs uppercase tracking-widest text-gray-500 mb-6">Bolty Dashboard</div>
 
-                {/* Cards Grid - 3x2 layout like Render */}
+                {/* Cards Grid - 3x2 layout */}
                 <div className="grid grid-cols-3 gap-4 mb-4">
-                  {/* Card 1 */}
+                  {/* Card 1: AI Agent */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -149,12 +149,12 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs text-gray-500 uppercase">app-backend</span>
+                      <span className="text-xs text-gray-500 uppercase">AI Agent</span>
                     </div>
                     <div className="text-green-400 text-xs font-medium mb-4">Deploying</div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">Memory</div>
+                        <div className="text-xs text-gray-500 mb-1">Requests</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.3, 0.5, 0.4, 0.7, 0.6, 0.8].map((h, i) => (
                             <div key={i} className="flex-1 bg-purple-500/60 rounded" style={{ height: `${h * 100}%` }} />
@@ -164,7 +164,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </motion.div>
 
-                  {/* Card 2 */}
+                  {/* Card 2: Marketplace */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -174,12 +174,14 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-cyan-400" />
-                      <span className="text-xs text-gray-500 uppercase">app-backend</span>
+                      <span className="text-xs text-gray-500 uppercase">Marketplace</span>
                     </div>
-                    <div className="text-yellow-400 text-xs font-medium mb-4">Deploying</div>
+                    <div className="text-green-400 text-xs font-medium mb-4 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Live
+                    </div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">CPU</div>
+                        <div className="text-xs text-gray-500 mb-1">Sales</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.4, 0.45, 0.42, 0.48, 0.44, 0.5].map((h, i) => (
                             <div key={i} className="flex-1 bg-cyan-500/60 rounded" style={{ height: `${h * 100}%` }} />
@@ -189,7 +191,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </motion.div>
 
-                  {/* Card 3 */}
+                  {/* Card 3: ETH Payments */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -199,14 +201,14 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-pink-400" />
-                      <span className="text-xs text-gray-500 uppercase">app-backend</span>
+                      <span className="text-xs text-gray-500 uppercase">ETH Payments</span>
                     </div>
                     <div className="text-green-400 text-xs font-medium mb-4 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Available
+                      <CheckCircle2 className="w-3 h-3" /> Active
                     </div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">Memory</div>
+                        <div className="text-xs text-gray-500 mb-1">Volume</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.5, 0.55, 0.52, 0.58, 0.54, 0.6].map((h, i) => (
                             <div key={i} className="flex-1 bg-pink-500/60 rounded" style={{ height: `${h * 100}%` }} />
@@ -216,7 +218,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </motion.div>
 
-                  {/* Card 4 */}
+                  {/* Card 4: Repos */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -226,12 +228,12 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs text-gray-500 uppercase">Instances</span>
+                      <span className="text-xs text-gray-500 uppercase">Repos</span>
                     </div>
-                    <div className="text-green-400 text-xs font-medium mb-4">3</div>
+                    <div className="text-green-400 text-xs font-medium mb-4">24 synced</div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">CPU</div>
+                        <div className="text-xs text-gray-500 mb-1">Commits</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.4, 0.5, 0.45, 0.55, 0.48, 0.6].map((h, i) => (
                             <div key={i} className="flex-1 bg-purple-500/60 rounded" style={{ height: `${h * 100}%` }} />
@@ -241,7 +243,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </motion.div>
 
-                  {/* Card 5 */}
+                  {/* Card 5: Users */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -251,12 +253,12 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <Activity className="w-4 h-4 text-cyan-400" />
-                      <span className="text-xs text-gray-500 uppercase">Requests/s</span>
+                      <span className="text-xs text-gray-500 uppercase">Users</span>
                     </div>
                     <div className="text-green-400 text-xs font-medium mb-4">1.2k</div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">Memory</div>
+                        <div className="text-xs text-gray-500 mb-1">Growth</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.35, 0.48, 0.44, 0.52, 0.46, 0.55].map((h, i) => (
                             <div key={i} className="flex-1 bg-cyan-500/60 rounded" style={{ height: `${h * 100}%` }} />
@@ -266,7 +268,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </motion.div>
 
-                  {/* Card 6 */}
+                  {/* Card 6: Uptime */}
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -281,7 +283,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     <div className="text-green-400 text-xs font-medium mb-4">99.9%</div>
                     <div className="space-y-2">
                       <div>
-                        <div className="text-xs text-gray-500 mb-1">CPU</div>
+                        <div className="text-xs text-gray-500 mb-1">Status</div>
                         <div className="flex gap-1 h-8 items-end">
                           {[0.55, 0.58, 0.56, 0.6, 0.58, 0.62].map((h, i) => (
                             <div key={i} className="flex-1 bg-green-500/60 rounded" style={{ height: `${h * 100}%` }} />
