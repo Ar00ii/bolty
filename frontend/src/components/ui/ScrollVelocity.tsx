@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, Children } from 'react';
 
 interface ScrollVelocityRowProps {
   children: ReactNode;
@@ -11,6 +11,9 @@ export function ScrollVelocityRow({
   children,
   duration = 30,
 }: ScrollVelocityRowProps) {
+  const childrenArray = Children.toArray(children);
+  const lastChild = childrenArray[childrenArray.length - 1];
+
   return (
     <div className="flex overflow-hidden w-full">
       <div
@@ -21,6 +24,7 @@ export function ScrollVelocityRow({
         }}
       >
         {children}
+        <div style={{ width: '128px', flexShrink: 0 }} />
       </div>
       <div
         className="flex gap-32 flex-shrink-0 animate-scroll"
@@ -31,6 +35,7 @@ export function ScrollVelocityRow({
         aria-hidden
       >
         {children}
+        <div style={{ width: '128px', flexShrink: 0 }} />
       </div>
     </div>
   );
