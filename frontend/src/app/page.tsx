@@ -17,7 +17,7 @@ import {
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
   Search, Menu, X, ChevronDown, LogOut, Settings, User as UserIcon,
-  Bell, Code2, Zap, Plus, Circle,
+  Bell, Code2, Zap, Plus, Circle, Globe, Mail,
 } from 'lucide-react';
 
 // Data
@@ -133,16 +133,28 @@ export default function HomePage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navLinks = [
-    { href: '/market', label: 'Marketplace' },
-    { href: '#how-it-works', label: 'How It Works', isHash: true },
-  ];
-
-  const docsMenu = [
-    { href: '/docs/agent-protocol', label: 'Agent Protocol' },
-    { href: '/docs/api', label: 'API Reference' },
-    { href: '/docs/guide', label: 'Getting Started' },
-  ];
+  const navSections = {
+    OVERVIEW: [
+      { href: '/market', label: 'Marketplace', icon: Bot },
+      { href: '/market/agents', label: 'AI Agents', icon: Zap },
+      { href: '/market/repos', label: 'Repositories', icon: GitBranch },
+    ],
+    COMMUNITY: [
+      { href: '/chat', label: 'Global Chat', icon: MessageSquare },
+      { href: '/messages', label: 'Messages', icon: MessageSquare },
+      { href: '/leaderboard', label: 'Leaderboard', icon: TrendingUp },
+    ],
+    ACCOUNT: [
+      { href: '/orders', label: 'Orders', icon: CheckCircle2 },
+      { href: '/api-keys', label: 'API Keys', icon: Key },
+      { href: '/profile', label: 'Profile', icon: UserIcon },
+      { href: '/settings', label: 'Settings', icon: Settings },
+    ],
+    RESOURCES: [
+      { href: '/docs/agent-protocol', label: 'Documentation', icon: Code2 },
+      { href: '#how-it-works', label: 'How It Works', icon: Rocket },
+    ],
+  };
 
   const isScrolled = scrollY > 20;
   const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -187,28 +199,15 @@ export default function HomePage() {
             <span className="text-white font-bold text-lg">Bolty</span>
           </div>
 
-          {/* Left Links - Hidden on mobile */}
+          {/* Left Links - Main Nav Menu - Hidden on mobile */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white"
-                title={link.label}
-              >
-                {link.label}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
-              </Link>
-            ))}
-
-            {/* Docs Submenu */}
             <div ref={docsRef} className="relative">
               <motion.button
                 onClick={() => setDocsOpen(!docsOpen)}
                 className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white flex items-center gap-1"
-                title="Documentation"
+                title="Navigation"
               >
-                Docs
+                Navigation
                 <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
                   <ChevronDown className="w-3.5 h-3.5" />
                 </motion.div>
@@ -222,18 +221,28 @@ export default function HomePage() {
                     animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
                     exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
                     transition={{ duration: 0.2 }}
-                    className="absolute top-full mt-2 w-48 rounded-lg border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
+                    className="absolute top-full mt-2 w-80 rounded-lg border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
                   >
-                    {docsMenu.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setDocsOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                      >
-                        <Code2 className="w-3.5 h-3.5" />
-                        {item.label}
-                      </Link>
+                    {Object.entries(navSections).map(([section, items]) => (
+                      <div key={section}>
+                        <div className="px-4 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold bg-black/40">
+                          {section}
+                        </div>
+                        {items.map((item) => {
+                          const IconComponent = item.icon;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setDocsOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                            >
+                              <IconComponent className="w-4 h-4 flex-shrink-0" />
+                              {item.label}
+                            </Link>
+                          );
+                        })}
+                      </div>
                     ))}
                   </motion.div>
                 )}
@@ -380,13 +389,18 @@ export default function HomePage() {
                         animate={!prefersReducedMotion ? { opacity: 1, y: 0 } : {}}
                         exit={!prefersReducedMotion ? { opacity: 0, y: -8 } : {}}
                         transition={{ duration: 0.2 }}
-                        className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900"
+                        className="absolute right-0 top-full mt-2 w-64 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900 max-h-96 overflow-y-auto"
                       >
                         <div className="p-3 border-b border-zinc-700/50">
                           <p className="text-sm font-medium text-white truncate">{user?.displayName || user?.username || 'User'}</p>
                           <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
                         </div>
-                        <div className="py-1">
+
+                        {/* Account Section */}
+                        <div>
+                          <div className="px-3 py-2 text-xs uppercase tracking-widest text-zinc-600 font-semibold bg-black/40">
+                            ACCOUNT
+                          </div>
                           <Link
                             href="/profile"
                             onClick={() => setProfileOpen(false)}
@@ -409,6 +423,7 @@ export default function HomePage() {
                             <Settings className="w-4 h-4" /> Settings
                           </Link>
                         </div>
+
                         <div className="py-1 border-t border-zinc-700/50">
                           <button
                             className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
@@ -450,77 +465,48 @@ export default function HomePage() {
               animate={!prefersReducedMotion ? { opacity: 1, height: 'auto' } : {}}
               exit={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
               transition={{ duration: 0.3 }}
-              className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm overflow-hidden"
+              className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm overflow-hidden max-h-96 overflow-y-auto"
             >
-              <div className="px-4 py-4 space-y-3">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.href}
-                    initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
-                    animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: i * 0.05 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`block px-3 py-2 rounded-lg transition-all text-sm font-medium ${
-                        pathname === link.href
-                          ? 'text-white bg-purple-500/10 border-l-2 border-purple-500'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5'
-                      }`}
+              <div className="px-4 py-4">
+                {Object.entries(navSections).map(([section, items], sectionIdx) => (
+                  <div key={section} className={sectionIdx > 0 ? 'mt-4' : ''}>
+                    <motion.div
+                      initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                      animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                      transition={{ delay: sectionIdx * 0.05 }}
+                      className="px-3 py-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold"
                     >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-
-                {/* Mobile Docs Menu */}
-                <motion.div
-                  initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
-                  animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                  transition={{ delay: 0.1 }}
-                >
-                  <button
-                    onClick={() => setDocsOpen(!docsOpen)}
-                    className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
-                  >
-                    Docs
-                    <motion.div animate={{ rotate: docsOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronDown className="w-4 h-4" />
+                      {section}
                     </motion.div>
-                  </button>
-                  <AnimatePresence>
-                    {docsOpen && (
-                      <motion.div
-                        initial={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
-                        animate={!prefersReducedMotion ? { opacity: 1, height: 'auto' } : {}}
-                        exit={!prefersReducedMotion ? { opacity: 0, height: 0 } : {}}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        {docsMenu.map((item) => (
+                    {items.map((item, itemIdx) => {
+                      const IconComponent = item.icon;
+                      return (
+                        <motion.div
+                          key={item.href}
+                          initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
+                          animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
+                          transition={{ delay: (sectionIdx * 0.05) + (itemIdx * 0.02) }}
+                        >
                           <Link
-                            key={item.href}
                             href={item.href}
-                            onClick={() => {
-                              setDocsOpen(false);
-                              setMobileMenuOpen(false);
-                            }}
-                            className="block px-6 py-2 text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
                           >
+                            <IconComponent className="w-4 h-4 flex-shrink-0" />
                             {item.label}
                           </Link>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                ))}
 
                 {!isAuthenticated && (
                   <motion.div
                     initial={!prefersReducedMotion ? { opacity: 0, x: -16 } : {}}
                     animate={!prefersReducedMotion ? { opacity: 1, x: 0 } : {}}
-                    transition={{ delay: 0.15 }}
+                    transition={{ delay: 0.3 }}
+                    className="mt-4 pt-4 border-t border-zinc-700/50"
                   >
                     <Link
                       href="/auth"
