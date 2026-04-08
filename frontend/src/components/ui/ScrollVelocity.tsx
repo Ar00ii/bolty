@@ -24,7 +24,7 @@ export function ScrollVelocityRow({
         }}
       >
         {children}
-        <div style={{ width: '128px', flexShrink: 0 }} />
+        <div style={{ width: '1px', flexShrink: 0 }} />
       </div>
       <div
         className="flex gap-32 flex-shrink-0 animate-scroll"
@@ -35,7 +35,7 @@ export function ScrollVelocityRow({
         aria-hidden
       >
         {children}
-        <div style={{ width: '128px', flexShrink: 0 }} />
+        <div style={{ width: '1px', flexShrink: 0 }} />
       </div>
     </div>
   );
