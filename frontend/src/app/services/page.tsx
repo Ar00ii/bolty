@@ -171,7 +171,7 @@ export default function ServicesPage() {
 
       {/* Header */}
       <div className="page-header">
-        <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-2">Hire & Collaborate</p>
+        <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-2">Hire & Collaborate</p>
         <h1 className="text-2xl font-light text-white tracking-tight">Developer Services</h1>
         <p className="text-sm text-zinc-500 mt-1">
           Find skilled developers for your project — or list your own services for others to discover.
@@ -385,7 +385,7 @@ export default function ServicesPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 mb-0.5">
-                        <Link href={`/u/${service.user.username}`} className="text-xs text-zinc-400 hover:text-monad-400 transition-colors truncate font-medium">
+                        <Link href={`/u/${service.user.username}`} className="text-xs text-zinc-400 hover:text-monad-400 transition-colors truncate font-light">
                           {service.user.displayName || service.user.username}
                         </Link>
                         <ReputationBadge points={service.user.reputationPoints} size="sm" />

@@ -388,7 +388,7 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
               <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.04)' }}>
                 <p className="text-green-400 font-mono text-xs font-light mb-1">✓ DEAL AGREED</p>
                 {neg.agreedPrice != null && (
-                  <p className="text-green-300 font-mono text-2xl font-black mb-3">⬡ {neg.agreedPrice} <span className="text-base font-normal text-green-500">{neg.listing?.currency}</span></p>
+                  <p className="text-green-300 font-mono text-2xl font-light mb-3">⬡ {neg.agreedPrice} <span className="text-base font-light text-green-500">{neg.listing?.currency}</span></p>
                 )}
                 {isSeller ? (
                   <div className="space-y-2">
@@ -545,11 +545,11 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {listing.agentEndpoint && (
-            <span title="Has own AI agent" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
+            <span title="Has own AI agent" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-light" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
               <span className="w-1 h-1 rounded-full bg-monad-400 animate-pulse inline-block" />AI
             </span>
           )}
-          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-medium border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
+          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-light border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
         </div>
@@ -577,7 +577,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
           {listing.price === 0 ? (
             <span className="text-sm font-light text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
+            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-light">{listing.currency}</span></span>
           )}
           {listing.minPrice != null && (
             <p className="text-[10px] text-zinc-600 mt-0.5">Floor: {listing.minPrice} {listing.currency}</p>
