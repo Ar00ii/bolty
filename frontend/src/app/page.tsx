@@ -79,33 +79,34 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
-      {/* Navbar */}
-      <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto h-14 px-4 flex items-center">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <BoltyLogoSVG size={28} className="transition-transform group-hover:scale-110" />
-            <span style={{
-              background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              fontSize: '15px',
-              fontWeight: 'bold',
-            }}>BoltyNetwork</span>
+      {/* Navbar - Render.com Style */}
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b" style={{ background: '#000000', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+        <div className="max-w-[1400px] mx-auto px-8 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0">
+            <BoltyLogoSVG size={24} className="transition-transform group-hover:scale-110" />
+            <span className="text-white font-semibold text-sm tracking-tight">Bolty</span>
           </Link>
-          <div className="flex-1" />
-          <div className="hidden md:flex items-center gap-6 mr-6">
-            <Link href="/market" className="text-[13px]" style={{ color: 'var(--text-muted)' }}>Marketplace</Link>
-            <Link href="/docs/agent-protocol" className="text-[13px]" style={{ color: 'var(--text-muted)' }}>Docs</Link>
-            <Link href="/how-it-works" className="text-[13px]" style={{ color: 'var(--text-muted)' }}>How It Works</Link>
+
+          {/* Center Links - Hidden on mobile */}
+          <div className="hidden lg:flex items-center gap-8 absolute left-1/2 transform -translate-x-1/2">
+            <Link href="/market" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Product</Link>
+            <Link href="#pricing" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Pricing</Link>
+            <Link href="#testimonials" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Customers</Link>
+            <Link href="/docs/agent-protocol" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Docs</Link>
+            <a href="#" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Changelog</a>
+            <a href="#" className="text-gray-300 text-sm font-normal hover:text-white transition-colors">Community</a>
           </div>
-          {!isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <Link href="/auth" className="text-[13px]" style={{ color: 'var(--text-muted)' }}>Sign in</Link>
-              <Link href="/auth?tab=register" className="btn-primary text-[13px] px-4 py-1.5">Get started</Link>
-            </div>
-          ) : (
-            <Link href="/market" className="btn-primary text-[13px] px-4 py-1.5">Go to Dashboard</Link>
-          )}
+
+          {/* Right Side */}
+          <div className="flex items-center gap-6 flex-shrink-0">
+            <Link href="/contact" className="hidden sm:block text-gray-300 text-sm font-normal hover:text-white transition-colors">Contact</Link>
+            {!isAuthenticated ? (
+              <Link href="/auth?tab=register" className="text-white text-sm font-normal px-5 py-2 bg-white/95 hover:bg-white rounded transition-colors">Dashboard</Link>
+            ) : (
+              <Link href="/market" className="text-white text-sm font-normal px-5 py-2 bg-white/95 hover:bg-white rounded transition-colors">Dashboard</Link>
+            )}
+          </div>
         </div>
       </nav>
 
