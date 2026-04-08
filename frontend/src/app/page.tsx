@@ -11,6 +11,7 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
+  Code2, Database, Container, GitHub, Cpu, Zap,
 } from 'lucide-react';
 
 // Data
@@ -117,65 +118,25 @@ export default function HomePage() {
       {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
       <section className="py-12 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         <ScrollVelocityRow duration={50}>
-          {/* React */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="11" r="2" fill="#61dafb" opacity="0.4"/>
-            <path d="M19.03 6.72c-1.82-3.15-5.48-5.16-9.03-5.16-3.55 0-7.21 2.01-9.03 5.16-.37.64-.7 1.31-.98 2-1.15 2.98-1.49 6.4-.95 9.62.54 3.21 2.26 6.07 4.83 8.04 2.57 1.97 5.98 3.09 9.13 3.09 3.15 0 6.56-1.12 9.13-3.09 2.57-1.97 4.29-4.83 4.83-8.04.54-3.22.2-6.64-.95-9.62-.28-.69-.61-1.36-.98-2z" fill="none" stroke="#61dafb" stroke-width="1.5" opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          {/* TypeScript */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#3178c6" opacity="0.4">
-            <rect width="24" height="24" rx="2"/>
-            <path d="M8 12l2-3 2 3m0 3h3m-6 0h3" stroke="white" stroke-width="1.5" fill="none"/>
-          </svg>
-          {/* Python */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" opacity="0.4">
-            <defs><linearGradient id="py"><stop offset="0%" style={{stopColor:'#366994'}}/><stop offset="100%" style={{stopColor:'#ffd43b'}}/></linearGradient></defs>
-            <circle cx="12" cy="12" r="10" fill="url(#py)"/>
-            <path d="M8.5 8c1 0 1.5.5 1.5 1.5v5c0 1-.5 1.5-1.5 1.5S7 15.5 7 14.5v-5C7 8.5 7.5 8 8.5 8z" fill="white" opacity="0.6"/>
-          </svg>
-          {/* Node.js */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#339933" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M10 10l2 1.5 2-1.5M10 13l2 1.5 2-1.5" stroke="white" stroke-width="1" fill="none"/>
-          </svg>
-          {/* Docker */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#2496ed" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <rect x="8" y="10" width="1" height="2" fill="white"/>
-            <rect x="10" y="10" width="1" height="2" fill="white"/>
-            <rect x="12" y="10" width="1" height="2" fill="white"/>
-            <rect x="14" y="10" width="1" height="2" fill="white"/>
-          </svg>
-          {/* PostgreSQL */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#336791" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M10 9h4M11 13h2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-          {/* Git */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#f34f29" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9 12l2 1.5 4-3" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          </svg>
-          {/* Tailwind */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="#06b6d4" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M8 14l2-2 2 2m2-4l1.5-1.5 1.5 1.5" stroke="white" stroke-width="1" fill="none" stroke-linecap="round"/>
-          </svg>
-          {/* Base */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M8 12h8M10 10l1 1 2-3" stroke="white" stroke-width="1" fill="none" stroke-linecap="round"/>
-          </svg>
-          {/* GitHub */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M9 14c0 .5.5 1 1 1s1-.5 1-1-.5-1-1-1-1 .5-1 1zm4 0c0 .5.5 1 1 1s1-.5 1-1-.5-1-1-1-1 .5-1 1z" fill="white"/>
-          </svg>
-          {/* Next.js */}
-          <svg className="w-14 h-14 flex-shrink-0" viewBox="0 0 24 24" fill="white" opacity="0.4">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M10 10h4m-4 2h3m-3 2h2" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          </svg>
+          {[
+            { Icon: Code2, name: 'TypeScript' },
+            { Icon: Bot, name: 'AI' },
+            { Icon: Container, name: 'Docker' },
+            { Icon: Database, name: 'PostgreSQL' },
+            { Icon: GitBranch, name: 'Git' },
+            { Icon: Zap, name: 'Fast API' },
+            { Icon: Cpu, name: 'Performance' },
+            { Icon: Shield, name: 'Security' },
+            { Icon: GitHub, name: 'GitHub' },
+            { Icon: MessageSquare, name: 'WebSocket' },
+          ].map(({ Icon, name }) => (
+            <Icon
+              key={name}
+              className="w-14 h-14 flex-shrink-0 text-white opacity-40 hover:opacity-100 transition-opacity"
+              strokeWidth={1.5}
+              title={name}
+            />
+          ))}
         </ScrollVelocityRow>
 
         {/* Fade edges */}
