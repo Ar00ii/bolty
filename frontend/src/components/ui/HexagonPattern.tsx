@@ -1,58 +1,87 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useRef } from 'react';
 
 interface HexagonPatternProps {
-  hexagons: [number, number][];
+  hexagons?: [number, number][];
   className?: string;
 }
 
-export function HexagonPattern({ hexagons, className = '' }: HexagonPatternProps) {
-  const hexSize = 50;
-  const hexWidth = hexSize * 2;
-  const hexHeight = hexSize * Math.sqrt(3);
+export const HexagonPattern = React.forwardRef<
+  HTMLCanvasElement,
+  HexagonPatternProps & React.HTMLAttributes<HTMLCanvasElement>
+>(({ hexagons = [], className = '', ...props }, ref) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size
+    const width = canvas.offsetWidth;
+    const height = canvas.offsetHeight;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+    // Clear canvas
+    ctx.fillStyle = 'transparent';
+    ctx.fillRect(0, 0, width, height);
+
+    // Hexagon settings
+    const hexSize = 40;
+    const gap = 10;
+
+    // Draw hexagons
+    hexagons.forEach(([col, row]) => {
+      const x = col * (hexSize * 1.5 + gap) + hexSize + 50;
+      const y = row * (hexSize * Math.sqrt(3) + gap) + hexSize + 50;
+
+      drawHexagon(ctx, x, y, hexSize);
+    });
+
+    function drawHexagon(
+      context: CanvasRenderingContext2D,
+      centerX: number,
+      centerY: number,
+      size: number
+    ) {
+      context.beginPath();
+
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * Math.PI) / 3;
+        const xOffset = Math.cos(angle) * size;
+        const yOffset = Math.sin(angle) * size;
+
+        if (i === 0) {
+          context.moveTo(centerX + xOffset, centerY + yOffset);
+        } else {
+          context.lineTo(centerX + xOffset, centerY + yOffset);
+        }
+      }
+
+      context.closePath();
+      context.strokeStyle = 'rgba(168, 85, 247, 0.4)';
+      context.lineWidth = 1;
+      context.stroke();
+    }
+  }, [hexagons]);
 
   return (
-    <svg
-      className={`absolute inset-0 w-full h-full ${className}`}
-      viewBox={`0 0 1000 1000`}
-      preserveAspectRatio="xMidYMid slice"
-      style={{
-        opacity: 0.4,
+    <canvas
+      ref={(el) => {
+        canvasRef.current = el;
+        if (typeof ref === 'function') ref(el);
+        else if (ref) ref.current = el;
       }}
-    >
-      <defs>
-        <pattern
-          id="hexagon"
-          x="0"
-          y="0"
-          width={hexWidth}
-          height={hexHeight}
-          patternUnits="userSpaceOnUse"
-        >
-          <polygon
-            points={`${hexSize},0 ${hexSize * 2},${hexHeight / 2} ${hexSize * 2},${hexHeight * 1.5} ${hexSize},${hexHeight * 2} 0,${hexHeight * 1.5} 0,${hexHeight / 2}`}
-            fill="none"
-            stroke="rgba(168, 85, 247, 0.3)"
-            strokeWidth="1"
-          />
-        </pattern>
-      </defs>
-
-      {/* Render hexagons */}
-      {hexagons.map((pos, i) => {
-        const x = pos[0] * hexWidth;
-        const y = pos[1] * hexHeight;
-        const points = `${x + hexSize},${y} ${x + hexSize * 2},${y + hexHeight / 2} ${x + hexSize * 2},${y + hexHeight * 1.5} ${x + hexSize},${y + hexHeight * 2} ${x},${y + hexHeight * 1.5} ${x},${y + hexHeight / 2}`;
-
-        return (
-          <polygon
-            key={i}
-            points={points}
-            fill="none"
-            stroke="rgba(168, 85, 247, 0.4)"
-            strokeWidth="1"
-          />
-        );
-      })}
-    </svg>
+      className={`w-full h-full ${className}`}
+      {...props}
+    />
   );
-}
+});
+
+HexagonPattern.displayName = 'HexagonPattern';
