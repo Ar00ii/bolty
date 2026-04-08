@@ -11,7 +11,6 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
-  Code2, Database, Container, Github, Cpu, Zap,
 } from 'lucide-react';
 
 // Data
@@ -119,22 +118,23 @@ export default function HomePage() {
       <section className="py-12 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
         <ScrollVelocityRow duration={50}>
           {[
-            { Icon: Code2, name: 'TypeScript' },
-            { Icon: Bot, name: 'AI' },
-            { Icon: Container, name: 'Docker' },
-            { Icon: Database, name: 'PostgreSQL' },
-            { Icon: GitBranch, name: 'Git' },
-            { Icon: Zap, name: 'Fast API' },
-            { Icon: Cpu, name: 'Performance' },
-            { Icon: Shield, name: 'Security' },
-            { Icon: Github, name: 'GitHub' },
-            { Icon: MessageSquare, name: 'WebSocket' },
-          ].map(({ Icon, name }) => (
-            <Icon
-              key={name}
-              className="w-14 h-14 flex-shrink-0 text-white opacity-40 hover:opacity-100 transition-opacity"
-              strokeWidth={1.5}
-              title={name}
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg', alt: 'Node.js' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', alt: 'Docker' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg', alt: 'PostgreSQL' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', alt: 'Git' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg', alt: 'Tailwind' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
+          ].map((icon) => (
+            <img
+              key={icon.alt}
+              src={icon.src}
+              alt={icon.alt}
+              className="w-14 h-14 flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+              title={icon.alt}
             />
           ))}
         </ScrollVelocityRow>
