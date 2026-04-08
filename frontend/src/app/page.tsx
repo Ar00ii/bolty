@@ -504,8 +504,8 @@ export default function HomePage() {
                   className="!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center"
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={4}
-                  beamSize={4}
-                  gridColor="rgba(255, 255, 255, 0.8)"
+                  beamSize={8}
+                  gridColor="rgba(255, 255, 255, 0.35)"
                   perspective={200}
                   beamDuration={4}
                 >
@@ -549,8 +549,8 @@ export default function HomePage() {
                   className={`!border-0 !p-0 !rounded-none overflow-hidden flex items-center justify-center ${i < 2 ? 'border-r' : ''}`}
                   style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
                   beamsPerSide={4}
-                  beamSize={4}
-                  gridColor="rgba(255, 255, 255, 0.8)"
+                  beamSize={8}
+                  gridColor="rgba(255, 255, 255, 0.35)"
                   perspective={200}
                   beamDuration={4}
                 >
