@@ -14,9 +14,10 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      {showSidebar && <UnifiedHeader />}
+      {/* Show header only on landing and auth pages */}
+      {!showSidebar && <UnifiedHeader />}
 
-      <div className={`flex ${showSidebar ? 'pt-16' : ''}`}>
+      <div className={`flex ${!showSidebar && !isHome ? 'pt-16' : ''}`}>
         {showSidebar && <Sidebar />}
 
         <div className="flex-1 w-full">
