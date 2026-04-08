@@ -45,7 +45,7 @@ export function ScrollVelocityContainer({
   className = '',
 }: ScrollVelocityContainerProps) {
   return (
-    <div className={`flex flex-col gap-6 overflow-hidden ${className}`}>
+    <div className={`flex flex-col gap-4 overflow-hidden ${className}`}>
       {children}
     </div>
   );
