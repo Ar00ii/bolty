@@ -129,13 +129,14 @@ export default function HomePage() {
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
             { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
           ].map((icon) => (
-            <img
-              key={icon.alt}
-              src={icon.src}
-              alt={icon.alt}
-              className="w-14 h-14 flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
-              title={icon.alt}
-            />
+            <div key={icon.alt} className="w-14 h-14 flex-shrink-0 flex items-center justify-center">
+              <img
+                src={icon.src}
+                alt={icon.alt}
+                className="max-w-full max-h-full opacity-50 hover:opacity-100 transition-opacity"
+                title={icon.alt}
+              />
+            </div>
           ))}
         </ScrollVelocityRow>
 
