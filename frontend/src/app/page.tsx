@@ -281,8 +281,8 @@ export default function HomePage() {
       </section>
 
       {/* ── FEATURES (BENTO GRID) ── */}
-      <section className="py-20 px-4 border-t relative" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
+      <section className="py-24 px-4 border-t relative" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -297,26 +297,25 @@ export default function HomePage() {
             {FEATURES.map((f, i) => {
               const Icon = f.icon;
               return (
-                <Spotlight key={f.href} spotlightColor="rgba(168, 85, 247, 0.25)">
-                  <AnimatedCard
-                    index={i}
-                    className={`rounded-lg border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 group ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
-                    style={{
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                      background: 'rgba(0, 0, 0, 0)',
-                    }}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all group-hover:bg-purple-500/20 group-hover:scale-110" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
-                        <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{f.title}</h3>
-                        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{f.description}</p>
-                      </div>
+                <AnimatedCard
+                  key={f.href}
+                  index={i}
+                  className={`rounded-lg border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 group ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
+                  style={{
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(0, 0, 0, 0)',
+                  }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all group-hover:bg-purple-500/20 group-hover:scale-110" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
+                      <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
                     </div>
-                  </AnimatedCard>
-                </Spotlight>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{f.title}</h3>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{f.description}</p>
+                    </div>
+                  </div>
+                </AnimatedCard>
               );
             })}
           </div>
