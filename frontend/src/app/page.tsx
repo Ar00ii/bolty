@@ -301,8 +301,7 @@ export default function HomePage() {
           <div
             className="relative overflow-hidden rounded-lg"
             style={{
-              borderTop: '1px solid rgba(168, 85, 247, 0.3)',
-              borderLeft: '1px solid rgba(168, 85, 247, 0.3)',
+              border: '1px solid rgba(168, 85, 247, 0.4)',
             }}
           >
             {/* Noise texture overlay */}
@@ -315,11 +314,15 @@ export default function HomePage() {
             />
 
             {/* Grid Container */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
               {FEATURES.map((f, i) => {
                 const Icon = f.icon;
                 const accentColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
                 const accentColor = accentColors[i % accentColors.length];
+
+                // Reputation System (index 5) spans 2 rows on left
+                const isReputationCard = i === 5;
+                const gridClass = isReputationCard ? 'lg:row-span-2' : f.featured ? 'lg:col-span-2' : '';
 
                 return (
                   <motion.div
@@ -327,10 +330,10 @@ export default function HomePage() {
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: i * 0.1 }}
-                    className={`group relative ${f.featured ? 'lg:col-span-2' : ''}`}
+                    className={`group relative ${gridClass}`}
                     style={{
-                      borderRight: '1px solid rgba(168, 85, 247, 0.3)',
-                      borderBottom: '1px solid rgba(168, 85, 247, 0.3)',
+                      borderRight: i % 2 === 0 && !f.featured ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
+                      borderBottom: i < FEATURES.length - 1 ? '1px solid rgba(168, 85, 247, 0.4)' : 'none',
                     }}
                   >
                     {/* Card Background with Gradient */}
@@ -339,6 +342,7 @@ export default function HomePage() {
                       style={{
                         background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(100, 50, 150, 0.08) 100%)',
                         boxShadow: 'inset 0 1px 1px rgba(168, 85, 247, 0.1), inset 0 -1px 1px rgba(0, 0, 0, 0.5)',
+                        minHeight: isReputationCard ? '400px' : 'auto',
                       }}
                     >
                       <div className="relative z-10">
