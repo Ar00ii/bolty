@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useTheme } from '@/lib/theme/ThemeContext';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
@@ -11,6 +12,7 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
+  Sun, Moon,
 } from 'lucide-react';
 
 // Data
@@ -68,6 +70,7 @@ const TESTIMONIALS = [
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
@@ -92,6 +95,16 @@ export default function HomePage() {
 
           {/* Right Side */}
           <div className="flex items-center gap-2 md:gap-4">
+            {/* Dark mode toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+              aria-label="Toggle dark mode"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             {!isAuthenticated ? (
               <>
                 <Link href="/auth" className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
@@ -126,6 +139,7 @@ export default function HomePage() {
               key={icon.alt}
               src={icon.src}
               alt={icon.alt}
+              loading="lazy"
               className="w-14 h-14 flex-shrink-0 flex-grow-0 opacity-50 hover:opacity-100 transition-opacity"
               style={{ objectFit: 'contain', objectPosition: 'center' }}
               title={icon.alt}
@@ -160,27 +174,31 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className={`group rounded-lg border p-6 transition-all duration-300 ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
+                  className={`group rounded-lg border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
                   style={{
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                     background: 'rgba(0, 0, 0, 0)',
                   }}
                   onMouseEnter={(e) => {
                     const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    el.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+                    el.style.background = 'rgba(168, 85, 247, 0.05)';
+                    el.style.transform = 'translateY(-2px)';
                   }}
                   onMouseLeave={(e) => {
                     const el = e.currentTarget as HTMLElement;
                     el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    el.style.background = 'rgba(0, 0, 0, 0)';
+                    el.style.transform = 'translateY(0)';
                   }}
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
-                      <Icon className="w-6 h-6 text-purple-400" />
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all group-hover:bg-purple-500/20 group-hover:scale-110" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
+                      <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">{f.title}</h3>
-                      <p className="text-sm text-gray-400">{f.description}</p>
+                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{f.title}</h3>
+                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{f.description}</p>
                     </div>
                   </div>
                 </motion.div>
