@@ -44,7 +44,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto">
+      <div className="relative z-10 max-w-7xl mx-auto min-h-screen flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* LEFT: Text & Buttons */}
           <motion.div
@@ -92,166 +92,134 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             </div>
           </motion.div>
 
-          {/* RIGHT: Deploy + Dashboard */}
+          {/* RIGHT: Deploy + Cards (floating) */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative flex flex-col items-center"
+            className="relative h-96 flex items-center justify-center"
           >
             {/* Deploy Button */}
             <motion.button
-              initial={{ opacity: 0, y: -20 }}
+              initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="px-8 py-3 rounded-lg font-mono text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors mb-8"
+              className="absolute top-0 left-1/2 transform -translate-x-1/2 px-8 py-3 rounded-lg font-mono text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition-colors z-20"
             >
               deploy
             </motion.button>
 
-            {/* Arrow - Simple and clear */}
-            <svg width="80" height="120" viewBox="0 0 80 120" className="mb-4">
-              {/* Vertical line */}
+            {/* Arrow line - vertical */}
+            <svg width="3" height="80" viewBox="0 0 3 80" className="absolute top-20 left-1/2 transform -translate-x-1/2" style={{ pointerEvents: 'none' }}>
               <motion.line
-                x1="40"
-                y1="10"
-                x2="40"
-                y2="90"
+                x1="1.5"
+                y1="0"
+                x2="1.5"
+                y2="80"
                 stroke="#a855f7"
                 strokeWidth="2"
                 initial={{ pathLength: 0 }}
                 animate={isDeploying ? { pathLength: 1 } : { pathLength: 0 }}
                 transition={{ duration: 1.2 }}
               />
-              {/* Horizontal line */}
-              <motion.line
-                x1="40"
-                y1="90"
-                x2="10"
-                y2="90"
-                stroke="#a855f7"
-                strokeWidth="2"
-                initial={{ pathLength: 0 }}
-                animate={isDeploying ? { pathLength: 1 } : { pathLength: 0 }}
-                transition={{ duration: 0.8, delay: 1 }}
-              />
-              {/* Arrow head */}
-              <motion.polygon
-                points="10,90 15,85 15,95"
-                fill="#a855f7"
-                initial={{ opacity: 0 }}
-                animate={isDeploying ? { opacity: 1 } : { opacity: 0 }}
-                transition={{ delay: 1.5 }}
-              />
             </svg>
 
-            {/* Dashboard - appears after arrow */}
+            {/* Cards - positioned around the center, floating */}
             {showDashboard && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="w-full rounded-lg border border-white/20 p-6"
-                style={{ background: 'rgba(0, 0, 0, 0.6)' }}
-              >
-                <div className="text-xs uppercase tracking-widest text-gray-500 mb-6">Production Dashboard</div>
-
-                {/* Cards Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  {/* Card 1 */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="border border-white/10 rounded-lg p-4"
-                    style={{ background: 'rgba(168, 85, 247, 0.1)' }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Activity className="w-4 h-4 text-purple-400" />
-                      <span className="text-xs text-gray-500 uppercase">AI Agent</span>
-                    </div>
-                    <div className="text-sm text-green-400 font-medium mb-3">Deploying</div>
-                    <div className="flex gap-1 h-10 items-end">
-                      {[0.3, 0.5, 0.4, 0.7, 0.6, 0.8].map((h, i) => (
-                        <div key={i} className="flex-1 bg-purple-500/60 rounded" style={{ height: `${h * 100}%` }} />
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Card 2 */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="border border-white/10 rounded-lg p-4"
-                    style={{ background: 'rgba(6, 182, 212, 0.1)' }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Activity className="w-4 h-4 text-cyan-400" />
-                      <span className="text-xs text-gray-500 uppercase">ETH Pay</span>
-                    </div>
-                    <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Available
-                    </div>
-                    <div className="flex gap-1 h-10 items-end">
-                      {[0.4, 0.45, 0.42, 0.48, 0.44, 0.5].map((h, i) => (
-                        <div key={i} className="flex-1 bg-cyan-500/60 rounded" style={{ height: `${h * 100}%` }} />
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Card 3 */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="border border-white/10 rounded-lg p-4"
-                    style={{ background: 'rgba(236, 72, 153, 0.1)' }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Activity className="w-4 h-4 text-pink-400" />
-                      <span className="text-xs text-gray-500 uppercase">Database</span>
-                    </div>
-                    <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Available
-                    </div>
-                    <div className="flex gap-1 h-10 items-end">
-                      {[0.5, 0.55, 0.52, 0.58, 0.54, 0.6].map((h, i) => (
-                        <div key={i} className="flex-1 bg-pink-500/60 rounded" style={{ height: `${h * 100}%` }} />
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  {/* Card 4 */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.8 }}
-                    className="border border-white/10 rounded-lg p-4"
-                    style={{ background: 'rgba(34, 197, 94, 0.1)' }}
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Activity className="w-4 h-4 text-green-400" />
-                      <span className="text-xs text-gray-500 uppercase">Cache</span>
-                    </div>
-                    <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
-                      <CheckCircle2 className="w-4 h-4" /> Available
-                    </div>
-                    <div className="flex gap-1 h-10 items-end">
-                      {[0.6, 0.62, 0.64, 0.66, 0.68, 0.65].map((h, i) => (
-                        <div key={i} className="flex-1 bg-green-500/60 rounded" style={{ height: `${h * 100}%` }} />
-                      ))}
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Bottom Stats */}
+              <>
+                {/* Card 1 - Top Left */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="absolute w-48 border border-white/20 rounded-lg p-4"
+                  style={{ background: 'rgba(168, 85, 247, 0.15)', top: '20%', left: '-20%' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Activity className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs text-gray-500 uppercase">AI Agent</span>
+                  </div>
+                  <div className="text-sm text-green-400 font-medium mb-3">Deploying</div>
+                  <div className="flex gap-1 h-12 items-end">
+                    {[0.3, 0.5, 0.4, 0.7, 0.6, 0.8].map((h, i) => (
+                      <div key={i} className="flex-1 bg-purple-500/60 rounded" style={{ height: `${h * 100}%` }} />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Card 2 - Right Middle */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="absolute w-48 border border-white/20 rounded-lg p-4"
+                  style={{ background: 'rgba(6, 182, 212, 0.15)', top: '50%', right: '-20%', transform: 'translateY(-50%)' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <span className="text-xs text-gray-500 uppercase">ETH Pay</span>
+                  </div>
+                  <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" /> Available
+                  </div>
+                  <div className="flex gap-1 h-12 items-end">
+                    {[0.4, 0.45, 0.42, 0.48, 0.44, 0.5].map((h, i) => (
+                      <div key={i} className="flex-1 bg-cyan-500/60 rounded" style={{ height: `${h * 100}%` }} />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Card 3 - Bottom Left */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="absolute w-48 border border-white/20 rounded-lg p-4"
+                  style={{ background: 'rgba(236, 72, 153, 0.15)', bottom: '0%', left: '-20%' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Activity className="w-4 h-4 text-pink-400" />
+                    <span className="text-xs text-gray-500 uppercase">Database</span>
+                  </div>
+                  <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" /> Available
+                  </div>
+                  <div className="flex gap-1 h-12 items-end">
+                    {[0.5, 0.55, 0.52, 0.58, 0.54, 0.6].map((h, i) => (
+                      <div key={i} className="flex-1 bg-pink-500/60 rounded" style={{ height: `${h * 100}%` }} />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Card 4 - Bottom Right */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="absolute w-48 border border-white/20 rounded-lg p-4"
+                  style={{ background: 'rgba(34, 197, 94, 0.15)', bottom: '0%', right: '-20%' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <Activity className="w-4 h-4 text-green-400" />
+                    <span className="text-xs text-gray-500 uppercase">Cache</span>
+                  </div>
+                  <div className="text-sm text-green-400 font-medium mb-3 flex items-center gap-1">
+                    <CheckCircle2 className="w-4 h-4" /> Available
+                  </div>
+                  <div className="flex gap-1 h-12 items-end">
+                    {[0.6, 0.62, 0.64, 0.66, 0.68, 0.65].map((h, i) => (
+                      <div key={i} className="flex-1 bg-green-500/60 rounded" style={{ height: `${h * 100}%` }} />
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Card 5 - Center Right (wider) */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20, scale: 0.8 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: 1.0 }}
-                  className="border border-white/10 rounded-lg p-4"
-                  style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+                  className="absolute w-56 border border-white/20 rounded-lg p-4"
+                  style={{ background: 'rgba(0, 0, 0, 0.6)', right: '-25%', top: '50%', transform: 'translateY(-50%)' }}
                 >
                   <div className="grid grid-cols-3 gap-4">
                     <div>
@@ -268,7 +236,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     </div>
                   </div>
                 </motion.div>
-              </motion.div>
+              </>
             )}
           </motion.div>
         </div>
