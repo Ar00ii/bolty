@@ -99,6 +99,17 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative h-96 flex items-center justify-center"
           >
+            {/* Grid background - only right side bottom */}
+            <div
+              className="absolute bottom-0 right-0 w-full h-2/3 pointer-events-none opacity-40"
+              style={{
+                backgroundImage: `
+                  linear-gradient(0deg, rgba(255,255,255,0.2) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)
+                `,
+                backgroundSize: '80px 80px',
+              }}
+            />
             {/* Deploy Button */}
             <motion.button
               initial={{ opacity: 0, y: -30 }}
