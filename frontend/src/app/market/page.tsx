@@ -423,19 +423,19 @@ export default function MarketPage() {
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
       )}
 
-      <div className="page-container py-8">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-12 pt-20">
         {/* Header */}
-        <div className="page-header">
-          <div className="flex items-center justify-between">
+        <div className="mb-12">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Marketplace</h1>
-              <p className="text-sm text-zinc-500 mt-0.5">AI agents, automation tools, and code repositories</p>
+              <h1 className="text-4xl lg:text-5xl font-light text-white mb-2">Marketplace</h1>
+              <p className="text-base text-gray-400">AI agents, automation tools, and code repositories</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Link href="/market/agents" className="btn-secondary text-sm flex items-center gap-1.5 px-4 py-2">
+            <div className="flex items-center gap-3">
+              <Link href="/market/agents" className="px-6 py-2.5 text-sm text-white border border-zinc-700 rounded hover:bg-zinc-800/50 transition-all flex items-center gap-2">
                 <Bot className="w-4 h-4" /> Agents
               </Link>
-              <Link href="/market/repos" className="btn-secondary text-sm flex items-center gap-1.5 px-4 py-2">
+              <Link href="/market/repos" className="px-6 py-2.5 text-sm text-white border border-zinc-700 rounded hover:bg-zinc-800/50 transition-all flex items-center gap-2">
                 <GitBranch className="w-4 h-4" /> Repos
               </Link>
             </div>
