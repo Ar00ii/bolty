@@ -11,6 +11,7 @@ import {
   Bot, GitBranch, ArrowRight, Shield,
   Key, Star, TrendingUp,
   MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
+  Search, Menu, X, ChevronDown, LogOut, Settings, User as UserIcon,
 } from 'lucide-react';
 
 // Data
@@ -94,8 +95,20 @@ const FAQ = [
 ];
 
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const profileRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const navLinks = [
+    { href: '/market', label: 'Marketplace' },
+    { href: '/docs/agent-protocol', label: 'Docs' },
+    { href: '#how-it-works', label: 'How It Works', isHash: true },
+  ];
 
   return (
     <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
@@ -106,11 +119,27 @@ export default function HomePage() {
         backdropFilter: 'blur(10px)'
       }}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
           {/* Left Links - Hidden on mobile */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/market" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Marketplace</Link>
-            <Link href="/docs/agent-protocol" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">Docs</Link>
-            <a href="#how-it-works" className="text-gray-400 text-sm font-normal hover:text-white transition-colors">How It Works</a>
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-1.5 rounded-md text-sm font-medium transition-all relative group text-gray-400 hover:text-white"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-purple-400 group-hover:w-full transition-all duration-300" />
+              </Link>
+            ))}
           </div>
 
           {/* Mobile Logo - Only visible on mobile */}
@@ -120,16 +149,153 @@ export default function HomePage() {
 
           {/* Right Side */}
           <div className="flex items-center gap-2 md:gap-4">
-            {!isAuthenticated ? (
+            {/* Search */}
+            <div className="relative hidden sm:flex">
+              {searchOpen ? (
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                    <input
+                      ref={searchRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search..."
+                      className="w-48 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-purple-500/50 transition-colors"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') setSearchOpen(false);
+                      }}
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    }}
+                    className="text-zinc-500 hover:text-zinc-300 p-1"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-zinc-700/50 text-zinc-500 hover:text-zinc-300 hover:border-zinc-600 text-xs transition-all"
+                >
+                  <Search className="w-3.5 h-3.5" />
+                  <span>Search</span>
+                </button>
+              )}
+            </div>
+
+            {isAuthenticated ? (
               <>
-                <Link href="/auth" className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors">Sign in</Link>
-                <Link href="/auth?tab=register" className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-colors shadow-lg hover:shadow-xl">Get started</Link>
+                {/* Profile dropdown */}
+                <div ref={profileRef} className="relative">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-all"
+                  >
+                    {user?.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={user?.displayName || user?.username || 'user'}
+                        className="w-7 h-7 rounded-full border border-zinc-700"
+                      />
+                    ) : (
+                      <div className="w-7 h-7 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-semibold">
+                        {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">
+                      {user?.displayName || user?.username || 'User'}
+                    </span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 bg-zinc-900">
+                      <div className="p-3 border-b border-zinc-700/50">
+                        <p className="text-sm font-medium text-white truncate">{user?.displayName || user?.username || 'User'}</p>
+                        <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
+                      </div>
+                      <div className="py-1">
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <UserIcon className="w-4 h-4" /> Profile
+                        </Link>
+                        <Link
+                          href="/api-keys"
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <Key className="w-4 h-4" /> API Keys
+                        </Link>
+                        <Link
+                          href="/profile?tab=security"
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                        >
+                          <Settings className="w-4 h-4" /> Settings
+                        </Link>
+                      </div>
+                      <div className="py-1 border-t border-zinc-700/50">
+                        <button
+                          className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
+                        >
+                          <LogOut className="w-4 h-4" /> Sign out
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
-              <Link href="/market" className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-colors shadow-lg hover:shadow-xl">Dashboard</Link>
+              <>
+                <Link
+                  href="/auth"
+                  className="hidden sm:block text-gray-400 text-sm font-normal hover:text-white transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/auth?tab=register"
+                  className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-all shadow-lg hover:shadow-xl"
+                >
+                  Get started
+                </Link>
+              </>
             )}
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-zinc-700/50 bg-black/95 backdrop-blur-sm">
+            <div className="px-4 py-4 space-y-3">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                >
+                  {link.label}
+                </Link>
+              ))}
+              {!isAuthenticated && (
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── HERO (RENDER STYLE) ── */}
