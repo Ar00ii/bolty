@@ -358,8 +358,8 @@ export default function HomePage() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className={`group relative ${gridClass}`}
                     style={{
-                      borderRight: i % 2 === 0 && !f.featured && !isReputationCard ? `1px solid ${accentBorderMap[accentColor]}` : 'none',
-                      borderBottom: i < FEATURES.length - 1 ? `1px solid ${accentBorderMap[accentColor]}` : 'none',
+                      borderRight: !f.featured && !isReputationCard && i > 0 && (i - 1) % 2 === 0 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+                      borderBottom: i < FEATURES.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
                     }}
                   >
                     {/* Card Background with Gradient */}
