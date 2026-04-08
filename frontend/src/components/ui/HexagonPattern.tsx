@@ -39,12 +39,13 @@ export const HexagonPattern = React.forwardRef<
     const hexHeight = hexRadius * Math.sqrt(3);
 
     // Draw hexagons in a grid pattern
+    const verticalSpacing = hexHeight * (Math.sqrt(3) / 2);
     for (let col = -2; col < Math.ceil(width / (hexWidth * 0.75)) + 2; col++) {
-      for (let row = -2; row < Math.ceil(height / hexHeight) + 2; row++) {
+      for (let row = -2; row < Math.ceil(height / verticalSpacing) + 2; row++) {
         // Honeycomb offset pattern
         const xOffset = row % 2 === 0 ? 0 : hexWidth * 0.75;
         const x = col * (hexWidth * 0.75) + xOffset + 50;
-        const y = row * (hexHeight * 0.75) + 50;
+        const y = row * verticalSpacing + 50;
 
         drawHexagon(ctx, x, y, hexRadius);
       }
