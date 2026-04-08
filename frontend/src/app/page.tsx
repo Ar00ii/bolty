@@ -13,6 +13,7 @@ import { Spotlight } from '@/components/ui/Spotlight';
 import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { StaticWarpBackground } from '@/components/ui/StaticWarpBackground';
+import { WarpBackground } from '@/components/ui/WarpBackground';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -487,25 +488,31 @@ export default function HomePage() {
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
             <h2 className="text-4xl lg:text-5xl font-light mb-8">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {HOW_IT_WORKS.map((item, i) => {
                 const Icon = item.icon;
                 return (
-                  <motion.div
+                  <WarpBackground
                     key={i}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.15 }}
-                    className="flex gap-4"
+                    className="h-24"
+                    gridColor="rgba(255, 255, 255, 0.08)"
+                    beamsPerSide={2}
+                    beamSize={8}
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(0, 0, 0, 0.5)',
+                    }}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-light">
-                      {item.step}
+                    <div className="flex items-center gap-4 h-full px-6">
+                      <div className="w-10 h-10 rounded-lg bg-purple-600/30 flex items-center justify-center flex-shrink-0 text-purple-400 font-light text-sm">
+                        {item.step}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-light text-white">{item.title}</h3>
+                        <p className="text-sm text-gray-400">{item.desc}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-light text-white">{item.title}</h3>
-                      <p className="text-sm text-gray-400 mt-1">{item.desc}</p>
-                    </div>
-                  </motion.div>
+                  </WarpBackground>
                 );
               })}
             </div>
