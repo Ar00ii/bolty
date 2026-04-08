@@ -7,6 +7,35 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Focus states for keyboard navigation */
+button:focus,
+a:focus,
+input:focus {
+  outline: 2px solid rgba(168, 85, 247, 0.5);
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Custom focus visible for better UX */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(168, 85, 247, 0.8);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    CSS Variables
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -722,6 +751,23 @@ h1, h2, h3, h4, h5, h6 {
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
+  }
+
+  /* Section separators */
+  section {
+    position: relative;
+  }
+
+  section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2), transparent);
+    pointer-events: none;
+  }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
