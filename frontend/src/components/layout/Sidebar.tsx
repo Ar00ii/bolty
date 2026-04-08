@@ -298,7 +298,7 @@ function SidebarItem({
               animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="space-y-1 border-l-2 border-white/5 ml-2 pl-2 py-1"
+              className="space-y-1 border-l-2 border-purple-500/20 ml-2 pl-2 py-1"
             >
               {section.children!.map((child, idx) => {
                 const childActive = isActive(child.href);
