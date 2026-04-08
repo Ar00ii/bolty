@@ -194,11 +194,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-3 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
-                <div className="w-5 h-5 flex items-center justify-center">
-                  <svg viewBox="0 0 24 24" fill="currentColor" style={{ color: '#627EEA' }} className="w-5 h-5">
-                    <path d="M11.944 17.97H4.58v-4.55h7.364c.879 0 1.434.574 1.434 1.39v1.77c0 .816-.555 1.39-1.434 1.39zm6.56-9.73H4.58V3.68h13.924v4.56z"/>
-                  </svg>
-                </div>
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/ethereum/ethereum-original.svg" alt="Ethereum" className="w-5 h-5" />
                 <span className="text-white font-medium text-sm">Ethereum</span>
               </div>
 
