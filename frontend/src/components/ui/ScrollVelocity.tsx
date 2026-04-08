@@ -14,13 +14,13 @@ export function ScrollVelocityRow({
   return (
     <div className="flex overflow-hidden w-full">
       <div
-        className="flex gap-24 flex-shrink-0 animate-scroll"
+        className="flex gap-32 flex-shrink-0 animate-scroll"
         style={{ animationDuration: `${duration}s` }}
       >
         {children}
       </div>
       <div
-        className="flex gap-24 flex-shrink-0 animate-scroll"
+        className="flex gap-32 flex-shrink-0 animate-scroll"
         style={{ animationDuration: `${duration}s` }}
         aria-hidden
       >
