@@ -7,6 +7,10 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { GradientText } from '@/components/ui/GradientText';
+import { Spotlight } from '@/components/ui/Spotlight';
+import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -426,14 +430,13 @@ export default function HomePage() {
                 >
                   Sign in
                 </Link>
-                <motion.div whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}} whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}>
-                  <Link
-                    href="/auth?tab=register"
-                    className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-all shadow-lg hover:shadow-xl"
-                  >
-                    Get started
-                  </Link>
-                </motion.div>
+                <ShimmerButton
+                  as={Link}
+                  href="/auth?tab=register"
+                  className="text-white text-xs md:text-sm font-normal px-3 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 rounded transition-all shadow-lg hover:shadow-xl"
+                >
+                  Get started
+                </ShimmerButton>
               </>
             )}
           </div>
@@ -581,46 +584,33 @@ export default function HomePage() {
             className="mb-16"
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Platform Features</p>
-            <h2 className="text-5xl font-bold text-white">Everything you need</h2>
+            <h2 className="text-5xl font-bold">Everything you <GradientText gradient="purple">need</GradientText></h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max">
             {FEATURES.map((f, i) => {
               const Icon = f.icon;
               return (
-                <motion.div
-                  key={f.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className={`group rounded-lg border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
-                  style={{
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    background: 'rgba(0, 0, 0, 0)',
-                  }}
-                  onMouseEnter={(e) => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-                    el.style.background = 'rgba(168, 85, 247, 0.05)';
-                    el.style.transform = 'translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    const el = e.currentTarget as HTMLElement;
-                    el.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    el.style.background = 'rgba(0, 0, 0, 0)';
-                    el.style.transform = 'translateY(0)';
-                  }}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all group-hover:bg-purple-500/20 group-hover:scale-110" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
-                      <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                <Spotlight key={f.href} spotlightColor="rgba(168, 85, 247, 0.25)">
+                  <AnimatedCard
+                    index={i}
+                    className={`rounded-lg border p-6 transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-purple-500/10 group ${f.featured ? 'md:col-span-2 md:row-span-1' : ''}`}
+                    style={{
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                      background: 'rgba(0, 0, 0, 0)',
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition-all group-hover:bg-purple-500/20 group-hover:scale-110" style={{ background: 'rgba(168, 85, 247, 0.1)' }}>
+                        <Icon className="w-6 h-6 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{f.title}</h3>
+                        <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{f.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-purple-300 transition-colors">{f.title}</h3>
-                      <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{f.description}</p>
-                    </div>
-                  </div>
-                </motion.div>
+                  </AnimatedCard>
+                </Spotlight>
               );
             })}
           </div>
@@ -637,7 +627,7 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-8">Three steps to get started</h2>
+            <h2 className="text-4xl lg:text-5xl font-bold mb-8">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
 
             <div className="space-y-6">
               {HOW_IT_WORKS.map((item, i) => {
@@ -820,24 +810,32 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-bold text-white mb-4">Ready to start building?</h2>
+            <h2 className="text-5xl font-bold mb-4">Ready to <GradientText gradient="purple">start building</GradientText>?</h2>
             <p className="text-lg text-gray-400 mb-8">
               Join the platform where code meets commerce. Publish, sell, and earn — all in one place.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!isAuthenticated ? (
                 <>
-                  <Link href="/auth?tab=register" className="text-white text-sm px-8 py-3 rounded-lg flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
+                  <ShimmerButton
+                    as={Link}
+                    href="/auth?tab=register"
+                    className="text-white text-sm px-8 py-3 rounded-lg flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
+                  >
                     Create free account <ArrowRight className="w-4 h-4" />
-                  </Link>
+                  </ShimmerButton>
                   <Link href="/docs/agent-protocol" className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all">
                     Read the docs
                   </Link>
                 </>
               ) : (
-                <Link href="/market" className="text-white text-sm px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl hover:scale-105 active:scale-95">
+                <ShimmerButton
+                  as={Link}
+                  href="/market"
+                  className="text-white text-sm px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
+                >
                   Go to dashboard <ArrowRight className="w-4 h-4" />
-                </Link>
+                </ShimmerButton>
               )}
             </div>
           </motion.div>
