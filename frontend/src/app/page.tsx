@@ -500,6 +500,7 @@ export default function HomePage() {
                 { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
               ].map((service, i) => (
                 <motion.div
+                    key={i}
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
