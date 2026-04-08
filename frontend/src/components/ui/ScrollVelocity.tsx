@@ -21,7 +21,7 @@ export function ScrollVelocityRow({
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`,
-          gap: '48px'
+          gap: '40px'
         }}
       >
         {children}
@@ -31,7 +31,7 @@ export function ScrollVelocityRow({
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`,
-          gap: '48px'
+          gap: '40px'
         }}
         aria-hidden
       >
