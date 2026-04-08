@@ -1036,6 +1036,151 @@ p, span, a, li, button, input, textarea {
     border-color: rgba(131, 110, 249, 0.3);
   }
 
+  /* ── Enhanced Card Hover Effects ── */
+  .card,
+  [role="article"],
+  .marketplace-card,
+  .agent-card,
+  .repo-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .card:hover,
+  [role="article"]:hover,
+  .marketplace-card:hover,
+  .agent-card:hover,
+  .repo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(131, 110, 249, 0.15);
+  }
+
+  /* ── Enhanced Button Hover Effects ── */
+  button:not(:disabled),
+  .btn,
+  [role="button"] {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button:not(:disabled):hover,
+  .btn:hover,
+  [role="button"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(131, 110, 249, 0.2);
+  }
+
+  button:not(:disabled):active,
+  .btn:active,
+  [role="button"]:active {
+    transform: translateY(0px);
+  }
+
+  /* ── Button Ripple Effect ── */
+  button:not(:disabled)::after,
+  .btn::after,
+  [role="button"]::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  button:not(:disabled):active::after,
+  .btn:active::after,
+  [role="button"]:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* ── Link Hover Animation ── */
+  a:not([role="button"]),
+  .link {
+    position: relative;
+    transition: color 0.2s ease;
+  }
+
+  a:not([role="button"])::after,
+  .link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #836ef9, #a78bfa);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  a:not([role="button"]):hover::after,
+  .link:hover::after {
+    width: 100%;
+  }
+
+  /* ── Input Field Enhancements ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+
+  input[type="text"]:hover,
+  input[type="email"]:hover,
+  input[type="password"]:hover,
+  input[type="search"]:hover,
+  textarea:hover,
+  select:hover {
+    border-color: rgba(131, 110, 249, 0.3);
+    box-shadow: 0 0 12px rgba(131, 110, 249, 0.1);
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="search"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #836ef9;
+    box-shadow: 0 0 16px rgba(131, 110, 249, 0.25);
+  }
+
+  /* ── Badge/Pill Animations ── */
+  .badge,
+  .pill,
+  .tag {
+    transition: all 0.2s ease;
+  }
+
+  .badge:hover,
+  .pill:hover,
+  .tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(131, 110, 249, 0.2);
+  }
+
+  /* ── Icon Hover Effects ── */
+  svg,
+  .icon {
+    transition: all 0.2s ease;
+  }
+
+  button:hover svg,
+  a:hover svg,
+  .icon-hover:hover {
+    transform: scale(1.1) rotate(2deg);
+  }
+
   /* ── Sidebar Styling ── */
   aside {
     scrollbar-width: thin;
