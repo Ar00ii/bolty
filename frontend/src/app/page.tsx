@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
+import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { motion } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -106,7 +107,38 @@ export default function HomePage() {
       {/* ── HERO (RENDER STYLE) ── */}
       <RenderHero isAuthenticated={isAuthenticated} />
 
-{/* ── FEATURES (BENTO GRID) ── */}
+      {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
+      <section className="py-12 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+        <ScrollVelocityRow duration={50}>
+          {[
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg', alt: 'Node.js' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', alt: 'Docker' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg', alt: 'PostgreSQL' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', alt: 'Git' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg', alt: 'Tailwind' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
+            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
+          ].map((icon) => (
+            <img
+              key={icon.alt}
+              src={icon.src}
+              alt={icon.alt}
+              className="w-14 h-14 flex-shrink-0 flex-grow-0 opacity-50 hover:opacity-100 transition-opacity"
+              style={{ objectFit: 'contain', objectPosition: 'center' }}
+              title={icon.alt}
+            />
+          ))}
+        </ScrollVelocityRow>
+
+        {/* Fade edges */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }} />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
+      </section>
+
+      {/* ── FEATURES (BENTO GRID) ── */}
       <section className="py-20 px-4 border-t relative" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
