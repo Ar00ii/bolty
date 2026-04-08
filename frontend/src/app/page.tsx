@@ -545,26 +545,36 @@ export default function HomePage() {
               { name: 'Cache Layer', desc: 'Edge caching for low latency', active: false },
               { name: 'Auth Service', desc: 'OAuth, JWT & Web3 wallets', active: false },
             ].map((service, i) => (
-              <div
+              <WarpBackground
                 key={i}
-                className="rounded-xl border px-5 py-4 flex items-center justify-between"
+                className="!p-4 !border-0 h-20"
+                gridColor="rgba(255, 255, 255, 0.08)"
+                beamsPerSide={2}
+                beamSize={8}
                 style={{
-                  borderColor: service.active ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.1)',
-                  background: '#000000',
-                  boxShadow: service.active ? '0 0 24px rgba(34, 197, 94, 0.1)' : 'none',
+                  borderRadius: '0.75rem',
                 }}
               >
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
-                  <div>
-                    <span className={`block text-sm ${service.active ? 'text-green-400' : 'text-gray-200'}`}>{service.name}</span>
-                    <span className="block text-xs text-gray-500">{service.desc}</span>
+                <div
+                  className="rounded-xl border px-5 py-4 flex items-center justify-between h-full"
+                  style={{
+                    borderColor: service.active ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.1)',
+                    background: '#000000',
+                    boxShadow: service.active ? '0 0 24px rgba(34, 197, 94, 0.1)' : 'none',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                    <div>
+                      <span className={`block text-sm ${service.active ? 'text-green-400' : 'text-gray-200'}`}>{service.name}</span>
+                      <span className="block text-xs text-gray-500">{service.desc}</span>
+                    </div>
                   </div>
+                  {service.active && (
+                    <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                  )}
                 </div>
-                {service.active && (
-                  <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
-                )}
-              </div>
+              </WarpBackground>
             ))}
           </motion.div>
         </div>
