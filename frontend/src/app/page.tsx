@@ -515,19 +515,37 @@ export default function HomePage() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-3"
+            className="space-y-4"
           >
-            {['Web service', 'API Layer', 'Database', 'Queue Worker', 'Cache Layer', 'Auth Service'].map((service, i) => (
+            {[
+              { name: 'Web service', desc: 'Frontend & backend hosting', active: false },
+              { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', active: true },
+              { name: 'Database', desc: 'Managed PostgreSQL & Redis', active: false },
+              { name: 'Queue Worker', desc: 'Background jobs & async tasks', active: false },
+              { name: 'Cache Layer', desc: 'Edge caching for low latency', active: false },
+              { name: 'Auth Service', desc: 'OAuth, JWT & Web3 wallets', active: false },
+            ].map((service, i) => (
               <div
                 key={i}
-                className="flex items-center gap-3 p-4 rounded-lg border transition-all"
+                className="relative rounded-xl border px-6 py-5 transition-all overflow-hidden"
                 style={{
-                  borderColor: i === 1 ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.1)',
-                  background: i === 1 ? 'rgba(34, 197, 94, 0.1)' : 'rgba(0, 0, 0, 0)',
+                  borderColor: service.active ? 'rgba(34, 197, 94, 0.5)' : 'rgba(255, 255, 255, 0.08)',
+                  background: service.active ? 'rgba(34, 197, 94, 0.06)' : 'rgba(255, 255, 255, 0.02)',
+                  boxShadow: service.active ? '0 0 20px rgba(34, 197, 94, 0.1)' : 'none',
                 }}
               >
-                <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${i === 1 ? 'text-green-400' : 'text-gray-500'}`} />
-                <span className={i === 1 ? 'text-green-400 font-light' : 'text-gray-300'}>{service}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className={`w-5 h-5 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
+                    <div>
+                      <span className={`block text-sm ${service.active ? 'text-green-400' : 'text-gray-200'}`}>{service.name}</span>
+                      <span className="block text-xs text-gray-500 mt-0.5">{service.desc}</span>
+                    </div>
+                  </div>
+                  {service.active && (
+                    <span className="text-xs text-green-400/70 border border-green-400/20 rounded-full px-2 py-0.5">Live</span>
+                  )}
+                </div>
               </div>
             ))}
           </motion.div>
