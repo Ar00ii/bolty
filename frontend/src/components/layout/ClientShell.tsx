@@ -1,20 +1,31 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/ui/footer-section';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(false);
+
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
   const showSidebar = !isHome && !isAuth;
 
+  // Show loading bar on route change
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <ProgressBar isLoading={isLoading} />
       {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
 
