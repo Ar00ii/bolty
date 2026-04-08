@@ -1035,3 +1035,62 @@ p, span, a, li, button, input, textarea {
     background-color: rgba(131, 110, 249, 0.1);
     border-color: rgba(131, 110, 249, 0.3);
   }
+
+  /* ── Sidebar Layout ── */
+  aside {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(131, 110, 249, 0.3) transparent;
+  }
+
+  aside::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  aside::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  aside::-webkit-scrollbar-thumb {
+    background: rgba(131, 110, 249, 0.3);
+    border-radius: 3px;
+  }
+
+  aside::-webkit-scrollbar-thumb:hover {
+    background: rgba(131, 110, 249, 0.5);
+  }
+
+  /* ── Sidebar Collapse Animation ── */
+  @media (min-width: 1024px) {
+    aside {
+      animation: sidebar-enter 0.3s ease;
+    }
+
+    @keyframes sidebar-enter {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  }
+
+  /* ── Mobile Sidebar ── */
+  @media (max-width: 1023px) {
+    aside {
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  /* ── Ensure proper spacing with sidebar ── */
+  main {
+    transition: margin-left 0.3s ease;
+  }
+
+  @media (max-width: 1023px) {
+    main {
+      margin-left: 0;
+    }
+  }
