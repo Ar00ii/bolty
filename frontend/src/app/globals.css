@@ -1036,14 +1036,14 @@ p, span, a, li, button, input, textarea {
     border-color: rgba(131, 110, 249, 0.3);
   }
 
-  /* ── Sidebar Layout ── */
+  /* ── Sidebar Styling ── */
   aside {
     scrollbar-width: thin;
-    scrollbar-color: rgba(131, 110, 249, 0.3) transparent;
+    scrollbar-color: rgba(131, 110, 249, 0.4) transparent;
   }
 
   aside::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
   }
 
   aside::-webkit-scrollbar-track {
@@ -1051,46 +1051,105 @@ p, span, a, li, button, input, textarea {
   }
 
   aside::-webkit-scrollbar-thumb {
-    background: rgba(131, 110, 249, 0.3);
+    background: rgba(131, 110, 249, 0.4);
     border-radius: 3px;
+    transition: background-color 0.2s ease;
   }
 
   aside::-webkit-scrollbar-thumb:hover {
-    background: rgba(131, 110, 249, 0.5);
+    background: rgba(131, 110, 249, 0.6);
   }
 
-  /* ── Sidebar Collapse Animation ── */
+  /* ── Sidebar Menu Items ── */
+  aside a, aside button {
+    position: relative;
+    overflow: hidden;
+  }
+
+  aside a::before, aside button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(131, 110, 249, 0.1) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  aside a:hover::before, aside button:hover::before {
+    opacity: 1;
+  }
+
+  /* ── Desktop Sidebar Layout ── */
   @media (min-width: 1024px) {
     aside {
-      animation: sidebar-enter 0.3s ease;
+      position: relative;
+      animation: sidebar-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     @keyframes sidebar-enter {
       from {
         opacity: 0;
-        transform: translateX(-20px);
+        transform: translateX(-30px);
       }
       to {
         opacity: 1;
         transform: translateX(0);
       }
     }
+
+    /* Flex layout for sidebar + content */
+    main {
+      width: 100%;
+    }
   }
 
   /* ── Mobile Sidebar ── */
   @media (max-width: 1023px) {
     aside {
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.8);
+      border-right: 1px solid rgba(131, 110, 249, 0.1);
+    }
+
+    /* Ensure menu button is above sidebar */
+    button[aria-label*="menu"] {
+      z-index: 50;
+      pointer-events: auto;
+    }
+
+    /* Touch-friendly spacing on mobile */
+    aside a, aside button {
+      min-height: 44px;
     }
   }
 
-  /* ── Ensure proper spacing with sidebar ── */
-  main {
-    transition: margin-left 0.3s ease;
+  /* ── Smooth Transitions ── */
+  aside {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @media (max-width: 1023px) {
-    main {
-      margin-left: 0;
+  /* ── Sidebar Badge Animation ── */
+  .sidebar-badge {
+    animation: badge-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes badge-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  /* ── Focus Visible for Accessibility ── */
+  aside button:focus-visible,
+  aside a:focus-visible {
+    outline: 2px solid rgba(168, 85, 247, 0.8);
+    outline-offset: -2px;
+  }
+
+  /* ── Reduced Motion Support ── */
+  @media (prefers-reduced-motion: reduce) {
+    aside,
+    aside * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
     }
   }
