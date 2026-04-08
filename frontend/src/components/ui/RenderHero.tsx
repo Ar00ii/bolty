@@ -110,12 +110,18 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               {phase === 'idle' || phase === 'pressed' ? 'Deploy' : phase === 'deploying' ? 'Deploying...' : 'Deployed'}
             </motion.div>
 
-            {/* Arrow line */}
-            <svg width="4" height="100" viewBox="0 0 4 100" className="absolute -top-1 right-16 z-10" style={{ pointerEvents: 'none' }}>
+            {/* Arrow line - better positioned */}
+            <svg width="2" height="120" viewBox="0 0 2 120" className="absolute left-1/2 -translate-x-1/2 z-10" style={{ pointerEvents: 'none', top: '35px' }}>
+              <defs>
+                <linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#a855f7" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#a855f7" stopOpacity="0.5" />
+                </linearGradient>
+              </defs>
               <motion.line
-                x1="2" y1="0" x2="2" y2="100"
-                stroke="#a855f7"
-                strokeWidth="2"
+                x1="1" y1="0" x2="1" y2="120"
+                stroke="url(#arrowGrad)"
+                strokeWidth="3"
                 strokeLinecap="round"
                 initial={{ pathLength: 0, opacity: 0 }}
                 animate={phase !== 'idle' ? { pathLength: 1, opacity: 1 } : { pathLength: 0, opacity: 0 }}
@@ -127,10 +133,10 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             <AnimatePresence>
               {showDashboard && (
                 <motion.div
-                  initial={{ opacity: 0, y: 40, scale: 0.97 }}
+                  initial={{ opacity: 0, y: 60, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  className="border border-white/15 rounded-xl p-6 pt-20"
+                  className="border border-white/15 rounded-xl p-8 pt-24"
                   style={{ background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(20px)' }}
                 >
                   <div className="flex items-center justify-between mb-6">
@@ -147,7 +153,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-3 gap-6">
                     {[
                       { name: 'AI Agent', metric: 'Requests', color: 'purple', bars: [0.3, 0.5, 0.4, 0.7, 0.6, 0.8], status: phase === 'done' ? 'Live' : 'Deploying', statusColor: phase === 'done' ? 'text-green-400' : 'text-yellow-400' },
                       { name: 'Marketplace', metric: 'Sales', color: 'cyan', bars: [0.4, 0.45, 0.5, 0.48, 0.55, 0.6], status: 'Live', statusColor: 'text-green-400' },
@@ -161,7 +167,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 * i, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                        className="border border-white/10 rounded-lg p-3"
+                        className="border border-white/10 rounded-lg p-4"
                         style={{ background: 'rgba(0, 0, 0, 0.4)' }}
                       >
                         <div className="flex items-center gap-2 mb-2">
