@@ -529,7 +529,7 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
             <Bot className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.75} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-[13px] font-semibold text-white truncate leading-tight">{listing.title}</h3>
+            <h3 className="text-[13px] font-light text-white truncate leading-tight">{listing.title}</h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               {listing.seller.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -575,9 +575,9 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
         <div>
           {listing.price === 0 ? (
-            <span className="text-sm font-semibold text-green-400">Free</span>
+            <span className="text-sm font-light text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-semibold text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
+            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-normal">{listing.currency}</span></span>
           )}
           {listing.minPrice != null && (
             <p className="text-[10px] text-zinc-600 mt-0.5">Floor: {listing.minPrice} {listing.currency}</p>
@@ -677,7 +677,7 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
         {keys.map(k => (
           <div key={k.id} className="flex items-center gap-2 py-1.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
             <div className="flex-1 min-w-0">
-              <p className="text-zinc-300 font-mono text-xs font-semibold">{k.label || 'unnamed key'}</p>
+              <p className="text-zinc-300 font-mono text-xs font-light">{k.label || 'unnamed key'}</p>
               <p className="text-zinc-600 font-mono text-xs">
                 created {timeAgo(k.createdAt)}{k.lastUsedAt ? ` · last used ${timeAgo(k.lastUsedAt)}` : ' · never used'}
               </p>

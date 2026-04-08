@@ -152,7 +152,7 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 className="text-sm font-semibold text-monad-300 hover:text-monad-200 truncate">{repo.name}</h3>
+              <h3 className="text-sm font-light text-monad-300 hover:text-monad-200 truncate">{repo.name}</h3>
               <span className={`px-1.5 py-0.5 rounded-full text-[11px] border ${
                 repo.isLocked
                   ? 'bg-monad-500/10 border-monad-500/30 text-monad-400'
@@ -216,7 +216,7 @@ function RepoCard({ repo, isAuthenticated, onVote, onDownload, onUnlock }: {
           {repo.isLocked && repo.lockedPriceUsd ? (
             <button
               onClick={() => onUnlock(repo)}
-              className="px-3 py-1.5 rounded-full text-xs font-semibold text-white transition-all hover:shadow-[0_0_12px_rgba(131,110,249,0.4)]"
+              className="px-3 py-1.5 rounded-full text-xs font-light text-white transition-all hover:shadow-[0_0_12px_rgba(131,110,249,0.4)]"
               style={{ background: 'linear-gradient(135deg,#7c3aed,#6d28d9)', border: '1px solid rgba(131,110,249,0.4)' }}
             >
               Unlock — ${repo.lockedPriceUsd}
