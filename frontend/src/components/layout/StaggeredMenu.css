@@ -58,7 +58,7 @@
   border: none;
   cursor: pointer;
   color: #a1a1aa;
-  font-weight: 500;
+  font-weight: 300;
   font-size: 0.8rem;
   line-height: 1;
   overflow: visible;
@@ -174,7 +174,7 @@
 .sm-panel-title {
   margin: 0 0 1.25rem 0;
   font-size: 0.625rem;
-  font-weight: 600;
+  font-weight: 300;
   color: rgba(255, 255, 255, 0.2);
   text-transform: uppercase;
   letter-spacing: 0.15em;
@@ -200,7 +200,7 @@
 .sm-panel-item {
   position: relative;
   color: #52525b;
-  font-weight: 700;
+  font-weight: 300;
   font-size: clamp(2rem, 4.5vw, 2.5rem);
   cursor: pointer;
   line-height: 1.15;
@@ -240,7 +240,7 @@
   top: 0.15em;
   right: 0.3em;
   font-size: 0.65rem;
-  font-weight: 400;
+  font-weight: 300;
   color: var(--sm-accent, #836ef9);
   letter-spacing: 0;
   pointer-events: none;
@@ -269,7 +269,7 @@
   padding: 0.6rem 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 300;
   color: #71717a;
   text-decoration: none;
   transition: color 0.15s ease, background 0.15s ease;
@@ -281,7 +281,7 @@
 .sm-sub-link[data-active='true'] {
   color: var(--sm-accent, #836ef9);
   background: rgba(131, 110, 249, 0.08);
-  font-weight: 600;
+  font-weight: 300;
 }
 .sm-sub-dot {
   margin-left: auto;
@@ -323,7 +323,7 @@
 .sm-socials-title {
   margin: 0;
   font-size: 0.625rem;
-  font-weight: 600;
+  font-weight: 300;
   color: var(--sm-accent, #836ef9);
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -341,7 +341,7 @@
 }
 .sm-socials-link {
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 300;
   color: #a1a1aa;
   text-decoration: none;
   transition: color 0.2s ease, opacity 0.2s ease;
@@ -377,7 +377,7 @@
   padding: 0.65rem 1rem;
   border-radius: 0.65rem;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 300;
   background: linear-gradient(135deg, #836ef9, #6c58e0);
   color: #fff;
   border: none;
@@ -397,7 +397,7 @@
   padding: 0.65rem 1rem;
   border-radius: 0.65rem;
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 300;
   background: transparent;
   color: #71717a;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -440,12 +440,12 @@
   justify-content: center;
   color: #836ef9;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 300;
   flex-shrink: 0;
 }
 .sm-user-info-name {
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 300;
   color: #d4d4d8;
 }
 .sm-user-info-sub {
