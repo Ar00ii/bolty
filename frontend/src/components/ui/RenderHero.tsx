@@ -4,12 +4,34 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { useState, useRef } from 'react';
 
 interface RenderHeroProps {
   isAuthenticated?: boolean;
 }
 
 export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deployComplete, setDeployComplete] = useState(false);
+  const deployButtonRef = useRef<HTMLButtonElement>(null);
+  const dashboardRef = useRef<HTMLDivElement>(null);
+
+  const handleDeploy = async () => {
+    if (isDeploying) return;
+    setIsDeploying(true);
+
+    // Simulate deployment
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    setDeployComplete(true);
+    setIsDeploying(false);
+
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setDeployComplete(false);
+    }, 3000);
+  };
+
   return (
     <div className="relative min-h-screen pt-32 pb-20 px-4 overflow-hidden">
       {/* Gradient background: black to purple */}
@@ -99,18 +121,80 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative"
         >
-          {/* $ git push box */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="absolute -top-8 right-4 bg-gray-200 text-black px-4 py-2 rounded font-mono text-sm font-medium"
-          >
-            $ git push
-          </motion.div>
+          {/* Deploy Button with Arrow */}
+          <div className="absolute -top-16 right-4 flex flex-col items-center gap-2">
+            {/* Arrow SVG */}
+            <svg
+              width="2"
+              height="40"
+              viewBox="0 0 2 40"
+              className="absolute top-12"
+              preserveAspectRatio="none"
+            >
+              <motion.line
+                x1="1"
+                y1="0"
+                x2="1"
+                y2="40"
+                stroke="url(#arrowGradient)"
+                strokeWidth="2"
+                initial={{ strokeDasharray: 40, strokeDashoffset: 40 }}
+                animate={
+                  isDeploying ? { strokeDashoffset: 0 } : { strokeDashoffset: 40 }
+                }
+                transition={{ duration: 1.5 }}
+              />
+              <defs>
+                <linearGradient
+                  id="arrowGradient"
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="1"
+                >
+                  <stop offset="0%" stopColor="#a855f7" />
+                  <stop offset="100%" stopColor="#ec4899" />
+                </linearGradient>
+              </defs>
+            </svg>
+
+            {/* Deploy Button */}
+            <motion.button
+              ref={deployButtonRef}
+              onClick={handleDeploy}
+              disabled={isDeploying}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className={`px-6 py-2 rounded font-mono text-sm font-medium transition-all ${
+                isDeploying
+                  ? 'bg-purple-600 text-white'
+                  : deployComplete
+                  ? 'bg-green-500 text-white'
+                  : 'bg-gray-200 text-black hover:bg-gray-300'
+              } disabled:opacity-75`}
+            >
+              {isDeploying ? '⚙️ Deploying...' : deployComplete ? '✓ Deployed' : 'deploy'}
+            </motion.button>
+          </div>
 
           {/* Dashboard container */}
-          <div className="rounded-lg border border-white/20 p-6" style={{ background: 'rgba(0, 0, 0, 0.4)' }}>
+          <div
+            ref={dashboardRef}
+            className="rounded-lg border border-white/20 p-6 transition-all"
+            style={{
+              background: isDeploying
+                ? 'rgba(168, 85, 247, 0.15)'
+                : deployComplete
+                ? 'rgba(34, 197, 94, 0.1)'
+                : 'rgba(0, 0, 0, 0.4)',
+              borderColor: isDeploying
+                ? 'rgba(168, 85, 247, 0.4)'
+                : deployComplete
+                ? 'rgba(34, 197, 94, 0.3)'
+                : 'rgba(255, 255, 255, 0.2)',
+            }}
+          >
             {/* Header */}
             <div className="mb-6">
               <div className="text-xs uppercase tracking-widest text-gray-500">Production</div>
@@ -121,8 +205,23 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               {/* Card 1: AI Agent Deploy */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: isDeploying ? [1, 1.02, 1] : 1,
+                  boxShadow: isDeploying
+                    ? [
+                        '0 0 0px rgba(168, 85, 247, 0)',
+                        '0 0 20px rgba(168, 85, 247, 0.5)',
+                        '0 0 0px rgba(168, 85, 247, 0)',
+                      ]
+                    : '0 0 0px rgba(168, 85, 247, 0)',
+                }}
+                transition={{
+                  delay: 0.5,
+                  scale: isDeploying ? { duration: 0.5, repeat: Infinity } : { duration: 0.3 },
+                  boxShadow: isDeploying ? { duration: 0.8, repeat: Infinity } : { duration: 0.3 },
+                }}
                 className="border border-white/10 rounded p-4"
                 style={{ background: 'rgba(0, 0, 0, 0.5)' }}
               >
@@ -145,8 +244,23 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               {/* Card 2: ETH Payments */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: isDeploying ? [1, 1.02, 1] : 1,
+                  boxShadow: isDeploying
+                    ? [
+                        '0 0 0px rgba(6, 182, 212, 0)',
+                        '0 0 20px rgba(6, 182, 212, 0.5)',
+                        '0 0 0px rgba(6, 182, 212, 0)',
+                      ]
+                    : '0 0 0px rgba(6, 182, 212, 0)',
+                }}
+                transition={{
+                  delay: 0.6,
+                  scale: isDeploying ? { duration: 0.6, repeat: Infinity } : { duration: 0.3 },
+                  boxShadow: isDeploying ? { duration: 0.9, repeat: Infinity } : { duration: 0.3 },
+                }}
                 className="border border-white/10 rounded p-4"
                 style={{ background: 'rgba(0, 0, 0, 0.5)' }}
               >
@@ -171,8 +285,23 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               {/* Card 3: Database */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: isDeploying ? [1, 1.02, 1] : 1,
+                  boxShadow: isDeploying
+                    ? [
+                        '0 0 0px rgba(236, 72, 153, 0)',
+                        '0 0 20px rgba(236, 72, 153, 0.5)',
+                        '0 0 0px rgba(236, 72, 153, 0)',
+                      ]
+                    : '0 0 0px rgba(236, 72, 153, 0)',
+                }}
+                transition={{
+                  delay: 0.7,
+                  scale: isDeploying ? { duration: 0.7, repeat: Infinity } : { duration: 0.3 },
+                  boxShadow: isDeploying ? { duration: 1, repeat: Infinity } : { duration: 0.3 },
+                }}
                 className="border border-white/10 rounded p-4"
                 style={{ background: 'rgba(0, 0, 0, 0.5)' }}
               >
@@ -197,8 +326,23 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
               {/* Card 4: Cache */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                  scale: isDeploying ? [1, 1.02, 1] : 1,
+                  boxShadow: isDeploying
+                    ? [
+                        '0 0 0px rgba(34, 197, 94, 0)',
+                        '0 0 20px rgba(34, 197, 94, 0.5)',
+                        '0 0 0px rgba(34, 197, 94, 0)',
+                      ]
+                    : '0 0 0px rgba(34, 197, 94, 0)',
+                }}
+                transition={{
+                  delay: 0.8,
+                  scale: isDeploying ? { duration: 0.8, repeat: Infinity } : { duration: 0.3 },
+                  boxShadow: isDeploying ? { duration: 1.1, repeat: Infinity } : { duration: 0.3 },
+                }}
                 className="border border-white/10 rounded p-4"
                 style={{ background: 'rgba(0, 0, 0, 0.5)' }}
               >
