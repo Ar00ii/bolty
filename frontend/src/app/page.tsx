@@ -14,6 +14,7 @@ import { AnimatedCard } from '@/components/ui/AnimatedCard';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { StaticWarpBackground } from '@/components/ui/StaticWarpBackground';
 import { WarpBackground } from '@/components/ui/WarpBackground';
+import { AnimatedCounter, CountUp } from '@/components/ui/AnimatedCounter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, GitBranch, ArrowRight, Shield,
@@ -395,15 +396,36 @@ export default function HomePage() {
                           <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Active Agents</span>
-                              <span className="text-cyan-400 font-light">2,847</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter value={2847} />
+                              </motion.span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Total Revenue</span>
-                              <span className="text-cyan-400 font-light">$243K ETH</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter value={243} suffix="K ETH" duration={2.5} />
+                              </motion.span>
                             </div>
                             <div className="flex justify-between items-center text-sm">
                               <span className="text-gray-400">Success Rate</span>
-                              <span className="text-cyan-400 font-light">98.7%</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter value={98.7} suffix="%" decimals={1} duration={2.5} />
+                              </motion.span>
                             </div>
                           </div>
                         )}
@@ -452,7 +474,14 @@ export default function HomePage() {
                             <div className="space-y-2">
                               <div className="flex justify-between text-xs">
                                 <span className="text-gray-400">Your Rank</span>
-                                <span className="text-purple-400 font-light">#342</span>
+                                <motion.span
+                                  initial={{ opacity: 0, x: 10 }}
+                                  whileInView={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.5 }}
+                                  className="text-purple-400 font-light"
+                                >
+                                  #<AnimatedCounter value={342} />
+                                </motion.span>
                               </div>
                               <div className="flex gap-1 mt-3">
                                 {[...Array(7)].map((_, idx) => (
