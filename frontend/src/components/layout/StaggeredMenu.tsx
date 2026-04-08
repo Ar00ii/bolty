@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { gsap } from 'gsap';
 import {
   Globe, Flame, Star, MessageSquare, UserCheck, ShoppingBag, Store,
-  Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut,
+  Code2, GitBranch, Package, Cpu, Bot, User as UserIcon, Settings, Wallet, LogOut, Key,
   UserPlus, Zap, Percent, Coins, Briefcase, Trophy, ShoppingCart, BookOpen, type LucideIcon,
 } from 'lucide-react';
 import './StaggeredMenu.css';
@@ -99,6 +99,7 @@ const PROFILE_ITEM: NavItem = {
   sub: [
     { href: '/profile',              label: 'My Profile', icon: UserIcon },
     { href: '/profile?tab=wallet',   label: 'Wallet',     icon: Wallet },
+    { href: '/api-keys',             label: 'API Keys',   icon: Key },
     { href: '/profile?tab=agent',    label: 'AI Agent',   icon: Cpu },
     { href: '/profile?tab=security', label: 'Security',   icon: Settings },
   ],
