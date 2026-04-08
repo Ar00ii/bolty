@@ -477,22 +477,8 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS (SERVICES GRID) ── */}
-      <section className="py-24 px-4 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)', background: '#000000' }}>
-        {/* Warp Background for entire section */}
-        <WarpBackground
-          className="absolute inset-0 !rounded-none !border-0 !p-0"
-          gridColor="rgba(255, 255, 255, 0.06)"
-          beamsPerSide={2}
-          beamSize={10}
-          perspective={150}
-          style={{
-            pointerEvents: 'none',
-          }}
-        >
-          <div />
-        </WarpBackground>
-
-        <div className="max-w-7xl mx-auto relative z-10">
+      <section className="py-24 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto">
           {/* ONE Unified Container with all content */}
           <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
             {/* Title section - full width */}
