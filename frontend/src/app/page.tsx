@@ -655,42 +655,50 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS WITH GRID PATTERN ── */}
       <section
-        className="py-32 px-6 relative"
+        className="py-24 px-8 relative border-t border-b"
         style={{
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.08) 25%, rgba(255,255,255,.08) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.08) 75%, rgba(255,255,255,.08) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.08) 25%, rgba(255,255,255,.08) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.08) 75%, rgba(255,255,255,.08) 76%, transparent 77%, transparent)`,
-          backgroundSize: '100px 100px',
+          borderColor: 'rgba(255,255,255,0.1)',
+          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.04) 25%, rgba(255,255,255,.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.04) 75%, rgba(255,255,255,.04) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.04) 25%, rgba(255,255,255,.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.04) 75%, rgba(255,255,255,.04) 76%, transparent 77%, transparent)`,
+          backgroundSize: '50px 50px',
           backgroundColor: '#000000'
         }}
       >
-        <div className="max-w-5xl mx-auto">
-          {/* Company Logos - Top Row */}
-          <div className="flex justify-center items-center gap-12 mb-20 flex-wrap">
-            {['Base44', 'THATCH', 'Paradigm', 'FEY', 'Monadic'].map((company, i) => (
-              <motion.p
+        <div className="max-w-6xl mx-auto">
+          {/* Company Logos with Icons & Dividers */}
+          <div className="flex justify-between items-start gap-4 mb-16">
+            {[
+              { icon: '●', name: 'Base44' },
+              { icon: '━', name: 'THATCH' },
+              { icon: '□', name: 'Paradigm' },
+              { icon: '◀', name: 'FEY' },
+              { icon: '⊗', name: 'Monadic' },
+            ].map((company, i) => (
+              <motion.div
                 key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="text-gray-500 text-sm tracking-wider font-light"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex-1 text-center pb-4 border-b border-gray-800"
               >
-                {company}
-              </motion.p>
+                <div className="text-gray-600 text-lg mb-2">{company.icon}</div>
+                <p className="text-gray-500 text-xs tracking-widest font-light">{company.name}</p>
+              </motion.div>
             ))}
           </div>
 
-          {/* Testimonial */}
+          {/* Main Testimonial */}
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center space-y-6"
+            className="text-center space-y-8"
           >
-            <p className="text-xl lg:text-2xl font-light text-white leading-relaxed max-w-3xl mx-auto">
-              "We scaled out of other platforms. Everything else we tried eventually broke at our scale. Render was the only one that kept scaling with us, and it's the product we continue to grow on."
+            <p className="text-2xl lg:text-3xl font-light text-white leading-relaxed max-w-4xl mx-auto">
+              "Easier than large clouds, more feature-rich than single-purpose hosting providers, Render lets me ship the entirety of my projects in one place."
             </p>
 
             <p className="text-xs tracking-widest text-cyan-400 font-mono">
-              ANNA MONACO, CEO & FOUNDER AT PARADIGM
+              MITCHELL HASHIMOTO, CO-FOUNDER OF HASHICORP
             </p>
           </motion.div>
         </div>
