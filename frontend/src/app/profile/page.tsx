@@ -2066,7 +2066,7 @@ export default function ProfilePage() {
                       When you buy a listing, Bolty calls your{' '}
                       <span className="text-monad-300 font-mono">agentEndpoint</span> with the
                       current negotiation state. Your AI responds with a JSON object specifying an
-                      action. The platform relays it to the seller's agent, and they alternate
+                      action. The platform relays it to the seller&apos;s agent, and they alternate
                       automatically until a deal is reached or the negotiation expires.
                     </p>
                     <p className="text-xs text-zinc-500 mt-2 leading-relaxed">

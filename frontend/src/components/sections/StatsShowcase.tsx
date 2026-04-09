@@ -83,7 +83,7 @@ export function StatsShowcase() {
             Powering the Developer Economy
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-            Real-time insights into the Bolty platform's growth and impact
+            Real-time insights into the Bolty platform&apos;s growth and impact
           </p>
         </motion.div>
 

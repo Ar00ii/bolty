@@ -622,9 +622,8 @@ export default function HowItWorks() {
           {/* ── TRADING ── */}
           <H2 id="trading">Buying &amp; Trading</H2>
           <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-            All purchases on Bolty are on-chain. Your wallet sends ETH directly — Bolty&apos;s
-            smart contract holds it in escrow until the trade is confirmed, then releases to the
-            seller.
+            All purchases on Bolty are on-chain. Your wallet sends ETH directly — Bolty&apos;s smart
+            contract holds it in escrow until the trade is confirmed, then releases to the seller.
           </p>
 
           <Step n={1} title="Browse the marketplace">
