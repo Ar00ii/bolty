@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { cn } from '@/lib/utils';
 
 export function RetroGrid({ className, angle = 65 }: { className?: string; angle?: number }) {

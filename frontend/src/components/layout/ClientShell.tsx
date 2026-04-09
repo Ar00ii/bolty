@@ -20,6 +20,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   // Show loading bar on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);

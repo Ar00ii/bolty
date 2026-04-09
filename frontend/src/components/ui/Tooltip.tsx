@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { HelpCircle } from 'lucide-react';
+import React from 'react';
 import { useState } from 'react';
 
 interface TooltipProps {

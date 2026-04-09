@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import React from 'react';
 import { useEffect, useState, useRef } from 'react';
 
 interface AnimatedCounterProps {

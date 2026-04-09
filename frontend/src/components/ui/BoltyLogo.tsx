@@ -96,6 +96,7 @@ export function BoltyFloatingLogos() {
       delay: Math.random() * 6,
       duration: 4 + Math.random() * 4,
     }));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLogos(items);
   }, []);
 

@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useEffect, useRef } from 'react';
 
 const CHARS = '01001101 01011010 00110101 10110100 11010011 ABCDEF0123456789';

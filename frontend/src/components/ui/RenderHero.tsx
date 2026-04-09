@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Activity } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 interface RenderHeroProps {

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';

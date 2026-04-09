@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { TrendingUp, Users, Zap, Shield } from 'lucide-react';
+import React from 'react';
 
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 

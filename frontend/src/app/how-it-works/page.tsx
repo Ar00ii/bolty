@@ -1,22 +1,27 @@
 'use client';
 
 import { ChevronRight, Copy, Check } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 
 import { WarpBackground } from '@/components/ui/warp-background';
 
 const BRAND = '#836EF9';
 
-export default function HowItWorks() {
-  const [copied, setCopied] = useState('');
-
-  const copy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(id);
-    setTimeout(() => setCopied(''), 2000);
-  };
-
-  const Code = ({ code, id, lang = 'bash' }: { code: string; id: string; lang?: string }) => (
+// Move components outside to avoid "Cannot create components during render" error
+const Code = memo(
+  ({
+    code,
+    id,
+    lang = 'bash',
+    onCopy,
+    copied,
+  }: {
+    code: string;
+    id: string;
+    lang?: string;
+    onCopy: (text: string, id: string) => void;
+    copied: string;
+  }) => (
     <div
       style={{
         margin: '1rem 0 1.5rem',
@@ -39,7 +44,7 @@ export default function HowItWorks() {
           {lang}
         </span>
         <button
-          onClick={() => copy(code, id)}
+          onClick={() => onCopy(code, id)}
           style={{
             background: 'none',
             border: 'none',
@@ -77,17 +82,13 @@ export default function HowItWorks() {
         <code>{code}</code>
       </pre>
     </div>
-  );
+  ),
+);
 
-  const Step = ({
-    n,
-    title,
-    children,
-  }: {
-    n: number;
-    title: string;
-    children: React.ReactNode;
-  }) => (
+Code.displayName = 'Code';
+
+const Step = memo(
+  ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
     <div style={{ display: 'flex', gap: '1.25rem', marginBottom: '2.5rem' }}>
       <div
         style={{
@@ -121,61 +122,75 @@ export default function HowItWorks() {
         <div style={{ color: '#8b949e', lineHeight: 1.7 }}>{children}</div>
       </div>
     </div>
-  );
+  ),
+);
 
-  const H2 = ({ id, children }: any) => (
-    <h2
-      id={id}
-      style={{
-        fontSize: '1.5rem',
-        fontWeight: 700,
-        color: 'var(--text)',
-        margin: '0 0 1rem',
-        paddingTop: '0.5rem',
-        letterSpacing: '-0.02em',
-      }}
-    >
-      {children}
-    </h2>
-  );
+Step.displayName = 'Step';
 
-  const Note = ({ children }: any) => (
-    <div
-      style={{
-        background: 'rgba(131,110,249,0.08)',
-        border: '1px solid rgba(131,110,249,0.25)',
-        borderRadius: 8,
-        padding: '0.85rem 1rem',
-        marginBottom: '1.5rem',
-        fontSize: '0.9rem',
-        color: '#c9d1d9',
-        lineHeight: 1.6,
-      }}
-    >
-      {children}
-    </div>
-  );
+const H2 = memo(({ id, children }: { id?: string; children: React.ReactNode }) => (
+  <h2
+    id={id}
+    style={{
+      fontSize: '1.5rem',
+      fontWeight: 700,
+      color: 'var(--text)',
+      margin: '0 0 1rem',
+      paddingTop: '0.5rem',
+      letterSpacing: '-0.02em',
+    }}
+  >
+    {children}
+  </h2>
+));
 
-  const Warn = ({ children }: any) => (
-    <div
-      style={{
-        background: 'rgba(248,81,73,0.08)',
-        border: '1px solid rgba(248,81,73,0.25)',
-        borderRadius: 8,
-        padding: '0.85rem 1rem',
-        marginBottom: '1.5rem',
-        fontSize: '0.9rem',
-        color: '#c9d1d9',
-        lineHeight: 1.6,
-      }}
-    >
-      ⚠️ {children}
-    </div>
-  );
+H2.displayName = 'H2';
 
-  const Divider = () => (
-    <hr style={{ border: 'none', borderTop: '1px solid #21262d', margin: '3rem 0' }} />
-  );
+const Note = memo(({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{
+      background: 'rgba(131,110,249,0.08)',
+      border: '1px solid rgba(131,110,249,0.25)',
+      borderRadius: 8,
+      padding: '0.85rem 1rem',
+      marginBottom: '1.5rem',
+      fontSize: '0.9rem',
+      color: '#c9d1d9',
+      lineHeight: 1.6,
+    }}
+  >
+    {children}
+  </div>
+));
+
+Note.displayName = 'Note';
+
+const Warn = memo(({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{
+      background: 'rgba(248,81,73,0.08)',
+      border: '1px solid rgba(248,81,73,0.25)',
+      borderRadius: 8,
+      padding: '0.85rem 1rem',
+      marginBottom: '1.5rem',
+      fontSize: '0.9rem',
+      color: '#c9d1d9',
+      lineHeight: 1.6,
+    }}
+  >
+    ⚠️ {children}
+  </div>
+));
+
+Warn.displayName = 'Warn';
+
+const Divider = memo(() => (
+  <hr style={{ border: 'none', borderTop: '1px solid #21262d', margin: '3rem 0' }} />
+));
+
+Divider.displayName = 'Divider';
+
+export default function HowItWorks() {
+  const [copied, setCopied] = useState('');
 
   const navItems = [
     { id: 'start', label: 'Getting Started' },
@@ -186,6 +201,12 @@ export default function HowItWorks() {
     { id: 'trading', label: 'Buying & Trading' },
     { id: 'fees', label: 'Fees & Payments' },
   ];
+
+  const copy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(''), 2000);
+  };
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh' }}>

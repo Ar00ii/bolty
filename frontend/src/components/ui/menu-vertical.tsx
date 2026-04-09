@@ -2,6 +2,7 @@
 import { ArrowRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
+import React from 'react';
 
 type MenuItem = {
   label: string;

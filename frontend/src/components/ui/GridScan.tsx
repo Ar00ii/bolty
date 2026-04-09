@@ -7,6 +7,7 @@ import {
   EffectPass,
   RenderPass,
 } from 'postprocessing';
+import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './GridScan.css';

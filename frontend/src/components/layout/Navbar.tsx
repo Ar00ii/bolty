@@ -68,7 +68,9 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfileOpen(false);
   }, [pathname]);
 

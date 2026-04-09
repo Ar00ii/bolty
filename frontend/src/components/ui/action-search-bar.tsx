@@ -1,6 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Send } from 'lucide-react';
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -66,10 +67,12 @@ function ActionSearchBar({
 
   useEffect(() => {
     if (!isFocused) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResult(null);
       return;
     }
     if (!debouncedQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResult({ actions });
       return;
     }

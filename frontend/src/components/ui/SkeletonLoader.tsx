@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 interface SkeletonLoaderProps {
   count?: number;
   shape?: 'rect' | 'circle' | 'card' | 'text' | 'table-row';

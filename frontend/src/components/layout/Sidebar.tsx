@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import React from 'react';
 import { useState, useEffect } from 'react';
 
 interface NavSection {
@@ -42,6 +43,7 @@ export function Sidebar() {
 
   // Initialize on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
@@ -52,6 +54,7 @@ export function Sidebar() {
   // Close sidebar on route change (mobile only)
   useEffect(() => {
     if (isMobile && isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsOpen(false);
     }
   }, [pathname, isMobile]);

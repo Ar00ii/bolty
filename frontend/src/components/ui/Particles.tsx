@@ -1,6 +1,7 @@
 'use client';
 
 import { Renderer, Camera, Geometry, Program, Mesh } from 'ogl';
+import React from 'react';
 import { useEffect, useRef } from 'react';
 import './Particles.css';
 

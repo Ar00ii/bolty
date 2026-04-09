@@ -50,23 +50,6 @@ export function Waves({
   const rafRef = useRef<number | null>(null);
   const boundingRef = useRef<DOMRect | null>(null);
 
-  useEffect(() => {
-    if (!containerRef.current || !svgRef.current) return;
-    noiseRef.current = createNoise2D();
-    setSize();
-    setLines();
-    window.addEventListener('resize', onResize);
-    window.addEventListener('mousemove', onMouseMove);
-    containerRef.current.addEventListener('touchmove', onTouchMove, { passive: false });
-    rafRef.current = requestAnimationFrame(tick);
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('mousemove', onMouseMove);
-      containerRef.current?.removeEventListener('touchmove', onTouchMove);
-    };
-  }, []);
-
   const setSize = () => {
     if (!containerRef.current || !svgRef.current) return;
     boundingRef.current = containerRef.current.getBoundingClientRect();
@@ -111,17 +94,6 @@ export function Waves({
     }
   };
 
-  const onResize = () => {
-    setSize();
-    setLines();
-  };
-  const onMouseMove = (e: MouseEvent) => updateMousePosition(e.pageX, e.pageY);
-  const onTouchMove = (e: TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    updateMousePosition(touch.clientX, touch.clientY);
-  };
-
   const updateMousePosition = (x: number, y: number) => {
     if (!boundingRef.current) return;
     const mouse = mouseRef.current;
@@ -139,6 +111,24 @@ export function Waves({
       containerRef.current.style.setProperty('--y', `${mouse.sy}px`);
     }
   };
+
+  const onResize = () => {
+    setSize();
+    setLines();
+  };
+
+  const onMouseMove = (e: MouseEvent) => updateMousePosition(e.pageX, e.pageY);
+
+  const onTouchMove = (e: TouchEvent) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    updateMousePosition(touch.clientX, touch.clientY);
+  };
+
+  const moved = (point: Point, withCursorForce = true) => ({
+    x: point.x + point.wave.x + (withCursorForce ? point.cursor.x : 0),
+    y: point.y + point.wave.y + (withCursorForce ? point.cursor.y : 0),
+  });
 
   const movePoints = (time: number) => {
     const { current: lines } = linesRef;
@@ -172,11 +162,6 @@ export function Waves({
       });
     });
   };
-
-  const moved = (point: Point, withCursorForce = true) => ({
-    x: point.x + point.wave.x + (withCursorForce ? point.cursor.x : 0),
-    y: point.y + point.wave.y + (withCursorForce ? point.cursor.y : 0),
-  });
 
   const drawLines = () => {
     linesRef.current.forEach((points, lIndex) => {
@@ -212,6 +197,23 @@ export function Waves({
     drawLines();
     rafRef.current = requestAnimationFrame(tick);
   };
+
+  useEffect(() => {
+    if (!containerRef.current || !svgRef.current) return;
+    noiseRef.current = createNoise2D();
+    setSize();
+    setLines();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('mousemove', onMouseMove);
+    containerRef.current.addEventListener('touchmove', onTouchMove, { passive: false });
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('mousemove', onMouseMove);
+      containerRef.current?.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
 
   return (
     <div

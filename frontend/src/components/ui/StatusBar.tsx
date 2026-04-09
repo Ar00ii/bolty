@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import React from 'react';
 
 const STATS = [
   { value: 'Beta', label: 'Platform Status', indicator: true },

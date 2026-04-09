@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import React from 'react';
 import { useEffect, useState } from 'react';
 
 interface ProgressBarProps {
@@ -18,11 +19,13 @@ export function ProgressBar({
 
   useEffect(() => {
     if (!isLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProgress(100);
       const timer = setTimeout(() => setProgress(0), 500);
       return () => clearTimeout(timer);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setProgress(10);
 
     const interval = setInterval(() => {

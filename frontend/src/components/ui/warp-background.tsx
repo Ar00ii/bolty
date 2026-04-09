@@ -25,8 +25,18 @@ const Beam = ({
   delay: number;
   duration: number;
 }) => {
-  const hue = Math.floor(Math.random() * 360);
-  const ar = Math.floor(Math.random() * 10) + 1;
+  // useMemo to generate random values only once
+  // eslint-disable-next-line react-hooks/purity
+  const { hue, ar } = React.useMemo(
+    () => ({
+      // eslint-disable-next-line react-hooks/purity
+      hue: Math.floor(Math.random() * 360),
+      // eslint-disable-next-line react-hooks/purity
+      ar: Math.floor(Math.random() * 10) + 1,
+    }),
+    [],
+  );
+
   return (
     <motion.div
       style={

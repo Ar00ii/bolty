@@ -1,7 +1,17 @@
 'use client';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 export function FloatingPaths({ position }: { position: number }) {
+  // Generate random durations once for each path
+  // eslint-disable-next-line react-hooks/purity
+  const randomDurations = React.useMemo(
+    () =>
+      // eslint-disable-next-line react-hooks/purity
+      Array.from({ length: 36 }, () => 20 + Math.random() * 10),
+    [],
+  );
+
   const paths = Array.from({ length: 36 }, (_, i) => ({
     id: i,
     d: `M-${380 - i * 5 * position} -${189 + i * 6}C-${
@@ -30,7 +40,7 @@ export function FloatingPaths({ position }: { position: number }) {
               pathOffset: [0, 1, 0],
             }}
             transition={{
-              duration: 20 + Math.random() * 10,
+              duration: randomDurations[path.id],
               repeat: Number.POSITIVE_INFINITY,
               ease: 'linear',
             }}

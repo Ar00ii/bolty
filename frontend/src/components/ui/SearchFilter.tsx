@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X } from 'lucide-react';
+import React from 'react';
 import { useState, useCallback, useMemo } from 'react';
 
 export interface FilterOption {

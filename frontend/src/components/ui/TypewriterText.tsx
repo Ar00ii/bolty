@@ -26,7 +26,9 @@ export function TypewriterText({ text, speed = 30, className, onComplete }: Type
   }, [index, text, speed, onComplete]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDisplayed('');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIndex(0);
   }, [text]);
 

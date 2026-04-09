@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import React from 'react';
 
 const elements = [
   { delay: 0, x: '10%', y: '20%', size: 120, duration: 6 },

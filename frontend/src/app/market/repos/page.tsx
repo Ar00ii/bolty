@@ -1298,7 +1298,9 @@ function ReposMarketPageContent() {
     try {
       const p = await api.get<any>('/chart/eth-price');
       if (p.price) ethPrice = p.price;
-    } catch {}
+    } catch {
+      // eslint-disable-next-line no-empty
+    }
     const totalUsd = repo.lockedPriceUsd;
     const totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
     const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);

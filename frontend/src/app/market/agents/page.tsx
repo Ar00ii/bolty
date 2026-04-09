@@ -345,7 +345,9 @@ function NegotiationModal({
       try {
         const p = await api.get<any>('/chart/eth-price');
         if (p.price) ethPrice = p.price;
-      } catch {}
+      } catch {
+        // eslint-disable-next-line no-empty
+      }
       const totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
       const totalUsd = neg.agreedPrice * ethPrice;
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);

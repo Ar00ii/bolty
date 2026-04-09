@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { CheckCircle2, Activity } from 'lucide-react';
+import React from 'react';
 
 import { AnimatedSparkline } from './AnimatedSparkline';
 import { BentoCard } from './BentoCard';

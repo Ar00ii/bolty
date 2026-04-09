@@ -10,17 +10,18 @@ const ThemeContext = createContext<{
 }>({ theme: 'dark', toggleTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof localStorage === 'undefined') return 'dark';
+    const stored = localStorage.getItem('bolty-theme') as Theme | null;
+    return stored === 'light' ? 'light' : 'dark';
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = (typeof localStorage !== 'undefined' &&
-      localStorage.getItem('bolty-theme')) as Theme | null;
-    const initial: Theme = stored === 'light' ? 'light' : 'dark';
-    setTheme(initial);
-    document.documentElement.setAttribute('data-theme', initial);
+    document.documentElement.setAttribute('data-theme', theme);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-  }, []);
+  }, [theme]);
 
   const toggleTheme = () => {
     const next: Theme = theme === 'dark' ? 'light' : 'dark';

@@ -1,5 +1,6 @@
 'use client';
 import { gsap } from 'gsap';
+import React from 'react';
 import { useEffect, useRef } from 'react';
 import './GridMotion.css';
 

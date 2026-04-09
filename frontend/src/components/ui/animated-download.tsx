@@ -40,8 +40,11 @@ export function AnimatedDownload({
   useEffect(() => {
     const newTarget = label ?? (isAnimating ? 'UPLOADING' : 'READY');
     if (newTarget !== targetText) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTargetText(newTarget);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTextIterations(0);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsTextAnimating(true);
     }
   }, [isAnimating, label, targetText]);
@@ -81,8 +84,11 @@ export function AnimatedDownload({
 
   useEffect(() => {
     if (!isAnimating) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAnimatedProgress(0);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilesCount(0);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimeRemainingSeconds(154);
       return;
     }

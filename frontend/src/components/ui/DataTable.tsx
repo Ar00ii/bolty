@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import React from 'react';
 import { useState } from 'react';
 
 export interface Column<T> {
