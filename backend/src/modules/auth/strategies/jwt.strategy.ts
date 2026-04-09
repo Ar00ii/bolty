@@ -10,7 +10,7 @@ import { JwtPayload } from '../auth.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    private readonly _config: ConfigService,
+    config: ConfigService,
     private readonly prisma: PrismaService,
   ) {
     super({
@@ -20,7 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: _config.get<string>('JWT_SECRET') || 'changeme',
+      secretOrKey: config.get<string>('JWT_SECRET') || 'changeme',
       passReqToCallback: false,
     });
   }

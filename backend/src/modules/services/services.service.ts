@@ -55,7 +55,7 @@ export class ServicesService {
       data: {
         title: sanitizeText(dto.title.slice(0, 120)),
         description: sanitizeText(dto.description.slice(0, 3000)),
-        category: dto.category as const,
+        category: dto.category as unknown as any,
         skills: (dto.skills || []).map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15),
         minBudget: dto.minBudget || null,
         maxBudget: dto.maxBudget || null,
@@ -178,7 +178,7 @@ export class ServicesService {
 
     return this.prisma.serviceListing.update({
       where: { id },
-      data: updates as unknown,
+      data: updates as Record<string, unknown>,
       include: {
         user: {
           select: {
@@ -209,7 +209,7 @@ export class ServicesService {
     const newStatus = service.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
     return this.prisma.serviceListing.update({
       where: { id },
-      data: { status: newStatus as unknown as string },
+      data: { status: newStatus as 'ACTIVE' | 'PAUSED' },
       select: { id: true, status: true },
     });
   }

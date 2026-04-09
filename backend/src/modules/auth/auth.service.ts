@@ -42,7 +42,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly redis: RedisService,
-    private readonly _usersService: UsersService,
+    _usersService: UsersService,
     private readonly emailService: EmailService,
   ) {}
 

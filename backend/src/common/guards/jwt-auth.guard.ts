@@ -29,7 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as Promise<boolean>;
   }
 
-  handleRequest<TUser = AuthUser>(
+  handleRequest<TUser extends any = AuthUser>(
     err: Error | null,
     user: TUser | null,
   ): TUser {
