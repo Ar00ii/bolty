@@ -655,9 +655,10 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS SECTION ── */}
       <section
-        className="relative py-32 px-6 overflow-hidden"
+        className="relative py-32 px-6 overflow-hidden border-t"
         style={{
           backgroundColor: '#000000',
+          borderColor: 'rgba(255,255,255,0.1)',
         }}
       >
         {/* Hexagon Pattern Background */}
