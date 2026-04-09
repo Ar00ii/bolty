@@ -1742,6 +1742,15 @@ function CreateListingForm({
     email: false,
     datadog: false,
   });
+  const [showTiers, setShowTiers] = useState(false);
+  const [pricingTiers, setPricingTiers] = useState<
+    Array<{ name: string; price: string; features: string; users: string }>
+  >([
+    { name: 'Basic', price: form.price, features: 'Core features', users: '1' },
+  ]);
+  const [newTierName, setNewTierName] = useState('');
+  const [showReadme, setShowReadme] = useState(false);
+  const [deploySuccess, setDeploySuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const testAgent = async () => {
@@ -2446,6 +2455,19 @@ function CreateListingForm({
               />
               {fieldErrors.minPrice && <p className="text-xs text-red-400 mt-1">{fieldErrors.minPrice}</p>}
             </div>
+
+            {/* Pricing Tiers Builder Button */}
+            <button
+              type="button"
+              onClick={() => setShowTiers(true)}
+              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+              style={{
+                borderColor: 'rgba(131,110,249,0.2)',
+                background: 'rgba(131,110,249,0.05)',
+              }}
+            >
+              💰 Create Pricing Tiers
+            </button>
           </>
         )}
 
@@ -2817,6 +2839,188 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Revenue Tiers Builder Modal */}
+      {showTiers && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div
+            className="rounded-2xl border max-w-3xl w-full my-8"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Pricing Tiers</h3>
+              <button
+                onClick={() => setShowTiers(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <p className="text-xs text-zinc-600">
+                Create multiple pricing tiers to appeal to different customer segments.
+              </p>
+
+              {/* Tiers Table */}
+              <div className="overflow-x-auto">
+                <div className="space-y-2">
+                  {/* Header */}
+                  <div className="grid grid-cols-4 gap-3 px-4 py-2 text-xs font-light text-zinc-400">
+                    <div>Tier Name</div>
+                    <div>Price</div>
+                    <div>Features</div>
+                    <div>Max Users</div>
+                  </div>
+
+                  {/* Tier Rows */}
+                  {pricingTiers.map((tier, idx) => (
+                    <div key={idx} className="grid grid-cols-4 gap-3 p-3 rounded-lg border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+                      <input
+                        type="text"
+                        value={tier.name}
+                        onChange={(e) => {
+                          const updated = [...pricingTiers];
+                          updated[idx].name = e.target.value;
+                          setPricingTiers(updated);
+                        }}
+                        className="text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        placeholder="Tier name"
+                      />
+                      <input
+                        type="number"
+                        value={tier.price}
+                        onChange={(e) => {
+                          const updated = [...pricingTiers];
+                          updated[idx].price = e.target.value;
+                          setPricingTiers(updated);
+                        }}
+                        className="text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        placeholder="0.00"
+                      />
+                      <input
+                        type="text"
+                        value={tier.features}
+                        onChange={(e) => {
+                          const updated = [...pricingTiers];
+                          updated[idx].features = e.target.value;
+                          setPricingTiers(updated);
+                        }}
+                        className="text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        placeholder="Feature list"
+                      />
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          value={tier.users}
+                          onChange={(e) => {
+                            const updated = [...pricingTiers];
+                            updated[idx].users = e.target.value;
+                            setPricingTiers(updated);
+                          }}
+                          className="text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700 flex-1"
+                          placeholder="1"
+                        />
+                        {idx > 0 && (
+                          <button
+                            onClick={() => {
+                              setPricingTiers(pricingTiers.filter((_, i) => i !== idx));
+                            }}
+                            className="text-red-400 hover:text-red-300 text-xs px-2"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add Tier Form */}
+              <div className="p-4 rounded-lg border" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)' }}>
+                <p className="text-xs font-light text-zinc-400 mb-3">Add New Tier</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Tier name (e.g., Professional)"
+                    value={newTierName}
+                    onChange={(e) => setNewTierName(e.target.value)}
+                    className="flex-1 text-xs px-3 py-2 rounded-lg font-light"
+                    style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      color: '#e4e4e7',
+                      outline: 'none',
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      if (newTierName.trim()) {
+                        setPricingTiers([
+                          ...pricingTiers,
+                          {
+                            name: newTierName,
+                            price: '',
+                            features: '',
+                            users: '',
+                          },
+                        ]);
+                        setNewTierName('');
+                      }
+                    }}
+                    className="px-3 py-2 rounded-lg text-xs font-light text-monad-300 border transition-all"
+                    style={{
+                      borderColor: 'rgba(131,110,249,0.4)',
+                      background: 'rgba(131,110,249,0.1)',
+                    }}
+                  >
+                    + Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview Table */}
+              <div
+                className="rounded-lg p-4 border overflow-x-auto"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  borderColor: 'rgba(255,255,255,0.05)',
+                }}
+              >
+                <p className="text-xs font-light text-zinc-400 mb-3">Preview</p>
+                <div className="text-xs">
+                  <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${pricingTiers.length}, 1fr)` }}>
+                    {pricingTiers.map((tier, idx) => (
+                      <div key={idx} className="p-3 rounded border" style={{ borderColor: 'rgba(131,110,249,0.3)', background: 'rgba(131,110,249,0.05)' }}>
+                        <p className="font-light text-zinc-300 mb-2">{tier.name}</p>
+                        <p className="text-lg font-light text-monad-300 mb-2">${tier.price || '0'}</p>
+                        <p className="text-zinc-600 text-xs mb-2">{tier.features || '—'}</p>
+                        <p className="text-zinc-600 text-xs">Up to {tier.users || '1'} user{parseInt(tier.users || '1') > 1 ? 's' : ''}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowTiers(false)}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  background: 'transparent',
+                }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Advanced Integrations Modal */}
       {showIntegrations && (
