@@ -157,6 +157,66 @@ const AGENT_TYPE_INFO: Record<string, { description: string; examples: string[] 
   },
 };
 
+// Generate OpenAPI-like documentation
+const generateApiDocs = (form: any): string => {
+  const slug = form.title
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]/g, '');
+
+  return `{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "${form.title || 'Agent API'}",
+    "description": "${form.description?.substring(0, 100) || 'Agent API'}",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.bolty.io/agents/${slug}",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/invoke": {
+      "post": {
+        "summary": "Invoke the agent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "input": { "type": "string" },
+                  "context": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "output": { "type": "string" },
+                    "metadata": { "type": "object" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}`;
+};
+
 const ROLE_LABELS: Record<string, string> = {
   buyer: 'you',
   seller: 'seller',
@@ -277,6 +337,46 @@ function Tip({ message, variant = 'info' }: TipProps) {
     <p className={`text-xs font-light mt-2 ${colorMap[variant]}`}>
       💡 {message}
     </p>
+  );
+}
+
+interface CodeBlockProps {
+  code: string;
+  language?: string;
+}
+
+function CodeBlock({ code, language = 'json' }: CodeBlockProps) {
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+      <div
+        className="flex items-center justify-between px-3 py-2 text-xs"
+        style={{ background: 'rgba(255,255,255,0.02)' }}
+      >
+        <span className="text-zinc-600 font-mono">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 px-2 py-1 rounded text-xs text-zinc-400 hover:text-zinc-300 transition-colors"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
+        >
+          <Copy className="w-3 h-3" />
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <pre
+        className="overflow-x-auto p-3 text-xs font-mono text-zinc-300"
+        style={{ background: 'rgba(0,0,0,0.3)' }}
+      >
+        <code>{code}</code>
+      </pre>
+    </div>
   );
 }
 
@@ -1495,6 +1595,7 @@ function CreateListingForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showApiDocs, setShowApiDocs] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateField = (field: string, value: string): string => {
@@ -2245,6 +2346,19 @@ function CreateListingForm({
                 <p className="text-red-400 font-light text-xs">{error}</p>
               </div>
             )}
+
+            {/* API Docs Button */}
+            <button
+              type="button"
+              onClick={() => setShowApiDocs(true)}
+              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+              style={{
+                borderColor: 'rgba(131,110,249,0.2)',
+                background: 'rgba(131,110,249,0.05)',
+              }}
+            >
+              📄 View OpenAPI Documentation
+            </button>
           </div>
         )}
 
@@ -2306,6 +2420,35 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* API Docs Modal */}
+      {showApiDocs && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="rounded-2xl border max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="sticky top-0 flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">OpenAPI Documentation</h3>
+              <button
+                onClick={() => setShowApiDocs(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-xs text-zinc-600 mb-4">
+                Auto-generated API specification for your agent. This helps developers integrate with your agent.
+              </p>
+              <CodeBlock code={generateApiDocs(form)} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
