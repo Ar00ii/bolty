@@ -33,6 +33,7 @@ import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
+import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -653,21 +654,25 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── TESTIMONIALS SECTION ── */}
-        <div className="py-16 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        {/* ── FEATURES GRID SECTION ── */}
+        <div className="py-24 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="max-w-7xl mx-auto">
-            {/* Testimonials Box */}
-            <div
-              className="relative rounded-lg overflow-hidden p-12"
-              style={{
-                border: '1px solid rgba(59, 130, 246, 0.5)',
-                background: 'rgba(0, 0, 0, 0.4)',
-                backdropFilter: 'blur(10px)'
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-16"
             >
-              {/* Testimonials Carousel */}
-              <TestimonialCarousel />
-            </div>
+              <h2 className="text-4xl lg:text-5xl font-light text-white mb-4">
+                Powerful features built for <GradientText gradient="purple">builders</GradientText>
+              </h2>
+              <p className="text-gray-400 max-w-2xl">
+                Everything you need to deploy, manage, and monetize AI agents at scale.
+              </p>
+            </motion.div>
+
+            {/* Features Grid */}
+            <FeaturesGrid />
           </div>
         </div>
       </section>
