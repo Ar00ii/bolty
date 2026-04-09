@@ -165,7 +165,7 @@ export class ApiKeysService {
     // Check if code matches and belongs to this user
     if (
       verificationCode.email !== user.email ||
-      (verificationCode.data as any)?.keyId !== keyId ||
+      ((verificationCode.data as unknown as Record<string, unknown>)?.keyId as string) !== keyId ||
       verificationCode.purpose !== 'DELETE_API_KEY'
     ) {
       // Increment attempts

@@ -399,7 +399,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       // Show public repos OR locked repos (private locked repos are visible but content is hidden)
       OR: [{ isPrivate: false }, { isLocked: true }],
       ...(language ? { language: { equals: language, mode: 'insensitive' as const } } : {}),
@@ -743,7 +743,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           repositoryId: repoId,
           userId: data.targetUserId,
           name: targetUser.displayName || targetUser.username || 'Unknown',
-          type: 'USER' as any,
+          type: 'USER' as unknown as string,
           role: data.role?.slice(0, 80) || null,
           url: null,
         },
@@ -771,7 +771,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repositoryId: repoId,
         userId: null,
         name: data.name.slice(0, 80),
-        type: type as any,
+        type: type as unknown as string,
         role: data.role?.slice(0, 80) || null,
         url: data.url?.slice(0, 500) || null,
       },

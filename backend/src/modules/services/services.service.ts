@@ -55,7 +55,7 @@ export class ServicesService {
       data: {
         title: sanitizeText(dto.title.slice(0, 120)),
         description: sanitizeText(dto.description.slice(0, 3000)),
-        category: dto.category as any,
+        category: dto.category as unknown as string,
         skills: (dto.skills || []).map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15),
         minBudget: dto.minBudget || null,
         maxBudget: dto.maxBudget || null,
@@ -90,7 +90,7 @@ export class ServicesService {
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: 'ACTIVE',
       ...(category ? { category } : {}),
       ...(userId ? { userId } : {}),
@@ -165,7 +165,7 @@ export class ServicesService {
     if (!service) throw new NotFoundException('Service listing not found');
     if (service.userId !== userId) throw new ForbiddenException('Not authorized');
 
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     if (dto.title) updates.title = sanitizeText(dto.title.slice(0, 120));
     if (dto.description) updates.description = sanitizeText(dto.description.slice(0, 3000));
     if (dto.category) updates.category = dto.category;
@@ -178,7 +178,7 @@ export class ServicesService {
 
     return this.prisma.serviceListing.update({
       where: { id },
-      data: updates,
+      data: updates as unknown,
       include: {
         user: {
           select: {

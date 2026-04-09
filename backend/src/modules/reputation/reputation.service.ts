@@ -114,7 +114,7 @@ export class ReputationService {
         data: {
           userId,
           points,
-          reason: reason as any,
+          reason: reason as unknown as string,
           resourceId: resourceId || null,
           note: note || null,
         },

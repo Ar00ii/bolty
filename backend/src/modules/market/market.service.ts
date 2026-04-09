@@ -130,7 +130,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (title.length < 3) throw new ForbiddenException('Title too short');
     if (description.length < 10) throw new ForbiddenException('Description too short');
     if (dto.price < 0 || dto.price > 1_000_000) throw new ForbiddenException('Invalid price');
-    if (dto.minPrice != null && (dto.minPrice < 0 || dto.minPrice > dto.price)) {
+    if (
+      dto.minPrice !== null &&
+      dto.minPrice !== undefined &&
+      (dto.minPrice < 0 || dto.minPrice > dto.price)
+    ) {
       throw new ForbiddenException('Minimum price must be between 0 and asking price');
     }
 
@@ -164,7 +168,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
         agentEndpoint: dto.agentEndpoint ? dto.agentEndpoint.trim().slice(0, 500) : null,
-        minPrice: dto.minPrice != null ? dto.minPrice : null,
+        minPrice: dto.minPrice !== null && dto.minPrice !== undefined ? dto.minPrice : null,
         fileKey: dto.fileKey || null,
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
         fileSize: dto.fileSize || null,
@@ -182,7 +186,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const take = 20;
     const skip = (page - 1) * take;
 
-    const where: any = { status: 'ACTIVE' };
+    const where: Record<string, unknown> = { status: 'ACTIVE' };
     if (params.type && params.type !== 'ALL') where.type = params.type;
     if (params.search) {
       where.OR = [

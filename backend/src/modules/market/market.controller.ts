@@ -188,14 +188,14 @@ export class MarketController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (req, file, cb) => {
+        destination: (_req, _file, cb) => {
           fs.mkdirSync(UPLOADS_DIR, { recursive: true });
           cb(null, UPLOADS_DIR);
         },
-        filename: (req, file, cb) => cb(null, crypto.randomUUID()),
+        filename: (_req, _file, cb) => cb(null, crypto.randomUUID()),
       }),
       limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
+      fileFilter: (_req, file, cb) => {
         if (ALLOWED_MIMETYPES.has(file.mimetype) || file.mimetype.startsWith('text/')) {
           cb(null, true);
         } else {

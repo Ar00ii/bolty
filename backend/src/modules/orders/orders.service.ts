@@ -96,7 +96,7 @@ export class OrdersService {
     }
 
     // If this order uses escrow, require release tx proof
-    const data: any = { status: 'COMPLETED', completedAt: new Date() };
+    const data: Record<string, unknown> = { status: 'COMPLETED', completedAt: new Date() };
     if (order.escrowStatus === 'FUNDED') {
       if (!escrowReleaseTx) {
         throw new BadRequestException(
@@ -110,7 +110,7 @@ export class OrdersService {
 
     return this.prisma.marketPurchase.update({
       where: { id: orderId },
-      data,
+      data: data as unknown,
       include: ORDER_INCLUDE,
     });
   }
@@ -125,7 +125,7 @@ export class OrdersService {
       throw new BadRequestException('Cannot dispute this order');
     }
 
-    const data: any = { status: 'DISPUTED' };
+    const data: Record<string, unknown> = { status: 'DISPUTED' };
     if (order.escrowStatus === 'FUNDED') {
       data.escrowStatus = 'DISPUTED';
       data.escrowDisputedAt = new Date();
