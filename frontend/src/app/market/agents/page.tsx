@@ -1927,7 +1927,11 @@ function CreateListingForm({
       };
       const result = await api.post<MarketListing>('/market', payload);
       await refresh();
-      onCreated(result);
+      setDeploySuccess(true);
+      // Show success for 2 seconds then call onCreated
+      setTimeout(() => {
+        onCreated(result);
+      }, 2000);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to create listing');
     } finally {
@@ -2926,6 +2930,109 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Success Confirmation Modal */}
+      {deploySuccess && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="rounded-2xl border max-w-2xl w-full"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="p-8 text-center space-y-6">
+              {/* Success Animation */}
+              <div className="text-6xl animate-bounce">🎉</div>
+
+              {/* Title */}
+              <div>
+                <h2 className="text-2xl font-light text-zinc-100 mb-2">Agent Deployed Successfully!</h2>
+                <p className="text-sm text-zinc-600">Your {form.title} is now live on the Bolty marketplace.</p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon: '🌐', label: 'Public URL', value: 'Active' },
+                  { icon: '🔑', label: 'API Keys', value: 'Generated' },
+                  { icon: '📊', label: 'Analytics', value: 'Ready' },
+                ].map((stat, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg p-3 border"
+                    style={{
+                      background: 'rgba(34,197,94,0.05)',
+                      borderColor: 'rgba(34,197,94,0.2)',
+                    }}
+                  >
+                    <p className="text-2xl mb-1">{stat.icon}</p>
+                    <p className="text-xs text-zinc-600">{stat.label}</p>
+                    <p className="text-xs font-light text-green-300 mt-1">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Next Steps */}
+              <div
+                className="rounded-lg p-4 border text-left"
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  borderColor: 'rgba(131,110,249,0.2)',
+                }}
+              >
+                <p className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">Next Steps</p>
+                <div className="space-y-2 text-xs font-light text-zinc-400">
+                  <div className="flex items-start gap-2">
+                    <span className="text-monad-300 mt-1">→</span>
+                    <span>Share your agent URL with others</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-monad-300 mt-1">→</span>
+                    <span>Monitor usage and earnings in your dashboard</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-monad-300 mt-1">→</span>
+                    <span>Update and manage versions anytime</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`Check out my new agent on Bolty: ${form.title}`);
+                  }}
+                  className="py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                  style={{
+                    borderColor: 'rgba(131,110,249,0.4)',
+                    color: '#e2d9ff',
+                    background: 'rgba(131,110,249,0.1)',
+                  }}
+                >
+                  📋 Share
+                </button>
+                <button
+                  onClick={() => {
+                    setDeploySuccess(false);
+                  }}
+                  className="py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                    border: '1px solid rgba(131,110,249,0.4)',
+                    color: '#e2d9ff',
+                  }}
+                >
+                  ✨ Go to Dashboard
+                </button>
+              </div>
+
+              <p className="text-xs text-zinc-600">Redirecting in a moment...</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* README Generator Modal */}
       {showReadme && (
