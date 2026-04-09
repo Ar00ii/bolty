@@ -1728,6 +1728,12 @@ function CreateListingForm({
   const [sandboxLoading, setSandboxLoading] = useState(false);
   const [sandboxResult, setSandboxResult] = useState<{ output?: string; error?: string } | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showTeam, setShowTeam] = useState(false);
+  const [teamEmail, setTeamEmail] = useState('');
+  const [teamRole, setTeamRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Editor');
+  const [teamMembers, setTeamMembers] = useState<Array<{ email: string; role: 'Owner' | 'Editor' | 'Viewer' }>>([
+    { email: 'You (Owner)', role: 'Owner' },
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const testAgent = async () => {
@@ -2683,7 +2689,7 @@ function CreateListingForm({
             )}
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => setShowApiDocs(true)}
@@ -2716,6 +2722,17 @@ function CreateListingForm({
                 }}
               >
                 📊 Analytics
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTeam(true)}
+                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                👥 Team
               </button>
             </div>
           </div>
@@ -2779,6 +2796,174 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Team Collaboration Modal */}
+      {showTeam && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="rounded-2xl border max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Team Management</h3>
+              <button
+                onClick={() => {
+                  setShowTeam(false);
+                  setTeamEmail('');
+                  setTeamRole('Editor');
+                }}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <p className="text-xs text-zinc-600">
+                Share access with team members to collaborate on this agent.
+              </p>
+
+              {/* Invite Form */}
+              <div
+                className="rounded-lg p-4 border"
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  borderColor: 'rgba(131,110,249,0.2)',
+                }}
+              >
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-light text-zinc-400 mb-2 block">Email Address</label>
+                    <input
+                      type="email"
+                      placeholder="colleague@company.com"
+                      value={teamEmail}
+                      onChange={(e) => setTeamEmail(e.target.value)}
+                      className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                      style={{
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#e4e4e7',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-light text-zinc-400 mb-2 block">Role</label>
+                    <select
+                      value={teamRole}
+                      onChange={(e) => setTeamRole(e.target.value as any)}
+                      className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                      style={{
+                        background: 'rgba(15,15,24,0.8)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#e4e4e7',
+                        outline: 'none',
+                      }}
+                    >
+                      <option value="Viewer">Viewer - View only</option>
+                      <option value="Editor">Editor - Full edit access</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (teamEmail.trim()) {
+                        setTeamMembers([
+                          ...teamMembers,
+                          { email: teamEmail, role: teamRole },
+                        ]);
+                        setTeamEmail('');
+                        setTeamRole('Editor');
+                      }
+                    }}
+                    disabled={!teamEmail.trim()}
+                    className="w-full py-2 px-4 rounded-lg text-xs font-light transition-all disabled:opacity-40"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                      border: '1px solid rgba(131,110,249,0.4)',
+                      color: '#e2d9ff',
+                    }}
+                  >
+                    + Add Team Member
+                  </button>
+                </div>
+              </div>
+
+              {/* Team Members List */}
+              <div>
+                <p className="text-xs font-light text-zinc-400 mb-3">Team Members ({teamMembers.length})</p>
+                <div className="space-y-2">
+                  {teamMembers.map((member, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                      style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        borderColor: 'rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-light"
+                          style={{ background: 'rgba(131,110,249,0.2)' }}
+                        >
+                          {member.email.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-xs font-light text-zinc-300">{member.email}</p>
+                          <p className="text-xs text-zinc-600">{member.role}</p>
+                        </div>
+                      </div>
+                      {idx > 0 && (
+                        <button
+                          onClick={() => {
+                            setTeamMembers(teamMembers.filter((_, i) => i !== idx));
+                          }}
+                          className="text-red-400 hover:text-red-300 text-xs"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div
+                className="rounded-lg p-3 border"
+                style={{
+                  background: 'rgba(34,197,94,0.05)',
+                  borderColor: 'rgba(34,197,94,0.2)',
+                }}
+              >
+                <p className="text-xs font-light text-green-300">
+                  ✨ Team members will receive an invitation email and can collaborate on this agent after accepting.
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowTeam(false);
+                  setTeamEmail('');
+                }}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  background: 'transparent',
+                }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analytics Dashboard Modal */}
       {showAnalytics && (
