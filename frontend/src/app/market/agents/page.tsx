@@ -1806,16 +1806,114 @@ function CreateListingForm({
         {/* Step 5: Review */}
         {step === 5 && (
           <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-light text-zinc-100 mb-4">Preview</h3>
+              <div
+                className="rounded-lg border p-5 overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  borderWidth: '1px',
+                }}
+              >
+                <div className="space-y-3">
+                  {/* Agent card preview */}
+                  <div className="group cursor-pointer">
+                    <div
+                      className="relative rounded-lg border p-4 transition-all"
+                      style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        borderColor: 'rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      {/* Icon placeholder */}
+                      <div className="flex items-start gap-3 mb-3">
+                        <div
+                          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'rgba(131,110,249,0.2)' }}
+                        >
+                          <Bot className="w-5 h-5 text-monad-300" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-light text-zinc-100 truncate">{form.title || 'Agent Title'}</h4>
+                          <div className="flex gap-2 mt-1">
+                            <Badge className="text-xs">{TYPE_LABELS[form.type]}</Badge>
+                            {form.category && (
+                              <Badge variant="secondary" className="text-xs">
+                                {form.category}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Description preview */}
+                      <p className="text-xs font-light text-zinc-500 line-clamp-2">
+                        {form.description || 'Agent description will appear here'}
+                      </p>
+
+                      {/* Tags preview */}
+                      {form.tags && (
+                        <div className="flex gap-1 mt-3 flex-wrap">
+                          {form.tags
+                            .split(',')
+                            .slice(0, 3)
+                            .map((tag) => (
+                              <span
+                                key={tag.trim()}
+                                className="text-xs px-2 py-1 rounded-md"
+                                style={{
+                                  background: 'rgba(131,110,249,0.1)',
+                                  color: 'rgba(131,110,249,0.8)',
+                                }}
+                              >
+                                {tag.trim()}
+                              </span>
+                            ))}
+                          {form.tags.split(',').length > 3 && (
+                            <span
+                              className="text-xs px-2 py-1 rounded-md"
+                              style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                color: 'rgba(255,255,255,0.5)',
+                              }}
+                            >
+                              +{form.tags.split(',').length - 3}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Footer with price */}
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                        <span className="text-xs text-zinc-600">Starting at</span>
+                        <span className="text-lg font-light text-monad-300">
+                          {form.price || '0'} {form.currency}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary */}
             <div className="rounded-lg p-4" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)', border: '1px solid' }}>
-              <h3 className="text-sm font-light text-zinc-100 mb-3">Review Your Agent</h3>
+              <h4 className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">Deployment Summary</h4>
               <div className="space-y-2 text-xs font-light">
                 <div className="flex justify-between">
                   <span className="text-zinc-600">Type:</span>
                   <span className="text-zinc-300">{TYPE_LABELS[form.type]}</span>
                 </div>
+                {form.category && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-600">Category:</span>
+                    <span className="text-zinc-300">{form.category}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-zinc-600">Title:</span>
-                  <span className="text-zinc-300">{form.title}</span>
+                  <span className="text-zinc-600">Pricing Model:</span>
+                  <span className="text-zinc-300 capitalize">{form.pricingModel}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-600">Price:</span>
@@ -1823,20 +1921,26 @@ function CreateListingForm({
                 </div>
                 {form.minPrice && (
                   <div className="flex justify-between">
-                    <span className="text-zinc-600">Floor:</span>
+                    <span className="text-zinc-600">Floor Price:</span>
                     <span className="text-zinc-300">{form.minPrice} {form.currency}</span>
                   </div>
                 )}
                 {form.tags && (
                   <div className="flex justify-between">
                     <span className="text-zinc-600">Tags:</span>
-                    <span className="text-zinc-300">{form.tags}</span>
+                    <span className="text-zinc-300">{form.tags.split(',').length} tags</span>
                   </div>
                 )}
                 {uploadedFile && (
                   <div className="flex justify-between">
                     <span className="text-zinc-600">File:</span>
                     <span className="text-zinc-300">{uploadedFile.fileName}</span>
+                  </div>
+                )}
+                {ACCEPTS_AGENT_ENDPOINT.has(form.type) && form.agentEndpoint && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-600">Webhook:</span>
+                    <span className="text-zinc-300 truncate">Configured</span>
                   </div>
                 )}
               </div>
