@@ -1588,6 +1588,37 @@ function CreateListingForm({
 
   const categoryData = AGENT_CATEGORIES[form.type as keyof typeof AGENT_CATEGORIES];
 
+  // Calculate completion percentage
+  const calculateCompletion = (): number => {
+    let completed = 0;
+    let total = 5; // title, description, type, price, currency
+
+    if (form.title.trim()) completed++;
+    if (form.description.trim()) completed++;
+    if (form.type) completed++;
+    if (form.price) completed++;
+    if (form.tags.trim()) completed++;
+
+    // Add conditional fields
+    if (ACCEPTS_AGENT_ENDPOINT.has(form.type) && form.agentEndpoint.trim()) {
+      completed++;
+      total++;
+    } else if (ACCEPTS_AGENT_ENDPOINT.has(form.type)) {
+      total++;
+    }
+
+    if (ACCEPTS_FILE.has(form.type) && uploadedFile) {
+      completed++;
+      total++;
+    } else if (ACCEPTS_FILE.has(form.type)) {
+      total++;
+    }
+
+    return Math.round((completed / total) * 100);
+  };
+
+  const completion = calculateCompletion();
+
   return (
     <div
       className="rounded-2xl border p-8 max-w-2xl mx-auto"
@@ -1597,7 +1628,21 @@ function CreateListingForm({
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-2xl font-light text-zinc-100">Deploy New Agent</h2>
-          <p className="text-xs text-zinc-600 mt-1">Step {step} of {steps.length}</p>
+          <div className="flex items-center gap-3 mt-2">
+            <p className="text-xs text-zinc-600">Step {step} of {steps.length}</p>
+            <div className="flex items-center gap-2">
+              <div className="w-20 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <div
+                  className="h-1.5 rounded-full transition-all"
+                  style={{
+                    width: `${completion}%`,
+                    background: 'linear-gradient(90deg, rgba(131,110,249,0.6), rgba(99,102,241,0.6))',
+                  }}
+                />
+              </div>
+              <span className="text-xs text-zinc-600">{completion}%</span>
+            </div>
+          </div>
         </div>
         <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300 transition-colors">
           <X className="w-5 h-5" />
@@ -1646,7 +1691,15 @@ function CreateListingForm({
               />
               <input
                 type="text"
-                placeholder="e.g., Smart Data Analyzer"
+                placeholder={
+                  form.type === 'AI_AGENT'
+                    ? 'e.g., Smart Data Analyzer'
+                    : form.type === 'BOT'
+                      ? 'e.g., Discord Moderation Bot'
+                      : form.type === 'SCRIPT'
+                        ? 'e.g., Automated Report Generator'
+                        : 'e.g., Custom Analytics Tool'
+                }
                 value={form.title}
                 onChange={(e) => field('title', e.target.value)}
                 maxLength={100}
