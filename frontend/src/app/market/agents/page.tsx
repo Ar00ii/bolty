@@ -138,6 +138,25 @@ const PRICING_TIERS = [
   { label: 'Subscription', value: 'subscription', description: 'Recurring payment' },
 ];
 
+const AGENT_TYPE_INFO: Record<string, { description: string; examples: string[] }> = {
+  AI_AGENT: {
+    description: 'LLM-powered agents that can think and make decisions autonomously',
+    examples: ['Data analysis', 'Content generation', 'Code generation', 'Research assistant'],
+  },
+  BOT: {
+    description: 'Bots that integrate with platforms like Discord, Telegram, or Slack',
+    examples: ['Discord moderation', 'Twitter automation', 'Telegram assistant', 'Chat support'],
+  },
+  SCRIPT: {
+    description: 'Standalone scripts and automation tools for developers',
+    examples: ['Data processing', 'Report generation', 'System automation', 'Batch operations'],
+  },
+  OTHER: {
+    description: 'Tools, plugins, extensions, and other technical products',
+    examples: ['Browser extension', 'IDE plugin', 'Template', 'Library'],
+  },
+};
+
 const ROLE_LABELS: Record<string, string> = {
   buyer: 'you',
   seller: 'seller',
@@ -1669,7 +1688,7 @@ function CreateListingForm({
           <>
             <div>
               <HelpLabel label="Agent Type" required help="Choose the type that best describes your product" />
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 flex-wrap mb-3">
                 {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
                   <button
                     key={t}
@@ -1681,6 +1700,24 @@ function CreateListingForm({
                   </button>
                 ))}
               </div>
+
+              {form.type && (
+                <div
+                  className="rounded-lg p-3 border"
+                  style={{
+                    background: 'rgba(131,110,249,0.05)',
+                    borderColor: 'rgba(131,110,249,0.2)',
+                  }}
+                >
+                  <p className="text-xs font-light text-zinc-300 mb-2">
+                    {AGENT_TYPE_INFO[form.type as keyof typeof AGENT_TYPE_INFO]?.description}
+                  </p>
+                  <p className="text-xs text-zinc-600">
+                    Examples:{' '}
+                    {AGENT_TYPE_INFO[form.type as keyof typeof AGENT_TYPE_INFO]?.examples.join(', ')}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
