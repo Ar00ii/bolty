@@ -208,6 +208,28 @@ const generateSecurityScan = (fileName: string): SecurityScan => {
   };
 };
 
+// Generate analytics data
+const generateAnalyticsData = (agentName: string) => {
+  const seed = agentName.length;
+  return {
+    totalRevenue: 2450 + seed * 150,
+    requestsMonth: 1240 + seed * 80,
+    avgResponseTime: 145 + seed * 5,
+    successRate: 98.5 + (seed % 1.4),
+    topIntegration: 'Python SDK',
+    users: 12 + seed,
+    dailyRequests: Array.from({ length: 30 }, (_, i) => ({
+      day: i + 1,
+      requests: Math.floor(Math.random() * 60 + 20),
+    })),
+    pricingTiers: {
+      'Free': 35,
+      'Pro': 45,
+      'Enterprise': 20,
+    },
+  };
+};
+
 // Generate code snippets for integration
 const codeSnippets = {
   python: (agentName: string) => `import requests
@@ -1702,6 +1724,7 @@ function CreateListingForm({
   const [sandboxInput, setSandboxInput] = useState('');
   const [sandboxLoading, setSandboxLoading] = useState(false);
   const [sandboxResult, setSandboxResult] = useState<{ output?: string; error?: string } | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const testAgent = async () => {
@@ -2543,7 +2566,7 @@ function CreateListingForm({
             )}
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => setShowApiDocs(true)}
@@ -2565,6 +2588,17 @@ function CreateListingForm({
                 }}
               >
                 💻 Code Examples
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAnalytics(true)}
+                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                📊 Analytics
               </button>
             </div>
           </div>
@@ -2628,6 +2662,163 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Analytics Dashboard Modal */}
+      {showAnalytics && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div
+            className="rounded-2xl border max-w-3xl w-full my-8"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Analytics Template</h3>
+              <button
+                onClick={() => setShowAnalytics(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <p className="text-xs text-zinc-600">
+                This is a preview of your agent analytics dashboard after deployment. Real data will populate here.
+              </p>
+
+              {/* Key Metrics */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: 'Revenue', value: `$${generateAnalyticsData(form.title).totalRevenue}`, icon: '💰' },
+                  { label: 'Requests', value: generateAnalyticsData(form.title).requestsMonth.toLocaleString(), icon: '📈' },
+                  { label: 'Response Time', value: `${generateAnalyticsData(form.title).avgResponseTime}ms`, icon: '⚡' },
+                  { label: 'Success Rate', value: `${generateAnalyticsData(form.title).successRate.toFixed(1)}%`, icon: '✅' },
+                ].map((metric, i) => (
+                  <div
+                    key={i}
+                    className="rounded-lg p-3 border"
+                    style={{
+                      background: 'rgba(131,110,249,0.05)',
+                      borderColor: 'rgba(131,110,249,0.2)',
+                    }}
+                  >
+                    <p className="text-2xl mb-1">{metric.icon}</p>
+                    <p className="text-xs text-zinc-600">{metric.label}</p>
+                    <p className="text-sm font-light text-zinc-300 mt-1">{metric.value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Charts */}
+              <div className="space-y-4">
+                {/* Requests Chart */}
+                <div
+                  className="rounded-lg p-4 border"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    borderColor: 'rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <p className="text-xs font-light text-zinc-400 mb-3">Requests Over Last 30 Days</p>
+                  <div className="flex items-end gap-1 h-32">
+                    {generateAnalyticsData(form.title)
+                      .dailyRequests.slice(-30)
+                      .map((data, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-t transition-all hover:bg-monad-500/50"
+                          style={{
+                            height: `${(data.requests / 80) * 100}%`,
+                            background: 'rgba(131,110,249,0.4)',
+                          }}
+                          title={`Day ${data.day}: ${data.requests} requests`}
+                        />
+                      ))}
+                  </div>
+                </div>
+
+                {/* Pricing Distribution */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div
+                    className="rounded-lg p-4 border"
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      borderColor: 'rgba(255,255,255,0.05)',
+                    }}
+                  >
+                    <p className="text-xs font-light text-zinc-400 mb-3">Users by Tier</p>
+                    <div className="space-y-2">
+                      {Object.entries(generateAnalyticsData(form.title).pricingTiers).map(([tier, count]) => (
+                        <div key={tier} className="flex items-center justify-between">
+                          <span className="text-xs text-zinc-500">{tier}</span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 rounded-full bg-zinc-800">
+                              <div
+                                className="h-2 rounded-full"
+                                style={{
+                                  width: `${count}%`,
+                                  background: tier === 'Enterprise' ? 'rgba(131,110,249,0.6)' : 'rgba(131,110,249,0.4)',
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-zinc-400 w-6">{count}%</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    className="rounded-lg p-4 border"
+                    style={{
+                      background: 'rgba(255,255,255,0.02)',
+                      borderColor: 'rgba(255,255,255,0.05)',
+                    }}
+                  >
+                    <p className="text-xs font-light text-zinc-400 mb-3">Top Integration</p>
+                    <div className="space-y-3 mt-4">
+                      <div>
+                        <p className="text-sm text-zinc-300">{generateAnalyticsData(form.title).topIntegration}</p>
+                        <p className="text-xs text-zinc-600 mt-1">Most used integration method</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-zinc-600">Active Users</p>
+                        <p className="text-2xl font-light text-monad-300">{generateAnalyticsData(form.title).users}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className="rounded-lg p-3 border"
+                style={{
+                  background: 'rgba(34,197,94,0.05)',
+                  borderColor: 'rgba(34,197,94,0.2)',
+                }}
+              >
+                <p className="text-xs font-light text-green-300">
+                  ✨ Your analytics dashboard will be live immediately after deployment. Access it from your agent settings.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowAnalytics(false)}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  background: 'transparent',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Code Snippets Modal */}
       {showCodeSnippets && (
