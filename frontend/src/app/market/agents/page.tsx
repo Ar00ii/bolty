@@ -163,6 +163,82 @@ const AGENT_TYPE_INFO: Record<string, { description: string; examples: string[] 
   },
 };
 
+// Generate README content
+const generateReadme = (form: any, tiers?: any[]): string => {
+  const tierSection = tiers && tiers.length > 0
+    ? `\n${tiers.map((tier) => `- **${tier.name}**: $${tier.price}/month`).join('\n')}`
+    : `- **Basic**: $${form.price}/month`;
+
+  return `# ${form.title || 'Agent'}
+
+${form.description || 'Agent description'}
+
+## Features
+
+- Core functionality overview
+- Support for ${form.type === 'AI_AGENT' ? 'AI-powered operations' : form.type === 'BOT' ? 'bot integration' : 'automation'}
+- Easy integration with existing systems
+
+## Getting Started
+
+### Installation
+
+\`\`\`bash
+npm install @bolty/${form.title?.toLowerCase().replace(/\\s+/g, '-') || 'agent'}
+\`\`\`
+
+### Basic Usage
+
+\`\`\`python
+import bolty
+
+agent = bolty.Agent(
+    api_key="YOUR_API_KEY",
+    endpoint="https://api.bolty.io/agents/${form.title?.toLowerCase().replace(/\\s+/g, '-') || 'agent'}"
+)
+
+result = agent.invoke(input="Your input here")
+print(result.output)
+\`\`\`
+
+## Configuration
+
+The agent can be configured with the following options:
+
+- **api_key**: Your Bolty API key
+- **timeout**: Request timeout in seconds (default: 30)
+- **retry**: Number of retries on failure (default: 3)
+
+## API Reference
+
+### invoke(input, context)
+
+Invoke the agent with the given input.
+
+**Parameters:**
+- \`input\` (string): The input for the agent
+- \`context\` (dict, optional): Additional context data
+
+**Returns:**
+- Response object with \`output\` and \`metadata\`
+
+## Pricing
+${tierSection}
+
+## Support
+
+For questions and support, visit [Bolty Documentation](https://docs.bolty.io)
+
+## License
+
+MIT License - See LICENSE file for details
+
+---
+
+Built with ❤️ on [Bolty Marketplace](https://bolty.io)
+`;
+};
+
 // Generate security scan results
 const generateSecurityScan = (fileName: string): SecurityScan => {
   const issues: Array<{ severity: 'critical' | 'high' | 'medium' | 'low'; message: string }> = [];
@@ -2732,7 +2808,7 @@ function CreateListingForm({
             )}
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               <button
                 type="button"
                 onClick={() => setShowApiDocs(true)}
@@ -2753,7 +2829,7 @@ function CreateListingForm({
                   background: 'rgba(131,110,249,0.05)',
                 }}
               >
-                💻 Code Examples
+                💻 Code
               </button>
               <button
                 type="button"
@@ -2765,6 +2841,17 @@ function CreateListingForm({
                 }}
               >
                 📊 Analytics
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowReadme(true)}
+                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                📝 README
               </button>
               <button
                 type="button"
@@ -2839,6 +2926,85 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* README Generator Modal */}
+      {showReadme && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div
+            className="rounded-2xl border max-w-3xl w-full my-8"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Generated README.md</h3>
+              <button
+                onClick={() => setShowReadme(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-4">
+              <p className="text-xs text-zinc-600">
+                This README will be displayed on your agent's marketplace page. You can edit it after deployment.
+              </p>
+
+              <CodeBlock code={generateReadme(form, pricingTiers)} language="markdown" />
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(generateReadme(form, pricingTiers));
+                    alert('README copied to clipboard!');
+                  }}
+                  className="flex-1 py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                  style={{
+                    borderColor: 'rgba(131,110,249,0.4)',
+                    color: '#e2d9ff',
+                    background: 'rgba(131,110,249,0.1)',
+                  }}
+                >
+                  📋 Copy to Clipboard
+                </button>
+                <button
+                  onClick={() => {
+                    const element = document.createElement('a');
+                    element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(generateReadme(form, pricingTiers))}`);
+                    element.setAttribute('download', 'README.md');
+                    element.style.display = 'none';
+                    document.body.appendChild(element);
+                    element.click();
+                    document.body.removeChild(element);
+                  }}
+                  className="flex-1 py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                  style={{
+                    borderColor: 'rgba(131,110,249,0.4)',
+                    color: '#e2d9ff',
+                    background: 'rgba(131,110,249,0.1)',
+                  }}
+                >
+                  ⬇️ Download
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowReadme(false)}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  background: 'transparent',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Revenue Tiers Builder Modal */}
       {showTiers && (
