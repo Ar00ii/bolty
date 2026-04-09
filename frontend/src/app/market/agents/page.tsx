@@ -14,6 +14,7 @@ import {
   Users,
   Zap,
   Send,
+  HelpCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -150,6 +151,16 @@ const ROLE_COLORS: Record<string, string> = {
   seller_agent: 'bg-monad-500/10 border-monad-500/15 text-monad-300',
 };
 
+const FIELD_HELP = {
+  webhook:
+    'Endpoint for AI-to-AI negotiations. Buyers can negotiate directly with your agent through this webhook.',
+  category: 'Choose the primary category for better discoverability in the marketplace.',
+  keywords: 'Help people find your agent. Use terms that describe what it does (analytics, nlp, automation).',
+  tags: 'Multiple tags increase visibility. Use 4-6 relevant tags separated by commas.',
+  price: 'Base price for your agent. Set to 0 for free or use pricing models for flexible pricing.',
+  floorPrice: 'Minimum acceptable price. Leave empty to allow any price in negotiations.',
+};
+
 function timeAgo(d: string) {
   const diff = Date.now() - new Date(d).getTime();
   const m = Math.floor(diff / 60000);
@@ -158,6 +169,33 @@ function timeAgo(d: string) {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h`;
   return `${Math.floor(h / 24)}d`;
+}
+
+interface HelpLabelProps {
+  label: string;
+  help?: string;
+  required?: boolean;
+}
+
+function HelpLabel({ label, help, required }: HelpLabelProps) {
+  const [showHelp, setShowHelp] = React.useState(false);
+  return (
+    <div className="relative">
+      <div className="flex items-center gap-2 mb-2">
+        <label className="text-xs font-light text-zinc-400">
+          {label} {required && '*'}
+        </label>
+        {help && (
+          <div className="relative group cursor-help">
+            <HelpCircle className="w-3.5 h-3.5 text-zinc-600 hover:text-zinc-500" />
+            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-300 whitespace-nowrap">
+              {help}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function formatBytes(bytes: number) {
@@ -1496,7 +1534,7 @@ function CreateListingForm({
         {step === 1 && (
           <>
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-3 block">Agent Type *</label>
+              <HelpLabel label="Agent Type" required help="Choose the type that best describes your product" />
               <div className="flex gap-2 flex-wrap">
                 {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
                   <button
@@ -1512,7 +1550,11 @@ function CreateListingForm({
             </div>
 
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-2 block">Title *</label>
+              <HelpLabel
+                label="Title"
+                required
+                help="Keep it short and descriptive. This appears in marketplace search results."
+              />
               <input
                 type="text"
                 placeholder="e.g., Smart Data Analyzer"
@@ -1558,7 +1600,10 @@ function CreateListingForm({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-light text-zinc-400 mb-2 block">Category</label>
+                <HelpLabel
+                  label="Category"
+                  help={FIELD_HELP.category}
+                />
                 <select
                   value={form.category}
                   onChange={(e) => field('category', e.target.value)}
@@ -1599,7 +1644,10 @@ function CreateListingForm({
             </div>
 
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-2 block">Keywords (for discoverability)</label>
+              <HelpLabel
+                label="Keywords"
+                help={FIELD_HELP.keywords}
+              />
               <input
                 type="text"
                 placeholder="e.g., analytics, nlp, automation"
@@ -1616,7 +1664,10 @@ function CreateListingForm({
             </div>
 
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-2 block">Tags (comma separated)</label>
+              <HelpLabel
+                label="Tags"
+                help={FIELD_HELP.tags}
+              />
               <input
                 type="text"
                 placeholder="e.g., ai, data, python, api"
@@ -1639,9 +1690,11 @@ function CreateListingForm({
           <>
             {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
               <div>
-                <label className="text-xs font-light text-zinc-400 mb-2 block">
-                  AI Negotiation Webhook {form.type && ACCEPTS_AGENT_ENDPOINT.has(form.type) && '*'}
-                </label>
+                <HelpLabel
+                  label="AI Negotiation Webhook"
+                  required
+                  help={FIELD_HELP.webhook}
+                />
                 <input
                   type="url"
                   placeholder="https://your-api.com/webhook"
@@ -1741,7 +1794,11 @@ function CreateListingForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-light text-zinc-400 mb-2 block">Price *</label>
+                <HelpLabel
+                  label="Price"
+                  required
+                  help={FIELD_HELP.price}
+                />
                 <input
                   type="number"
                   placeholder="0.00"
@@ -1783,7 +1840,10 @@ function CreateListingForm({
             </div>
 
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-2 block">Floor Price (minimum offer)</label>
+              <HelpLabel
+                label="Floor Price"
+                help={FIELD_HELP.floorPrice}
+              />
               <input
                 type="number"
                 placeholder="Leave empty if no minimum"
