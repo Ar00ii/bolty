@@ -653,54 +653,72 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS WITH GRID PATTERN ── */}
+      {/* ── TESTIMONIALS SECTION ── */}
       <section
-        className="py-24 px-8 relative border-t border-b"
+        className="relative py-32 px-6"
         style={{
-          borderColor: 'rgba(255,255,255,0.1)',
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.04) 25%, rgba(255,255,255,.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.04) 75%, rgba(255,255,255,.04) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.04) 25%, rgba(255,255,255,.04) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.04) 75%, rgba(255,255,255,.04) 76%, transparent 77%, transparent)`,
-          backgroundSize: '50px 50px',
-          backgroundColor: '#000000'
+          backgroundColor: '#0b0b0b',
+          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.05) 25%, rgba(255,255,255,.05) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.05) 75%, rgba(255,255,255,.05) 76%, transparent 77%, transparent)`,
+          backgroundSize: '60px 60px',
         }}
       >
-        <div className="max-w-6xl mx-auto">
-          {/* Company Logos with Icons & Dividers */}
-          <div className="flex justify-between items-start gap-4 mb-16">
+        <div className="max-w-5xl mx-auto">
+          {/* Logos Row with Dividers */}
+          <div className="flex justify-center items-end gap-12 mb-20 relative">
             {[
-              { icon: '●', name: 'Base44' },
-              { icon: '━', name: 'THATCH' },
-              { icon: '□', name: 'Paradigm' },
-              { icon: '◀', name: 'FEY' },
-              { icon: '⊗', name: 'Monadic' },
-            ].map((company, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="flex-1 text-center pb-4 border-b border-gray-800"
-              >
-                <div className="text-gray-600 text-lg mb-2">{company.icon}</div>
-                <p className="text-gray-500 text-xs tracking-widest font-light">{company.name}</p>
-              </motion.div>
+              { label: 'Base44', icon: '●' },
+              { label: 'THATCH', icon: '━' },
+              { label: 'Paradigm', icon: '□' },
+              { label: 'FEY', icon: '◀' },
+              { label: 'Monadic', icon: '⊗' },
+            ].map((company, idx) => (
+              <div key={idx} className="flex flex-col items-center">
+                {/* Icon */}
+                <div
+                  className="text-lg mb-3"
+                  style={{ color: 'rgba(255,255,255,0.7)' }}
+                >
+                  {company.icon}
+                </div>
+
+                {/* Logo Text */}
+                <div
+                  className="text-xs font-light tracking-wider mb-3"
+                  style={{ color: 'rgba(255,255,255,0.6)' }}
+                >
+                  {company.label}
+                </div>
+
+                {/* Divider Line */}
+                <div
+                  className="w-12 h-px"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
+                />
+              </div>
             ))}
           </div>
 
-          {/* Main Testimonial */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center space-y-8"
-          >
-            <p className="text-2xl lg:text-3xl font-light text-white leading-relaxed max-w-4xl mx-auto">
+          {/* Quote Section */}
+          <div className="text-center space-y-6">
+            <p
+              className="text-2xl lg:text-3xl font-light leading-relaxed"
+              style={{ color: '#ffffff' }}
+            >
               "Easier than large clouds, more feature-rich than single-purpose hosting providers, Render lets me ship the entirety of my projects in one place."
             </p>
 
-            <p className="text-xs tracking-widest text-cyan-400 font-mono">
+            {/* Author Tag */}
+            <div
+              className="inline-block px-4 py-2 font-mono text-xs tracking-wide"
+              style={{
+                backgroundColor: 'rgba(59, 130, 246, 0.15)',
+                color: '#3b82f6',
+                border: '1px solid rgba(59, 130, 246, 0.3)'
+              }}
+            >
               MITCHELL HASHIMOTO, CO-FOUNDER OF HASHICORP
-            </p>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
