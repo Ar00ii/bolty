@@ -32,10 +32,10 @@ export class EmailService {
   private appUrl: string;
   private logoUrl: string;
 
-  constructor(private readonly config: ConfigService) {
-    const apiKey = config.get<string>('RESEND_API_KEY', '');
-    this.from = config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
-    this.appUrl = config.get<string>('APP_URL', 'https://bolty.dev');
+  constructor(private readonly _config: ConfigService) {
+    const apiKey = this._config.get<string>('RESEND_API_KEY', '');
+    this.from = this._config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
+    this.appUrl = this._config.get<string>('APP_URL', 'https://bolty.dev');
     this.logoUrl = `${this.appUrl}/bolty-icon.png`;
 
     if (apiKey) {

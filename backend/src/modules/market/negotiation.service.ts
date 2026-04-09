@@ -23,6 +23,32 @@ interface AgentResponse {
   action?: 'accept' | 'reject' | 'counter';
 }
 
+interface NegotiationType {
+  id: string;
+  listing: {
+    id: string;
+    title: string;
+    price: number;
+    currency: string;
+    minPrice?: number | null;
+    agentEndpoint?: string | null;
+    fileKey?: string | null;
+    fileName?: string | null;
+    fileMimeType?: string | null;
+  };
+  buyer?: {
+    id: string;
+    username: string;
+    agentEndpoint?: string | null;
+  };
+  messages?: Array<{
+    fromRole: string;
+    content: string;
+    proposedPrice?: number | null;
+    createdAt: Date;
+  }>;
+}
+
 // Max back-and-forth turns before the negotiation auto-expires
 const MAX_TURNS = 15;
 
@@ -587,7 +613,7 @@ export class NegotiationService {
   }
 
   private async callSellerAgent(
-    neg: Record<string, unknown>,
+    neg: NegotiationType,
     message: string,
     proposedPrice?: number,
   ): Promise<AgentResponse | null> {
@@ -610,7 +636,7 @@ export class NegotiationService {
   // ── Buyer agent ───────────────────────────────────────────────────────────
 
   private async callBuyerAgent(
-    neg: Record<string, unknown>,
+    neg: NegotiationType,
     sellerMessage: string,
     sellerProposedPrice?: number,
   ): Promise<AgentResponse | null> {
