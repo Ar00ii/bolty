@@ -208,6 +208,54 @@ const generateSecurityScan = (fileName: string): SecurityScan => {
   };
 };
 
+// Generate code snippets for integration
+const codeSnippets = {
+  python: (agentName: string) => `import requests
+
+# Invoke agent
+response = requests.post(
+    "https://api.bolty.io/agents/${agentName.toLowerCase().replace(/\\s+/g, '-')}/invoke",
+    json={
+        "input": "Your agent input here",
+        "context": {}
+    },
+    headers={
+        "Authorization": f"Bearer {YOUR_API_KEY}"
+    }
+)
+
+result = response.json()
+print(result.get("output"))`,
+
+  javascript: (agentName: string) => `// Invoke agent
+const response = await fetch(
+  'https://api.bolty.io/agents/${agentName.toLowerCase().replace(/\\s+/g, '-')}/invoke',
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': \`Bearer \${YOUR_API_KEY}\`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      input: 'Your agent input here',
+      context: {}
+    })
+  }
+);
+
+const result = await response.json();
+console.log(result.output);`,
+
+  curl: (agentName: string) => `curl -X POST \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "input": "Your agent input here",
+    "context": {}
+  }' \\
+  https://api.bolty.io/agents/${agentName.toLowerCase().replace(/\\s+/g, '-')}/invoke`,
+};
+
 // Generate OpenAPI-like documentation
 const generateApiDocs = (form: any): string => {
   const slug = form.title
@@ -1648,6 +1696,8 @@ function CreateListingForm({
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showApiDocs, setShowApiDocs] = useState(false);
+  const [showCodeSnippets, setShowCodeSnippets] = useState(false);
+  const [selectedSnippet, setSelectedSnippet] = useState<'python' | 'javascript' | 'curl'>('python');
   const [showSandbox, setShowSandbox] = useState(false);
   const [sandboxInput, setSandboxInput] = useState('');
   const [sandboxLoading, setSandboxLoading] = useState(false);
@@ -2492,18 +2542,31 @@ function CreateListingForm({
               </div>
             )}
 
-            {/* API Docs Button */}
-            <button
-              type="button"
-              onClick={() => setShowApiDocs(true)}
-              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
-              style={{
-                borderColor: 'rgba(131,110,249,0.2)',
-                background: 'rgba(131,110,249,0.05)',
-              }}
-            >
-              📄 View OpenAPI Documentation
-            </button>
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setShowApiDocs(true)}
+                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                📄 API Docs
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCodeSnippets(true)}
+                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                💻 Code Examples
+              </button>
+            </div>
           </div>
         )}
 
@@ -2565,6 +2628,69 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Code Snippets Modal */}
+      {showCodeSnippets && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="rounded-2xl border max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="sticky top-0 flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Integration Examples</h3>
+              <button
+                onClick={() => setShowCodeSnippets(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <p className="text-xs text-zinc-600">
+                Copy and paste these code examples to integrate your agent into your application.
+              </p>
+
+              {/* Snippet Selector */}
+              <div className="flex gap-2">
+                {(['python', 'javascript', 'curl'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setSelectedSnippet(lang)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-light border transition-all ${
+                      selectedSnippet === lang
+                        ? 'bg-monad-500/20 border-monad-500/40 text-monad-300'
+                        : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'
+                    }`}
+                  >
+                    {lang === 'javascript' ? 'JavaScript' : lang === 'python' ? 'Python' : 'cURL'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Code Block */}
+              <CodeBlock
+                code={codeSnippets[selectedSnippet](form.title || 'my-agent')}
+                language={selectedSnippet}
+              />
+
+              <div
+                className="rounded-lg p-3 border"
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  borderColor: 'rgba(131,110,249,0.2)',
+                }}
+              >
+                <p className="text-xs font-light text-zinc-300">
+                  💡 Replace <code className="text-monad-300">YOUR_API_KEY</code> with your actual API key from your dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* API Docs Modal */}
       {showApiDocs && (
