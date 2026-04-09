@@ -656,9 +656,19 @@ export default function HomePage() {
         {/* ── TESTIMONIALS SECTION ── */}
         <div className="py-16 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="max-w-7xl mx-auto">
-            {/* Testimonials Carousel */}
-            <TestimonialCarousel />
-        </div>
+            {/* Testimonials Box */}
+            <div
+              className="relative rounded-lg overflow-hidden p-12"
+              style={{
+                border: '1px solid rgba(59, 130, 246, 0.5)',
+                background: 'rgba(0, 0, 0, 0.4)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              {/* Testimonials Carousel */}
+              <TestimonialCarousel />
+            </div>
+          </div>
         </div>
       </section>
 
