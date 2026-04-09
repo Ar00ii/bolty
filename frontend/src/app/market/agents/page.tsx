@@ -161,6 +161,30 @@ const FIELD_HELP = {
   floorPrice: 'Minimum acceptable price. Leave empty to allow any price in negotiations.',
 };
 
+// Validators
+const validators = {
+  url: (url: string): boolean => {
+    if (!url.trim()) return true;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  price: (price: string): boolean => {
+    if (!price.trim()) return true;
+    const num = parseFloat(price);
+    return !isNaN(num) && num >= 0;
+  },
+  tags: (tags: string): number => {
+    return tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean).length;
+  },
+};
+
 function timeAgo(d: string) {
   const diff = Date.now() - new Date(d).getTime();
   const m = Math.floor(diff / 60000);
@@ -1412,7 +1436,33 @@ function CreateListingForm({
   const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const validateField = (field: string, value: string): string => {
+    switch (field) {
+      case 'agentEndpoint':
+        if (ACCEPTS_AGENT_ENDPOINT.has(form.type) && value.trim() && !validators.url(value)) {
+          return 'Invalid webhook URL';
+        }
+        return '';
+      case 'price':
+        if (value && !validators.price(value)) {
+          return 'Price must be a positive number';
+        }
+        return '';
+      case 'minPrice':
+        if (value && !validators.price(value)) {
+          return 'Floor price must be a positive number';
+        }
+        if (form.price && value && parseFloat(value) > parseFloat(form.price)) {
+          return 'Floor price cannot exceed price';
+        }
+        return '';
+      default:
+        return '';
+    }
+  };
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
@@ -1699,18 +1749,36 @@ function CreateListingForm({
                   type="url"
                   placeholder="https://your-api.com/webhook"
                   value={form.agentEndpoint}
-                  onChange={(e) => field('agentEndpoint', e.target.value)}
+                  onChange={(e) => {
+                    field('agentEndpoint', e.target.value);
+                    const err = validateField('agentEndpoint', e.target.value);
+                    if (err) {
+                      setFieldErrors((p) => ({ ...p, agentEndpoint: err }));
+                    } else {
+                      setFieldErrors((p) => {
+                        const copy = { ...p };
+                        delete copy.agentEndpoint;
+                        return copy;
+                      });
+                    }
+                  }}
                   className="w-full text-sm px-3 py-2 rounded-lg font-light"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: fieldErrors.agentEndpoint
+                      ? '1px solid rgba(239,68,68,0.3)'
+                      : '1px solid rgba(255,255,255,0.08)',
                     color: '#e4e4e7',
                     outline: 'none',
                   }}
                 />
-                <p className="text-xs text-zinc-600 mt-1">
-                  Endpoint where buyers can negotiate with your agent
-                </p>
+                {fieldErrors.agentEndpoint ? (
+                  <p className="text-xs text-red-400 mt-1">{fieldErrors.agentEndpoint}</p>
+                ) : (
+                  <p className="text-xs text-zinc-600 mt-1">
+                    Endpoint where buyers can negotiate with your agent
+                  </p>
+                )}
               </div>
             )}
 
@@ -1803,18 +1871,33 @@ function CreateListingForm({
                   type="number"
                   placeholder="0.00"
                   value={form.price}
-                  onChange={(e) => field('price', e.target.value)}
+                  onChange={(e) => {
+                    field('price', e.target.value);
+                    const err = validateField('price', e.target.value);
+                    if (err) {
+                      setFieldErrors((p) => ({ ...p, price: err }));
+                    } else {
+                      setFieldErrors((p) => {
+                        const copy = { ...p };
+                        delete copy.price;
+                        return copy;
+                      });
+                    }
+                  }}
                   min="0"
                   step="0.01"
                   required
                   className="w-full text-sm px-3 py-2 rounded-lg font-light"
                   style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    border: fieldErrors.price
+                      ? '1px solid rgba(239,68,68,0.3)'
+                      : '1px solid rgba(255,255,255,0.08)',
                     color: '#e4e4e7',
                     outline: 'none',
                   }}
                 />
+                {fieldErrors.price && <p className="text-xs text-red-400 mt-1">{fieldErrors.price}</p>}
               </div>
 
               <div>
@@ -1848,17 +1931,32 @@ function CreateListingForm({
                 type="number"
                 placeholder="Leave empty if no minimum"
                 value={form.minPrice}
-                onChange={(e) => field('minPrice', e.target.value)}
+                onChange={(e) => {
+                  field('minPrice', e.target.value);
+                  const err = validateField('minPrice', e.target.value);
+                  if (err) {
+                    setFieldErrors((p) => ({ ...p, minPrice: err }));
+                  } else {
+                    setFieldErrors((p) => {
+                      const copy = { ...p };
+                      delete copy.minPrice;
+                      return copy;
+                    });
+                  }
+                }}
                 min="0"
                 step="0.01"
                 className="w-full text-sm px-3 py-2 rounded-lg font-light"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: fieldErrors.minPrice
+                    ? '1px solid rgba(239,68,68,0.3)'
+                    : '1px solid rgba(255,255,255,0.08)',
                   color: '#e4e4e7',
                   outline: 'none',
                 }}
               />
+              {fieldErrors.minPrice && <p className="text-xs text-red-400 mt-1">{fieldErrors.minPrice}</p>}
             </div>
           </>
         )}
