@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { IsString, IsOptional, MaxLength } from 'class-validator';
+import type { Request as ExpressRequest } from 'express';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
@@ -31,61 +32,76 @@ export class OrdersController {
 
   /** GET /orders — orders where I'm the buyer */
   @Get()
-  getBuyerOrders(@Request() req: any) {
+  getBuyerOrders(@Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.getBuyerOrders(req.user.id);
   }
 
   /** GET /orders/selling — orders where I'm the seller */
   @Get('selling')
-  getSellerOrders(@Request() req: any) {
+  getSellerOrders(@Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.getSellerOrders(req.user.id);
   }
 
   /** GET /orders/seller/stats */
   @Get('seller/stats')
-  getSellerStats(@Request() req: any) {
+  getSellerStats(@Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.getSellerStats(req.user.id);
   }
 
   /** GET /orders/:id */
   @Get(':id')
-  getOrder(@Param('id') id: string, @Request() req: any) {
+  getOrder(@Param('id') id: string, @Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.getOrder(id, req.user.id);
   }
 
   /** GET /orders/:id/messages */
   @Get(':id/messages')
-  getMessages(@Param('id') id: string, @Request() req: any) {
+  getMessages(@Param('id') id: string, @Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.getMessages(id, req.user.id);
   }
 
   /** POST /orders/:id/in-progress */
   @Post(':id/in-progress')
-  markInProgress(@Param('id') id: string, @Request() req: any) {
+  markInProgress(
+    @Param('id') id: string,
+    @Request() req: ExpressRequest & { user: { id: string } },
+  ) {
     return this.ordersService.markInProgress(id, req.user.id);
   }
 
   /** POST /orders/:id/deliver */
   @Post(':id/deliver')
-  markDelivered(@Param('id') id: string, @Request() req: any, @Body() body: DeliverDto) {
+  markDelivered(
+    @Param('id') id: string,
+    @Request() req: ExpressRequest & { user: { id: string } },
+    @Body() body: DeliverDto,
+  ) {
     return this.ordersService.markDelivered(id, req.user.id, body.deliveryNote);
   }
 
   /** POST /orders/:id/complete */
   @Post(':id/complete')
-  markCompleted(@Param('id') id: string, @Request() req: any, @Body() body: CompleteDto) {
+  markCompleted(
+    @Param('id') id: string,
+    @Request() req: ExpressRequest & { user: { id: string } },
+    @Body() body: CompleteDto,
+  ) {
     return this.ordersService.markCompleted(id, req.user.id, body.escrowReleaseTx);
   }
 
   /** POST /orders/:id/dispute */
   @Post(':id/dispute')
-  dispute(@Param('id') id: string, @Request() req: any) {
+  dispute(@Param('id') id: string, @Request() req: ExpressRequest & { user: { id: string } }) {
     return this.ordersService.dispute(id, req.user.id);
   }
 
   /** POST /orders/:id/messages */
   @Post(':id/messages')
-  sendMessage(@Param('id') id: string, @Request() req: any, @Body() body: SendMessageDto) {
+  sendMessage(
+    @Param('id') id: string,
+    @Request() req: ExpressRequest & { user: { id: string } },
+    @Body() body: SendMessageDto,
+  ) {
     return this.ordersService.sendMessage(id, req.user.id, body.content);
   }
 }

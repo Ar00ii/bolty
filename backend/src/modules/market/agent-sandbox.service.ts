@@ -110,12 +110,17 @@ export class AgentSandboxService {
             resolve(null);
             return;
           }
-          const action = (['accept', 'reject', 'counter'] as const).includes(parsed.action as any)
+          const action = (['accept', 'reject', 'counter'] as const).includes(
+            parsed.action as 'accept' | 'reject' | 'counter',
+          )
             ? parsed.action
             : 'counter';
           resolve({
             reply: String(parsed.reply).slice(0, 1000),
-            proposedPrice: parsed.proposedPrice != null ? Number(parsed.proposedPrice) : undefined,
+            proposedPrice:
+              parsed.proposedPrice !== null && parsed.proposedPrice !== undefined
+                ? Number(parsed.proposedPrice)
+                : undefined,
             action,
           });
         } catch {
