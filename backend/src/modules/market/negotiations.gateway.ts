@@ -15,7 +15,7 @@ import { Logger } from '@nestjs/common';
 })
 export class NegotiationsGateway implements OnGatewayInit {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(NegotiationsGateway.name);
 

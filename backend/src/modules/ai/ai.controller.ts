@@ -6,8 +6,6 @@ import {
   Param,
   Res,
   UseGuards,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
@@ -19,7 +17,7 @@ import { AiService } from './ai.service';
 class ChatDto {
   @IsString()
   @Length(1, 2000)
-  message: string;
+  message!: string;
 }
 
 @Controller('ai')

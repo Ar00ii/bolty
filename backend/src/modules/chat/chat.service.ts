@@ -28,7 +28,7 @@ export class ChatService {
   async validateAndSave(
     userId: string,
     content: string,
-    ipAddress?: string,
+    _ipAddress?: string,
   ): Promise<{ id: string; content: string; userId: string; createdAt: Date; user: { username: string | null; avatarUrl: string | null } }> {
     // ── Input validation ──────────────────────────────────────────────────
     if (!content || typeof content !== 'string') {

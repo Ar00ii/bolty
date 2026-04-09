@@ -53,7 +53,7 @@ class WsRateLimiter {
 })
 export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(DmGateway.name);
 
@@ -122,8 +122,9 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const messages = await this.dmService.getConversation(client.userId, data.peerId);
       client.emit('conversation', { peerId: data.peerId, messages });
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      client.emit('error', { message: error.message });
     }
   }
 
@@ -163,8 +164,9 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
         peerId: client.userId,
         message: payload,
       });
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      client.emit('error', { message: error.message });
     }
   }
 }

@@ -1,7 +1,6 @@
 import {
   Injectable,
   Logger,
-  InternalServerErrorException,
   ForbiddenException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -156,7 +155,8 @@ export class AiService {
       res.write('data: [DONE]\n\n');
       res.end();
     } catch (err) {
-      this.logger.error(`Gemini API error: ${err?.message || err}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Gemini API error: ${errMsg}`);
       res.write(`data: ${JSON.stringify({ error: 'AI service temporarily unavailable' })}\n\n`);
       res.end();
     }
