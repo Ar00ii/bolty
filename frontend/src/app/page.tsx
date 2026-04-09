@@ -655,52 +655,43 @@ export default function HomePage() {
 
       {/* ── TESTIMONIALS WITH GRID PATTERN ── */}
       <section
-        className="py-20 px-4 border-t relative overflow-hidden"
+        className="py-32 px-6 relative"
         style={{
-          borderColor: 'var(--border)',
-          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.03) 25%, rgba(255,255,255,.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.03) 75%, rgba(255,255,255,.03) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.03) 25%, rgba(255,255,255,.03) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.03) 75%, rgba(255,255,255,.03) 76%, transparent 77%, transparent)`,
-          backgroundSize: '80px 80px',
+          backgroundImage: `linear-gradient(0deg, transparent 24%, rgba(255,255,255,.08) 25%, rgba(255,255,255,.08) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.08) 75%, rgba(255,255,255,.08) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255,255,255,.08) 25%, rgba(255,255,255,.08) 26%, transparent 27%, transparent 74%, rgba(255,255,255,.08) 75%, rgba(255,255,255,.08) 76%, transparent 77%, transparent)`,
+          backgroundSize: '100px 100px',
           backgroundColor: '#000000'
         }}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* Company Logos */}
-          <div className="flex justify-center items-center gap-8 lg:gap-12 mb-16 flex-wrap">
-            {[
-              { name: 'Base44', logo: '●' },
-              { name: 'THATCH', logo: 'T' },
-              { name: 'Paradigm', logo: '□' },
-              { name: 'FEY', logo: '◀' },
-              { name: 'Monadic', logo: 'M' },
-            ].map((company, i) => (
-              <motion.div
+        <div className="max-w-5xl mx-auto">
+          {/* Company Logos - Top Row */}
+          <div className="flex justify-center items-center gap-12 mb-20 flex-wrap">
+            {['Base44', 'THATCH', 'Paradigm', 'FEY', 'Monadic'].map((company, i) => (
+              <motion.p
                 key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 transition={{ delay: i * 0.1 }}
-                className="text-gray-400 hover:text-gray-300 transition-colors"
+                className="text-gray-500 text-sm tracking-wider font-light"
               >
-                <p className="text-sm font-light tracking-widest">{company.name}</p>
-              </motion.div>
+                {company}
+              </motion.p>
             ))}
           </div>
 
-          {/* Testimonial Quote */}
+          {/* Testimonial */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center space-y-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            className="text-center space-y-6"
           >
-            <p className="text-2xl lg:text-3xl font-light text-white leading-relaxed max-w-3xl mx-auto">
+            <p className="text-xl lg:text-2xl font-light text-white leading-relaxed max-w-3xl mx-auto">
               "We scaled out of other platforms. Everything else we tried eventually broke at our scale. Render was the only one that kept scaling with us, and it's the product we continue to grow on."
             </p>
 
-            <div>
-              <p className="text-sm font-mono text-cyan-400 tracking-wider">
-                ANNA MONACO, CEO & FOUNDER AT PARADIGM
-              </p>
-            </div>
+            <p className="text-xs tracking-widest text-cyan-400 font-mono">
+              ANNA MONACO, CEO & FOUNDER AT PARADIGM
+            </p>
           </motion.div>
         </div>
       </section>
