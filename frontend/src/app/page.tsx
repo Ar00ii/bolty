@@ -811,7 +811,7 @@ export default function HomePage() {
                     <Star key={j} className="w-4 h-4 text-purple-400 fill-purple-400" />
                   ))}
                 </div>
-                <p className="text-gray-300 mb-4">"{t.text}"</p>
+                <p className="text-gray-300 mb-4">&quot;{t.text}&quot;</p>
                 <div className="pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
                   <p className="font-light text-white">{t.name}</p>
                   <p className="text-xs text-gray-500">{t.role}</p>
