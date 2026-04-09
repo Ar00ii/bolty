@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X, MessageSquare, Bot } from 'lucide-react';
+import React, { useState } from 'react';
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95, transformOrigin: 'bottom left' },

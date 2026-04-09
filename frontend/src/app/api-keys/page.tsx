@@ -1,21 +1,10 @@
 'use client';
 
+import { Key, Plus, Trash2, Copy, Check, Eye, EyeOff, AlertTriangle, Shield } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/lib/auth/AuthProvider';
+
 import { api, ApiError } from '@/lib/api/client';
-import {
-  Key,
-  Plus,
-  Trash2,
-  Copy,
-  Check,
-  Eye,
-  EyeOff,
-  AlertTriangle,
-  Shield,
-  Clock,
-  MoreHorizontal,
-} from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface ApiKeyInfo {
   id: string;

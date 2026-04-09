@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 interface ProgressBarProps {
   isLoading: boolean;
@@ -51,7 +51,7 @@ export function ProgressBar({
       <div
         className="absolute right-0 top-0 h-full w-20 blur-xl opacity-50"
         style={{
-          background: `linear-gradient(90deg, transparent, currentColor)`,
+          background: 'linear-gradient(90deg, transparent, currentColor)',
         }}
       />
     </motion.div>

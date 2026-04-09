@@ -1,38 +1,31 @@
 'use client';
 
-import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { connectMetaMask, getMetaMaskProvider } from '@/lib/wallet/ethereum';
-import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
 import {
   Bot,
-  User,
   X,
   Key,
   Plus,
   Trash2,
   Copy,
-  Eye,
-  EyeOff,
   ShieldCheck,
   ShieldAlert,
-  Package,
   Globe,
-  Star,
   Cpu,
-  AlertTriangle,
-  Wallet,
   Users,
   Zap,
   Send,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+
+import { Badge } from '@/components/ui/badge';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

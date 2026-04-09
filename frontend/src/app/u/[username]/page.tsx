@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 

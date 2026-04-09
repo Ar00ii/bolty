@@ -1,8 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Home,
@@ -21,6 +18,9 @@ import {
   Trophy,
   ChevronRight,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface NavSection {
   label: string;

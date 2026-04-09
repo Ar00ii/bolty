@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { Trophy, GitBranch, Package } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@/lib/api/client';
+import React, { useState, useEffect } from 'react';
+
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { ReputationBadge } from '@/components/ui/reputation-badge';
-import { Trophy, GitBranch, Package } from 'lucide-react';
+import { api } from '@/lib/api/client';
 
 interface LeaderboardEntry {
   id: string;

@@ -1,7 +1,7 @@
 'use client';
-import React, { useState } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useState } from 'react';
 import type { ComponentType, SVGProps } from 'react';
 
 interface FaqItem {

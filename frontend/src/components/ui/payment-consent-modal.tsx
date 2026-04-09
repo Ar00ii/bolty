@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
 import { Shield, AlertTriangle, Lock, X } from 'lucide-react';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import React, { useState } from 'react';
+
 import { isEscrowEnabled } from '@/lib/wallet/escrow';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface PaymentConsentModalProps {
   listingTitle: string;
@@ -75,7 +76,7 @@ export function PaymentConsentModal({
         `Buyer wallet:  ${buyerAddress}`,
         `Seller wallet: ${sellerAddress}`,
         `Listing: ${listingTitle}`,
-        escrow ? `Mode: ESCROW (funds held until delivery confirmed)` : `Mode: DIRECT PAYMENT`,
+        escrow ? 'Mode: ESCROW (funds held until delivery confirmed)' : 'Mode: DIRECT PAYMENT',
         '',
         'PAYMENT BREAKDOWN:',
         `  To seller:        ${sellerAmountETH} ETH  (97.5%)`,

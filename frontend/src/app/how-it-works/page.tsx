@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { ChevronRight, Copy, Check } from 'lucide-react';
+import React, { useState } from 'react';
+
 import { WarpBackground } from '@/components/ui/warp-background';
 
 const BRAND = '#836EF9';
@@ -142,7 +143,7 @@ export default function HowItWorks() {
     <div
       style={{
         background: 'rgba(131,110,249,0.08)',
-        border: `1px solid rgba(131,110,249,0.25)`,
+        border: '1px solid rgba(131,110,249,0.25)',
         borderRadius: 8,
         padding: '0.85rem 1rem',
         marginBottom: '1.5rem',

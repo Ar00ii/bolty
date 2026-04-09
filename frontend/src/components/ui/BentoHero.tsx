@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BentoCard } from './BentoCard';
-import { AnimatedSparkline } from './AnimatedSparkline';
 import { CheckCircle2, Activity } from 'lucide-react';
+
+import { AnimatedSparkline } from './AnimatedSparkline';
+import { BentoCard } from './BentoCard';
 
 export function BentoHero() {
   const agentDeployData = [0.3, 0.5, 0.4, 0.7, 0.6, 0.8, 0.7, 0.75, 0.8];

@@ -1,15 +1,5 @@
 'use client';
 
-import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError, API_URL } from '@/lib/api/client';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
-import { DottedSurface } from '@/components/ui/dotted-surface';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   GitBranch,
   Lock,
@@ -29,6 +19,15 @@ import {
   Copy,
   Check,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+
+import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
+import { Badge } from '@/components/ui/badge';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { api, ApiError, API_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────

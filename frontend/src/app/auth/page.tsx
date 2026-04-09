@@ -1,11 +1,5 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
-import { Waves } from '@/components/ui/wave-background';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import {
   Shield,
   Lock,
@@ -19,6 +13,13 @@ import {
   Zap,
   AlertTriangle,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { Waves } from '@/components/ui/wave-background';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 // -- Error mapping ------------------------------------------------------------
 function mapError(err: unknown): string {

@@ -1,10 +1,5 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
-import { ReputationBadge } from '@/components/ui/reputation-badge';
 import {
   Plus,
   X,
@@ -24,6 +19,12 @@ import {
   HelpCircle,
   ChevronDown,
 } from 'lucide-react';
+import Link from 'next/link';
+import React, { useState, useEffect, useCallback } from 'react';
+
+import { ReputationBadge } from '@/components/ui/reputation-badge';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface ServiceUser {
   id: string;

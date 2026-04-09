@@ -23,7 +23,8 @@ export function FloatingElements() {
             top: el.y,
             width: el.size,
             height: el.size,
-            background: `radial-gradient(circle, rgba(131, 110, 249, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)`,
+            background:
+              'radial-gradient(circle, rgba(131, 110, 249, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%)',
             filter: 'blur(40px)',
           }}
           animate={{

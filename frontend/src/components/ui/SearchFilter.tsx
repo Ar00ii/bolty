@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
-import { Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Search, X } from 'lucide-react';
+import { useState, useCallback, useMemo } from 'react';
 
 export interface FilterOption {
   id: string;

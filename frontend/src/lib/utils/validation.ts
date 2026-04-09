@@ -40,7 +40,7 @@ export const validators = {
   minLength:
     (min: number) =>
     (value: string): string | null => {
-      if (!value) return `This field is required`;
+      if (!value) return 'This field is required';
       return value.length < min ? `Minimum ${min} characters required` : null;
     },
 

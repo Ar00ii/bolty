@@ -1,7 +1,7 @@
 'use client';
 
-import { forwardRef, InputHTMLAttributes } from 'react';
 import { AlertCircle } from 'lucide-react';
+import { forwardRef, InputHTMLAttributes } from 'react';
 
 interface FormInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

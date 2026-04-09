@@ -1,4 +1,5 @@
 'use client';
+import gsap from 'gsap';
 import React, {
   Children,
   cloneElement,
@@ -8,7 +9,6 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import gsap from 'gsap';
 import './CardSwap.css';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {

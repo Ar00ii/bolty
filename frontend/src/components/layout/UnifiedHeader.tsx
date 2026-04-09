@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import React, { useState, useRef, useEffect } from 'react';
+
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 const NAV_LINKS = [
   { href: '/market', label: 'Marketplace' },

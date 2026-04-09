@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { TrendingUp, Users, Zap, Shield } from 'lucide-react';
+
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 
 interface Stat {
   label: string;
@@ -97,13 +98,15 @@ export function StatsShowcase() {
             <motion.div
               key={stat.label}
               variants={itemVariants}
-              className={`relative group overflow-hidden rounded-lg border border-white/10 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/5`}
+              className={
+                'relative group overflow-hidden rounded-lg border border-white/10 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/5'
+              }
             >
               {/* Gradient background on hover */}
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
-                  background: `linear-gradient(135deg, rgba(131,110,249,0.1), rgba(6,182,212,0.1))`,
+                  background: 'linear-gradient(135deg, rgba(131,110,249,0.1), rgba(6,182,212,0.1))',
                 }}
               />
 

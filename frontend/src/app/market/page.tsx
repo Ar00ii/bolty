@@ -1,28 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Bot, X, GitBranch, Star, TrendingUp, Clock, Package, Zap, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError, API_URL } from '@/lib/api/client';
+import React, { useState, useEffect, useRef } from 'react';
+
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { Badge } from '@/components/ui/badge';
-import { connectMetaMask, isMetaMaskInstalled, getMetaMaskProvider } from '@/lib/wallet/ethereum';
-import {
-  Bot,
-  User,
-  X,
-  ShieldCheck,
-  ShieldAlert,
-  GitBranch,
-  Star,
-  TrendingUp,
-  Clock,
-  Package,
-  Zap,
-  ArrowRight,
-  Search,
-  SlidersHorizontal,
-} from 'lucide-react';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

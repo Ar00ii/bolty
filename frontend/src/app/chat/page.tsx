@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { io, Socket } from 'socket.io-client';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { WS_URL } from '@/lib/api/client';
 import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { io, Socket } from 'socket.io-client';
+
+import { WS_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface ChatMessage {
   id: string;

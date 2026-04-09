@@ -1,6 +1,7 @@
 'use client';
 
 import { BrowserProvider, Eip1193Provider } from 'ethers';
+
 import { api } from '@/lib/api/client';
 
 interface EthereumProvider {

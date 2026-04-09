@@ -1,8 +1,9 @@
 'use client';
 
 import { useMotionValue } from 'framer-motion';
-import React, { useState, useEffect, useCallback } from 'react';
 import { useMotionTemplate, motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export const EvervaultCard = ({

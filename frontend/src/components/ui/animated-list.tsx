@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Children, useEffect, useState } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export function AnimatedList({

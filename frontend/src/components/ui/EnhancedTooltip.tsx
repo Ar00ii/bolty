@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { ReactNode } from 'react';
 
 interface EnhancedTooltipProps {
@@ -62,7 +62,7 @@ export function EnhancedTooltip({
               transform:
                 side === 'left' || side === 'right'
                   ? `translate${side === 'left' ? 'X' : 'X'}(-${side === 'left' ? 'calc(100% + 8px)' : 'calc(-100% - 8px)'}) translateY(-50%)`
-                  : `translateX(-50%)`,
+                  : 'translateX(-50%)',
             }}
           >
             <div className="text-zinc-300">{content}</div>

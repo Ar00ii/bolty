@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
 import Link from 'next/link';
+import React, { useState } from 'react';
 
 function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
   const [copied, setCopied] = useState(false);

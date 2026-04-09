@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ValidationError, validateForm } from '@/lib/utils/validation';
+
+import { validateForm } from '@/lib/utils/validation';
 
 export interface UseFormOptions<T> {
   initialValues: T;

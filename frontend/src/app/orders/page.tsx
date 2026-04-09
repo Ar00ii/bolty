@@ -1,9 +1,5 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { API_URL } from '@/lib/api/client';
 import {
   ShoppingBag,
   Package,
@@ -16,6 +12,11 @@ import {
   TrendingUp,
   Lock,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, useCallback } from 'react';
+
+import { API_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 const API = API_URL;
 

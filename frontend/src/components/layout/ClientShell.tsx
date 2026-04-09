@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
+
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { Footer } from '@/components/ui/footer-section';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 

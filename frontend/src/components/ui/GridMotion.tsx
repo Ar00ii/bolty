@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { useEffect, useRef } from 'react';
 import './GridMotion.css';
 
 interface GridMotionProps {

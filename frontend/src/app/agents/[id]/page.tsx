@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import { useParams } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from 'react';
+
 import { api, ApiError, API_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import React, { useState, useEffect } from 'react';
+
 import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function ProfileSetupPage() {
   const { user, isLoading, refresh } = useAuth();

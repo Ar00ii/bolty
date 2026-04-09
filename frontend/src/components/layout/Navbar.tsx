@@ -1,10 +1,5 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { useTheme } from '@/lib/theme/ThemeContext';
 import {
   Search,
   Sun,
@@ -19,6 +14,12 @@ import {
   Menu,
   X,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
+
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { useTheme } from '@/lib/theme/ThemeContext';
 
 interface NavbarProps {
   menuOpen: boolean;

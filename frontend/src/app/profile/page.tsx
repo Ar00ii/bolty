@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError, API_URL } from '@/lib/api/client';
+import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
 import { TerminalCard } from '@/components/ui/TerminalCard';
+import { api, ApiError, API_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
