@@ -34,6 +34,7 @@ import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
+import { TechStack } from '@/components/TechStack';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -312,77 +313,11 @@ export default function HomePage() {
       {/* ── HERO (RENDER STYLE) ── */}
       <RenderHero isAuthenticated={isAuthenticated} />
 
-      {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
-      <section
-        className="py-12 relative overflow-hidden"
-        style={{ borderColor: 'var(--border)' }}
-      >
-        <ScrollVelocityRow duration={50}>
-          {[
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg',
-              alt: 'React',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg',
-              alt: 'TypeScript',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
-              alt: 'Python',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg',
-              alt: 'Node.js',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg',
-              alt: 'Docker',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg',
-              alt: 'PostgreSQL',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
-              alt: 'Git',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
-              alt: 'Tailwind',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg',
-              alt: 'MongoDB',
-            },
-            {
-              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg',
-              alt: 'Redis',
-            },
-          ].map((icon) => (
-            <div key={icon.alt} className="w-28 flex items-center justify-start pl-2 flex-shrink-0">
-              <img
-                src={icon.src}
-                alt={icon.alt}
-                loading="lazy"
-                className="w-14 h-14 opacity-50 hover:opacity-100 transition-opacity"
-                style={{ objectFit: 'contain', objectPosition: 'left' }}
-                title={icon.alt}
-              />
-            </div>
-          ))}
-          <div className="flex-shrink-0" style={{ width: '64px' }} />
-        </ScrollVelocityRow>
-
-        {/* Fade edges */}
-        <div
-          className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10"
-          style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }}
-        />
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10"
-          style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }}
-        />
+      {/* ── TECHNOLOGIES STACK ── */}
+      <section className="py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <TechStack />
+        </div>
       </section>
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
