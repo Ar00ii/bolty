@@ -1694,7 +1694,7 @@ function CreateListingForm({
   onCancel: () => void;
 }) {
   const { refresh } = useAuth();
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -1709,6 +1709,9 @@ function CreateListingForm({
     tags: '',
     agentUrl: '',
     agentEndpoint: '',
+    version: '1.0.0',
+    releaseNotes: '',
+    releaseType: 'initial',
   });
   const [uploading, setUploading] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -1845,6 +1848,8 @@ function CreateListingForm({
         return form.agentEndpoint.trim() !== '' || !ACCEPTS_AGENT_ENDPOINT.has(form.type);
       case 4:
         return form.price !== '';
+      case 5:
+        return form.version !== '';
       default:
         return true;
     }
@@ -1855,7 +1860,8 @@ function CreateListingForm({
     { num: 2, label: 'Category & Tags' },
     { num: 3, label: 'Configuration' },
     { num: 4, label: 'Pricing' },
-    { num: 5, label: 'Review' },
+    { num: 5, label: 'Versioning' },
+    { num: 6, label: 'Review' },
   ];
 
   const categoryData = AGENT_CATEGORIES[form.type as keyof typeof AGENT_CATEGORIES];
@@ -2416,8 +2422,119 @@ function CreateListingForm({
           </>
         )}
 
-        {/* Step 5: Review */}
+        {/* Step 5: Versioning */}
         {step === 5 && (
+          <>
+            <div className="rounded-lg p-4 border mb-4" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)' }}>
+              <p className="text-xs font-light text-zinc-400 mb-1">First Deployment</p>
+              <p className="text-sm font-light text-zinc-300">Version will be locked at v1.0.0 for your initial release</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <HelpLabel label="Major" help="Breaking changes or major features" />
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={form.version.split('.')[0]}
+                  onChange={(e) => {
+                    const parts = form.version.split('.');
+                    field('version', `${e.target.value}.${parts[1]}.${parts[2]}`);
+                  }}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  disabled
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#a1a1a1',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              <div>
+                <HelpLabel label="Minor" help="New features, backward compatible" />
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={form.version.split('.')[1]}
+                  onChange={(e) => {
+                    const parts = form.version.split('.');
+                    field('version', `${parts[0]}.${e.target.value}.${parts[2]}`);
+                  }}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  disabled
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#a1a1a1',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              <div>
+                <HelpLabel label="Patch" help="Bug fixes and improvements" />
+                <input
+                  type="number"
+                  min="0"
+                  max="99"
+                  value={form.version.split('.')[2]}
+                  onChange={(e) => {
+                    const parts = form.version.split('.');
+                    field('version', `${parts[0]}.${parts[1]}.${e.target.value}`);
+                  }}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  disabled
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#a1a1a1',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <HelpLabel label="Release Notes" help="Describe what changed in this version" />
+              <textarea
+                placeholder="Initial release - Describe your agent's capabilities and features..."
+                value={form.releaseNotes}
+                onChange={(e) => field('releaseNotes', e.target.value)}
+                maxLength={500}
+                rows={4}
+                className="w-full text-sm px-3 py-2 rounded-lg font-light resize-none"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-zinc-600">{form.releaseNotes.length}/500</p>
+              </div>
+            </div>
+
+            <div
+              className="rounded-lg p-3 border mt-4"
+              style={{
+                background: 'rgba(34,197,94,0.05)',
+                borderColor: 'rgba(34,197,94,0.2)',
+              }}
+            >
+              <p className="text-xs font-light text-green-300">
+                ✨ Version history will be maintained for all future releases of your agent.
+              </p>
+            </div>
+          </>
+        )}
+
+        {/* Step 6: Review */}
+        {step === 6 && (
           <div className="space-y-4">
             <div>
               <h3 className="text-sm font-light text-zinc-100 mb-4">Preview</h3>
@@ -2626,7 +2743,7 @@ function CreateListingForm({
             </button>
           )}
 
-          {step < 5 ? (
+          {step < 6 ? (
             <button
               type="button"
               onClick={() => {
