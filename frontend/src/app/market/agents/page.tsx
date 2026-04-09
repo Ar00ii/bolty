@@ -110,6 +110,33 @@ const TYPE_COLORS: Record<string, string> = {
 };
 const ACCEPTS_FILE = new Set(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER']);
 const ACCEPTS_AGENT_ENDPOINT = new Set(['AI_AGENT', 'BOT']);
+
+const AGENT_CATEGORIES = {
+  AI_AGENT: {
+    name: 'AI Agent',
+    subcategories: ['LLM Assistant', 'Data Analysis', 'Content Generation', 'Automation', 'Code Generation', 'Other'],
+  },
+  BOT: {
+    name: 'Bot',
+    subcategories: ['Discord Bot', 'Telegram Bot', 'Twitter Bot', 'Chat Bot', 'Utility Bot', 'Other'],
+  },
+  SCRIPT: {
+    name: 'Script',
+    subcategories: ['Python Script', 'JavaScript/Node', 'Shell Script', 'Automation', 'Data Processing', 'Other'],
+  },
+  OTHER: {
+    name: 'Other',
+    subcategories: ['Tool', 'Plugin', 'Extension', 'Template', 'Library', 'Other'],
+  },
+};
+
+const PRICING_TIERS = [
+  { label: 'Free', value: '0', description: 'No cost' },
+  { label: 'Pay-per-use', value: 'usage', description: 'Based on usage' },
+  { label: 'Fixed Price', value: 'fixed', description: 'One-time payment' },
+  { label: 'Subscription', value: 'subscription', description: 'Recurring payment' },
+];
+
 const ROLE_LABELS: Record<string, string> = {
   buyer: 'you',
   seller: 'seller',
@@ -1326,12 +1353,17 @@ function CreateListingForm({
   onCancel: () => void;
 }) {
   const { refresh } = useAuth();
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [form, setForm] = useState({
     title: '',
     description: '',
     type: 'AI_AGENT' as MarketListing['type'],
+    category: '',
+    subcategory: '',
+    keywords: '',
     price: '',
     minPrice: '',
+    pricingModel: 'fixed',
     currency: 'ETH',
     tags: '',
     agentUrl: '',
@@ -1404,200 +1436,477 @@ function CreateListingForm({
 
   const field = (key: keyof typeof form, value: string) => setForm((p) => ({ ...p, [key]: value }));
 
+  const canProceedToStep = (currentStep: number): boolean => {
+    switch (currentStep) {
+      case 1:
+        return form.title.trim() !== '' && form.description.trim() !== '';
+      case 2:
+        return true;
+      case 3:
+        return form.agentEndpoint.trim() !== '' || !ACCEPTS_AGENT_ENDPOINT.has(form.type);
+      case 4:
+        return form.price !== '';
+      default:
+        return true;
+    }
+  };
+
+  const steps = [
+    { num: 1, label: 'Type & Description' },
+    { num: 2, label: 'Category & Tags' },
+    { num: 3, label: 'Configuration' },
+    { num: 4, label: 'Pricing' },
+    { num: 5, label: 'Review' },
+  ];
+
+  const categoryData = AGENT_CATEGORIES[form.type as keyof typeof AGENT_CATEGORIES];
+
   return (
     <div
-      className="rounded-2xl border p-5"
+      className="rounded-2xl border p-8 max-w-2xl mx-auto"
       style={{ background: '#0a0a12', borderColor: 'rgba(131,110,249,0.2)' }}
     >
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-light text-zinc-100">Deploy New Agent</h2>
-        <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300">
-          <X className="w-4 h-4" />
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-2xl font-light text-zinc-100">Deploy New Agent</h2>
+          <p className="text-xs text-zinc-600 mt-1">Step {step} of {steps.length}</p>
+        </div>
+        <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300 transition-colors">
+          <X className="w-5 h-5" />
         </button>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-3">
-        {/* Type selector */}
-        <div className="flex gap-2 flex-wrap">
-          {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => field('type', t)}
-              className={`text-xs font-mono px-3 py-1.5 rounded-lg border transition-all ${form.type === t ? 'bg-monad-500/20 border-monad-500/40 text-monad-300' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'}`}
-            >
-              {TYPE_LABELS[t]}
-            </button>
-          ))}
-        </div>
-        <input
-          type="text"
-          placeholder="Title *"
-          value={form.title}
-          onChange={(e) => field('title', e.target.value)}
-          maxLength={100}
-          required
-          className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e4e4e7',
-            outline: 'none',
-          }}
-        />
-        <textarea
-          placeholder="Description *"
-          value={form.description}
-          onChange={(e) => field('description', e.target.value)}
-          maxLength={1000}
-          rows={3}
-          required
-          className="w-full text-sm px-3 py-2 rounded-lg font-mono resize-none"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e4e4e7',
-            outline: 'none',
-          }}
-        />
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="Price"
-            value={form.price}
-            onChange={(e) => field('price', e.target.value)}
-            min="0"
-            step="0.01"
-            className="flex-1 text-sm px-3 py-2 rounded-lg font-mono"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e4e4e7',
-              outline: 'none',
-            }}
-          />
-          <input
-            type="number"
-            placeholder="Floor price"
-            value={form.minPrice}
-            onChange={(e) => field('minPrice', e.target.value)}
-            min="0"
-            step="0.01"
-            className="flex-1 text-sm px-3 py-2 rounded-lg font-mono"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e4e4e7',
-              outline: 'none',
-            }}
-          />
-          <select
-            value={form.currency}
-            onChange={(e) => field('currency', e.target.value)}
-            className="w-24 text-sm px-2 py-2 rounded-lg font-mono"
-            style={{
-              background: '#0f0f18',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e4e4e7',
-              outline: 'none',
-            }}
-          >
-            {['ETH', 'BOLTY'].map((c) => (
-              <option key={c} value={c}>
-                {c === 'BOLTY' ? 'BOLTY (0 tax)' : c}
-              </option>
-            ))}
-          </select>
-        </div>
-        <input
-          type="text"
-          placeholder="Tags (comma separated)"
-          value={form.tags}
-          onChange={(e) => field('tags', e.target.value)}
-          className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e4e4e7',
-            outline: 'none',
-          }}
-        />
-        {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
-          <input
-            type="url"
-            placeholder="AI negotiation webhook (optional)"
-            value={form.agentEndpoint}
-            onChange={(e) => field('agentEndpoint', e.target.value)}
-            className="w-full text-sm px-3 py-2 rounded-lg font-mono"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#e4e4e7',
-              outline: 'none',
-            }}
-          />
-        )}
-        {ACCEPTS_FILE.has(form.type) && (
-          <div>
+
+      {/* Progress Bar */}
+      <div className="flex gap-2 mb-8">
+        {steps.map((s) => (
+          <div key={s.num} className="flex-1">
             <div
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full rounded-xl border-2 border-dashed py-6 text-center cursor-pointer transition-colors hover:border-monad-500/40"
+              className="h-1.5 rounded-full transition-all"
               style={{
-                borderColor: uploadedFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)',
-              }}
-            >
-              {uploading ? (
-                <p className="text-xs font-mono text-monad-400 animate-pulse">
-                  {scanning ? 'scanning for security threats...' : 'uploading...'}
-                </p>
-              ) : uploadedFile ? (
-                <div className="space-y-1">
-                  {uploadedFile.scanPassed ? (
-                    <ShieldCheck className="w-5 h-5 text-green-400 mx-auto" />
-                  ) : (
-                    <ShieldAlert className="w-5 h-5 text-red-400 mx-auto" />
-                  )}
-                  <p className="text-xs font-mono text-green-400">{uploadedFile.fileName}</p>
-                  <p className="text-xs font-mono text-zinc-600">
-                    {formatBytes(uploadedFile.fileSize)}
-                  </p>
-                  {uploadedFile.scanNote && (
-                    <p className="text-xs font-mono text-zinc-500">{uploadedFile.scanNote}</p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  <p className="text-xs font-mono text-zinc-500">click to upload agent file</p>
-                  <p className="text-zinc-700 font-mono text-xs">
-                    .py .js .ts .zip .json .yaml .sh .txt — max 10 MB
-                  </p>
-                </div>
-              )}
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".py,.js,.ts,.zip,.json,.yaml,.yml,.sh,.txt"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFileUpload(f);
+                background: s.num <= step ? 'rgba(131,110,249,0.6)' : 'rgba(255,255,255,0.1)',
               }}
             />
           </div>
+        ))}
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Step 1: Type & Description */}
+        {step === 1 && (
+          <>
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-3 block">Agent Type *</label>
+              <div className="flex gap-2 flex-wrap">
+                {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => field('type', t)}
+                    className={`text-xs font-light px-4 py-2 rounded-lg border transition-all ${form.type === t ? 'bg-monad-500/20 border-monad-500/40 text-monad-300' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'}`}
+                  >
+                    {TYPE_LABELS[t]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-2 block">Title *</label>
+              <input
+                type="text"
+                placeholder="e.g., Smart Data Analyzer"
+                value={form.title}
+                onChange={(e) => field('title', e.target.value)}
+                maxLength={100}
+                required
+                className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+              <p className="text-xs text-zinc-600 mt-1">{form.title.length}/100</p>
+            </div>
+
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-2 block">Description *</label>
+              <textarea
+                placeholder="What does your agent do? What problems does it solve?"
+                value={form.description}
+                onChange={(e) => field('description', e.target.value)}
+                maxLength={1000}
+                rows={4}
+                required
+                className="w-full text-sm px-3 py-2 rounded-lg font-light resize-none"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+              <p className="text-xs text-zinc-600 mt-1">{form.description.length}/1000</p>
+            </div>
+          </>
         )}
-        {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all"
-          style={{
-            background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
-            border: '1px solid rgba(131,110,249,0.4)',
-            color: '#e2d9ff',
-          }}
-        >
-          {submitting ? 'deploying...' : 'deploy agent →'}
-        </button>
+
+        {/* Step 2: Category & Tags */}
+        {step === 2 && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">Category</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => field('category', e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                >
+                  <option value="">Select category</option>
+                  {categoryData &&
+                    categoryData.subcategories.map((sub) => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">Subcategory</label>
+                <input
+                  type="text"
+                  placeholder="Specify more..."
+                  value={form.subcategory}
+                  onChange={(e) => field('subcategory', e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-2 block">Keywords (for discoverability)</label>
+              <input
+                type="text"
+                placeholder="e.g., analytics, nlp, automation"
+                value={form.keywords}
+                onChange={(e) => field('keywords', e.target.value)}
+                className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-2 block">Tags (comma separated)</label>
+              <input
+                type="text"
+                placeholder="e.g., ai, data, python, api"
+                value={form.tags}
+                onChange={(e) => field('tags', e.target.value)}
+                className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Step 3: Configuration */}
+        {step === 3 && (
+          <>
+            {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">
+                  AI Negotiation Webhook {form.type && ACCEPTS_AGENT_ENDPOINT.has(form.type) && '*'}
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://your-api.com/webhook"
+                  value={form.agentEndpoint}
+                  onChange={(e) => field('agentEndpoint', e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                />
+                <p className="text-xs text-zinc-600 mt-1">
+                  Endpoint where buyers can negotiate with your agent
+                </p>
+              </div>
+            )}
+
+            {ACCEPTS_FILE.has(form.type) && (
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-3 block">Agent File</label>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full rounded-xl border-2 border-dashed py-8 text-center cursor-pointer transition-colors"
+                  style={{
+                    borderColor: uploadedFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)',
+                    background: uploadedFile ? 'rgba(34,197,94,0.05)' : 'transparent',
+                  }}
+                >
+                  {uploading ? (
+                    <p className="text-xs font-light text-monad-400 animate-pulse">
+                      {scanning ? 'scanning for security threats...' : 'uploading...'}
+                    </p>
+                  ) : uploadedFile ? (
+                    <div className="space-y-2">
+                      {uploadedFile.scanPassed ? (
+                        <ShieldCheck className="w-6 h-6 text-green-400 mx-auto" />
+                      ) : (
+                        <ShieldAlert className="w-6 h-6 text-red-400 mx-auto" />
+                      )}
+                      <p className="text-xs font-light text-zinc-300">{uploadedFile.fileName}</p>
+                      <p className="text-xs font-light text-zinc-600">
+                        {formatBytes(uploadedFile.fileSize)}
+                      </p>
+                      {uploadedFile.scanNote && (
+                        <p className="text-xs font-light text-zinc-500">{uploadedFile.scanNote}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <p className="text-sm font-light text-zinc-500">Click to upload agent file</p>
+                      <p className="text-xs font-light text-zinc-700">
+                        .py .js .ts .zip .json .yaml .sh — max 10 MB
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".py,.js,.ts,.zip,.json,.yaml,.yml,.sh,.txt"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleFileUpload(f);
+                  }}
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Step 4: Pricing */}
+        {step === 4 && (
+          <>
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-3 block">Pricing Model</label>
+              <div className="grid grid-cols-2 gap-3">
+                {PRICING_TIERS.map((tier) => (
+                  <button
+                    key={tier.value}
+                    type="button"
+                    onClick={() => field('pricingModel', tier.value)}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      form.pricingModel === tier.value
+                        ? 'bg-monad-500/20 border-monad-500/40'
+                        : 'bg-transparent border-white/10 hover:border-white/20'
+                    }`}
+                  >
+                    <p className="text-sm font-light text-zinc-100">{tier.label}</p>
+                    <p className="text-xs font-light text-zinc-600">{tier.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">Price *</label>
+                <input
+                  type="number"
+                  placeholder="0.00"
+                  value={form.price}
+                  onChange={(e) => field('price', e.target.value)}
+                  min="0"
+                  step="0.01"
+                  required
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">Currency</label>
+                <select
+                  value={form.currency}
+                  onChange={(e) => field('currency', e.target.value)}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                  style={{
+                    background: 'rgba(15,15,24,0.8)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                >
+                  {['ETH', 'BOLTY'].map((c) => (
+                    <option key={c} value={c}>
+                      {c === 'BOLTY' ? 'BOLTY (0 tax)' : c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-light text-zinc-400 mb-2 block">Floor Price (minimum offer)</label>
+              <input
+                type="number"
+                placeholder="Leave empty if no minimum"
+                value={form.minPrice}
+                onChange={(e) => field('minPrice', e.target.value)}
+                min="0"
+                step="0.01"
+                className="w-full text-sm px-3 py-2 rounded-lg font-light"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        {/* Step 5: Review */}
+        {step === 5 && (
+          <div className="space-y-4">
+            <div className="rounded-lg p-4" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)', border: '1px solid' }}>
+              <h3 className="text-sm font-light text-zinc-100 mb-3">Review Your Agent</h3>
+              <div className="space-y-2 text-xs font-light">
+                <div className="flex justify-between">
+                  <span className="text-zinc-600">Type:</span>
+                  <span className="text-zinc-300">{TYPE_LABELS[form.type]}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-600">Title:</span>
+                  <span className="text-zinc-300">{form.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-zinc-600">Price:</span>
+                  <span className="text-zinc-300">{form.price} {form.currency}</span>
+                </div>
+                {form.minPrice && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-600">Floor:</span>
+                    <span className="text-zinc-300">{form.minPrice} {form.currency}</span>
+                  </div>
+                )}
+                {form.tags && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-600">Tags:</span>
+                    <span className="text-zinc-300">{form.tags}</span>
+                  </div>
+                )}
+                {uploadedFile && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-600">File:</span>
+                    <span className="text-zinc-300">{uploadedFile.fileName}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-lg p-3" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', border: '1px solid' }}>
+                <p className="text-red-400 font-light text-xs">{error}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Error */}
+        {error && step !== 5 && (
+          <p className="text-red-400 font-light text-xs">{error}</p>
+        )}
+
+        {/* Navigation */}
+        <div className="flex gap-3 pt-4">
+          {step > 1 && (
+            <button
+              type="button"
+              onClick={() => setStep((prev) => (prev - 1) as any)}
+              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all border"
+              style={{
+                borderColor: 'rgba(255,255,255,0.1)',
+                color: '#e4e4e7',
+                background: 'transparent',
+              }}
+            >
+              Back
+            </button>
+          )}
+
+          {step < 5 ? (
+            <button
+              type="button"
+              onClick={() => {
+                setError('');
+                if (canProceedToStep(step)) {
+                  setStep((prev) => (prev + 1) as any);
+                } else {
+                  setError('Please fill in the required fields');
+                }
+              }}
+              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all disabled:opacity-40"
+              style={{
+                background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                border: '1px solid rgba(131,110,249,0.4)',
+                color: '#e2d9ff',
+              }}
+            >
+              Next
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all disabled:opacity-40"
+              style={{
+                background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                border: '1px solid rgba(131,110,249,0.4)',
+                color: '#e2d9ff',
+              }}
+            >
+              {submitting ? 'deploying...' : 'deploy agent →'}
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
