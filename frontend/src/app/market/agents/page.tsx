@@ -1596,7 +1596,30 @@ function CreateListingForm({
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showApiDocs, setShowApiDocs] = useState(false);
+  const [showSandbox, setShowSandbox] = useState(false);
+  const [sandboxInput, setSandboxInput] = useState('');
+  const [sandboxLoading, setSandboxLoading] = useState(false);
+  const [sandboxResult, setSandboxResult] = useState<{ output?: string; error?: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const testAgent = async () => {
+    if (!sandboxInput.trim()) return;
+    setSandboxLoading(true);
+    setSandboxResult(null);
+    try {
+      // Simulate agent response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setSandboxResult({
+        output: `Agent processed: "${sandboxInput.trim()}"\n\nResponse: This is a simulated response from your ${TYPE_LABELS[form.type]} agent.`,
+      });
+    } catch (err) {
+      setSandboxResult({
+        error: 'Failed to test agent. Please ensure webhook is configured.',
+      });
+    } finally {
+      setSandboxLoading(false);
+    }
+  };
 
   const validateField = (field: string, value: string): string => {
     switch (field) {
@@ -2070,6 +2093,21 @@ function CreateListingForm({
                 />
               </div>
             )}
+
+            {/* Sandbox Test Button */}
+            {form.agentEndpoint && ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
+              <button
+                type="button"
+                onClick={() => setShowSandbox(true)}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.05)',
+                }}
+              >
+                🧪 Test Agent in Sandbox
+              </button>
+            )}
           </>
         )}
 
@@ -2445,6 +2483,108 @@ function CreateListingForm({
                 Auto-generated API specification for your agent. This helps developers integrate with your agent.
               </p>
               <CodeBlock code={generateApiDocs(form)} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sandbox Test Modal */}
+      {showSandbox && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="rounded-2xl border max-w-2xl w-full"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+              <h3 className="text-lg font-light text-zinc-100">Test Agent in Sandbox</h3>
+              <button
+                onClick={() => {
+                  setShowSandbox(false);
+                  setSandboxInput('');
+                  setSandboxResult(null);
+                }}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <p className="text-xs text-zinc-600">
+                Test your agent with sample input before deploying to production.
+              </p>
+
+              <div>
+                <label className="text-xs font-light text-zinc-400 mb-2 block">Test Input</label>
+                <textarea
+                  placeholder="Enter test input for your agent..."
+                  value={sandboxInput}
+                  onChange={(e) => setSandboxInput(e.target.value)}
+                  rows={4}
+                  className="w-full text-sm px-3 py-2 rounded-lg font-light resize-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#e4e4e7',
+                    outline: 'none',
+                  }}
+                />
+              </div>
+
+              {sandboxResult && (
+                <div
+                  className="rounded-lg p-3 border"
+                  style={{
+                    background: sandboxResult.error
+                      ? 'rgba(239,68,68,0.05)'
+                      : 'rgba(34,197,94,0.05)',
+                    borderColor: sandboxResult.error
+                      ? 'rgba(239,68,68,0.2)'
+                      : 'rgba(34,197,94,0.2)',
+                  }}
+                >
+                  <p className="text-xs font-light text-zinc-600 mb-2">Response:</p>
+                  <p
+                    className={`text-xs font-light whitespace-pre-wrap ${sandboxResult.error ? 'text-red-400' : 'text-green-400'}`}
+                  >
+                    {sandboxResult.error || sandboxResult.output}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={testAgent}
+                  disabled={sandboxLoading || !sandboxInput.trim()}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-light transition-all disabled:opacity-40"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                    border: '1px solid rgba(131,110,249,0.4)',
+                    color: '#e2d9ff',
+                  }}
+                >
+                  {sandboxLoading ? '🔄 Testing...' : '▶️ Test Agent'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSandbox(false);
+                    setSandboxInput('');
+                    setSandboxResult(null);
+                  }}
+                  className="flex-1 py-2 px-3 rounded-lg text-xs font-light border transition-all"
+                  style={{
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    color: '#e4e4e7',
+                    background: 'transparent',
+                  }}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
