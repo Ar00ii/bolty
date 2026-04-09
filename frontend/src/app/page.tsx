@@ -397,7 +397,7 @@ export default function HomePage() {
           <HexagonPattern className="w-full h-full" />
         </div>
 
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto relative z-10">
           {/* Big box: border + black bg + corner brackets inside + title + cards */}
           <div
             className="relative rounded-lg overflow-hidden"
@@ -843,7 +843,7 @@ export default function HomePage() {
 
       {/* ── FAQ SECTION ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -902,7 +902,7 @@ export default function HomePage() {
 
       {/* ── NEWSLETTER SIGNUP ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -929,7 +929,7 @@ export default function HomePage() {
 
       {/* ── CTA FINAL ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
