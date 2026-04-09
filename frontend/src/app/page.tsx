@@ -32,6 +32,7 @@ import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -655,62 +656,8 @@ export default function HomePage() {
         {/* ── TESTIMONIALS SECTION ── */}
         <div className="py-32 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="max-w-5xl mx-auto">
-          {/* Logos Row with Dividers */}
-          <div className="flex justify-center items-end gap-12 mb-20 relative">
-            {[
-              { label: 'Base44', icon: '●' },
-              { label: 'THATCH', icon: '━' },
-              { label: 'Paradigm', icon: '□' },
-              { label: 'FEY', icon: '◀' },
-              { label: 'Monadic', icon: '⊗' },
-            ].map((company, idx) => (
-              <div key={idx} className="flex flex-col items-center">
-                {/* Icon */}
-                <div
-                  className="text-lg mb-3"
-                  style={{ color: 'rgba(255,255,255,0.7)' }}
-                >
-                  {company.icon}
-                </div>
-
-                {/* Logo Text */}
-                <div
-                  className="text-xs font-light tracking-wider mb-3"
-                  style={{ color: 'rgba(255,255,255,0.6)' }}
-                >
-                  {company.label}
-                </div>
-
-                {/* Divider Line */}
-                <div
-                  className="w-12 h-px"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.15)' }}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Quote Section */}
-          <div className="text-center space-y-6">
-            <p
-              className="text-2xl lg:text-3xl font-light leading-relaxed"
-              style={{ color: '#ffffff' }}
-            >
-              "Easier than large clouds, more feature-rich than single-purpose hosting providers, Render lets me ship the entirety of my projects in one place."
-            </p>
-
-            {/* Author Tag */}
-            <div
-              className="inline-block px-4 py-2 font-mono text-xs tracking-wide"
-              style={{
-                backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                color: '#3b82f6',
-                border: '1px solid rgba(59, 130, 246, 0.3)'
-              }}
-            >
-              MITCHELL HASHIMOTO, CO-FOUNDER OF HASHICORP
-            </div>
-          </div>
+            {/* Testimonials Carousel */}
+            <TestimonialCarousel />
         </div>
         </div>
       </section>
