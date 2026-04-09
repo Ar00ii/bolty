@@ -12,7 +12,8 @@ interface RippleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 }
 
 const variantStyles = {
-  primary: 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg hover:shadow-purple-500/30',
+  primary:
+    'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg hover:shadow-purple-500/30',
   secondary: 'bg-white/10 text-white border border-white/20 hover:bg-white/15',
   outline: 'border-2 border-purple-600 text-purple-400 hover:bg-purple-600/10',
   ghost: 'text-white hover:bg-white/5',
@@ -37,11 +38,9 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, RippleButtonProp
       onClick,
       ...props
     },
-    ref
+    ref,
   ) => {
-    const [ripples, setRipples] = React.useState<
-      Array<{ id: number; x: number; y: number }>
-    >([]);
+    const [ripples, setRipples] = React.useState<Array<{ id: number; x: number; y: number }>>([]);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const rippleIdRef = useRef(0);
 
@@ -110,9 +109,7 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, RippleButtonProp
             />
           )}
           {!loading && icon && <span className="flex items-center">{icon}</span>}
-          <span className={loading ? 'opacity-0' : 'opacity-100'}>
-            {children}
-          </span>
+          <span className={loading ? 'opacity-0' : 'opacity-100'}>{children}</span>
         </div>
 
         {/* Shine effect on hover */}
@@ -122,13 +119,12 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, RippleButtonProp
           whileHover={{ x: '100%' }}
           transition={{ duration: 0.5 }}
           style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
           }}
         />
       </motion.button>
     );
-  }
+  },
 );
 
 RippleButton.displayName = 'RippleButton';

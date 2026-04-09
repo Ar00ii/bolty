@@ -39,7 +39,9 @@ export function UnifiedHeader() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <BoltyLogoSVG size={24} />
-          <span className="text-white font-light text-sm md:text-base hidden sm:inline">BoltyNetwork</span>
+          <span className="text-white font-light text-sm md:text-base hidden sm:inline">
+            BoltyNetwork
+          </span>
         </Link>
 
         {/* Desktop Nav */}
@@ -49,9 +51,7 @@ export function UnifiedHeader() {
               key={link.href}
               href={link.href}
               className={`text-sm transition-colors ${
-                pathname.startsWith(link.href)
-                  ? 'text-white'
-                  : 'text-gray-300 hover:text-white'
+                pathname.startsWith(link.href) ? 'text-white' : 'text-gray-300 hover:text-white'
               }`}
             >
               {link.label}
@@ -70,7 +70,10 @@ export function UnifiedHeader() {
 
           {!isAuthenticated ? (
             <>
-              <Link href="/auth" className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors">
+              <Link
+                href="/auth"
+                className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors"
+              >
                 Sign in
               </Link>
               <ShimmerButton
@@ -88,11 +91,7 @@ export function UnifiedHeader() {
                 className="flex items-center gap-2 px-2 py-1 hover:opacity-80 transition-opacity"
               >
                 {user?.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt="profile"
-                    className="w-8 h-8 rounded-full"
-                  />
+                  <img src={user.avatarUrl} alt="profile" className="w-8 h-8 rounded-full" />
                 ) : (
                   <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-light">
                     {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
@@ -104,7 +103,9 @@ export function UnifiedHeader() {
               {profileOpen && (
                 <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
                   <div className="p-3 border-b border-zinc-700">
-                    <p className="text-sm font-light text-white">{user?.displayName || user?.username}</p>
+                    <p className="text-sm font-light text-white">
+                      {user?.displayName || user?.username}
+                    </p>
                     <p className="text-xs text-zinc-400">{user?.email}</p>
                   </div>
                   <Link

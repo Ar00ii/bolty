@@ -1,9 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Public } from '../../common/decorators/public.decorator';
-import { ChartService } from './chart.service';
-import { IsOptional, IsNumber, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsOptional, IsNumber, Min, Max } from 'class-validator';
+
+import { Public } from '../../common/decorators/public.decorator';
+
+import { ChartService } from './chart.service';
 
 class HistoryQuery {
   @IsOptional()

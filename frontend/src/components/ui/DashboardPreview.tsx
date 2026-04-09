@@ -82,7 +82,7 @@ export function DashboardPreview() {
         <MetricCard
           label="CPU"
           value="28%"
-          chart={{ points: [0.25, 0.28, 0.26, 0.32, 0.28, 0.30, 0.28] }}
+          chart={{ points: [0.25, 0.28, 0.26, 0.32, 0.28, 0.3, 0.28] }}
         />
       </div>
 
@@ -92,12 +92,12 @@ export function DashboardPreview() {
           label="app-database"
           value="Available"
           status="available"
-          chart={{ points: [0.5, 0.55, 0.52, 0.58, 0.54, 0.60, 0.56] }}
+          chart={{ points: [0.5, 0.55, 0.52, 0.58, 0.54, 0.6, 0.56] }}
         />
         <MetricCard
           label="Storage"
           value="1.2TB / 2TB"
-          chart={{ points: [0.6, 0.62, 0.64, 0.66, 0.68, 0.70, 0.72] }}
+          chart={{ points: [0.6, 0.62, 0.64, 0.66, 0.68, 0.7, 0.72] }}
         />
       </div>
     </motion.div>

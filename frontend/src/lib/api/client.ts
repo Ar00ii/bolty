@@ -42,10 +42,7 @@ class ApiClient {
       });
     } catch (err) {
       if (err instanceof TypeError) {
-        throw new ApiError(
-          'Cannot connect to server. Make sure the backend is running.',
-          0,
-        );
+        throw new ApiError('Cannot connect to server. Make sure the backend is running.', 0);
       }
       throw err;
     }
@@ -188,12 +185,20 @@ class ApiClient {
       for (const line of text.split('\n')) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6).trim();
-        if (data === '[DONE]') { onDone(); return; }
+        if (data === '[DONE]') {
+          onDone();
+          return;
+        }
         try {
           const parsed = JSON.parse(data) as { chunk?: string; error?: string };
-          if (parsed.error) { onError(parsed.error); return; }
+          if (parsed.error) {
+            onError(parsed.error);
+            return;
+          }
           if (parsed.chunk) onChunk(parsed.chunk);
-        } catch { /* skip malformed */ }
+        } catch {
+          /* skip malformed */
+        }
       }
     }
   }

@@ -1,19 +1,15 @@
-import {
-  Injectable,
-  Logger,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, ForbiddenException, NotFoundException } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
 
 const MAX_MESSAGE_LENGTH = 500;
 const FLOOD_WINDOW = 10; // seconds
-const FLOOD_MAX = 5;     // messages per window
+const FLOOD_MAX = 5; // messages per window
 const SPAM_PATTERNS = [
-  /(.)\1{9,}/,           // 10+ repeated chars
-  /https?:\/\//gi,       // URLs (configurable)
+  /(.)\1{9,}/, // 10+ repeated chars
+  /https?:\/\//gi, // URLs (configurable)
 ];
 
 @Injectable()
@@ -29,7 +25,13 @@ export class ChatService {
     userId: string,
     content: string,
     _ipAddress?: string,
-  ): Promise<{ id: string; content: string; userId: string; createdAt: Date; user: { username: string | null; avatarUrl: string | null } }> {
+  ): Promise<{
+    id: string;
+    content: string;
+    userId: string;
+    createdAt: Date;
+    user: { username: string | null; avatarUrl: string | null };
+  }> {
     // ── Input validation ──────────────────────────────────────────────────
     if (!content || typeof content !== 'string') {
       throw new ForbiddenException('Invalid message');

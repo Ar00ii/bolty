@@ -23,25 +23,31 @@ export function SkeletonLoader({
         style={{ width: height, height, minWidth: height }}
       />
     ),
-    rect: (
-      <div
-        key={0}
-        className={`skeleton rounded-lg ${className}`}
-        style={{ width, height }}
-      />
-    ),
+    rect: <div key={0} className={`skeleton rounded-lg ${className}`} style={{ width, height }} />,
     text: Array.from({ length: 3 }).map((_, i) => (
-      <div key={i} className={`skeleton rounded-lg ${className}`} style={{ height: '16px', marginBottom: i < 2 ? '8px' : '0' }} />
+      <div
+        key={i}
+        className={`skeleton rounded-lg ${className}`}
+        style={{ height: '16px', marginBottom: i < 2 ? '8px' : '0' }}
+      />
     )),
     card: (
-      <div key={0} className={`skeleton rounded-lg p-4 space-y-3 ${className}`} style={{ width, height: '200px' }}>
+      <div
+        key={0}
+        className={`skeleton rounded-lg p-4 space-y-3 ${className}`}
+        style={{ width, height: '200px' }}
+      >
         <div className="skeleton rounded-lg h-12" />
         <div className="skeleton rounded-lg h-4" />
         <div className="skeleton rounded-lg h-4 w-3/4" />
       </div>
     ),
     'table-row': (
-      <div key={0} className={`skeleton rounded-lg h-12 ${className}`} style={{ width, display: 'flex', gap: '16px' }}>
+      <div
+        key={0}
+        className={`skeleton rounded-lg h-12 ${className}`}
+        style={{ width, display: 'flex', gap: '16px' }}
+      >
         <div className="skeleton rounded-lg flex-1 h-full" />
         <div className="skeleton rounded-lg flex-1 h-full" />
         <div className="skeleton rounded-lg flex-1 h-full" />
@@ -57,7 +63,7 @@ export function SkeletonLoader({
       elements.push(
         <div key={i} className="mb-3">
           {shapes[shape]}
-        </div>
+        </div>,
       );
     }
   }

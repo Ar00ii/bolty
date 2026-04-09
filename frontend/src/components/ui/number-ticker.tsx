@@ -49,10 +49,7 @@ export function NumberTicker({
   }, [springValue, decimalPlaces, prefix, suffix]);
 
   return (
-    <span
-      ref={ref}
-      className={cn('inline-block tabular-nums', className)}
-    >
+    <span ref={ref} className={cn('inline-block tabular-nums', className)}>
       {prefix}0{suffix}
     </span>
   );

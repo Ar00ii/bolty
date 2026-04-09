@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,8 +11,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { Logger } from '@nestjs/common';
+
 import { DmService } from './dm.service';
 
 interface AuthenticatedSocket extends Socket {
@@ -77,7 +78,10 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .find((c) => c.trim().startsWith('access_token='))
           ?.split('=')[1];
 
-      if (!token) { client.disconnect(); return; }
+      if (!token) {
+        client.disconnect();
+        return;
+      }
 
       const payload = this.jwtService.verify<{ sub: string; username: string }>(token);
       (client as AuthenticatedSocket).userId = payload.sub;

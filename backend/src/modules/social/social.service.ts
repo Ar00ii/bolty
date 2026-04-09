@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
-import { PrismaService } from '../../common/prisma/prisma.service';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ConflictException,
+} from '@nestjs/common';
 import { FriendshipStatus } from '@prisma/client';
+
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
 export class SocialService {
@@ -66,13 +72,13 @@ export class SocialService {
         ],
       },
       include: {
-        sender:   { select: { id: true, username: true, displayName: true, avatarUrl: true } },
+        sender: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
         receiver: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
       orderBy: { updatedAt: 'desc' },
     });
 
-    return friendships.map(f => {
+    return friendships.map((f) => {
       const friend = f.senderId === userId ? f.receiver : f.sender;
       return { id: f.id, friend, since: f.updatedAt };
     });
@@ -86,7 +92,7 @@ export class SocialService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return requests.map(r => ({ id: r.id, from: r.sender, createdAt: r.createdAt }));
+    return requests.map((r) => ({ id: r.id, from: r.sender, createdAt: r.createdAt }));
   }
 
   async getSentRequests(userId: string) {
@@ -97,10 +103,13 @@ export class SocialService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return requests.map(r => ({ id: r.id, to: r.receiver, createdAt: r.createdAt }));
+    return requests.map((r) => ({ id: r.id, to: r.receiver, createdAt: r.createdAt }));
   }
 
-  async getFriendshipStatus(userId: string, targetId: string): Promise<{
+  async getFriendshipStatus(
+    userId: string,
+    targetId: string,
+  ): Promise<{
     status: 'none' | 'pending_sent' | 'pending_received' | 'friends';
     requestId?: string;
   }> {

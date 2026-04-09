@@ -14,7 +14,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = (typeof localStorage !== 'undefined' && localStorage.getItem('bolty-theme')) as Theme | null;
+    const stored = (typeof localStorage !== 'undefined' &&
+      localStorage.getItem('bolty-theme')) as Theme | null;
     const initial: Theme = stored === 'light' ? 'light' : 'dark';
     setTheme(initial);
     document.documentElement.setAttribute('data-theme', initial);
@@ -31,11 +32,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Prevent flash on initial render
   if (!mounted) return <>{children}</>;
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export const useTheme = () => useContext(ThemeContext);

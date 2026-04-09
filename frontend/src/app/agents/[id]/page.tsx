@@ -45,7 +45,10 @@ interface ApiKey {
 const POST_TYPE_CONFIG = {
   GENERAL: { label: 'Update', color: 'text-zinc-400 border-zinc-700 bg-zinc-800/40' },
   PRICE_UPDATE: { label: 'Price', color: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5' },
-  ANNOUNCEMENT: { label: 'Announcement', color: 'text-monad-400 border-monad-400/30 bg-monad-400/5' },
+  ANNOUNCEMENT: {
+    label: 'Announcement',
+    color: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+  },
   DEAL: { label: 'Deal', color: 'text-green-400 border-green-400/30 bg-green-400/5' },
 };
 
@@ -56,7 +59,6 @@ const TYPE_COLORS: Record<string, string> = {
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
-
 
 function formatBytes(b: number) {
   if (b < 1024) return `${b} B`;
@@ -79,7 +81,10 @@ function timeAgo(dateStr: string) {
 function PostCard({ post }: { post: AgentPost }) {
   const cfg = POST_TYPE_CONFIG[post.postType] || POST_TYPE_CONFIG.GENERAL;
   return (
-    <div className="rounded-xl p-4" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+    <div
+      className="rounded-xl p-4"
+      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+    >
       <div className="flex items-center justify-between mb-2 gap-2">
         <span className={`text-xs font-mono px-2 py-0.5 rounded border ${cfg.color}`}>
           {cfg.label}
@@ -144,11 +149,16 @@ export default function AgentDetailPage() {
     }
   }, [id]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   useEffect(() => {
     if (isOwner && activeTab === 'keys') {
-      api.get<ApiKey[]>(`/market/${id}/apikeys`).then(setApiKeys).catch(() => {});
+      api
+        .get<ApiKey[]>(`/market/${id}/apikeys`)
+        .then(setApiKeys)
+        .catch(() => {});
     }
   }, [isOwner, activeTab, id]);
 
@@ -163,7 +173,7 @@ export default function AgentDetailPage() {
         price: postPrice ? parseFloat(postPrice) : undefined,
         currency: postType === 'PRICE_UPDATE' ? postCurrency : undefined,
       });
-      setPosts(prev => [created, ...prev]);
+      setPosts((prev) => [created, ...prev]);
       setPostContent('');
       setPostPrice('');
       setPostType('GENERAL');
@@ -179,9 +189,12 @@ export default function AgentDetailPage() {
     setGeneratingKey(true);
     setNewKey(null);
     try {
-      const result = await api.post<{ key: string; label: string | null }>(`/market/${id}/apikeys`, {
-        label: keyLabel.trim() || undefined,
-      });
+      const result = await api.post<{ key: string; label: string | null }>(
+        `/market/${id}/apikeys`,
+        {
+          label: keyLabel.trim() || undefined,
+        },
+      );
       setNewKey(result.key);
       setKeyLabel('');
       const updated = await api.get<ApiKey[]>(`/market/${id}/apikeys`);
@@ -195,28 +208,34 @@ export default function AgentDetailPage() {
 
   const revokeKey = async (keyId: string) => {
     await api.delete(`/market/apikeys/${keyId}`);
-    setApiKeys(prev => prev.filter(k => k.id !== keyId));
+    setApiKeys((prev) => prev.filter((k) => k.id !== keyId));
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+      </div>
+    );
 
-  if (notFound || !agent) return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-3">
-      <div className="text-4xl font-mono text-zinc-700">404</div>
-      <div className="text-zinc-400 text-sm">Agent not found</div>
-      <Link href="/market" className="text-monad-400 text-sm hover:underline">← Back to Agents</Link>
-    </div>
-  );
+  if (notFound || !agent)
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-3">
+        <div className="text-4xl font-mono text-zinc-700">404</div>
+        <div className="text-zinc-400 text-sm">Agent not found</div>
+        <Link href="/market" className="text-monad-400 text-sm hover:underline">
+          ← Back to Agents
+        </Link>
+      </div>
+    );
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
-
       {/* ── Agent header ── */}
-      <div className="rounded-2xl p-6 mb-6" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+      <div
+        className="rounded-2xl p-6 mb-6"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
         <div className="flex items-start justify-between flex-wrap gap-4">
           <div className="flex items-start gap-4">
             {/* Agent avatar */}
@@ -225,8 +244,12 @@ export default function AgentDetailPage() {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h1 className="text-xl font-light" style={{ color: 'var(--text)' }}>{agent.title}</h1>
-                <span className={`text-xs font-mono px-2 py-0.5 rounded border ${TYPE_COLORS[agent.type] || TYPE_COLORS.OTHER}`}>
+                <h1 className="text-xl font-light" style={{ color: 'var(--text)' }}>
+                  {agent.title}
+                </h1>
+                <span
+                  className={`text-xs font-mono px-2 py-0.5 rounded border ${TYPE_COLORS[agent.type] || TYPE_COLORS.OTHER}`}
+                >
                   {agent.type.toLowerCase().replace('_', ' ')}
                 </span>
                 {agent.agentEndpoint && (
@@ -235,7 +258,11 @@ export default function AgentDetailPage() {
                   </span>
                 )}
               </div>
-              <Link href={`/u/${agent.seller.username}`} className="text-sm hover:underline" style={{ color: 'var(--text-muted)' }}>
+              <Link
+                href={`/u/${agent.seller.username}`}
+                className="text-sm hover:underline"
+                style={{ color: 'var(--text-muted)' }}
+              >
                 by @{agent.seller.username || 'anon'}
               </Link>
             </div>
@@ -244,13 +271,15 @@ export default function AgentDetailPage() {
           {/* Price + action */}
           <div className="flex flex-col items-end gap-2">
             <div className="text-lg font-mono font-light">
-              {agent.price === 0
-                ? <span className="text-green-400">Free</span>
-                : <span className="text-monad-400">{agent.price} {agent.currency}</span>
-              }
+              {agent.price === 0 ? (
+                <span className="text-green-400">Free</span>
+              ) : (
+                <span className="text-monad-400">
+                  {agent.price} {agent.currency}
+                </span>
+              )}
             </div>
-            <Link href={`/market?negotiate=${agent.id}`}
-              className="btn-neon text-xs py-1.5 px-4">
+            <Link href={`/market?negotiate=${agent.id}`} className="btn-neon text-xs py-1.5 px-4">
               {agent.agentEndpoint ? '🤖 Negotiate' : agent.price === 0 ? 'Get' : 'Buy / Contact'}
             </Link>
           </div>
@@ -259,9 +288,16 @@ export default function AgentDetailPage() {
         {/* Tags */}
         {agent.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-4">
-            {agent.tags.map(t => (
-              <span key={t} className="text-xs px-2 py-0.5 rounded-full font-mono"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            {agent.tags.map((t) => (
+              <span
+                key={t}
+                className="text-xs px-2 py-0.5 rounded-full font-mono"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border)',
+                }}
+              >
                 {t}
               </span>
             ))}
@@ -270,14 +306,20 @@ export default function AgentDetailPage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="flex gap-1 mb-6 rounded-xl p-1" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-        {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab as typeof activeTab)}
+      <div
+        className="flex gap-1 mb-6 rounded-xl p-1"
+        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+      >
+        {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab as typeof activeTab)}
             className={`flex-1 py-2 text-sm font-light rounded-lg transition-all capitalize ${
               activeTab === tab
                 ? 'bg-monad-500/15 text-monad-400 border border-monad-400/20'
                 : 'text-zinc-500 hover:text-zinc-300'
-            }`}>
+            }`}
+          >
             {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
           </button>
         ))}
@@ -288,44 +330,77 @@ export default function AgentDetailPage() {
         <div className="space-y-4">
           {isOwner && (
             <>
-              <button onClick={() => setShowPost(!showPost)}
+              <button
+                onClick={() => setShowPost(!showPost)}
                 className="w-full py-3 rounded-xl text-sm font-light transition-all"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+                style={{
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-muted)',
+                }}
+              >
                 + Post an update as this agent
               </button>
 
               {showPost && (
-                <div className="rounded-xl p-4 space-y-3" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                <div
+                  className="rounded-xl p-4 space-y-3"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
                   <div className="flex gap-2 flex-wrap">
-                    {(Object.keys(POST_TYPE_CONFIG) as AgentPost['postType'][]).map(t => (
-                      <button key={t} onClick={() => setPostType(t)}
+                    {(Object.keys(POST_TYPE_CONFIG) as AgentPost['postType'][]).map((t) => (
+                      <button
+                        key={t}
+                        onClick={() => setPostType(t)}
                         className={`text-xs px-3 py-1 rounded-lg border transition-all ${
                           postType === t
                             ? POST_TYPE_CONFIG[t].color
                             : 'text-zinc-500 border-zinc-700 hover:border-zinc-500'
-                        }`}>
+                        }`}
+                      >
                         {POST_TYPE_CONFIG[t].label}
                       </button>
                     ))}
                   </div>
                   <textarea
                     value={postContent}
-                    onChange={e => setPostContent(e.target.value)}
+                    onChange={(e) => setPostContent(e.target.value)}
                     rows={3}
                     maxLength={2000}
                     placeholder="What does your agent want to say?"
                     className="w-full px-4 py-2.5 rounded-xl text-sm resize-none outline-none"
-                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                    style={{
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--text)',
+                    }}
                   />
                   {postType === 'PRICE_UPDATE' && (
                     <div className="flex gap-2">
-                      <input type="number" value={postPrice} onChange={e => setPostPrice(e.target.value)}
-                        placeholder="Price" min="0" step="0.01"
+                      <input
+                        type="number"
+                        value={postPrice}
+                        onChange={(e) => setPostPrice(e.target.value)}
+                        placeholder="Price"
+                        min="0"
+                        step="0.01"
                         className="flex-1 px-3 py-2 rounded-lg text-sm outline-none"
-                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-                      <select value={postCurrency} onChange={e => setPostCurrency(e.target.value)}
+                        style={{
+                          background: 'var(--bg-elevated)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text)',
+                        }}
+                      />
+                      <select
+                        value={postCurrency}
+                        onChange={(e) => setPostCurrency(e.target.value)}
                         className="px-3 py-2 rounded-lg text-sm outline-none"
-                        style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text)' }}>
+                        style={{
+                          background: 'var(--bg-elevated)',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text)',
+                        }}
+                      >
                         <option value="SOL">SOL</option>
                         <option value="ETH">ETH</option>
                         <option value="USD">USD</option>
@@ -334,9 +409,17 @@ export default function AgentDetailPage() {
                   )}
                   {postError && <p className="text-red-400 text-xs">{postError}</p>}
                   <div className="flex justify-end gap-2">
-                    <button onClick={() => setShowPost(false)} className="text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5">Cancel</button>
-                    <button onClick={submitPost} disabled={posting || !postContent.trim()}
-                      className="btn-neon text-xs px-4 py-1.5 disabled:opacity-40">
+                    <button
+                      onClick={() => setShowPost(false)}
+                      className="text-xs text-zinc-500 hover:text-zinc-300 px-3 py-1.5"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={submitPost}
+                      disabled={posting || !postContent.trim()}
+                      className="btn-neon text-xs px-4 py-1.5 disabled:opacity-40"
+                    >
                       {posting ? 'Posting...' : 'Post'}
                     </button>
                   </div>
@@ -346,12 +429,19 @@ export default function AgentDetailPage() {
           )}
 
           {posts.length === 0 ? (
-            <div className="text-center py-16 rounded-xl" style={{ border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+            <div
+              className="text-center py-16 rounded-xl"
+              style={{ border: '1px solid var(--border)', color: 'var(--text-muted)' }}
+            >
               <p className="text-sm font-mono">No posts yet.</p>
-              {isOwner && <p className="text-xs mt-1 opacity-60">Post the first update for this agent above.</p>}
+              {isOwner && (
+                <p className="text-xs mt-1 opacity-60">
+                  Post the first update for this agent above.
+                </p>
+              )}
             </div>
           ) : (
-            posts.map(post => <PostCard key={post.id} post={post} />)
+            posts.map((post) => <PostCard key={post.id} post={post} />)
           )}
         </div>
       )}
@@ -359,39 +449,79 @@ export default function AgentDetailPage() {
       {/* ── About tab ── */}
       {activeTab === 'about' && (
         <div className="space-y-4">
-          <div className="rounded-xl p-5" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-            <h3 className="text-sm font-light mb-3" style={{ color: 'var(--text)' }}>Description</h3>
-            <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-muted)' }}>
+          <div
+            className="rounded-xl p-5"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+          >
+            <h3 className="text-sm font-light mb-3" style={{ color: 'var(--text)' }}>
+              Description
+            </h3>
+            <p
+              className="text-sm leading-relaxed whitespace-pre-wrap"
+              style={{ color: 'var(--text-muted)' }}
+            >
               {agent.description}
             </p>
           </div>
 
           {agent.agentUrl && (
-            <div className="rounded-xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <div
+              className="rounded-xl p-4"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
               <h3 className="text-xs font-mono text-zinc-500 mb-2">Agent URL</h3>
-              <a href={agent.agentUrl} target="_blank" rel="noopener noreferrer"
-                className="text-sm text-monad-400 hover:underline break-all">
+              <a
+                href={agent.agentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-monad-400 hover:underline break-all"
+              >
                 {agent.agentUrl}
               </a>
             </div>
           )}
 
           {agent.fileName && agent.fileKey && (
-            <div className="rounded-xl p-4" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+            <div
+              className="rounded-xl p-4"
+              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+            >
               <h3 className="text-xs font-mono text-zinc-500 mb-2">Download</h3>
-              <a href={`${API_URL}/market/files/${agent.fileKey}`}
-                className="text-sm text-yellow-400 hover:underline flex items-center gap-2">
+              <a
+                href={`${API_URL}/market/files/${agent.fileKey}`}
+                className="text-sm text-yellow-400 hover:underline flex items-center gap-2"
+              >
                 <span>↓</span>
                 <span>{agent.fileName}</span>
-                {agent.fileSize && <span className="text-zinc-600 text-xs">({formatBytes(agent.fileSize)})</span>}
+                {agent.fileSize && (
+                  <span className="text-zinc-600 text-xs">({formatBytes(agent.fileSize)})</span>
+                )}
               </a>
             </div>
           )}
 
-          <div className="rounded-xl p-4 text-xs font-mono space-y-1"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-            <p>Published: {new Date(agent.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p>Status: <span className={agent.status === 'ACTIVE' ? 'text-green-400' : 'text-yellow-400'}>{agent.status.toLowerCase()}</span></p>
+          <div
+            className="rounded-xl p-4 text-xs font-mono space-y-1"
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+            }}
+          >
+            <p>
+              Published:{' '}
+              {new Date(agent.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+            <p>
+              Status:{' '}
+              <span className={agent.status === 'ACTIVE' ? 'text-green-400' : 'text-yellow-400'}>
+                {agent.status.toLowerCase()}
+              </span>
+            </p>
           </div>
         </div>
       )}
@@ -400,14 +530,27 @@ export default function AgentDetailPage() {
       {activeTab === 'keys' && isOwner && (
         <div className="space-y-4">
           {/* Info box */}
-          <div className="rounded-xl p-4 text-sm" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
-            <p className="font-light mb-1" style={{ color: 'var(--text)' }}>API Keys for automated posting</p>
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-              Your agent or script can post updates automatically using an API key.
-              Call <code className="text-monad-400 bg-monad-400/10 px-1 rounded">POST {API_URL}/market/{agent.id}/posts</code> with
-              header <code className="text-monad-400 bg-monad-400/10 px-1 rounded">X-Agent-Key: bak_...</code>
+          <div
+            className="rounded-xl p-4 text-sm"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+          >
+            <p className="font-light mb-1" style={{ color: 'var(--text)' }}>
+              API Keys for automated posting
             </p>
-            <pre className="mt-3 p-3 rounded-lg text-xs overflow-x-auto" style={{ background: 'var(--bg-card)', color: 'var(--text-muted)' }}>{`fetch("${API_URL}/market/${agent.id}/posts", {
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+              Your agent or script can post updates automatically using an API key. Call{' '}
+              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+                POST {API_URL}/market/{agent.id}/posts
+              </code>{' '}
+              with header{' '}
+              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+                X-Agent-Key: bak_...
+              </code>
+            </p>
+            <pre
+              className="mt-3 p-3 rounded-lg text-xs overflow-x-auto"
+              style={{ background: 'var(--bg-card)', color: 'var(--text-muted)' }}
+            >{`fetch("${API_URL}/market/${agent.id}/posts", {
   method: "POST",
   headers: {
     "Content-Type": "application/json",
@@ -424,40 +567,71 @@ export default function AgentDetailPage() {
 
           {/* New key shown once */}
           {newKey && (
-            <div className="rounded-xl p-4" style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.05)' }}>
-              <p className="text-green-400 text-xs font-light mb-2">API key generated — save it now, it won&apos;t be shown again:</p>
+            <div
+              className="rounded-xl p-4"
+              style={{
+                border: '1px solid rgba(74,222,128,0.3)',
+                background: 'rgba(74,222,128,0.05)',
+              }}
+            >
+              <p className="text-green-400 text-xs font-light mb-2">
+                API key generated — save it now, it won&apos;t be shown again:
+              </p>
               <code className="text-sm font-mono text-green-300 break-all">{newKey}</code>
             </div>
           )}
 
           {/* Generate form */}
           <div className="flex gap-2">
-            <input value={keyLabel} onChange={e => setKeyLabel(e.target.value)}
+            <input
+              value={keyLabel}
+              onChange={(e) => setKeyLabel(e.target.value)}
               placeholder="Label (optional, e.g. 'my-script')"
               className="flex-1 px-3 py-2 rounded-xl text-sm outline-none"
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', color: 'var(--text)' }} />
-            <button onClick={generateKey} disabled={generatingKey}
-              className="btn-neon text-xs px-4 py-2 disabled:opacity-40">
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                color: 'var(--text)',
+              }}
+            />
+            <button
+              onClick={generateKey}
+              disabled={generatingKey}
+              className="btn-neon text-xs px-4 py-2 disabled:opacity-40"
+            >
               {generatingKey ? '...' : '+ Generate Key'}
             </button>
           </div>
 
           {/* Key list */}
           {apiKeys.length === 0 ? (
-            <p className="text-xs text-center py-8 font-mono" style={{ color: 'var(--text-muted)' }}>No API keys yet.</p>
+            <p
+              className="text-xs text-center py-8 font-mono"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              No API keys yet.
+            </p>
           ) : (
             <div className="space-y-2">
-              {apiKeys.map(k => (
-                <div key={k.id} className="flex items-center justify-between rounded-xl px-4 py-3"
-                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+              {apiKeys.map((k) => (
+                <div
+                  key={k.id}
+                  className="flex items-center justify-between rounded-xl px-4 py-3"
+                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                >
                   <div>
-                    <p className="text-sm font-light" style={{ color: 'var(--text)' }}>{k.label || 'Unnamed key'}</p>
+                    <p className="text-sm font-light" style={{ color: 'var(--text)' }}>
+                      {k.label || 'Unnamed key'}
+                    </p>
                     <p className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
-                      Created {new Date(k.createdAt).toLocaleDateString()} · {k.lastUsedAt ? `Last used ${timeAgo(k.lastUsedAt)}` : 'Never used'}
+                      Created {new Date(k.createdAt).toLocaleDateString()} ·{' '}
+                      {k.lastUsedAt ? `Last used ${timeAgo(k.lastUsedAt)}` : 'Never used'}
                     </p>
                   </div>
-                  <button onClick={() => revokeKey(k.id)}
-                    className="text-xs text-red-400 hover:text-red-300 border border-red-400/30 px-2.5 py-1 rounded-lg">
+                  <button
+                    onClick={() => revokeKey(k.id)}
+                    className="text-xs text-red-400 hover:text-red-300 border border-red-400/30 px-2.5 py-1 rounded-lg"
+                  >
                     Revoke
                   </button>
                 </div>

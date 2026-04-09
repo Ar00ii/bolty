@@ -10,8 +10,13 @@ export function useUnreadDMs(isAuthenticated: boolean) {
     const fetchCount = async () => {
       try {
         const resp = await fetch(`${API_URL}/dm/unread-count`, { credentials: 'include' });
-        if (resp.ok) { const data = await resp.json(); setCount(data.count ?? 0); }
-      } catch { /* ignore */ }
+        if (resp.ok) {
+          const data = await resp.json();
+          setCount(data.count ?? 0);
+        }
+      } catch {
+        /* ignore */
+      }
     };
 
     fetchCount();

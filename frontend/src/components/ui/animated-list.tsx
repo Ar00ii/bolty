@@ -17,7 +17,7 @@ export function AnimatedList({
 
   useEffect(() => {
     if (index < childrenArray.length - 1) {
-      const timer = setTimeout(() => setIndex(prev => prev + 1), delay);
+      const timer = setTimeout(() => setIndex((prev) => prev + 1), delay);
       return () => clearTimeout(timer);
     }
   }, [index, delay, childrenArray.length]);

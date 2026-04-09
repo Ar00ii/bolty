@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
 import { spawn } from 'child_process';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+
+import { Injectable, Logger } from '@nestjs/common';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 const SANDBOX_TIMEOUT_MS = 10_000;
@@ -32,8 +33,10 @@ export class AgentSandboxService {
     if (ext === 'js' || ext === 'mjs' || ext === 'cjs') return 'node';
     if (ext === 'ts') return 'node'; // transpiled by ts-node if available, else skip
     if (ext === 'py') return 'python3';
-    if (fileMimeType === 'application/javascript' || fileMimeType === 'text/javascript') return 'node';
-    if (fileMimeType === 'text/x-python' || fileMimeType === 'application/x-python') return 'python3';
+    if (fileMimeType === 'application/javascript' || fileMimeType === 'text/javascript')
+      return 'node';
+    if (fileMimeType === 'text/x-python' || fileMimeType === 'application/x-python')
+      return 'python3';
     return null;
   }
 
@@ -75,8 +78,12 @@ export class AgentSandboxService {
       child.stdin.write(input);
       child.stdin.end();
 
-      child.stdout.on('data', (chunk: Buffer) => { stdout += chunk.toString(); });
-      child.stderr.on('data', (chunk: Buffer) => { stderr += chunk.toString(); });
+      child.stdout.on('data', (chunk: Buffer) => {
+        stdout += chunk.toString();
+      });
+      child.stderr.on('data', (chunk: Buffer) => {
+        stderr += chunk.toString();
+      });
 
       const timer = setTimeout(() => {
         child.kill('SIGKILL');
@@ -94,9 +101,15 @@ export class AgentSandboxService {
         try {
           // Find the first JSON object in stdout
           const match = stdout.match(/\{[\s\S]*\}/);
-          if (!match) { resolve(null); return; }
+          if (!match) {
+            resolve(null);
+            return;
+          }
           const parsed = JSON.parse(match[0]) as SandboxResponse;
-          if (!parsed.reply) { resolve(null); return; }
+          if (!parsed.reply) {
+            resolve(null);
+            return;
+          }
           const action = (['accept', 'reject', 'counter'] as const).includes(parsed.action as any)
             ? parsed.action
             : 'counter';

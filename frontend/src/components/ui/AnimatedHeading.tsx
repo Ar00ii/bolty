@@ -37,10 +37,7 @@ export function AnimatedHeading({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      <Component
-        className={`font-light ${className}`}
-        style={gradientStyle}
-      >
+      <Component className={`font-light ${className}`} style={gradientStyle}>
         {children}
       </Component>
     </motion.div>
@@ -73,9 +70,7 @@ export function WordReveal({
       className={className}
     >
       {words.map((word, idx) => {
-        const isHighlight = highlightWords.some(
-          (hw) => hw.toLowerCase() === word.toLowerCase()
-        );
+        const isHighlight = highlightWords.some((hw) => hw.toLowerCase() === word.toLowerCase());
 
         return (
           <motion.span
@@ -87,7 +82,11 @@ export function WordReveal({
               duration: 0.3,
               ease: [0.4, 0, 0.2, 1],
             }}
-            className={isHighlight ? 'font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400' : ''}
+            className={
+              isHighlight
+                ? 'font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400'
+                : ''
+            }
           >
             {word}{' '}
           </motion.span>
@@ -105,12 +104,7 @@ interface CharRevealProps {
   duration?: number;
 }
 
-export function CharReveal({
-  text,
-  delay = 0,
-  className = '',
-  duration = 0.02,
-}: CharRevealProps) {
+export function CharReveal({ text, delay = 0, className = '', duration = 0.02 }: CharRevealProps) {
   const chars = text.split('');
 
   return (

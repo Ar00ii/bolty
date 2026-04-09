@@ -23,8 +23,8 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
       )}
       <h3 className="text-lg font-light text-white mb-2">{title}</h3>
       <p className="text-sm text-zinc-400 text-center max-w-sm mb-6">{description}</p>
-      {action && (
-        action.href ? (
+      {action &&
+        (action.href ? (
           <a href={action.href} className="btn-primary text-sm">
             {action.label}
           </a>
@@ -32,8 +32,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
           <button onClick={action.onClick} className="btn-primary text-sm">
             {action.label}
           </button>
-        )
-      )}
+        ))}
     </div>
   );
 }

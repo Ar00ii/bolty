@@ -1,3 +1,7 @@
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import {
   Controller,
   Get,
@@ -13,24 +17,16 @@ import {
   BadRequestException,
   Res,
 } from '@nestjs/common';
-import { Throttle } from '@nestjs/throttler';
-import {
-  IsString,
-  IsOptional,
-  MaxLength,
-  MinLength,
-  Matches,
-  IsUrl,
-} from 'class-validator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
+import { Throttle } from '@nestjs/throttler';
+import { IsString, IsOptional, MaxLength, MinLength, Matches, IsUrl } from 'class-validator';
 import { Response } from 'express';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { diskStorage } from 'multer';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { UsersService } from './users.service';
 
 const AVATAR_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
@@ -82,15 +78,17 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  async updateProfile(
-    @CurrentUser('id') userId: string,
-    @Body() dto: UpdateProfileDto,
-  ) {
+  async updateProfile(@CurrentUser('id') userId: string, @Body() dto: UpdateProfileDto) {
     try {
       return await this.usersService.updateProfile(userId, dto);
     } catch (err: unknown) {
       // Prisma unique constraint violation (P2002)
-      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code: string }).code === 'P2002'
+      ) {
         const target = (err as { meta?: { target?: string[] } }).meta?.target;
         if (target?.includes('username')) throw new ConflictException('Username already taken');
         throw new ConflictException('This value is already in use');
@@ -125,10 +123,7 @@ export class UsersController {
       },
     }),
   )
-  async uploadAvatar(
-    @CurrentUser('id') userId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadAvatar(@CurrentUser('id') userId: string, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
     const avatarUrl = `/api/v1/users/avatars/${file.filename}`;
     await this.usersService.updateProfile(userId, { avatarUrl });

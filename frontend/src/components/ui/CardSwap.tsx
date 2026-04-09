@@ -1,5 +1,13 @@
 'use client';
-import React, { Children, cloneElement, forwardRef, isValidElement, useEffect, useMemo, useRef } from 'react';
+import React, {
+  Children,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import gsap from 'gsap';
 import './CardSwap.css';
 
@@ -90,7 +98,8 @@ const CardSwap = ({
   useEffect(() => {
     const total = refs.length;
     refs.forEach((r, i) => {
-      if (r.current) placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount);
+      if (r.current)
+        placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount);
     });
 
     const swap = () => {
@@ -109,14 +118,36 @@ const CardSwap = ({
         if (!el) return;
         const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
         tl.set(el, { zIndex: slot.zIndex }, 'promote');
-        tl.to(el, { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease }, `promote+=${i * 0.15}`);
+        tl.to(
+          el,
+          { x: slot.x, y: slot.y, z: slot.z, duration: config.durMove, ease: config.ease },
+          `promote+=${i * 0.15}`,
+        );
       });
 
       const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
       tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
-      tl.call(() => { gsap.set(elFront, { zIndex: backSlot.zIndex }); }, undefined, 'return');
-      tl.to(elFront, { x: backSlot.x, y: backSlot.y, z: backSlot.z, duration: config.durReturn, ease: config.ease }, 'return');
-      tl.call(() => { order.current = [...rest, front]; });
+      tl.call(
+        () => {
+          gsap.set(elFront, { zIndex: backSlot.zIndex });
+        },
+        undefined,
+        'return',
+      );
+      tl.to(
+        elFront,
+        {
+          x: backSlot.x,
+          y: backSlot.y,
+          z: backSlot.z,
+          duration: config.durReturn,
+          ease: config.ease,
+        },
+        'return',
+      );
+      tl.call(() => {
+        order.current = [...rest, front];
+      });
     };
 
     swap();
@@ -125,8 +156,14 @@ const CardSwap = ({
     if (pauseOnHover) {
       const node = container.current;
       if (!node) return;
-      const pause = () => { tlRef.current?.pause(); clearInterval(intervalRef.current); };
-      const resume = () => { tlRef.current?.play(); intervalRef.current = setInterval(swap, delay); };
+      const pause = () => {
+        tlRef.current?.pause();
+        clearInterval(intervalRef.current);
+      };
+      const resume = () => {
+        tlRef.current?.play();
+        intervalRef.current = setInterval(swap, delay);
+      };
       node.addEventListener('mouseenter', pause);
       node.addEventListener('mouseleave', resume);
       return () => {
@@ -142,15 +179,28 @@ const CardSwap = ({
 
   const rendered = childArr.map((child, i) =>
     isValidElement(child)
-      ? cloneElement(child as React.ReactElement<CardProps & { ref?: React.Ref<HTMLDivElement>; style?: React.CSSProperties; onClick?: React.MouseEventHandler }>, {
-          key: i,
-          ref: refs[i],
-          style: { width, height, ...((child.props as { style?: React.CSSProperties }).style ?? {}) },
-          onClick: (e: React.MouseEvent) => {
-            (child.props as { onClick?: React.MouseEventHandler }).onClick?.(e);
-            onCardClick?.(i);
+      ? cloneElement(
+          child as React.ReactElement<
+            CardProps & {
+              ref?: React.Ref<HTMLDivElement>;
+              style?: React.CSSProperties;
+              onClick?: React.MouseEventHandler;
+            }
+          >,
+          {
+            key: i,
+            ref: refs[i],
+            style: {
+              width,
+              height,
+              ...((child.props as { style?: React.CSSProperties }).style ?? {}),
+            },
+            onClick: (e: React.MouseEvent) => {
+              (child.props as { onClick?: React.MouseEventHandler }).onClick?.(e);
+              onCardClick?.(i);
+            },
           },
-        })
+        )
       : child,
   );
 

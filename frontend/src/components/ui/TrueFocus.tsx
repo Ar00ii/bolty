@@ -35,9 +35,12 @@ const TrueFocus = ({
 
   useEffect(() => {
     if (!manualMode) {
-      const interval = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % words.length);
-      }, (animationDuration + pauseBetweenAnimations) * 1000);
+      const interval = setInterval(
+        () => {
+          setCurrentIndex((prev) => (prev + 1) % words.length);
+        },
+        (animationDuration + pauseBetweenAnimations) * 1000,
+      );
       return () => clearInterval(interval);
     }
   }, [manualMode, animationDuration, pauseBetweenAnimations, words.length]);
@@ -75,12 +78,16 @@ const TrueFocus = ({
         return (
           <span
             key={index}
-            ref={el => { wordRefs.current[index] = el; }}
+            ref={(el) => {
+              wordRefs.current[index] = el;
+            }}
             className={`focus-word ${manualMode ? 'manual' : ''} ${isActive && !manualMode ? 'active' : ''}`}
-            style={{
-              filter: isActive ? 'blur(0px)' : `blur(${blurAmount}px)`,
-              transition: `filter ${animationDuration}s ease`,
-            } as React.CSSProperties}
+            style={
+              {
+                filter: isActive ? 'blur(0px)' : `blur(${blurAmount}px)`,
+                transition: `filter ${animationDuration}s ease`,
+              } as React.CSSProperties
+            }
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
           >

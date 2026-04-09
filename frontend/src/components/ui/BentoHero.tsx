@@ -48,8 +48,8 @@ export function BentoHero() {
             Build, ship, and earn <span className="text-purple-500">with AI agents</span>
           </h1>
           <p className="text-lg text-gray-400">
-            The developer platform for publishing code, deploying AI agents, and earning from your work.
-            Connect your stack, reach buyers, get paid in ETH.
+            The developer platform for publishing code, deploying AI agents, and earning from your
+            work. Connect your stack, reach buyers, get paid in ETH.
           </p>
         </motion.div>
 
@@ -61,7 +61,9 @@ export function BentoHero() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Activity className="w-4 h-4 text-green-400" />
-                  <span className="text-xs uppercase tracking-wider text-gray-500">AI Agent Deploy</span>
+                  <span className="text-xs uppercase tracking-wider text-gray-500">
+                    AI Agent Deploy
+                  </span>
                 </div>
                 <div className="text-sm text-green-400 font-light">Available</div>
               </div>
@@ -77,7 +79,12 @@ export function BentoHero() {
               <span className="text-xs uppercase tracking-wider text-gray-500">CPU Usage</span>
               <div className="text-3xl font-light text-white">28%</div>
               <div className="h-12">
-                <AnimatedSparkline data={[0.2, 0.25, 0.28, 0.26, 0.32, 0.28, 0.3]} color="#ec4899" width={100} height={40} />
+                <AnimatedSparkline
+                  data={[0.2, 0.25, 0.28, 0.26, 0.32, 0.28, 0.3]}
+                  color="#ec4899"
+                  width={100}
+                  height={40}
+                />
               </div>
             </div>
           </BentoCard>
@@ -88,7 +95,9 @@ export function BentoHero() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Activity className="w-4 h-4 text-green-400" />
-                  <span className="text-xs uppercase tracking-wider text-gray-500">ETH Payment Node</span>
+                  <span className="text-xs uppercase tracking-wider text-gray-500">
+                    ETH Payment Node
+                  </span>
                 </div>
                 <div className="text-sm text-green-400 font-light">Available</div>
               </div>
@@ -104,7 +113,12 @@ export function BentoHero() {
               <span className="text-xs uppercase tracking-wider text-gray-500">Memory</span>
               <div className="text-3xl font-light text-white">42%</div>
               <div className="h-12">
-                <AnimatedSparkline data={[0.4, 0.42, 0.45, 0.42, 0.48, 0.44, 0.46]} color="#22c55e" width={100} height={40} />
+                <AnimatedSparkline
+                  data={[0.4, 0.42, 0.45, 0.42, 0.48, 0.44, 0.46]}
+                  color="#22c55e"
+                  width={100}
+                  height={40}
+                />
               </div>
             </div>
           </BentoCard>
@@ -112,7 +126,9 @@ export function BentoHero() {
           {/* Card 5: Services Status (3x1) */}
           <BentoCard colSpan={3} delay={0.4}>
             <div className="h-full space-y-4">
-              <span className="text-xs uppercase tracking-wider text-gray-500 block">Active Services</span>
+              <span className="text-xs uppercase tracking-wider text-gray-500 block">
+                Active Services
+              </span>
               <div className="grid grid-cols-4 gap-4 flex-1">
                 {[
                   { name: 'Web Service', status: true },
@@ -161,9 +177,7 @@ export function BentoHero() {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mt-12 flex gap-4 justify-center"
         >
-          <button className="btn-primary text-sm px-6 py-2.5 rounded-lg">
-            Start building
-          </button>
+          <button className="btn-primary text-sm px-6 py-2.5 rounded-lg">Start building</button>
           <button className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
             Explore marketplace
           </button>

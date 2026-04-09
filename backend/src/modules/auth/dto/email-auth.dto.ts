@@ -1,7 +1,8 @@
 import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
 
 // At least 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_=+\[\]{};':"\\|,.<>/?`~]).{8,}$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_=+[\]{};':"\\|,.<>/?`~]).{8,}$/;
 const PASSWORD_MESSAGE =
   'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character';
 
@@ -12,7 +13,9 @@ export class RegisterEmailDto {
   @IsString()
   @MinLength(3, { message: 'Username must be at least 3 characters' })
   @MaxLength(30, { message: 'Username must be 30 characters or fewer' })
-  @Matches(/^[a-z0-9_-]+$/, { message: 'Username can only contain lowercase letters, numbers, _ and -' })
+  @Matches(/^[a-z0-9_-]+$/, {
+    message: 'Username can only contain lowercase letters, numbers, _ and -',
+  })
   username!: string;
 
   @IsString()

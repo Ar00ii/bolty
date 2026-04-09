@@ -33,27 +33,25 @@ export const EvervaultCard = ({
       const str = generateRandomString(1500);
       setRandomString(str);
     },
-    [mouseX, mouseY]
+    [mouseX, mouseY],
   );
 
   return (
     <div
       className={cn(
         'p-0.5 bg-transparent flex items-center justify-center w-full h-full relative',
-        className
+        className,
       )}
     >
       <div
         onMouseMove={onMouseMove}
         className="group/card w-full relative overflow-hidden bg-transparent flex flex-col items-center justify-center h-full"
       >
-        <CardPattern
-          mouseX={mouseX}
-          mouseY={mouseY}
-          randomString={randomString}
-        />
+        <CardPattern mouseX={mouseX} mouseY={mouseY} randomString={randomString} />
         <div className="relative z-10 flex flex-col items-center justify-center gap-3">
-          {children ? children : (
+          {children ? (
+            children
+          ) : (
             <p className="text-sm font-light text-white text-center">{text}</p>
           )}
         </div>
@@ -93,8 +91,7 @@ export function CardPattern({
   );
 }
 
-const characters =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 export const generateRandomString = (length: number) => {
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -108,7 +105,7 @@ export const Icon = ({ className, ...rest }: React.HTMLAttributes<HTMLDivElement
     <div
       className={cn(
         'h-6 w-6 rounded-full border-2 border-white/30 flex items-center justify-center text-white',
-        className
+        className,
       )}
       {...rest}
     />

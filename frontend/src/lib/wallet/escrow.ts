@@ -121,5 +121,11 @@ export async function getEscrowOrder(orderId: string) {
   const contract = new ethers.Contract(escrowAddress, ESCROW_ABI, provider);
 
   const [buyer, seller, amount, createdAt, status] = await contract.getOrder(orderId);
-  return { buyer, seller, amount: amount.toString(), createdAt: Number(createdAt), status: Number(status) };
+  return {
+    buyer,
+    seller,
+    amount: amount.toString(),
+    createdAt: Number(createdAt),
+    status: Number(status),
+  };
 }

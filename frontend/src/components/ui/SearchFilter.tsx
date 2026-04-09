@@ -34,19 +34,22 @@ export function SearchFilter({
 
   const filteredSuggestions = useMemo(() => {
     if (!query) return [];
-    return suggestions.filter(s => s.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
+    return suggestions.filter((s) => s.toLowerCase().includes(query.toLowerCase())).slice(0, 5);
   }, [query, suggestions]);
 
-  const handleSearch = useCallback((value: string) => {
-    setQuery(value);
-    setShowSuggestions(!!value);
+  const handleSearch = useCallback(
+    (value: string) => {
+      setQuery(value);
+      setShowSuggestions(!!value);
 
-    if (debounceTimer) clearTimeout(debounceTimer);
-    const timer = setTimeout(() => {
-      onSearch(value);
-    }, debounce);
-    setDebounceTimer(timer);
-  }, [onSearch, debounce, debounceTimer]);
+      if (debounceTimer) clearTimeout(debounceTimer);
+      const timer = setTimeout(() => {
+        onSearch(value);
+      }, debounce);
+      setDebounceTimer(timer);
+    },
+    [onSearch, debounce, debounceTimer],
+  );
 
   const handleSuggestionClick = (suggestion: string) => {
     setQuery(suggestion);
@@ -55,9 +58,9 @@ export function SearchFilter({
   };
 
   const handleFilterToggle = (filterId: string) => {
-    setSelectedFilters(prev => {
+    setSelectedFilters((prev) => {
       const updated = prev.includes(filterId)
-        ? prev.filter(f => f !== filterId)
+        ? prev.filter((f) => f !== filterId)
         : [...prev, filterId];
       onFilterChange?.(updated);
       return updated;

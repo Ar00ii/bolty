@@ -33,7 +33,8 @@ const GridMotion = ({ items = [], gradientColor = 'black' }: GridMotionProps) =>
         if (row) {
           const direction = index % 2 === 0 ? 1 : -1;
           const moveAmount =
-            ((mouseXRef.current / window.innerWidth) * maxMoveAmount - maxMoveAmount / 2) * direction;
+            ((mouseXRef.current / window.innerWidth) * maxMoveAmount - maxMoveAmount / 2) *
+            direction;
           gsap.to(row, {
             x: moveAmount,
             duration: baseDuration + inertiaFactors[index % inertiaFactors.length],
@@ -66,7 +67,9 @@ const GridMotion = ({ items = [], gradientColor = 'black' }: GridMotionProps) =>
             <div
               key={rowIndex}
               className="gridMotion-row"
-              ref={(el) => { rowRefs.current[rowIndex] = el; }}
+              ref={(el) => {
+                rowRefs.current[rowIndex] = el;
+              }}
             >
               {[...Array(7)].map((_, itemIndex) => {
                 const content = combinedItems[rowIndex * 7 + itemIndex];

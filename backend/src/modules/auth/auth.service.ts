@@ -1,3 +1,5 @@
+import { randomInt } from 'crypto';
+
 import {
   Injectable,
   UnauthorizedException,
@@ -6,16 +8,16 @@ import {
   ConflictException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
-import { randomInt } from 'crypto';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
-import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
-import * as bcrypt from 'bcrypt';
+import { UsersService } from '../users/users.service';
 
 export interface JwtPayload {
   sub: string;
@@ -183,10 +185,23 @@ export class AuthService {
     let user: { id: string };
     try {
       user = await this.prisma.user.create({
-        data: { email, username, passwordHash, displayName: username, userTag, gender: data.gender, occupation: data.occupation },
+        data: {
+          email,
+          username,
+          passwordHash,
+          displayName: username,
+          userTag,
+          gender: data.gender,
+          occupation: data.occupation,
+        },
       });
     } catch (err: unknown) {
-      if (err && typeof err === 'object' && 'code' in err && (err as { code: string }).code === 'P2002') {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code: string }).code === 'P2002'
+      ) {
         const target = (err as { meta?: { target?: string[] } }).meta?.target;
         if (target?.includes('email')) throw new ConflictException('Email already in use');
         if (target?.includes('username')) throw new ConflictException('Username already taken');
@@ -199,16 +214,19 @@ export class AuthService {
     this.logger.log(`New email user registered: ${username}`);
 
     // Send welcome email (fire and forget — don't block registration)
-    this.emailService.sendWelcomeEmail(email, username).catch((err: Error) =>
-      this.logger.warn(`Welcome email failed for ${username}: ${err.message}`),
-    );
+    this.emailService
+      .sendWelcomeEmail(email, username)
+      .catch((err: Error) =>
+        this.logger.warn(`Welcome email failed for ${username}: ${err.message}`),
+      );
 
     return this.generateTokens(user.id);
   }
 
-  async loginWithEmail(
-    data: { identifier: string; password: string },
-  ): Promise<AuthTokens | { twoFactorRequired: true; tempToken: string }> {
+  async loginWithEmail(data: {
+    identifier: string;
+    password: string;
+  }): Promise<AuthTokens | { twoFactorRequired: true; tempToken: string }> {
     const identifier = data.identifier.toLowerCase().trim();
     const isEmail = identifier.includes('@');
     const user = await (isEmail
@@ -272,10 +290,7 @@ export class AuthService {
     }
 
     // Clear attempts and code on success
-    await Promise.all([
-      this.redis.del(`2fa:${payload.sub}`),
-      this.redis.del(attemptsKey),
-    ]);
+    await Promise.all([this.redis.del(`2fa:${payload.sub}`), this.redis.del(attemptsKey)]);
     return this.generateTokens(payload.sub);
   }
 
@@ -292,7 +307,9 @@ export class AuthService {
       await this.emailService.send2FAEnableCode(user.email, code);
     } catch (err) {
       await this.redis.del(`2fa_enable:${userId}`);
-      throw new BadRequestException('Failed to send verification email. Verify a domain at resend.com/domains to send to any email address.');
+      throw new BadRequestException(
+        'Failed to send verification email. Verify a domain at resend.com/domains to send to any email address.',
+      );
     }
     this.logger.log(`2FA enable code sent for user ${userId}`);
   }
@@ -303,7 +320,8 @@ export class AuthService {
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
     const stored = await this.redis.get(`2fa_enable:${userId}`);
-    if (!stored || stored !== code) throw new UnauthorizedException('Invalid or expired verification code');
+    if (!stored || stored !== code)
+      throw new UnauthorizedException('Invalid or expired verification code');
 
     await this.redis.del(`2fa_enable:${userId}`);
     await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
@@ -371,7 +389,8 @@ export class AuthService {
   async requestDeleteAccount(userId: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
-    if (!user.email) throw new BadRequestException('No email address on this account — contact support');
+    if (!user.email)
+      throw new BadRequestException('No email address on this account — contact support');
 
     const code = randomInt(100000, 1000000).toString();
     await this.redis.set(`delete_account:${userId}`, code, 600); // 10 min
@@ -413,9 +432,11 @@ export class AuthService {
     const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:3000');
     const resetUrl = `${frontendUrl}/auth/reset-password?token=${token}`;
 
-    this.emailService.sendPasswordResetEmail(user.email, resetUrl).catch((err: Error) =>
-      this.logger.warn(`Password reset email failed for ${user.email}: ${err.message}`),
-    );
+    this.emailService
+      .sendPasswordResetEmail(user.email, resetUrl)
+      .catch((err: Error) =>
+        this.logger.warn(`Password reset email failed for ${user.email}: ${err.message}`),
+      );
     this.logger.log(`Password reset requested for user ${user.id}`);
   }
 
@@ -490,7 +511,9 @@ export class AuthService {
       if (existingByUsername) {
         // Only link if the account doesn't already have a different GitHub ID
         if (existingByUsername.githubId && existingByUsername.githubId !== githubProfile.id) {
-          throw new ConflictException('This username is already linked to a different GitHub account');
+          throw new ConflictException(
+            'This username is already linked to a different GitHub account',
+          );
         }
         this.logger.log(`Linking GitHub to existing user: ${githubProfile.login}`);
         user = await this.prisma.user.update({

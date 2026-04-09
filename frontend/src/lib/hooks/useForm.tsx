@@ -25,27 +25,27 @@ export function useForm<T extends Record<string, any>>({
       const { name, value, type } = e.target;
       const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
 
-      setValues(prev => ({ ...prev, [name]: val }));
+      setValues((prev) => ({ ...prev, [name]: val }));
 
       // Real-time validation if schema exists
       if (validationSchema && name in validationSchema) {
         const validator = validationSchema[name as keyof T];
         const error = validator(val);
-        setErrors(prev => ({
+        setErrors((prev) => ({
           ...prev,
           [name]: error || '',
         }));
       }
     },
-    [validationSchema]
+    [validationSchema],
   );
 
   const handleBlur = useCallback(
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const { name } = e.target;
-      setTouched(prev => ({ ...prev, [name]: true }));
+      setTouched((prev) => ({ ...prev, [name]: true }));
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -59,12 +59,10 @@ export function useForm<T extends Record<string, any>>({
         if (validationErrors.length > 0) {
           const errorMap = validationErrors.reduce(
             (acc, err) => ({ ...acc, [err.field]: err.message }),
-            {}
+            {},
           );
           setErrors(errorMap);
-          setTouched(
-            Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {})
-          );
+          setTouched(Object.keys(values).reduce((acc, key) => ({ ...acc, [key]: true }), {}));
           return;
         }
       }
@@ -78,7 +76,7 @@ export function useForm<T extends Record<string, any>>({
         setIsSubmitting(false);
       }
     },
-    [values, validationSchema, onSubmit]
+    [values, validationSchema, onSubmit],
   );
 
   const resetForm = useCallback(() => {
@@ -89,11 +87,11 @@ export function useForm<T extends Record<string, any>>({
   }, [initialValues]);
 
   const setFieldValue = useCallback((field: keyof T, value: any) => {
-    setValues(prev => ({ ...prev, [field]: value }));
+    setValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const setFieldError = useCallback((field: string, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   }, []);
 
   return {

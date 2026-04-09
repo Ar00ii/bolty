@@ -5,8 +5,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home, Globe, Briefcase, MessageSquare, BookOpen, Menu, X,
-  Flame, Star, ShoppingCart, Bot, GitBranch, Code2, Trophy,
+  Home,
+  Globe,
+  Briefcase,
+  MessageSquare,
+  BookOpen,
+  Menu,
+  X,
+  Flame,
+  Star,
+  ShoppingCart,
+  Bot,
+  GitBranch,
+  Code2,
+  Trophy,
   ChevronRight,
 } from 'lucide-react';
 
@@ -128,11 +140,23 @@ export function Sidebar() {
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              key="close"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <X className="w-5 h-5" />
             </motion.div>
           ) : (
-            <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+            <motion.div
+              key="menu"
+              initial={{ rotate: 90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: -90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
               <Menu className="w-5 h-5" />
             </motion.div>
           )}
@@ -239,13 +263,7 @@ interface SidebarItemProps {
   onNavigate?: () => void;
 }
 
-function SidebarItem({
-  section,
-  isActive,
-  isExpanded,
-  onToggle,
-  onNavigate,
-}: SidebarItemProps) {
+function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: SidebarItemProps) {
   const Icon = section.icon;
   const hasChildren = section.children && section.children.length > 0;
   const active = isActive(section.href);

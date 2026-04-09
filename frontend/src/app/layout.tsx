@@ -89,10 +89,7 @@ const jsonLd = {
   logo: `${BASE_URL}/icon`,
   description:
     'Bolty is the AI developer platform for publishing code, deploying AI agents, and earning from your work.',
-  sameAs: [
-    'https://twitter.com/boltynetwork',
-    'https://github.com/boltynetwork',
-  ],
+  sameAs: ['https://twitter.com/boltynetwork', 'https://github.com/boltynetwork'],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',
@@ -106,7 +103,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -116,9 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
-              <ClientShell>
-                {children}
-              </ClientShell>
+              <ClientShell>{children}</ClientShell>
             </AuthProvider>
             <ToastContainer />
           </ToastProvider>

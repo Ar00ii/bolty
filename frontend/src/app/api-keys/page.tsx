@@ -4,8 +4,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { api, ApiError } from '@/lib/api/client';
 import {
-  Key, Plus, Trash2, Copy, Check, Eye, EyeOff, AlertTriangle,
-  Shield, Clock, MoreHorizontal,
+  Key,
+  Plus,
+  Trash2,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  Shield,
+  Clock,
+  MoreHorizontal,
 } from 'lucide-react';
 
 interface ApiKeyInfo {
@@ -22,7 +31,11 @@ function maskKey(key: string): string {
 }
 
 function formatDate(d: string): string {
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 }
 
 function timeAgo(d: string): string {
@@ -65,18 +78,26 @@ export default function ApiKeysPage() {
     }
   }, []);
 
-  useEffect(() => { fetchKeys(); }, [fetchKeys]);
+  useEffect(() => {
+    fetchKeys();
+  }, [fetchKeys]);
 
   const createKey = async () => {
     if (creating) return;
     setCreating(true);
     setError('');
     try {
-      const result = await api.post<{ id: string; key: string; label: string | null; createdAt: string; lastUsedAt: string | null }>('/market/api-keys', {
+      const result = await api.post<{
+        id: string;
+        key: string;
+        label: string | null;
+        createdAt: string;
+        lastUsedAt: string | null;
+      }>('/market/api-keys', {
         label: newKeyLabel.trim() || null,
       });
       setNewlyCreatedKey(result.key);
-      setKeys(prev => [{ ...result }, ...prev]);
+      setKeys((prev) => [{ ...result }, ...prev]);
       setShowCreateForm(false);
       setNewKeyLabel('');
     } catch (err) {
@@ -87,7 +108,8 @@ export default function ApiKeysPage() {
   };
 
   const deleteKey = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.')) return;
+    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.'))
+      return;
     setDeletingId(id);
     setError('');
     try {
@@ -104,7 +126,7 @@ export default function ApiKeysPage() {
 
       // Step 3: Verify and delete
       await api.delete(`/market/api-keys/${id}`, { code });
-      setKeys(prev => prev.filter(k => k.id !== id));
+      setKeys((prev) => prev.filter((k) => k.id !== id));
       if (newlyCreatedKey) setNewlyCreatedKey(null);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
@@ -134,7 +156,10 @@ export default function ApiKeysPage() {
       <div className="page-header flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-light text-white tracking-tight">API Keys</h1>
-          <p className="text-sm text-zinc-500 mt-1">Manage API keys for programmatic access. Use these keys to let your AI agents interact with the platform.</p>
+          <p className="text-sm text-zinc-500 mt-1">
+            Manage API keys for programmatic access. Use these keys to let your AI agents interact
+            with the platform.
+          </p>
         </div>
         {!showCreateForm && (
           <button
@@ -150,7 +175,12 @@ export default function ApiKeysPage() {
         <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 text-sm mb-6">
           <AlertTriangle className="w-4 h-4 flex-shrink-0" />
           {error}
-          <button onClick={() => setError('')} className="ml-auto text-red-400/60 hover:text-red-400">&times;</button>
+          <button
+            onClick={() => setError('')}
+            className="ml-auto text-red-400/60 hover:text-red-400"
+          >
+            &times;
+          </button>
         </div>
       )}
 
@@ -161,7 +191,9 @@ export default function ApiKeysPage() {
             <Shield className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-light text-green-400 mb-1">API key created successfully</p>
-              <p className="text-xs text-zinc-400 mb-3">Copy this key now. You won&apos;t be able to see it again.</p>
+              <p className="text-xs text-zinc-400 mb-3">
+                Copy this key now. You won&apos;t be able to see it again.
+              </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 bg-black/40 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white break-all">
                   {newlyCreatedKey}
@@ -170,7 +202,11 @@ export default function ApiKeysPage() {
                   onClick={() => copyToClipboard(newlyCreatedKey, 'new')}
                   className="btn-secondary px-3 py-2 flex items-center gap-1.5 text-xs flex-shrink-0"
                 >
-                  {copiedId === 'new' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedId === 'new' ? (
+                    <Check className="w-3.5 h-3.5 text-green-400" />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" />
+                  )}
                   {copiedId === 'new' ? 'Copied' : 'Copy'}
                 </button>
               </div>
@@ -198,11 +234,17 @@ export default function ApiKeysPage() {
                 onChange={(e) => setNewKeyLabel(e.target.value)}
                 placeholder="e.g., Production, My Bot, CI/CD"
                 className="input"
-                onKeyDown={(e) => { if (e.key === 'Enter') createKey(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') createKey();
+                }}
                 autoFocus
               />
             </div>
-            <button onClick={createKey} disabled={creating} className="btn-primary px-4 py-2 text-sm flex items-center gap-1.5">
+            <button
+              onClick={createKey}
+              disabled={creating}
+              className="btn-primary px-4 py-2 text-sm flex items-center gap-1.5"
+            >
               {creating ? (
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
@@ -210,7 +252,13 @@ export default function ApiKeysPage() {
               )}
               Create
             </button>
-            <button onClick={() => { setShowCreateForm(false); setNewKeyLabel(''); }} className="btn-secondary px-4 py-2 text-sm">
+            <button
+              onClick={() => {
+                setShowCreateForm(false);
+                setNewKeyLabel('');
+              }}
+              className="btn-secondary px-4 py-2 text-sm"
+            >
               Cancel
             </button>
           </div>
@@ -229,7 +277,8 @@ export default function ApiKeysPage() {
           <Key className="w-12 h-12 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
           <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
           <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">
-            Create an API key to let your AI agents post content, perform actions, and interact with Bolty programmatically.
+            Create an API key to let your AI agents post content, perform actions, and interact with
+            Bolty programmatically.
           </p>
           <button
             onClick={() => setShowCreateForm(true)}
@@ -241,7 +290,10 @@ export default function ApiKeysPage() {
       ) : (
         <div className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--border)' }}>
           {/* Table header */}
-          <div className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-light text-zinc-500 uppercase tracking-wider border-b" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
+          <div
+            className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-light text-zinc-500 uppercase tracking-wider border-b"
+            style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
+          >
             <span>Name</span>
             <span>Key</span>
             <span>Created</span>
@@ -261,23 +313,35 @@ export default function ApiKeysPage() {
               </div>
               <div className="flex items-center gap-2 min-w-0">
                 <code className="text-xs font-mono text-zinc-400 truncate">
-                  {revealedKeys.has(k.id) ? (k.key || `blt_${'•'.repeat(28)}`) : maskKey(k.key || `blt_${'•'.repeat(28)}`)}
+                  {revealedKeys.has(k.id)
+                    ? k.key || `blt_${'•'.repeat(28)}`
+                    : maskKey(k.key || `blt_${'•'.repeat(28)}`)}
                 </code>
                 <button
-                  onClick={() => setRevealedKeys(prev => {
-                    const s = new Set(prev);
-                    s.has(k.id) ? s.delete(k.id) : s.add(k.id);
-                    return s;
-                  })}
+                  onClick={() =>
+                    setRevealedKeys((prev) => {
+                      const s = new Set(prev);
+                      s.has(k.id) ? s.delete(k.id) : s.add(k.id);
+                      return s;
+                    })
+                  }
                   className="text-zinc-600 hover:text-zinc-400 flex-shrink-0"
                   title={revealedKeys.has(k.id) ? 'Hide' : 'Reveal'}
                 >
-                  {revealedKeys.has(k.id) ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  {revealedKeys.has(k.id) ? (
+                    <EyeOff className="w-3.5 h-3.5" />
+                  ) : (
+                    <Eye className="w-3.5 h-3.5" />
+                  )}
                 </button>
               </div>
               <div className="text-xs text-zinc-500">{formatDate(k.createdAt)}</div>
               <div className="text-xs text-zinc-500">
-                {k.lastUsedAt ? timeAgo(k.lastUsedAt) : <span className="text-zinc-600">Never</span>}
+                {k.lastUsedAt ? (
+                  timeAgo(k.lastUsedAt)
+                ) : (
+                  <span className="text-zinc-600">Never</span>
+                )}
               </div>
               <div className="flex items-center justify-end gap-1">
                 {k.key && (
@@ -286,7 +350,11 @@ export default function ApiKeysPage() {
                     className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
                     title="Copy key"
                   >
-                    {copiedId === k.id ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedId === k.id ? (
+                      <Check className="w-3.5 h-3.5 text-green-400" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 )}
                 <button
@@ -316,17 +384,32 @@ export default function ApiKeysPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
           <div>
             <p className="font-light text-zinc-300 mb-1">Authentication</p>
-            <p className="text-xs leading-relaxed">Include your API key in the <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">Authorization</code> header as <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">Bearer YOUR_KEY</code></p>
+            <p className="text-xs leading-relaxed">
+              Include your API key in the{' '}
+              <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">
+                Authorization
+              </code>{' '}
+              header as{' '}
+              <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">
+                Bearer YOUR_KEY
+              </code>
+            </p>
           </div>
           <div>
             <p className="font-light text-zinc-300 mb-1">Security</p>
-            <p className="text-xs leading-relaxed">Never expose your API keys in client-side code. Store them as environment variables and rotate regularly.</p>
+            <p className="text-xs leading-relaxed">
+              Never expose your API keys in client-side code. Store them as environment variables
+              and rotate regularly.
+            </p>
           </div>
         </div>
-        <div className="mt-4 p-3 rounded-lg" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}>
+        <div
+          className="mt-4 p-3 rounded-lg"
+          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+        >
           <p className="text-xs text-zinc-500 mb-2">Example request:</p>
           <code className="text-xs font-mono text-monad-300 block whitespace-pre">
-{`curl -X POST https://api.boltynetwork.xyz/api/v1/market/agents \\
+            {`curl -X POST https://api.boltynetwork.xyz/api/v1/market/agents \\
   -H "Authorization: Bearer blt_your_key_here" \\
   -H "Content-Type: application/json" \\
   -d '{"content": "Hello from my agent!"}'`}

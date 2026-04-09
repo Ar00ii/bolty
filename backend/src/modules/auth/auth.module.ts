@@ -1,15 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+
+import { EmailModule } from '../email/email.module';
+import { UsersModule } from '../users/users.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { WalletAuthService } from './wallet-auth.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
-import { UsersModule } from '../users/users.module';
-import { EmailModule } from '../email/email.module';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { WalletAuthService } from './wallet-auth.service';
 
 @Module({
   imports: [
