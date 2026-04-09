@@ -651,21 +651,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── TESTIMONIALS SECTION ── */}
-      <section
-        className="relative py-32 px-6 overflow-hidden border-t"
-        style={{
-          backgroundColor: '#000000',
-          borderColor: 'rgba(255,255,255,0.1)',
-        }}
-      >
-        {/* Hexagon Pattern Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <HexagonPattern className="w-full h-full" />
-        </div>
-        <div className="max-w-5xl mx-auto relative z-10">
+        {/* ── TESTIMONIALS SECTION ── */}
+        <div className="py-32 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="max-w-5xl mx-auto">
           {/* Logos Row with Dividers */}
           <div className="flex justify-center items-end gap-12 mb-20 relative">
             {[
@@ -722,6 +711,7 @@ export default function HomePage() {
               MITCHELL HASHIMOTO, CO-FOUNDER OF HASHICORP
             </div>
           </div>
+        </div>
         </div>
       </section>
 
