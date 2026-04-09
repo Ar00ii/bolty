@@ -35,16 +35,12 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
           )}
         </div>
         {error && (
-          <p className="text-xs text-red-400 font-light mt-1 flex items-center gap-1">
-            {error}
-          </p>
+          <p className="text-xs text-red-400 font-light mt-1 flex items-center gap-1">{error}</p>
         )}
-        {hint && !error && (
-          <p className="text-xs text-zinc-500 font-light mt-1">{hint}</p>
-        )}
+        {hint && !error && <p className="text-xs text-zinc-500 font-light mt-1">{hint}</p>}
       </div>
     );
-  }
+  },
 );
 
 FormInput.displayName = 'FormInput';

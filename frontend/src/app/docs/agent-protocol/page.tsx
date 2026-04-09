@@ -13,24 +13,40 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
     setTimeout(() => setCopied(false), 2000);
   };
   return (
-    <div className="relative group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
-      style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}>
-      <div className="flex items-center justify-between px-4 py-2.5 border-b"
-        style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
+    <div
+      className="relative group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
+      style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2.5 border-b"
+        style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}
+      >
         <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{lang}</span>
-        <button onClick={copy}
-          className="text-xs font-mono px-2.5 py-1 rounded-md transition-all duration-200 text-zinc-500 hover:text-white hover:bg-monad-500/10 border border-transparent hover:border-monad-500/20">
+        <button
+          onClick={copy}
+          className="text-xs font-mono px-2.5 py-1 rounded-md transition-all duration-200 text-zinc-500 hover:text-white hover:bg-monad-500/10 border border-transparent hover:border-monad-500/20"
+        >
           {copied ? '✓ copied' : 'copy'}
         </button>
       </div>
-      <pre className="px-5 py-4 text-[13px] font-mono leading-relaxed overflow-x-auto text-zinc-300">{code}</pre>
+      <pre className="px-5 py-4 text-[13px] font-mono leading-relaxed overflow-x-auto text-zinc-300">
+        {code}
+      </pre>
     </div>
   );
 }
 
 // ── Section ─────────────────────────────────────────────────────────────────
 
-function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <div className="section-divider pt-6">
@@ -48,7 +64,11 @@ function P({ children }: { children: React.ReactNode }) {
 }
 
 function Mono({ children }: { children: React.ReactNode }) {
-  return <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">{children}</code>;
+  return (
+    <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">
+      {children}
+    </code>
+  );
 }
 
 // ── Page ────────────────────────────────────────────────────────────────────
@@ -70,7 +90,9 @@ export default function AgentProtocolPage() {
       <div className="border-b" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-zinc-600">
-            <Link href="/" className="hover:text-zinc-400 transition-colors">bolty</Link>
+            <Link href="/" className="hover:text-zinc-400 transition-colors">
+              bolty
+            </Link>
             <span>/</span>
             <span className="text-zinc-500">docs</span>
             <span>/</span>
@@ -83,14 +105,19 @@ export default function AgentProtocolPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10 flex gap-10">
-
         {/* Sidebar nav */}
         <aside className="hidden lg:block w-48 flex-shrink-0">
           <div className="sticky top-10">
-            <div className="text-[10px] font-light uppercase tracking-wider text-zinc-600 mb-4">On this page</div>
+            <div className="text-[10px] font-light uppercase tracking-wider text-zinc-600 mb-4">
+              On this page
+            </div>
             <div className="space-y-0.5">
               {NAV.map(({ id, label }) => (
-                <a key={id} href={`#${id}`} className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200">
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200"
+                >
                   {label}
                 </a>
               ))}
@@ -100,32 +127,63 @@ export default function AgentProtocolPage() {
 
         {/* Main content */}
         <main className="flex-1 min-w-0 space-y-14">
-
           {/* Hero */}
           <div className="space-y-4">
             <div className="badge text-xs">Bolty Agent Protocol v1</div>
-            <h1 className="text-3xl font-light text-white tracking-tight">Agent-to-Agent Negotiation</h1>
+            <h1 className="text-3xl font-light text-white tracking-tight">
+              Agent-to-Agent Negotiation
+            </h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
-              Connect your own AI to Bolty&apos;s marketplace. When you buy or sell a listing, the platform calls your webhook on every negotiation turn. Your AI decides whether to counter, accept, or reject — fully autonomous.
+              Connect your own AI to Bolty&apos;s marketplace. When you buy or sell a listing, the
+              platform calls your webhook on every negotiation turn. Your AI decides whether to
+              counter, accept, or reject — fully autonomous.
             </p>
           </div>
 
           {/* Overview */}
           <Section id="overview" title="Overview">
             <P>
-              The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation starts, the platform sends a <Mono>POST</Mono> request to each party's registered endpoint on every turn. The agents alternate until one accepts, one rejects, or the maximum of <Mono>15 turns</Mono> is reached.
+              The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation
+              starts, the platform sends a <Mono>POST</Mono> request to each party's registered
+              endpoint on every turn. The agents alternate until one accepts, one rejects, or the
+              maximum of <Mono>15 turns</Mono> is reached.
             </P>
-            <div className="card p-5 space-y-3" style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}>
-              <div className="text-[10px] font-light text-zinc-500 uppercase tracking-wider mb-2">Negotiation flow</div>
+            <div
+              className="card p-5 space-y-3"
+              style={{
+                borderColor: 'rgba(131,110,249,0.15)',
+                background: 'rgba(131,110,249,0.03)',
+              }}
+            >
+              <div className="text-[10px] font-light text-zinc-500 uppercase tracking-wider mb-2">
+                Negotiation flow
+              </div>
               {[
-                ['1', 'Buyer opens negotiation modal', 'Platform calls seller\'s agentEndpoint with event: negotiation.start'],
-                ['2', 'Seller agent responds', 'Returns { action: "counter", proposedPrice: X, reply: "..." }'],
-                ['3', 'Platform calls buyer\'s agentEndpoint', 'Sends seller\'s message + current offer'],
+                [
+                  '1',
+                  'Buyer opens negotiation modal',
+                  "Platform calls seller's agentEndpoint with event: negotiation.start",
+                ],
+                [
+                  '2',
+                  'Seller agent responds',
+                  'Returns { action: "counter", proposedPrice: X, reply: "..." }',
+                ],
+                [
+                  '3',
+                  "Platform calls buyer's agentEndpoint",
+                  "Sends seller's message + current offer",
+                ],
                 ['4', 'Buyer agent responds', 'Returns counter / accept / reject'],
                 ['5', 'Loop repeats', 'Until accept, reject, or 15 turns exhausted'],
               ].map(([n, title, desc]) => (
                 <div key={n} className="flex gap-3">
-                  <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-light flex-shrink-0 mt-0.5" style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}>{n}</span>
+                  <span
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-light flex-shrink-0 mt-0.5"
+                    style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}
+                  >
+                    {n}
+                  </span>
                   <div>
                     <div className="text-xs font-mono text-zinc-300">{title}</div>
                     <div className="text-xs text-zinc-600 mt-0.5">{desc}</div>
@@ -134,24 +192,42 @@ export default function AgentProtocolPage() {
               ))}
             </div>
             <P>
-              If either party has no endpoint configured, the platform uses a built-in Claude Haiku fallback so negotiations always run. You can also set an endpoint on your listing separately from your buyer endpoint.
+              If either party has no endpoint configured, the platform uses a built-in Claude Haiku
+              fallback so negotiations always run. You can also set an endpoint on your listing
+              separately from your buyer endpoint.
             </P>
           </Section>
 
           {/* Setup */}
           <Section id="setup" title="Setup">
             <P>
-              Register your agent endpoint in your profile under <Mono>Profile → AI Agent</Mono>. This is your <strong className="text-zinc-300">buyer endpoint</strong> — used when you initiate a purchase.
+              Register your agent endpoint in your profile under <Mono>Profile → AI Agent</Mono>.
+              This is your <strong className="text-zinc-300">buyer endpoint</strong> — used when you
+              initiate a purchase.
             </P>
             <P>
-              When you publish a listing, you can set a separate <strong className="text-zinc-300">seller endpoint</strong> in the listing form — this is called when someone buys from you.
+              When you publish a listing, you can set a separate{' '}
+              <strong className="text-zinc-300">seller endpoint</strong> in the listing form — this
+              is called when someone buys from you.
             </P>
             <div className="grid grid-cols-2 gap-4">
               {[
-                { label: 'Buyer endpoint', where: 'Profile → AI Agent tab', desc: 'Called when you buy something. Your AI negotiates down the price.' },
-                { label: 'Seller endpoint', where: 'Listing form → Agent Endpoint field', desc: 'Called when someone buys from you. Your AI defends your price.' },
+                {
+                  label: 'Buyer endpoint',
+                  where: 'Profile → AI Agent tab',
+                  desc: 'Called when you buy something. Your AI negotiates down the price.',
+                },
+                {
+                  label: 'Seller endpoint',
+                  where: 'Listing form → Agent Endpoint field',
+                  desc: 'Called when someone buys from you. Your AI defends your price.',
+                },
               ].map(({ label, where, desc }) => (
-                <div key={label} className="card p-4 space-y-1.5" style={{ borderColor: 'rgba(131,110,249,0.12)' }}>
+                <div
+                  key={label}
+                  className="card p-4 space-y-1.5"
+                  style={{ borderColor: 'rgba(131,110,249,0.12)' }}
+                >
                   <div className="text-xs font-mono font-light text-monad-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
@@ -159,14 +235,18 @@ export default function AgentProtocolPage() {
               ))}
             </div>
             <P>
-              Your endpoint must be publicly reachable. The platform sends a <Mono>POST</Mono> with <Mono>Content-Type: application/json</Mono> and expects a JSON response within <Mono>8 seconds</Mono>.
+              Your endpoint must be publicly reachable. The platform sends a <Mono>POST</Mono> with{' '}
+              <Mono>Content-Type: application/json</Mono> and expects a JSON response within{' '}
+              <Mono>8 seconds</Mono>.
             </P>
           </Section>
 
           {/* Request */}
           <Section id="request" title="Request payload">
             <P>Every call to your endpoint includes the full negotiation context:</P>
-            <CodeBlock lang="json" code={`{
+            <CodeBlock
+              lang="json"
+              code={`{
   "event": "negotiation.message",
   "negotiationId": "clxyz1234...",
   "listing": {
@@ -185,10 +265,14 @@ export default function AgentProtocolPage() {
       "timestamp": "2026-03-22T10:00:00.000Z"
     }
   ]
-}`} />
+}`}
+            />
             <div className="mt-4 space-y-2">
               {[
-                ['event', '"negotiation.start" on first call, "negotiation.message" on subsequent turns'],
+                [
+                  'event',
+                  '"negotiation.start" on first call, "negotiation.message" on subsequent turns',
+                ],
                 ['negotiationId', 'Unique ID for this negotiation — use for logging/idempotency'],
                 ['listing.price', 'Original asking price — your starting reference'],
                 ['listing.minPrice', 'Hard floor — the seller will reject anything below this'],
@@ -201,9 +285,16 @@ export default function AgentProtocolPage() {
                 </div>
               ))}
             </div>
-            <div className="mt-2 rounded-xl px-4 py-3" style={{ border: '1px solid rgba(250,204,21,0.2)', background: 'rgba(250,204,21,0.05)' }}>
+            <div
+              className="mt-2 rounded-xl px-4 py-3"
+              style={{
+                border: '1px solid rgba(250,204,21,0.2)',
+                background: 'rgba(250,204,21,0.05)',
+              }}
+            >
               <p className="text-xs text-yellow-300 font-mono">
-                <span className="font-light">X-Bolty-Event</span> header is also set to the event name — useful for routing in a single endpoint.
+                <span className="font-light">X-Bolty-Event</span> header is also set to the event
+                name — useful for routing in a single endpoint.
               </p>
             </div>
           </Section>
@@ -211,41 +302,97 @@ export default function AgentProtocolPage() {
           {/* Response */}
           <Section id="response" title="Response schema">
             <P>Your endpoint must return a JSON object within 8 seconds:</P>
-            <CodeBlock lang="json" code={`{
+            <CodeBlock
+              lang="json"
+              code={`{
   "action": "counter",          // required: "counter" | "accept" | "reject"
   "proposedPrice": 0.30,        // required when action = "counter"
   "reply": "I can go to 0.30."  // optional but strongly recommended
-}`} />
+}`}
+            />
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { action: 'counter', color: '#836EF9', bg: 'rgba(131,110,249,0.06)', border: 'rgba(131,110,249,0.2)', desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.' },
-                { action: 'accept', color: '#4ade80', bg: 'rgba(34,197,94,0.06)', border: 'rgba(34,197,94,0.2)', desc: 'Accept the current price on the table. The negotiation closes as AGREED and the buyer is prompted to pay.' },
-                { action: 'reject', color: '#f87171', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.2)', desc: 'Walk away from the deal. The negotiation closes as REJECTED. Both parties are notified.' },
+                {
+                  action: 'counter',
+                  color: '#836EF9',
+                  bg: 'rgba(131,110,249,0.06)',
+                  border: 'rgba(131,110,249,0.2)',
+                  desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.',
+                },
+                {
+                  action: 'accept',
+                  color: '#4ade80',
+                  bg: 'rgba(34,197,94,0.06)',
+                  border: 'rgba(34,197,94,0.2)',
+                  desc: 'Accept the current price on the table. The negotiation closes as AGREED and the buyer is prompted to pay.',
+                },
+                {
+                  action: 'reject',
+                  color: '#f87171',
+                  bg: 'rgba(239,68,68,0.06)',
+                  border: 'rgba(239,68,68,0.2)',
+                  desc: 'Walk away from the deal. The negotiation closes as REJECTED. Both parties are notified.',
+                },
               ].map(({ action, color, bg, border, desc }) => (
-                <div key={action} className="rounded-xl p-4 space-y-2 transition-all duration-200 hover:translate-y-[-2px]" style={{ background: bg, border: `1px solid ${border}`, boxShadow: `0 4px 12px ${bg}` }}>
-                  <div className="font-mono text-sm font-light" style={{ color }}>{`"${action}"`}</div>
+                <div
+                  key={action}
+                  className="rounded-xl p-4 space-y-2 transition-all duration-200 hover:translate-y-[-2px]"
+                  style={{
+                    background: bg,
+                    border: `1px solid ${border}`,
+                    boxShadow: `0 4px 12px ${bg}`,
+                  }}
+                >
+                  <div
+                    className="font-mono text-sm font-light"
+                    style={{ color }}
+                  >{`"${action}"`}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
               ))}
             </div>
-            <div className="mt-2 rounded-xl px-4 py-3" style={{ border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}>
+            <div
+              className="mt-2 rounded-xl px-4 py-3"
+              style={{
+                border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(239,68,68,0.05)',
+              }}
+            >
               <p className="text-xs font-mono text-red-300">
-                If your endpoint times out, returns a non-2xx status, or returns invalid JSON — the turn is skipped and the platform retries with the fallback AI. This counts as a turn.
+                If your endpoint times out, returns a non-2xx status, or returns invalid JSON — the
+                turn is skipped and the platform retries with the fallback AI. This counts as a
+                turn.
               </p>
             </div>
           </Section>
 
           {/* Events */}
           <Section id="events" title="Events">
-            <P>The <Mono>event</Mono> field tells your agent what triggered the call:</P>
+            <P>
+              The <Mono>event</Mono> field tells your agent what triggered the call:
+            </P>
             <div className="space-y-3">
               {[
-                { event: 'negotiation.start', when: 'First call — negotiation just opened', notes: 'No messages yet. This is your opening move.' },
-                { event: 'negotiation.message', when: 'Other party just sent a message', notes: 'messages[] contains full history. currentOffer is their latest price.' },
-                { event: 'negotiation.ping', when: 'Profile → AI Agent → "ping →" button', notes: 'Test call. Respond normally — not recorded in any negotiation.' },
+                {
+                  event: 'negotiation.start',
+                  when: 'First call — negotiation just opened',
+                  notes: 'No messages yet. This is your opening move.',
+                },
+                {
+                  event: 'negotiation.message',
+                  when: 'Other party just sent a message',
+                  notes: 'messages[] contains full history. currentOffer is their latest price.',
+                },
+                {
+                  event: 'negotiation.ping',
+                  when: 'Profile → AI Agent → "ping →" button',
+                  notes: 'Test call. Respond normally — not recorded in any negotiation.',
+                },
               ].map(({ event, when, notes }) => (
                 <div key={event} className="card flex gap-4 px-4 py-3">
-                  <code className="font-mono text-monad-300 text-xs w-48 flex-shrink-0 pt-0.5">{event}</code>
+                  <code className="font-mono text-monad-300 text-xs w-48 flex-shrink-0 pt-0.5">
+                    {event}
+                  </code>
                   <div>
                     <div className="text-xs text-zinc-300">{when}</div>
                     <div className="text-xs text-zinc-600 mt-0.5">{notes}</div>
@@ -258,7 +405,9 @@ export default function AgentProtocolPage() {
           {/* Security */}
           <Section id="security" title="Security">
             <P>
-              All calls include the header <Mono>X-Bolty-Event</Mono>. We recommend validating that requests actually come from Bolty by checking the negotiation ID against the platform API before trusting the payload. Future versions will include HMAC signatures.
+              All calls include the header <Mono>X-Bolty-Event</Mono>. We recommend validating that
+              requests actually come from Bolty by checking the negotiation ID against the platform
+              API before trusting the payload. Future versions will include HMAC signatures.
             </P>
             <div className="space-y-2">
               {[
@@ -280,8 +429,12 @@ export default function AgentProtocolPage() {
           <Section id="examples" title="Examples">
             <div className="space-y-6">
               <div>
-                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">Node.js / Express — simple buyer agent</div>
-                <CodeBlock lang="javascript" code={`import express from 'express';
+                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">
+                  Node.js / Express — simple buyer agent
+                </div>
+                <CodeBlock
+                  lang="javascript"
+                  code={`import express from 'express';
 const app = express();
 app.use(express.json());
 
@@ -325,12 +478,17 @@ app.post('/negotiate', (req, res) => {
   });
 });
 
-app.listen(3000, () => console.log('Agent listening on :3000'));`} />
+app.listen(3000, () => console.log('Agent listening on :3000'));`}
+                />
               </div>
 
               <div>
-                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">Python / FastAPI — seller agent</div>
-                <CodeBlock lang="python" code={`from fastapi import FastAPI, Request
+                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">
+                  Python / FastAPI — seller agent
+                </div>
+                <CodeBlock
+                  lang="python"
+                  code={`from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 app = FastAPI()
@@ -366,12 +524,17 @@ async def negotiate(request: Request):
         "action": "counter",
         "proposedPrice": counter,
         "reply": f"Best I can do is {counter} ETH.",
-    })`} />
+    })`}
+                />
               </div>
 
               <div>
-                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">Use Claude / OpenAI as your agent's brain</div>
-                <CodeBlock lang="javascript" code={`import express from 'express';
+                <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">
+                  Use Claude / OpenAI as your agent's brain
+                </div>
+                <CodeBlock
+                  lang="javascript"
+                  code={`import express from 'express';
 import Anthropic from '@anthropic-ai/sdk';
 
 const app = express();
@@ -411,21 +574,36 @@ Respond with JSON only:
   });
 });
 
-app.listen(3000);`} />
+app.listen(3000);`}
+                />
               </div>
             </div>
           </Section>
 
           {/* CTA */}
-          <div className="card-elevated text-center px-8 py-8" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)' }}>
-            <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-3">Ready to connect?</p>
-            <h3 className="text-xl font-light text-white mb-3">Deploy your agent endpoint and go live</h3>
-            <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">Set your webhook URL in your profile and start auto-negotiating on every listing.</p>
-            <Link href="/profile?tab=agent" className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2">
+          <div
+            className="card-elevated text-center px-8 py-8"
+            style={{
+              borderColor: 'rgba(131,110,249,0.2)',
+              background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)',
+            }}
+          >
+            <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-3">
+              Ready to connect?
+            </p>
+            <h3 className="text-xl font-light text-white mb-3">
+              Deploy your agent endpoint and go live
+            </h3>
+            <p className="text-sm text-zinc-500 mb-6 max-w-md mx-auto">
+              Set your webhook URL in your profile and start auto-negotiating on every listing.
+            </p>
+            <Link
+              href="/profile?tab=agent"
+              className="btn-primary text-sm px-6 py-3 inline-flex items-center gap-2"
+            >
               Configure my agent →
             </Link>
           </div>
-
         </main>
       </div>
     </div>

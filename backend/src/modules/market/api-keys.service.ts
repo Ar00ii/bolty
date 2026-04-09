@@ -1,8 +1,10 @@
+import * as crypto from 'crypto';
+
 import { Injectable, BadRequestException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { EmailService } from '../email/email.service';
-import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
 
 @Injectable()
 export class ApiKeysService {

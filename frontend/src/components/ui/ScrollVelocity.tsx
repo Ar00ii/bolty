@@ -7,10 +7,7 @@ interface ScrollVelocityRowProps {
   duration?: number;
 }
 
-export function ScrollVelocityRow({
-  children,
-  duration = 30,
-}: ScrollVelocityRowProps) {
+export function ScrollVelocityRow({ children, duration = 30 }: ScrollVelocityRowProps) {
   const childrenArray = Children.toArray(children);
   const lastChild = childrenArray[childrenArray.length - 1];
 
@@ -21,7 +18,7 @@ export function ScrollVelocityRow({
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`,
-          gap: '64px'
+          gap: '64px',
         }}
       >
         {children}
@@ -31,7 +28,7 @@ export function ScrollVelocityRow({
         style={{
           animationDuration: `${duration}s`,
           animation: `scroll-x ${duration}s linear infinite`,
-          gap: '64px'
+          gap: '64px',
         }}
         aria-hidden
       >

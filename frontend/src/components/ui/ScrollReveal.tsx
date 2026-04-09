@@ -87,11 +87,7 @@ interface ScrollItemProps {
   className?: string;
 }
 
-export function ScrollItem({
-  children,
-  direction = 'up',
-  className = '',
-}: ScrollItemProps) {
+export function ScrollItem({ children, direction = 'up', className = '' }: ScrollItemProps) {
   const directionMap = {
     up: { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } },
     down: { initial: { opacity: 0, y: -20 }, animate: { opacity: 1, y: 0 } },

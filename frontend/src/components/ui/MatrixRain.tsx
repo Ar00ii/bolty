@@ -25,7 +25,7 @@ export function MatrixRain({ opacity = 0.12 }: { opacity?: number }) {
       canvas.height = window.innerHeight;
       const cols = Math.floor(canvas.width / FONT_SIZE) + 1;
       dropsRef.current = Array.from({ length: cols }, () =>
-        Math.floor(Math.random() * -canvas.height / FONT_SIZE),
+        Math.floor((Math.random() * -canvas.height) / FONT_SIZE),
       );
     };
 

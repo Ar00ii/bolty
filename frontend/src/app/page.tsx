@@ -17,11 +17,32 @@ import { WarpBackground } from '@/components/ui/WarpBackground';
 import { AnimatedCounter, CountUp } from '@/components/ui/AnimatedCounter';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Bot, GitBranch, ArrowRight, Shield,
-  Key, Star, TrendingUp,
-  MessageSquare, UserPlus, Upload, Rocket, CheckCircle2,
-  Search, Menu, X, ChevronDown, LogOut, Settings, User as UserIcon,
-  Bell, Code2, Zap, Plus, Circle, Globe, Mail,
+  Bot,
+  GitBranch,
+  ArrowRight,
+  Shield,
+  Key,
+  Star,
+  TrendingUp,
+  MessageSquare,
+  UserPlus,
+  Upload,
+  Rocket,
+  CheckCircle2,
+  Search,
+  Menu,
+  X,
+  ChevronDown,
+  LogOut,
+  Settings,
+  User as UserIcon,
+  Bell,
+  Code2,
+  Zap,
+  Plus,
+  Circle,
+  Globe,
+  Mail,
 } from 'lucide-react';
 
 // Data
@@ -29,14 +50,16 @@ const FEATURES = [
   {
     icon: Bot,
     title: 'AI Agent Marketplace',
-    description: 'Discover, publish, and sell AI agents. From GPT-powered tools to custom automation bots.',
+    description:
+      'Discover, publish, and sell AI agents. From GPT-powered tools to custom automation bots.',
     href: '/market/agents',
     featured: true,
   },
   {
     icon: GitBranch,
     title: 'Code Repositories',
-    description: 'Sync GitHub repos. Offer free or paid access, earn reputation, build your profile.',
+    description:
+      'Sync GitHub repos. Offer free or paid access, earn reputation, build your profile.',
     href: '/market/repos',
   },
   {
@@ -66,41 +89,74 @@ const FEATURES = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or Web3 wallet. Your profile is your identity.', icon: UserPlus },
-  { step: '02', title: 'Publish your work', desc: 'Connect GitHub or upload AI agents to the marketplace.', icon: Upload },
-  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate, build reputation, grow your brand.', icon: Rocket },
+  {
+    step: '01',
+    title: 'Create your account',
+    desc: 'Sign up with GitHub, email, or Web3 wallet. Your profile is your identity.',
+    icon: UserPlus,
+  },
+  {
+    step: '02',
+    title: 'Publish your work',
+    desc: 'Connect GitHub or upload AI agents to the marketplace.',
+    icon: Upload,
+  },
+  {
+    step: '03',
+    title: 'Earn and grow',
+    desc: 'Set prices in ETH, negotiate, build reputation, grow your brand.',
+    icon: Rocket,
+  },
 ];
 
 const TESTIMONIALS = [
-  { name: 'Alex R.', role: 'Senior Full-Stack Dev', text: 'Published three repos in my first week and earned ETH without crypto complexity.' },
-  { name: 'Yuki T.', role: 'AI/ML Engineer', text: 'The AI agent marketplace is exactly what I needed. Deployed my toolkit and it has buyers.' },
-  { name: 'Sara M.', role: 'Indie Developer', text: 'The built-in AI assistant saves me hours every week.' },
+  {
+    name: 'Alex R.',
+    role: 'Senior Full-Stack Dev',
+    text: 'Published three repos in my first week and earned ETH without crypto complexity.',
+  },
+  {
+    name: 'Yuki T.',
+    role: 'AI/ML Engineer',
+    text: 'The AI agent marketplace is exactly what I needed. Deployed my toolkit and it has buyers.',
+  },
+  {
+    name: 'Sara M.',
+    role: 'Indie Developer',
+    text: 'The built-in AI assistant saves me hours every week.',
+  },
 ];
 
 const FAQ = [
   {
     question: 'How do I publish my AI agent?',
-    answer: 'Simply connect your GitHub repository or upload your agent files directly. Our platform handles deployment, versioning, and scaling automatically.'
+    answer:
+      'Simply connect your GitHub repository or upload your agent files directly. Our platform handles deployment, versioning, and scaling automatically.',
   },
   {
     question: 'How do I get paid?',
-    answer: 'Earnings are processed directly to your Ethereum wallet. We handle payment processing through smart contracts with zero middleman fees.'
+    answer:
+      'Earnings are processed directly to your Ethereum wallet. We handle payment processing through smart contracts with zero middleman fees.',
   },
   {
     question: 'What programming languages are supported?',
-    answer: 'We support any language and framework. Just containerize it with Docker, and our platform handles the rest.'
+    answer:
+      'We support any language and framework. Just containerize it with Docker, and our platform handles the rest.',
   },
   {
     question: 'How does the reputation system work?',
-    answer: 'Your reputation grows with positive transactions, community contributions, and uptime. Higher reputation unlocks premium features and visibility.'
+    answer:
+      'Your reputation grows with positive transactions, community contributions, and uptime. Higher reputation unlocks premium features and visibility.',
   },
   {
     question: 'Can I test my agent before publishing?',
-    answer: 'Yes! Use our sandbox environment to test API endpoints, chat interactions, and integrations before going live.'
+    answer:
+      'Yes! Use our sandbox environment to test API endpoints, chat interactions, and integrations before going live.',
   },
   {
     question: 'What are the fees?',
-    answer: 'We take a 5% commission on transactions. No setup fees, no hidden charges. Transparent pricing for everyone.'
+    answer:
+      'We take a 5% commission on transactions. No setup fees, no hidden charges. Transparent pricing for everyone.',
   },
 ];
 
@@ -163,7 +219,9 @@ export default function HomePage() {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <BoltyLogoSVG size={24} />
-            <span className="text-white font-light text-sm md:text-base hidden sm:inline">BoltyNetwork</span>
+            <span className="text-white font-light text-sm md:text-base hidden sm:inline">
+              BoltyNetwork
+            </span>
           </div>
 
           {/* Desktop Nav */}
@@ -187,7 +245,10 @@ export default function HomePage() {
 
             {!isAuthenticated ? (
               <>
-                <Link href="/auth" className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors">
+                <Link
+                  href="/auth"
+                  className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors"
+                >
                   Sign in
                 </Link>
                 <ShimmerButton
@@ -207,11 +268,7 @@ export default function HomePage() {
                     className="flex items-center gap-2 px-2 py-1"
                   >
                     {user?.avatarUrl ? (
-                      <img
-                        src={user.avatarUrl}
-                        alt="profile"
-                        className="w-8 h-8 rounded-full"
-                      />
+                      <img src={user.avatarUrl} alt="profile" className="w-8 h-8 rounded-full" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-light">
                         {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
@@ -223,16 +280,30 @@ export default function HomePage() {
                   {profileOpen && (
                     <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
                       <div className="p-3 border-b border-zinc-700">
-                        <p className="text-sm font-light text-white">{user?.displayName || user?.username}</p>
+                        <p className="text-sm font-light text-white">
+                          {user?.displayName || user?.username}
+                        </p>
                         <p className="text-xs text-zinc-400">{user?.email}</p>
                       </div>
-                      <Link href="/profile" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50">
+                      <Link
+                        href="/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
                         Profile
                       </Link>
-                      <Link href="/api-keys" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50">
+                      <Link
+                        href="/api-keys"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
                         API Keys
                       </Link>
-                      <Link href="/settings" onClick={() => setProfileOpen(false)} className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50">
+                      <Link
+                        href="/settings"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
                         Settings
                       </Link>
                       <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 border-t border-zinc-700">
@@ -251,19 +322,52 @@ export default function HomePage() {
       <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
-      <section className="py-12 border-t relative overflow-hidden" style={{ borderColor: 'var(--border)' }}>
+      <section
+        className="py-12 border-t relative overflow-hidden"
+        style={{ borderColor: 'var(--border)' }}
+      >
         <ScrollVelocityRow duration={50}>
           {[
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg', alt: 'Node.js' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', alt: 'Docker' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg', alt: 'PostgreSQL' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg', alt: 'Git' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg', alt: 'Tailwind' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg', alt: 'MongoDB' },
-            { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg', alt: 'Redis' },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg',
+              alt: 'React',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg',
+              alt: 'TypeScript',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg',
+              alt: 'Python',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg',
+              alt: 'Node.js',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg',
+              alt: 'Docker',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg',
+              alt: 'PostgreSQL',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg',
+              alt: 'Git',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg',
+              alt: 'Tailwind',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg',
+              alt: 'MongoDB',
+            },
+            {
+              src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/redis/redis-original.svg',
+              alt: 'Redis',
+            },
           ].map((icon) => (
             <div key={icon.alt} className="w-28 flex items-center justify-start pl-2 flex-shrink-0">
               <img
@@ -280,15 +384,24 @@ export default function HomePage() {
         </ScrollVelocityRow>
 
         {/* Fade edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10" style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }} />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10" style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }} />
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 w-32 z-10"
+          style={{ background: 'linear-gradient(to right, var(--bg), transparent)' }}
+        />
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 w-32 z-10"
+          style={{ background: 'linear-gradient(to left, var(--bg), transparent)' }}
+        />
       </section>
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
-      <section className="py-24 px-4 border-t relative overflow-hidden" style={{
-        borderColor: 'var(--border)',
-        background: '#000000'
-      }}>
+      <section
+        className="py-24 px-4 border-t relative overflow-hidden"
+        style={{
+          borderColor: 'var(--border)',
+          background: '#000000',
+        }}
+      >
         {/* Hexagon Pattern Background */}
         <div className="absolute inset-0 pointer-events-none">
           <HexagonPattern className="w-full h-full" />
@@ -317,7 +430,12 @@ export default function HomePage() {
               className="p-10 md:p-14 pb-8"
             >
               <h2 className="text-5xl md:text-6xl font-light text-white leading-tight">
-                Deploy apps and agents<br />with <GradientText gradient="purple" animated={false}>zero ops</GradientText>
+                Deploy apps and agents
+                <br />
+                with{' '}
+                <GradientText gradient="purple" animated={false}>
+                  zero ops
+                </GradientText>
               </h2>
             </motion.div>
 
@@ -327,7 +445,14 @@ export default function HomePage() {
                 const Icon = f.icon;
                 const accentColors = ['cyan', 'emerald', 'pink', 'yellow', 'blue', 'purple'];
                 const accentColor = accentColors[i % accentColors.length];
-                const accentTextColors = ['text-cyan-400', 'text-emerald-400', 'text-pink-400', 'text-yellow-400', 'text-blue-400', 'text-purple-400'];
+                const accentTextColors = [
+                  'text-cyan-400',
+                  'text-emerald-400',
+                  'text-pink-400',
+                  'text-yellow-400',
+                  'text-blue-400',
+                  'text-purple-400',
+                ];
                 const accentTextColor = accentTextColors[i % accentTextColors.length];
 
                 const accentBgMap: { [key: string]: string } = {
@@ -350,7 +475,11 @@ export default function HomePage() {
 
                 // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
                 const isReputationCard = i === 5;
-                const gridClass = isReputationCard ? 'lg:col-span-2 lg:row-span-2' : f.featured ? 'lg:col-span-2' : '';
+                const gridClass = isReputationCard
+                  ? 'lg:col-span-2 lg:row-span-2'
+                  : f.featured
+                    ? 'lg:col-span-2'
+                    : '';
 
                 return (
                   <motion.div
@@ -360,8 +489,12 @@ export default function HomePage() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className={`group relative ${gridClass}`}
                     style={{
-                      borderRight: !f.featured && !isReputationCard && i > 0 && (i - 1) % 2 === 0 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
-                      borderBottom: i < FEATURES.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+                      borderRight:
+                        !f.featured && !isReputationCard && i > 0 && (i - 1) % 2 === 0
+                          ? '1px solid rgba(255, 255, 255, 0.2)'
+                          : 'none',
+                      borderBottom:
+                        i < FEATURES.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
                     }}
                   >
                     {/* Card Background with Gradient */}
@@ -387,8 +520,12 @@ export default function HomePage() {
                               <Icon className="w-6 h-6" />
                             </div>
                           </div>
-                          <h3 className="text-xl font-light text-white mb-4 leading-snug">{f.title}</h3>
-                          <p className="text-gray-300 text-sm leading-relaxed font-light">{f.description}</p>
+                          <h3 className="text-xl font-light text-white mb-4 leading-snug">
+                            {f.title}
+                          </h3>
+                          <p className="text-gray-300 text-sm leading-relaxed font-light">
+                            {f.description}
+                          </p>
                         </div>
 
                         {/* Visual Content - Different for each card */}
@@ -424,7 +561,12 @@ export default function HomePage() {
                                 transition={{ delay: 0.4 }}
                                 className="text-cyan-400 font-light"
                               >
-                                <AnimatedCounter value={98.7} suffix="%" decimals={1} duration={2.5} />
+                                <AnimatedCounter
+                                  value={98.7}
+                                  suffix="%"
+                                  decimals={1}
+                                  duration={2.5}
+                                />
                               </motion.span>
                             </div>
                           </div>
@@ -435,16 +577,22 @@ export default function HomePage() {
                             <div className="space-y-2">
                               {['Production', 'Development', 'Testing'].map((env, idx) => (
                                 <div key={idx} className="flex items-center gap-2">
-                                  <div className="w-2 h-2 rounded-full" style={{
-                                    background: ['#06b6d4', '#10b981', '#f97316'][idx]
-                                  }} />
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{
+                                      background: ['#06b6d4', '#10b981', '#f97316'][idx],
+                                    }}
+                                  />
                                   <span className="text-xs text-gray-400">{env}</span>
                                   <div className="flex-1 h-1 bg-white/5 rounded-full ml-2">
-                                    <div className="h-full rounded-full" style={{
-                                      width: ['65%', '42%', '28%'][idx],
-                                      background: ['#06b6d4', '#10b981', '#f97316'][idx],
-                                      opacity: 0.6
-                                    }} />
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{
+                                        width: ['65%', '42%', '28%'][idx],
+                                        background: ['#06b6d4', '#10b981', '#f97316'][idx],
+                                        opacity: 0.6,
+                                      }}
+                                    />
                                   </div>
                                 </div>
                               ))}
@@ -455,7 +603,9 @@ export default function HomePage() {
                         {i === 4 && (
                           <div className="mt-6 pt-6 border-t border-white/10 space-y-2">
                             <div className="flex gap-2">
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">A</div>
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
+                                A
+                              </div>
                               <div className="flex-1 bg-white/5 rounded-lg p-2 text-xs text-gray-300">
                                 Connected to WebSocket
                               </div>
@@ -464,7 +614,9 @@ export default function HomePage() {
                               <div className="flex-1 max-w-xs bg-blue-500/20 rounded-lg p-2 text-xs text-blue-300 text-right">
                                 Real-time sync enabled
                               </div>
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">U</div>
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
+                                U
+                              </div>
                             </div>
                           </div>
                         )}
@@ -485,10 +637,16 @@ export default function HomePage() {
                               </div>
                               <div className="flex gap-1 mt-3">
                                 {[...Array(7)].map((_, idx) => (
-                                  <div key={idx} className="flex-1 h-8 bg-white/5 rounded-sm overflow-hidden">
-                                    <div className="h-full bg-purple-500/40" style={{
-                                      height: `${[45, 60, 70, 85, 75, 65, 55][idx]}%`
-                                    }} />
+                                  <div
+                                    key={idx}
+                                    className="flex-1 h-8 bg-white/5 rounded-sm overflow-hidden"
+                                  >
+                                    <div
+                                      className="h-full bg-purple-500/40"
+                                      style={{
+                                        height: `${[45, 60, 70, 85, 75, 65, 55][idx]}%`,
+                                      }}
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -518,50 +676,93 @@ export default function HomePage() {
               className="p-8 lg:p-12 border-b"
               style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
             >
-              <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Getting Started</p>
-              <h2 className="text-4xl lg:text-5xl font-light">Three steps to <GradientText gradient="purple">get started</GradientText></h2>
+              <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">
+                Getting Started
+              </p>
+              <h2 className="text-4xl lg:text-5xl font-light">
+                Three steps to <GradientText gradient="purple">get started</GradientText>
+              </h2>
             </motion.div>
 
             {/* Top: 2 boxes side by side */}
-            <div className="grid grid-cols-2 gap-8" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div
+              className="grid grid-cols-2 gap-8"
+              style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+            >
               {[
-                { name: 'Web service', desc: 'Frontend & backend hosting', details: 'Deploy and scale web applications with automatic load balancing and CDN integration.', active: false },
-                { name: 'API Layer', desc: 'RESTful endpoints with auto-scaling', details: 'Production-grade API infrastructure with rate limiting, versioning, and monitoring.', active: true },
+                {
+                  name: 'Web service',
+                  desc: 'Frontend & backend hosting',
+                  details:
+                    'Deploy and scale web applications with automatic load balancing and CDN integration.',
+                  active: false,
+                },
+                {
+                  name: 'API Layer',
+                  desc: 'RESTful endpoints with auto-scaling',
+                  details:
+                    'Production-grade API infrastructure with rate limiting, versioning, and monitoring.',
+                  active: true,
+                },
               ].map((service, i) => (
                 <motion.div
-                    key={i}
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ delay: i * 0.1 }}
-                    className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
-                    style={{
-                      border: '2px solid',
-                      borderColor: i === 1 ? '#06B6D4' : '#836EF9'
-                    }}
-                  >
-                    <div className="flex items-start gap-4 mb-4">
-                      <CheckCircle2 className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`} />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className={`text-lg lg:text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}>{service.name}</h3>
-                          {service.active && (
-                            <span className="text-xs text-green-400 border border-green-500 rounded-full px-2 py-0.5">Live</span>
-                          )}
-                        </div>
-                        <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
+                  key={i}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
+                  style={{
+                    border: '2px solid',
+                    borderColor: i === 1 ? '#06B6D4' : '#836EF9',
+                  }}
+                >
+                  <div className="flex items-start gap-4 mb-4">
+                    <CheckCircle2
+                      className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h3
+                          className={`text-lg lg:text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}
+                        >
+                          {service.name}
+                        </h3>
+                        {service.active && (
+                          <span className="text-xs text-green-400 border border-green-500 rounded-full px-2 py-0.5">
+                            Live
+                          </span>
+                        )}
                       </div>
+                      <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
                     </div>
-                    <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
-                  </motion.div>
+                  </div>
+                  <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
+                </motion.div>
               ))}
             </div>
 
             {/* Bottom: 3 boxes */}
-            <div className="grid grid-cols-3 gap-8 pt-8" style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}>
+            <div
+              className="grid grid-cols-3 gap-8 pt-8"
+              style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
+            >
               {[
-                { name: 'Database', desc: 'Managed PostgreSQL & Redis', details: 'High-availability database cluster with automatic backups and failover.' },
-                { name: 'Queue Worker', desc: 'Background jobs & async tasks', details: 'Distributed task processing with retry logic and dead-letter handling.' },
-                { name: 'Cache Layer', desc: 'Edge caching for low latency', details: 'Global edge network with intelligent cache invalidation.' },
+                {
+                  name: 'Database',
+                  desc: 'Managed PostgreSQL & Redis',
+                  details:
+                    'High-availability database cluster with automatic backups and failover.',
+                },
+                {
+                  name: 'Queue Worker',
+                  desc: 'Background jobs & async tasks',
+                  details: 'Distributed task processing with retry logic and dead-letter handling.',
+                },
+                {
+                  name: 'Cache Layer',
+                  desc: 'Edge caching for low latency',
+                  details: 'Global edge network with intelligent cache invalidation.',
+                },
               ].map((service, i) => (
                 <motion.div
                   key={i}
@@ -571,25 +772,25 @@ export default function HomePage() {
                   className="bg-black rounded p-6 lg:p-8"
                   style={{
                     border: '2px solid',
-                    borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i]
+                    borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i],
                   }}
                 >
-                    <div className="flex items-start gap-4 mb-4">
-                      <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
-                      <div className="flex-1">
-                        <h3 className="text-lg lg:text-xl font-light text-white">{service.name}</h3>
-                        <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
-                      </div>
+                  <div className="flex items-start gap-4 mb-4">
+                    <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
+                    <div className="flex-1">
+                      <h3 className="text-lg lg:text-xl font-light text-white">{service.name}</h3>
+                      <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
                     </div>
-                    <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
-                  </motion.div>
+                  </div>
+                  <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
+                </motion.div>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-{/* ── TESTIMONIALS ── */}
+      {/* ── TESTIMONIALS ── */}
       <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
@@ -653,8 +854,9 @@ export default function HomePage() {
                 transition={{ delay: i * 0.05 }}
                 className="border rounded-lg transition-all"
                 style={{
-                  borderColor: openFaqIndex === i ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                  background: openFaqIndex === i ? 'rgba(168, 85, 247, 0.05)' : 'transparent'
+                  borderColor:
+                    openFaqIndex === i ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                  background: openFaqIndex === i ? 'rgba(168, 85, 247, 0.05)' : 'transparent',
                 }}
               >
                 <button
@@ -676,7 +878,7 @@ export default function HomePage() {
                   initial={false}
                   animate={{
                     height: openFaqIndex === i ? 'auto' : 0,
-                    opacity: openFaqIndex === i ? 1 : 0
+                    opacity: openFaqIndex === i ? 1 : 0,
                   }}
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
@@ -698,7 +900,9 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl font-light text-white mb-2">Stay updated</h2>
-            <p className="text-gray-400 mb-8">Get the latest news about new agents, features, and opportunities.</p>
+            <p className="text-gray-400 mb-8">
+              Get the latest news about new agents, features, and opportunities.
+            </p>
             <div className="flex gap-2 max-w-md mx-auto">
               <input
                 type="email"
@@ -722,9 +926,12 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl font-light mb-4">Ready to <GradientText gradient="purple">start building</GradientText>?</h2>
+            <h2 className="text-5xl font-light mb-4">
+              Ready to <GradientText gradient="purple">start building</GradientText>?
+            </h2>
             <p className="text-lg text-gray-400 mb-8">
-              Join the platform where code meets commerce. Publish, sell, and earn — all in one place.
+              Join the platform where code meets commerce. Publish, sell, and earn — all in one
+              place.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {!isAuthenticated ? (
@@ -736,7 +943,10 @@ export default function HomePage() {
                   >
                     Create free account <ArrowRight className="w-4 h-4" />
                   </ShimmerButton>
-                  <Link href="/docs/agent-protocol" className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all">
+                  <Link
+                    href="/docs/agent-protocol"
+                    className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all"
+                  >
                     Read the docs
                   </Link>
                 </>
@@ -764,17 +974,44 @@ export default function HomePage() {
                 <BoltyLogoSVG size={24} />
                 <span className="text-white font-light">Bolty</span>
               </div>
-              <p className="text-sm text-gray-500">The fastest path to production for AI agents and apps.</p>
+              <p className="text-sm text-gray-500">
+                The fastest path to production for AI agents and apps.
+              </p>
             </div>
 
             {/* Product */}
             <div>
               <h3 className="text-white font-light mb-4">Product</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/market" className="text-gray-400 hover:text-white transition-colors">Marketplace</Link></li>
-                <li><Link href="/market/agents" className="text-gray-400 hover:text-white transition-colors">Agents</Link></li>
-                <li><Link href="/market/repos" className="text-gray-400 hover:text-white transition-colors">Repositories</Link></li>
-                <li><Link href="#how-it-works" className="text-gray-400 hover:text-white transition-colors">How It Works</Link></li>
+                <li>
+                  <Link href="/market" className="text-gray-400 hover:text-white transition-colors">
+                    Marketplace
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/market/agents"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Agents
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/market/repos"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Repositories
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#how-it-works"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    How It Works
+                  </Link>
+                </li>
               </ul>
             </div>
 
@@ -782,10 +1019,29 @@ export default function HomePage() {
             <div>
               <h3 className="text-white font-light mb-4">Resources</h3>
               <ul className="space-y-2 text-sm">
-                <li><Link href="/docs/agent-protocol" className="text-gray-400 hover:text-white transition-colors">Documentation</Link></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API Reference</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Community</a></li>
+                <li>
+                  <Link
+                    href="/docs/agent-protocol"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    API Reference
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Community
+                  </a>
+                </li>
               </ul>
             </div>
 
@@ -793,10 +1049,26 @@ export default function HomePage() {
             <div>
               <h3 className="text-white font-light mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms</a></li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Contact
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Terms
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -806,9 +1078,27 @@ export default function HomePage() {
             <div className="flex flex-col md:flex-row justify-between items-center">
               <p className="text-sm text-gray-500">© 2026 Bolty. All rights reserved.</p>
               <div className="flex gap-6 mt-4 md:mt-0">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="GitHub">GitHub</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="Twitter">Twitter</a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors text-sm" aria-label="Discord">Discord</a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="GitHub"
+                >
+                  GitHub
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="Twitter"
+                >
+                  Twitter
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="Discord"
+                >
+                  Discord
+                </a>
               </div>
             </div>
           </div>

@@ -15,7 +15,8 @@ interface DecryptedTextProps {
   onAnimationComplete?: () => void;
 }
 
-const DEFAULT_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+const DEFAULT_CHARS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
 
 export default function DecryptedText({
   text,
@@ -37,14 +38,18 @@ export default function DecryptedText({
   const hasAnimatedRef = useRef(false);
 
   const getRevealOrder = useCallback((): number[] => {
-    const indices = text.split('').map((_, i) => i).filter(i => text[i] !== ' ');
+    const indices = text
+      .split('')
+      .map((_, i) => i)
+      .filter((i) => text[i] !== ' ');
     if (revealDirection === 'end') return [...indices].reverse();
     if (revealDirection === 'center') {
       const mid = Math.floor(indices.length / 2);
       const result: number[] = [];
       for (let i = 0; i <= mid; i++) {
         if (mid - i >= 0 && indices[mid - i] !== undefined) result.push(indices[mid - i]);
-        if (mid + i + 1 < indices.length && indices[mid + i + 1] !== undefined) result.push(indices[mid + i + 1]);
+        if (mid + i + 1 < indices.length && indices[mid + i + 1] !== undefined)
+          result.push(indices[mid + i + 1]);
       }
       return result;
     }
@@ -64,15 +69,17 @@ export default function DecryptedText({
     const revealed = new Set<number>();
 
     // add spaces as already revealed
-    text.split('').forEach((ch, i) => { if (ch === ' ') revealed.add(i); });
+    text.split('').forEach((ch, i) => {
+      if (ch === ' ') revealed.add(i);
+    });
 
     intervalRef.current = setInterval(() => {
       // scramble unrevealed
-      setDisplayText(prev =>
+      setDisplayText((prev) =>
         prev.map((ch, i) => {
           if (revealed.has(i) || text[i] === ' ') return text[i];
           return randomChar();
-        })
+        }),
       );
 
       if (sequential) {
@@ -127,7 +134,7 @@ export default function DecryptedText({
           startAnimation();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -136,17 +143,25 @@ export default function DecryptedText({
   // init scramble for non-view modes
   useEffect(() => {
     if (animateOn === 'view') {
-      setDisplayText(text.split('').map(ch => (ch === ' ' ? ' ' : randomChar())));
+      setDisplayText(text.split('').map((ch) => (ch === ' ' ? ' ' : randomChar())));
     }
   }, [animateOn, text, randomChar]);
 
   useEffect(() => {
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
-  const handleMouseEnter = () => { if (animateOn === 'hover') startAnimation(); };
-  const handleMouseLeave = () => { if (animateOn === 'hover') resetAnimation(); };
-  const handleClick = () => { if (animateOn === 'click') startAnimation(); };
+  const handleMouseEnter = () => {
+    if (animateOn === 'hover') startAnimation();
+  };
+  const handleMouseLeave = () => {
+    if (animateOn === 'hover') resetAnimation();
+  };
+  const handleClick = () => {
+    if (animateOn === 'click') startAnimation();
+  };
 
   return (
     <span

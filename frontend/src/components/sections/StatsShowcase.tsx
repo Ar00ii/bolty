@@ -100,7 +100,8 @@ export function StatsShowcase() {
               className={`relative group overflow-hidden rounded-lg border border-white/10 p-6 backdrop-blur-sm transition-all duration-300 hover:border-white/20 hover:bg-white/5`}
             >
               {/* Gradient background on hover */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
                   background: `linear-gradient(135deg, rgba(131,110,249,0.1), rgba(6,182,212,0.1))`,
                 }}
@@ -109,7 +110,9 @@ export function StatsShowcase() {
               {/* Content */}
               <div className="relative z-10">
                 {/* Icon */}
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4 ${stat.color}`}>
+                <div
+                  className={`inline-flex items-center justify-center w-12 h-12 rounded-lg mb-4 ${stat.color}`}
+                >
                   {stat.icon}
                 </div>
 
@@ -153,9 +156,7 @@ export function StatsShowcase() {
           transition={{ delay: 0.6, duration: 0.5 }}
           className="text-center mt-16"
         >
-          <p className="text-zinc-400 mb-6">
-            Join thousands of developers building the future
-          </p>
+          <p className="text-zinc-400 mb-6">Join thousands of developers building the future</p>
           <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-light hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-1">
             Start Building Today
           </button>

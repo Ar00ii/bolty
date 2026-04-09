@@ -11,17 +11,16 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 
-import { AuthService } from './auth.service';
-import { WalletAuthService } from './wallet-auth.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
-import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { AuthService } from './auth.service';
 import {
   RegisterEmailDto,
   LoginEmailDto,
@@ -34,6 +33,8 @@ import {
   ResetPasswordDto,
   Enable2FADto,
 } from './dto/email-auth.dto';
+import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
+import { WalletAuthService } from './wallet-auth.service';
 
 const isProd = process.env.NODE_ENV === 'production';
 const COOKIE_OPTIONS = {
@@ -43,7 +44,7 @@ const COOKIE_OPTIONS = {
   path: '/',
 };
 
-const ACCESS_TOKEN_MAX_AGE  = 15 * 60 * 1000;        // 15 minutes — matches JWT_EXPIRES_IN
+const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000; // 15 minutes — matches JWT_EXPIRES_IN
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 @Controller('auth')
@@ -226,7 +227,9 @@ export class AuthController {
     // Bypass passport redirect — construct GitHub OAuth URL manually to guarantee 'repo' scope
     // This ensures private repos are accessible (passport-github2 may not pass scope correctly)
     const clientId = this.config.get<string>('GITHUB_CLIENT_ID') || '';
-    const callbackURL = this.config.get<string>('GITHUB_CALLBACK_URL') || 'http://localhost:3001/api/v1/auth/github/callback';
+    const callbackURL =
+      this.config.get<string>('GITHUB_CALLBACK_URL') ||
+      'http://localhost:3001/api/v1/auth/github/callback';
     const scope = 'read:user repo';
     const url = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackURL)}&scope=${encodeURIComponent(scope)}`;
     return res.redirect(url);
@@ -236,13 +239,19 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(
-    @Req() req: Request & { user: { id: string; login: string; avatar_url: string; bio?: string; accessToken: string }; cookies: Record<string, string> },
+    @Req()
+    req: Request & {
+      user: { id: string; login: string; avatar_url: string; bio?: string; accessToken: string };
+      cookies: Record<string, string>;
+    },
     @Res() res: Response,
   ) {
     const frontendUrl = this.config.get<string>('FRONTEND_URL', 'http://localhost:3000');
 
     // If user is already authenticated → link GitHub to existing account
-    const existingToken = (req as unknown as { cookies: Record<string, string> }).cookies?.['access_token'];
+    const existingToken = (req as unknown as { cookies: Record<string, string> }).cookies?.[
+      'access_token'
+    ];
     if (existingToken) {
       try {
         const payload = await this.authService.validateToken(existingToken);
@@ -310,10 +319,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('link/wallet')
-  async linkWallet(
-    @CurrentUser('id') userId: string,
-    @Body() dto: VerifyEthereumDto,
-  ) {
+  async linkWallet(@CurrentUser('id') userId: string, @Body() dto: VerifyEthereumDto) {
     await this.walletAuthService.linkWalletToUser(userId, dto.address, dto.signature, dto.nonce);
     return { success: true };
   }
@@ -339,11 +345,7 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('verify/ethereum')
-  async verifyEthereum(
-    @Body() dto: VerifyEthereumDto,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
+  async verifyEthereum(@Body() dto: VerifyEthereumDto, @Req() req: Request, @Res() res: Response) {
     const tokens = await this.walletAuthService.verifyEthereum(
       dto.address,
       dto.signature,
@@ -394,10 +396,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('logout')
-  async logout(
-    @CurrentUser('id') userId: string,
-    @Res() res: Response,
-  ) {
+  async logout(@CurrentUser('id') userId: string, @Res() res: Response) {
     await this.authService.revokeAllTokens(userId);
 
     res.clearCookie('access_token', COOKIE_OPTIONS);

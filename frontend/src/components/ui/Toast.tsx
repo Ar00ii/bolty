@@ -50,10 +50,7 @@ function Toast({ toast, onClose }: { toast: any; onClose: () => void }) {
     >
       {icons[toast.type]}
       <span className={`text-sm font-light ${textColors[toast.type]}`}>{toast.message}</span>
-      <button
-        onClick={onClose}
-        className="ml-auto opacity-60 hover:opacity-100 transition-opacity"
-      >
+      <button onClick={onClose} className="ml-auto opacity-60 hover:opacity-100 transition-opacity">
         <X className="w-4 h-4" />
       </button>
     </motion.div>

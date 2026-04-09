@@ -29,23 +29,32 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
   const spring = { type: 'spring' as const, stiffness: 200, damping: 28 };
 
   const moveForward = () => {
-    setCards(prev => [...prev.slice(1), prev[0]]);
-    setCurrentIndex(prev => (prev + 1) % items.length);
+    setCards((prev) => [...prev.slice(1), prev[0]]);
+    setCurrentIndex((prev) => (prev + 1) % items.length);
   };
 
   const moveBack = () => {
-    setCards(prev => [prev[prev.length - 1], ...prev.slice(0, -1)]);
-    setCurrentIndex(prev => (prev - 1 + items.length) % items.length);
+    setCards((prev) => [prev[prev.length - 1], ...prev.slice(0, -1)]);
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
   };
 
-  const handleDragEnd = (_: React.PointerEvent, info: { offset: { x: number }; velocity: { x: number } }) => {
+  const handleDragEnd = (
+    _: React.PointerEvent,
+    info: { offset: { x: number }; velocity: { x: number } },
+  ) => {
     if (Math.abs(info.offset.x) > swipeThreshold || Math.abs(info.velocity.x) > 500) {
       if (info.offset.x < 0 || info.velocity.x < 0) {
         setDragDirection('left');
-        setTimeout(() => { moveForward(); setDragDirection(null); }, 150);
+        setTimeout(() => {
+          moveForward();
+          setDragDirection(null);
+        }, 150);
       } else {
         setDragDirection('right');
-        setTimeout(() => { moveBack(); setDragDirection(null); }, 150);
+        setTimeout(() => {
+          moveBack();
+          setDragDirection(null);
+        }, 150);
       }
     }
     dragX.set(0);
@@ -89,16 +98,21 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
                   drag={isFront ? 'x' : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.6}
-                  onDrag={(_e, info) => { if (isFront) dragX.set(info.offset.x); }}
+                  onDrag={(_e, info) => {
+                    if (isFront) dragX.set(info.offset.x);
+                  }}
                   onDragEnd={handleDragEnd as never}
-                  whileDrag={isFront ? { cursor: 'grabbing', scale: 1.02, zIndex: cards.length + 1 } : {}}
+                  whileDrag={
+                    isFront ? { cursor: 'grabbing', scale: 1.02, zIndex: cards.length + 1 } : {}
+                  }
                 >
                   {isFront && (
                     <div className="absolute inset-0 p-8 flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between mb-3">
                           <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">
-                            {String(currentIndex + 1).padStart(2, '0')} / {String(items.length).padStart(2, '0')}
+                            {String(currentIndex + 1).padStart(2, '0')} /{' '}
+                            {String(items.length).padStart(2, '0')}
                           </p>
                           {Icon && (
                             <Icon

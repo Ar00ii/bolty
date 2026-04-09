@@ -1,14 +1,8 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { IsString, IsOptional, MaxLength } from 'class-validator';
+
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { OrdersService } from './orders.service';
 
 class DeliverDto {
@@ -73,21 +67,13 @@ export class OrdersController {
 
   /** POST /orders/:id/deliver */
   @Post(':id/deliver')
-  markDelivered(
-    @Param('id') id: string,
-    @Request() req: any,
-    @Body() body: DeliverDto,
-  ) {
+  markDelivered(@Param('id') id: string, @Request() req: any, @Body() body: DeliverDto) {
     return this.ordersService.markDelivered(id, req.user.id, body.deliveryNote);
   }
 
   /** POST /orders/:id/complete */
   @Post(':id/complete')
-  markCompleted(
-    @Param('id') id: string,
-    @Request() req: any,
-    @Body() body: CompleteDto,
-  ) {
+  markCompleted(@Param('id') id: string, @Request() req: any, @Body() body: CompleteDto) {
     return this.ordersService.markCompleted(id, req.user.id, body.escrowReleaseTx);
   }
 
@@ -99,11 +85,7 @@ export class OrdersController {
 
   /** POST /orders/:id/messages */
   @Post(':id/messages')
-  sendMessage(
-    @Param('id') id: string,
-    @Request() req: any,
-    @Body() body: SendMessageDto,
-  ) {
+  sendMessage(@Param('id') id: string, @Request() req: any, @Body() body: SendMessageDto) {
     return this.ordersService.sendMessage(id, req.user.id, body.content);
   }
 }

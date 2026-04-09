@@ -11,9 +11,26 @@ import { Badge } from '@/components/ui/badge';
 import { connectMetaMask, getMetaMaskProvider } from '@/lib/wallet/ethereum';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
 import {
-  Bot, User, X, Key, Plus, Trash2, Copy, Eye, EyeOff,
-  ShieldCheck, ShieldAlert, Package, Globe, Star, Cpu,
-  AlertTriangle, Wallet, Users, Zap, Send,
+  Bot,
+  User,
+  X,
+  Key,
+  Plus,
+  Trash2,
+  Copy,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  ShieldAlert,
+  Package,
+  Globe,
+  Star,
+  Cpu,
+  AlertTriangle,
+  Wallet,
+  Users,
+  Zap,
+  Send,
 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 
@@ -60,7 +77,15 @@ interface Negotiation {
   agreedPrice?: number | null;
   mode: 'AI_AI' | 'HUMAN';
   humanSwitchRequestedBy?: string | null;
-  listing: { id: string; title: string; price: number; currency: string; sellerId: string; agentEndpoint?: string | null; minPrice?: number | null };
+  listing: {
+    id: string;
+    title: string;
+    price: number;
+    currency: string;
+    sellerId: string;
+    agentEndpoint?: string | null;
+    minPrice?: number | null;
+  };
   buyer: { id: string; username: string | null };
   messages: NegotiationMessage[];
 }
@@ -77,7 +102,13 @@ interface UploadedFileMeta {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const TYPES = ['ALL', 'AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'];
-const TYPE_LABELS: Record<string, string> = { ALL: 'all', AI_AGENT: 'ai agent', BOT: 'bot', SCRIPT: 'script', OTHER: 'other' };
+const TYPE_LABELS: Record<string, string> = {
+  ALL: 'all',
+  AI_AGENT: 'ai agent',
+  BOT: 'bot',
+  SCRIPT: 'script',
+  OTHER: 'other',
+};
 const TYPE_COLORS: Record<string, string> = {
   BOT: 'text-monad-400/80 border-monad-400/25 bg-monad-400/5',
   AI_AGENT: 'text-monad-400/70 border-monad-400/20 bg-monad-400/5',
@@ -86,7 +117,12 @@ const TYPE_COLORS: Record<string, string> = {
 };
 const ACCEPTS_FILE = new Set(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER']);
 const ACCEPTS_AGENT_ENDPOINT = new Set(['AI_AGENT', 'BOT']);
-const ROLE_LABELS: Record<string, string> = { buyer: 'you', seller: 'seller', buyer_agent: 'your agent', seller_agent: 'agent' };
+const ROLE_LABELS: Record<string, string> = {
+  buyer: 'you',
+  seller: 'seller',
+  buyer_agent: 'your agent',
+  seller_agent: 'agent',
+};
 const ROLE_COLORS: Record<string, string> = {
   buyer: 'bg-monad-500/10 border-monad-500/20 text-monad-300',
   seller: 'bg-zinc-800/50 border-zinc-700/30 text-zinc-300',
@@ -114,7 +150,15 @@ function formatBytes(bytes: number) {
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing; onClose: () => void; userId: string }) {
+function NegotiationModal({
+  listing,
+  onClose,
+  userId,
+}: {
+  listing: MarketListing;
+  onClose: () => void;
+  userId: string;
+}) {
   const [neg, setNeg] = useState<Negotiation | null>(null);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -128,43 +172,78 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
   const [requestingSwitch, setRequestingSwitch] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
-  const [consentData, setConsentData] = useState<{ sellerWallet: string; buyerAddress: string; sellerWei: bigint; platformWei: bigint; totalWei: bigint; negotiationId: string; amountWei: string; totalUsd: number } | null>(null);
+  const [consentData, setConsentData] = useState<{
+    sellerWallet: string;
+    buyerAddress: string;
+    sellerWei: bigint;
+    platformWei: bigint;
+    totalWei: bigint;
+    negotiationId: string;
+    amountWei: string;
+    totalUsd: number;
+  } | null>(null);
 
   // Start negotiation + setup WebSocket
   useEffect(() => {
-    api.post<Negotiation>(`/market/${listing.id}/negotiate`, {})
+    api
+      .post<Negotiation>(`/market/${listing.id}/negotiate`, {})
       .then((n) => {
         setNeg(n);
         // Connect WebSocket once we have the negotiation id
-        const socket = io(`${SOCKET_URL}/negotiations`, { withCredentials: true, transports: ['websocket'] });
+        const socket = io(`${SOCKET_URL}/negotiations`, {
+          withCredentials: true,
+          transports: ['websocket'],
+        });
         socketRef.current = socket;
         socket.emit('join:negotiation', n.id);
 
         socket.on('negotiation:message', (msg: NegotiationMessage) => {
           setAgentTyping(null);
-          setNeg((prev) => prev ? { ...prev, messages: [...prev.messages.filter(m => m.id !== msg.id), msg] } : prev);
+          setNeg((prev) =>
+            prev
+              ? { ...prev, messages: [...prev.messages.filter((m) => m.id !== msg.id), msg] }
+              : prev,
+          );
         });
 
         socket.on('negotiation:status', (data: { status: string; agreedPrice?: number | null }) => {
-          setNeg((prev) => prev ? { ...prev, status: data.status as Negotiation['status'], agreedPrice: data.agreedPrice ?? prev.agreedPrice } : prev);
+          setNeg((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  status: data.status as Negotiation['status'],
+                  agreedPrice: data.agreedPrice ?? prev.agreedPrice,
+                }
+              : prev,
+          );
         });
 
-        socket.on('negotiation:agent-typing', ({ role }: { role: 'buyer_agent' | 'seller_agent' }) => {
-          setAgentTyping(role);
-          // Auto-clear after 5s as safety net
-          setTimeout(() => setAgentTyping(null), 5000);
-        });
+        socket.on(
+          'negotiation:agent-typing',
+          ({ role }: { role: 'buyer_agent' | 'seller_agent' }) => {
+            setAgentTyping(role);
+            // Auto-clear after 5s as safety net
+            setTimeout(() => setAgentTyping(null), 5000);
+          },
+        );
 
-        socket.on('negotiation:human-switch-request', ({ requestedByUserId }: { requestedByUserId: string }) => {
-          setSwitchPending({ requestedBy: requestedByUserId });
-        });
+        socket.on(
+          'negotiation:human-switch-request',
+          ({ requestedByUserId }: { requestedByUserId: string }) => {
+            setSwitchPending({ requestedBy: requestedByUserId });
+          },
+        );
 
         socket.on('negotiation:human-switch-activated', () => {
           setSwitchPending(null);
-          setNeg((prev) => prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev);
+          setNeg((prev) =>
+            prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev,
+          );
         });
       })
-      .catch((err) => setError(err instanceof ApiError ? err.message : 'Failed to start negotiation'))
+      .catch((err) =>
+        setError(err instanceof ApiError ? err.message : 'Failed to start negotiation'),
+      )
       .finally(() => setLoading(false));
 
     return () => {
@@ -173,101 +252,197 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
     };
   }, [listing.id]);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [neg?.messages.length, agentTyping]);
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [neg?.messages.length, agentTyping]);
 
   const send = async () => {
     if (!neg || !message.trim()) return;
-    setSending(true); setError('');
+    setSending(true);
+    setError('');
     try {
-      const updated = await api.post<Negotiation>(`/market/negotiations/${neg.id}/message`, { content: message.trim(), proposedPrice: offerPrice ? parseFloat(offerPrice) : undefined });
-      setNeg(updated); setMessage(''); setOfferPrice('');
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to send'); } finally { setSending(false); }
+      const updated = await api.post<Negotiation>(`/market/negotiations/${neg.id}/message`, {
+        content: message.trim(),
+        proposedPrice: offerPrice ? parseFloat(offerPrice) : undefined,
+      });
+      setNeg(updated);
+      setMessage('');
+      setOfferPrice('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to send');
+    } finally {
+      setSending(false);
+    }
   };
 
   const accept = async () => {
-    if (!neg) return; setSending(true);
-    try { const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/accept`, {}); setNeg(u); }
-    catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to accept'); } finally { setSending(false); }
+    if (!neg) return;
+    setSending(true);
+    try {
+      const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/accept`, {});
+      setNeg(u);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to accept');
+    } finally {
+      setSending(false);
+    }
   };
 
   const reject = async () => {
-    if (!neg) return; setSending(true);
-    try { const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/reject`, {}); setNeg(u); }
-    catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to reject'); } finally { setSending(false); }
+    if (!neg) return;
+    setSending(true);
+    try {
+      const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/reject`, {});
+      setNeg(u);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to reject');
+    } finally {
+      setSending(false);
+    }
   };
 
   const requestHumanSwitch = async () => {
-    if (!neg) return; setRequestingSwitch(true); setError('');
+    if (!neg) return;
+    setRequestingSwitch(true);
+    setError('');
     try {
       await api.post(`/market/negotiations/${neg.id}/request-human`, {});
-      setNeg((prev) => prev ? { ...prev, humanSwitchRequestedBy: userId } : prev);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to request switch'); }
-    finally { setRequestingSwitch(false); }
+      setNeg((prev) => (prev ? { ...prev, humanSwitchRequestedBy: userId } : prev));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to request switch');
+    } finally {
+      setRequestingSwitch(false);
+    }
   };
 
   const acceptHumanSwitch = async () => {
-    if (!neg) return; setRequestingSwitch(true); setError('');
+    if (!neg) return;
+    setRequestingSwitch(true);
+    setError('');
     try {
       await api.post(`/market/negotiations/${neg.id}/accept-human`, {});
       setSwitchPending(null);
-      setNeg((prev) => prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to accept switch'); }
-    finally { setRequestingSwitch(false); }
+      setNeg((prev) => (prev ? { ...prev, mode: 'HUMAN', humanSwitchRequestedBy: null } : prev));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to accept switch');
+    } finally {
+      setRequestingSwitch(false);
+    }
   };
 
   const payWithEth = async () => {
     if (!neg?.agreedPrice) return;
-    setPaying(true); setError('');
+    setPaying(true);
+    setError('');
     try {
       const ethereum = getMetaMaskProvider();
-      if (!ethereum) { setError('MetaMask not found'); setPaying(false); return; }
+      if (!ethereum) {
+        setError('MetaMask not found');
+        setPaying(false);
+        return;
+      }
       const sellerData = await api.get<any>(`/market/${listing.id}`);
       const sellerWallet = sellerData?.seller?.walletAddress;
-      if (!sellerWallet) { setError('Seller has no wallet linked'); setPaying(false); return; }
+      if (!sellerWallet) {
+        setError('Seller has no wallet linked');
+        setPaying(false);
+        return;
+      }
       let ethPrice = 2000;
-      try { const p = await api.get<any>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch {}
+      try {
+        const p = await api.get<any>('/chart/eth-price');
+        if (p.price) ethPrice = p.price;
+      } catch {}
       const totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
       const totalUsd = neg.agreedPrice * ethPrice;
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
       const platformWei = totalWei - sellerWei;
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' }) as string[];
-      setConsentData({ sellerWallet, buyerAddress: accounts[0], sellerWei, platformWei, totalWei, negotiationId: neg.id, amountWei: totalWei.toString(), totalUsd });
+      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+      setConsentData({
+        sellerWallet,
+        buyerAddress: accounts[0],
+        sellerWei,
+        platformWei,
+        totalWei,
+        negotiationId: neg.id,
+        amountWei: totalWei.toString(),
+        totalUsd,
+      });
     } catch (err: any) {
       const msg = err?.message || String(err);
-      setError(msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80));
-    } finally { setPaying(false); }
+      setError(
+        msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80),
+      );
+    } finally {
+      setPaying(false);
+    }
   };
 
   const executePayment = async (signature: string, consentMessage: string) => {
     if (!consentData) return;
-    const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei, totalWei } = consentData;
+    const {
+      sellerWallet,
+      buyerAddress,
+      sellerWei,
+      platformWei,
+      negotiationId,
+      amountWei,
+      totalWei,
+    } = consentData;
     setConsentData(null);
     const ethereum = getMetaMaskProvider();
-    if (!ethereum) { setError('MetaMask not found'); return; }
+    if (!ethereum) {
+      setError('MetaMask not found');
+      return;
+    }
 
     try {
       if (isEscrowEnabled()) {
         // ── Escrow mode: single deposit to escrow contract ──
         const txHash = await escrowDeposit(negotiationId, sellerWallet, totalWei);
         await api.post(`/market/${listing.id}/purchase`, {
-          txHash, amountWei, negotiationId,
-          consentSignature: signature, consentMessage,
+          txHash,
+          amountWei,
+          negotiationId,
+          consentSignature: signature,
+          consentMessage,
           escrowContract: getEscrowAddress(),
         });
       } else {
         // ── Legacy mode: direct payment to seller + platform fee ──
         const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-        const txHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }] })) as string;
+        const txHash = (await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
+        })) as string;
         let platformFeeTxHash: string | undefined;
         if (platformWallet) {
-          platformFeeTxHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }] })) as string;
+          platformFeeTxHash = (await ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [
+              { from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) },
+            ],
+          })) as string;
         }
-        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, negotiationId, platformFeeTxHash, consentSignature: signature, consentMessage });
+        await api.post(`/market/${listing.id}/purchase`, {
+          txHash,
+          amountWei,
+          negotiationId,
+          platformFeeTxHash,
+          consentSignature: signature,
+          consentMessage,
+        });
       }
       setPaid(true);
     } catch (err: any) {
       const msg = err?.message || String(err);
-      setError(msg.includes('rejected') ? 'Payment cancelled' : err instanceof ApiError ? err.message : 'Payment failed: ' + msg.slice(0, 80));
+      setError(
+        msg.includes('rejected')
+          ? 'Payment cancelled'
+          : err instanceof ApiError
+            ? err.message
+            : 'Payment failed: ' + msg.slice(0, 80),
+      );
     }
   };
 
@@ -277,51 +452,103 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
   const otherRequestedSwitch = switchPending && switchPending.requestedBy !== userId;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}>
-      <div className="w-full max-w-lg flex flex-col" style={{ maxHeight: '88vh', background: '#07070f', border: '1px solid rgba(131,110,249,0.3)', borderRadius: 20, boxShadow: '0 0 60px rgba(131,110,249,0.12)' }}>
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}
+    >
+      <div
+        className="w-full max-w-lg flex flex-col"
+        style={{
+          maxHeight: '88vh',
+          background: '#07070f',
+          border: '1px solid rgba(131,110,249,0.3)',
+          borderRadius: 20,
+          boxShadow: '0 0 60px rgba(131,110,249,0.12)',
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0" style={{ borderColor: 'rgba(131,110,249,0.15)' }}>
+        <div
+          className="flex items-center justify-between px-4 py-3 border-b shrink-0"
+          style={{ borderColor: 'rgba(131,110,249,0.15)' }}
+        >
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse shrink-0" />
-            <span className="text-monad-400 font-mono text-xs font-light shrink-0">negotiate://</span>
+            <span className="text-monad-400 font-mono text-xs font-light shrink-0">
+              negotiate://
+            </span>
             <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
             {neg && (
-              <span className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}>
+              <span
+                className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}
+              >
                 [{neg.status.toLowerCase()}]
               </span>
             )}
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 font-mono text-xs ml-2 shrink-0 transition-colors">[×]</button>
+          <button
+            onClick={onClose}
+            className="text-zinc-500 hover:text-zinc-300 font-mono text-xs ml-2 shrink-0 transition-colors"
+          >
+            [×]
+          </button>
         </div>
 
         {/* AI mode banner */}
         {isAiMode && neg?.status === 'ACTIVE' && (
-          <div className="px-4 py-2.5 border-b shrink-0 flex items-center justify-between gap-3" style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}>
+          <div
+            className="px-4 py-2.5 border-b shrink-0 flex items-center justify-between gap-3"
+            style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}
+          >
             <div className="flex items-center gap-2">
               <Zap className="w-3.5 h-3.5 text-monad-400 shrink-0" strokeWidth={1.5} />
-              <p className="text-monad-400 text-xs font-mono">AI agents negotiating automatically</p>
+              <p className="text-monad-400 text-xs font-mono">
+                AI agents negotiating automatically
+              </p>
             </div>
             {!iHaveRequestedSwitch && !switchPending && (
-              <button onClick={requestHumanSwitch} disabled={requestingSwitch} className="text-xs font-mono text-zinc-500 hover:text-zinc-300 border rounded-lg px-2.5 py-1 transition-all shrink-0 disabled:opacity-40" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+              <button
+                onClick={requestHumanSwitch}
+                disabled={requestingSwitch}
+                className="text-xs font-mono text-zinc-500 hover:text-zinc-300 border rounded-lg px-2.5 py-1 transition-all shrink-0 disabled:opacity-40"
+                style={{ borderColor: 'rgba(255,255,255,0.08)' }}
+              >
                 {requestingSwitch ? '...' : 'take over'}
               </button>
             )}
             {iHaveRequestedSwitch && (
-              <span className="text-xs font-mono text-zinc-500 shrink-0">waiting for other party...</span>
+              <span className="text-xs font-mono text-zinc-500 shrink-0">
+                waiting for other party...
+              </span>
             )}
           </div>
         )}
 
         {/* Human switch request — Pokemon trade dialog */}
         {otherRequestedSwitch && neg?.status === 'ACTIVE' && (
-          <div className="mx-4 mt-3 rounded-xl px-4 py-3 shrink-0 flex items-center justify-between gap-3" style={{ border: '1px solid rgba(250,204,21,0.25)', background: 'rgba(250,204,21,0.05)' }}>
+          <div
+            className="mx-4 mt-3 rounded-xl px-4 py-3 shrink-0 flex items-center justify-between gap-3"
+            style={{
+              border: '1px solid rgba(250,204,21,0.25)',
+              background: 'rgba(250,204,21,0.05)',
+            }}
+          >
             <div className="flex items-center gap-2 min-w-0">
               <Users className="w-3.5 h-3.5 text-yellow-400 shrink-0" strokeWidth={1.5} />
-              <p className="text-yellow-300 text-xs font-mono truncate">Other party wants to negotiate manually</p>
+              <p className="text-yellow-300 text-xs font-mono truncate">
+                Other party wants to negotiate manually
+              </p>
             </div>
             <div className="flex gap-2 shrink-0">
-              <button onClick={acceptHumanSwitch} disabled={requestingSwitch} className="text-xs font-mono px-3 py-1 rounded-lg transition-all disabled:opacity-40" style={{ background: 'rgba(250,204,21,0.15)', border: '1px solid rgba(250,204,21,0.3)', color: '#fde68a' }}>
+              <button
+                onClick={acceptHumanSwitch}
+                disabled={requestingSwitch}
+                className="text-xs font-mono px-3 py-1 rounded-lg transition-all disabled:opacity-40"
+                style={{
+                  background: 'rgba(250,204,21,0.15)',
+                  border: '1px solid rgba(250,204,21,0.3)',
+                  color: '#fde68a',
+                }}
+              >
                 {requestingSwitch ? '...' : 'accept'}
               </button>
             </div>
@@ -330,8 +557,13 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
         {/* Floor price info */}
         {listing.minPrice != null && (
-          <div className="px-4 py-1.5 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-            <p className="text-zinc-600 text-xs font-mono">floor price: {listing.minPrice} {listing.currency} — agents won't go below this</p>
+          <div
+            className="px-4 py-1.5 shrink-0"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <p className="text-zinc-600 text-xs font-mono">
+              floor price: {listing.minPrice} {listing.currency} — agents won't go below this
+            </p>
           </div>
         )}
 
@@ -340,7 +572,9 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {loading && (
             <div className="text-center py-12">
               <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto mb-3" />
-              <p className="text-monad-400 text-xs font-mono animate-pulse">initializing negotiation protocol...</p>
+              <p className="text-monad-400 text-xs font-mono animate-pulse">
+                initializing negotiation protocol...
+              </p>
             </div>
           )}
 
@@ -350,11 +584,15 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
             const isSellerRole = msg.fromRole === 'seller' || msg.fromRole === 'seller_agent';
             return (
               <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[75%] rounded-2xl border px-3 py-2.5 text-xs font-mono ${ROLE_COLORS[msg.fromRole] || ROLE_COLORS.seller}`}
-                  style={{ boxShadow: isAgent ? '0 0 16px rgba(131,110,249,0.08)' : undefined }}>
+                <div
+                  className={`max-w-[75%] rounded-2xl border px-3 py-2.5 text-xs font-mono ${ROLE_COLORS[msg.fromRole] || ROLE_COLORS.seller}`}
+                  style={{ boxShadow: isAgent ? '0 0 16px rgba(131,110,249,0.08)' : undefined }}
+                >
                   <div className="flex items-center gap-1.5 mb-1.5">
                     {isAgent && <Zap className="w-2.5 h-2.5 text-monad-400" strokeWidth={2} />}
-                    <span className="text-zinc-500 text-[10px] uppercase tracking-wider">{ROLE_LABELS[msg.fromRole]}</span>
+                    <span className="text-zinc-500 text-[10px] uppercase tracking-wider">
+                      {ROLE_LABELS[msg.fromRole]}
+                    </span>
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
@@ -370,12 +608,24 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {/* Typing indicator */}
           {agentTyping && (
             <div className="flex justify-start">
-              <div className="rounded-2xl border px-3 py-2.5 flex items-center gap-2" style={{ borderColor: 'rgba(131,110,249,0.2)', background: 'rgba(131,110,249,0.06)' }}>
+              <div
+                className="rounded-2xl border px-3 py-2.5 flex items-center gap-2"
+                style={{
+                  borderColor: 'rgba(131,110,249,0.2)',
+                  background: 'rgba(131,110,249,0.06)',
+                }}
+              >
                 <Zap className="w-3 h-3 text-monad-400" strokeWidth={2} />
-                <span className="text-xs font-mono text-monad-400/80">{agentTyping === 'seller_agent' ? 'seller' : 'buyer'} agent thinking</span>
+                <span className="text-xs font-mono text-monad-400/80">
+                  {agentTyping === 'seller_agent' ? 'seller' : 'buyer'} agent thinking
+                </span>
                 <span className="flex gap-0.5">
-                  {[0, 1, 2].map(i => (
-                    <span key={i} className="w-1 h-1 rounded-full bg-monad-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                  {[0, 1, 2].map((i) => (
+                    <span
+                      key={i}
+                      className="w-1 h-1 rounded-full bg-monad-400 animate-bounce"
+                      style={{ animationDelay: `${i * 0.15}s` }}
+                    />
                   ))}
                 </span>
               </div>
@@ -385,23 +635,58 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {/* AGREED — pay or confirm */}
           {neg?.status === 'AGREED' && !paid && (
             <div className="text-center py-2">
-              <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.04)' }}>
+              <div
+                className="rounded-2xl px-5 py-4"
+                style={{
+                  border: '1px solid rgba(34,197,94,0.3)',
+                  background: 'rgba(34,197,94,0.04)',
+                }}
+              >
                 <p className="text-green-400 font-mono text-xs font-light mb-1">✓ DEAL AGREED</p>
                 {neg.agreedPrice != null && (
-                  <p className="text-green-300 font-mono text-2xl font-light mb-3">⬡ {neg.agreedPrice} <span className="text-base font-light text-green-500">{neg.listing?.currency}</span></p>
+                  <p className="text-green-300 font-mono text-2xl font-light mb-3">
+                    ⬡ {neg.agreedPrice}{' '}
+                    <span className="text-base font-light text-green-500">
+                      {neg.listing?.currency}
+                    </span>
+                  </p>
                 )}
                 {isSeller ? (
                   <div className="space-y-2">
-                    <p className="text-zinc-500 text-xs font-mono">Your agent agreed this price. Confirm to open DM with buyer.</p>
-                    <button onClick={accept} disabled={sending} className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.4)', color: '#4ade80' }}>
+                    <p className="text-zinc-500 text-xs font-mono">
+                      Your agent agreed this price. Confirm to open DM with buyer.
+                    </p>
+                    <button
+                      onClick={accept}
+                      disabled={sending}
+                      className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all"
+                      style={{
+                        background: 'rgba(34,197,94,0.15)',
+                        border: '1px solid rgba(34,197,94,0.4)',
+                        color: '#4ade80',
+                      }}
+                    >
                       {sending ? 'confirming...' : 'confirm deal + open DM chat'}
                     </button>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-zinc-500 text-xs font-mono">Pay with MetaMask to complete the purchase.</p>
-                    <button onClick={payWithEth} disabled={paying} className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)', border: '1px solid rgba(131,110,249,0.4)', color: 'white' }}>
-                      {paying ? 'awaiting MetaMask...' : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
+                    <p className="text-zinc-500 text-xs font-mono">
+                      Pay with MetaMask to complete the purchase.
+                    </p>
+                    <button
+                      onClick={payWithEth}
+                      disabled={paying}
+                      className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
+                      style={{
+                        background: 'linear-gradient(135deg,#836EF9,#6b4fe0)',
+                        border: '1px solid rgba(131,110,249,0.4)',
+                        color: 'white',
+                      }}
+                    >
+                      {paying
+                        ? 'awaiting MetaMask...'
+                        : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
                     </button>
                   </div>
                 )}
@@ -411,10 +696,28 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
           {paid && (
             <div className="text-center py-2">
-              <div className="rounded-2xl px-5 py-4" style={{ border: '1px solid rgba(131,110,249,0.4)', background: 'rgba(131,110,249,0.07)' }}>
+              <div
+                className="rounded-2xl px-5 py-4"
+                style={{
+                  border: '1px solid rgba(131,110,249,0.4)',
+                  background: 'rgba(131,110,249,0.07)',
+                }}
+              >
                 <p className="text-monad-300 font-mono text-sm font-light mb-1">✓ PAYMENT SENT</p>
-                <p className="text-zinc-500 text-xs font-mono mb-3">Check your DMs to coordinate with the seller.</p>
-                <Link href="/dm" className="inline-block text-xs font-mono font-light py-2 px-4 rounded-xl transition-all" style={{ background: 'rgba(131,110,249,0.2)', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}>open messages →</Link>
+                <p className="text-zinc-500 text-xs font-mono mb-3">
+                  Check your DMs to coordinate with the seller.
+                </p>
+                <Link
+                  href="/dm"
+                  className="inline-block text-xs font-mono font-light py-2 px-4 rounded-xl transition-all"
+                  style={{
+                    background: 'rgba(131,110,249,0.2)',
+                    border: '1px solid rgba(131,110,249,0.4)',
+                    color: '#c4b5fd',
+                  }}
+                >
+                  open messages →
+                </Link>
               </div>
             </div>
           )}
@@ -430,7 +733,9 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
           {neg?.status === 'EXPIRED' && (
             <div className="text-center py-2">
               <div className="inline-block border border-zinc-700/50 bg-zinc-800/20 rounded-xl px-4 py-3">
-                <p className="text-zinc-500 font-mono text-xs">Negotiation expired after max turns — no deal reached.</p>
+                <p className="text-zinc-500 font-mono text-xs">
+                  Negotiation expired after max turns — no deal reached.
+                </p>
               </div>
             </div>
           )}
@@ -441,10 +746,15 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
         {/* HUMAN mode footer — only visible when both parties agreed to manual negotiation */}
         {neg?.status === 'ACTIVE' && neg.mode === 'HUMAN' && (
-          <div className="border-t px-4 py-3 space-y-2 shrink-0" style={{ borderColor: 'rgba(131,110,249,0.2)' }}>
+          <div
+            className="border-t px-4 py-3 space-y-2 shrink-0"
+            style={{ borderColor: 'rgba(131,110,249,0.2)' }}
+          >
             <div className="flex items-center gap-1.5 mb-1">
               <Users className="w-3 h-3 text-zinc-500" strokeWidth={1.5} />
-              <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wider">manual negotiation</span>
+              <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wider">
+                manual negotiation
+              </span>
             </div>
             <div className="flex gap-2">
               <input
@@ -454,7 +764,12 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                 onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
                 placeholder="type your message..."
                 className="flex-1 text-xs px-3 py-2 rounded-xl font-mono transition-all"
-                style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.2)', color: '#e4e4e7', outline: 'none' }}
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  border: '1px solid rgba(131,110,249,0.2)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
                 disabled={sending}
               />
               <input
@@ -463,7 +778,12 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                 onChange={(e) => setOfferPrice(e.target.value)}
                 placeholder={`offer (${listing.currency})`}
                 className="w-28 text-xs px-3 py-2 rounded-xl font-mono transition-all"
-                style={{ background: 'rgba(131,110,249,0.05)', border: '1px solid rgba(131,110,249,0.2)', color: '#e4e4e7', outline: 'none' }}
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  border: '1px solid rgba(131,110,249,0.2)',
+                  color: '#e4e4e7',
+                  outline: 'none',
+                }}
                 min="0"
                 step="0.001"
                 disabled={sending}
@@ -475,7 +795,10 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                   onClick={accept}
                   disabled={sending}
                   className="text-green-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-green-400/10"
-                  style={{ border: '1px solid rgba(34,197,94,0.3)', background: 'rgba(34,197,94,0.05)' }}
+                  style={{
+                    border: '1px solid rgba(34,197,94,0.3)',
+                    background: 'rgba(34,197,94,0.05)',
+                  }}
                 >
                   accept deal
                 </button>
@@ -483,7 +806,10 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                   onClick={reject}
                   disabled={sending}
                   className="text-red-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-red-400/10"
-                  style={{ border: '1px solid rgba(239,68,68,0.25)', background: 'rgba(239,68,68,0.04)' }}
+                  style={{
+                    border: '1px solid rgba(239,68,68,0.25)',
+                    background: 'rgba(239,68,68,0.04)',
+                  }}
                 >
                   reject
                 </button>
@@ -492,9 +818,20 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
                 onClick={send}
                 disabled={sending || !message.trim()}
                 className="flex items-center gap-1.5 text-xs font-mono font-light py-1.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg,rgba(131,110,249,0.3),rgba(131,110,249,0.15))', border: '1px solid rgba(131,110,249,0.4)', color: '#c4b5fd' }}
+                style={{
+                  background:
+                    'linear-gradient(135deg,rgba(131,110,249,0.3),rgba(131,110,249,0.15))',
+                  border: '1px solid rgba(131,110,249,0.4)',
+                  color: '#c4b5fd',
+                }}
               >
-                {sending ? '...' : <><Send className="w-3 h-3" strokeWidth={2} /> send</>}
+                {sending ? (
+                  '...'
+                ) : (
+                  <>
+                    <Send className="w-3 h-3" strokeWidth={2} /> send
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -519,37 +856,69 @@ function NegotiationModal({ listing, onClose, userId }: { listing: MarketListing
 
 // ── Agent Card ────────────────────────────────────────────────────────────────
 
-function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketListing; isAuthenticated: boolean; onNegotiate: () => void }) {
+function AgentCard({
+  listing,
+  isAuthenticated,
+  onNegotiate,
+}: {
+  listing: MarketListing;
+  isAuthenticated: boolean;
+  onNegotiate: () => void;
+}) {
   return (
     <div className="card-interactive flex flex-col h-full group">
       {/* Header row */}
       <div className="flex items-start justify-between gap-2 mb-3">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}
+          >
             <Bot className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.75} />
           </div>
           <div className="min-w-0">
-            <h3 className="text-[13px] font-light text-white truncate leading-tight">{listing.title}</h3>
+            <h3 className="text-[13px] font-light text-white truncate leading-tight">
+              {listing.title}
+            </h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               {listing.seller.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={listing.seller.avatarUrl} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+                <img
+                  src={listing.seller.avatarUrl}
+                  alt=""
+                  className="w-3.5 h-3.5 rounded-full object-cover"
+                />
               ) : (
                 <div className="w-3.5 h-3.5 rounded-full bg-monad-500/20 flex items-center justify-center">
-                  <span className="text-[7px] font-light text-monad-400">{(listing.seller.username || 'A').charAt(0).toUpperCase()}</span>
+                  <span className="text-[7px] font-light text-monad-400">
+                    {(listing.seller.username || 'A').charAt(0).toUpperCase()}
+                  </span>
                 </div>
               )}
-              <span className="text-[11px] text-zinc-500">@{listing.seller.username || 'anon'}</span>
+              <span className="text-[11px] text-zinc-500">
+                @{listing.seller.username || 'anon'}
+              </span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           {listing.agentEndpoint && (
-            <span title="Has own AI agent" className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-light" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.2)', color: '#a78bfa' }}>
-              <span className="w-1 h-1 rounded-full bg-monad-400 animate-pulse inline-block" />AI
+            <span
+              title="Has own AI agent"
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-light"
+              style={{
+                background: 'rgba(131,110,249,0.12)',
+                border: '1px solid rgba(131,110,249,0.2)',
+                color: '#a78bfa',
+              }}
+            >
+              <span className="w-1 h-1 rounded-full bg-monad-400 animate-pulse inline-block" />
+              AI
             </span>
           )}
-          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-light border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>
+          <span
+            className={`px-1.5 py-0.5 rounded-md text-[10px] font-light border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}
+          >
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
         </div>
@@ -563,8 +932,11 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       {/* Tags */}
       {listing.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
-          {listing.tags.slice(0, 4).map(tag => (
-            <span key={tag} className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">
+          {listing.tags.slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+            >
               {tag}
             </span>
           ))}
@@ -572,21 +944,37 @@ function AgentCard({ listing, isAuthenticated, onNegotiate }: { listing: MarketL
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+      <div
+        className="flex items-center justify-between pt-3 border-t"
+        style={{ borderColor: 'var(--border)' }}
+      >
         <div>
           {listing.price === 0 ? (
             <span className="text-sm font-light text-green-400">Free</span>
           ) : (
-            <span className="text-sm font-light text-white">{listing.price} <span className="text-xs text-zinc-500 font-light">{listing.currency}</span></span>
+            <span className="text-sm font-light text-white">
+              {listing.price}{' '}
+              <span className="text-xs text-zinc-500 font-light">{listing.currency}</span>
+            </span>
           )}
           {listing.minPrice != null && (
-            <p className="text-[10px] text-zinc-600 mt-0.5">Floor: {listing.minPrice} {listing.currency}</p>
+            <p className="text-[10px] text-zinc-600 mt-0.5">
+              Floor: {listing.minPrice} {listing.currency}
+            </p>
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <Link href={`/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">View</Link>
+          <Link href={`/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">
+            View
+          </Link>
           <button
-            onClick={() => { if (!isAuthenticated) { window.location.href = '/auth'; return; } onNegotiate(); }}
+            onClick={() => {
+              if (!isAuthenticated) {
+                window.location.href = '/auth';
+                return;
+              }
+              onNegotiate();
+            }}
             className="btn-primary text-xs py-1 px-3"
           >
             {listing.price === 0 ? 'Get free' : 'Negotiate'}
@@ -611,33 +999,45 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get<ApiKeyInfo[]>(`/market/${listing.id}/apikeys`)
+    api
+      .get<ApiKeyInfo[]>(`/market/${listing.id}/apikeys`)
       .then(setKeys)
       .catch(() => setError('Failed to load API keys'))
       .finally(() => setLoading(false));
   }, [listing.id]);
 
   const generate = async () => {
-    setGenerating(true); setError('');
+    setGenerating(true);
+    setError('');
     try {
-      const result = await api.post<{ key: string; label: string | null }>(`/market/${listing.id}/apikeys`, { label: newKeyLabel.trim() || undefined });
+      const result = await api.post<{ key: string; label: string | null }>(
+        `/market/${listing.id}/apikeys`,
+        { label: newKeyLabel.trim() || undefined },
+      );
       setRevealedKey(result.key);
       setNewKeyLabel('');
       // Refresh list (won't show raw key again)
       const updated = await api.get<ApiKeyInfo[]>(`/market/${listing.id}/apikeys`);
       setKeys(updated);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to generate key'); }
-    finally { setGenerating(false); }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to generate key');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const revoke = async (keyId: string) => {
-    setRevokingId(keyId); setError('');
+    setRevokingId(keyId);
+    setError('');
     try {
       await api.delete(`/market/apikeys/${keyId}`);
-      setKeys(prev => prev.filter(k => k.id !== keyId));
+      setKeys((prev) => prev.filter((k) => k.id !== keyId));
       setConfirmRevokeId(null);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to revoke key'); }
-    finally { setRevokingId(null); }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
+    } finally {
+      setRevokingId(null);
+    }
   };
 
   const copyKey = async (key: string) => {
@@ -647,8 +1047,14 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
   };
 
   return (
-    <div className="mt-3 rounded-xl border" style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}>
-      <div className="flex items-center gap-2 px-3 py-2 border-b" style={{ borderColor: 'rgba(131,110,249,0.1)' }}>
+    <div
+      className="mt-3 rounded-xl border"
+      style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}
+    >
+      <div
+        className="flex items-center gap-2 px-3 py-2 border-b"
+        style={{ borderColor: 'rgba(131,110,249,0.1)' }}
+      >
         <Key className="w-3 h-3 text-monad-400" />
         <span className="text-monad-400 font-mono text-xs font-light">API Keys</span>
         <span className="text-zinc-600 font-mono text-xs ml-auto">{keys.length}/3</span>
@@ -656,14 +1062,30 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
 
       {/* Revealed key banner */}
       {revealedKey && (
-        <div className="mx-3 mt-3 rounded-lg p-3" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
-          <p className="text-green-400 font-mono text-xs font-light mb-1">✓ New key generated — save it now, it won&apos;t be shown again</p>
+        <div
+          className="mx-3 mt-3 rounded-lg p-3"
+          style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}
+        >
+          <p className="text-green-400 font-mono text-xs font-light mb-1">
+            ✓ New key generated — save it now, it won&apos;t be shown again
+          </p>
           <div className="flex items-center gap-2 mt-1">
             <code className="text-green-300 font-mono text-xs flex-1 break-all">{revealedKey}</code>
-            <button onClick={() => copyKey(revealedKey)} className="text-xs font-mono px-2 py-1 rounded shrink-0 transition-all" style={{ background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: copied ? '#4ade80' : '#86efac' }}>
+            <button
+              onClick={() => copyKey(revealedKey)}
+              className="text-xs font-mono px-2 py-1 rounded shrink-0 transition-all"
+              style={{
+                background: 'rgba(34,197,94,0.15)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                color: copied ? '#4ade80' : '#86efac',
+              }}
+            >
               {copied ? '✓ copied' : <Copy className="w-3 h-3" />}
             </button>
-            <button onClick={() => setRevealedKey(null)} className="text-zinc-500 hover:text-zinc-300">
+            <button
+              onClick={() => setRevealedKey(null)}
+              className="text-zinc-500 hover:text-zinc-300"
+            >
               <X className="w-3 h-3" />
             </button>
           </div>
@@ -673,23 +1095,52 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
       {/* Key list */}
       <div className="px-3 pt-2 pb-1 space-y-2">
         {loading && <p className="text-zinc-600 font-mono text-xs py-1">loading...</p>}
-        {!loading && keys.length === 0 && <p className="text-zinc-600 font-mono text-xs py-1">no keys yet</p>}
-        {keys.map(k => (
-          <div key={k.id} className="flex items-center gap-2 py-1.5 border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+        {!loading && keys.length === 0 && (
+          <p className="text-zinc-600 font-mono text-xs py-1">no keys yet</p>
+        )}
+        {keys.map((k) => (
+          <div
+            key={k.id}
+            className="flex items-center gap-2 py-1.5 border-b"
+            style={{ borderColor: 'rgba(255,255,255,0.04)' }}
+          >
             <div className="flex-1 min-w-0">
-              <p className="text-zinc-300 font-mono text-xs font-light">{k.label || 'unnamed key'}</p>
+              <p className="text-zinc-300 font-mono text-xs font-light">
+                {k.label || 'unnamed key'}
+              </p>
               <p className="text-zinc-600 font-mono text-xs">
-                created {timeAgo(k.createdAt)}{k.lastUsedAt ? ` · last used ${timeAgo(k.lastUsedAt)}` : ' · never used'}
+                created {timeAgo(k.createdAt)}
+                {k.lastUsedAt ? ` · last used ${timeAgo(k.lastUsedAt)}` : ' · never used'}
               </p>
             </div>
             {confirmRevokeId === k.id ? (
               <div className="flex items-center gap-1 shrink-0">
                 <span className="text-zinc-500 font-mono text-xs">revoke?</span>
-                <button onClick={() => revoke(k.id)} disabled={revokingId === k.id} className="text-red-400 font-mono text-xs px-2 py-0.5 rounded disabled:opacity-40" style={{ border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.05)' }}>{revokingId === k.id ? '...' : 'yes'}</button>
-                <button onClick={() => setConfirmRevokeId(null)} className="text-zinc-500 font-mono text-xs px-2 py-0.5 rounded" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>no</button>
+                <button
+                  onClick={() => revoke(k.id)}
+                  disabled={revokingId === k.id}
+                  className="text-red-400 font-mono text-xs px-2 py-0.5 rounded disabled:opacity-40"
+                  style={{
+                    border: '1px solid rgba(239,68,68,0.3)',
+                    background: 'rgba(239,68,68,0.05)',
+                  }}
+                >
+                  {revokingId === k.id ? '...' : 'yes'}
+                </button>
+                <button
+                  onClick={() => setConfirmRevokeId(null)}
+                  className="text-zinc-500 font-mono text-xs px-2 py-0.5 rounded"
+                  style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                >
+                  no
+                </button>
               </div>
             ) : (
-              <button onClick={() => setConfirmRevokeId(k.id)} className="text-zinc-600 hover:text-red-400 transition-colors shrink-0" title="Revoke key">
+              <button
+                onClick={() => setConfirmRevokeId(k.id)}
+                className="text-zinc-600 hover:text-red-400 transition-colors shrink-0"
+                title="Revoke key"
+              >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             )}
@@ -703,14 +1154,34 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
           <input
             type="text"
             value={newKeyLabel}
-            onChange={e => setNewKeyLabel(e.target.value)}
+            onChange={(e) => setNewKeyLabel(e.target.value)}
             placeholder="label (optional)"
             maxLength={40}
             className="flex-1 text-xs px-2 py-1.5 rounded-lg font-mono"
-            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }}
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+              outline: 'none',
+            }}
           />
-          <button onClick={generate} disabled={generating} className="text-xs font-mono px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-40 transition-all" style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)', color: '#c4b5fd' }}>
-            {generating ? '...' : <><Plus className="w-3 h-3" /> generate</>}
+          <button
+            onClick={generate}
+            disabled={generating}
+            className="text-xs font-mono px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-40 transition-all"
+            style={{
+              background: 'rgba(131,110,249,0.15)',
+              border: '1px solid rgba(131,110,249,0.3)',
+              color: '#c4b5fd',
+            }}
+          >
+            {generating ? (
+              '...'
+            ) : (
+              <>
+                <Plus className="w-3 h-3" /> generate
+              </>
+            )}
           </button>
         </div>
       )}
@@ -721,14 +1192,21 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
 
 // ── My Agent Card (publications) ──────────────────────────────────────────────
 
-function MyAgentCard({ listing, onDelete }: { listing: MarketListing; onDelete: (id: string) => void }) {
+function MyAgentCard({
+  listing,
+  onDelete,
+}: {
+  listing: MarketListing;
+  onDelete: (id: string) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
   const handleDelete = async () => {
-    setDeleting(true); setDeleteError('');
+    setDeleting(true);
+    setDeleteError('');
     try {
       await api.delete(`/market/${listing.id}`);
       onDelete(listing.id);
@@ -740,53 +1218,131 @@ function MyAgentCard({ listing, onDelete }: { listing: MarketListing; onDelete: 
   };
 
   return (
-    <div className="rounded-xl border transition-colors" style={{ borderColor: expanded ? 'rgba(131,110,249,0.25)' : 'rgba(255,255,255,0.07)', background: '#0a0a12' }}>
+    <div
+      className="rounded-xl border transition-colors"
+      style={{
+        borderColor: expanded ? 'rgba(131,110,249,0.25)' : 'rgba(255,255,255,0.07)',
+        background: '#0a0a12',
+      }}
+    >
       <div className="flex items-center gap-3 p-3">
         {/* Type icon */}
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}>
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+          style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}
+        >
           <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="text-sm font-light text-zinc-100 truncate">{listing.title}</h3>
-            <Badge className={`rounded-full border border-dashed px-2 py-0 text-xs font-mono ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}>{listing.type.toLowerCase().replace('_', ' ')}</Badge>
-            {listing.agentEndpoint && <Badge className="rounded-full bg-monad-500/15 border border-monad-500/25 px-2 py-0 text-xs font-mono text-monad-400">AI endpoint</Badge>}
-            {listing.fileKey && <Badge className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0 text-xs font-mono text-zinc-500">file uploaded</Badge>}
+            <Badge
+              className={`rounded-full border border-dashed px-2 py-0 text-xs font-mono ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}
+            >
+              {listing.type.toLowerCase().replace('_', ' ')}
+            </Badge>
+            {listing.agentEndpoint && (
+              <Badge className="rounded-full bg-monad-500/15 border border-monad-500/25 px-2 py-0 text-xs font-mono text-monad-400">
+                AI endpoint
+              </Badge>
+            )}
+            {listing.fileKey && (
+              <Badge className="rounded-full bg-zinc-800/60 border border-white/08 px-2 py-0 text-xs font-mono text-zinc-500">
+                file uploaded
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
-            <span className="font-mono font-light text-monad-300">{listing.price} {listing.currency}</span>
-            {listing.minPrice != null && <span className="text-zinc-600"> · floor: {listing.minPrice}</span>}
+            <span className="font-mono font-light text-monad-300">
+              {listing.price} {listing.currency}
+            </span>
+            {listing.minPrice != null && (
+              <span className="text-zinc-600"> · floor: {listing.minPrice}</span>
+            )}
             <span className="text-zinc-700"> · {timeAgo(listing.createdAt)}</span>
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <Link href={`/agents/${listing.id}`} className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all">view</Link>
-          <button onClick={() => setExpanded(p => !p)} className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all" style={{ background: expanded ? 'rgba(131,110,249,0.15)' : 'transparent', border: `1px solid ${expanded ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.08)'}`, color: expanded ? '#c4b5fd' : '#71717a' }}>
+          <Link
+            href={`/agents/${listing.id}`}
+            className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all"
+          >
+            view
+          </Link>
+          <button
+            onClick={() => setExpanded((p) => !p)}
+            className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all"
+            style={{
+              background: expanded ? 'rgba(131,110,249,0.15)' : 'transparent',
+              border: `1px solid ${expanded ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.08)'}`,
+              color: expanded ? '#c4b5fd' : '#71717a',
+            }}
+          >
             {expanded ? 'collapse' : 'manage'}
           </button>
           {confirmDelete ? (
             <div className="flex items-center gap-1">
-              <button onClick={handleDelete} disabled={deleting} className="text-xs font-mono px-2 py-1.5 rounded-lg text-red-400 disabled:opacity-40 transition-all" style={{ border: '1px solid rgba(239,68,68,0.35)', background: 'rgba(239,68,68,0.08)' }}>{deleting ? '...' : 'confirm'}</button>
-              <button onClick={() => setConfirmDelete(false)} className="text-xs font-mono px-2 py-1.5 rounded-lg text-zinc-500 transition-all" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>cancel</button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-xs font-mono px-2 py-1.5 rounded-lg text-red-400 disabled:opacity-40 transition-all"
+                style={{
+                  border: '1px solid rgba(239,68,68,0.35)',
+                  background: 'rgba(239,68,68,0.08)',
+                }}
+              >
+                {deleting ? '...' : 'confirm'}
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="text-xs font-mono px-2 py-1.5 rounded-lg text-zinc-500 transition-all"
+                style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              >
+                cancel
+              </button>
             </div>
           ) : (
-            <button onClick={() => setConfirmDelete(true)} className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-400/5 transition-all" title="Delete listing">
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="p-1.5 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-400/5 transition-all"
+              title="Delete listing"
+            >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
       </div>
       {deleteError && <p className="text-red-400 font-mono text-xs px-3 pb-2">{deleteError}</p>}
-      {expanded && <div className="px-3 pb-3"><ApiKeyManager listing={listing} /></div>}
+      {expanded && (
+        <div className="px-3 pb-3">
+          <ApiKeyManager listing={listing} />
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Create Listing Form ────────────────────────────────────────────────────────
 
-function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: MarketListing) => void; onCancel: () => void }) {
+function CreateListingForm({
+  onCreated,
+  onCancel,
+}: {
+  onCreated: (listing: MarketListing) => void;
+  onCancel: () => void;
+}) {
   const { refresh } = useAuth();
-  const [form, setForm] = useState({ title: '', description: '', type: 'AI_AGENT' as MarketListing['type'], price: '', minPrice: '', currency: 'ETH', tags: '', agentUrl: '', agentEndpoint: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    type: 'AI_AGENT' as MarketListing['type'],
+    price: '',
+    minPrice: '',
+    currency: 'ETH',
+    tags: '',
+    agentUrl: '',
+    agentEndpoint: '',
+  });
   const [uploading, setUploading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<UploadedFileMeta | null>(null);
@@ -795,95 +1351,257 @@ function CreateListingForm({ onCreated, onCancel }: { onCreated: (listing: Marke
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = async (file: File) => {
-    setUploading(true); setScanning(false); setError('');
+    setUploading(true);
+    setScanning(false);
+    setError('');
     try {
       const formData = new FormData();
       formData.append('file', file);
       setScanning(true);
       const result = await api.upload<UploadedFileMeta>('/market/upload', formData);
       setUploadedFile(result as UploadedFileMeta);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Upload failed'); }
-    finally { setUploading(false); setScanning(false); }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Upload failed');
+    } finally {
+      setUploading(false);
+      setScanning(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.description.trim()) { setError('Title and description are required'); return; }
-    setSubmitting(true); setError('');
+    if (!form.title.trim() || !form.description.trim()) {
+      setError('Title and description are required');
+      return;
+    }
+    setSubmitting(true);
+    setError('');
     try {
       const payload: any = {
-        title: form.title.trim(), description: form.description.trim(), type: form.type,
-        price: parseFloat(form.price) || 0, currency: form.currency,
-        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+        title: form.title.trim(),
+        description: form.description.trim(),
+        type: form.type,
+        price: parseFloat(form.price) || 0,
+        currency: form.currency,
+        tags: form.tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
         ...(form.minPrice ? { minPrice: parseFloat(form.minPrice) } : {}),
         ...(form.agentEndpoint.trim() ? { agentEndpoint: form.agentEndpoint.trim() } : {}),
-        ...(uploadedFile ? { fileKey: uploadedFile.fileKey, fileName: uploadedFile.fileName, fileSize: uploadedFile.fileSize, fileMimeType: uploadedFile.fileMimeType } : {}),
+        ...(uploadedFile
+          ? {
+              fileKey: uploadedFile.fileKey,
+              fileName: uploadedFile.fileName,
+              fileSize: uploadedFile.fileSize,
+              fileMimeType: uploadedFile.fileMimeType,
+            }
+          : {}),
       };
       const result = await api.post<MarketListing>('/market', payload);
       await refresh();
       onCreated(result);
-    } catch (err) { setError(err instanceof ApiError ? err.message : 'Failed to create listing'); }
-    finally { setSubmitting(false); }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to create listing');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const field = (key: keyof typeof form, value: string) => setForm(p => ({ ...p, [key]: value }));
+  const field = (key: keyof typeof form, value: string) => setForm((p) => ({ ...p, [key]: value }));
 
   return (
-    <div className="rounded-2xl border p-5" style={{ background: '#0a0a12', borderColor: 'rgba(131,110,249,0.2)' }}>
+    <div
+      className="rounded-2xl border p-5"
+      style={{ background: '#0a0a12', borderColor: 'rgba(131,110,249,0.2)' }}
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-base font-light text-zinc-100">Deploy New Agent</h2>
-        <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300"><X className="w-4 h-4" /></button>
+        <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300">
+          <X className="w-4 h-4" />
+        </button>
       </div>
       <form onSubmit={handleSubmit} className="space-y-3">
         {/* Type selector */}
         <div className="flex gap-2 flex-wrap">
-          {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map(t => (
-            <button key={t} type="button" onClick={() => field('type', t)} className={`text-xs font-mono px-3 py-1.5 rounded-lg border transition-all ${form.type === t ? 'bg-monad-500/20 border-monad-500/40 text-monad-300' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'}`}>
+          {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => field('type', t)}
+              className={`text-xs font-mono px-3 py-1.5 rounded-lg border transition-all ${form.type === t ? 'bg-monad-500/20 border-monad-500/40 text-monad-300' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'}`}
+            >
               {TYPE_LABELS[t]}
             </button>
           ))}
         </div>
-        <input type="text" placeholder="Title *" value={form.title} onChange={e => field('title', e.target.value)} maxLength={100} required className="w-full text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
-        <textarea placeholder="Description *" value={form.description} onChange={e => field('description', e.target.value)} maxLength={1000} rows={3} required className="w-full text-sm px-3 py-2 rounded-lg font-mono resize-none" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
+        <input
+          type="text"
+          placeholder="Title *"
+          value={form.title}
+          onChange={(e) => field('title', e.target.value)}
+          maxLength={100}
+          required
+          className="w-full text-sm px-3 py-2 rounded-lg font-mono"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#e4e4e7',
+            outline: 'none',
+          }}
+        />
+        <textarea
+          placeholder="Description *"
+          value={form.description}
+          onChange={(e) => field('description', e.target.value)}
+          maxLength={1000}
+          rows={3}
+          required
+          className="w-full text-sm px-3 py-2 rounded-lg font-mono resize-none"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#e4e4e7',
+            outline: 'none',
+          }}
+        />
         <div className="flex gap-2">
-          <input type="number" placeholder="Price" value={form.price} onChange={e => field('price', e.target.value)} min="0" step="0.01" className="flex-1 text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
-          <input type="number" placeholder="Floor price" value={form.minPrice} onChange={e => field('minPrice', e.target.value)} min="0" step="0.01" className="flex-1 text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
-          <select value={form.currency} onChange={e => field('currency', e.target.value)} className="w-24 text-sm px-2 py-2 rounded-lg font-mono" style={{ background: '#0f0f18', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }}>
-            {['ETH', 'BOLTY'].map(c => <option key={c} value={c}>{c === 'BOLTY' ? 'BOLTY (0 tax)' : c}</option>)}
+          <input
+            type="number"
+            placeholder="Price"
+            value={form.price}
+            onChange={(e) => field('price', e.target.value)}
+            min="0"
+            step="0.01"
+            className="flex-1 text-sm px-3 py-2 rounded-lg font-mono"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+              outline: 'none',
+            }}
+          />
+          <input
+            type="number"
+            placeholder="Floor price"
+            value={form.minPrice}
+            onChange={(e) => field('minPrice', e.target.value)}
+            min="0"
+            step="0.01"
+            className="flex-1 text-sm px-3 py-2 rounded-lg font-mono"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+              outline: 'none',
+            }}
+          />
+          <select
+            value={form.currency}
+            onChange={(e) => field('currency', e.target.value)}
+            className="w-24 text-sm px-2 py-2 rounded-lg font-mono"
+            style={{
+              background: '#0f0f18',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+              outline: 'none',
+            }}
+          >
+            {['ETH', 'BOLTY'].map((c) => (
+              <option key={c} value={c}>
+                {c === 'BOLTY' ? 'BOLTY (0 tax)' : c}
+              </option>
+            ))}
           </select>
         </div>
-        <input type="text" placeholder="Tags (comma separated)" value={form.tags} onChange={e => field('tags', e.target.value)} className="w-full text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
+        <input
+          type="text"
+          placeholder="Tags (comma separated)"
+          value={form.tags}
+          onChange={(e) => field('tags', e.target.value)}
+          className="w-full text-sm px-3 py-2 rounded-lg font-mono"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#e4e4e7',
+            outline: 'none',
+          }}
+        />
         {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
-          <input type="url" placeholder="AI negotiation webhook (optional)" value={form.agentEndpoint} onChange={e => field('agentEndpoint', e.target.value)} className="w-full text-sm px-3 py-2 rounded-lg font-mono" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#e4e4e7', outline: 'none' }} />
+          <input
+            type="url"
+            placeholder="AI negotiation webhook (optional)"
+            value={form.agentEndpoint}
+            onChange={(e) => field('agentEndpoint', e.target.value)}
+            className="w-full text-sm px-3 py-2 rounded-lg font-mono"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+              outline: 'none',
+            }}
+          />
         )}
         {ACCEPTS_FILE.has(form.type) && (
           <div>
             <div
               onClick={() => fileInputRef.current?.click()}
               className="w-full rounded-xl border-2 border-dashed py-6 text-center cursor-pointer transition-colors hover:border-monad-500/40"
-              style={{ borderColor: uploadedFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)' }}
+              style={{
+                borderColor: uploadedFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)',
+              }}
             >
               {uploading ? (
-                <p className="text-xs font-mono text-monad-400 animate-pulse">{scanning ? 'scanning for security threats...' : 'uploading...'}</p>
+                <p className="text-xs font-mono text-monad-400 animate-pulse">
+                  {scanning ? 'scanning for security threats...' : 'uploading...'}
+                </p>
               ) : uploadedFile ? (
                 <div className="space-y-1">
-                  {uploadedFile.scanPassed ? <ShieldCheck className="w-5 h-5 text-green-400 mx-auto" /> : <ShieldAlert className="w-5 h-5 text-red-400 mx-auto" />}
+                  {uploadedFile.scanPassed ? (
+                    <ShieldCheck className="w-5 h-5 text-green-400 mx-auto" />
+                  ) : (
+                    <ShieldAlert className="w-5 h-5 text-red-400 mx-auto" />
+                  )}
                   <p className="text-xs font-mono text-green-400">{uploadedFile.fileName}</p>
-                  <p className="text-xs font-mono text-zinc-600">{formatBytes(uploadedFile.fileSize)}</p>
-                  {uploadedFile.scanNote && <p className="text-xs font-mono text-zinc-500">{uploadedFile.scanNote}</p>}
+                  <p className="text-xs font-mono text-zinc-600">
+                    {formatBytes(uploadedFile.fileSize)}
+                  </p>
+                  {uploadedFile.scanNote && (
+                    <p className="text-xs font-mono text-zinc-500">{uploadedFile.scanNote}</p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-1">
                   <p className="text-xs font-mono text-zinc-500">click to upload agent file</p>
-                  <p className="text-zinc-700 font-mono text-xs">.py .js .ts .zip .json .yaml .sh .txt — max 10 MB</p>
+                  <p className="text-zinc-700 font-mono text-xs">
+                    .py .js .ts .zip .json .yaml .sh .txt — max 10 MB
+                  </p>
                 </div>
               )}
             </div>
-            <input ref={fileInputRef} type="file" accept=".py,.js,.ts,.zip,.json,.yaml,.yml,.sh,.txt" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFileUpload(f); }} />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".py,.js,.ts,.zip,.json,.yaml,.yml,.sh,.txt"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileUpload(f);
+              }}
+            />
           </div>
         )}
         {error && <p className="text-red-400 font-mono text-xs">{error}</p>}
-        <button type="submit" disabled={submitting} className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all" style={{ background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))', border: '1px solid rgba(131,110,249,0.4)', color: '#e2d9ff' }}>
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all"
+          style={{
+            background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+            border: '1px solid rgba(131,110,249,0.4)',
+            color: '#e2d9ff',
+          }}
+        >
           {submitting ? 'deploying...' : 'deploy agent →'}
         </button>
       </form>
@@ -926,14 +1644,19 @@ function AgentsPageContent() {
   }, [searchParams]);
 
   const fetchListings = useCallback(async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const params = new URLSearchParams();
       if (type !== 'ALL') params.set('type', type);
       if (search) params.set('search', search);
       const data = await api.get<{ data: MarketListing[] }>(`/market?${params}`);
       setListings(data.data);
-    } catch { setError('Failed to load listings'); } finally { setLoading(false); }
+    } catch {
+      setError('Failed to load listings');
+    } finally {
+      setLoading(false);
+    }
   }, [type, search]);
 
   const fetchMyListings = useCallback(async () => {
@@ -941,11 +1664,17 @@ function AgentsPageContent() {
     setMyLoading(true);
     try {
       const data = await api.get<{ data: MarketListing[] }>('/market');
-      setMyListings(data.data.filter(l => l.seller.id === user.id));
-    } catch { setError('Failed to load your listings'); } finally { setMyLoading(false); }
+      setMyListings(data.data.filter((l) => l.seller.id === user.id));
+    } catch {
+      setError('Failed to load your listings');
+    } finally {
+      setMyLoading(false);
+    }
   }, [isAuthenticated, user]);
 
-  useEffect(() => { fetchListings(); }, [fetchListings]);
+  useEffect(() => {
+    fetchListings();
+  }, [fetchListings]);
 
   useEffect(() => {
     if (activeTab === 'mine' && isAuthenticated) fetchMyListings();
@@ -961,18 +1690,25 @@ function AgentsPageContent() {
       {/* Header */}
       <div className="page-header">
         <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
-          <Link href="/market" className="hover:text-zinc-400 transition-colors">Market</Link>
+          <Link href="/market" className="hover:text-zinc-400 transition-colors">
+            Market
+          </Link>
           <span>/</span>
           <span className="text-zinc-400">AI Agents</span>
         </div>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-light text-white tracking-tight">AI Agents</h1>
-            <p className="text-sm text-zinc-500 mt-1">Discover autonomous agents, bots, and automation tools built by the community.</p>
+            <p className="text-sm text-zinc-500 mt-1">
+              Discover autonomous agents, bots, and automation tools built by the community.
+            </p>
           </div>
           {isAuthenticated && (
             <button
-              onClick={() => { switchTab('mine'); setShowCreate(true); }}
+              onClick={() => {
+                switchTab('mine');
+                setShowCreate(true);
+              }}
               className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2"
             >
               <Plus className="w-4 h-4" /> Deploy Agent
@@ -983,13 +1719,19 @@ function AgentsPageContent() {
 
       {/* Tabs */}
       <div className="tab-group mb-6">
-        {([['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />], ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />]] as const).map(([id, label, icon]) => (
+        {(
+          [
+            ['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />],
+            ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />],
+          ] as const
+        ).map(([id, label, icon]) => (
           <button
             key={id}
             onClick={() => switchTab(id)}
             className={`tab-item ${activeTab === id ? 'active' : ''}`}
           >
-            {icon}{label}
+            {icon}
+            {label}
           </button>
         ))}
       </div>
@@ -1004,12 +1746,12 @@ function AgentsPageContent() {
                 type="text"
                 placeholder="Search agents..."
                 value={search}
-                onChange={e => setSearch(e.target.value)}
+                onChange={(e) => setSearch(e.target.value)}
                 className="input w-full"
               />
             </div>
             <div className="flex gap-1.5 flex-wrap">
-              {TYPES.map(t => (
+              {TYPES.map((t) => (
                 <button
                   key={t}
                   onClick={() => setType(t)}
@@ -1038,8 +1780,13 @@ function AgentsPageContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {listings.map(l => (
-                <AgentCard key={l.id} listing={l} isAuthenticated={isAuthenticated} onNegotiate={() => setNegotiatingListing(l)} />
+              {listings.map((l) => (
+                <AgentCard
+                  key={l.id}
+                  listing={l}
+                  isAuthenticated={isAuthenticated}
+                  onNegotiate={() => setNegotiatingListing(l)}
+                />
               ))}
             </div>
           )}
@@ -1052,15 +1799,23 @@ function AgentsPageContent() {
           {!isAuthenticated ? (
             <div className="card text-center py-16">
               <p className="text-zinc-500 text-sm mb-4">Sign in to manage your agents</p>
-              <Link href="/auth" className="btn-primary text-sm px-4 py-2 inline-flex">Sign in</Link>
+              <Link href="/auth" className="btn-primary text-sm px-4 py-2 inline-flex">
+                Sign in
+              </Link>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-zinc-500">{myListings.length} agent{myListings.length !== 1 ? 's' : ''} published</p>
+                <p className="text-sm text-zinc-500">
+                  {myListings.length} agent{myListings.length !== 1 ? 's' : ''} published
+                </p>
                 <button
-                  onClick={() => setShowCreate(p => !p)}
-                  className={showCreate ? 'btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5' : 'btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5'}
+                  onClick={() => setShowCreate((p) => !p)}
+                  className={
+                    showCreate
+                      ? 'btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5'
+                      : 'btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5'
+                  }
                 >
                   <Plus className="w-3 h-3" /> {showCreate ? 'Cancel' : 'Deploy new'}
                 </button>
@@ -1069,7 +1824,10 @@ function AgentsPageContent() {
               {showCreate && (
                 <div className="mb-6">
                   <CreateListingForm
-                    onCreated={(l) => { setMyListings(p => [l, ...p]); setShowCreate(false); }}
+                    onCreated={(l) => {
+                      setMyListings((p) => [l, ...p]);
+                      setShowCreate(false);
+                    }}
                     onCancel={() => setShowCreate(false)}
                   />
                 </div>
@@ -1077,20 +1835,29 @@ function AgentsPageContent() {
 
               {myLoading ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => <div key={i} className="skeleton h-20 rounded-xl" />)}
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="skeleton h-20 rounded-xl" />
+                  ))}
                 </div>
               ) : myListings.length === 0 ? (
                 <div className="card text-center py-16">
                   <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
                   <p className="text-zinc-600 text-sm mb-3">No agents deployed yet</p>
-                  <button onClick={() => setShowCreate(true)} className="btn-primary text-xs px-4 py-2 inline-flex items-center gap-1.5">
+                  <button
+                    onClick={() => setShowCreate(true)}
+                    className="btn-primary text-xs px-4 py-2 inline-flex items-center gap-1.5"
+                  >
                     <Plus className="w-3 h-3" /> Deploy your first agent
                   </button>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {myListings.map(l => (
-                    <MyAgentCard key={l.id} listing={l} onDelete={(id) => setMyListings(p => p.filter(x => x.id !== id))} />
+                  {myListings.map((l) => (
+                    <MyAgentCard
+                      key={l.id}
+                      listing={l}
+                      onDelete={(id) => setMyListings((p) => p.filter((x) => x.id !== id))}
+                    />
                   ))}
                 </div>
               )}
@@ -1101,7 +1868,11 @@ function AgentsPageContent() {
 
       {/* Negotiation modal */}
       {negotiatingListing && user && (
-        <NegotiationModal listing={negotiatingListing} onClose={() => setNegotiatingListing(null)} userId={user.id} />
+        <NegotiationModal
+          listing={negotiatingListing}
+          onClose={() => setNegotiatingListing(null)}
+          userId={user.id}
+        />
       )}
     </div>
   );

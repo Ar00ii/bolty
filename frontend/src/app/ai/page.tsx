@@ -21,8 +21,8 @@ export default function AiPage() {
           </p>
         </div>
         <p className="text-zinc-400 text-sm font-mono leading-relaxed max-w-md mx-auto mb-2">
-          The AI assistant is temporarily offline while we perform scheduled maintenance
-          and upgrade our systems.
+          The AI assistant is temporarily offline while we perform scheduled maintenance and upgrade
+          our systems.
         </p>
         <p className="text-zinc-500 text-xs font-mono mb-8">
           We&apos;ll be back online soon. Thank you for your patience.

@@ -30,9 +30,11 @@ export function HighlightCard({
         'hover:-translate-y-[3px] hover:shadow-lg hover:border-white/20',
         className,
       )}
-      style={{
-        '--_accent': accentColor,
-      } as React.CSSProperties}
+      style={
+        {
+          '--_accent': accentColor,
+        } as React.CSSProperties
+      }
     >
       {/* Gradient top border — visible on hover */}
       <div
@@ -88,12 +90,8 @@ export function HighlightCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-light leading-tight text-[var(--text)]">
-            {title}
-          </h3>
-          <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
-            {description}
-          </p>
+          <h3 className="text-sm font-light leading-tight text-[var(--text)]">{title}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{description}</p>
         </div>
       </CardContent>
     </Card>

@@ -43,7 +43,9 @@ export function AnimatedCounter({
             const easeOutQuad = (t: number) => 1 - (1 - t) * (1 - t);
             const easedProgress = easeOutQuad(progress);
 
-            setCount(Math.floor(value * easedProgress * Math.pow(10, decimals)) / Math.pow(10, decimals));
+            setCount(
+              Math.floor(value * easedProgress * Math.pow(10, decimals)) / Math.pow(10, decimals),
+            );
 
             if (progress === 1) {
               clearInterval(timer);
@@ -54,7 +56,7 @@ export function AnimatedCounter({
           return () => clearInterval(timer);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     const div = document.currentScript?.previousElementSibling;

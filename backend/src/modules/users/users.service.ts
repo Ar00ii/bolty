@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 interface UpdateProfileData {
@@ -57,7 +58,14 @@ export class UsersService {
       const tag = q.slice(1);
       return this.prisma.user.findMany({
         where: { userTag: tag },
-        select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true, reputationPoints: true },
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatarUrl: true,
+          userTag: true,
+          reputationPoints: true,
+        },
         take: 10,
       });
     }
@@ -66,7 +74,14 @@ export class UsersService {
     const term = q.replace(/^@/, '');
     return this.prisma.user.findMany({
       where: { username: { contains: term, mode: 'insensitive' } },
-      select: { id: true, username: true, displayName: true, avatarUrl: true, userTag: true, reputationPoints: true },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        userTag: true,
+        reputationPoints: true,
+      },
       take: 10,
       orderBy: { username: 'asc' },
     });

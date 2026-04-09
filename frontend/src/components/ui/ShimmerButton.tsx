@@ -17,13 +17,8 @@ export const ShimmerButton = ({
   ...props
 }: ShimmerButtonProps) => {
   return (
-    <Component
-      className={`shimmer-button ${className}`}
-      {...props}
-    >
-      <span className="shimmer-button-content">
-        {children}
-      </span>
+    <Component className={`shimmer-button ${className}`} {...props}>
+      <span className="shimmer-button-content">{children}</span>
       <span className="shimmer-button-shimmer"></span>
     </Component>
   );

@@ -48,7 +48,8 @@ export function ProgressBar({
       transition={{ duration: 0.3 }}
     >
       {/* Glow effect */}
-      <div className="absolute right-0 top-0 h-full w-20 blur-xl opacity-50"
+      <div
+        className="absolute right-0 top-0 h-full w-20 blur-xl opacity-50"
         style={{
           background: `linear-gradient(90deg, transparent, currentColor)`,
         }}

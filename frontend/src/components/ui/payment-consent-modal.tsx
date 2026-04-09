@@ -7,10 +7,10 @@ import { isEscrowEnabled } from '@/lib/wallet/escrow';
 interface PaymentConsentModalProps {
   listingTitle: string;
   sellerAddress: string;
-  sellerAmountETH: string;   // 97.5% of total
-  platformFeeETH: string;    // 2.5% of total
+  sellerAmountETH: string; // 97.5% of total
+  platformFeeETH: string; // 2.5% of total
   totalETH: string;
-  totalUsd: string;          // total in USD
+  totalUsd: string; // total in USD
   buyerAddress: string;
   onConsent: (signature: string, message: string) => void;
   onCancel: () => void;
@@ -34,7 +34,10 @@ export function PaymentConsentModal({
   const escrow = isEscrowEnabled();
 
   const handleSign = async () => {
-    if (!checked) { setError('You must accept the terms first'); return; }
+    if (!checked) {
+      setError('You must accept the terms first');
+      return;
+    }
     setSigning(true);
     setError('');
 
@@ -85,11 +88,11 @@ export function PaymentConsentModal({
         'This document is stored as proof of informed consent.',
       ].join('\n');
 
-      const accounts = await eth.request({ method: 'eth_requestAccounts' }) as string[];
-      const signature = await eth.request({
+      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
+      const signature = (await eth.request({
         method: 'personal_sign',
         params: [message, accounts[0]],
-      }) as string;
+      })) as string;
 
       onConsent(signature, message);
     } catch (err: unknown) {
@@ -118,48 +121,81 @@ export function PaymentConsentModal({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+        <div
+          className="flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+        >
           <div className="flex items-center gap-2.5">
             <Shield className="w-4 h-4 text-monad-400" />
             <span className="font-light text-white text-sm">Payment Consent</span>
-            <span className="text-[10px] font-mono text-monad-400/60 border border-monad-400/20 px-1.5 py-0.5 rounded">BETA</span>
+            <span className="text-[10px] font-mono text-monad-400/60 border border-monad-400/20 px-1.5 py-0.5 rounded">
+              BETA
+            </span>
           </div>
-          <button onClick={onCancel} className="text-zinc-600 hover:text-zinc-300 transition-colors">
+          <button
+            onClick={onCancel}
+            className="text-zinc-600 hover:text-zinc-300 transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Warning / Info */}
         {escrow ? (
-          <div className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
+          <div
+            className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl"
+            style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}
+          >
             <Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-green-300/80 leading-relaxed">
-              <strong>Escrow protected.</strong> Funds are held in a smart contract until you confirm delivery. You can dispute if the seller doesn&apos;t deliver.
+              <strong>Escrow protected.</strong> Funds are held in a smart contract until you
+              confirm delivery. You can dispute if the seller doesn&apos;t deliver.
             </p>
           </div>
         ) : (
-          <div className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl" style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}>
+          <div
+            className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl"
+            style={{ background: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}
+          >
             <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-yellow-300/80 leading-relaxed">
-              <strong>Peer-to-peer blockchain transaction.</strong> Payments are irreversible. Bolty is not responsible for disputes or losses.
+              <strong>Peer-to-peer blockchain transaction.</strong> Payments are irreversible. Bolty
+              is not responsible for disputes or losses.
             </p>
           </div>
         )}
 
         {/* Breakdown */}
-        <div className="mx-5 mt-4 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.07)' }}>
-          <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-3">Transaction breakdown</p>
+        <div
+          className="mx-5 mt-4 p-4 rounded-xl"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px dashed rgba(255,255,255,0.07)',
+          }}
+        >
+          <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-3">
+            Transaction breakdown
+          </p>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-zinc-400">To seller <span className="text-zinc-600 font-mono text-xs">(97.5%)</span></span>
+              <span className="text-zinc-400">
+                To seller <span className="text-zinc-600 font-mono text-xs">(97.5%)</span>
+              </span>
               <span className="text-white font-mono">{sellerAmountETH} ETH</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-zinc-400">Platform fee <span className="text-zinc-600 font-mono text-xs">(2.5%)</span></span>
+              <span className="text-zinc-400">
+                Platform fee <span className="text-zinc-600 font-mono text-xs">(2.5%)</span>
+              </span>
               <span className="text-white font-mono">{platformFeeETH} ETH</span>
             </div>
-            <div className="flex justify-between pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-              <span className="text-zinc-200 font-light">Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}</span>
+            <div
+              className="flex justify-between pt-2 border-t"
+              style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+            >
+              <span className="text-zinc-200 font-light">
+                Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
+              </span>
               <div className="text-right">
                 <span className="text-monad-300 font-mono font-light">{totalETH} ETH</span>
                 <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
@@ -205,8 +241,12 @@ export function PaymentConsentModal({
             onChange={(e) => setChecked(e.target.checked)}
             className="mt-0.5 w-4 h-4 cursor-pointer accent-violet-500 flex-shrink-0"
           />
-          <label htmlFor="consent-check" className="text-xs text-zinc-400 cursor-pointer leading-relaxed">
-            I have read and understood all terms. I voluntarily consent to this transaction and accept all associated risks.
+          <label
+            htmlFor="consent-check"
+            className="text-xs text-zinc-400 cursor-pointer leading-relaxed"
+          >
+            I have read and understood all terms. I voluntarily consent to this transaction and
+            accept all associated risks.
           </label>
         </div>
 
@@ -224,7 +264,10 @@ export function PaymentConsentModal({
             onClick={handleSign}
             disabled={!checked || signing}
             className="flex-1 py-2.5 text-sm font-light text-white rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ background: 'rgba(131,110,249,0.18)', border: '1px solid rgba(131,110,249,0.45)' }}
+            style={{
+              background: 'rgba(131,110,249,0.18)',
+              border: '1px solid rgba(131,110,249,0.45)',
+            }}
           >
             {signing ? 'Signing…' : 'Sign & Continue'}
           </button>

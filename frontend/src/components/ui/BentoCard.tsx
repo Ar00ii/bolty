@@ -11,12 +11,7 @@ interface BentoCardProps {
   delay?: number;
 }
 
-export function BentoCard({
-  children,
-  colSpan = 1,
-  rowSpan = 1,
-  delay = 0,
-}: BentoCardProps) {
+export function BentoCard({ children, colSpan = 1, rowSpan = 1, delay = 0 }: BentoCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   const colClass = {
@@ -54,7 +49,8 @@ export function BentoCard({
           <div
             className="absolute inset-0 rounded-lg pointer-events-none"
             style={{
-              boxShadow: 'inset 0 0 30px rgba(168, 85, 247, 0.1), 0 0 30px rgba(168, 85, 247, 0.05)',
+              boxShadow:
+                'inset 0 0 30px rgba(168, 85, 247, 0.1), 0 0 30px rgba(168, 85, 247, 0.05)',
             }}
           />
         )}

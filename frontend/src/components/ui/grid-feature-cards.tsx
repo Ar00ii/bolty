@@ -28,12 +28,25 @@ export function GridPattern({
   y,
   squares,
   ...props
-}: React.ComponentProps<'svg'> & { width: number; height: number; x: string; y: string; squares?: number[][] }) {
+}: React.ComponentProps<'svg'> & {
+  width: number;
+  height: number;
+  x: string;
+  y: string;
+  squares?: number[][];
+}) {
   const patternId = React.useId();
   return (
     <svg aria-hidden="true" {...props}>
       <defs>
-        <pattern id={patternId} width={width} height={height} patternUnits="userSpaceOnUse" x={x} y={y}>
+        <pattern
+          id={patternId}
+          width={width}
+          height={height}
+          patternUnits="userSpaceOnUse"
+          x={x}
+          y={y}
+        >
           <path d={`M.5 ${height}V.5H${width}`} fill="none" />
         </pattern>
       </defs>
@@ -41,7 +54,14 @@ export function GridPattern({
       {squares && (
         <svg x={x} y={y} className="overflow-visible">
           {squares.map(([sx, sy], index) => (
-            <rect strokeWidth="0" key={index} width={width + 1} height={height + 1} x={sx * width} y={sy * height} />
+            <rect
+              strokeWidth="0"
+              key={index}
+              width={width + 1}
+              height={height + 1}
+              x={sx * width}
+              y={sy * height}
+            />
           ))}
         </svg>
       )}

@@ -22,7 +22,11 @@ export function AnimatedGradientText({
       {/* Animated gradient border */}
       <span
         className="absolute inset-0 rounded-full p-px [background:linear-gradient(var(--ag-angle,0deg),#836EF9,#c4b5fd,#836EF9)] animate-[gradientRotate_4s_linear_infinite] opacity-60 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ WebkitMask: 'linear-gradient(#fff_0_0) content-box, linear-gradient(#fff_0_0)', WebkitMaskComposite: 'xor', maskComposite: 'exclude' }}
+        style={{
+          WebkitMask: 'linear-gradient(#fff_0_0) content-box, linear-gradient(#fff_0_0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+        }}
       />
       {children}
     </div>

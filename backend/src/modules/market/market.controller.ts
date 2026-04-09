@@ -1,3 +1,7 @@
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import {
   Controller,
   Get,
@@ -16,19 +20,18 @@ import {
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { Response } from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
-import { MarketService } from './market.service';
-import { NegotiationService } from './negotiation.service';
-import { AgentScanService } from './agent-scan.service';
-import { ApiKeysService } from './api-keys.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { diskStorage } from 'multer';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
+
+import { AgentScanService } from './agent-scan.service';
+import { ApiKeysService } from './api-keys.service';
+import { MarketService } from './market.service';
+import { NegotiationService } from './negotiation.service';
 
 interface CreateListingBody {
   title: string;
@@ -65,12 +68,26 @@ interface SendMessageBody {
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 
 const ALLOWED_MIMETYPES = new Set([
-  'text/plain', 'text/x-python', 'text/javascript', 'application/javascript',
-  'text/typescript', 'application/json', 'application/zip',
-  'application/x-zip-compressed', 'application/x-zip', 'text/x-yaml',
-  'application/x-yaml', 'text/yaml', 'text/x-sh', 'text/x-shellscript',
-  'application/x-sh', 'application/x-python', 'text/markdown', 'text/csv',
-  'application/toml', 'text/x-toml',
+  'text/plain',
+  'text/x-python',
+  'text/javascript',
+  'application/javascript',
+  'text/typescript',
+  'application/json',
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/x-zip',
+  'text/x-yaml',
+  'application/x-yaml',
+  'text/yaml',
+  'text/x-sh',
+  'text/x-shellscript',
+  'application/x-sh',
+  'application/x-python',
+  'text/markdown',
+  'text/csv',
+  'application/toml',
+  'text/x-toml',
 ]);
 
 @UseGuards(JwtAuthGuard)
@@ -92,10 +109,7 @@ export class MarketController {
 
   @Post('api-keys')
   @HttpCode(HttpStatus.CREATED)
-  createApiKey(
-    @CurrentUser('id') userId: string,
-    @Body() body: { label?: string | null },
-  ) {
+  createApiKey(@CurrentUser('id') userId: string, @Body() body: { label?: string | null }) {
     return this.apiKeysService.createApiKey(userId, body.label || null);
   }
 
@@ -144,7 +158,10 @@ export class MarketController {
     }
     if (!fs.existsSync(filePath)) throw new NotFoundException('File not found');
     const meta = await this.marketService.getListingByFileKey(key);
-    res.setHeader('Content-Disposition', `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`,
+    );
     res.setHeader('Content-Type', meta?.fileMimeType || 'application/octet-stream');
     res.sendFile(filePath);
   }
@@ -155,10 +172,7 @@ export class MarketController {
   }
 
   @Get('negotiations/:id')
-  getNegotiation(
-    @Param('id') id: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  getNegotiation(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.negotiationService.getNegotiation(id, userId);
   }
 
@@ -190,10 +204,7 @@ export class MarketController {
       },
     }),
   )
-  async uploadFile(
-    @CurrentUser('id') _userId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadFile(@CurrentUser('id') _userId: string, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file received');
     const scan = await this.agentScanService.scan(file.filename, file.originalname);
     return {
@@ -225,8 +236,14 @@ export class MarketController {
   ) {
     if (!body.txHash?.trim()) throw new BadRequestException('txHash required');
     return this.marketService.purchaseListing(
-      id, buyerId, body.txHash, body.amountWei || '0', body.negotiationId,
-      body.platformFeeTxHash, body.consentSignature, body.consentMessage,
+      id,
+      buyerId,
+      body.txHash,
+      body.amountWei || '0',
+      body.negotiationId,
+      body.platformFeeTxHash,
+      body.consentSignature,
+      body.consentMessage,
       body.escrowContract,
     );
   }
@@ -240,10 +257,7 @@ export class MarketController {
   // ── Negotiations ───────────────────────────────────────────────────────────
 
   @Post(':listingId/negotiate')
-  startNegotiation(
-    @Param('listingId') listingId: string,
-    @CurrentUser('id') buyerId: string,
-  ) {
+  startNegotiation(@Param('listingId') listingId: string, @CurrentUser('id') buyerId: string) {
     return this.negotiationService.startNegotiation(buyerId, listingId);
   }
 

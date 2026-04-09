@@ -9,7 +9,12 @@ interface PaginationProps {
   isLoading?: boolean;
 }
 
-export function Pagination({ currentPage, totalPages, onPageChange, isLoading = false }: PaginationProps) {
+export function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+  isLoading = false,
+}: PaginationProps) {
   const pages = [];
   const maxVisible = 5;
   const halfVisible = Math.floor(maxVisible / 2);
@@ -48,8 +53,8 @@ export function Pagination({ currentPage, totalPages, onPageChange, isLoading = 
               page === currentPage
                 ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
                 : page === '...'
-                ? 'text-zinc-600 cursor-default'
-                : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
+                  ? 'text-zinc-600 cursor-default'
+                  : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
             }`}
           >
             {page}

@@ -1,10 +1,10 @@
-"use client";
-import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Link, Zap } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BoltyLogo } from "@/components/ui/BoltyLogo";
+'use client';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowRight, Link, Zap } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 interface TimelineItem {
   id: number;
@@ -14,7 +14,7 @@ interface TimelineItem {
   category: string;
   icon: React.ElementType;
   relatedIds: number[];
-  status: "completed" | "in-progress" | "pending";
+  status: 'completed' | 'in-progress' | 'pending';
   energy: number;
 }
 
@@ -22,9 +22,7 @@ interface RadialOrbitalTimelineProps {
   timelineData: TimelineItem[];
 }
 
-export default function RadialOrbitalTimeline({
-  timelineData,
-}: RadialOrbitalTimelineProps) {
+export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTimelineProps) {
   const [expandedItems, setExpandedItems] = useState<Record<number, boolean>>({});
   const [rotationAngle, setRotationAngle] = useState<number>(0);
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
@@ -115,16 +113,16 @@ export default function RadialOrbitalTimeline({
     return getRelatedItems(activeNodeId).includes(itemId);
   };
 
-  const getStatusStyles = (status: TimelineItem["status"]): string => {
+  const getStatusStyles = (status: TimelineItem['status']): string => {
     switch (status) {
-      case "completed":
-        return "text-white bg-black border-white";
-      case "in-progress":
-        return "text-black bg-white border-black";
-      case "pending":
-        return "text-white bg-black/40 border-white/50";
+      case 'completed':
+        return 'text-white bg-black border-white';
+      case 'in-progress':
+        return 'text-black bg-white border-black';
+      case 'pending':
+        return 'text-white bg-black/40 border-white/50';
       default:
-        return "text-white bg-black/40 border-white/50";
+        return 'text-white bg-black/40 border-white/50';
     }
   };
 
@@ -138,17 +136,27 @@ export default function RadialOrbitalTimeline({
         <div
           className="absolute w-full h-full flex items-center justify-center"
           ref={orbitRef}
-          style={{ perspective: "1000px" }}
+          style={{ perspective: '1000px' }}
         >
           {/* Center: Bolty logo */}
           <div className="absolute w-32 h-32 rounded-full flex items-center justify-center z-10">
             <div className="absolute w-40 h-40 rounded-full border border-monad-400/30 animate-ping opacity-50" />
             <div
               className="absolute w-48 h-48 rounded-full border border-monad-400/20 animate-ping opacity-30"
-              style={{ animationDelay: "0.5s" }}
+              style={{ animationDelay: '0.5s' }}
             />
-            <div className="absolute inset-0 rounded-full blur-xl opacity-40" style={{ background: "rgba(131,110,249,0.6)" }} />
-            <BoltyLogo size={250} color="#836EF9" className="relative z-10" style={{ filter: "drop-shadow(0 0 14px rgba(131,110,249,0.9))" } as React.CSSProperties} />
+            <div
+              className="absolute inset-0 rounded-full blur-xl opacity-40"
+              style={{ background: 'rgba(131,110,249,0.6)' }}
+            />
+            <BoltyLogo
+              size={250}
+              color="#836EF9"
+              className="relative z-10"
+              style={
+                { filter: 'drop-shadow(0 0 14px rgba(131,110,249,0.9))' } as React.CSSProperties
+              }
+            />
           </div>
 
           {/* Orbit ring */}
@@ -164,7 +172,9 @@ export default function RadialOrbitalTimeline({
             return (
               <div
                 key={item.id}
-                ref={(el) => { nodeRefs.current[item.id] = el; }}
+                ref={(el) => {
+                  nodeRefs.current[item.id] = el;
+                }}
                 className="absolute transition-all duration-700 cursor-pointer"
                 style={{
                   transform: `translate(${position.x}px, ${position.y}px)`,
@@ -178,7 +188,7 @@ export default function RadialOrbitalTimeline({
               >
                 {/* Energy glow */}
                 <div
-                  className={`absolute rounded-full ${isPulsing ? "animate-pulse" : ""}`}
+                  className={`absolute rounded-full ${isPulsing ? 'animate-pulse' : ''}`}
                   style={{
                     background: `radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0) 70%)`,
                     width: `${item.energy * 0.5 + 40}px`,
@@ -192,11 +202,11 @@ export default function RadialOrbitalTimeline({
                 <div
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center
-                    ${isExpanded ? "bg-monad-500 text-white" : isRelated ? "bg-monad-500/40 text-white" : "bg-black text-white"}
+                    ${isExpanded ? 'bg-monad-500 text-white' : isRelated ? 'bg-monad-500/40 text-white' : 'bg-black text-white'}
                     border-2
-                    ${isExpanded ? "border-monad-400 shadow-lg shadow-monad-400/30" : isRelated ? "border-monad-400 animate-pulse" : "border-white/30"}
+                    ${isExpanded ? 'border-monad-400 shadow-lg shadow-monad-400/30' : isRelated ? 'border-monad-400 animate-pulse' : 'border-white/30'}
                     transition-all duration-300 transform
-                    ${isExpanded ? "scale-150" : ""}
+                    ${isExpanded ? 'scale-150' : ''}
                   `}
                 >
                   <Icon size={16} />
@@ -204,8 +214,11 @@ export default function RadialOrbitalTimeline({
 
                 {/* Label */}
                 <div
-                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? "text-monad-300 scale-125" : "text-white/70"}`}
-                  style={{ left: "50%", transform: `translateX(-50%) ${isExpanded ? "scale(1.25)" : ""}` }}
+                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? 'text-monad-300 scale-125' : 'text-white/70'}`}
+                  style={{
+                    left: '50%',
+                    transform: `translateX(-50%) ${isExpanded ? 'scale(1.25)' : ''}`,
+                  }}
                 >
                   {item.title}
                 </div>
@@ -217,7 +230,11 @@ export default function RadialOrbitalTimeline({
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge className={`px-2 text-xs ${getStatusStyles(item.status)}`}>
-                          {item.status === "completed" ? "LIVE" : item.status === "in-progress" ? "BETA" : "SOON"}
+                          {item.status === 'completed'
+                            ? 'LIVE'
+                            : item.status === 'in-progress'
+                              ? 'BETA'
+                              : 'SOON'}
                         </Badge>
                         <span className="text-xs font-mono text-white/50">{item.category}</span>
                       </div>

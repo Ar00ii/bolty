@@ -60,12 +60,7 @@ export const HexagonPattern = React.forwardRef<
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
 
-    function drawHexagon(
-      context: CanvasRenderingContext2D,
-      x: number,
-      y: number,
-      size: number
-    ) {
+    function drawHexagon(context: CanvasRenderingContext2D, x: number, y: number, size: number) {
       context.beginPath();
 
       for (let i = 0; i < 6; i++) {

@@ -6,10 +6,19 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import {
-  Search, Sun, Moon, Bell, ChevronDown, LogOut, User, Settings,
-  Key, ShoppingBag, Menu, X,
+  Search,
+  Sun,
+  Moon,
+  Bell,
+  ChevronDown,
+  LogOut,
+  User,
+  Settings,
+  Key,
+  ShoppingBag,
+  Menu,
+  X,
 } from 'lucide-react';
-
 
 interface NavbarProps {
   menuOpen: boolean;
@@ -58,7 +67,9 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
     if (searchOpen && searchRef.current) searchRef.current.focus();
   }, [searchOpen]);
 
-  useEffect(() => { setProfileOpen(false); }, [pathname]);
+  useEffect(() => {
+    setProfileOpen(false);
+  }, [pathname]);
 
   return (
     <nav
@@ -82,7 +93,8 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
         {/* Nav links - desktop */}
         <div className="hidden lg:flex items-center gap-1">
           {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href || (link.href !== '/market' && pathname.startsWith(link.href));
+            const isActive =
+              pathname === link.href || (link.href !== '/market' && pathname.startsWith(link.href));
             return (
               <Link
                 key={link.href}
@@ -114,10 +126,18 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search agents, repos..."
                   className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-monad-400/50 transition-colors"
-                  onKeyDown={(e) => { if (e.key === 'Escape') setSearchOpen(false); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') setSearchOpen(false);
+                  }}
                 />
               </div>
-              <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }} className="text-zinc-500 hover:text-zinc-300 p-1">
+              <button
+                onClick={() => {
+                  setSearchOpen(false);
+                  setSearchQuery('');
+                }}
+                className="text-zinc-500 hover:text-zinc-300 p-1"
+              >
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -128,7 +148,9 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
             >
               <Search className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Search</span>
-              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700">/</kbd>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-zinc-800 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700">
+                /
+              </kbd>
             </button>
           )}
         </div>
@@ -155,38 +177,66 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
               >
                 {user?.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatarUrl} alt={displayLabel} className="w-7 h-7 rounded-full border border-zinc-700" />
+                  <img
+                    src={user.avatarUrl}
+                    alt={displayLabel}
+                    className="w-7 h-7 rounded-full border border-zinc-700"
+                  />
                 ) : (
                   <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-light">
                     {displayLabel[0]?.toUpperCase()}
                   </div>
                 )}
-                <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">{displayLabel}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+                <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">
+                  {displayLabel}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50" style={{ background: 'var(--bg-card)' }}>
+                <div
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50"
+                  style={{ background: 'var(--bg-card)' }}
+                >
                   <div className="p-3 border-b border-zinc-700/50">
                     <p className="text-sm font-light text-white truncate">{displayLabel}</p>
-                    <p className="text-xs text-zinc-500 truncate">{user?.email || user?.githubLogin || ''}</p>
+                    <p className="text-xs text-zinc-500 truncate">
+                      {user?.email || user?.githubLogin || ''}
+                    </p>
                   </div>
                   <div className="py-1">
-                    <Link href="/profile" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                    >
                       <User className="w-4 h-4" /> Profile
                     </Link>
-                    <Link href="/orders" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                    <Link
+                      href="/orders"
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                    >
                       <ShoppingBag className="w-4 h-4" /> Orders
                     </Link>
-                    <Link href="/api-keys" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                    <Link
+                      href="/api-keys"
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                    >
                       <Key className="w-4 h-4" /> API Keys
                     </Link>
-                    <Link href="/profile?tab=security" className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all">
+                    <Link
+                      href="/profile?tab=security"
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                    >
                       <Settings className="w-4 h-4" /> Settings
                     </Link>
                   </div>
                   <div className="py-1 border-t border-zinc-700/50">
-                    <button onClick={logout} className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left">
+                    <button
+                      onClick={logout}
+                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
+                    >
                       <LogOut className="w-4 h-4" /> Sign out
                     </button>
                   </div>
@@ -196,7 +246,10 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <Link href="/auth" className="text-sm text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+            <Link
+              href="/auth"
+              className="text-sm text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors"
+            >
               Sign in
             </Link>
             <Link href="/auth?tab=register" className="btn-primary text-sm px-3.5 py-1.5">

@@ -7,7 +7,9 @@ import { X, MessageSquare, Bot } from 'lucide-react';
 const containerVariants = {
   hidden: { opacity: 0, y: 20, scale: 0.95, transformOrigin: 'bottom left' },
   visible: {
-    opacity: 1, y: 0, scale: 1,
+    opacity: 1,
+    y: 0,
+    scale: 1,
     transition: { type: 'spring', damping: 25, stiffness: 300 },
   },
   exit: { opacity: 0, y: 20, scale: 0.95, transition: { duration: 0.18 } },
@@ -37,11 +39,21 @@ export function FloatingAIChat() {
             }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b"
-              style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.06)' }}>
+            <div
+              className="flex items-center justify-between px-4 py-3 border-b"
+              style={{
+                borderColor: 'rgba(131,110,249,0.15)',
+                background: 'rgba(131,110,249,0.06)',
+              }}
+            >
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: 'rgba(131,110,249,0.15)', border: '1px solid rgba(131,110,249,0.3)' }}>
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{
+                    background: 'rgba(131,110,249,0.15)',
+                    border: '1px solid rgba(131,110,249,0.3)',
+                  }}
+                >
                   <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
                 </div>
                 <div>
@@ -63,14 +75,26 @@ export function FloatingAIChat() {
 
             {/* Maintenance message */}
             <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                style={{ background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.2)' }}>
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                style={{
+                  background: 'rgba(234,179,8,0.1)',
+                  border: '1px solid rgba(234,179,8,0.2)',
+                }}
+              >
                 <Bot className="w-5 h-5 text-yellow-400" strokeWidth={1.5} />
               </div>
               <p className="text-sm font-light text-white mb-1">AI Assistant</p>
-              <div className="rounded-lg px-3 py-2 mb-2"
-                style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}>
-                <p className="text-xs text-yellow-400 font-mono font-light">INACTIVE — MAINTENANCE</p>
+              <div
+                className="rounded-lg px-3 py-2 mb-2"
+                style={{
+                  background: 'rgba(234,179,8,0.08)',
+                  border: '1px solid rgba(234,179,8,0.2)',
+                }}
+              >
+                <p className="text-xs text-yellow-400 font-mono font-light">
+                  INACTIVE — MAINTENANCE
+                </p>
               </div>
               <p className="text-xs leading-relaxed" style={{ color: 'rgba(161,161,170,0.6)' }}>
                 The AI assistant is temporarily offline for maintenance. We&apos;ll be back soon.
@@ -84,18 +108,28 @@ export function FloatingAIChat() {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={() => setOpen(o => !o)}
+        onClick={() => setOpen((o) => !o)}
         className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 cursor-pointer"
-        style={open
-          ? { background: 'rgba(39,39,42,0.95)', border: '1px solid rgba(131,110,249,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }
-          : { background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', border: '1px solid rgba(131,110,249,0.3)', boxShadow: '0 4px 20px rgba(131,110,249,0.3)' }
+        style={
+          open
+            ? {
+                background: 'rgba(39,39,42,0.95)',
+                border: '1px solid rgba(131,110,249,0.3)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+              }
+            : {
+                background: 'linear-gradient(135deg, #836EF9, #6b4fe0)',
+                border: '1px solid rgba(131,110,249,0.3)',
+                boxShadow: '0 4px 20px rgba(131,110,249,0.3)',
+              }
         }
         aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}
       >
-        {open
-          ? <X className="w-5 h-5 text-zinc-300" strokeWidth={2} />
-          : <MessageSquare className="w-5 h-5 text-white" strokeWidth={1.8} />
-        }
+        {open ? (
+          <X className="w-5 h-5 text-zinc-300" strokeWidth={2} />
+        ) : (
+          <MessageSquare className="w-5 h-5 text-white" strokeWidth={1.8} />
+        )}
       </motion.button>
     </div>
   );

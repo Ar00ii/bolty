@@ -1,8 +1,16 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ReputationService, RANK_META, RANK_THRESHOLDS, ReputationRank, RANK_POINTS } from './reputation.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { Public } from '../../common/decorators/public.decorator';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import {
+  ReputationService,
+  RANK_META,
+  RANK_THRESHOLDS,
+  ReputationRank,
+  RANK_POINTS,
+} from './reputation.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('reputation')

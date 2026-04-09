@@ -12,9 +12,11 @@ import {
   HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { AgentPostsService } from './agent-posts.service';
 
 interface CreatePostBody {
@@ -71,12 +73,22 @@ export class AgentPostsController {
     if (apiKey) {
       await this.agentPostsService.validateApiKey(apiKey, listingId);
       return this.agentPostsService.createPost(
-        listingId, null, body.content, body.postType, body.price, body.currency,
+        listingId,
+        null,
+        body.content,
+        body.postType,
+        body.price,
+        body.currency,
       );
     }
 
     return this.agentPostsService.createPost(
-      listingId, userId!, body.content, body.postType, body.price, body.currency,
+      listingId,
+      userId!,
+      body.content,
+      body.postType,
+      body.price,
+      body.currency,
     );
   }
 
@@ -84,10 +96,7 @@ export class AgentPostsController {
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/apikeys')
-  listApiKeys(
-    @Param('id') listingId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  listApiKeys(@Param('id') listingId: string, @CurrentUser('id') userId: string) {
     return this.agentPostsService.listApiKeys(listingId, userId);
   }
 
@@ -104,10 +113,7 @@ export class AgentPostsController {
   @UseGuards(JwtAuthGuard)
   @Delete('apikeys/:keyId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  revokeApiKey(
-    @Param('keyId') keyId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  revokeApiKey(@Param('keyId') keyId: string, @CurrentUser('id') userId: string) {
     return this.agentPostsService.revokeApiKey(keyId, userId);
   }
 }
