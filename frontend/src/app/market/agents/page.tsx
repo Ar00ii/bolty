@@ -185,6 +185,26 @@ const validators = {
   },
 };
 
+// Tips for users
+const getTips = {
+  tags: (count: number): string | null => {
+    if (count === 0) return 'Add tags to improve discoverability in search';
+    if (count < 4) return `Add ${4 - count} more tag${4 - count > 1 ? 's' : ''} for optimal visibility (4-6 recommended)`;
+    if (count > 6) return `Consider using ${count - 2}-${count - 1} tags for cleaner presentation`;
+    return null;
+  },
+  title: (length: number): string | null => {
+    if (length === 0) return 'Give your agent a clear, descriptive name';
+    if (length < 10) return 'Make your title more descriptive for better search results';
+    return null;
+  },
+  description: (length: number): string | null => {
+    if (length === 0) return 'Describe what your agent does and who should use it';
+    if (length < 50) return 'Add more details about features and benefits';
+    return null;
+  },
+};
+
 function timeAgo(d: string) {
   const diff = Date.now() - new Date(d).getTime();
   const m = Math.floor(diff / 60000);
@@ -212,13 +232,32 @@ function HelpLabel({ label, help, required }: HelpLabelProps) {
         {help && (
           <div className="relative group cursor-help">
             <HelpCircle className="w-3.5 h-3.5 text-zinc-600 hover:text-zinc-500" />
-            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-300 whitespace-nowrap">
+            <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-zinc-300 whitespace-nowrap z-10">
               {help}
             </div>
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+interface TipProps {
+  message: string | null;
+  variant?: 'info' | 'success' | 'warning';
+}
+
+function Tip({ message, variant = 'info' }: TipProps) {
+  if (!message) return null;
+  const colorMap = {
+    info: 'text-monad-300',
+    success: 'text-green-300',
+    warning: 'text-yellow-300',
+  };
+  return (
+    <p className={`text-xs font-light mt-2 ${colorMap[variant]}`}>
+      💡 {message}
+    </p>
   );
 }
 
@@ -1620,11 +1659,14 @@ function CreateListingForm({
                   outline: 'none',
                 }}
               />
-              <p className="text-xs text-zinc-600 mt-1">{form.title.length}/100</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-zinc-600 mt-1">{form.title.length}/100</p>
+              </div>
+              <Tip message={getTips.title(form.title.length)} />
             </div>
 
             <div>
-              <label className="text-xs font-light text-zinc-400 mb-2 block">Description *</label>
+              <HelpLabel label="Description" required help="What does your agent do? What problems does it solve?" />
               <textarea
                 placeholder="What does your agent do? What problems does it solve?"
                 value={form.description}
@@ -1640,7 +1682,10 @@ function CreateListingForm({
                   outline: 'none',
                 }}
               />
-              <p className="text-xs text-zinc-600 mt-1">{form.description.length}/1000</p>
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-zinc-600 mt-1">{form.description.length}/1000</p>
+              </div>
+              <Tip message={getTips.description(form.description.length)} />
             </div>
           </>
         )}
@@ -1731,6 +1776,7 @@ function CreateListingForm({
                   outline: 'none',
                 }}
               />
+              <Tip message={getTips.tags(validators.tags(form.tags))} />
             </div>
           </>
         )}
