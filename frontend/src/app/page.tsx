@@ -654,8 +654,8 @@ export default function HomePage() {
         </div>
 
         {/* ── TESTIMONIALS SECTION ── */}
-        <div className="py-32 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="max-w-5xl mx-auto">
+        <div className="py-16 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="max-w-7xl mx-auto">
             {/* Testimonials Carousel */}
             <TestimonialCarousel />
         </div>
