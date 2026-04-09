@@ -137,7 +137,6 @@ export default function PublicProfilePage() {
         {/* Avatar */}
         <div className="shrink-0">
           {profile.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.avatarUrl}
               alt={displayName || ''}

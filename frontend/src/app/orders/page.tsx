@@ -85,7 +85,6 @@ function OrderCard({
       {/* Avatar */}
       <div className="w-10 h-10 rounded-full bg-monad-500/15 border border-monad-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
         {peer?.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
         ) : (
           <span className="text-base text-monad-400">

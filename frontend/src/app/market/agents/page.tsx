@@ -877,7 +877,6 @@ function AgentCard({
             </h3>
             <div className="flex items-center gap-1.5 mt-0.5">
               {listing.seller.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={listing.seller.avatarUrl}
                   alt=""

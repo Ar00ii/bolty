@@ -263,7 +263,6 @@ function Avatar({
   const cls =
     size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-sm';
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
       <img
         src={src}
@@ -930,7 +929,6 @@ export default function ProfilePage() {
                 )}
                 {walletAddress && (
                   <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src="/metamask.png"
                       alt=""
@@ -1330,7 +1328,6 @@ export default function ProfilePage() {
                       border: '1px solid rgba(251,146,60,0.2)',
                     }}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
                   </div>
                   <div className="flex-1 min-w-0">

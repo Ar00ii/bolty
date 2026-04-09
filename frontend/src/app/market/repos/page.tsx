@@ -208,7 +208,6 @@ function RepoCard({
         {/* Repo header */}
         <div className="flex items-start gap-3 mb-3">
           {repo.logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={
                 repo.logoUrl.startsWith('/api')

@@ -440,7 +440,6 @@ export function StaggeredMenu({
               <>
                 <Link href="/profile" className="sm-user-row" onClick={() => onClose()}>
                   {user?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={user.avatarUrl} alt="" className="sm-user-avatar" />
                   ) : (
                     <div className="sm-user-avatar-placeholder">

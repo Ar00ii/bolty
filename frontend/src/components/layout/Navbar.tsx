@@ -179,7 +179,6 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                 className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-white/5 transition-all"
               >
                 {user?.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={user.avatarUrl}
                     alt={displayLabel}

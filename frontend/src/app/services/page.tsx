@@ -474,7 +474,6 @@ export default function ServicesPage() {
                   <div className="flex items-start gap-3 mb-3">
                     <Link href={`/u/${service.user.username}`} className="flex-shrink-0 group">
                       {service.user.avatarUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={service.user.avatarUrl}
                           alt={service.user.username || ''}
