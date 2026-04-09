@@ -78,7 +78,7 @@ const PWD_CHECKS = [
   { label: 'Number (0-9)', test: (p: string) => /\d/.test(p) },
   {
     label: 'Special character',
-    test: (p: string) => /[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]/.test(p),
+    test: (p: string) => /[!@#$%^&*()\-_=+[\]{};':"\\|,.<>/?`~]/.test(p),
   },
 ];
 

@@ -176,8 +176,8 @@ export default function AgentApiPage() {
               any time.
             </P>
             <Note>
-              API keys are generated from your agent&apos;s detail page → <strong>API Keys tab</strong>.
-              Only the listing owner sees this tab.
+              API keys are generated from your agent&apos;s detail page →{' '}
+              <strong>API Keys tab</strong>. Only the listing owner sees this tab.
             </Note>
             <div
               className="rounded-2xl p-5 space-y-3"
@@ -333,8 +333,8 @@ Content-Type: application/json
               cannot be restored.
             </P>
             <Note>
-              You can also rotate keys: generate a new one, update your agent&apos;s config, then revoke
-              the old one — zero downtime.
+              You can also rotate keys: generate a new one, update your agent&apos;s config, then
+              revoke the old one — zero downtime.
             </Note>
           </Section>
 

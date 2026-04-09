@@ -385,7 +385,7 @@ export default function HowItWorks() {
           </Step>
 
           <Step n={3} title="Approve the signature">
-            You'll see a message like:
+            You&apos;ll see a message like:
             <br />
             <code
               style={{
@@ -420,8 +420,8 @@ export default function HowItWorks() {
           </p>
 
           <Step n={1} title="Go to Profile → Connections">
-            Click on <strong>Connect GitHub</strong>. You'll be redirected to GitHub's authorization
-            page.
+            Click on <strong>Connect GitHub</strong>. You&apos;ll be redirected to GitHub&apos;s
+            authorization page.
           </Step>
 
           <Step n={2} title="Authorize Bolty">
@@ -601,11 +601,11 @@ export default function HowItWorks() {
               </li>
               <li>
                 <strong style={{ color: 'var(--text)' }}>Agent Endpoint URL</strong> — optional:
-                your agent's webhook URL for autonomous negotiations (see below)
+                your agent&apos;s webhook URL for autonomous negotiations (see below)
               </li>
               <li>
                 <strong style={{ color: 'var(--text)' }}>Upload file</strong> — optional: attach
-                your agent's code or documentation
+                your agent&apos;s code or documentation
               </li>
             </ul>
           </Step>
@@ -622,13 +622,14 @@ export default function HowItWorks() {
           {/* ── TRADING ── */}
           <H2 id="trading">Buying &amp; Trading</H2>
           <p style={{ color: '#8b949e', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-            All purchases on Bolty are on-chain. Your wallet sends ETH directly — Bolty's smart
-            contract holds it in escrow until the trade is confirmed, then releases to the seller.
+            All purchases on Bolty are on-chain. Your wallet sends ETH directly —
+            {' '}
+Bolty&apos;s smart contract holds it in escrow until the trade is confirmed, then releases to the seller.
           </p>
 
           <Step n={1} title="Browse the marketplace">
             Go to <strong>Market → Agents</strong> or <strong>Market → Repositories</strong>. Use
-            search and filters (language, type, price) to find what you're looking for.
+            search and filters (language, type, price) to find what you&apos;re looking for.
           </Step>
 
           <Step n={2} title="Choose how to purchase">
@@ -643,8 +644,8 @@ export default function HowItWorks() {
                 seller and propose a lower price
               </li>
               <li>
-                <strong style={{ color: 'var(--text)' }}>Let AI negotiate for you</strong> — Bolty's
-                AI handles back-and-forth automatically using your own deployed agent
+                <strong style={{ color: 'var(--text)' }}>Let AI negotiate for you</strong> —
+                Bolty&apos;s AI handles back-and-forth automatically using your own deployed agent
               </li>
             </ul>
           </Step>
@@ -653,7 +654,7 @@ export default function HowItWorks() {
             Once you agree on a price, MetaMask (or your WalletConnect wallet) will prompt you to
             confirm <strong>two transactions</strong>:
             <ol style={{ marginTop: '0.5rem', paddingLeft: '1.25rem', lineHeight: 2 }}>
-              <li>Payment to the seller's wallet (97.5% of the amount)</li>
+              <li>Payment to the seller&apos;s wallet (97.5% of the amount)</li>
               <li>Platform fee to Bolty (2.5% of the amount)</li>
             </ol>
             Approve both. Funds enter the escrow contract.

@@ -557,7 +557,7 @@ function NegotiationModal({
             style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
           >
             <p className="text-zinc-600 text-xs font-mono">
-              floor price: {listing.minPrice} {listing.currency} — agents won't go below this
+              floor price: {listing.minPrice} {listing.currency} — agents won&apos;t go below this
             </p>
           </div>
         )}
