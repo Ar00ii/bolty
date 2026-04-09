@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 interface HexagonPatternProps {
   className?: string;
@@ -10,7 +10,7 @@ export const HexagonPattern = React.forwardRef<
   HTMLCanvasElement,
   HexagonPatternProps & React.HTMLAttributes<HTMLCanvasElement>
 >(({ className = '', ...props }, ref) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -82,17 +82,16 @@ export const HexagonPattern = React.forwardRef<
     }
   }, []);
 
-  return (
-    <canvas
-      ref={(el) => {
-        canvasRef.current = el;
-        if (typeof ref === 'function') ref(el);
-        else if (ref) ref.current = el;
-      }}
-      className={`w-full h-full ${className}`}
-      {...props}
-    />
+  const handleRef = useCallback(
+    (el: HTMLCanvasElement | null) => {
+      canvasRef.current = el;
+      if (typeof ref === 'function') ref(el);
+      else if (ref) ref.current = el;
+    },
+    [ref],
   );
+
+  return <canvas ref={handleRef} className={`w-full h-full ${className}`} {...props} />;
 });
 
 HexagonPattern.displayName = 'HexagonPattern';

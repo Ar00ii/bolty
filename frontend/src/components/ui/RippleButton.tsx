@@ -77,7 +77,6 @@ export const RippleButton = React.forwardRef<HTMLButtonElement, RippleButtonProp
           ${sizeStyles[size]}
           ${className}
         `}
-        {...props}
       >
         {/* Ripples */}
         <div className="absolute inset-0 pointer-events-none">

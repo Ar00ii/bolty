@@ -18,7 +18,7 @@ export default function AiPage() {
           style={{ background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.25)' }}
         >
           <p className="text-yellow-400 font-mono text-sm font-light">
-            // STATUS: INACTIVE — MAINTENANCE
+            {'// STATUS: INACTIVE — MAINTENANCE'}
           </p>
         </div>
         <p className="text-zinc-400 text-sm font-mono leading-relaxed max-w-md mx-auto mb-2">

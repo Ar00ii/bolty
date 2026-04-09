@@ -21,15 +21,16 @@ const Beam = ({
   x,
   delay,
   duration,
+  hue,
+  ar,
 }: {
   width: string | number;
   x: string | number;
   delay: number;
   duration: number;
+  hue: number;
+  ar: number;
 }) => {
-  const hue = Math.floor(Math.random() * 360);
-  const ar = Math.floor(Math.random() * 10) + 1;
-
   return (
     <motion.div
       style={
@@ -68,14 +69,18 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   ...props
 }) => {
   const generateBeams = useCallback(() => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     const beams = [];
     const cellsPerSide = Math.floor(100 / beamSize);
     const step = cellsPerSide / beamsPerSide;
 
+    // eslint-disable-next-line no-plusplus
     for (let i = 0; i < beamsPerSide; i++) {
       const x = Math.floor(i * step);
       const delay = Math.random() * (beamDelayMax - beamDelayMin) + beamDelayMin;
-      beams.push({ x, delay });
+      const hue = Math.floor(Math.random() * 360);
+      const ar = Math.floor(Math.random() * 10) + 1;
+      beams.push({ x, delay, hue, ar });
     }
     return beams;
   }, [beamsPerSide, beamSize, beamDelayMax, beamDelayMin]);
@@ -88,17 +93,15 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
   return (
     <div className={cn('relative overflow-hidden', className)} {...props}>
       <div
+        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
         style={
           {
             '--perspective': `${perspective}px`,
             '--grid-color': gridColor,
             '--beam-size': `${beamSize}%`,
+            perspective: `${perspective}px`,
           } as React.CSSProperties
         }
-        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
-        style={{
-          perspective: `${perspective}px`,
-        }}
       >
         {/* top side */}
         <div
@@ -120,6 +123,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              hue={beam.hue}
+              ar={beam.ar}
             />
           ))}
         </div>
@@ -143,6 +148,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              hue={beam.hue}
+              ar={beam.ar}
             />
           ))}
         </div>
@@ -166,6 +173,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              hue={beam.hue}
+              ar={beam.ar}
             />
           ))}
         </div>
@@ -189,6 +198,8 @@ export const WarpBackground: React.FC<WarpBackgroundProps> = ({
               x={`${beam.x * beamSize}%`}
               delay={beam.delay}
               duration={beamDuration}
+              hue={beam.hue}
+              ar={beam.ar}
             />
           ))}
         </div>

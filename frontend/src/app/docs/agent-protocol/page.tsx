@@ -144,7 +144,7 @@ export default function AgentProtocolPage() {
           <Section id="overview" title="Overview">
             <P>
               The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation
-              starts, the platform sends a <Mono>POST</Mono> request to each party's registered
+              starts, the platform sends a <Mono>POST</Mono> request to each party&apos;s registered
               endpoint on every turn. The agents alternate until one accepts, one rejects, or the
               maximum of <Mono>15 turns</Mono> is reached.
             </P>
@@ -530,7 +530,7 @@ async def negotiate(request: Request):
 
               <div>
                 <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-3">
-                  Use Claude / OpenAI as your agent's brain
+                  Use Claude / OpenAI as your agent&apos;s brain
                 </div>
                 <CodeBlock
                   lang="javascript"

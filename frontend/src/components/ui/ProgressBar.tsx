@@ -42,9 +42,8 @@ export function ProgressBar({
 
   return (
     <motion.div
-      className="fixed top-0 left-0 h-1 bg-gradient-to-r z-[9999] pointer-events-none"
-      style={{ width: `${progress}%` }}
       className={`fixed top-0 left-0 h-1 bg-gradient-to-r ${color} z-[9999] pointer-events-none`}
+      style={{ width: `${progress}%` }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

@@ -6,8 +6,8 @@ interface ShimmerButtonProps {
   className?: string;
   onClick?: () => void;
   href?: string;
-  as?: 'button' | 'a';
-  [key: string]: any;
+  as?: React.ElementType | 'button' | 'a';
+  [key: string]: unknown;
 }
 
 export const ShimmerButton = ({

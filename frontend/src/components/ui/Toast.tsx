@@ -6,6 +6,12 @@ import React from 'react';
 
 import { useToast } from '@/lib/hooks/useToast';
 
+interface ToastType {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+}
+
 export function ToastContainer() {
   const { toasts, removeToast } = useToast();
 
@@ -20,7 +26,7 @@ export function ToastContainer() {
   );
 }
 
-function Toast({ toast, onClose }: { toast: any; onClose: () => void }) {
+function Toast({ toast, onClose }: { toast: ToastType; onClose: () => void }) {
   const icons = {
     success: <CheckCircle2 className="w-5 h-5 text-green-400" strokeWidth={2} />,
     error: <AlertCircle className="w-5 h-5 text-red-400" strokeWidth={2} />,

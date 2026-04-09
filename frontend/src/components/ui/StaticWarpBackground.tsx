@@ -22,17 +22,15 @@ export const StaticWarpBackground: React.FC<StaticWarpBackgroundProps> = ({
   return (
     <div className={cn('relative rounded-xl border overflow-hidden', className)} {...props}>
       <div
+        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
         style={
           {
             '--perspective': `${perspective}px`,
             '--grid-color': gridColor,
             '--beam-size': `${beamSize}%`,
+            perspective: `${perspective}px`,
           } as React.CSSProperties
         }
-        className="pointer-events-none absolute top-0 left-0 size-full overflow-hidden [clipPath:inset(0)]"
-        style={{
-          perspective: `${perspective}px`,
-        }}
       >
         {/* top side - static grid */}
         <div
