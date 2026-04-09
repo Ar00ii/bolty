@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+
 import './globals.css';
-import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ClientShell } from '@/components/layout/ClientShell';
-import { ThemeProvider } from '@/lib/theme/ThemeContext';
-import { ToastProvider } from '@/lib/hooks/useToast';
 import { ToastContainer } from '@/components/ui/Toast';
+import { AuthProvider } from '@/lib/auth/AuthProvider';
+import { ToastProvider } from '@/lib/hooks/useToast';
+import { ThemeProvider } from '@/lib/theme/ThemeContext';
 
 const BASE_URL = 'https://boltynetwork.xyz';
 

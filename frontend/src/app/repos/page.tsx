@@ -1,13 +1,5 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Link from 'next/link';
-import { GridPattern, genRandomPattern } from '@/components/ui/grid-feature-cards';
-import { DottedSurface } from '@/components/ui/dotted-surface';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { api, ApiError } from '@/lib/api/client';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import {
   GitBranch,
   Lock,
@@ -21,13 +13,20 @@ import {
   Wallet,
   Upload,
   X,
-  Users,
   Plus,
   Search,
   Trash2,
 } from 'lucide-react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import Link from 'next/link';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+
+import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { DottedSurface } from '@/components/ui/dotted-surface';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {

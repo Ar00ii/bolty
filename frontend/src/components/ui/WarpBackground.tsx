@@ -1,7 +1,7 @@
 'use client';
 
-import React, { HTMLAttributes, useCallback, useMemo } from 'react';
 import { motion } from 'motion/react';
+import React, { HTMLAttributes, useCallback, useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -40,7 +40,9 @@ const Beam = ({
           '--background': `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
         } as React.CSSProperties
       }
-      className={`absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]`}
+      className={
+        'absolute top-0 left-[var(--x)] aspect-[1/var(--aspect-ratio)] w-[var(--width)] [background:var(--background)]'
+      }
       initial={{ y: '100cqmax', x: '-50%' }}
       animate={{ y: '-100%', x: '-50%' }}
       transition={{

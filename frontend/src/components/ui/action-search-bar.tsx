@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Send } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
+import { Input } from '@/components/ui/input';
 
 function useDebounce<T>(value: T, delay: number = 200): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);

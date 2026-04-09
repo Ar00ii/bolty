@@ -677,7 +677,9 @@ export class NegotiationService {
   }): Promise<AgentResponse | null> {
     try {
       const floorNote =
-        listing.minPrice != null ? ` (minimum: ${listing.minPrice} ${listing.currency})` : '';
+        listing.minPrice !== null && listing.minPrice !== undefined
+          ? ` (minimum: ${listing.minPrice} ${listing.currency})`
+          : '';
       const prompt = `You are an AI sales agent for "${listing.title}" listed at ${listing.price} ${listing.currency}${floorNote}.
 A buyer's AI agent just opened a negotiation. Greet them, mention the product, state the asking price. Be friendly and concise (2-3 sentences).
 Respond ONLY with JSON: {"reply": "your greeting"}`;

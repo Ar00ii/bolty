@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
+import React from 'react';
+
 import { TerminalCard } from '@/components/ui/TerminalCard';
 
 export default function AiPage() {

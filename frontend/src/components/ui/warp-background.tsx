@@ -1,6 +1,7 @@
-import { cn } from '@/lib/utils';
 import { motion } from 'motion/react';
 import React, { HTMLAttributes, useCallback, useMemo } from 'react';
+
+import { cn } from '@/lib/utils';
 
 interface WarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -36,7 +37,9 @@ const Beam = ({
           '--background': `linear-gradient(hsl(${hue} 80% 60%), transparent)`,
         } as React.CSSProperties
       }
-      className={`absolute left-[var(--x)] top-0 [aspect-ratio:1/var(--aspect-ratio)] [background:var(--background)] [width:var(--width)]`}
+      className={
+        'absolute left-[var(--x)] top-0 [aspect-ratio:1/var(--aspect-ratio)] [background:var(--background)] [width:var(--width)]'
+      }
       initial={{ y: '100cqmax', x: '-50%' }}
       animate={{ y: '-100%', x: '-50%' }}
       transition={{

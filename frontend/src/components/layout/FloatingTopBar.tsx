@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
+
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 export function FloatingTopBar() {
   const { user, isAuthenticated, logout } = useAuth();

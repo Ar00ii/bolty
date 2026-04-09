@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { BentoGrid, BentoCard } from './bento-grid';
 import { Bot, Code2, Coins, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+
+import { BentoGrid, BentoCard } from './bento-grid';
 
 // ── Animated negotiation chat ─────────────────────────────────────────────────
 const MESSAGES = [

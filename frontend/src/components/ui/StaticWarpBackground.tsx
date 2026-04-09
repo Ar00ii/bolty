@@ -1,6 +1,7 @@
 'use client';
 
 import React, { HTMLAttributes } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface StaticWarpBackgroundProps extends HTMLAttributes<HTMLDivElement> {

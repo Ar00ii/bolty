@@ -129,7 +129,8 @@ const useAnimationLoop = (
       const ease = 1 - Math.exp(-dt / ANIMATION_CONFIG.SMOOTH_TAU);
       velocityRef.current += (target - velocityRef.current) * ease;
       if (seqSize > 0) {
-        let next = (((offsetRef.current + velocityRef.current * dt) % seqSize) + seqSize) % seqSize;
+        const next =
+          (((offsetRef.current + velocityRef.current * dt) % seqSize) + seqSize) % seqSize;
         offsetRef.current = next;
         track.style.transform = isVertical
           ? `translate3d(0, ${-next}px, 0)`

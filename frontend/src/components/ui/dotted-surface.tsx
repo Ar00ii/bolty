@@ -1,7 +1,8 @@
 'use client';
-import { cn } from '@/lib/utils';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+
+import { cn } from '@/lib/utils';
 
 type DottedSurfaceProps = Omit<React.ComponentProps<'div'>, 'ref'>;
 

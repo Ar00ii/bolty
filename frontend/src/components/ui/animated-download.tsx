@@ -1,7 +1,8 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
 import { motion, useReducedMotion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface DownloadProps {

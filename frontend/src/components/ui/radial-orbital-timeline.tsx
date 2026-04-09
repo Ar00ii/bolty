@@ -1,10 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Link, Zap } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
 import { Badge } from '@/components/ui/badge';
+import { BoltyLogo } from '@/components/ui/BoltyLogo';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
 
 interface TimelineItem {
   id: number;
@@ -190,7 +191,8 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                 <div
                   className={`absolute rounded-full ${isPulsing ? 'animate-pulse' : ''}`}
                   style={{
-                    background: `radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0) 70%)`,
+                    background:
+                      'radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0) 70%)',
                     width: `${item.energy * 0.5 + 40}px`,
                     height: `${item.energy * 0.5 + 40}px`,
                     left: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,

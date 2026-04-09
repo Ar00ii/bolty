@@ -1,21 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
-import { RenderHero } from '@/components/ui/RenderHero';
-import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
-import { ShimmerButton } from '@/components/ui/ShimmerButton';
-import { GradientText } from '@/components/ui/GradientText';
-import { Spotlight } from '@/components/ui/Spotlight';
-import { AnimatedCard } from '@/components/ui/AnimatedCard';
-import { HexagonPattern } from '@/components/ui/HexagonPattern';
-import { StaticWarpBackground } from '@/components/ui/StaticWarpBackground';
-import { WarpBackground } from '@/components/ui/WarpBackground';
-import { AnimatedCounter, CountUp } from '@/components/ui/AnimatedCounter';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Bot,
   GitBranch,
@@ -29,21 +14,25 @@ import {
   Upload,
   Rocket,
   CheckCircle2,
-  Search,
   Menu,
-  X,
   ChevronDown,
-  LogOut,
   Settings,
   User as UserIcon,
-  Bell,
   Code2,
   Zap,
-  Plus,
-  Circle,
-  Globe,
-  Mail,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
+
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
+import { GradientText } from '@/components/ui/GradientText';
+import { HexagonPattern } from '@/components/ui/HexagonPattern';
+import { RenderHero } from '@/components/ui/RenderHero';
+import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
 const FEATURES = [
@@ -514,7 +503,8 @@ export default function HomePage() {
                               className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
                               style={{
                                 background: accentBgMap[accentColor],
-                                boxShadow: `inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(255, 255, 255, 0.1)`,
+                                boxShadow:
+                                  'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(255, 255, 255, 0.1)',
                               }}
                             >
                               <Icon className="w-6 h-6" />

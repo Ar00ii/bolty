@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronUp, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export interface Column<T> {
   key: keyof T;
@@ -46,7 +46,7 @@ export function DataTable<T extends Record<string, any>>({
     }
   };
 
-  let sortedData = [...data];
+  const sortedData = [...data];
   if (sortKey && sortDir) {
     sortedData.sort((a, b) => {
       const aVal = a[sortKey];

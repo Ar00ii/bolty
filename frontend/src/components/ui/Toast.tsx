@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
+
 import { useToast } from '@/lib/hooks/useToast';
 
 export function ToastContainer() {

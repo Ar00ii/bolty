@@ -1,8 +1,5 @@
 'use client';
 
-import React, { useCallback, useLayoutEffect, useRef, useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { gsap } from 'gsap';
 import {
   Globe,
@@ -32,6 +29,10 @@ import {
   BookOpen,
   type LucideIcon,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React, { useCallback, useLayoutEffect, useRef, useState, useEffect } from 'react';
+
 import './StaggeredMenu.css';
 import type { User } from '@/lib/auth/AuthProvider';
 

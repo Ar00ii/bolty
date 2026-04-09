@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import './TrueFocus.css';
 
 interface TrueFocusProps {
