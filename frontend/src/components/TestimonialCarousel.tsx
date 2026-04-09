@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Cpu, Cloud, Server, Zap, Network } from 'lucide-react';
 
 interface Testimonial {
   quote: string;
   author: string;
   role: string;
   company: string;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const TESTIMONIALS: Testimonial[] = [
@@ -17,35 +18,35 @@ const TESTIMONIALS: Testimonial[] = [
     author: "MITCHELL HASHIMOTO",
     role: "CO-FOUNDER",
     company: "HASHICORP",
-    icon: "●"
+    icon: <Cpu className="w-6 h-6" />
   },
   {
     quote: "The most intuitive platform we've used for deploying AI agents at scale. It just works.",
     author: "SARAH CHEN",
     role: "HEAD OF ENGINEERING",
     company: "BASE44",
-    icon: "━"
+    icon: <Cloud className="w-6 h-6" />
   },
   {
     quote: "Zero operational overhead. We went from months of infrastructure setup to live in days.",
     author: "ALEX RODRIGUEZ",
     role: "FOUNDER & CEO",
     company: "THATCH",
-    icon: "□"
+    icon: <Server className="w-6 h-6" />
   },
   {
     quote: "The automation capabilities are unmatched. Our deployment velocity increased 10x.",
     author: "JAMES PARK",
     role: "CTO",
     company: "PARADIGM",
-    icon: "◀"
+    icon: <Zap className="w-6 h-6" />
   },
   {
     quote: "Finally, a platform that understands what builders need. Highly recommended.",
     author: "ELENA VASQUEZ",
     role: "PRODUCT LEAD",
     company: "MONADIC",
-    icon: "⊗"
+    icon: <Network className="w-6 h-6" />
   }
 ];
 
@@ -101,8 +102,8 @@ export const TestimonialCarousel = () => {
           >
             {/* Icon */}
             <div
-              className="text-lg mb-3"
-              style={{ color: 'rgba(255,255,255,0.7)' }}
+              className="mb-3"
+              style={{ color: 'rgba(59, 130, 246, 0.8)' }}
             >
               {testimonial.icon}
             </div>
