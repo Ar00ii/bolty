@@ -314,7 +314,7 @@ export default function HomePage() {
 
       {/* ── TECHNOLOGIES (SCROLL MARQUEE) ── */}
       <section
-        className="py-12 border-t relative overflow-hidden"
+        className="py-12 relative overflow-hidden"
         style={{ borderColor: 'var(--border)' }}
       >
         <ScrollVelocityRow duration={50}>
@@ -387,7 +387,7 @@ export default function HomePage() {
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
       <section
-        className="py-24 px-4 border-t relative overflow-hidden"
+        className="py-24 px-4 relative overflow-hidden"
         style={{
           borderColor: 'var(--border)',
           background: '#000000',
@@ -655,7 +655,7 @@ export default function HomePage() {
         </div>
 
         {/* ── FEATURES GRID SECTION ── */}
-        <div className="py-24 px-6 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        <div className="py-24 px-6" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="max-w-7xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -678,7 +678,7 @@ export default function HomePage() {
       </section>
 
       {/* ── HOW IT WORKS (SERVICES GRID) ── */}
-      <section className="py-24 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-24 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="w-full mx-auto">
           {/* ONE Unified Container with all content */}
           <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
@@ -805,7 +805,7 @@ export default function HomePage() {
       </section>
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -847,7 +847,7 @@ export default function HomePage() {
       </section>
 
       {/* ── FAQ SECTION ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -906,7 +906,7 @@ export default function HomePage() {
       </section>
 
       {/* ── NEWSLETTER SIGNUP ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -933,7 +933,7 @@ export default function HomePage() {
       </section>
 
       {/* ── CTA FINAL ── */}
-      <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
