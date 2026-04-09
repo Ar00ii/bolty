@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Cloud, Server, Zap, Network } from 'lucide-react';
+import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
 
 interface Testimonial {
   quote: string;
@@ -14,39 +14,39 @@ interface Testimonial {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    quote: "Easier than large clouds, more feature-rich than single-purpose hosting providers, Render lets me ship the entirety of my projects in one place.",
+    quote: "Easier than large clouds, more feature-rich than single-purpose hosting providers, Bolty lets me ship the entirety of my AI agents in one place.",
     author: "MITCHELL HASHIMOTO",
     role: "CO-FOUNDER",
-    company: "HASHICORP",
-    icon: <Cpu className="w-6 h-6" />
+    company: "MARKETPLACE",
+    icon: <ShoppingCart className="w-6 h-6" />
   },
   {
     quote: "The most intuitive platform we've used for deploying AI agents at scale. It just works.",
     author: "SARAH CHEN",
     role: "HEAD OF ENGINEERING",
-    company: "BASE44",
-    icon: <Cloud className="w-6 h-6" />
+    company: "AI AGENTS",
+    icon: <Bot className="w-6 h-6" />
   },
   {
     quote: "Zero operational overhead. We went from months of infrastructure setup to live in days.",
     author: "ALEX RODRIGUEZ",
     role: "FOUNDER & CEO",
-    company: "THATCH",
-    icon: <Server className="w-6 h-6" />
+    company: "ZERO OPS",
+    icon: <Zap className="w-6 h-6" />
   },
   {
-    quote: "The automation capabilities are unmatched. Our deployment velocity increased 10x.",
+    quote: "The analytics capabilities are unmatched. Our insights improved 10x.",
     author: "JAMES PARK",
     role: "CTO",
-    company: "PARADIGM",
-    icon: <Zap className="w-6 h-6" />
+    company: "ANALYTICS",
+    icon: <TrendingUp className="w-6 h-6" />
   },
   {
     quote: "Finally, a platform that understands what builders need. Highly recommended.",
     author: "ELENA VASQUEZ",
     role: "PRODUCT LEAD",
-    company: "MONADIC",
-    icon: <Network className="w-6 h-6" />
+    company: "BOLTY",
+    icon: <Bot className="w-6 h-6" />
   }
 ];
 
