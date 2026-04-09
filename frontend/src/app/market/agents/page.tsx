@@ -1734,6 +1734,14 @@ function CreateListingForm({
   const [teamMembers, setTeamMembers] = useState<Array<{ email: string; role: 'Owner' | 'Editor' | 'Viewer' }>>([
     { email: 'You (Owner)', role: 'Owner' },
   ]);
+  const [showIntegrations, setShowIntegrations] = useState(false);
+  const [integrations, setIntegrations] = useState<Record<string, boolean>>({
+    slack: false,
+    discord: false,
+    webhook: false,
+    email: false,
+    datadog: false,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const testAgent = async () => {
@@ -2300,6 +2308,19 @@ function CreateListingForm({
                 🧪 Test Agent in Sandbox
               </button>
             )}
+
+            {/* Integrations Button */}
+            <button
+              type="button"
+              onClick={() => setShowIntegrations(true)}
+              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+              style={{
+                borderColor: 'rgba(131,110,249,0.2)',
+                background: 'rgba(131,110,249,0.05)',
+              }}
+            >
+              ⚡ Setup Integrations
+            </button>
           </>
         )}
 
@@ -2796,6 +2817,128 @@ function CreateListingForm({
           )}
         </div>
       </form>
+
+      {/* Advanced Integrations Modal */}
+      {showIntegrations && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div
+            className="rounded-2xl border max-w-2xl w-full my-8"
+            style={{
+              background: '#0a0a12',
+              borderColor: 'rgba(131,110,249,0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+              <h3 className="text-lg font-light text-zinc-100">Setup Integrations</h3>
+              <button
+                onClick={() => setShowIntegrations(false)}
+                className="text-zinc-500 hover:text-zinc-300"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 space-y-3">
+              <p className="text-xs text-zinc-600 mb-4">
+                Connect your agent to external services for notifications and monitoring.
+              </p>
+
+              {[
+                { id: 'slack', name: 'Slack', description: 'Send agent notifications to Slack channels', icon: '💬' },
+                { id: 'discord', name: 'Discord', description: 'Post agent events to Discord webhooks', icon: '🎮' },
+                { id: 'webhook', name: 'Custom Webhook', description: 'Send data to your custom endpoint', icon: '🔗' },
+                { id: 'email', name: 'Email Alerts', description: 'Receive email notifications on errors', icon: '📧' },
+                { id: 'datadog', name: 'Datadog', description: 'Send metrics to Datadog monitoring', icon: '📊' },
+              ].map((integration) => (
+                <div
+                  key={integration.id}
+                  className="rounded-lg p-4 border"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    borderColor: integrations[integration.id] ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">{integration.icon}</span>
+                        <p className="text-sm font-light text-zinc-300">{integration.name}</p>
+                      </div>
+                      <p className="text-xs text-zinc-600">{integration.description}</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={integrations[integration.id]}
+                      onChange={(e) => {
+                        setIntegrations({
+                          ...integrations,
+                          [integration.id]: e.target.checked,
+                        });
+                      }}
+                      className="mt-1"
+                    />
+                  </div>
+
+                  {integrations[integration.id] && (
+                    <div className="mt-3 pt-3 border-t border-zinc-800 space-y-2">
+                      {integration.id === 'slack' && (
+                        <input
+                          type="text"
+                          placeholder="Slack webhook URL"
+                          className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        />
+                      )}
+                      {integration.id === 'discord' && (
+                        <input
+                          type="text"
+                          placeholder="Discord webhook URL"
+                          className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        />
+                      )}
+                      {integration.id === 'webhook' && (
+                        <input
+                          type="text"
+                          placeholder="Your endpoint URL"
+                          className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        />
+                      )}
+                      {integration.id === 'email' && (
+                        <input
+                          type="email"
+                          placeholder="Email for alerts"
+                          className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        />
+                      )}
+                      {integration.id === 'datadog' && (
+                        <input
+                          type="text"
+                          placeholder="Datadog API key"
+                          className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
+                        />
+                      )}
+                      <button className="text-xs px-2 py-1 rounded text-monad-300 border border-monad-500/20 hover:border-monad-500/40 transition-all">
+                        Test Connection
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              <button
+                onClick={() => setShowIntegrations(false)}
+                className="w-full py-2 px-4 rounded-lg text-xs font-light border transition-all"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.1)',
+                  color: '#e4e4e7',
+                  background: 'transparent',
+                }}
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Team Collaboration Modal */}
       {showTeam && (
