@@ -209,7 +209,7 @@ export class ServicesService {
     const newStatus = service.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
     return this.prisma.serviceListing.update({
       where: { id },
-      data: { status: newStatus as any },
+      data: { status: newStatus as unknown as string },
       select: { id: true, status: true },
     });
   }

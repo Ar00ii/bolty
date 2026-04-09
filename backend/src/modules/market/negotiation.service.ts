@@ -355,8 +355,13 @@ export class NegotiationService {
   private async runBuyerTurn(negId: string) {
     try {
       const neg = await this.fetchNegForAi(negId);
-      if (!neg || neg.status !== 'ACTIVE' || (neg as any).mode !== 'AI_AI') return;
-      if ((neg as any).turnCount >= MAX_TURNS) {
+      if (
+        !neg ||
+        neg.status !== 'ACTIVE' ||
+        (neg as unknown as Record<string, unknown>).mode !== 'AI_AI'
+      )
+        return;
+      if (((neg as unknown as Record<string, unknown>).turnCount as number) >= MAX_TURNS) {
         await this.expireNegotiation(negId);
         return;
       }
@@ -387,7 +392,9 @@ export class NegotiationService {
 
       await this.prisma.agentNegotiation.update({
         where: { id: negId },
-        data: { turnCount: { increment: 1 } } as any,
+        data: {
+          turnCount: { increment: 1 },
+        } as unknown as Record<string, unknown>,
       });
 
       if (buyerReply.action === 'accept') {

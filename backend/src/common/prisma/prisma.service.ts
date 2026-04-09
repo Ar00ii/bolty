@@ -2,16 +2,16 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
-const FALLBACK_DATABASE_URL =
-  'postgresql://postgres.ffmgcebzjatjxsfldchf:reloj78.AAAA@aws-1-eu-west-2.pooler.supabase.com:5432/postgres';
-
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly config: ConfigService) {
-    const databaseUrl = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
+    const databaseUrl = config.get<string>('DATABASE_URL');
+    if (!databaseUrl) {
+      throw new Error('DATABASE_URL environment variable is required');
+    }
     super({
       log:
-        process.env.NODE_ENV === 'development'
+        config.get<string>('NODE_ENV') === 'development'
           ? ['query', 'info', 'warn', 'error']
           : ['warn', 'error'],
       datasources: {
