@@ -27,7 +27,7 @@ class CompleteDto {
 class SendMessageDto {
   @IsString()
   @MaxLength(5000)
-  content: string;
+  content!: string;
 }
 
 @Controller('orders')

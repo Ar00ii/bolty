@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { WinstonLogger } from './common/logger/winston.logger';
 
@@ -15,9 +15,10 @@ const REQUIRED_ENV_VARS = [
   'FRONTEND_URL',
 ];
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const missing = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);
   if (missing.length > 0) {
+    // eslint-disable-next-line no-console
     console.error(`[Bootstrap] Missing required environment variables: ${missing.join(', ')}`);
     process.exit(1);
   }

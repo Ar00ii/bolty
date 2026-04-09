@@ -121,7 +121,7 @@ export class NegotiationService {
     if (neg.buyerId !== senderId && neg.listing.sellerId !== senderId) throw new ForbiddenException();
 
     // In AI_AI mode humans cannot type manually
-    if ((neg as any).mode === 'AI_AI') {
+    if (neg.mode === 'AI_AI') {
       throw new BadRequestException(
         'This negotiation is in AI-vs-AI mode. Request a switch to human mode first.',
       );
@@ -432,7 +432,11 @@ export class NegotiationService {
   // ── Seller agent ──────────────────────────────────────────────────────────
 
   private buildSandboxContext(
-    neg: any,
+    neg: {
+      id: string;
+      listing: { id: string; title: string; price: number; currency: string; minPrice?: number | null };
+      messages?: Array<{ fromRole: string; content: string; proposedPrice?: number | null; createdAt: Date }>;
+    },
     event: 'negotiation.start' | 'negotiation.message',
     message?: string,
     proposedPrice?: number,
@@ -449,7 +453,7 @@ export class NegotiationService {
       },
       message,
       proposedPrice,
-      history: (neg.messages ?? []).map((m: any) => ({
+      history: (neg.messages ?? []).map((m) => ({
         role: m.fromRole,
         content: m.content,
         proposedPrice: m.proposedPrice,
@@ -458,7 +462,11 @@ export class NegotiationService {
     };
   }
 
-  private async sellerAgentGreet(neg: any): Promise<AgentResponse | null> {
+  private async sellerAgentGreet(neg: {
+    id: string;
+    listing: { id: string; title: string; price: number; currency: string; minPrice?: number | null; agentEndpoint?: string | null; fileKey?: string | null; fileName?: string | null; fileMimeType?: string | null };
+    messages?: Array<{ fromRole: string; content: string; proposedPrice?: number | null; createdAt: Date }>;
+  }): Promise<AgentResponse | null> {
     const ctx = this.buildSandboxContext(neg, 'negotiation.start');
     if (neg.listing.agentEndpoint && isSafeUrl(neg.listing.agentEndpoint)) {
       return this.callWebhook(neg.listing.agentEndpoint, ctx);
@@ -511,7 +519,8 @@ export class NegotiationService {
         action: ['accept', 'reject', 'counter'].includes(data?.action) ? data.action : 'counter',
       };
     } catch (err) {
-      this.logger.warn(`Webhook failed (${url}): ${err.message}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Webhook failed (${url}): ${errMsg}`);
       return null;
     }
   }

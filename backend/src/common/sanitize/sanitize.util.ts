@@ -29,7 +29,7 @@ export function sanitizeText(input: string): string {
 
 // Validate that a string contains only safe characters
 export function isAlphanumericSafe(input: string): boolean {
-  return /^[a-zA-Z0-9_\-\.]+$/.test(input);
+  return /^[a-zA-Z0-9_\-.]+$/.test(input);
 }
 
 // Validate URL safety (prevent SSRF)
