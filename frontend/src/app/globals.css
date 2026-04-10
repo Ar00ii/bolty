@@ -1457,6 +1457,15 @@ p, span, a, li, button, input, textarea {
   }
 }
 
+@keyframes subtleScrollDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
 .profile-container {
   min-height: 100vh;
   background: linear-gradient(135deg, var(--bg) 0%, rgba(131, 110, 249, 0.02) 50%, var(--bg) 100%);
@@ -1589,7 +1598,8 @@ p, span, a, li, button, input, textarea {
   font-size: 14px;
   color: var(--text-secondary);
   font-weight: 300;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  animation: subtleScrollDown 2.5s ease-in-out infinite;
 }
 
 /* Profile Form Elements - Enhanced */

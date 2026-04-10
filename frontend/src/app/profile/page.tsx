@@ -877,10 +877,10 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="profile-container min-h-screen pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="profile-container min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-12 animate-[fade-in_0.5s_ease]">
+        <div className="mb-3 animate-[fade-in_0.5s_ease]">
           <h1 className="profile-title">Account Settings</h1>
           <p className="profile-subtitle">Manage your profile, security, and preferences</p>
         </div>
@@ -888,7 +888,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* ── Sidebar Menu ──────────────────────────────────────────── */}
           <div className="lg:col-span-1">
-            <nav className="profile-menu-sidebar sticky top-32 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+            <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
