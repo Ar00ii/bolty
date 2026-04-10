@@ -27,13 +27,13 @@ export const TechStack = memo(() => {
         <div className="tech-stack-track">
           {/* First set */}
           {techLogos.map((logo, i) => (
-            <div key={`first-${i}`} className="tech-logo">
+            <div key={`first-${i}`} className={`tech-logo ${logo.alt === 'GitHub' ? 'github-logo' : ''}`}>
               <img src={logo.src} alt={logo.alt} loading="lazy" />
             </div>
           ))}
           {/* Duplicate for seamless loop */}
           {techLogos.map((logo, i) => (
-            <div key={`second-${i}`} className="tech-logo">
+            <div key={`second-${i}`} className={`tech-logo ${logo.alt === 'GitHub' ? 'github-logo' : ''}`}>
               <img src={logo.src} alt={logo.alt} loading="lazy" />
             </div>
           ))}
