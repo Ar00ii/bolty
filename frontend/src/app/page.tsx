@@ -35,6 +35,7 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
+import { NestedBoxesBackground } from '@/components/NestedBoxesBackground';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -633,108 +634,8 @@ export default function HomePage() {
               </h2>
             </motion.div>
 
-            {/* Top: 2 boxes side by side */}
-            <div
-              className="grid grid-cols-2 gap-8"
-              style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-            >
-              {[
-                {
-                  name: 'Web service',
-                  desc: 'Frontend & backend hosting',
-                  details:
-                    'Deploy and scale web applications with automatic load balancing and CDN integration.',
-                  active: false,
-                },
-                {
-                  name: 'API Layer',
-                  desc: 'RESTful endpoints with auto-scaling',
-                  details:
-                    'Production-grade API infrastructure with rate limiting, versioning, and monitoring.',
-                  active: true,
-                },
-              ].map((service, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="bg-black rounded p-6 lg:p-8 max-w-md mx-4"
-                  style={{
-                    border: '2px solid',
-                    borderColor: i === 1 ? '#06B6D4' : '#836EF9',
-                  }}
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <CheckCircle2
-                      className={`w-6 h-6 flex-shrink-0 ${service.active ? 'text-green-400' : 'text-gray-600'}`}
-                    />
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h3
-                          className={`text-lg lg:text-xl font-light ${service.active ? 'text-green-400' : 'text-white'}`}
-                        >
-                          {service.name}
-                        </h3>
-                        {service.active && (
-                          <span className="text-xs text-green-400 border border-green-500 rounded-full px-2 py-0.5">
-                            Live
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Bottom: 3 boxes */}
-            <div
-              className="grid grid-cols-3 gap-8 pt-8"
-              style={{ borderColor: 'rgba(255, 255, 255, 0.5)' }}
-            >
-              {[
-                {
-                  name: 'Database',
-                  desc: 'Managed PostgreSQL & Redis',
-                  details:
-                    'High-availability database cluster with automatic backups and failover.',
-                },
-                {
-                  name: 'Queue Worker',
-                  desc: 'Background jobs & async tasks',
-                  details: 'Distributed task processing with retry logic and dead-letter handling.',
-                },
-                {
-                  name: 'Cache Layer',
-                  desc: 'Edge caching for low latency',
-                  details: 'Global edge network with intelligent cache invalidation.',
-                },
-              ].map((service, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: (i + 2) * 0.1 }}
-                  className="bg-black rounded p-6 lg:p-8"
-                  style={{
-                    border: '2px solid',
-                    borderColor: ['#836EF9', '#EC4899', '#06B6D4'][i],
-                  }}
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    <CheckCircle2 className="w-6 h-6 flex-shrink-0 text-gray-600" />
-                    <div className="flex-1">
-                      <h3 className="text-lg lg:text-xl font-light text-white">{service.name}</h3>
-                      <p className="text-sm lg:text-base text-gray-400 mt-1">{service.desc}</p>
-                    </div>
-                  </div>
-                  <p className="text-sm lg:text-base text-gray-300 ml-10">{service.details}</p>
-                </motion.div>
-              ))}
-            </div>
+            {/* Background with 3 nested boxes */}
+            <NestedBoxesBackground />
           </div>
         </div>
       </section>
