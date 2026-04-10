@@ -882,7 +882,6 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="mb-0 animate-[fade-in_0.5s_ease]">
           <h1 className="profile-title">Account Settings</h1>
-          <p className="profile-subtitle">Manage your profile, security, and preferences</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 -mt-8">
