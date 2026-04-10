@@ -76,7 +76,7 @@ export const validators = {
 
 export function validateForm<T extends Record<string, any>>(
   data: T,
-  schema: Record<keyof T, (value: any) => string | null>,
+  schema: Partial<Record<keyof T, (value: any) => string | null>>,
 ): ValidationError[] {
   const errors: ValidationError[] = [];
 
