@@ -913,7 +913,7 @@ export default function ProfilePage() {
               {/* Leaderboard */}
               <Link
                 href="/reputation/leaderboard"
-                className="profile-menu-item min-w-fit lg:w-full hover:text-white lg:mb-24"
+                className="profile-menu-item w-full min-w-fit hover:text-white lg:mb-24"
               >
                 <div className="profile-menu-icon">
                   <svg
