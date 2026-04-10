@@ -1482,8 +1482,10 @@ p, span, a, li, button, input, textarea {
 
 .profile-menu-item {
   position: relative;
-  display: flex;
-  align-items: center;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
   gap: 16px;
   padding: 16px 20px;
   cursor: pointer;
