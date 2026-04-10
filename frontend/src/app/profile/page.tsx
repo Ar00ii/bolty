@@ -877,17 +877,17 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="profile-container min-h-screen pt-12 pb-40 px-4 sm:px-6 lg:px-8">
+    <div className="profile-container min-h-screen pt-8 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-0 animate-[fade-in_0.5s_ease]">
-          <h1 className="profile-title">Account Settings</h1>
+          <h1 className="text-2xl font-bold text-white">Account Settings</h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 -mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 -mt-4">
           {/* ── Sidebar Menu ──────────────────────────────────────────── */}
           <div className="lg:col-span-1">
-            <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+            <nav className="profile-menu-sidebar sticky top-20 lg:space-y-1 lg:space-x-0 space-x-1 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
@@ -2039,33 +2039,31 @@ export default function ProfilePage() {
           {/* API KEYS */}
           {tab === 'api-keys' && (
             <div className="profile-content-card">
-              <SectionHeader title="API Keys" subtitle="Manage your API credentials for integrations." />
-              <div className="space-y-4">
-                <div className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-white">Production Key</p>
-                      <p className="text-xs text-gray-400 mt-1">sk_prod_••••••••••••</p>
-                    </div>
-                    <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Copy</button>
+              <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
+              <div className="space-y-2">
+                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white">Production Key</p>
+                    <p className="text-xs text-gray-400">sk_prod_••••••••••••</p>
                   </div>
+                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Copy</button>
                 </div>
               </div>
-              <button className="mt-6 px-4 py-2 bg-black border border-gray-700 hover:border-gray-600 rounded-lg text-sm text-white">Generate New Key</button>
+              <button className="mt-3 px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-xs text-white">New Key</button>
             </div>
           )}
 
           {/* BILLING */}
           {tab === 'billing' && (
             <div className="profile-content-card">
-              <SectionHeader title="Billing & Subscription" subtitle="Manage your subscription and payment methods." />
-              <div className="space-y-6">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <p className="text-sm text-gray-400">Current Plan</p>
-                  <p className="text-xl font-medium text-white mt-2">Professional</p>
-                  <p className="text-xs text-gray-500 mt-1">$99/month • Renews Dec 15, 2024</p>
+              <h2 className="text-lg font-semibold text-white mb-3">Billing</h2>
+              <div className="space-y-2">
+                <div className="p-3 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">Current Plan</p>
+                  <p className="text-base font-medium text-white mt-1">Professional</p>
+                  <p className="text-xs text-gray-500">$99/month • Renews Dec 15</p>
                 </div>
-                <button className="w-full px-4 py-2 bg-black border border-gray-700 hover:border-gray-600 rounded-lg text-white text-sm">Update Payment Method</button>
+                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Update Payment</button>
               </div>
             </div>
           )}
@@ -2073,16 +2071,16 @@ export default function ProfilePage() {
           {/* USAGE */}
           {tab === 'usage' && (
             <div className="profile-content-card">
-              <SectionHeader title="Usage & Analytics" subtitle="Monitor your API usage and limits." />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">API Calls This Month</p>
-                  <p className="text-2xl font-medium text-white mt-2">24,582</p>
-                  <p className="text-xs text-gray-500 mt-1">of 100,000 limit</p>
+              <h2 className="text-lg font-semibold text-white mb-3">Usage</h2>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2 border border-gray-700 rounded text-center">
+                  <p className="text-xs text-gray-400">API Calls</p>
+                  <p className="text-lg font-medium text-white mt-1">24,582</p>
+                  <p className="text-xs text-gray-500">/ 100,000</p>
                 </div>
-                <div className="p-4 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">Active Agents</p>
-                  <p className="text-2xl font-medium text-white mt-2">12</p>
+                <div className="p-2 border border-gray-700 rounded text-center">
+                  <p className="text-xs text-gray-400">Agents</p>
+                  <p className="text-lg font-medium text-white mt-1">12</p>
                 </div>
               </div>
             </div>
@@ -2091,21 +2089,21 @@ export default function ProfilePage() {
           {/* NOTIFICATIONS */}
           {tab === 'notifications' && (
             <div className="profile-content-card">
-              <SectionHeader title="Notification Preferences" subtitle="Choose how you want to be notified." />
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 border border-gray-700 rounded-lg">
+              <h2 className="text-lg font-semibold text-white mb-3">Notifications</h2>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
                   <div>
-                    <p className="text-sm font-medium text-white">Email on API errors</p>
-                    <p className="text-xs text-gray-400">Get notified about failed requests</p>
+                    <p className="text-sm text-white">API Errors</p>
+                    <p className="text-xs text-gray-400">Failed requests</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                  <input type="checkbox" defaultChecked className="w-3 h-3" />
                 </div>
-                <div className="flex items-center justify-between p-3 border border-gray-700 rounded-lg">
+                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
                   <div>
-                    <p className="text-sm font-medium text-white">Weekly usage report</p>
-                    <p className="text-xs text-gray-400">Summary of your API usage</p>
+                    <p className="text-sm text-white">Weekly Report</p>
+                    <p className="text-xs text-gray-400">Usage summary</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                  <input type="checkbox" defaultChecked className="w-3 h-3" />
                 </div>
               </div>
             </div>
@@ -2114,21 +2112,21 @@ export default function ProfilePage() {
           {/* INTEGRATIONS */}
           {tab === 'integrations' && (
             <div className="profile-content-card">
-              <SectionHeader title="Integrations" subtitle="Connect third-party services to Bolty." />
-              <div className="space-y-3">
-                <div className="p-4 border border-gray-700 rounded-lg flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white mb-3">Integrations</h2>
+              <div className="space-y-2">
+                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white">Slack</p>
-                    <p className="text-xs text-gray-400">Send notifications to Slack</p>
+                    <p className="text-sm text-white">Slack</p>
+                    <p className="text-xs text-gray-400">Notifications</p>
                   </div>
-                  <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connect</button>
+                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded">Connect</button>
                 </div>
-                <div className="p-4 border border-gray-700 rounded-lg flex items-center justify-between">
+                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-white">GitHub</p>
-                    <p className="text-xs text-gray-400">Deploy from GitHub repos</p>
+                    <p className="text-sm text-white">GitHub</p>
+                    <p className="text-xs text-gray-400">Connected</p>
                   </div>
-                  <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connected</button>
+                  <span className="text-xs text-green-400">✓</span>
                 </div>
               </div>
             </div>
@@ -2137,15 +2135,15 @@ export default function ProfilePage() {
           {/* ACTIVITY LOG */}
           {tab === 'activity' && (
             <div className="profile-content-card">
-              <SectionHeader title="Activity Log" subtitle="View your account activity history." />
+              <h2 className="text-lg font-semibold text-white mb-3">Activity</h2>
               <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg text-sm">
+                <div className="p-2 border border-gray-700 rounded text-xs">
                   <p className="text-gray-300">Profile updated</p>
-                  <p className="text-xs text-gray-500 mt-1">Dec 10, 2024 at 2:30 PM</p>
+                  <p className="text-gray-500">Dec 10 • 2:30 PM</p>
                 </div>
-                <div className="p-3 border border-gray-700 rounded-lg text-sm">
+                <div className="p-2 border border-gray-700 rounded text-xs">
                   <p className="text-gray-300">API key generated</p>
-                  <p className="text-xs text-gray-500 mt-1">Dec 8, 2024 at 10:15 AM</p>
+                  <p className="text-gray-500">Dec 8 • 10:15 AM</p>
                 </div>
               </div>
             </div>
@@ -2154,18 +2152,18 @@ export default function ProfilePage() {
           {/* PREFERENCES */}
           {tab === 'preferences' && (
             <div className="profile-content-card">
-              <SectionHeader title="Preferences" subtitle="Customize your experience." />
-              <div className="space-y-4">
+              <h2 className="text-lg font-semibold text-white mb-3">Preferences</h2>
+              <div className="space-y-2">
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Theme</label>
-                  <select className="mt-2 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
+                  <label className="text-xs font-medium text-gray-300">Theme</label>
+                  <select className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs">
                     <option>Dark (Default)</option>
                     <option>Light</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Language</label>
-                  <select className="mt-2 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
+                  <label className="text-xs font-medium text-gray-300">Language</label>
+                  <select className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs">
                     <option>English</option>
                     <option>Spanish</option>
                     <option>French</option>

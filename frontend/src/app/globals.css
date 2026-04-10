@@ -1303,5 +1303,5 @@ p, span, a, li, button, input, textarea {
 
   /* ── Profile Content Card ── */
   .profile-content-card {
-    @apply p-6 border border-gray-700 rounded-lg bg-gray-900/30 backdrop-blur-sm;
+    @apply p-3 border border-gray-700 rounded-lg bg-gray-900/30 backdrop-blur-sm;
   }
