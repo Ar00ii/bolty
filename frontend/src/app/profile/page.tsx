@@ -923,7 +923,7 @@ export default function ProfilePage() {
               <div className="space-y-1.5">
                 {githubLogin && (
                   <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    <IconGitHub className="w-3 h-3 flex-shrink-0" />
+                    <IconGitHub className="w-3 h-3 flex-shrink-0 text-white" />
                     <span className="truncate font-mono">{githubLogin}</span>
                   </div>
                 )}
@@ -1416,7 +1416,7 @@ export default function ProfilePage() {
                   className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}
                 >
                   <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
-                    <IconGitHub className="w-5 h-5 text-[var(--text)]" />
+                    <IconGitHub className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
