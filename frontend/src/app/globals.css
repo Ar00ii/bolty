@@ -1307,7 +1307,7 @@ p, span, a, li, button, input, textarea {
   }
 
   .profile-menu-item {
-    @apply relative flex flex-col items-center justify-center aspect-square px-2 py-2 rounded-xl border-2 border-gray-700/40 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200 text-gray-400 hover:text-purple-300;
+    @apply relative flex flex-col items-center justify-center aspect-square px-1 py-1 rounded-lg border border-gray-700/40 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200 text-gray-400 hover:text-purple-300;
   }
 
   .profile-menu-item.active {
@@ -1315,11 +1315,11 @@ p, span, a, li, button, input, textarea {
   }
 
   .profile-menu-icon {
-    @apply w-5 h-5 flex-shrink-0;
+    @apply w-4 h-4 flex-shrink-0;
   }
 
   .profile-menu-label {
-    @apply text-xs font-semibold text-center leading-tight mt-1;
+    @apply text-[10px] font-semibold text-center leading-none mt-0.5;
   }
 
   /* ── Profile Content Card ── */
