@@ -281,7 +281,7 @@ function Avatar({
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-8">
+    <div className="mb-8 mt-0">
       <h2 className="text-lg font-light text-white tracking-tight">{title}</h2>
       {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>}
     </div>
@@ -885,7 +885,7 @@ export default function ProfilePage() {
           <p className="profile-subtitle">Manage your profile, security, and preferences</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 -mt-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-1">
           {/* ── Sidebar Menu ──────────────────────────────────────────── */}
           <div className="lg:col-span-1">
             <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
