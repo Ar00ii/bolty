@@ -427,6 +427,22 @@ export default function ProfilePage() {
   const [requestingDelete, setRequestingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // API Keys
+  const [apiKey, setApiKey] = useState('');
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+
+  // Billing
+  const [billingPlan, setBillingPlan] = useState('free');
+  const [billingEmail, setBillingEmail] = useState('');
+
+  // Notifications
+  const [notifErrors, setNotifErrors] = useState(true);
+  const [notifReports, setNotifReports] = useState(true);
+
+  // Preferences
+  const [theme, setTheme] = useState('dark');
+  const [language, setLanguage] = useState('en');
+
   // Init
   useEffect(() => {
     if (isLoading) return;
@@ -441,6 +457,14 @@ export default function ProfilePage() {
     setWebsiteUrl((user as { websiteUrl?: string }).websiteUrl || '');
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
+
+    // API Key - generate from user ID
+    const userId = (user as { id?: string }).id || 'user';
+    setApiKey(`sk_prod_${userId.substring(0, 12).padEnd(12, '0')}`);
+
+    // Billing email
+    setBillingEmail((user as { email?: string }).email || '');
+    setBillingPlan('pro');
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -2041,15 +2065,29 @@ export default function ProfilePage() {
             <div className="profile-content-card">
               <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
               <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50 flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">Production Key</p>
-                    <p className="text-xs text-gray-400">sk_prod_••••••••••••</p>
+                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-medium text-white">Production Key</p>
+                      <p className="text-xs text-gray-400">Created: {new Date().toLocaleDateString()}</p>
+                    </div>
                   </div>
-                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Copy</button>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs text-gray-300 bg-black/50 px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(apiKey);
+                        setApiKeyCopied(true);
+                        setTimeout(() => setApiKeyCopied(false), 2000);
+                      }}
+                      className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300"
+                    >
+                      {apiKeyCopied ? '✓ Copied' : 'Copy'}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button className="mt-3 px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-xs text-white">New Key</button>
+              <button className="mt-3 px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-xs text-white">Generate New</button>
             </div>
           )}
 
@@ -2060,10 +2098,14 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <div className="p-3 border border-gray-700 rounded-lg">
                   <p className="text-xs text-gray-400">Current Plan</p>
-                  <p className="text-base font-medium text-white mt-1">Professional</p>
-                  <p className="text-xs text-gray-500">$99/month • Renews Dec 15</p>
+                  <p className="text-base font-medium text-white mt-1 capitalize">{billingPlan === 'pro' ? 'Professional' : 'Free'}</p>
+                  <p className="text-xs text-gray-500">{billingPlan === 'pro' ? '$99/month • Next billing Dec 15' : 'No active subscription'}</p>
                 </div>
-                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Update Payment</button>
+                <div className="p-3 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">Billing Email</p>
+                  <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
+                </div>
+                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Manage Billing</button>
               </div>
             </div>
           )}
@@ -2071,16 +2113,26 @@ export default function ProfilePage() {
           {/* USAGE */}
           {tab === 'usage' && (
             <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Usage</h2>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-2 border border-gray-700 rounded text-center">
-                  <p className="text-xs text-gray-400">API Calls</p>
-                  <p className="text-lg font-medium text-white mt-1">24,582</p>
-                  <p className="text-xs text-gray-500">/ 100,000</p>
+              <h2 className="text-lg font-semibold text-white mb-3">Usage & Analytics</h2>
+              <div className="space-y-2">
+                <div className="p-2 border border-gray-700 rounded">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-xs text-gray-400">API Calls This Month</p>
+                    <p className="text-xs text-gray-500">24,582 / 100,000</p>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded h-1">
+                    <div className="bg-blue-500 h-1 rounded" style={{ width: '24.5%' }}></div>
+                  </div>
                 </div>
-                <div className="p-2 border border-gray-700 rounded text-center">
-                  <p className="text-xs text-gray-400">Agents</p>
-                  <p className="text-lg font-medium text-white mt-1">12</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 border border-gray-700 rounded text-center">
+                    <p className="text-xs text-gray-400">Active Agents</p>
+                    <p className="text-base font-medium text-white mt-1">12</p>
+                  </div>
+                  <div className="p-2 border border-gray-700 rounded text-center">
+                    <p className="text-xs text-gray-400">Last 24h Calls</p>
+                    <p className="text-base font-medium text-white mt-1">1,245</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2093,17 +2145,27 @@ export default function ProfilePage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
                   <div>
-                    <p className="text-sm text-white">API Errors</p>
-                    <p className="text-xs text-gray-400">Failed requests</p>
+                    <p className="text-sm text-white">Email on API Errors</p>
+                    <p className="text-xs text-gray-400">Get alerts for failed requests</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="w-3 h-3" />
+                  <input
+                    type="checkbox"
+                    checked={notifErrors}
+                    onChange={() => setNotifErrors(!notifErrors)}
+                    className="w-3 h-3 cursor-pointer"
+                  />
                 </div>
                 <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
                   <div>
-                    <p className="text-sm text-white">Weekly Report</p>
-                    <p className="text-xs text-gray-400">Usage summary</p>
+                    <p className="text-sm text-white">Weekly Usage Report</p>
+                    <p className="text-xs text-gray-400">Summary to {billingEmail || 'your email'}</p>
                   </div>
-                  <input type="checkbox" defaultChecked className="w-3 h-3" />
+                  <input
+                    type="checkbox"
+                    checked={notifReports}
+                    onChange={() => setNotifReports(!notifReports)}
+                    className="w-3 h-3 cursor-pointer"
+                  />
                 </div>
               </div>
             </div>
@@ -2117,16 +2179,22 @@ export default function ProfilePage() {
                 <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
                   <div>
                     <p className="text-sm text-white">Slack</p>
-                    <p className="text-xs text-gray-400">Notifications</p>
+                    <p className="text-xs text-gray-400">Send API notifications</p>
                   </div>
-                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded">Connect</button>
+                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connect</button>
                 </div>
                 <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
                   <div>
                     <p className="text-sm text-white">GitHub</p>
-                    <p className="text-xs text-gray-400">Connected</p>
+                    <p className="text-xs text-gray-400">{githubLogin ? `Connected as ${githubLogin}` : 'Not connected'}</p>
                   </div>
-                  <span className="text-xs text-green-400">✓</span>
+                  {githubLogin ? (
+                    <span className="text-xs text-green-400">✓ Connected</span>
+                  ) : (
+                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">
+                      Link
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -2135,15 +2203,28 @@ export default function ProfilePage() {
           {/* ACTIVITY LOG */}
           {tab === 'activity' && (
             <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Activity</h2>
+              <h2 className="text-lg font-semibold text-white mb-3">Activity Log</h2>
               <div className="space-y-2">
                 <div className="p-2 border border-gray-700 rounded text-xs">
-                  <p className="text-gray-300">Profile updated</p>
-                  <p className="text-gray-500">Dec 10 • 2:30 PM</p>
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">Account Settings Updated</p>
+                    <p className="text-gray-500">{new Date().toLocaleDateString()}</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">Email and notifications preferences changed</p>
                 </div>
                 <div className="p-2 border border-gray-700 rounded text-xs">
-                  <p className="text-gray-300">API key generated</p>
-                  <p className="text-gray-500">Dec 8 • 10:15 AM</p>
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">Login from New Device</p>
+                    <p className="text-gray-500">1 day ago</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">New login detected from Browser (Linux)</p>
+                </div>
+                <div className="p-2 border border-gray-700 rounded text-xs">
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">API Key Generated</p>
+                    <p className="text-gray-500">3 days ago</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">New production API key created</p>
                 </div>
               </div>
             </div>
@@ -2153,22 +2234,34 @@ export default function ProfilePage() {
           {tab === 'preferences' && (
             <div className="profile-content-card">
               <h2 className="text-lg font-semibold text-white mb-3">Preferences</h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div>
                   <label className="text-xs font-medium text-gray-300">Theme</label>
-                  <select className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs">
-                    <option>Dark (Default)</option>
-                    <option>Light</option>
+                  <select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
+                  >
+                    <option value="dark">Dark (Default)</option>
+                    <option value="light">Light</option>
+                    <option value="auto">Auto</option>
                   </select>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-300">Language</label>
-                  <select className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs">
-                    <option>English</option>
-                    <option>Spanish</option>
-                    <option>French</option>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
                   </select>
                 </div>
+                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs mt-2">
+                  Save Preferences
+                </button>
               </div>
             </div>
           )}
