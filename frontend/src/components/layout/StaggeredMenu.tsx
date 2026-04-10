@@ -440,7 +440,11 @@ export function StaggeredMenu({
               <>
                 <Link href="/profile" className="sm-user-row" onClick={() => onClose()}>
                   {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} alt="" className="sm-user-avatar" />
+                    <img
+                      src={user.avatarUrl}
+                      alt={`${displayLabel}'s profile picture`}
+                      className="sm-user-avatar"
+                    />
                   ) : (
                     <div className="sm-user-avatar-placeholder">
                       {displayLabel[0]?.toUpperCase()}

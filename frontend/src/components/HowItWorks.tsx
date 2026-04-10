@@ -13,6 +13,8 @@ export const HowItWorks = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="mb-16"
+          role="region"
+          aria-label="How it works section"
         >
           <h2 className="text-5xl lg:text-6xl font-light text-white mb-4">
             Click, click, done.
