@@ -1300,3 +1300,134 @@ p, span, a, li, button, input, textarea {
     border-radius: inherit;
     pointer-events: none;
   }
+}
+
+/* Profile Page Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.profile-form-section {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.profile-sidebar {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.profile-card {
+  border: 1px solid rgba(168, 85, 247, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.03), rgba(131, 110, 249, 0.02));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-card:hover {
+  border-color: rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(131, 110, 249, 0.03));
+  box-shadow: 0 8px 24px rgba(131, 110, 249, 0.08);
+  transform: translateY(-2px);
+}
+
+.profile-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.25s ease;
+  font-weight: 300;
+}
+
+.profile-input:focus {
+  border-color: rgba(168, 85, 247, 0.5);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  outline: none;
+}
+
+.profile-input::placeholder {
+  color: var(--text-muted);
+}
+
+.tab-button {
+  position: relative;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.tab-button.active {
+  color: var(--brand);
+}
+
+.tab-button.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--accent-cyan));
+  border-radius: 1px;
+  animation: slideInLeft 0.2s ease-out;
+}
+
+.form-error {
+  color: var(--error);
+  font-size: 13px;
+  margin-top: 6px;
+  animation: fadeInUp 0.2s ease-out;
+}
+
+.form-success {
+  color: var(--success);
+  font-size: 13px;
+  margin-top: 6px;
+  animation: fadeInUp 0.2s ease-out;
+}

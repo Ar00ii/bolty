@@ -304,7 +304,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -313,7 +313,7 @@ function Textarea({ ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] resize-none ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] resize-none font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -323,7 +323,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="btn-primary w-full py-3 rounded-lg text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-purple-500/20"
     >
       {loading ? (
         <>
@@ -955,8 +955,8 @@ export default function ProfilePage() {
 
           {/* Nav list */}
           <nav
-            className="rounded-2xl border border-[var(--border)] overflow-hidden"
-            style={{ background: 'var(--bg-card)' }}
+            className="rounded-2xl border border-[rgba(168,85,247,0.15)] overflow-hidden backdrop-blur-sm"
+            style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.03), rgba(131,110,249,0.02))' }}
           >
             {(
               [
@@ -976,27 +976,27 @@ export default function ProfilePage() {
               <button
                 key={id}
                 onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150 ${i < arr.length - 1 ? 'border-b border-[var(--border)]' : ''} ${
-                  tab === id ? 'bg-monad-500/10' : 'hover:bg-white/[0.025]'
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all duration-200 ${i < arr.length - 1 ? 'border-b border-[rgba(168,85,247,0.1)]' : ''} ${
+                  tab === id ? 'bg-purple-600/10' : 'hover:bg-white/[0.03]'
                 }`}
               >
                 <div
-                  className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                  className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
                     tab === id
-                      ? 'bg-monad-500/20 border border-monad-500/25'
+                      ? 'bg-purple-500/20 border border-purple-500/30'
                       : 'bg-[var(--bg-elevated)] border border-[var(--border)]'
                   }`}
                 >
                   <Icon
-                    className={`w-3.5 h-3.5 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`}
+                    className={`w-3.5 h-3.5 ${tab === id ? 'text-purple-300' : 'text-[var(--text-muted)]'}`}
                   />
                 </div>
                 <span
-                  className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-light' : 'text-[var(--text)]'}`}
+                  className={`text-sm flex-1 font-light ${tab === id ? 'text-purple-200' : 'text-[var(--text)]'}`}
                 >
                   {label}
                 </span>
-                {tab === id && <div className="w-1 h-4 rounded-full bg-monad-400 flex-shrink-0" />}
+                {tab === id && <div className="w-1.5 h-5 rounded-full bg-gradient-to-b from-purple-400 to-purple-500 flex-shrink-0" />}
               </button>
             ))}
           </nav>
