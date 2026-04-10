@@ -76,11 +76,13 @@ export function useForm<T extends Record<string, unknown>>({
       // Real-time validation if schema exists
       if (validationSchema && name in validationSchema) {
         const validator = validationSchema[name as keyof T];
-        const error = validator(val);
-        setErrors((prev) => ({
-          ...prev,
-          [name]: error || '',
-        }));
+        if (typeof validator === 'function') {
+          const error = validator(val);
+          setErrors((prev) => ({
+            ...prev,
+            [name]: error || '',
+          }));
+        }
       }
     },
     [validationSchema],
