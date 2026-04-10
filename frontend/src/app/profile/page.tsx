@@ -8,7 +8,7 @@ import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity' | 'preferences';
 
 interface Friend {
   id: string;
@@ -892,9 +892,16 @@ export default function ProfilePage() {
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+                { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
+                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
+                { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
                 { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+                { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
+                { id: 'preferences' as Tab, label: 'Preferences', Icon: IconUser },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
                 <button

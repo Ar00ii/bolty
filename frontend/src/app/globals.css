@@ -11,7 +11,7 @@ html {
 button:focus,
 a:focus,
 input:focus {
-  outline: 2px solid rgba(168, 85, 247, 0.5);
+  outline: 2px solid rgba(255, 255, 255, 0.5);
   outline-offset: 2px;
 }
 
@@ -26,7 +26,7 @@ input:focus:not(:focus-visible) {
 button:focus-visible,
 a:focus-visible,
 input:focus-visible {
-  outline: 2px solid rgba(168, 85, 247, 0.8);
+  outline: 2px solid rgba(255, 255, 255, 0.8);
   outline-offset: 2px;
 }
 
@@ -809,7 +809,7 @@ p, span, a, li, button, input, textarea {
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     pointer-events: none;
   }
   @keyframes float {
@@ -885,13 +885,13 @@ p, span, a, li, button, input, textarea {
 
   .card-interactive:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(131, 110, 249, 0.15);
-    border-color: rgba(131, 110, 249, 0.3);
+    box-shadow: 0 12px 24px rgba(200, 200, 200, 0.15);
+    border-color: rgba(200, 200, 200, 0.3);
   }
 
   .card-elevated:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(131, 110, 249, 0.1);
+    box-shadow: 0 8px 16px rgba(200, 200, 200, 0.1);
   }
 
   /* ── Button Micro-interactions ── */
@@ -1024,7 +1024,7 @@ p, span, a, li, button, input, textarea {
 
   .filter-pill:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(131, 110, 249, 0.15);
+    box-shadow: 0 4px 8px rgba(200, 200, 200, 0.15);
   }
 
   /* ── Data Table Row Hover ── */
@@ -1033,7 +1033,7 @@ p, span, a, li, button, input, textarea {
   }
 
   table tbody tr:hover {
-    background-color: rgba(131, 110, 249, 0.05);
+    background-color: rgba(200, 200, 200, 0.05);
   }
 
   /* ── Pagination Button States ── */
@@ -1047,8 +1047,8 @@ p, span, a, li, button, input, textarea {
   }
 
   .pagination-btn:not(:disabled):hover {
-    background-color: rgba(131, 110, 249, 0.1);
-    border-color: rgba(131, 110, 249, 0.3);
+    background-color: rgba(200, 200, 200, 0.1);
+    border-color: rgba(200, 200, 200, 0.3);
   }
 
   /* ── Enhanced Card Hover Effects ── */
@@ -1067,7 +1067,7 @@ p, span, a, li, button, input, textarea {
   .agent-card:hover,
   .repo-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(131, 110, 249, 0.15);
+    box-shadow: 0 12px 32px rgba(200, 200, 200, 0.15);
   }
 
   /* ── Enhanced Button Hover Effects ── */
@@ -1083,7 +1083,7 @@ p, span, a, li, button, input, textarea {
   .btn:hover,
   [role="button"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(131, 110, 249, 0.2);
+    box-shadow: 0 8px 20px rgba(200, 200, 200, 0.2);
   }
 
   button:not(:disabled):active,
@@ -1156,8 +1156,8 @@ p, span, a, li, button, input, textarea {
   input[type="search"]:hover,
   textarea:hover,
   select:hover {
-    border-color: rgba(131, 110, 249, 0.3);
-    box-shadow: 0 0 12px rgba(131, 110, 249, 0.1);
+    border-color: rgba(200, 200, 200, 0.3);
+    box-shadow: 0 0 12px rgba(200, 200, 200, 0.1);
   }
 
   input[type="text"]:focus,
@@ -1167,7 +1167,7 @@ p, span, a, li, button, input, textarea {
   textarea:focus,
   select:focus {
     border-color: #836ef9;
-    box-shadow: 0 0 16px rgba(131, 110, 249, 0.25);
+    box-shadow: 0 0 16px rgba(200, 200, 200, 0.25);
   }
 
   /* ── Badge/Pill Animations ── */
@@ -1181,7 +1181,7 @@ p, span, a, li, button, input, textarea {
   .pill:hover,
   .tag:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(131, 110, 249, 0.2);
+    box-shadow: 0 4px 12px rgba(200, 200, 200, 0.2);
   }
 
   /* ── Icon Hover Effects ── */
@@ -1199,7 +1199,7 @@ p, span, a, li, button, input, textarea {
   /* ── Sidebar Styling ── */
   aside {
     scrollbar-width: thin;
-    scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
   }
 
   aside::-webkit-scrollbar {
@@ -1211,13 +1211,13 @@ p, span, a, li, button, input, textarea {
   }
 
   aside::-webkit-scrollbar-thumb {
-    background: rgba(168, 85, 247, 0.2);
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
     transition: background 0.2s;
   }
 
   aside::-webkit-scrollbar-thumb:hover {
-    background: rgba(168, 85, 247, 0.4);
+    background: rgba(255, 255, 255, 0.4);
   }
 
   /* Sidebar link/button base styles */
@@ -1232,7 +1232,7 @@ p, span, a, li, button, input, textarea {
     content: '';
     position: absolute;
     inset: 0;
-    background: rgba(168, 85, 247, 0.05);
+    background: rgba(255, 255, 255, 0.05);
     opacity: 0;
     border-radius: inherit;
     transition: opacity 0.2s ease;
@@ -1252,7 +1252,7 @@ p, span, a, li, button, input, textarea {
   /* ── Mobile Sidebar ── */
   @media (max-width: 1023px) {
     aside {
-      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -4px 0 16px rgba(131, 110, 249, 0.1);
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -4px 0 16px rgba(200, 200, 200, 0.1);
     }
 
     /* Touch-friendly spacing on mobile */
@@ -1264,7 +1264,7 @@ p, span, a, li, button, input, textarea {
   /* ── Focus Visible for Accessibility ── */
   aside button:focus-visible,
   aside a:focus-visible {
-    outline: 2px solid rgba(168, 85, 247, 0.6);
+    outline: 2px solid rgba(255, 255, 255, 0.6);
     outline-offset: -2px;
   }
 
@@ -1295,7 +1295,7 @@ p, span, a, li, button, input, textarea {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(131, 110, 249, 0.05));
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 200, 0.05));
     border-radius: inherit;
     pointer-events: none;
   }
@@ -1353,17 +1353,17 @@ p, span, a, li, button, input, textarea {
 }
 
 .profile-card {
-  border: 1px solid rgba(168, 85, 247, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 24px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.03), rgba(131, 110, 249, 0.02));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(200, 200, 200, 0.02));
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .profile-card:hover {
-  border-color: rgba(168, 85, 247, 0.2);
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(131, 110, 249, 0.03));
-  box-shadow: 0 8px 24px rgba(131, 110, 249, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(200, 200, 200, 0.03));
+  box-shadow: 0 8px 24px rgba(200, 200, 200, 0.08);
   transform: translateY(-2px);
 }
 
@@ -1379,9 +1379,9 @@ p, span, a, li, button, input, textarea {
 }
 
 .profile-input:focus {
-  border-color: rgba(168, 85, 247, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
   background: var(--bg-card);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
   outline: none;
 }
 
@@ -1468,7 +1468,7 @@ p, span, a, li, button, input, textarea {
 
 .profile-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg) 0%, rgba(131, 110, 249, 0.02) 50%, var(--bg) 100%);
+  background: linear-gradient(135deg, var(--bg) 0%, rgba(200, 200, 200, 0.02) 50%, var(--bg) 100%);
 }
 
 /* Sidebar Menu - Modern & Visual */
@@ -1490,21 +1490,21 @@ p, span, a, li, button, input, textarea {
   padding: 16px 20px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(135deg, transparent, transparent);
-  border: 1px solid rgba(168, 85, 247, 0);
+  border: 1px solid rgba(255, 255, 255, 0);
 }
 
 .profile-menu-item:hover {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(131, 110, 249, 0.04));
-  border-color: rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateX(4px);
 }
 
 .profile-menu-item.active {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(131, 110, 249, 0.08));
-  border-color: rgba(168, 85, 247, 0.3);
-  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(200, 200, 200, 0.08));
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .profile-menu-item.active::before {
@@ -1514,7 +1514,7 @@ p, span, a, li, button, input, textarea {
   top: 0;
   bottom: 0;
   width: 4px;
-  background: linear-gradient(180deg, rgba(168, 85, 247, 0.8), rgba(131, 110, 249, 0.4));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(200, 200, 200, 0.4));
   border-radius: 0 4px 4px 0;
   animation: slideInLeft 0.3s ease-out;
 }
@@ -1526,22 +1526,22 @@ p, span, a, li, button, input, textarea {
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  background: rgba(168, 85, 247, 0.05);
-  border: 1px solid rgba(168, 85, 247, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
 .profile-menu-item:hover .profile-menu-icon {
-  background: rgba(168, 85, 247, 0.12);
-  border-color: rgba(168, 85, 247, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
   transform: scale(1.05);
 }
 
 .profile-menu-item.active .profile-menu-icon {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(131, 110, 249, 0.15));
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(200, 200, 200, 0.15));
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
 .profile-menu-label {
@@ -1558,7 +1558,7 @@ p, span, a, li, button, input, textarea {
 }
 
 .profile-menu-item.active .profile-menu-label {
-  color: rgba(168, 85, 247, 0.9);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 400;
 }
 
@@ -1568,19 +1568,19 @@ p, span, a, li, button, input, textarea {
 }
 
 .profile-content-card {
-  border: 1px solid rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   padding: 32px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.04), rgba(131, 110, 249, 0.02));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(200, 200, 200, 0.02));
   backdrop-filter: blur(4px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .profile-content-card:hover {
-  border-color: rgba(168, 85, 247, 0.25);
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.07), rgba(131, 110, 249, 0.04));
-  box-shadow: 0 12px 40px rgba(168, 85, 247, 0.08);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(200, 200, 200, 0.04));
+  box-shadow: 0 12px 40px rgba(255, 255, 255, 0.08);
 }
 
 /* Header Title */
@@ -1590,7 +1590,7 @@ p, span, a, li, button, input, textarea {
   color: white;
   margin-bottom: 8px;
   letter-spacing: -0.5px;
-  background: linear-gradient(135deg, white, rgba(168, 85, 247, 0.8));
+  background: linear-gradient(135deg, white, rgba(255, 255, 255, 0.8));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1625,7 +1625,7 @@ p, span, a, li, button, input, textarea {
   display: block;
   font-size: 13px;
   font-weight: 400;
-  color: rgba(168, 85, 247, 0.7);
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1641,27 +1641,27 @@ p, span, a, li, button, input, textarea {
   font-size: 14px;
   font-weight: 300;
   color: white;
-  background: rgba(168, 85, 247, 0.04);
-  border: 1px solid rgba(168, 85, 247, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   transition: all 0.3s ease;
   font-family: inherit;
 }
 
 .profile-input-modern:hover {
-  background: rgba(168, 85, 247, 0.06);
-  border-color: rgba(168, 85, 247, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 .profile-input-modern:focus {
   outline: none;
-  background: rgba(168, 85, 247, 0.08);
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), inset 0 0 0 1px rgba(168, 85, 247, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
 }
 
 .profile-input-modern::placeholder {
-  color: rgba(168, 85, 247, 0.5);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* User Card Section */
@@ -1669,8 +1669,8 @@ p, span, a, li, button, input, textarea {
   display: flex;
   gap: 24px;
   padding: 24px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(131, 110, 249, 0.04));
-  border: 1px solid rgba(168, 85, 247, 0.15);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(200, 200, 200, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 16px;
   margin-bottom: 24px;
   animation: fadeInUp 0.4s ease-out;
@@ -1680,8 +1680,8 @@ p, span, a, li, button, input, textarea {
   width: 80px;
   height: 80px;
   border-radius: 16px;
-  border: 2px solid rgba(168, 85, 247, 0.25);
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(131, 110, 249, 0.05));
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(200, 200, 200, 0.05));
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1696,8 +1696,8 @@ p, span, a, li, button, input, textarea {
 
 .profile-avatar-large:hover {
   transform: scale(1.05);
-  border-color: rgba(168, 85, 247, 0.4);
-  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.15);
 }
 
 .profile-avatar-large img {
@@ -1733,20 +1733,20 @@ p, span, a, li, button, input, textarea {
   font-size: 14px;
   font-weight: 400;
   color: white;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.9), rgba(131, 110, 249, 0.8));
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(200, 200, 200, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
 }
 
 .profile-btn-primary:hover {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 1), rgba(131, 110, 249, 0.9));
-  border-color: rgba(168, 85, 247, 0.5);
-  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(200, 200, 200, 0.9));
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
 }
 
