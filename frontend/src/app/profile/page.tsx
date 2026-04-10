@@ -1191,7 +1191,7 @@ export default function ProfilePage() {
               <Alert type="success" msg={socMsg} />
               <Alert type="error" msg={socErr} />
 
-              <form onSubmit={handleSaveSocial} className="space-y-4">
+              <form onSubmit={handleSaveSocial} className="space-y-6">
                 {(
                   [
                     {
@@ -1244,14 +1244,14 @@ export default function ProfilePage() {
                   }>
                 ).map((item) => (
                   <Field key={item.key} label={item.label}>
-                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
                       {item.icon}
                       <input
                         type="url"
                         value={item.value}
                         onChange={(e) => item.setter(e.target.value)}
                         placeholder={item.placeholder}
-                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
+                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
                       />
                       {item.value && (
                         <button
@@ -1266,7 +1266,7 @@ export default function ProfilePage() {
                   </Field>
                 ))}
 
-                <div className="pt-1">
+                <div className="pt-2">
                   <SaveButton loading={socSaving} label="Save social links" />
                 </div>
               </form>
