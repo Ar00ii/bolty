@@ -35,7 +35,6 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
-import { NestedBoxesBackground } from '@/components/NestedBoxesBackground';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -610,14 +609,6 @@ export default function HomePage() {
             {/* Features Grid */}
             <FeaturesGrid />
           </div>
-        </div>
-      </section>
-
-      {/* ── NESTED BOXES BACKGROUND ── */}
-      <section className="py-48 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="w-full mx-auto">
-          {/* Background with 3 nested boxes */}
-          <NestedBoxesBackground />
         </div>
       </section>
 
