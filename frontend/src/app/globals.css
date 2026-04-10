@@ -1302,8 +1302,12 @@ p, span, a, li, button, input, textarea {
   }
 
   /* ── Profile Menu ── */
+  .profile-menu-sidebar {
+    @apply lg:grid lg:grid-cols-2 lg:gap-2 !important;
+  }
+
   .profile-menu-item {
-    @apply relative flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl border-2 border-gray-700/40 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200 text-gray-400 hover:text-purple-300;
+    @apply relative flex flex-col items-center justify-center aspect-square px-2 py-2 rounded-xl border-2 border-gray-700/40 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200 text-gray-400 hover:text-purple-300;
   }
 
   .profile-menu-item.active {
@@ -1315,7 +1319,7 @@ p, span, a, li, button, input, textarea {
   }
 
   .profile-menu-label {
-    @apply text-xs font-semibold text-center leading-tight;
+    @apply text-xs font-semibold text-center leading-tight mt-1;
   }
 
   /* ── Profile Content Card ── */
