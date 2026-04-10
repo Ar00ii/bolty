@@ -1,7 +1,7 @@
 .tech-stack-wrapper {
   position: relative;
   width: 100%;
-  min-height: 280px;
+  min-height: 180px;
   background: #000000;
   display: flex;
   align-items: center;
@@ -57,14 +57,14 @@
 .tech-stack-track {
   display: flex;
   gap: 80px;
-  padding: 40px 20px;
+  padding: 15px 20px;
   animation: scroll-left-infinite 40s linear infinite;
 }
 
 .tech-logo {
   flex-shrink: 0;
-  width: 220px;
-  height: 220px;
+  width: 160px;
+  height: 160px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,7 +91,7 @@
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(-220px * 8 - 80px * 8));
+    transform: translateX(calc(-160px * 8 - 80px * 8));
   }
 }
 
