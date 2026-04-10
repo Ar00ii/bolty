@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { TerminalCard } from '@/components/ui/TerminalCard';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -878,88 +877,19 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 animate-[fade-in_0.4s_ease]">
-      <div className="flex gap-5 items-start">
-        {/* ── Sidebar ──────────────────────────────────────────────── */}
-        <div className="w-56 flex-shrink-0 sticky top-24 space-y-3">
-          {/* User card */}
-          <div
-            className="rounded-2xl border border-[var(--border)] overflow-hidden"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            <div
-              className="h-px w-full"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent, rgba(131,110,249,0.35), transparent)',
-              }}
-            />
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="relative flex-shrink-0">
-                  <Avatar
-                    src={user?.avatarUrl}
-                    name={user?.displayName || user?.username}
-                    size="md"
-                  />
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-light text-[var(--text)] truncate leading-tight">
-                    {user?.displayName || user?.username || 'New User'}
-                  </div>
-                  {username && (
-                    <div className="text-xs text-[var(--text-muted)] font-mono truncate">
-                      @{username}
-                    </div>
-                  )}
-                  {userTag && (
-                    <div className="text-xs font-mono text-monad-400/70 mt-0.5">#{userTag}</div>
-                  )}
-                </div>
-              </div>
+    <div className="profile-container min-h-screen pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-12 animate-[fade-in_0.5s_ease]">
+          <h1 className="profile-title">Account Settings</h1>
+          <p className="profile-subtitle">Manage your profile, security, and preferences</p>
+        </div>
 
-              {/* Extra info pills */}
-              <div className="space-y-1.5">
-                {githubLogin && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    <IconGitHub className="w-3 h-3 flex-shrink-0 text-white" />
-                    <span className="truncate font-mono">{githubLogin}</span>
-                  </div>
-                )}
-                {walletAddress && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    <img
-                      src="/metamask.png"
-                      alt=""
-                      className="w-3 h-3 object-contain flex-shrink-0"
-                    />
-                    <span className="truncate font-mono">
-                      {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {profileUrl && (
-                <Link
-                  href={profileUrl}
-                  target="_blank"
-                  className="flex items-center justify-center gap-1.5 w-full text-xs text-[var(--text-muted)] hover:text-monad-400 border border-[var(--border)] hover:border-monad-500/30 px-3 py-2 rounded-xl transition-all duration-200"
-                >
-                  View profile <IconArrow className="w-3 h-3" />
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Nav list */}
-          <nav
-            className="rounded-2xl border border-[rgba(168,85,247,0.15)] overflow-hidden backdrop-blur-sm"
-            style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.03), rgba(131,110,249,0.02))' }}
-          >
-            {(
-              [
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* ── Sidebar Menu ──────────────────────────────────────────── */}
+          <div className="lg:col-span-1">
+            <nav className="profile-menu-sidebar sticky top-32 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+              {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
@@ -967,79 +897,51 @@ export default function ProfilePage() {
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
-              ] as Array<{
-                id: Tab;
-                label: string;
-                Icon: React.ComponentType<{ className?: string }>;
-              }>
-            ).map(({ id, label, Icon }, i, arr) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all duration-200 ${i < arr.length - 1 ? 'border-b border-[rgba(168,85,247,0.1)]' : ''} ${
-                  tab === id ? 'bg-purple-600/10' : 'hover:bg-white/[0.03]'
-                }`}
-              >
-                <div
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
-                    tab === id
-                      ? 'bg-purple-500/20 border border-purple-500/30'
-                      : 'bg-[var(--bg-elevated)] border border-[var(--border)]'
-                  }`}
+              ].map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full`}
                 >
-                  <Icon
-                    className={`w-3.5 h-3.5 ${tab === id ? 'text-purple-300' : 'text-[var(--text-muted)]'}`}
-                  />
+                  <div className="profile-menu-icon">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className="profile-menu-label hidden lg:inline">{label}</span>
+                </button>
+              ))}
+
+              {/* Leaderboard */}
+              <Link
+                href="/reputation/leaderboard"
+                className="profile-menu-item min-w-fit lg:w-full hover:text-white"
+              >
+                <div className="profile-menu-icon">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"
+                    />
+                  </svg>
                 </div>
-                <span
-                  className={`text-sm flex-1 font-light ${tab === id ? 'text-purple-200' : 'text-[var(--text)]'}`}
-                >
-                  {label}
-                </span>
-                {tab === id && <div className="w-1.5 h-5 rounded-full bg-gradient-to-b from-purple-400 to-purple-500 flex-shrink-0" />}
-              </button>
-            ))}
-          </nav>
+                <span className="profile-menu-label hidden lg:inline">Leaderboard</span>
+              </Link>
+            </nav>
+          </div>
 
-          {/* Leaderboard link */}
-          <Link
-            href="/reputation/leaderboard"
-            className="flex items-center gap-3 px-3.5 py-3 rounded-2xl border border-[var(--border)] hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-150 group"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            <div className="w-6 h-6 rounded-md bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center flex-shrink-0 group-hover:border-monad-500/25 group-hover:bg-monad-500/10 transition-colors">
-              <svg
-                className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"
-                />
-              </svg>
-            </div>
-            <span className="text-sm text-[var(--text)] group-hover:text-monad-300 transition-colors flex-1">
-              Leaderboard
-            </span>
-            <IconArrow className="w-3 h-3 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" />
-          </Link>
-        </div>
-
-        {/* ── Main content panel ───────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
+          {/* ── Main content panel ───────────────────────────────────── */}
+          <div className="lg:col-span-3 profile-content">
           {/* ════════════════════════════════════════════
-          GENERAL  — monad purple tint
+          GENERAL
       ════════════════════════════════════════════ */}
           {tab === 'general' && (
-            <TerminalCard
-              title="profile.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(131,110,249,0.06)_0%,var(--bg-card)_40%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="General Information"
                 subtitle="Your public identity on Bolty."
@@ -1172,18 +1074,14 @@ export default function ProfilePage() {
 
                 <SaveButton loading={genSaving} />
               </form>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
           SOCIAL  — blue tint
       ════════════════════════════════════════════ */}
           {tab === 'social' && (
-            <TerminalCard
-              title="social-links.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(59,130,246,0.07)_0%,var(--bg-card)_45%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="Social Links"
                 subtitle="Connect your online presence to your Bolty profile."
@@ -1270,7 +1168,7 @@ export default function ProfilePage() {
                   <SaveButton loading={socSaving} label="Save social links" />
                 </div>
               </form>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
@@ -1311,11 +1209,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <TerminalCard
-                title="metamask.connect"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,146,60,0.08)_0%,var(--bg-card)_50%)]"
-              >
+              <div className="profile-content-card">
                 <Alert type="success" msg={walletMsg} />
                 <Alert type="error" msg={walletErr} />
 
@@ -1390,7 +1284,7 @@ export default function ProfilePage() {
                     )}
                   </button>
                 )}
-              </TerminalCard>
+              </div>
             </div>
           )}
 
@@ -1398,11 +1292,7 @@ export default function ProfilePage() {
           CONNECTIONS
       ════════════════════════════════════════════ */}
           {tab === 'connections' && (
-            <TerminalCard
-              title="linked-accounts.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(40,200,64,0.05)_0%,var(--bg-card)_45%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="Connected Accounts"
                 subtitle="Link external services to unlock more Bolty features."
@@ -1455,7 +1345,7 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
@@ -1464,11 +1354,7 @@ export default function ProfilePage() {
           {tab === 'friends' && (
             <div className="space-y-4">
               {/* Search */}
-              <TerminalCard
-                title="user-search"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,191,36,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <SectionHeader
                   title="Find People"
                   subtitle="Search by @username or exact user ID — for example #1234."
@@ -1533,14 +1419,10 @@ export default function ProfilePage() {
                     No users found for &quot;{searchQuery}&quot;
                   </div>
                 )}
-              </TerminalCard>
+              </div>
 
               {/* Requests + list */}
-              <TerminalCard
-                title={`friends (${friends.length})`}
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,191,36,0.04)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 {friendsLoading ? (
                   <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
                     <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
@@ -1667,7 +1549,7 @@ export default function ProfilePage() {
                     ) : null}
                   </div>
                 )}
-              </TerminalCard>
+              </div>
             </div>
           )}
 
@@ -1680,11 +1562,7 @@ export default function ProfilePage() {
               <Alert type="error" msg={secErr} />
 
               {/* 2FA */}
-              <TerminalCard
-                title="two-factor-auth"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(16,185,129,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <div className="flex items-start gap-4">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}
@@ -1791,14 +1669,10 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
-              </TerminalCard>
+              </div>
 
               {/* Email */}
-              <TerminalCard
-                title="email-address"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(59,130,246,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <div className="flex items-center justify-between mb-1">
                   <div>
                     <div className="text-sm font-light text-[var(--text)]">Email Address</div>
@@ -1911,7 +1785,7 @@ export default function ProfilePage() {
                     </div>
                   </form>
                 )}
-              </TerminalCard>
+              </div>
 
               {/* Delete account — danger zone */}
               <div
@@ -2082,11 +1956,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Endpoint form */}
-              <TerminalCard
-                title="agent-config.json"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(131,110,249,0.07)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <Alert type="success" msg={agentMsg} />
                 <Alert type="error" msg={agentErr} />
 
@@ -2179,13 +2049,15 @@ export default function ProfilePage() {
 
                   <SaveButton loading={agentSaving} label="Save endpoint" />
                 </form>
-              </TerminalCard>
+              </div>
             </div>
           )}
+          </div>
+          {/* end main content panel */}
         </div>
-        {/* end main content panel */}
+        {/* end grid */}
       </div>
-      {/* end flex row */}
+      {/* end container */}
     </div>
   );
 }
