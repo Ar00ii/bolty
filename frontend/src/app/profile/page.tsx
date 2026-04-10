@@ -282,9 +282,9 @@ function Avatar({
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-base font-light text-[var(--text)] tracking-tight">{title}</h2>
-      {subtitle && <p className="text-xs text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
+    <div className="mb-8">
+      <h2 className="text-lg font-light text-white tracking-tight">{title}</h2>
+      {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -292,7 +292,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-light text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">
+      <label className="block text-sm font-light text-[var(--text-secondary)] mb-2.5">
         {label}
       </label>
       {children}
@@ -1048,7 +1048,7 @@ export default function ProfilePage() {
               <Alert type="error" msg={genErr} />
 
               {/* Avatar upload */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] mb-5">
+              <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
                 <div
                   className="relative group flex-shrink-0 cursor-pointer"
                   onClick={() => avatarInputRef.current?.click()}
@@ -1112,7 +1112,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <form onSubmit={handleSaveGeneral} className="space-y-5">
+              <form onSubmit={handleSaveGeneral} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Username">
                     <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
