@@ -322,7 +322,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-lg text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 transition-all duration-200 border border-gray-700 hover:border-gray-600 text-white"
+      className="btn-primary w-full py-3 rounded-2xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 transition-all duration-200 border-2 border-purple-500/40 hover:border-purple-500/60 text-purple-200 hover:text-purple-100"
     >
       {loading ? (
         <>
@@ -931,12 +931,13 @@ export default function ProfilePage() {
                 <button
                   key={id}
                   onClick={() => setTab(id)}
-                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full`}
+                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full lg:min-w-0`}
+                  title={label}
                 >
                   <div className="profile-menu-icon">
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <span className="profile-menu-label hidden lg:inline">{label}</span>
+                  <span className="profile-menu-label">{label}</span>
                 </button>
               ))}
             </nav>
@@ -2080,14 +2081,14 @@ export default function ProfilePage() {
                         setApiKeyCopied(true);
                         setTimeout(() => setApiKeyCopied(false), 2000);
                       }}
-                      className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300"
+                      className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200"
                     >
                       {apiKeyCopied ? '✓ Copied' : 'Copy'}
                     </button>
                   </div>
                 </div>
               </div>
-              <button className="mt-3 px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-xs text-white">Generate New</button>
+              <button className="mt-3 px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-xs text-purple-200 hover:text-purple-100">Generate New</button>
             </div>
           )}
 
@@ -2105,7 +2106,7 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-400">Billing Email</p>
                   <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
                 </div>
-                <button className="w-full px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Manage Billing</button>
+                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs">Manage Billing</button>
               </div>
             </div>
           )}
@@ -2181,7 +2182,7 @@ export default function ProfilePage() {
                     <p className="text-sm text-white">Slack</p>
                     <p className="text-xs text-gray-400">Send API notifications</p>
                   </div>
-                  <button className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connect</button>
+                  <button className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">Connect</button>
                 </div>
                 <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
                   <div>
@@ -2191,7 +2192,7 @@ export default function ProfilePage() {
                   {githubLogin ? (
                     <span className="text-xs text-green-400">✓ Connected</span>
                   ) : (
-                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">
+                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">
                       Link
                     </button>
                   )}
@@ -2259,7 +2260,7 @@ export default function ProfilePage() {
                     <option value="fr">Français</option>
                   </select>
                 </div>
-                <button className="w-full px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-white text-xs mt-2">
+                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs mt-2">
                   Save Preferences
                 </button>
               </div>
