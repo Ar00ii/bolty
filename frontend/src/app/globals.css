@@ -1301,25 +1301,25 @@ p, span, a, li, button, input, textarea {
     pointer-events: none;
   }
 
-  /* ── Profile Menu ── */
+  /* ── Profile Menu Sidebar ── */
   .profile-menu-sidebar {
-    @apply lg:grid lg:grid-cols-2 lg:gap-2 !important;
+    @apply flex lg:flex-col gap-0 lg:gap-1 !important;
   }
 
   .profile-menu-item {
-    @apply relative flex flex-col items-center justify-center aspect-square px-1 py-1 rounded-lg border border-gray-700/40 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all duration-200 text-gray-400 hover:text-purple-300;
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg border border-transparent hover:bg-purple-500/10 hover:border-purple-500/30 transition-all duration-200 text-gray-400 hover:text-purple-300 font-medium text-sm min-w-fit lg:w-full;
   }
 
   .profile-menu-item.active {
-    @apply border-purple-500/60 bg-purple-500/10 text-purple-300;
+    @apply bg-purple-500/20 border-purple-500/50 text-purple-200;
   }
 
   .profile-menu-icon {
-    @apply w-4 h-4 flex-shrink-0;
+    @apply w-5 h-5 flex-shrink-0;
   }
 
   .profile-menu-label {
-    @apply text-[10px] font-semibold text-center leading-none mt-0.5;
+    @apply hidden lg:inline whitespace-nowrap;
   }
 
   /* ── Profile Content Card ── */
