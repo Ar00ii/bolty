@@ -1,3 +1,17 @@
+/**
+ * HowItWorks Component
+ *
+ * Displays a 3-step "Click, click, done" workflow section showcasing the main features:
+ * 1. Deploy New Agent - Form for deploying AI agents
+ * 2. Build Reputation - Reputation system with rank tiers
+ * 3. Earn & Grow - Marketplace for agents and repositories
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <HowItWorks />
+ * ```
+ */
 'use client';
 
 import { motion } from 'framer-motion';

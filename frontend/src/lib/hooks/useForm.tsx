@@ -12,12 +12,49 @@ export type ValidationSchema<T extends Record<string, unknown>> = Partial<
   Record<keyof T, FieldValidator>
 >;
 
+/** Options for useForm hook */
 export interface UseFormOptions<T extends Record<string, unknown>> {
+  /** Initial form values */
   initialValues: T;
+  /** Validation schema for form fields */
   validationSchema?: ValidationSchema<T>;
+  /** Callback function called on form submission */
   onSubmit: (values: T) => Promise<void> | void;
 }
 
+/**
+ * Custom hook for managing form state, validation, and submission
+ *
+ * @template T - The shape of form values
+ * @param {UseFormOptions<T>} options - Configuration options
+ * @param {T} options.initialValues - Initial values for form fields
+ * @param {ValidationSchema<T>} [options.validationSchema] - Optional validation rules
+ * @param {Function} options.onSubmit - Callback when form is submitted successfully
+ *
+ * @returns {Object} Form state and handlers
+ * @returns {T} values - Current form values
+ * @returns {Record<string, string>} errors - Field errors
+ * @returns {Record<string, boolean>} touched - Touched field tracking
+ * @returns {boolean} isSubmitting - Whether form is being submitted
+ * @returns {string} submitError - Submit error message
+ * @returns {Function} handleChange - Input change handler
+ * @returns {Function} handleBlur - Input blur handler
+ * @returns {Function} handleSubmit - Form submit handler
+ * @returns {Function} resetForm - Reset form to initial state
+ * @returns {Function} setFieldValue - Set individual field value
+ * @returns {Function} setFieldError - Set field error manually
+ *
+ * @example
+ * ```tsx
+ * const { values, errors, handleChange, handleSubmit } = useForm({
+ *   initialValues: { email: '', password: '' },
+ *   validationSchema: {
+ *     email: (v) => !v ? 'Required' : null,
+ *   },
+ *   onSubmit: (values) => api.login(values),
+ * });
+ * ```
+ */
 export function useForm<T extends Record<string, unknown>>({
   initialValues,
   validationSchema,
