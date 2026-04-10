@@ -930,7 +930,7 @@ export default function ProfilePage() {
                     />
                   </svg>
                 </div>
-                <span className="profile-menu-label hidden lg:inline">Leaderboard</span>
+                <span className="profile-menu-label">Leaderboard</span>
               </Link>
             </nav>
           </div>
