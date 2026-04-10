@@ -88,6 +88,22 @@ img {
   --shadow-brand: 0 4px 14px rgba(131,110,249,0.25);
   --shadow-glow:  0 0 20px rgba(131,110,249,0.3), 0 0 40px rgba(6,182,212,0.2);
   --card-hover-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 0 0 1px rgba(131,110,249,0.1);
+  /* Extended color palette */
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --purple-950: #3f0f5c;
+  /* Spacing constants */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
   color-scheme: dark;
 }
 
