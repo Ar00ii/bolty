@@ -967,7 +967,7 @@ export default function ProfilePage() {
                     name={user?.displayName || user?.username}
                     size="lg"
                   />
-                  <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 rounded-full bg-gray-950/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     {avatarUploading ? (
                       <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     ) : (
@@ -2073,7 +2073,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <code className="text-xs text-gray-300 bg-black/50 px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
+                    <code className="text-xs text-gray-300 bg-[#050506] px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(apiKey);
@@ -2087,7 +2087,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </div>
-              <button className="mt-3 px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-xs text-white">Generate New</button>
+              <button className="mt-3 px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-xs text-white">Generate New</button>
             </div>
           )}
 
@@ -2105,7 +2105,7 @@ export default function ProfilePage() {
                   <p className="text-xs text-gray-400">Billing Email</p>
                   <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
                 </div>
-                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Manage Billing</button>
+                <button className="w-full px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-white text-xs">Manage Billing</button>
               </div>
             </div>
           )}
@@ -2259,7 +2259,7 @@ export default function ProfilePage() {
                     <option value="fr">Français</option>
                   </select>
                 </div>
-                <button className="w-full px-3 py-1 bg-black border border-gray-700 hover:border-gray-600 rounded text-white text-xs mt-2">
+                <button className="w-full px-3 py-1 bg-gray-950 border border-gray-700 hover:border-gray-600 rounded text-white text-xs mt-2">
                   Save Preferences
                 </button>
               </div>

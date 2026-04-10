@@ -2,7 +2,7 @@
   position: relative;
   width: 100vw;
   min-height: 180px;
-  background: #000000;
+  background: var(--bg);
   left: 50%;
   right: 50%;
   margin-left: -50vw;
