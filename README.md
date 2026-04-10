@@ -36,7 +36,7 @@ bolty-platform/
 - ethers.js (Web3)
 - socket.io-client
 - recharts (price chart)
-- @solana/web3.js (Phantom)
+- @base/web3.js (MetaMask)
 
 ### Backend
 - NestJS (Node.js)
@@ -44,7 +44,7 @@ bolty-platform/
 - Redis (rate limiting, sessions, nonces)
 - Socket.io (WebSockets)
 - Passport.js (auth strategies)
-- Google Generative AI (Gemini)
+- Anthropic AI (Claude)
 - Helmet, CORS, CSRF protection
 
 ### Infrastructure
