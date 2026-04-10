@@ -3,16 +3,22 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, User, LogOut, Settings, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 export function FloatingTopBar() {
+  const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const isHome = pathname === '/';
+  const isAuth = pathname.startsWith('/auth');
+  const shouldShow = isAuthenticated && !isHome && !isAuth;
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -31,7 +37,7 @@ export function FloatingTopBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!isAuthenticated) return null;
+  if (!shouldShow) return null;
 
   return (
     <motion.div
