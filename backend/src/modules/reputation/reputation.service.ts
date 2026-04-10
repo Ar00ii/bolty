@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 export enum ReputationRank {
@@ -42,7 +43,10 @@ export function getRankForPoints(points: number): ReputationRank {
   return ReputationRank.NEWCOMER;
 }
 
-export const RANK_META: Record<ReputationRank, { label: string; color: string; badge: string; description: string }> = {
+export const RANK_META: Record<
+  ReputationRank,
+  { label: string; color: string; badge: string; description: string }
+> = {
   [ReputationRank.NEWCOMER]: {
     label: 'Newcomer',
     color: '#71717a',
@@ -110,7 +114,7 @@ export class ReputationService {
         data: {
           userId,
           points,
-          reason: reason as any,
+          reason: reason as unknown as any,
           resourceId: resourceId || null,
           note: note || null,
         },
@@ -141,7 +145,10 @@ export class ReputationService {
     const nextThreshold = nextRank ? RANK_THRESHOLDS[nextRank] : null;
     const currentThreshold = RANK_THRESHOLDS[rank];
     const progress = nextThreshold
-      ? Math.min(100, Math.floor(((points - currentThreshold) / (nextThreshold - currentThreshold)) * 100))
+      ? Math.min(
+          100,
+          Math.floor(((points - currentThreshold) / (nextThreshold - currentThreshold)) * 100),
+        )
       : 100;
 
     const events = await this.prisma.reputationEvent.findMany({

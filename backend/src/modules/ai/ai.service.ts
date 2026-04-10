@@ -1,15 +1,11 @@
-import {
-  Injectable,
-  Logger,
-  InternalServerErrorException,
-  ForbiddenException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+import { Injectable, Logger, ForbiddenException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { sanitizeAiPrompt } from '../../common/sanitize/sanitize.util';
-import { Response } from 'express';
 
 const SYSTEM_PROMPT = `You are Bolty AI, an assistant for the Bolty memecoin platform.
 You help users with questions about crypto, DeFi, blockchain technology, and the Bolty ecosystem.
@@ -24,7 +20,7 @@ export class AiService {
   private readonly genAI: GoogleGenerativeAI;
 
   // Per-user rate limiting
-  private readonly AI_RATE_LIMIT = 10;  // messages per window
+  private readonly AI_RATE_LIMIT = 10; // messages per window
   private readonly AI_RATE_WINDOW = 60; // seconds
 
   constructor(
@@ -156,7 +152,8 @@ export class AiService {
       res.write('data: [DONE]\n\n');
       res.end();
     } catch (err) {
-      this.logger.error(`Gemini API error: ${err?.message || err}`);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Gemini API error: ${errMsg}`);
       res.write(`data: ${JSON.stringify({ error: 'AI service temporarily unavailable' })}\n\n`);
       res.end();
     }

@@ -1,13 +1,30 @@
 import {
-  Controller, Get, Post, Delete, Param, Body, UseGuards, HttpCode, HttpStatus,
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { SocialService } from './social.service';
 import { IsString, IsBoolean } from 'class-validator';
 
-class SendRequestDto { @IsString() targetId: string; }
-class RespondDto { @IsBoolean() accept: boolean; }
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { SocialService } from './social.service';
+
+class SendRequestDto {
+  @IsString()
+  targetId!: string;
+}
+
+class RespondDto {
+  @IsBoolean()
+  accept!: boolean;
+}
 
 @Controller('social')
 @UseGuards(JwtAuthGuard)

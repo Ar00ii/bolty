@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,8 +11,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { Logger } from '@nestjs/common';
+
 import { DmService } from './dm.service';
 
 interface AuthenticatedSocket extends Socket {
@@ -53,7 +54,7 @@ class WsRateLimiter {
 })
 export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(DmGateway.name);
 
@@ -77,7 +78,10 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .find((c) => c.trim().startsWith('access_token='))
           ?.split('=')[1];
 
-      if (!token) { client.disconnect(); return; }
+      if (!token) {
+        client.disconnect();
+        return;
+      }
 
       const payload = this.jwtService.verify<{ sub: string; username: string }>(token);
       (client as AuthenticatedSocket).userId = payload.sub;
@@ -122,8 +126,9 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       const messages = await this.dmService.getConversation(client.userId, data.peerId);
       client.emit('conversation', { peerId: data.peerId, messages });
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      client.emit('error', { message: error.message });
     }
   }
 
@@ -163,8 +168,9 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
         peerId: client.userId,
         message: payload,
       });
-    } catch (err: any) {
-      client.emit('error', { message: err.message });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      client.emit('error', { message: error.message });
     }
   }
 }

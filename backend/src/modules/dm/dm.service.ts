@@ -1,4 +1,5 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
 
@@ -110,9 +111,7 @@ export class DmService {
     ]);
 
     // Build unread count lookup: senderId → count
-    const unreadMap = new Map<string, number>(
-      unreadGroups.map((g) => [g.senderId, g._count.id]),
-    );
+    const unreadMap = new Map<string, number>(unreadGroups.map((g) => [g.senderId, g._count.id]));
 
     // Deduplicate to one entry per peer
     const seen = new Set<string>();

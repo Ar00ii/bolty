@@ -1,8 +1,9 @@
 'use client';
 
 import { useMotionValue } from 'framer-motion';
-import React, { useState, useEffect, useCallback } from 'react';
 import { useMotionTemplate, motion } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export const EvervaultCard = ({
@@ -21,6 +22,7 @@ export const EvervaultCard = ({
 
   useEffect(() => {
     const str = generateRandomString(1500);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRandomString(str);
   }, []);
 
@@ -33,28 +35,26 @@ export const EvervaultCard = ({
       const str = generateRandomString(1500);
       setRandomString(str);
     },
-    [mouseX, mouseY]
+    [mouseX, mouseY],
   );
 
   return (
     <div
       className={cn(
         'p-0.5 bg-transparent flex items-center justify-center w-full h-full relative',
-        className
+        className,
       )}
     >
       <div
         onMouseMove={onMouseMove}
         className="group/card w-full relative overflow-hidden bg-transparent flex flex-col items-center justify-center h-full"
       >
-        <CardPattern
-          mouseX={mouseX}
-          mouseY={mouseY}
-          randomString={randomString}
-        />
+        <CardPattern mouseX={mouseX} mouseY={mouseY} randomString={randomString} />
         <div className="relative z-10 flex flex-col items-center justify-center gap-3">
-          {children ? children : (
-            <p className="text-sm font-medium text-white text-center">{text}</p>
+          {children ? (
+            children
+          ) : (
+            <p className="text-sm font-light text-white text-center">{text}</p>
           )}
         </div>
       </div>
@@ -85,7 +85,7 @@ export function CardPattern({
         className="absolute inset-0 rounded-2xl opacity-0 mix-blend-overlay group-hover/card:opacity-100"
         style={style}
       >
-        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-bold transition duration-500 leading-tight p-2 opacity-40">
+        <p className="absolute inset-x-0 text-[0.6rem] h-full break-words whitespace-pre-wrap text-white font-mono font-light transition duration-500 leading-tight p-2 opacity-40">
           {randomString}
         </p>
       </motion.div>
@@ -93,8 +93,7 @@ export function CardPattern({
   );
 }
 
-const characters =
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 export const generateRandomString = (length: number) => {
   let result = '';
   for (let i = 0; i < length; i++) {
@@ -108,7 +107,7 @@ export const Icon = ({ className, ...rest }: React.HTMLAttributes<HTMLDivElement
     <div
       className={cn(
         'h-6 w-6 rounded-full border-2 border-white/30 flex items-center justify-center text-white',
-        className
+        className,
       )}
       {...rest}
     />

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -55,15 +56,20 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     if (!username) return;
-    api.get<PublicProfile>(`/users/${username}`)
-      .then(p => {
+    api
+      .get<PublicProfile>(`/users/${username}`)
+      .then((p) => {
         setProfile(p);
         if (isAuthenticated && currentUser) {
           if (currentUser.id === p.id) {
             setFriendStatus('self');
           } else {
-            api.get<{ status: FriendStatus; requestId?: string }>(`/social/friends/status/${p.id}`)
-              .then(s => { setFriendStatus(s.status); setFriendRequestId(s.requestId); })
+            api
+              .get<{ status: FriendStatus; requestId?: string }>(`/social/friends/status/${p.id}`)
+              .then((s) => {
+                setFriendStatus(s.status);
+                setFriendRequestId(s.requestId);
+              })
               .catch(() => {});
           }
         }
@@ -91,7 +97,9 @@ export default function PublicProfilePage() {
       }
     } catch (err) {
       setFriendMsg(err instanceof ApiError ? err.message : 'Action failed');
-    } finally { setFriendLoading(false); }
+    } finally {
+      setFriendLoading(false);
+    }
   };
 
   if (loading) {
@@ -108,14 +116,19 @@ export default function PublicProfilePage() {
         <div className="text-center">
           <div className="text-4xl font-mono text-zinc-700 mb-2">404</div>
           <div className="text-zinc-400 text-sm">User not found</div>
-          <Link href="/" className="text-monad-400 text-sm hover:text-monad-300 mt-3 inline-block">← back home</Link>
+          <Link href="/" className="text-monad-400 text-sm hover:text-monad-300 mt-3 inline-block">
+            ← back home
+          </Link>
         </div>
       </div>
     );
   }
 
   const displayName = profile.displayName || profile.username;
-  const joinedDate = new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  const joinedDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -124,14 +137,13 @@ export default function PublicProfilePage() {
         {/* Avatar */}
         <div className="shrink-0">
           {profile.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.avatarUrl}
               alt={displayName || ''}
               className="w-24 h-24 rounded-2xl border-2 border-zinc-700"
             />
           ) : (
-            <div className="w-24 h-24 rounded-2xl bg-monad-500/20 border-2 border-monad-500/30 flex items-center justify-center text-monad-400 text-4xl font-bold">
+            <div className="w-24 h-24 rounded-2xl bg-monad-500/20 border-2 border-monad-500/30 flex items-center justify-center text-monad-400 text-4xl font-light">
               {displayName?.[0]?.toUpperCase()}
             </div>
           )}
@@ -141,12 +153,14 @@ export default function PublicProfilePage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between flex-wrap gap-2 mb-1">
             <div>
-              <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+              <h1 className="text-2xl font-light text-white">{displayName}</h1>
               <p className="text-zinc-500 font-mono text-sm">@{profile.username}</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {profile.role === 'ADMIN' && (
-                <span className="text-xs font-mono bg-monad-500/10 text-monad-400 border border-monad-500/20 px-2 py-0.5 rounded">admin</span>
+                <span className="text-xs font-mono bg-monad-500/10 text-monad-400 border border-monad-500/20 px-2 py-0.5 rounded">
+                  admin
+                </span>
               )}
               {isAuthenticated && friendStatus !== 'self' && (
                 <button
@@ -162,11 +176,15 @@ export default function PublicProfilePage() {
                           : 'border-monad-500/40 text-monad-400 hover:bg-monad-500/10'
                   }`}
                 >
-                  {friendLoading ? '...'
-                    : friendStatus === 'friends' ? 'Friends'
-                    : friendStatus === 'pending_received' ? 'Accept request'
-                    : friendStatus === 'pending_sent' ? 'Pending'
-                    : 'Add friend'}
+                  {friendLoading
+                    ? '...'
+                    : friendStatus === 'friends'
+                      ? 'Friends'
+                      : friendStatus === 'pending_received'
+                        ? 'Accept request'
+                        : friendStatus === 'pending_sent'
+                          ? 'Pending'
+                          : 'Add friend'}
                 </button>
               )}
               {friendMsg && <span className="text-xs text-green-400">{friendMsg}</span>}
@@ -180,7 +198,9 @@ export default function PublicProfilePage() {
           {/* Meta row */}
           <div className="flex flex-wrap items-center gap-4 mt-3">
             <span className="text-xs text-zinc-500 font-mono">Joined {joinedDate}</span>
-            <span className="text-xs text-zinc-500 font-mono">{profile._count.repositories} repos</span>
+            <span className="text-xs text-zinc-500 font-mono">
+              {profile._count.repositories} repos
+            </span>
             {profile.walletAddress && (
               <span className="text-xs text-zinc-600 font-mono">
                 ETH: {profile.walletAddress.slice(0, 6)}...{profile.walletAddress.slice(-4)}
@@ -212,7 +232,7 @@ export default function PublicProfilePage() {
                 className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg px-3 py-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
                 X / Twitter
               </a>
@@ -226,7 +246,7 @@ export default function PublicProfilePage() {
                 className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg px-3 py-1.5"
               >
                 <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                 </svg>
                 LinkedIn
               </a>
@@ -239,8 +259,18 @@ export default function PublicProfilePage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors border border-zinc-800 hover:border-zinc-600 rounded-lg px-3 py-1.5"
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                  />
                 </svg>
                 Website
               </a>
@@ -251,8 +281,9 @@ export default function PublicProfilePage() {
 
       {/* Repositories */}
       <div>
-        <h2 className="text-lg font-bold text-white mb-4 font-mono">
-          Repositories <span className="text-zinc-600 font-normal text-sm">({profile._count.repositories})</span>
+        <h2 className="text-lg font-light text-white mb-4 font-mono">
+          Repositories{' '}
+          <span className="text-zinc-600 font-light text-sm">({profile._count.repositories})</span>
         </h2>
 
         {profile.repositories.length === 0 ? (
@@ -270,20 +301,24 @@ export default function PublicProfilePage() {
                   <div className="flex items-center gap-1.5 min-w-0">
                     {repo.isLocked && <span className="text-yellow-400 shrink-0">🔒</span>}
                     {repo.isLocked ? (
-                      <span className="text-yellow-400 font-mono font-semibold text-sm truncate">{repo.name}</span>
+                      <span className="text-yellow-400 font-mono font-light text-sm truncate">
+                        {repo.name}
+                      </span>
                     ) : (
                       <a
                         href={repo.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-monad-400 font-mono font-semibold text-sm truncate hover:text-monad-300"
+                        className="text-monad-400 font-mono font-light text-sm truncate hover:text-monad-300"
                       >
                         {repo.name}
                       </a>
                     )}
                   </div>
                   {repo.language && (
-                    <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded shrink-0 ml-2">{repo.language}</span>
+                    <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded shrink-0 ml-2">
+                      {repo.language}
+                    </span>
                   )}
                 </div>
 
@@ -293,7 +328,9 @@ export default function PublicProfilePage() {
                   </div>
                 ) : (
                   repo.description && (
-                    <p className="text-zinc-400 text-xs leading-relaxed mb-2 line-clamp-2">{repo.description}</p>
+                    <p className="text-zinc-400 text-xs leading-relaxed mb-2 line-clamp-2">
+                      {repo.description}
+                    </p>
                   )
                 )}
 

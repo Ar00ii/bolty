@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import Anthropic from '@anthropic-ai/sdk';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 const MAX_SCAN_BYTES = 100_000; // Read up to 100KB for scanning
@@ -99,7 +100,11 @@ If the code appears to be a legitimate negotiation agent or general script with 
     }
 
     // If Claude is unavailable, allow upload but flag as unscanned
-    const fallback: ScanResult = { passed: true, note: 'Automated scan unavailable — review manually.', scannedAt: Date.now() };
+    const fallback: ScanResult = {
+      passed: true,
+      note: 'Automated scan unavailable — review manually.',
+      scannedAt: Date.now(),
+    };
     this.cache.set(fileKey, fallback);
     return fallback;
   }

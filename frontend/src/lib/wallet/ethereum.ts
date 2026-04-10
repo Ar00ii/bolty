@@ -1,6 +1,7 @@
 'use client';
 
 import { BrowserProvider, Eip1193Provider } from 'ethers';
+
 import { api } from '@/lib/api/client';
 
 interface EthereumProvider {
@@ -47,8 +48,10 @@ function parseMetaMaskError(err: unknown): string {
     if (code === 4001) return 'Connection rejected. You cancelled the request in MetaMask.';
     if (code === -32603) return 'MetaMask internal error. Make sure your wallet is unlocked.';
     if (code === 4100) return 'MetaMask is locked. Please unlock your wallet and try again.';
-    if (err.message.includes('User rejected')) return 'Connection rejected. You cancelled the request in MetaMask.';
-    if (err.message.includes('pending')) return 'MetaMask has a pending request. Open MetaMask and resolve it.';
+    if (err.message.includes('User rejected'))
+      return 'Connection rejected. You cancelled the request in MetaMask.';
+    if (err.message.includes('pending'))
+      return 'MetaMask has a pending request. Open MetaMask and resolve it.';
     if (err.message.includes('Cannot connect')) return err.message;
     return err.message;
   }
@@ -78,10 +81,9 @@ export async function connectMetaMask(): Promise<void> {
 
   let nonceData: { nonce: string; message: string };
   try {
-    nonceData = await api.post<{ nonce: string; message: string }>(
-      '/auth/nonce/ethereum',
-      { address },
-    );
+    nonceData = await api.post<{ nonce: string; message: string }>('/auth/nonce/ethereum', {
+      address,
+    });
   } catch (err) {
     throw new Error(err instanceof Error ? err.message : 'Failed to get nonce from server.');
   }

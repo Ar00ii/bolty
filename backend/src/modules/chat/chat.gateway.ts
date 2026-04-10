@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,8 +11,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { Logger, UseGuards } from '@nestjs/common';
+
 import { ChatService } from './chat.service';
 
 interface AuthenticatedSocket extends Socket {
@@ -69,7 +70,7 @@ class WsRateLimiter {
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(ChatGateway.name);
   private connectedUsers = new Map<string, { userId: string; username: string }>();
@@ -140,10 +141,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      const message = await this.chatService.validateAndSave(
-        client.userId,
-        data.content,
-      );
+      const message = await this.chatService.validateAndSave(client.userId, data.content);
 
       // Broadcast to all connected clients
       this.server.emit('newMessage', {
@@ -168,11 +166,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!client.userId) throw new WsException('Unauthorized');
 
     try {
-      await this.chatService.reportMessage(
-        data.messageId,
-        client.userId,
-        data.reason,
-      );
+      await this.chatService.reportMessage(data.messageId, client.userId, data.reason);
       client.emit('reportSuccess', { message: 'Report submitted' });
     } catch (err: unknown) {
       const error = err as Error;

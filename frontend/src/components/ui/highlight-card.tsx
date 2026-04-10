@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
 import Link from 'next/link';
+import React from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -26,13 +27,15 @@ export function HighlightCard({
     <Card
       className={cn(
         'group relative overflow-hidden border transition-all duration-200 ease-out',
-        'border-[var(--border)] bg-[var(--bg-card)] text-[var(--text)] shadow-none',
-        'hover:-translate-y-[3px] hover:shadow-lg',
+        'border-white/10 bg-black/20 backdrop-blur-md text-[var(--text)] shadow-none',
+        'hover:-translate-y-[3px] hover:shadow-lg hover:border-white/20',
         className,
       )}
-      style={{
-        '--_accent': accentColor,
-      } as React.CSSProperties}
+      style={
+        {
+          '--_accent': accentColor,
+        } as React.CSSProperties
+      }
     >
       {/* Gradient top border — visible on hover */}
       <div
@@ -88,12 +91,8 @@ export function HighlightCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-semibold leading-tight text-[var(--text)]">
-            {title}
-          </h3>
-          <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
-            {description}
-          </p>
+          <h3 className="text-sm font-light leading-tight text-[var(--text)]">{title}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">{description}</p>
         </div>
       </CardContent>
     </Card>

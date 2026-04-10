@@ -1,3 +1,7 @@
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import {
   Controller,
   Get,
@@ -15,7 +19,9 @@ import {
   BadRequestException,
   Res,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsIn,
@@ -26,18 +32,15 @@ import {
   Max,
   IsNotEmpty,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 import { Response } from 'express';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Request } from 'express';
+import { diskStorage } from 'multer';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { ReposService } from './repos.service';
-import { Request } from 'express';
 
 const LOGO_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'logos');
 
@@ -53,15 +56,15 @@ const ALLOWED_IMAGE_MIMETYPES = new Set([
 class PublishRepoDto {
   @IsNumber()
   @Type(() => Number)
-  id: number;
+  id!: number;
 
   @IsString()
   @IsNotEmpty()
-  name: string;
+  name!: string;
 
   @IsString()
   @IsNotEmpty()
-  full_name: string;
+  full_name!: string;
 
   @IsString()
   @IsOptional()
@@ -73,19 +76,19 @@ class PublishRepoDto {
 
   @IsNumber()
   @Type(() => Number)
-  stargazers_count: number;
+  stargazers_count!: number;
 
   @IsNumber()
   @Type(() => Number)
-  forks_count: number;
+  forks_count!: number;
 
   @IsString()
   @IsNotEmpty()
-  html_url: string;
+  html_url!: string;
 
   @IsString()
   @IsNotEmpty()
-  clone_url: string;
+  clone_url!: string;
 
   @IsOptional()
   topics?: string[];
@@ -120,7 +123,7 @@ class PublishRepoDto {
 class PurchaseRepoDto {
   @IsString()
   @IsNotEmpty()
-  txHash: string;
+  txHash!: string;
 
   @IsString()
   @IsOptional()
@@ -138,7 +141,7 @@ class PurchaseRepoDto {
 class VoteDto {
   @IsString()
   @IsIn(['UP', 'DOWN'])
-  value: 'UP' | 'DOWN';
+  value!: 'UP' | 'DOWN';
 }
 
 class ListReposQuery {
@@ -194,9 +197,7 @@ export class ReposController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('github/cache')
-  async clearGitHubCache(
-    @CurrentUser() user: { githubLogin: string | null },
-  ) {
+  async clearGitHubCache(@CurrentUser() user: { githubLogin: string | null }) {
     if (!user.githubLogin) return { ok: true };
     await this.reposService.clearGitHubReposCache(user.githubLogin);
     return { ok: true };
@@ -211,30 +212,20 @@ export class ReposController {
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @Post('publish')
-  publishRepo(
-    @Body() dto: PublishRepoDto,
-    @CurrentUser('id') userId: string,
-  ) {
+  publishRepo(@Body() dto: PublishRepoDto, @CurrentUser('id') userId: string) {
     return this.reposService.publishRepository(userId, dto);
   }
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 100, ttl: 3600000 } })
   @Post(':id/vote')
-  vote(
-    @Param('id') repoId: string,
-    @Body() dto: VoteDto,
-    @CurrentUser('id') userId: string,
-  ) {
+  vote(@Param('id') repoId: string, @Body() dto: VoteDto, @CurrentUser('id') userId: string) {
     return this.reposService.vote(userId, repoId, dto.value);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/vote')
-  removeVote(
-    @Param('id') repoId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  removeVote(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
     return this.reposService.removeVote(userId, repoId);
   }
 
@@ -248,17 +239,18 @@ export class ReposController {
     @CurrentUser('id') buyerId: string,
   ) {
     return this.reposService.purchaseRepository(
-      buyerId, repoId, dto.txHash,
-      dto.platformFeeTxHash, dto.consentSignature, dto.consentMessage,
+      buyerId,
+      repoId,
+      dto.txHash,
+      dto.platformFeeTxHash,
+      dto.consentSignature,
+      dto.consentMessage,
     );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/purchased')
-  checkPurchased(
-    @Param('id') repoId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  checkPurchased(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
     return this.reposService.checkPurchased(userId, repoId);
   }
 
@@ -292,7 +284,12 @@ export class ReposController {
         if (ALLOWED_IMAGE_MIMETYPES.has(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Only static images are allowed (PNG, JPG, WebP, SVG). GIFs and other formats are not permitted.'), false);
+          cb(
+            new BadRequestException(
+              'Only static images are allowed (PNG, JPG, WebP, SVG). GIFs and other formats are not permitted.',
+            ),
+            false,
+          );
         }
       },
     }),
@@ -339,17 +336,15 @@ export class ReposController {
   addCollaborator(
     @Param('id') repoId: string,
     @CurrentUser('id') userId: string,
-    @Body() body: { targetUserId?: string; name?: string; type?: string; url?: string; role?: string },
+    @Body()
+    body: { targetUserId?: string; name?: string; type?: string; url?: string; role?: string },
   ) {
     return this.reposService.addCollaborator(userId, repoId, body);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  deleteRepo(
-    @Param('id') repoId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  deleteRepo(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
     return this.reposService.deleteRepository(userId, repoId);
   }
 

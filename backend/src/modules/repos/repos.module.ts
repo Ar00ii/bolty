@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
+import { ReputationModule } from '../reputation/reputation.module';
+
 import { ReposController } from './repos.controller';
 import { ReposService } from './repos.service';
-import { ConfigModule } from '@nestjs/config';
-import { ReputationModule } from '../reputation/reputation.module';
 
 @Module({
   imports: [ConfigModule, ReputationModule],

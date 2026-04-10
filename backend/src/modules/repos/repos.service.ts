@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk';
 import {
   Injectable,
   Logger,
@@ -6,14 +7,13 @@ import {
   BadRequestException,
   ConflictException,
 } from '@nestjs/common';
-
 import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
+import axios from 'axios';
 import { ethers } from 'ethers';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
-import axios from 'axios';
 
 @Injectable()
 export class ReposService {
@@ -110,7 +110,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   // ── GitHub API fetch (server-side, no SSRF) ───────────────────────────────
 
-  async fetchGitHubRepos(githubLogin: string, accessToken?: string, userId?: string): Promise<unknown[]> {
+  async fetchGitHubRepos(
+    githubLogin: string,
+    accessToken?: string,
+    userId?: string,
+  ): Promise<unknown[]> {
     // If no cookie token, try to get it from the database
     let token = accessToken;
     if (!token && userId) {
@@ -124,15 +128,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // No token at all — user connected GitHub before but token is gone, needs re-auth
     if (!token && userId) {
       this.logger.warn(`No GitHub token for user ${userId} (${githubLogin}) — need re-auth`);
-      return [{
-        _bolty_reauth: true,
-        name: 'Reconecta GitHub para ver todos tus repos',
-        id: -1,
-        full_name: 'reauth',
-        html_url: '',
-        stargazers_count: 0,
-        forks_count: 0,
-      }] as unknown[];
+      return [
+        {
+          _bolty_reauth: true,
+          name: 'Reconecta GitHub para ver todos tus repos',
+          id: -1,
+          full_name: 'reauth',
+          html_url: '',
+          stargazers_count: 0,
+          forks_count: 0,
+        },
+      ] as unknown[];
     }
 
     const cacheKey = `gh_repos:${githubLogin}:${token ? 'auth' : 'public'}`;
@@ -161,8 +167,15 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         const scopes = (checkResp.headers?.['x-oauth-scopes'] as string) || '';
         this.logger.log(`GitHub token scopes for ${githubLogin}: [${scopes}]`);
 
-        if (!scopes.split(',').map((s: string) => s.trim()).includes('repo')) {
-          this.logger.warn(`Token for ${githubLogin} lacks 'repo' scope. Revoking to force re-auth.`);
+        if (
+          !scopes
+            .split(',')
+            .map((s: string) => s.trim())
+            .includes('repo')
+        ) {
+          this.logger.warn(
+            `Token for ${githubLogin} lacks 'repo' scope. Revoking to force re-auth.`,
+          );
           needsReauth = true;
 
           // Revoke the old token via GitHub API so next OAuth gives fresh scopes
@@ -193,26 +206,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         this.logger.warn(`GitHub scope check failed for ${githubLogin}: ${scopeCheckErr}`);
         needsReauth = true;
         if (userId) {
-          await this.prisma.user.update({ where: { id: userId }, data: { githubToken: null } }).catch(() => {});
+          await this.prisma.user
+            .update({ where: { id: userId }, data: { githubToken: null } })
+            .catch(() => {});
         }
       }
 
       if (needsReauth) {
         // Return empty list with reauth notice — token was revoked
-        return [{
-          _bolty_reauth: true,
-          name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
-          id: -1,
-          full_name: 'reauth',
-          html_url: '',
-          stargazers_count: 0,
-          forks_count: 0,
-        }] as unknown[];
+        return [
+          {
+            _bolty_reauth: true,
+            name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
+            id: -1,
+            full_name: 'reauth',
+            html_url: '',
+            stargazers_count: 0,
+            forks_count: 0,
+          },
+        ] as unknown[];
       }
 
       // Token has correct scopes — fetch all repos
       let page = 1;
       try {
+        // eslint-disable-next-line no-constant-condition
         while (true) {
           const url = `https://api.github.com/user/repos?per_page=100&page=${page}&sort=updated&type=all`;
           if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
@@ -230,22 +248,27 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       } catch (fetchErr) {
         this.logger.warn(`GitHub repo fetch failed for ${githubLogin}: ${fetchErr}`);
         if (userId) {
-          await this.prisma.user.update({ where: { id: userId }, data: { githubToken: null } }).catch(() => {});
+          await this.prisma.user
+            .update({ where: { id: userId }, data: { githubToken: null } })
+            .catch(() => {});
         }
-        return [{
-          _bolty_reauth: true,
-          name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
-          id: -1,
-          full_name: 'reauth',
-          html_url: '',
-          stargazers_count: 0,
-          forks_count: 0,
-        }] as unknown[];
+        return [
+          {
+            _bolty_reauth: true,
+            name: 'Reconecta GitHub para ver todos tus repos (públicos y privados)',
+            id: -1,
+            full_name: 'reauth',
+            html_url: '',
+            stargazers_count: 0,
+            forks_count: 0,
+          },
+        ] as unknown[];
       }
     } else {
       // No token: use public API (only returns public repos)
       let page = 1;
       this.logger.warn(`No GitHub token for ${githubLogin} — falling back to public API`);
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const url = `https://api.github.com/users/${encodeURIComponent(githubLogin)}/repos?per_page=100&page=${page}&sort=updated`;
         if (!isSafeUrl(url)) throw new BadRequestException('Invalid GitHub request');
@@ -301,7 +324,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     // Private repos must be locked with a price
     if (isPrivate && !isLocked) {
-      throw new BadRequestException('Private repositories must be published as locked with a price');
+      throw new BadRequestException(
+        'Private repositories must be published as locked with a price',
+      );
     }
     if (isLocked && (!githubRepoData.lockedPriceUsd || githubRepoData.lockedPriceUsd <= 0)) {
       throw new BadRequestException('Locked repositories must have a price greater than 0');
@@ -374,7 +399,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       // Show public repos OR locked repos (private locked repos are visible but content is hidden)
       OR: [{ isPrivate: false }, { isLocked: true }],
       ...(language ? { language: { equals: language, mode: 'insensitive' as const } } : {}),
@@ -396,8 +421,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       sortBy === 'stars'
         ? { stars: 'desc' as const }
         : sortBy === 'downloads'
-        ? { downloadCount: 'desc' as const }
-        : { createdAt: 'desc' as const };
+          ? { downloadCount: 'desc' as const }
+          : { createdAt: 'desc' as const };
 
     const [repos, total] = await Promise.all([
       this.prisma.repository.findMany({
@@ -496,7 +521,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const repo = await this.prisma.repository.findUnique({
       where: { id },
       include: {
-        user: { select: { username: true, displayName: true, avatarUrl: true, walletAddress: true } },
+        user: {
+          select: { username: true, displayName: true, avatarUrl: true, walletAddress: true },
+        },
         votes: userId ? { where: { userId } } : false,
         _count: { select: { votes: true } },
       },
@@ -522,7 +549,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     if (!repo) throw new NotFoundException('Repository not found');
     if (!repo.isLocked) throw new BadRequestException('Repository is not locked');
-    if (repo.userId === buyerId) throw new ForbiddenException('Cannot purchase your own repository');
+    if (repo.userId === buyerId)
+      throw new ForbiddenException('Cannot purchase your own repository');
 
     // Check if already purchased
     const existing = await this.prisma.repoPurchase.findFirst({
@@ -543,7 +571,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           where: { id: buyerId },
           select: { walletAddress: true },
         });
-        if (!buyer?.walletAddress || signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()) {
+        if (
+          !buyer?.walletAddress ||
+          signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()
+        ) {
           throw new BadRequestException('Consent signature does not match buyer wallet');
         }
       } catch (err) {
@@ -615,7 +646,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         platformFeeWei = feeTx.value.toString();
       } catch (err) {
         if (err instanceof BadRequestException) throw err;
-        this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
+        this.logger.error(
+          `Platform fee verification error: ${err instanceof Error ? err.message : err}`,
+        );
         throw new BadRequestException('Could not verify platform fee transaction');
       }
     }
@@ -710,15 +743,18 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           repositoryId: repoId,
           userId: data.targetUserId,
           name: targetUser.displayName || targetUser.username || 'Unknown',
-          type: 'USER' as any,
+          type: 'USER',
           role: data.role?.slice(0, 80) || null,
           url: null,
         },
         include: {
           user: {
             select: {
-              id: true, username: true, displayName: true,
-              avatarUrl: true, reputationPoints: true,
+              id: true,
+              username: true,
+              displayName: true,
+              avatarUrl: true,
+              reputationPoints: true,
             },
           },
         },
@@ -735,7 +771,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repositoryId: repoId,
         userId: null,
         name: data.name.slice(0, 80),
-        type: type as any,
+        type: type as unknown as any,
         role: data.role?.slice(0, 80) || null,
         url: data.url?.slice(0, 500) || null,
       },

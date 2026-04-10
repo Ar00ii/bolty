@@ -1,25 +1,28 @@
 import { IsEmail, IsString, MinLength, MaxLength, Matches, IsOptional } from 'class-validator';
 
 // At least 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\[\]{};':"\\|,.<>/?`~]).{8,}$/;
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_=+[\]{};':"\\|,.<>/?`~]).{8,}$/;
 const PASSWORD_MESSAGE =
   'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character';
 
 export class RegisterEmailDto {
   @IsEmail({}, { message: 'Enter a valid email address' })
-  email: string;
+  email!: string;
 
   @IsString()
   @MinLength(3, { message: 'Username must be at least 3 characters' })
   @MaxLength(30, { message: 'Username must be 30 characters or fewer' })
-  @Matches(/^[a-z0-9_-]+$/, { message: 'Username can only contain lowercase letters, numbers, _ and -' })
-  username: string;
+  @Matches(/^[a-z0-9_-]+$/, {
+    message: 'Username can only contain lowercase letters, numbers, _ and -',
+  })
+  username!: string;
 
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters' })
   @MaxLength(100)
   @Matches(PASSWORD_REGEX, { message: PASSWORD_MESSAGE })
-  password: string;
+  password!: string;
 
   @IsString()
   @IsOptional()
@@ -39,59 +42,59 @@ export class RegisterEmailDto {
 export class LoginEmailDto {
   @IsString()
   @MinLength(1, { message: 'Email or username is required' })
-  identifier: string;
+  identifier!: string;
 
   @IsString()
-  password: string;
+  password!: string;
 }
 
 export class ForgotPasswordDto {
   @IsString()
   @MinLength(1, { message: 'Email or username is required' })
-  identifier: string;
+  identifier!: string;
 }
 
 export class ResetPasswordDto {
   @IsString()
-  token: string;
+  token!: string;
 
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters' })
   @MaxLength(100)
   @Matches(PASSWORD_REGEX, { message: PASSWORD_MESSAGE })
-  newPassword: string;
+  newPassword!: string;
 }
 
 export class Verify2FADto {
   @IsString()
-  tempToken: string;
+  tempToken!: string;
 
   @IsString()
   @MinLength(6)
   @MaxLength(6)
-  code: string;
+  code!: string;
 }
 
 export class RequestEmailChangeDto {
   @IsEmail({}, { message: 'Enter a valid email address' })
-  newEmail: string;
+  newEmail!: string;
 
   @IsString()
-  password: string;
+  password!: string;
 }
 
 export class ConfirmEmailChangeDto {
   @IsString()
   @MinLength(6)
   @MaxLength(6)
-  code: string;
+  code!: string;
 }
 
 export class DeleteAccountDto {
   @IsString()
   @MinLength(6)
   @MaxLength(6)
-  code: string;
+  code!: string;
 }
 
 export class Toggle2FADto {
@@ -104,5 +107,5 @@ export class Enable2FADto {
   @IsString()
   @MinLength(6)
   @MaxLength(6)
-  code: string;
+  code!: string;
 }

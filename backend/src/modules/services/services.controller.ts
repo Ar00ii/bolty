@@ -1,11 +1,22 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param, Query,
-  UseGuards, HttpCode, HttpStatus,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { ServicesService, CreateServiceDto } from './services.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { ServicesService, CreateServiceDto } from './services.service';
 
 @UseGuards(JwtAuthGuard)
 @Controller('services')
@@ -37,10 +48,7 @@ export class ServicesController {
   }
 
   @Post()
-  createService(
-    @CurrentUser('id') userId: string,
-    @Body() dto: CreateServiceDto,
-  ) {
+  createService(@CurrentUser('id') userId: string, @Body() dto: CreateServiceDto) {
     return this.servicesService.createService(userId, dto);
   }
 
@@ -55,18 +63,12 @@ export class ServicesController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  deleteService(
-    @CurrentUser('id') userId: string,
-    @Param('id') id: string,
-  ) {
+  deleteService(@CurrentUser('id') userId: string, @Param('id') id: string) {
     return this.servicesService.deleteService(userId, id);
   }
 
   @Patch(':id/toggle')
-  toggleStatus(
-    @CurrentUser('id') userId: string,
-    @Param('id') id: string,
-  ) {
+  toggleStatus(@CurrentUser('id') userId: string, @Param('id') id: string) {
     return this.servicesService.toggleStatus(userId, id);
   }
 }

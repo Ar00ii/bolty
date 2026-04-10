@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useEffect, useRef } from 'react';
 
 const CHARS = '01001101 01011010 00110101 10110100 11010011 ABCDEF0123456789';
@@ -25,7 +26,7 @@ export function MatrixRain({ opacity = 0.12 }: { opacity?: number }) {
       canvas.height = window.innerHeight;
       const cols = Math.floor(canvas.width / FONT_SIZE) + 1;
       dropsRef.current = Array.from({ length: cols }, () =>
-        Math.floor(Math.random() * -canvas.height / FONT_SIZE),
+        Math.floor((Math.random() * -canvas.height) / FONT_SIZE),
       );
     };
 

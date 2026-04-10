@@ -4,14 +4,15 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
 
 const MAX_MSG_LENGTH = 2000;
 
 const ORDER_INCLUDE = {
-  buyer:   { select: { id: true, username: true, avatarUrl: true } },
-  seller:  { select: { id: true, username: true, avatarUrl: true } },
+  buyer: { select: { id: true, username: true, avatarUrl: true } },
+  seller: { select: { id: true, username: true, avatarUrl: true } },
   listing: { select: { id: true, title: true, type: true, price: true, currency: true } },
 } as const;
 
@@ -67,7 +68,8 @@ export class OrdersService {
   /** Seller marks order as delivered (with optional delivery note) */
   async markDelivered(orderId: string, userId: string, deliveryNote?: string) {
     const order = await this.getOrder(orderId, userId);
-    if (order.sellerId !== userId) throw new ForbiddenException('Only seller can mark as delivered');
+    if (order.sellerId !== userId)
+      throw new ForbiddenException('Only seller can mark as delivered');
     if (!['PENDING_DELIVERY', 'IN_PROGRESS'].includes(order.status)) {
       throw new BadRequestException('Invalid status transition');
     }
@@ -97,7 +99,9 @@ export class OrdersService {
     const data: any = { status: 'COMPLETED', completedAt: new Date() };
     if (order.escrowStatus === 'FUNDED') {
       if (!escrowReleaseTx) {
-        throw new BadRequestException('Escrow release transaction hash required. Release funds from escrow first.');
+        throw new BadRequestException(
+          'Escrow release transaction hash required. Release funds from escrow first.',
+        );
       }
       data.escrowReleaseTx = escrowReleaseTx;
       data.escrowStatus = 'RELEASED';
@@ -121,7 +125,7 @@ export class OrdersService {
       throw new BadRequestException('Cannot dispute this order');
     }
 
-    const data: any = { status: 'DISPUTED' };
+    const data: Record<string, unknown> = { status: 'DISPUTED' };
     if (order.escrowStatus === 'FUNDED') {
       data.escrowStatus = 'DISPUTED';
       data.escrowDisputedAt = new Date();

@@ -1,25 +1,17 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Body,
-  Param,
-  Res,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Res, UseGuards } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { Response } from 'express';
 import { IsString, Length } from 'class-validator';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { Response } from 'express';
+
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
 import { AiService } from './ai.service';
 
 class ChatDto {
   @IsString()
   @Length(1, 2000)
-  message: string;
+  message!: string;
 }
 
 @Controller('ai')
@@ -38,10 +30,7 @@ export class AiController {
   }
 
   @Get('sessions/:id')
-  getSession(
-    @Param('id') sessionId: string,
-    @CurrentUser('id') userId: string,
-  ) {
+  getSession(@Param('id') sessionId: string, @CurrentUser('id') userId: string) {
     return this.aiService.getSession(sessionId, userId);
   }
 

@@ -1,5 +1,5 @@
-import React from 'react';
 import { clsx } from 'clsx';
+import React from 'react';
 
 interface TerminalCardProps {
   title?: string;
@@ -8,11 +8,7 @@ interface TerminalCardProps {
   showDots?: boolean; // kept for API compat, no longer rendered
 }
 
-export function TerminalCard({
-  title,
-  children,
-  className,
-}: TerminalCardProps) {
+export function TerminalCard({ title, children, className }: TerminalCardProps) {
   return (
     <div className={clsx('terminal-card', className)}>
       {title && (

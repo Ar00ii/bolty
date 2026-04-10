@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { OrdersService } from './orders.service';
+
+import { AuthModule } from '../auth/auth.module';
+
 import { OrdersController } from './orders.controller';
 import { OrdersGateway } from './orders.gateway';
-import { AuthModule } from '../auth/auth.module';
+import { OrdersService } from './orders.service';
 
 @Module({
   imports: [AuthModule],

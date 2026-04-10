@@ -18,14 +18,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
 
     const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+      exception instanceof HttpException ? exception.getResponse() : 'Internal server error';
 
     // Don't expose stack traces in production
     const isProd = process.env.NODE_ENV === 'production';
@@ -34,10 +30,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message:
-        typeof message === 'object'
-          ? (message as Record<string, unknown>)
-          : message,
+      message: typeof message === 'object' ? (message as Record<string, unknown>) : message,
       ...(isProd ? {} : { stack: exception instanceof Error ? exception.stack : undefined }),
     };
 
