@@ -35,6 +35,7 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
+import { HowItWorks } from '@/components/HowItWorks';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -319,6 +320,9 @@ export default function HomePage() {
           <TechStack />
         </div>
       </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <HowItWorks />
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
       <section
