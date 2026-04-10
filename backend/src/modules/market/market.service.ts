@@ -1,3 +1,4 @@
+import Anthropic from '@anthropic-ai/sdk';
 import {
   Injectable,
   ForbiddenException,
@@ -6,8 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import Anthropic from '@anthropic-ai/sdk';
 import { ethers } from 'ethers';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 
@@ -58,7 +59,10 @@ export class MarketService {
    *  Tier 1 — Haiku: fast initial analysis
    *  Tier 2 — Sonnet: deep analysis only when Haiku flags something suspicious
    */
-  async scanContent(title: string, description: string): Promise<{ safe: boolean; reason: string }> {
+  async scanContent(
+    title: string,
+    description: string,
+  ): Promise<{ safe: boolean; reason: string }> {
     const basePrompt = `You are a content safety moderator for a developer marketplace.
 Analyze the following listing and determine if it is safe and legitimate.
 
@@ -126,7 +130,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (title.length < 3) throw new ForbiddenException('Title too short');
     if (description.length < 10) throw new ForbiddenException('Description too short');
     if (dto.price < 0 || dto.price > 1_000_000) throw new ForbiddenException('Invalid price');
-    if (dto.minPrice != null && (dto.minPrice < 0 || dto.minPrice > dto.price)) {
+    if (
+      dto.minPrice !== null &&
+      dto.minPrice !== undefined &&
+      (dto.minPrice < 0 || dto.minPrice > dto.price)
+    ) {
       throw new ForbiddenException('Minimum price must be between 0 and asking price');
     }
 
@@ -139,7 +147,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     // Check seller is not banned
-    const seller = await this.prisma.user.findUnique({ where: { id: sellerId }, select: { isBanned: true } });
+    const seller = await this.prisma.user.findUnique({
+      where: { id: sellerId },
+      select: { isBanned: true },
+    });
     if (!seller || seller.isBanned) throw new ForbiddenException('Account restricted');
 
     // AI security scan
@@ -157,7 +168,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
         agentEndpoint: dto.agentEndpoint ? dto.agentEndpoint.trim().slice(0, 500) : null,
-        minPrice: dto.minPrice != null ? dto.minPrice : null,
+        minPrice: dto.minPrice !== null && dto.minPrice !== undefined ? dto.minPrice : null,
         fileKey: dto.fileKey || null,
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
         fileSize: dto.fileSize || null,
@@ -175,7 +186,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const take = 20;
     const skip = (page - 1) * take;
 
-    const where: any = { status: 'ACTIVE' };
+    const where: Record<string, unknown> = { status: 'ACTIVE' };
     if (params.type && params.type !== 'ALL') where.type = params.type;
     if (params.search) {
       where.OR = [
@@ -207,7 +218,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       where: { id },
       include: {
         seller: { select: { id: true, username: true, avatarUrl: true, walletAddress: true } },
-        repository: { select: { id: true, name: true, githubUrl: true, language: true, stars: true } },
+        repository: {
+          select: { id: true, name: true, githubUrl: true, language: true, stars: true },
+        },
       },
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
@@ -237,7 +250,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       include: { seller: { select: { id: true, walletAddress: true } } },
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
-    if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot purchase your own listing');
+    if (listing.sellerId === buyerId)
+      throw new ForbiddenException('Cannot purchase your own listing');
 
     // Check not already purchased
     const existing = await this.prisma.marketPurchase.findFirst({ where: { listingId, buyerId } });
@@ -264,7 +278,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           where: { id: buyerId },
           select: { walletAddress: true },
         });
-        if (!buyer?.walletAddress || signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()) {
+        if (
+          !buyer?.walletAddress ||
+          signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()
+        ) {
           throw new BadRequestException('Consent signature does not match buyer wallet');
         }
       } catch (err) {
@@ -316,7 +333,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
             platformFeeWei = feeTx.value.toString();
           } catch (err) {
             if (err instanceof BadRequestException) throw err;
-            this.logger.error(`Platform fee verification error: ${err instanceof Error ? err.message : err}`);
+            this.logger.error(
+              `Platform fee verification error: ${err instanceof Error ? err.message : err}`,
+            );
             throw new BadRequestException('Could not verify platform fee transaction');
           }
         }
@@ -337,8 +356,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         negotiationId: negotiationId || null,
         verified: true,
         status: 'PENDING_DELIVERY',
-        platformFeeTxHash: useEscrow ? null : (platformFeeTxHash || null),
-        platformFeeWei: useEscrow ? null : (platformFeeWei || null),
+        platformFeeTxHash: useEscrow ? null : platformFeeTxHash || null,
+        platformFeeWei: useEscrow ? null : platformFeeWei || null,
         consentSignature: consentSignature || null,
         consentMessage: consentMessage || null,
         escrowContract: useEscrow ? escrowContract : null,
@@ -369,7 +388,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const listing = await this.prisma.marketListing.findUnique({ where: { id } });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { role: true } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
     if (listing.sellerId !== userId && !['ADMIN', 'MODERATOR'].includes(user?.role || '')) {
       throw new ForbiddenException('Insufficient permissions');
     }

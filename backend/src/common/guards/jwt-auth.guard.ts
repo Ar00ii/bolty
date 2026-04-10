@@ -1,15 +1,22 @@
 import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+
+interface AuthUser {
+  id: string;
+  email: string;
+  [key: string]: unknown;
+}
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
+  constructor(private readonly reflector: Reflector) {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -19,12 +26,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return true;
     }
 
-    return super.canActivate(context);
+    return super.canActivate(context) as Promise<boolean>;
   }
 
-  handleRequest(err: any, user: any): any {
-    if (err || !user) {
-      throw err || new UnauthorizedException('Authentication required');
+  handleRequest<TUser extends any = AuthUser>(
+    err: Error | null,
+    user: TUser | null,
+  ): TUser {
+    if (err !== null || user === null) {
+      throw err ?? new UnauthorizedException('Authentication required');
     }
     return user;
   }

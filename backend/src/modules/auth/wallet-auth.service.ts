@@ -1,6 +1,8 @@
 import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { ethers } from 'ethers';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
+
 import { AuthService } from './auth.service';
 import { AuthTokens } from './auth.service';
 
@@ -78,7 +80,12 @@ export class WalletAuthService {
 
   // ── Link wallet to existing account ──────────────────────────────────────
 
-  async linkWalletToUser(userId: string, address: string, signature: string, nonce: string): Promise<void> {
+  async linkWalletToUser(
+    userId: string,
+    address: string,
+    signature: string,
+    nonce: string,
+  ): Promise<void> {
     const normalized = address.toLowerCase();
     if (!ethers.isAddress(address)) throw new UnauthorizedException('Invalid Ethereum address');
 
@@ -92,7 +99,8 @@ export class WalletAuthService {
     } catch {
       throw new UnauthorizedException('Invalid signature');
     }
-    if (recovered.toLowerCase() !== normalized) throw new UnauthorizedException('Signature verification failed');
+    if (recovered.toLowerCase() !== normalized)
+      throw new UnauthorizedException('Signature verification failed');
 
     // Ensure wallet isn't already linked to another account — use transaction to prevent race
     await this.prisma.$transaction(async (tx) => {
@@ -103,7 +111,9 @@ export class WalletAuthService {
           throw new ConflictException('This wallet is already linked to another account');
         }
         await tx.user.update({ where: { id: existing.id }, data: { walletAddress: null } });
-        this.logger.log(`Transferred wallet ${normalized.slice(0, 8)}... from wallet-only account ${existing.id} to user ${userId}`);
+        this.logger.log(
+          `Transferred wallet ${normalized.slice(0, 8)}... from wallet-only account ${existing.id} to user ${userId}`,
+        );
       }
       await tx.user.update({ where: { id: userId }, data: { walletAddress: normalized } });
     });

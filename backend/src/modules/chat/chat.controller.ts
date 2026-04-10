@@ -1,14 +1,16 @@
 import { Controller, Get, Post, Body, Param, UseGuards, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { ChatService } from './chat.service';
 import { IsString, Length } from 'class-validator';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { ChatService } from './chat.service';
 
 class ReportDto {
   @IsString()
   @Length(5, 500)
-  reason: string;
+  reason!: string;
 }
 
 @Controller('chat')

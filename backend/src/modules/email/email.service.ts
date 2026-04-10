@@ -32,10 +32,10 @@ export class EmailService {
   private appUrl: string;
   private logoUrl: string;
 
-  constructor(private readonly config: ConfigService) {
-    const apiKey = config.get<string>('RESEND_API_KEY', '');
-    this.from = config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
-    this.appUrl = config.get<string>('APP_URL', 'https://bolty.dev');
+  constructor(private readonly _config: ConfigService) {
+    const apiKey = this._config.get<string>('RESEND_API_KEY', '');
+    this.from = this._config.get<string>('EMAIL_FROM', 'Bolty <noreply@boltynetwork.xyz>');
+    this.appUrl = this._config.get<string>('APP_URL', 'https://bolty.dev');
     this.logoUrl = `${this.appUrl}/bolty-icon.png`;
 
     if (apiKey) {
@@ -44,9 +44,7 @@ export class EmailService {
       this.logger.log(`Resend email configured (from: ${this.from})`);
     } else {
       this.devMode = true;
-      this.logger.warn(
-        'RESEND_API_KEY not set. Emails will be printed to the console.',
-      );
+      this.logger.warn('RESEND_API_KEY not set. Emails will be printed to the console.');
     }
   }
 
@@ -107,11 +105,11 @@ export class EmailService {
     if (this.devMode || !this.resend) {
       this.logger.log(
         `\n${'─'.repeat(60)}\n` +
-        `[EMAIL - DEV MODE]\n` +
-        `To:      ${to}\n` +
-        `Subject: ${subject}\n` +
-        `Body:\n${text}\n` +
-        `${'─'.repeat(60)}`,
+          '[EMAIL - DEV MODE]\n' +
+          `To:      ${to}\n` +
+          `Subject: ${subject}\n` +
+          `Body:\n${text}\n` +
+          `${'─'.repeat(60)}`,
       );
       return;
     }
@@ -139,7 +137,10 @@ export class EmailService {
 
   async sendWelcomeEmail(to: string, username: string): Promise<void> {
     const subject = 'Welcome to Bolty';
-    const html = this.shell(subject, `Welcome to Bolty, ${username}!`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Welcome to Bolty, ${username}!`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Welcome to Bolty</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Hi <strong style="color:#18181b;">@${username}</strong>, your account is ready.
@@ -170,7 +171,8 @@ export class EmailService {
       <a href="${this.appUrl}" style="display:inline-block;background:#836EF9;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:12px 28px;">
         Start exploring &rarr;
       </a>
-    `));
+    `),
+    );
     const text = `Welcome to Bolty, @${username}!\n\nYour account is ready. Start exploring at ${this.appUrl}`;
     await this.send(to, subject, html, text);
   }
@@ -179,7 +181,10 @@ export class EmailService {
 
   async send2FACode(to: string, code: string): Promise<void> {
     const subject = `${code} — your Bolty sign-in code`;
-    const html = this.shell(subject, `Your Bolty sign-in code is ${code}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Your Bolty sign-in code is ${code}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Complete Your Sign-In</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Here's your 6-digit verification code to complete your Bolty sign-in.
@@ -195,7 +200,8 @@ export class EmailService {
           If you didn't request this sign-in, you can safely ignore this email.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Your Bolty 2FA sign-in code: ${code}\n\nExpires in 10 minutes. Never share it.`;
     await this.send(to, subject, html, text);
   }
@@ -204,7 +210,10 @@ export class EmailService {
 
   async sendEmailChangeConfirmation(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm your new Bolty email`;
-    const html = this.shell(subject, `Confirm your email change with code ${code}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Confirm your email change with code ${code}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Confirm Email Change</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to change your Bolty email address to this one.
@@ -220,7 +229,8 @@ export class EmailService {
           <strong>Didn't request this?</strong> Your email won't change unless you enter the code. If this wasn't you, sign in and change your password immediately.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Your Bolty email change code: ${code}\n\nExpires in 15 minutes.`;
     await this.send(to, subject, html, text);
   }
@@ -229,7 +239,10 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
     const subject = 'Reset your Bolty password';
-    const html = this.shell(subject, 'Reset your Bolty password', bodyWrap(`
+    const html = this.shell(
+      subject,
+      'Reset your Bolty password',
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Password Reset</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         We received a request to reset your Bolty password.
@@ -253,7 +266,8 @@ export class EmailService {
           <strong>Didn't request a password reset?</strong> You can safely ignore this email — your password won't change.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Reset your Bolty password\n\nClick the link below (expires in 15 minutes):\n${resetUrl}\n\nIf you didn't request this, ignore this email.`;
     await this.send(to, subject, html, text);
   }
@@ -262,7 +276,10 @@ export class EmailService {
 
   async send2FAEnableCode(to: string, code: string): Promise<void> {
     const subject = `${code} — enable two-factor authentication`;
-    const html = this.shell(subject, `Confirm 2FA activation: ${code}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Confirm 2FA activation: ${code}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Enable Two-Factor Authentication</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to enable two-factor authentication (2FA) on your Bolty account.
@@ -279,7 +296,8 @@ export class EmailService {
           If you didn't request this, you can safely ignore this email.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Your Bolty 2FA activation code: ${code}\n\nExpires in 10 minutes.`;
     await this.send(to, subject, html, text);
   }
@@ -297,7 +315,10 @@ export class EmailService {
   ): Promise<void> {
     const subject = `🤖 Your agent agreed a deal — ${agreedPrice} ${currency}`;
     const dealUrl = `${this.appUrl}/market?neg=${negotiationId}`;
-    const html = this.shell(subject, `Your agent agreed a deal for ${listingTitle}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Your agent agreed a deal for ${listingTitle}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Agent Deal Alert</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         Hi <strong style="color:#18181b;">@${sellerUsername}</strong>,<br/>
@@ -332,7 +353,8 @@ export class EmailService {
           Once you confirm, a direct message chat will open between you and the buyer so you can coordinate the transaction.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Hi @${sellerUsername},\n\nYour AI agent agreed a deal!\n\nListing: ${listingTitle}\nAgreed price: ${agreedPrice} ${currency}\nBuyer: @${buyerUsername}\n\nReview and confirm at: ${dealUrl}`;
     await this.send(to, subject, html, text);
   }
@@ -341,7 +363,10 @@ export class EmailService {
 
   async sendDeleteAccountCode(to: string, code: string): Promise<void> {
     const subject = `${code} — confirm account deletion`;
-    const html = this.shell(subject, `Confirm account deletion: ${code}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Confirm account deletion: ${code}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">⚠️ Account Deletion Request</h1>
       <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to permanently delete your Bolty account.
@@ -366,7 +391,8 @@ export class EmailService {
           <strong>If you didn't request this, change your password immediately.</strong>
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Your Bolty account deletion code: ${code}\n\nExpires in 10 minutes. This is PERMANENT and will delete all your data.`;
     await this.send(to, subject, html, text);
   }
@@ -375,7 +401,10 @@ export class EmailService {
 
   async sendApiKeyDeleteCode(to: string, code: string): Promise<void> {
     const subject = `${code} — revoke your Bolty API key`;
-    const html = this.shell(subject, `Confirm API key revocation: ${code}`, bodyWrap(`
+    const html = this.shell(
+      subject,
+      `Confirm API key revocation: ${code}`,
+      bodyWrap(`
       <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Revoke API Key</h1>
       <p style="margin:0 0 4px;color:#71717a;font-size:15px;line-height:1.6;">
         You requested to revoke an API key on your Bolty account.
@@ -388,7 +417,8 @@ export class EmailService {
           If you didn't request this, change your password immediately.
         </p>
       </div>
-    `));
+    `),
+    );
     const text = `Your Bolty API key revocation code: ${code}\n\nExpires in 10 minutes.`;
     await this.send(to, subject, html, text);
   }

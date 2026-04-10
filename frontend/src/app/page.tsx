@@ -1,330 +1,935 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { BoltyLogoSVG, BoltyFloatingLogos } from '@/components/ui/BoltyLogo';
-import { HighlightCard } from '@/components/ui/highlight-card';
+import { motion } from 'framer-motion';
 import {
-  Bot, GitBranch, ArrowRight, Shield,
-  Key, Star, TrendingUp,
-  MessageSquare, UserPlus, Upload, Rocket,
+  Bot,
+  GitBranch,
+  ArrowRight,
+  Shield,
+  Key,
+  Star,
+  TrendingUp,
+  MessageSquare,
+  UserPlus,
+  Upload,
+  Rocket,
+  CheckCircle2,
+  Menu,
+  ChevronDown,
+  Settings,
+  User as UserIcon,
+  Code2,
+  Zap,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React, { useState, useEffect, useRef } from 'react';
 
-// ── Scroll reveal ──────────────────────────────────────────────────
-function useReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    if (!ref.current) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 },
-    );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-  return { ref, visible };
-}
+import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
+import { GradientText } from '@/components/ui/GradientText';
+import { HexagonPattern } from '@/components/ui/HexagonPattern';
+import { RenderHero } from '@/components/ui/RenderHero';
+import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { TestimonialCarousel } from '@/components/TestimonialCarousel';
+import { FeaturesGrid } from '@/components/FeaturesGrid';
+import { TechStack } from '@/components/TechStack';
+import { HowItWorks } from '@/components/HowItWorks';
+import { useAuth } from '@/lib/auth/AuthProvider';
 
-function Section({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  const { ref, visible } = useReveal();
-  return (
-    <div ref={ref} className={`reveal ${visible ? 'visible' : ''} ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-// ── Data ──────────────────────────────────────────────────────────
+// Data
 const FEATURES = [
   {
     icon: Bot,
     title: 'AI Agent Marketplace',
-    description: 'Discover, publish, and sell AI agents. From GPT-powered tools to custom automation bots.',
+    description:
+      'Discover, publish, and sell AI agents. From GPT-powered tools to custom automation bots.',
     href: '/market/agents',
+    featured: true,
   },
   {
     icon: GitBranch,
     title: 'Code Repositories',
-    description: 'Sync GitHub repos. Offer free or paid access, earn reputation, build your developer profile.',
+    description:
+      'Sync GitHub repos. Offer free or paid access, earn reputation, build your profile.',
     href: '/market/repos',
   },
   {
     icon: Key,
     title: 'API Key Management',
-    description: 'Generate API keys for your agents to interact with the platform programmatically.',
+    description: 'Generate API keys for your agents to interact programmatically.',
     href: '/api-keys',
   },
   {
     icon: Shield,
     title: 'Secure Payments',
-    description: 'On-chain ETH payments with smart contract escrow. No middleman, no delays.',
+    description: 'On-chain ETH payments with smart contract escrow. No middleman.',
     href: '/how-it-works',
   },
   {
     icon: MessageSquare,
     title: 'Real-time Chat',
-    description: 'Global chat, DMs, and negotiation system built on WebSockets. Connect instantly.',
+    description: 'Global chat, DMs, and negotiation system built on WebSockets.',
     href: '/chat',
   },
   {
     icon: TrendingUp,
     title: 'Reputation System',
-    description: 'Build your developer reputation. Earn points, climb the leaderboard, get recognized.',
+    description: 'Build your developer reputation. Earn points, climb leaderboards.',
     href: '/reputation/leaderboard',
   },
 ];
 
-const STATS = [
-  { value: 'Beta', label: 'Platform Status' },
-  { value: 'ETH', label: 'On-chain Payments' },
-  { value: 'Free', label: 'To Join' },
-  { value: '24/7', label: 'Platform Available' },
-];
-
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Create your account', desc: 'Sign up with GitHub, email, or a Web3 wallet. Your profile is your developer identity.', icon: UserPlus },
-  { step: '02', title: 'Publish your work', desc: 'Connect GitHub to sync repos, or upload AI agents and automation tools to the marketplace.', icon: Upload },
-  { step: '03', title: 'Earn and grow', desc: 'Set prices in ETH, negotiate with buyers, build reputation, and grow your developer brand.', icon: Rocket },
-];
-
-const INTEGRATIONS = [
-  { name: 'GitHub', desc: 'Sync repos in one click' },
-  { name: 'Ethereum', desc: 'On-chain ETH payments' },
-  { name: 'Claude AI', desc: 'Built-in AI assistant' },
-  { name: 'WebSockets', desc: 'Real-time everything' },
-  { name: 'PostgreSQL', desc: 'Robust data layer' },
-  { name: 'Any Language', desc: 'All stacks welcome' },
+  {
+    step: '01',
+    title: 'Create your account',
+    desc: 'Sign up with GitHub, email, or Web3 wallet. Your profile is your identity.',
+    icon: UserPlus,
+  },
+  {
+    step: '02',
+    title: 'Publish your work',
+    desc: 'Connect GitHub or upload AI agents to the marketplace.',
+    icon: Upload,
+  },
+  {
+    step: '03',
+    title: 'Earn and grow',
+    desc: 'Set prices in ETH, negotiate, build reputation, grow your brand.',
+    icon: Rocket,
+  },
 ];
 
 const TESTIMONIALS = [
-  { name: 'Alex R.', role: 'Senior Full-Stack Dev', text: 'Published three locked repos in my first week and earned my first ETH without any crypto complexity.' },
-  { name: 'Yuki T.', role: 'AI/ML Engineer', text: 'The AI agent marketplace is exactly what I needed. Deployed my automation toolkit and it already has buyers.' },
-  { name: 'Sara M.', role: 'Indie Developer', text: 'The built-in AI assistant saves me hours every week. Real code-level feedback, not generic advice.' },
+  {
+    name: 'Alex R.',
+    role: 'Senior Full-Stack Dev',
+    text: 'Published three repos in my first week and earned ETH without crypto complexity.',
+  },
+  {
+    name: 'Yuki T.',
+    role: 'AI/ML Engineer',
+    text: 'The AI agent marketplace is exactly what I needed. Deployed my toolkit and it has buyers.',
+  },
+  {
+    name: 'Sara M.',
+    role: 'Indie Developer',
+    text: 'The built-in AI assistant saves me hours every week.',
+  },
 ];
 
-// ── Component ────────────────────────────────────────────────────
+const FAQ = [
+  {
+    question: 'How do I publish my AI agent?',
+    answer:
+      'Simply connect your GitHub repository or upload your agent files directly. Our platform handles deployment, versioning, and scaling automatically.',
+  },
+  {
+    question: 'How do I get paid?',
+    answer:
+      'Earnings are processed directly to your Ethereum wallet. We handle payment processing through smart contracts with zero middleman fees.',
+  },
+  {
+    question: 'What programming languages are supported?',
+    answer:
+      'We support any language and framework. Just containerize it with Docker, and our platform handles the rest.',
+  },
+  {
+    question: 'How does the reputation system work?',
+    answer:
+      'Your reputation grows with positive transactions, community contributions, and uptime. Higher reputation unlocks premium features and visibility.',
+  },
+  {
+    question: 'Can I test my agent before publishing?',
+    answer:
+      'Yes! Use our sandbox environment to test API endpoints, chat interactions, and integrations before going live.',
+  },
+  {
+    question: 'What are the fees?',
+    answer:
+      'We take a 5% commission on transactions. No setup fees, no hidden charges. Transparent pricing for everyone.',
+  },
+];
+
 export default function HomePage() {
-  const { isAuthenticated } = useAuth();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const pathname = usePathname();
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Simple nav for unauthenticated users (landing page)
+  const simpleNavLinks = [
+    { href: '/market', label: 'Marketplace' },
+    { href: '/market/agents', label: 'Agents' },
+    { href: '/market/repos', label: 'Repos' },
+    { href: '/services', label: 'Services' },
+    { href: '/docs/agent-protocol', label: 'Docs' },
+  ];
+
+  // Organized sections for authenticated users
+  const navSections = {
+    OVERVIEW: [
+      { href: '/market', label: 'Marketplace', icon: Bot },
+      { href: '/market/agents', label: 'AI Agents', icon: Zap },
+      { href: '/market/repos', label: 'Repositories', icon: GitBranch },
+    ],
+    COMMUNITY: [
+      { href: '/chat', label: 'Global Chat', icon: MessageSquare },
+      { href: '/messages', label: 'Messages', icon: MessageSquare },
+      { href: '/leaderboard', label: 'Leaderboard', icon: TrendingUp },
+    ],
+    ACCOUNT: [
+      { href: '/orders', label: 'Orders', icon: CheckCircle2 },
+      { href: '/api-keys', label: 'API Keys', icon: Key },
+      { href: '/profile', label: 'Profile', icon: UserIcon },
+      { href: '/settings', label: 'Settings', icon: Settings },
+    ],
+    RESOURCES: [
+      { href: '/docs/agent-protocol', label: 'Documentation', icon: Code2 },
+      { href: '#how-it-works', label: 'How It Works', icon: Rocket },
+    ],
+  };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* Homepage Navbar */}
-      <nav className="nav-glass fixed top-0 left-0 right-0 z-50 border-b" style={{ background: 'var(--bg)', opacity: 1, backdropFilter: 'blur(12px)', borderColor: 'var(--border)' }}>
-        <div className="max-w-6xl mx-auto h-14 px-4 lg:px-6 flex items-center">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <BoltyLogoSVG size={28} className="transition-transform duration-200 group-hover:scale-110 drop-shadow-[0_0_6px_rgba(131,110,249,0.4)]" />
-            <span className="text-[15px] font-bold tracking-tight" style={{
-              background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>BoltyNetwork</span>
-          </Link>
-          <div className="flex-1" />
-          <div className="hidden md:flex items-center gap-6 mr-6">
-            <Link href="/market" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>Marketplace</Link>
-            <Link href="/docs/agent-protocol" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>Docs</Link>
-            <Link href="/how-it-works" className="text-[13px] transition-colors" style={{ color: 'var(--text-muted)' }}>How It Works</Link>
+    <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
+      {/* Navbar - Clean and Simple */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 border-b border-zinc-800 backdrop-blur-sm">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <BoltyLogoSVG size={24} />
+            <span className="text-white font-light text-sm md:text-base hidden sm:inline">
+              BoltyNetwork
+            </span>
           </div>
-          {!isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <Link href="/auth" className="text-[13px] px-3 py-1.5 transition-colors" style={{ color: 'var(--text-muted)' }}>Sign in</Link>
-              <Link href="/auth?tab=register" className="btn-primary text-[13px] px-4 py-1.5">Get started</Link>
-            </div>
-          ) : (
-            <Link href="/market" className="btn-primary text-[13px] px-4 py-1.5">Go to Dashboard</Link>
-          )}
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {simpleNavLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm text-gray-300 hover:text-white transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right: Auth Buttons */}
+          <div className="flex items-center gap-4 md:gap-6">
+            <button className="md:hidden text-zinc-400 hover:text-white">
+              <Menu className="w-5 h-5" />
+            </button>
+
+            {!isAuthenticated ? (
+              <>
+                <Link
+                  href="/auth"
+                  className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors"
+                >
+                  Sign in
+                </Link>
+                <ShimmerButton
+                  as={Link}
+                  href="/auth?tab=register"
+                  className="text-white text-xs md:text-sm px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+                >
+                  Get started
+                </ShimmerButton>
+              </>
+            ) : (
+              <>
+                {/* Profile Dropdown */}
+                <div ref={profileRef} className="relative">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 px-2 py-1"
+                  >
+                    {user?.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="profile" className="w-8 h-8 rounded-full" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-light">
+                        {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <ChevronDown className="w-4 h-4 text-zinc-400" />
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
+                      <div className="p-3 border-b border-zinc-700">
+                        <p className="text-sm font-light text-white">
+                          {user?.displayName || user?.username}
+                        </p>
+                        <p className="text-xs text-zinc-400">{user?.email}</p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/api-keys"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
+                        API Keys
+                      </Link>
+                      <Link
+                        href="/settings"
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+                      >
+                        Settings
+                      </Link>
+                      <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 border-t border-zinc-700">
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        {/* Subtle grid background */}
-        <div className="hero-grid-bg">
-          <svg width="100%" height="100%">
-            <defs>
-              <pattern id="hero-grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="var(--brand)" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#hero-grid)" />
-          </svg>
+      {/* ── HERO (RENDER STYLE) ── */}
+      <RenderHero isAuthenticated={isAuthenticated} />
+
+      {/* ── TECHNOLOGIES STACK ── */}
+      <section className="py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <TechStack />
         </div>
-        <BoltyFloatingLogos />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-monad-500/20 bg-monad-500/5 mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-            <span className="text-xs font-medium text-monad-400">Now in Beta — Open for developers</span>
+      </section>
+
+      {/* ── HOW IT WORKS ── */}
+      <HowItWorks />
+
+      {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
+      <section
+        className="py-24 px-4 relative overflow-hidden"
+        style={{
+          borderColor: 'var(--border)',
+          background: '#000000',
+        }}
+      >
+        {/* Hexagon Pattern Background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <HexagonPattern className="w-full h-full" />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Big box: border + black bg + corner brackets inside + title + cards */}
+          <div
+            className="relative rounded-lg overflow-hidden"
+            style={{
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              background: 'rgba(0, 0, 0, 0.6)',
+            }}
+          >
+            {/* Corner Brackets - inside the big box */}
+            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none z-20" />
+            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none z-20" />
+
+            {/* Title */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="p-10 md:p-14 pb-8"
+            >
+              <h2 className="text-5xl md:text-6xl font-light text-white leading-tight">
+                Deploy apps and agents
+                <br />
+                with{' '}
+                <GradientText gradient="purple" animated={false}>
+                  zero ops
+                </GradientText>
+              </h2>
+            </motion.div>
+
+            {/* Feature cards grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
+              {FEATURES.map((f, i) => {
+                const Icon = f.icon;
+                const accentColors = ['cyan', 'emerald', 'pink', 'yellow', 'blue', 'purple'];
+                const accentColor = accentColors[i % accentColors.length];
+                const accentTextColors = [
+                  'text-cyan-400',
+                  'text-emerald-400',
+                  'text-pink-400',
+                  'text-yellow-400',
+                  'text-blue-400',
+                  'text-purple-400',
+                ];
+                const accentTextColor = accentTextColors[i % accentTextColors.length];
+
+                const accentBgMap: { [key: string]: string } = {
+                  cyan: 'rgba(34, 211, 238, 0.1)',
+                  emerald: 'rgba(16, 185, 129, 0.1)',
+                  pink: 'rgba(236, 72, 153, 0.1)',
+                  yellow: 'rgba(234, 179, 8, 0.1)',
+                  blue: 'rgba(59, 130, 246, 0.1)',
+                  purple: 'rgba(168, 85, 247, 0.1)',
+                };
+
+                const accentBorderMap: { [key: string]: string } = {
+                  cyan: 'rgba(255, 255, 255, 0.2)',
+                  emerald: 'rgba(255, 255, 255, 0.2)',
+                  pink: 'rgba(255, 255, 255, 0.2)',
+                  yellow: 'rgba(255, 255, 255, 0.2)',
+                  blue: 'rgba(255, 255, 255, 0.2)',
+                  purple: 'rgba(255, 255, 255, 0.2)',
+                };
+
+                // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
+                const isReputationCard = i === 5;
+                const gridClass = isReputationCard
+                  ? 'lg:col-span-2 lg:row-span-2'
+                  : f.featured
+                    ? 'lg:col-span-2'
+                    : '';
+
+                return (
+                  <motion.div
+                    key={f.href}
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className={`group relative ${gridClass}`}
+                    style={{
+                      borderRight:
+                        !f.featured && !isReputationCard && i > 0 && (i - 1) % 2 === 0
+                          ? '1px solid rgba(255, 255, 255, 0.2)'
+                          : 'none',
+                      borderBottom:
+                        i < FEATURES.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+                    }}
+                  >
+                    {/* Card Background with Gradient */}
+                    <div
+                      className="relative h-full backdrop-blur-sm overflow-hidden p-8 md:p-12"
+                      style={{
+                        background: 'rgba(0, 0, 0, 0.6)',
+                        boxShadow: `inset 0 1px 1px ${accentBorderMap[accentColor]}, inset 0 -1px 1px rgba(0, 0, 0, 0.3)`,
+                        minHeight: isReputationCard ? 'auto' : 'auto',
+                      }}
+                    >
+                      <div className="relative z-10 h-full flex flex-col justify-between">
+                        {/* Header with Icon */}
+                        <div>
+                          <div className="flex items-start gap-4 mb-6">
+                            <div
+                              className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
+                              style={{
+                                background: accentBgMap[accentColor],
+                                boxShadow:
+                                  'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(255, 255, 255, 0.1)',
+                              }}
+                            >
+                              <Icon className="w-6 h-6" />
+                            </div>
+                          </div>
+                          <h3 className="text-xl font-light text-white mb-4 leading-snug">
+                            {f.title}
+                          </h3>
+                          <p className="text-gray-300 text-sm leading-relaxed font-light">
+                            {f.description}
+                          </p>
+                        </div>
+
+                        {/* Visual Content - Different for each card */}
+                        {i === 0 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Active Agents</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter value={2847} />
+                              </motion.span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Total Revenue</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter value={243} suffix="K ETH" duration={2.5} />
+                              </motion.span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-400">Success Rate</span>
+                              <motion.span
+                                initial={{ opacity: 0, x: 10 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="text-cyan-400 font-light"
+                              >
+                                <AnimatedCounter
+                                  value={98.7}
+                                  suffix="%"
+                                  decimals={1}
+                                  duration={2.5}
+                                />
+                              </motion.span>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 2 && (
+                          <div className="mt-6 pt-6 border-t border-white/10">
+                            <div className="space-y-2">
+                              {['Production', 'Development', 'Testing'].map((env, idx) => (
+                                <div key={idx} className="flex items-center gap-2">
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{
+                                      background: ['#06b6d4', '#10b981', '#f97316'][idx],
+                                    }}
+                                  />
+                                  <span className="text-xs text-gray-400">{env}</span>
+                                  <div className="flex-1 h-1 bg-white/5 rounded-full ml-2">
+                                    <div
+                                      className="h-full rounded-full"
+                                      style={{
+                                        width: ['65%', '42%', '28%'][idx],
+                                        background: ['#06b6d4', '#10b981', '#f97316'][idx],
+                                        opacity: 0.6,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 4 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-2">
+                            <div className="flex gap-2">
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
+                                A
+                              </div>
+                              <div className="flex-1 bg-white/5 rounded-lg p-2 text-xs text-gray-300">
+                                Connected to WebSocket
+                              </div>
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                              <div className="flex-1 max-w-xs bg-blue-500/20 rounded-lg p-2 text-xs text-blue-300 text-right">
+                                Real-time sync enabled
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
+                                U
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 5 && (
+                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-xs">
+                                <span className="text-gray-400">Your Rank</span>
+                                <motion.span
+                                  initial={{ opacity: 0, x: 10 }}
+                                  whileInView={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 0.5 }}
+                                  className="text-purple-400 font-light"
+                                >
+                                  #<AnimatedCounter value={342} />
+                                </motion.span>
+                              </div>
+                              <div className="flex gap-1 mt-3">
+                                {[...Array(7)].map((_, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="flex-1 h-8 bg-white/5 rounded-sm overflow-hidden"
+                                  >
+                                    <div
+                                      className="h-full bg-purple-500/40"
+                                      style={{
+                                        height: `${[45, 60, 70, 85, 75, 65, 55][idx]}%`,
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
+        </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6" style={{ color: 'var(--text)' }}>
-            Build, ship, and earn<br />
-            <span className="hero-gradient">with AI agents</span>
-          </h1>
+        {/* ── FEATURES GRID SECTION ── */}
+        <div className="py-24 px-6" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="max-w-7xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-16"
+            >
+              <h2 className="text-4xl lg:text-5xl font-light text-white mb-4">
+                Powerful features built for <GradientText gradient="purple">builders</GradientText>
+              </h2>
+              <p className="text-gray-400 max-w-2xl">
+                Everything you need to deploy, manage, and monetize AI agents at scale.
+              </p>
+            </motion.div>
 
-          <p className="text-lg max-w-2xl mx-auto mb-8 leading-relaxed" style={{ color: 'var(--text-muted)' }}>
-            The developer platform for publishing code, deploying AI agents,
-            and earning from your work. Connect your stack, reach buyers, get paid in ETH.
-          </p>
-
-          <div className="flex items-center justify-center gap-3">
-            {!isAuthenticated ? (
-              <>
-                <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                  Start building <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href="/market" className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
-                  Explore marketplace
-                </Link>
-              </>
-            ) : (
-              <Link href="/market" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                Go to dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
+            {/* Features Grid */}
+            <FeaturesGrid />
           </div>
+        </div>
+      </section>
 
-          {/* Mini stats */}
-          <div className="flex items-center justify-center gap-8 mt-12 pt-8 border-t" style={{ borderColor: 'var(--border)' }}>
-            {STATS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>{stat.value}</div>
-                <div className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{stat.label}</div>
-              </div>
+      {/* ── TESTIMONIALS ── */}
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-12"
+          >
+            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Developers</p>
+            <h2 className="text-5xl font-light text-white">What developers say</h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-lg border p-6"
+                style={{
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(0, 0, 0, 0)',
+                }}
+              >
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => (
+                    <Star key={j} className="w-4 h-4 text-purple-400 fill-purple-400" />
+                  ))}
+                </div>
+                <p className="text-gray-300 mb-4">&quot;{t.text}&quot;</p>
+                <div className="pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+                  <p className="font-light text-white">{t.name}</p>
+                  <p className="text-xs text-gray-500">{t.role}</p>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <Section>
-        <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Platform Features</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Everything you need to build and sell</h2>
-            </div>
+      {/* ── FAQ SECTION ── */}
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-12 text-center"
+          >
+            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Questions</p>
+            <h2 className="text-5xl font-light text-white">Frequently asked</h2>
+          </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {FEATURES.map((f) => (
-                <HighlightCard
-                  key={f.href}
-                  icon={f.icon}
-                  title={f.title}
-                  description={f.description}
-                  href={f.href}
-                />
-              ))}
-            </div>
+          <div className="space-y-3">
+            {FAQ.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="border rounded-lg transition-all"
+                style={{
+                  borderColor:
+                    openFaqIndex === i ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                  background: openFaqIndex === i ? 'rgba(168, 85, 247, 0.05)' : 'transparent',
+                }}
+              >
+                <button
+                  onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+                  aria-expanded={openFaqIndex === i}
+                  aria-controls={`faq-answer-${i}`}
+                >
+                  <h3 className="text-lg font-light text-white">{item.question}</h3>
+                  <motion.div
+                    animate={{ rotate: openFaqIndex === i ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ArrowRight className="w-5 h-5 text-purple-400" />
+                  </motion.div>
+                </button>
+                <motion.div
+                  id={`faq-answer-${i}`}
+                  initial={false}
+                  animate={{
+                    height: openFaqIndex === i ? 'auto' : 0,
+                    opacity: openFaqIndex === i ? 1 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <p className="px-6 pb-4 text-gray-400">{item.answer}</p>
+                </motion.div>
+              </motion.div>
+            ))}
           </div>
-        </section>
-      </Section>
+        </div>
+      </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <Section>
-        <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Getting Started</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Three steps to get started</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {HOW_IT_WORKS.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <div key={s.step} className="step-card">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="step-number">{s.step}</div>
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}>
-                        <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
-                      </div>
-                    </div>
-                    <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--text)' }}>{s.title}</h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>{s.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-      </Section>
-
-      {/* ── INTEGRATIONS ── */}
-      <Section>
-        <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Ecosystem</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>Works with your stack</h2>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {INTEGRATIONS.map((i) => (
-                <div key={i.name} className="card-elevated text-center py-6 px-4">
-                  <p className="text-sm font-semibold mb-1.5" style={{ color: 'var(--text)' }}>{i.name}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{i.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </Section>
-
-      {/* ── TESTIMONIALS ── */}
-      <Section>
-        <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <p className="text-xs font-medium text-monad-400 uppercase tracking-wider mb-3">Developers</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: 'var(--text)' }}>What developers are saying</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {TESTIMONIALS.map((t) => (
-                <div key={t.name} className="card-elevated p-6">
-                  <div className="flex gap-1 mb-4">
-                    {[1,2,3,4,5].map(s => <Star key={s} className="w-3.5 h-3.5 text-monad-400 fill-monad-400" />)}
-                  </div>
-                  <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--text-secondary)' }}>&ldquo;{t.text}&rdquo;</p>
-                  <div className="pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-                    <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>{t.name}</p>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{t.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </Section>
-
-      {/* ── CTA ── */}
-      <Section>
-        <section className="py-20 px-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4" style={{ color: 'var(--text)' }}>Ready to start building?</h2>
-            <p className="mb-8 max-w-lg mx-auto" style={{ color: 'var(--text-muted)' }}>
-              Join the developer platform where code meets commerce. Publish, sell, and earn — all in one place.
+      {/* ── NEWSLETTER SIGNUP ── */}
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl font-light text-white mb-2">Stay updated</h2>
+            <p className="text-gray-400 mb-8">
+              Get the latest news about new agents, features, and opportunities.
             </p>
-            {!isAuthenticated ? (
-              <div className="flex items-center justify-center gap-3">
-                <Link href="/auth?tab=register" className="btn-primary text-sm px-6 py-2.5 rounded-lg flex items-center gap-2">
-                  Create free account <ArrowRight className="w-4 h-4" />
-                </Link>
-                <Link href="/docs/agent-protocol" className="btn-secondary text-sm px-6 py-2.5 rounded-lg">
-                  Read the docs
-                </Link>
+            <div className="flex gap-2 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
+                aria-label="Email address for newsletter"
+              />
+              <button className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-light transition-colors">
+                Subscribe
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── CTA FINAL ── */}
+      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-5xl font-light mb-4">
+              Ready to <GradientText gradient="purple">start building</GradientText>?
+            </h2>
+            <p className="text-lg text-gray-400 mb-8">
+              Join the platform where code meets commerce. Publish, sell, and earn — all in one
+              place.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {!isAuthenticated ? (
+                <>
+                  <ShimmerButton
+                    as={Link}
+                    href="/auth?tab=register"
+                    className="text-white text-sm px-8 py-3 rounded-lg flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Create free account <ArrowRight className="w-4 h-4" />
+                  </ShimmerButton>
+                  <Link
+                    href="/docs/agent-protocol"
+                    className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all"
+                  >
+                    Read the docs
+                  </Link>
+                </>
+              ) : (
+                <ShimmerButton
+                  as={Link}
+                  href="/market"
+                  className="text-white text-sm px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
+                >
+                  Go to dashboard <ArrowRight className="w-4 h-4" />
+                </ShimmerButton>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="border-t px-4 py-12" style={{ borderColor: 'var(--border)' }}>
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <BoltyLogoSVG size={24} />
+                <span className="text-white font-light">Bolty</span>
               </div>
-            ) : (
-              <Link href="/market" className="btn-primary text-sm px-6 py-2.5 rounded-lg inline-flex items-center gap-2">
-                Go to dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
-            )}
+              <p className="text-sm text-gray-500">
+                The fastest path to production for AI agents and apps.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h3 className="text-white font-light mb-4">Product</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/market" className="text-gray-400 hover:text-white transition-colors">
+                    Marketplace
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/market/agents"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Agents
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/market/repos"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Repositories
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#how-it-works"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    How It Works
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Resources */}
+            <div>
+              <h3 className="text-white font-light mb-4">Resources</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link
+                    href="/docs/agent-protocol"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    API Reference
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Blog
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Community
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h3 className="text-white font-light mb-4">Company</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Contact
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    Terms
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
-        </section>
-      </Section>
+
+          {/* Bottom */}
+          <div className="border-t pt-8" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-sm text-gray-500">© 2026 Bolty. All rights reserved.</p>
+              <div className="flex gap-6 mt-4 md:mt-0">
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="GitHub"
+                >
+                  GitHub
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="Twitter"
+                >
+                  Twitter
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors text-sm"
+                  aria-label="Discord"
+                >
+                  Discord
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

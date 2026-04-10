@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
 
@@ -25,9 +26,15 @@ export class ServicesService {
 
   async createService(userId: string, dto: CreateServiceDto) {
     const validCategories = [
-      'AI_DEVELOPMENT', 'SMART_CONTRACTS', 'WEB_DEVELOPMENT',
-      'BOT_DEVELOPMENT', 'CONSULTING', 'CODE_REVIEW',
-      'MOBILE_DEVELOPMENT', 'DEVOPS', 'OTHER',
+      'AI_DEVELOPMENT',
+      'SMART_CONTRACTS',
+      'WEB_DEVELOPMENT',
+      'BOT_DEVELOPMENT',
+      'CONSULTING',
+      'CODE_REVIEW',
+      'MOBILE_DEVELOPMENT',
+      'DEVOPS',
+      'OTHER',
     ];
 
     if (!validCategories.includes(dto.category)) {
@@ -48,7 +55,7 @@ export class ServicesService {
       data: {
         title: sanitizeText(dto.title.slice(0, 120)),
         description: sanitizeText(dto.description.slice(0, 3000)),
-        category: dto.category as any,
+        category: dto.category as unknown as any,
         skills: (dto.skills || []).map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15),
         minBudget: dto.minBudget || null,
         maxBudget: dto.maxBudget || null,
@@ -83,7 +90,7 @@ export class ServicesService {
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: 'ACTIVE',
       ...(category ? { category } : {}),
       ...(userId ? { userId } : {}),
@@ -158,11 +165,12 @@ export class ServicesService {
     if (!service) throw new NotFoundException('Service listing not found');
     if (service.userId !== userId) throw new ForbiddenException('Not authorized');
 
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     if (dto.title) updates.title = sanitizeText(dto.title.slice(0, 120));
     if (dto.description) updates.description = sanitizeText(dto.description.slice(0, 3000));
     if (dto.category) updates.category = dto.category;
-    if (dto.skills) updates.skills = dto.skills.map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15);
+    if (dto.skills)
+      updates.skills = dto.skills.map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15);
     if (dto.minBudget !== undefined) updates.minBudget = dto.minBudget;
     if (dto.maxBudget !== undefined) updates.maxBudget = dto.maxBudget;
     if (dto.deliveryDays !== undefined) updates.deliveryDays = dto.deliveryDays;
@@ -170,7 +178,7 @@ export class ServicesService {
 
     return this.prisma.serviceListing.update({
       where: { id },
-      data: updates,
+      data: updates as Record<string, unknown>,
       include: {
         user: {
           select: {
@@ -201,7 +209,7 @@ export class ServicesService {
     const newStatus = service.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
     return this.prisma.serviceListing.update({
       where: { id },
-      data: { status: newStatus as any },
+      data: { status: newStatus as 'ACTIVE' | 'PAUSED' },
       select: { id: true, status: true },
     });
   }

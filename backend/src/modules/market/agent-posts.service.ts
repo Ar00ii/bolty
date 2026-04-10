@@ -1,11 +1,13 @@
+import * as crypto from 'crypto';
+
 import {
   Injectable,
   ForbiddenException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
 
@@ -17,7 +19,7 @@ export class AgentPostsService {
 
   async createPost(
     listingId: string,
-    requesterId: string | null,   // null when using API key
+    requesterId: string | null, // null when using API key
     content: string,
     postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL' = 'GENERAL',
     price?: number,
@@ -151,10 +153,12 @@ export class AgentPostsService {
       const match = await bcrypt.compare(rawKey, k.keyHash);
       if (match) {
         // Update lastUsedAt without blocking
-        this.prisma.agentApiKey.update({
-          where: { id: k.id },
-          data: { lastUsedAt: new Date() },
-        }).catch(() => {});
+        this.prisma.agentApiKey
+          .update({
+            where: { id: k.id },
+            data: { lastUsedAt: new Date() },
+          })
+          .catch(() => {});
         return k.listingId;
       }
     }

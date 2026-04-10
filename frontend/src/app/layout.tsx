@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
+import React from 'react';
+
 import './globals.css';
-import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ClientShell } from '@/components/layout/ClientShell';
+import { ToastContainer } from '@/components/ui/Toast';
+import { AuthProvider } from '@/lib/auth/AuthProvider';
+import { ToastProvider } from '@/lib/hooks/useToast';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
 
 const BASE_URL = 'https://boltynetwork.xyz';
@@ -87,10 +91,7 @@ const jsonLd = {
   logo: `${BASE_URL}/icon`,
   description:
     'Bolty is the AI developer platform for publishing code, deploying AI agents, and earning from your work.',
-  sameAs: [
-    'https://twitter.com/boltynetwork',
-    'https://github.com/boltynetwork',
-  ],
+  sameAs: ['https://twitter.com/boltynetwork', 'https://github.com/boltynetwork'],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',
@@ -104,7 +105,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -112,11 +116,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen">
         <ThemeProvider>
-          <AuthProvider>
-            <ClientShell>
-              {children}
-            </ClientShell>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <ClientShell>{children}</ClientShell>
+            </AuthProvider>
+            <ToastContainer />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

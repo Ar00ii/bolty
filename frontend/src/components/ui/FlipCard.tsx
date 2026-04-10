@@ -1,4 +1,6 @@
 'use client';
+import React from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface FlipCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -26,7 +28,9 @@ export default function FlipCard({
   const self = rotationClass[rotate];
 
   return (
-    <div className={cn('group h-72 w-full [perspective:1000px] cursor-default select-none', className)}>
+    <div
+      className={cn('group h-72 w-full [perspective:1000px] cursor-default select-none', className)}
+    >
       <div
         className={cn(
           'relative h-full rounded-2xl transition-all duration-700 [transform-style:preserve-3d]',
@@ -47,8 +51,13 @@ export default function FlipCard({
           <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-monad-400/30" />
           <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-monad-400/30" />
           {/* Glow */}
-          <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-            style={{ background: 'radial-gradient(ellipse at center, rgba(131,110,249,0.08) 0%, transparent 70%)' }} />
+          <div
+            className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{
+              background:
+                'radial-gradient(ellipse at center, rgba(131,110,249,0.08) 0%, transparent 70%)',
+            }}
+          />
           {/* Icon */}
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
@@ -57,11 +66,17 @@ export default function FlipCard({
             {icon}
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-white mb-1">{title}</div>
-            {subtitle && <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">{subtitle}</div>}
+            <div className="text-lg font-light text-white mb-1">{title}</div>
+            {subtitle && (
+              <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">
+                {subtitle}
+              </div>
+            )}
           </div>
           {/* Hint */}
-          <div className="absolute bottom-5 text-[10px] font-mono text-zinc-700 tracking-widest">HOVER TO LEARN MORE</div>
+          <div className="absolute bottom-5 text-[10px] font-mono text-zinc-700 tracking-widest">
+            HOVER TO LEARN MORE
+          </div>
         </div>
 
         {/* Back */}
@@ -81,14 +96,18 @@ export default function FlipCard({
           <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-monad-400/50" />
           <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-monad-400/50" />
           <div>
-            <div className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">{subtitle}</div>
-            <h3 className="text-xl font-black text-white mb-4 leading-tight">{title}</h3>
+            <div className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">
+              {subtitle}
+            </div>
+            <h3 className="text-xl font-light text-white mb-4 leading-tight">{title}</h3>
             <div className="w-8 h-px mb-4" style={{ background: 'rgba(131,110,249,0.6)' }} />
             <p className="text-sm text-zinc-300 leading-relaxed">{description}</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-            <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">Active</span>
+            <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">
+              Active
+            </span>
           </div>
         </div>
       </div>

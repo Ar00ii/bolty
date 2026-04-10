@@ -1,8 +1,9 @@
-"use client";
-import React from "react";
-import { motion } from "motion/react";
-import { Folder, HeartHandshakeIcon, SparklesIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+'use client';
+import { Folder, HeartHandshakeIcon, SparklesIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React from 'react';
+
+import { cn } from '@/lib/utils';
 
 interface DatabaseWithRestApiProps {
   className?: string;
@@ -32,17 +33,12 @@ const DatabaseWithRestApi = ({
   return (
     <div
       className={cn(
-        "relative flex h-[350px] w-full max-w-[500px] flex-col items-center",
-        className
+        'relative flex h-[350px] w-full max-w-[500px] flex-col items-center',
+        className,
       )}
     >
       {/* SVG Paths  */}
-      <svg
-        className="h-full sm:w-full text-muted"
-        width="100%"
-        height="100%"
-        viewBox="0 0 200 100"
-      >
+      <svg className="h-full sm:w-full text-muted" width="100%" height="100%" viewBox="0 0 200 100">
         <g
           stroke="currentColor"
           fill="none"
@@ -68,40 +64,16 @@ const DatabaseWithRestApi = ({
         </g>
         {/* Blue Lights */}
         <g mask="url(#db-mask-1)">
-          <circle
-            className="database db-light-1"
-            cx="0"
-            cy="0"
-            r="12"
-            fill="url(#db-blue-grad)"
-          />
+          <circle className="database db-light-1" cx="0" cy="0" r="12" fill="url(#db-blue-grad)" />
         </g>
         <g mask="url(#db-mask-2)">
-          <circle
-            className="database db-light-2"
-            cx="0"
-            cy="0"
-            r="12"
-            fill="url(#db-blue-grad)"
-          />
+          <circle className="database db-light-2" cx="0" cy="0" r="12" fill="url(#db-blue-grad)" />
         </g>
         <g mask="url(#db-mask-3)">
-          <circle
-            className="database db-light-3"
-            cx="0"
-            cy="0"
-            r="12"
-            fill="url(#db-blue-grad)"
-          />
+          <circle className="database db-light-3" cx="0" cy="0" r="12" fill="url(#db-blue-grad)" />
         </g>
         <g mask="url(#db-mask-4)">
-          <circle
-            className="database db-light-4"
-            cx="0"
-            cy="0"
-            r="12"
-            fill="url(#db-blue-grad)"
-          />
+          <circle className="database db-light-4" cx="0" cy="0" r="12" fill="url(#db-blue-grad)" />
         </g>
         {/* Buttons */}
         <g stroke="currentColor" fill="none" strokeWidth="0.4">
@@ -110,7 +82,7 @@ const DatabaseWithRestApi = ({
             <rect fill="#18181B" x="14" y="5" width="34" height="10" rx="5" />
             <DatabaseIcon x="18" y="7.5" />
             <text x="28" y="12" fill="white" stroke="none" fontSize="5" fontWeight="500">
-              {badgeTexts?.first || "GET"}
+              {badgeTexts?.first || 'GET'}
             </text>
           </g>
           {/* Second Button */}
@@ -118,7 +90,7 @@ const DatabaseWithRestApi = ({
             <rect fill="#18181B" x="60" y="5" width="34" height="10" rx="5" />
             <DatabaseIcon x="64" y="7.5" />
             <text x="74" y="12" fill="white" stroke="none" fontSize="5" fontWeight="500">
-              {badgeTexts?.second || "POST"}
+              {badgeTexts?.second || 'POST'}
             </text>
           </g>
           {/* Third Button */}
@@ -126,7 +98,7 @@ const DatabaseWithRestApi = ({
             <rect fill="#18181B" x="108" y="5" width="34" height="10" rx="5" />
             <DatabaseIcon x="112" y="7.5" />
             <text x="122" y="12" fill="white" stroke="none" fontSize="5" fontWeight="500">
-              {badgeTexts?.third || "PUT"}
+              {badgeTexts?.third || 'PUT'}
             </text>
           </g>
           {/* Fourth Button */}
@@ -134,7 +106,7 @@ const DatabaseWithRestApi = ({
             <rect fill="#18181B" x="150" y="5" width="40" height="10" rx="5" />
             <DatabaseIcon x="154" y="7.5" />
             <text x="165" y="12" fill="white" stroke="none" fontSize="5" fontWeight="500">
-              {badgeTexts?.fourth || "DELETE"}
+              {badgeTexts?.fourth || 'DELETE'}
             </text>
           </g>
         </g>
@@ -146,13 +118,21 @@ const DatabaseWithRestApi = ({
             <path d="M 77 10 v 10 q 0 5 5 5 h 13 q 5 0 5 5 v 10" strokeWidth="0.5" stroke="white" />
           </mask>
           <mask id="db-mask-3">
-            <path d="M 124 10 v 10 q 0 5 -5 5 h -14 q -5 0 -5 5 v 10" strokeWidth="0.5" stroke="white" />
+            <path
+              d="M 124 10 v 10 q 0 5 -5 5 h -14 q -5 0 -5 5 v 10"
+              strokeWidth="0.5"
+              stroke="white"
+            />
           </mask>
           <mask id="db-mask-4">
-            <path d="M 170 10 v 15 q 0 5 -5 5 h -60 q -5 0 -5 5 v 10" strokeWidth="0.5" stroke="white" />
+            <path
+              d="M 170 10 v 15 q 0 5 -5 5 h -60 q -5 0 -5 5 v 10"
+              strokeWidth="0.5"
+              stroke="white"
+            />
           </mask>
           <radialGradient id="db-blue-grad" fx="1">
-            <stop offset="0%" stopColor={lightColor || "#836EF9"} />
+            <stop offset="0%" stopColor={lightColor || '#836EF9'} />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
@@ -163,20 +143,20 @@ const DatabaseWithRestApi = ({
         <div className="absolute -top-3 z-20 flex items-center justify-center rounded-lg border border-white/10 bg-[#101112] px-2 py-1 sm:-top-4 sm:py-1.5">
           <SparklesIcon className="size-3 text-monad-400" />
           <span className="ml-2 text-[10px] text-zinc-300">
-            {title ? title : "Bolty Platform API"}
+            {title ? title : 'Bolty Platform API'}
           </span>
         </div>
-        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-semibold text-xs text-monad-400">
-          {circleText ? circleText : "ETH"}
+        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-light text-xs text-monad-400">
+          {circleText ? circleText : 'ETH'}
         </div>
         <div className="relative z-10 flex h-[150px] w-full items-center justify-center overflow-hidden rounded-lg border border-white/08 bg-black/80 shadow-md">
           <div className="absolute bottom-8 left-12 z-10 h-7 rounded-full bg-[#101112] px-3 text-xs border border-white/10 flex items-center gap-2">
             <HeartHandshakeIcon className="size-4 text-monad-400" />
-            <span className="text-zinc-300">{buttonTexts?.first || "bolty.dev"}</span>
+            <span className="text-zinc-300">{buttonTexts?.first || 'bolty.dev'}</span>
           </div>
           <div className="absolute right-16 z-10 hidden h-7 rounded-full bg-[#101112] px-3 text-xs sm:flex border border-white/10 items-center gap-2">
             <Folder className="size-4 text-monad-400" />
-            <span className="text-zinc-300">{buttonTexts?.second || "beta_v1"}</span>
+            <span className="text-zinc-300">{buttonTexts?.second || 'beta_v1'}</span>
           </div>
           <motion.div
             className="absolute -bottom-14 h-[100px] w-[100px] rounded-full border-t border-monad-500/20 bg-monad-500/5"
@@ -206,7 +186,7 @@ const DatabaseWithRestApi = ({
 
 export default DatabaseWithRestApi;
 
-const DatabaseIcon = ({ x = "0", y = "0" }: { x: string; y: string }) => {
+const DatabaseIcon = ({ x = '0', y = '0' }: { x: string; y: string }) => {
   return (
     <svg
       x={x}

@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { BentoGrid, BentoCard } from './bento-grid';
 import { Bot, Code2, Coins, Zap } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+
+import { BentoGrid, BentoCard } from './bento-grid';
 
 // ── Animated negotiation chat ─────────────────────────────────────────────────
 const MESSAGES = [
@@ -21,25 +22,32 @@ function NegotiationChat() {
       const reset = setTimeout(() => setVisible(1), 2500);
       return () => clearTimeout(reset);
     }
-    const t = setTimeout(() => setVisible(v => v + 1), 1100);
+    const t = setTimeout(() => setVisible((v) => v + 1), 1100);
     return () => clearTimeout(t);
   }, [visible]);
 
   return (
     <div className="absolute inset-0 flex flex-col justify-end px-4 pb-3 pt-8 gap-1.5 [mask-image:linear-gradient(to_bottom,transparent_0%,#000_35%)]">
       {MESSAGES.slice(0, visible).map((m, i) => (
-        <div key={i} className={`flex ${m.role === 'buyer' ? 'justify-start' : 'justify-end'} animate-[fadeSlideUp_0.3s_ease_both]`}>
-          <div className={`px-3 py-1.5 rounded-xl text-[10px] font-mono max-w-[75%] leading-snug ${
-            m.role === 'buyer'
-              ? 'bg-monad-500/15 border border-monad-500/25 text-monad-300'
-              : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
-          }`}>
-            <span className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-0.5">
+        <div
+          key={i}
+          className={`flex ${m.role === 'buyer' ? 'justify-start' : 'justify-end'} animate-[fadeSlideUp_0.3s_ease_both]`}
+        >
+          <div
+            className={`px-3 py-1.5 rounded-xl text-[10px] font-mono max-w-[75%] leading-snug ${
+              m.role === 'buyer'
+                ? 'bg-monad-500/15 border border-monad-500/25 text-monad-300'
+                : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
+            }`}
+          >
+            <span className="block text-[9px] font-light uppercase tracking-wider opacity-50 mb-0.5">
               {m.role === 'buyer' ? 'buyer agent' : 'seller agent'}
             </span>
             {m.text}
             {m.price && (
-              <span className="ml-2 text-[9px] font-bold text-monad-400 opacity-80">{m.price}</span>
+              <span className="ml-2 text-[9px] font-light text-monad-400 opacity-80">
+                {m.price}
+              </span>
             )}
           </div>
         </div>
@@ -70,13 +78,19 @@ function ListingsMarquee() {
     <div className="absolute inset-x-0 top-0 overflow-hidden h-full [mask-image:linear-gradient(to_top,transparent_20%,#000_70%)]">
       <div className="flex flex-col gap-2 pt-4 px-3 animate-[scrollUp_12s_linear_infinite]">
         {[...LISTINGS, ...LISTINGS].map((l, i) => (
-          <div key={i} className="flex items-center justify-between px-3 py-2 rounded-xl"
-            style={{ background: 'rgba(131,110,249,0.06)', border: '1px solid rgba(131,110,249,0.12)' }}>
+          <div
+            key={i}
+            className="flex items-center justify-between px-3 py-2 rounded-xl"
+            style={{
+              background: 'rgba(131,110,249,0.06)',
+              border: '1px solid rgba(131,110,249,0.12)',
+            }}
+          >
             <div>
-              <div className="text-[10px] font-semibold text-zinc-300">{l.name}</div>
+              <div className="text-[10px] font-light text-zinc-300">{l.name}</div>
               <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag}</div>
             </div>
-            <div className="text-[10px] font-mono font-bold text-monad-400">{l.price}</div>
+            <div className="text-[10px] font-mono font-light text-monad-400">{l.price}</div>
           </div>
         ))}
       </div>
@@ -88,33 +102,50 @@ function ListingsMarquee() {
 const API_LOGS = [
   { method: 'POST', path: '/market/abc/posts', status: 201, label: 'UPDATE' },
   { method: 'POST', path: '/market/abc/posts', status: 201, label: 'PRICE_UPDATE' },
-  { method: 'GET',  path: '/market/abc/posts', status: 200, label: 'READ' },
+  { method: 'GET', path: '/market/abc/posts', status: 200, label: 'READ' },
 ];
 
 function ApiAnimation() {
   const [active, setActive] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setActive(a => (a + 1) % API_LOGS.length), 1600);
+    const t = setInterval(() => setActive((a) => (a + 1) % API_LOGS.length), 1600);
     return () => clearInterval(t);
   }, []);
 
   return (
     <div className="absolute inset-0 flex flex-col justify-start pt-4 px-3 gap-2 [mask-image:linear-gradient(to_top,transparent_10%,#000_70%)]">
-      <div className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider mb-1">agent api</div>
+      <div className="text-[9px] font-mono text-zinc-600 uppercase tracking-wider mb-1">
+        agent api
+      </div>
       {API_LOGS.map((log, i) => (
-        <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
-          active === i ? 'opacity-100' : 'opacity-30'
-        }`} style={{
-          background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}`,
-        }}>
-          <span className={`text-[9px] font-mono font-bold ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}>{log.method}</span>
+        <div
+          key={i}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+            active === i ? 'opacity-100' : 'opacity-30'
+          }`}
+          style={{
+            background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
+            border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}`,
+          }}
+        >
+          <span
+            className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}
+          >
+            {log.method}
+          </span>
           <span className="text-[9px] font-mono text-zinc-500 flex-1 truncate">{log.path}</span>
-          <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${log.status === 201 ? 'bg-green-400/10 text-green-400' : 'bg-blue-400/10 text-blue-400'}`}>{log.status}</span>
+          <span
+            className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${log.status === 201 ? 'bg-green-400/10 text-green-400' : 'bg-blue-400/10 text-blue-400'}`}
+          >
+            {log.status}
+          </span>
           <span className="text-[9px] font-mono text-zinc-600">{log.label}</span>
         </div>
       ))}
-      <div className="mt-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)' }}>
+      <div
+        className="mt-2 px-3 py-2 rounded-lg"
+        style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)' }}
+      >
         <div className="text-[9px] font-mono text-zinc-500">
           <span className="text-monad-400">X-Agent-Key</span>: sk_bolty_xxx...
         </div>
@@ -127,7 +158,7 @@ function ApiAnimation() {
 function PaymentVisual() {
   const [step, setStep] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setStep(s => (s + 1) % 4), 1200);
+    const t = setInterval(() => setStep((s) => (s + 1) % 4), 1200);
     return () => clearInterval(t);
   }, []);
 
@@ -137,16 +168,30 @@ function PaymentVisual() {
     <div className="absolute inset-0 flex flex-col items-center justify-start pt-5 px-4 [mask-image:linear-gradient(to_top,transparent_10%,#000_70%)]">
       <div className="w-full space-y-2">
         {steps.map((s, i) => (
-          <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-500 ${
-            i < step ? 'opacity-100' : i === step ? 'opacity-100' : 'opacity-20'
-          }`} style={{
-            background: i <= step ? 'rgba(131,110,249,0.06)' : 'transparent',
-            border: `1px solid ${i <= step ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)'}`,
-          }}>
-            <span className={`w-3 h-3 rounded-full flex-shrink-0 transition-all duration-300 ${
-              i < step ? 'bg-green-400' : i === step ? 'bg-monad-400 animate-pulse' : 'bg-zinc-700'
-            }`} />
-            <span className={`text-[10px] font-mono ${i <= step ? 'text-zinc-300' : 'text-zinc-600'}`}>{s}</span>
+          <div
+            key={i}
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-500 ${
+              i < step ? 'opacity-100' : i === step ? 'opacity-100' : 'opacity-20'
+            }`}
+            style={{
+              background: i <= step ? 'rgba(131,110,249,0.06)' : 'transparent',
+              border: `1px solid ${i <= step ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)'}`,
+            }}
+          >
+            <span
+              className={`w-3 h-3 rounded-full flex-shrink-0 transition-all duration-300 ${
+                i < step
+                  ? 'bg-green-400'
+                  : i === step
+                    ? 'bg-monad-400 animate-pulse'
+                    : 'bg-zinc-700'
+              }`}
+            />
+            <span
+              className={`text-[10px] font-mono ${i <= step ? 'text-zinc-300' : 'text-zinc-600'}`}
+            >
+              {s}
+            </span>
           </div>
         ))}
       </div>

@@ -2,13 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus states for keyboard navigation */
+button:focus,
+a:focus,
+input:focus {
+  outline: 2px solid rgba(168, 85, 247, 0.5);
+  outline-offset: 2px;
+}
+
+/* Remove default focus for mouse users */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Custom focus visible for better UX */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid rgba(168, 85, 247, 0.8);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions with will-change for performance */
+* {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Performance optimizations */
+body {
+  font-display: swap;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Optimize images for CLS (Cumulative Layout Shift) */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+/* Optimize animations with GPU acceleration */
+.animate-scroll {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    CSS Variables
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root,
 :root[data-theme='dark'] {
-  --bg:           #0a0a0b;
+  --bg:           #050506;
   --bg-elevated:  #111113;
   --bg-card:      #131316;
   --bg-card2:     #1a1a1e;
@@ -20,6 +76,8 @@
   --brand:        #836EF9;
   --brand-dim:    rgba(131,110,249,0.08);
   --brand-hover:  #9580ff;
+  --accent-cyan:  #06B6D4;
+  --accent-magenta: #EC4899;
   --success:      #22c55e;
   --warning:      #f59e0b;
   --error:        #ef4444;
@@ -28,7 +86,24 @@
   --shadow-md:    0 4px 12px rgba(0,0,0,0.25);
   --shadow-lg:    0 12px 32px rgba(0,0,0,0.3);
   --shadow-brand: 0 4px 14px rgba(131,110,249,0.25);
+  --shadow-glow:  0 0 20px rgba(131,110,249,0.3), 0 0 40px rgba(6,182,212,0.2);
   --card-hover-shadow: 0 8px 24px rgba(0,0,0,0.2), 0 0 0 1px rgba(131,110,249,0.1);
+  /* Extended color palette */
+  --purple-300: #d8b4fe;
+  --purple-400: #c084fc;
+  --purple-500: #a855f7;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+  --purple-800: #6b21a8;
+  --purple-900: #581c87;
+  --purple-950: #3f0f5c;
+  /* Spacing constants */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
   color-scheme: dark;
 }
 
@@ -65,11 +140,22 @@ html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-fo
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Geist', system-ui, -apple-system, sans-serif;
+  font-weight: 300;
   min-height: 100vh;
   overflow-x: hidden;
   transition: background-color 0.2s ease, color 0.2s ease;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+p, span, a, li, button, input, textarea {
+  font-weight: 300;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -139,7 +225,7 @@ body {
 
   /* ── Buttons ── */
   .btn-primary {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            text-white cursor-pointer rounded-lg px-4 py-2;
     background: var(--brand);
     transition: all 0.2s ease;
@@ -153,7 +239,7 @@ body {
   .btn-primary:active { transform: translateY(0) scale(0.98); }
 
   .btn-secondary {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            cursor-pointer rounded-lg px-4 py-2;
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -169,7 +255,7 @@ body {
   .btn-secondary:active { transform: translateY(0); }
 
   .btn-ghost {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            cursor-pointer rounded-lg px-3 py-1.5;
     color: var(--text-muted);
     transition: all 0.2s ease;
@@ -180,7 +266,7 @@ body {
   }
 
   .btn-danger {
-    @apply relative inline-flex items-center justify-center font-medium text-sm
+    @apply relative inline-flex items-center justify-center font-light text-sm
            text-white cursor-pointer rounded-lg px-4 py-2;
     background: var(--error);
     transition: all 0.2s ease;
@@ -224,31 +310,31 @@ body {
 
   /* ── Badges ── */
   .badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: var(--brand-dim);
     color: var(--brand);
     border: 1px solid rgba(131,110,249,0.15);
   }
   .badge-secondary {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: var(--bg-elevated);
     color: var(--text-muted);
     border: 1px solid var(--border);
   }
   .badge-success {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(34,197,94,0.1);
     color: var(--success);
     border: 1px solid rgba(34,197,94,0.2);
   }
   .badge-warning {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(245,158,11,0.1);
     color: var(--warning);
     border: 1px solid rgba(245,158,11,0.2);
   }
   .badge-error {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: rgba(239,68,68,0.1);
     color: var(--error);
     border: 1px solid rgba(239,68,68,0.2);
@@ -297,7 +383,7 @@ body {
 
   /* ── Neon / branded buttons ── */
   .btn-neon {
-    @apply relative px-4 py-2 text-sm font-medium
+    @apply relative px-4 py-2 text-sm font-light
            text-monad-400 border border-monad-400/30 rounded-lg
            transition-all duration-200 cursor-pointer
            hover:border-monad-400/60 hover:text-white hover:bg-monad-400/10;
@@ -305,7 +391,7 @@ body {
   .btn-neon:hover { box-shadow: 0 0 16px rgba(131,110,249,0.15); }
 
   .btn-neon-solid {
-    @apply relative px-4 py-2 text-sm font-medium text-white rounded-lg
+    @apply relative px-4 py-2 text-sm font-light text-white rounded-lg
            transition-all duration-200 cursor-pointer;
     background: var(--brand);
     box-shadow: var(--shadow-sm);
@@ -351,13 +437,13 @@ body {
     padding: 16px;
   }
   .security-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium;
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     border: 1px solid var(--border);
     color: var(--text-muted);
     background: var(--bg-elevated);
   }
   .terminal-badge {
-    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light
            border border-monad-400/20 text-monad-400 bg-monad-500/5;
   }
 
@@ -380,7 +466,7 @@ body {
     margin-bottom: 24px;
   }
   .page-header h1 {
-    font-weight: 700;
+    font-weight: 300;
     letter-spacing: -0.02em;
     color: var(--text);
   }
@@ -410,7 +496,7 @@ body {
     padding: 7px 16px;
     border-radius: 7px;
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 300;
     cursor: pointer;
     transition: all 0.2s ease;
     color: var(--text-muted);
@@ -458,7 +544,7 @@ body {
     width: 32px; height: 32px;
     border-radius: 10px;
     font-size: 0.8125rem;
-    font-weight: 700;
+    font-weight: 300;
     background: var(--brand-dim);
     color: var(--brand);
     border: 1px solid rgba(131,110,249,0.15);
@@ -699,9 +785,33 @@ body {
     from { transform: translateY(0); }
     to   { transform: translateY(-50%); }
   }
+  @keyframes scroll-x {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-100%); }
+  }
+  .animate-scroll {
+    animation: scroll-x linear infinite;
+  }
   @keyframes spin-slow {
     from { transform: rotate(0deg); }
     to   { transform: rotate(360deg); }
+  }
+
+  /* Section separators */
+  section {
+    position: relative;
+  }
+
+  section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2), transparent);
+    pointer-events: none;
+  }
   }
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
@@ -735,4 +845,458 @@ body {
     0%, 100% { opacity: 0.1; transform: scale(1); }
     50%       { opacity: 0.18; transform: scale(1.05); }
   }
-}
+
+  /* New Render-style animations */
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(131,110,249,0.3), inset 0 0 20px rgba(131,110,249,0.1); }
+    50%       { box-shadow: 0 0 40px rgba(131,110,249,0.6), inset 0 0 30px rgba(131,110,249,0.2); }
+  }
+
+  @keyframes border-gradient {
+    0%   { border-color: #836EF9; }
+    50%  { border-color: #06B6D4; }
+    100% { border-color: #836EF9; }
+  }
+
+  @keyframes text-glow {
+    0%, 100% { text-shadow: 0 0 20px rgba(131,110,249,0.3); }
+    50%       { text-shadow: 0 0 40px rgba(131,110,249,0.6), 0 0 60px rgba(6,182,212,0.3); }
+  }
+
+  @keyframes card-stagger {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  @keyframes shimmer-load {
+    0%   { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+
+  /* ── Enhanced Card Hover Effects ── */
+  .card,
+  .card-elevated,
+  .card-interactive {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(131, 110, 249, 0.15);
+    border-color: rgba(131, 110, 249, 0.3);
+  }
+
+  .card-elevated:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(131, 110, 249, 0.1);
+  }
+
+  /* ── Button Micro-interactions ── */
+  button, a.btn-primary, a.btn-secondary {
+    position: relative;
+    overflow: hidden;
+  }
+
+  button:active, a.btn-primary:active, a.btn-secondary:active {
+    transform: scale(0.97);
+  }
+
+  /* Ripple effect for buttons */
+  button::before, a.btn-primary::before, a.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  /* ── Input Focus Animation ── */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    animation: input-focus 0.3s ease;
+  }
+
+  @keyframes input-focus {
+    0% { transform: scale(0.99); }
+    100% { transform: scale(1); }
+  }
+
+  /* ── Smooth Page Transitions ── */
+  @keyframes pageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pageExit {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(10px); }
+  }
+
+  /* ── Loading Skeleton Animation ── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-card) 0%,
+      var(--bg-card2) 50%,
+      var(--bg-card) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  @keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Success Check Animation ── */
+  @keyframes check-bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  /* ── Color Contrast Improvements ── */
+  .text-contrast-high {
+    color: #ffffff;
+  }
+
+  .text-contrast-medium {
+    color: #e4e4e7;
+  }
+
+  .text-contrast-low {
+    color: #a1a1aa;
+  }
+
+  /* ── Accessibility: Reduced Motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ── Mobile Responsive Touch Targets ── */
+  @media (max-width: 768px) {
+    button, a, input[type="checkbox"], input[type="radio"] {
+      min-height: 44px;
+      min-width: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Better spacing on mobile */
+    .page-container {
+      padding: 1rem;
+    }
+
+    .gap-4 {
+      gap: 1rem;
+    }
+
+    /* Touch-friendly card layouts */
+    .card {
+      padding: 1.25rem;
+    }
+
+    /* Collapse hamburger menu properly */
+    .sm-toggle {
+      font-size: 0.9rem;
+      padding: 0.75rem;
+    }
+  }
+
+  /* ── Filter Pills Animation ── */
+  .filter-pill {
+    transition: all 0.2s ease;
+  }
+
+  .filter-pill:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(131, 110, 249, 0.15);
+  }
+
+  /* ── Data Table Row Hover ── */
+  table tbody tr {
+    transition: background-color 0.2s ease;
+  }
+
+  table tbody tr:hover {
+    background-color: rgba(131, 110, 249, 0.05);
+  }
+
+  /* ── Pagination Button States ── */
+  .pagination-btn {
+    transition: all 0.2s ease;
+  }
+
+  .pagination-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  .pagination-btn:not(:disabled):hover {
+    background-color: rgba(131, 110, 249, 0.1);
+    border-color: rgba(131, 110, 249, 0.3);
+  }
+
+  /* ── Enhanced Card Hover Effects ── */
+  .card,
+  [role="article"],
+  .marketplace-card,
+  .agent-card,
+  .repo-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .card:hover,
+  [role="article"]:hover,
+  .marketplace-card:hover,
+  .agent-card:hover,
+  .repo-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(131, 110, 249, 0.15);
+  }
+
+  /* ── Enhanced Button Hover Effects ── */
+  button:not(:disabled),
+  .btn,
+  [role="button"] {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  button:not(:disabled):hover,
+  .btn:hover,
+  [role="button"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(131, 110, 249, 0.2);
+  }
+
+  button:not(:disabled):active,
+  .btn:active,
+  [role="button"]:active {
+    transform: translateY(0px);
+  }
+
+  /* ── Button Ripple Effect ── */
+  button:not(:disabled)::after,
+  .btn::after,
+  [role="button"]::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+
+  button:not(:disabled):active::after,
+  .btn:active::after,
+  [role="button"]:active::after {
+    width: 300px;
+    height: 300px;
+  }
+
+  /* ── Link Hover Animation ── */
+  a:not([role="button"]),
+  .link {
+    position: relative;
+    transition: color 0.2s ease;
+  }
+
+  a:not([role="button"])::after,
+  .link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #836ef9, #a78bfa);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  a:not([role="button"]):hover::after,
+  .link:hover::after {
+    width: 100%;
+  }
+
+  /* ── Input Field Enhancements ── */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  textarea,
+  select {
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+
+  input[type="text"]:hover,
+  input[type="email"]:hover,
+  input[type="password"]:hover,
+  input[type="search"]:hover,
+  textarea:hover,
+  select:hover {
+    border-color: rgba(131, 110, 249, 0.3);
+    box-shadow: 0 0 12px rgba(131, 110, 249, 0.1);
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="search"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: #836ef9;
+    box-shadow: 0 0 16px rgba(131, 110, 249, 0.25);
+  }
+
+  /* ── Badge/Pill Animations ── */
+  .badge,
+  .pill,
+  .tag {
+    transition: all 0.2s ease;
+  }
+
+  .badge:hover,
+  .pill:hover,
+  .tag:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(131, 110, 249, 0.2);
+  }
+
+  /* ── Icon Hover Effects ── */
+  svg,
+  .icon {
+    transition: all 0.2s ease;
+  }
+
+  button:hover svg,
+  a:hover svg,
+  .icon-hover:hover {
+    transform: scale(1.1) rotate(2deg);
+  }
+
+  /* ── Sidebar Styling ── */
+  aside {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.3) transparent;
+  }
+
+  aside::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  aside::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  aside::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.2);
+    border-radius: 3px;
+    transition: background 0.2s;
+  }
+
+  aside::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 85, 247, 0.4);
+  }
+
+  /* Sidebar link/button base styles */
+  aside a,
+  aside button {
+    position: relative;
+  }
+
+  /* Smooth transitions for sidebar items */
+  aside a::before,
+  aside button::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(168, 85, 247, 0.05);
+    opacity: 0;
+    border-radius: inherit;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  aside a:hover::before,
+  aside button:hover::before {
+    opacity: 1;
+  }
+
+  /* Active indicator animation */
+  [data-role="sidebar-item"][data-active="true"] {
+    position: relative;
+  }
+
+  /* ── Mobile Sidebar ── */
+  @media (max-width: 1023px) {
+    aside {
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.7), -4px 0 16px rgba(131, 110, 249, 0.1);
+    }
+
+    /* Touch-friendly spacing on mobile */
+    aside a, aside button {
+      min-height: 44px;
+    }
+  }
+
+  /* ── Focus Visible for Accessibility ── */
+  aside button:focus-visible,
+  aside a:focus-visible {
+    outline: 2px solid rgba(168, 85, 247, 0.6);
+    outline-offset: -2px;
+  }
+
+  /* ── Sidebar Header Animation ── */
+  aside > div:first-child {
+    animation: slideDown 0.4s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* ── Gradient text for active items ── */
+  aside a[data-active="true"],
+  aside button[data-active="true"] {
+    position: relative;
+  }
+
+  aside a[data-active="true"]::after,
+  aside button[data-active="true"]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(131, 110, 249, 0.05));
+    border-radius: inherit;
+    pointer-events: none;
+  }

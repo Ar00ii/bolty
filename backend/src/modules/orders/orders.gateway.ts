@@ -1,3 +1,5 @@
+import { Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,8 +11,7 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { JwtService } from '@nestjs/jwt';
-import { Logger } from '@nestjs/common';
+
 import { OrdersService } from './orders.service';
 
 interface AuthSocket extends Socket {
@@ -28,7 +29,7 @@ interface AuthSocket extends Socket {
 })
 export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
-  server: Server;
+  server!: Server;
 
   private readonly logger = new Logger(OrdersGateway.name);
 
@@ -46,10 +47,13 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .find((c) => c.trim().startsWith('access_token='))
           ?.split('=')[1];
 
-      if (!token) { client.disconnect(); return; }
+      if (!token) {
+        client.disconnect();
+        return;
+      }
 
       const payload = this.jwtService.verify<{ sub: string; username: string }>(token);
-      (client as AuthSocket).userId   = payload.sub;
+      (client as AuthSocket).userId = payload.sub;
       (client as AuthSocket).username = payload.username || 'anon';
       client.join(`user:${payload.sub}`);
       this.logger.log(`Orders WS connected: ${client.id} (${payload.sub})`);
@@ -94,13 +98,13 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
 
       const payload = {
-        id:             message.id,
-        orderId:        data.orderId,
-        content:        message.content,
-        senderId:       message.senderId,
+        id: message.id,
+        orderId: data.orderId,
+        content: message.content,
+        senderId: message.senderId,
         senderUsername: message.sender.username,
-        senderAvatar:   message.sender.avatarUrl,
-        createdAt:      message.createdAt,
+        senderAvatar: message.sender.avatarUrl,
+        createdAt: message.createdAt,
       };
 
       // Broadcast to everyone in the order room (buyer + seller)

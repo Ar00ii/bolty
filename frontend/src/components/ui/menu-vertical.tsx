@@ -1,7 +1,8 @@
-"use client";
-import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+'use client';
+import { ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
+import Link from 'next/link';
+import React from 'react';
 
 type MenuItem = {
   label: string;
@@ -18,7 +19,7 @@ const MotionLink = motion.create(Link);
 
 export const MenuVertical = ({
   menuItems = [],
-  color = "#836ef9",
+  color = '#836ef9',
   skew = 0,
 }: MenuVerticalProps) => {
   return (
@@ -32,10 +33,10 @@ export const MenuVertical = ({
         >
           <motion.div
             variants={{
-              initial: { x: "-100%", color: "inherit", opacity: 0 },
+              initial: { x: '-100%', color: 'inherit', opacity: 0 },
               hover: { x: 0, color, opacity: 1 },
             }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             className="z-0"
           >
             <ArrowRight strokeWidth={3} className="size-8" />
@@ -43,11 +44,11 @@ export const MenuVertical = ({
           <MotionLink
             href={item.href}
             variants={{
-              initial: { x: -32, color: "inherit" },
+              initial: { x: -32, color: 'inherit' },
               hover: { x: 0, color, skewX: skew },
             }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="font-semibold text-3xl no-underline"
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="font-light text-3xl no-underline"
           >
             {item.label}
           </MotionLink>

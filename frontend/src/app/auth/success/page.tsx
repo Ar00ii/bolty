@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import React from 'react';
+import { useEffect } from 'react';
+
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 export default function AuthSuccessPage() {
@@ -12,12 +14,15 @@ export default function AuthSuccessPage() {
     refresh().then(() => {
       // handled by the second useEffect once user is loaded
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (isLoading) return;
-    if (!user) { router.push('/auth'); return; }
+    if (!user) {
+      router.push('/auth');
+      return;
+    }
     if (!user.profileSetup) {
       router.push('/profile/setup');
     } else {

@@ -1,23 +1,21 @@
 import 'reflect-metadata';
-import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { AppModule } from './app.module';
-import helmet from 'helmet';
-import * as cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+
+import { AppModule } from './app.module';
 import { WinstonLogger } from './common/logger/winston.logger';
 
 // API Key generation fix - rebuild trigger
 
-const REQUIRED_ENV_VARS = [
-  'JWT_SECRET',
-  'DATABASE_URL',
-  'FRONTEND_URL',
-];
+const REQUIRED_ENV_VARS = ['JWT_SECRET', 'DATABASE_URL', 'FRONTEND_URL'];
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const missing = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);
   if (missing.length > 0) {
+    // eslint-disable-next-line no-console
     console.error(`[Bootstrap] Missing required environment variables: ${missing.join(', ')}`);
     process.exit(1);
   }
@@ -79,9 +77,9 @@ async function bootstrap() {
   // ── Global Validation Pipe ───────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,           // strip unknown properties
+      whitelist: true, // strip unknown properties
       forbidNonWhitelisted: true, // throw on unknown properties
-      transform: true,           // auto-transform payloads
+      transform: true, // auto-transform payloads
       disableErrorMessages: configService.get('NODE_ENV') === 'production',
       validationError: { target: false },
     }),

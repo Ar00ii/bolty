@@ -1,6 +1,7 @@
 'use client';
 
 import React, { Children, useEffect, useState } from 'react';
+
 import { cn } from '@/lib/utils';
 
 export function AnimatedList({
@@ -17,7 +18,7 @@ export function AnimatedList({
 
   useEffect(() => {
     if (index < childrenArray.length - 1) {
-      const timer = setTimeout(() => setIndex(prev => prev + 1), delay);
+      const timer = setTimeout(() => setIndex((prev) => prev + 1), delay);
       return () => clearTimeout(timer);
     }
   }, [index, delay, childrenArray.length]);

@@ -1,6 +1,13 @@
 'use client';
 import * as faceapi from 'face-api.js';
-import { BloomEffect, ChromaticAberrationEffect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
+import {
+  BloomEffect,
+  ChromaticAberrationEffect,
+  EffectComposer,
+  EffectPass,
+  RenderPass,
+} from 'postprocessing';
+import React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './GridScan.css';
@@ -359,7 +366,10 @@ export const GridScan = ({
 
     const onMove = (e: MouseEvent) => {
       if (uiFaceActive) return;
-      if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+      if (leaveTimer) {
+        clearTimeout(leaveTimer);
+        leaveTimer = null;
+      }
       const rect = el.getBoundingClientRect();
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
@@ -369,24 +379,41 @@ export const GridScan = ({
     const onClick = async () => {
       const nowSec = performance.now() / 1000;
       if (scanOnClick) pushScan(nowSec);
-      if (enableGyro && typeof window !== 'undefined' && window.DeviceOrientationEvent &&
-        (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission) {
+      if (
+        enableGyro &&
+        typeof window !== 'undefined' &&
+        window.DeviceOrientationEvent &&
+        (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> })
+          .requestPermission
+      ) {
         try {
-          await (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }).requestPermission();
-        } catch { /* noop */ }
+          await (
+            DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }
+          ).requestPermission();
+        } catch {
+          /* noop */
+        }
       }
     };
 
-    const onEnter = () => { if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; } };
+    const onEnter = () => {
+      if (leaveTimer) {
+        clearTimeout(leaveTimer);
+        leaveTimer = null;
+      }
+    };
 
     const onLeave = () => {
       if (uiFaceActive) return;
       if (leaveTimer) clearTimeout(leaveTimer);
-      leaveTimer = window.setTimeout(() => {
-        lookTarget.current.set(0, 0);
-        tiltTarget.current = 0;
-        yawTarget.current = 0;
-      }, Math.max(0, snapBackDelay || 0));
+      leaveTimer = window.setTimeout(
+        () => {
+          lookTarget.current.set(0, 0);
+          tiltTarget.current = 0;
+          yawTarget.current = 0;
+        },
+        Math.max(0, snapBackDelay || 0),
+      );
     };
 
     el.addEventListener('mousemove', onMove);
@@ -418,7 +445,13 @@ export const GridScan = ({
     container.appendChild(renderer.domElement);
 
     const uniforms = {
-      iResolution: { value: new THREE.Vector3(container.clientWidth, container.clientHeight, renderer.getPixelRatio()) },
+      iResolution: {
+        value: new THREE.Vector3(
+          container.clientWidth,
+          container.clientHeight,
+          renderer.getPixelRatio(),
+        ),
+      },
       iTime: { value: 0 },
       uSkew: { value: new THREE.Vector2(0, 0) },
       uTilt: { value: 0 },
@@ -437,7 +470,9 @@ export const GridScan = ({
       uPhaseTaper: { value: scanPhaseTaper },
       uScanDuration: { value: scanDuration },
       uScanDelay: { value: scanDelay },
-      uScanDirection: { value: scanDirection === 'backward' ? 1 : scanDirection === 'pingpong' ? 2 : 0 },
+      uScanDirection: {
+        value: scanDirection === 'backward' ? 1 : scanDirection === 'pingpong' ? 2 : 0,
+      },
       uScanStarts: { value: new Array(MAX_SCANS).fill(0) },
       uScanCount: { value: 0 },
     };
@@ -463,7 +498,11 @@ export const GridScan = ({
       composerRef.current = composer;
       const renderPass = new RenderPass(scene, camera);
       composer.addPass(renderPass);
-      const bloom = new BloomEffect({ intensity: 1.0, luminanceThreshold: bloomThreshold, luminanceSmoothing: bloomSmoothing });
+      const bloom = new BloomEffect({
+        intensity: 1.0,
+        luminanceThreshold: bloomThreshold,
+        luminanceSmoothing: bloomSmoothing,
+      });
       bloom.blendMode.opacity.value = Math.max(0, bloomIntensity);
       bloomRef.current = bloom;
       const chroma = new ChromaticAberrationEffect({
@@ -479,8 +518,13 @@ export const GridScan = ({
 
     const onResize = () => {
       renderer.setSize(container.clientWidth, container.clientHeight);
-      material.uniforms.iResolution.value.set(container.clientWidth, container.clientHeight, renderer.getPixelRatio());
-      if (composerRef.current) composerRef.current.setSize(container.clientWidth, container.clientHeight);
+      material.uniforms.iResolution.value.set(
+        container.clientWidth,
+        container.clientHeight,
+        renderer.getPixelRatio(),
+      );
+      if (composerRef.current)
+        composerRef.current.setSize(container.clientWidth, container.clientHeight);
     };
     window.addEventListener('resize', onResize);
 
@@ -490,20 +534,56 @@ export const GridScan = ({
       const dt = Math.max(0, Math.min(0.1, (now - last) / 1000));
       last = now;
 
-      lookCurrent.current.copy(smoothDampVec2(lookCurrent.current, lookTarget.current, lookVel.current, smoothTime, maxSpeed, dt));
-      const tiltSm = smoothDampFloat(tiltCurrent.current, tiltTarget.current, { v: tiltVel.current }, smoothTime, maxSpeed, dt);
-      tiltCurrent.current = tiltSm.value; tiltVel.current = tiltSm.v;
-      const yawSm = smoothDampFloat(yawCurrent.current, yawTarget.current, { v: yawVel.current }, smoothTime, maxSpeed, dt);
-      yawCurrent.current = yawSm.value; yawVel.current = yawSm.v;
+      lookCurrent.current.copy(
+        smoothDampVec2(
+          lookCurrent.current,
+          lookTarget.current,
+          lookVel.current,
+          smoothTime,
+          maxSpeed,
+          dt,
+        ),
+      );
+      const tiltSm = smoothDampFloat(
+        tiltCurrent.current,
+        tiltTarget.current,
+        { v: tiltVel.current },
+        smoothTime,
+        maxSpeed,
+        dt,
+      );
+      tiltCurrent.current = tiltSm.value;
+      tiltVel.current = tiltSm.v;
+      const yawSm = smoothDampFloat(
+        yawCurrent.current,
+        yawTarget.current,
+        { v: yawVel.current },
+        smoothTime,
+        maxSpeed,
+        dt,
+      );
+      yawCurrent.current = yawSm.value;
+      yawVel.current = yawSm.v;
 
-      const skew = new THREE.Vector2(lookCurrent.current.x * skewScale, -lookCurrent.current.y * yBoost * skewScale);
+      const skew = new THREE.Vector2(
+        lookCurrent.current.x * skewScale,
+        -lookCurrent.current.y * yBoost * skewScale,
+      );
       material.uniforms.uSkew.value.set(skew.x, skew.y);
       material.uniforms.uTilt.value = tiltCurrent.current * tiltScale;
-      material.uniforms.uYaw.value = THREE.MathUtils.clamp(yawCurrent.current * yawScale, -0.6, 0.6);
+      material.uniforms.uYaw.value = THREE.MathUtils.clamp(
+        yawCurrent.current * yawScale,
+        -0.6,
+        0.6,
+      );
       material.uniforms.iTime.value = now / 1000;
 
       renderer.clear(true, true, true);
-      if (composerRef.current) { composerRef.current.render(dt); } else { renderer.render(scene, camera); }
+      if (composerRef.current) {
+        composerRef.current.render(dt);
+      } else {
+        renderer.render(scene, camera);
+      }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
@@ -513,16 +593,41 @@ export const GridScan = ({
       window.removeEventListener('resize', onResize);
       material.dispose();
       quad.geometry.dispose();
-      if (composerRef.current) { composerRef.current.dispose(); composerRef.current = null; }
+      if (composerRef.current) {
+        composerRef.current.dispose();
+        composerRef.current = null;
+      }
       renderer.dispose();
       renderer.forceContextLoss();
       if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
     };
   }, [
-    sensitivity, lineThickness, linesColor, scanColor, scanOpacity, gridScale, lineStyle, lineJitter,
-    scanDirection, enablePost, noiseIntensity, bloomIntensity, scanGlow, scanSoftness, scanPhaseTaper,
-    scanDuration, scanDelay, bloomThreshold, bloomSmoothing, chromaticAberration,
-    smoothTime, maxSpeed, skewScale, yBoost, tiltScale, yawScale,
+    sensitivity,
+    lineThickness,
+    linesColor,
+    scanColor,
+    scanOpacity,
+    gridScale,
+    lineStyle,
+    lineJitter,
+    scanDirection,
+    enablePost,
+    noiseIntensity,
+    bloomIntensity,
+    scanGlow,
+    scanSoftness,
+    scanPhaseTaper,
+    scanDuration,
+    scanDelay,
+    bloomThreshold,
+    bloomSmoothing,
+    chromaticAberration,
+    smoothTime,
+    maxSpeed,
+    skewScale,
+    yBoost,
+    tiltScale,
+    yawScale,
   ]);
 
   useEffect(() => {
@@ -539,7 +644,8 @@ export const GridScan = ({
       u.uNoise.value = Math.max(0, noiseIntensity);
       u.uScanGlow.value = scanGlow;
       u.uScanOpacity.value = Math.max(0, Math.min(1, scanOpacity));
-      u.uScanDirection.value = scanDirection === 'backward' ? 1 : scanDirection === 'pingpong' ? 2 : 0;
+      u.uScanDirection.value =
+        scanDirection === 'backward' ? 1 : scanDirection === 'pingpong' ? 2 : 0;
       u.uScanSoftness.value = scanSoftness;
       u.uPhaseTaper.value = scanPhaseTaper;
       u.uScanDuration.value = Math.max(0.05, scanDuration);
@@ -554,9 +660,24 @@ export const GridScan = ({
       chromaRef.current.offset.set(chromaticAberration, chromaticAberration);
     }
   }, [
-    lineThickness, linesColor, scanColor, gridScale, lineStyle, lineJitter, bloomIntensity,
-    bloomThreshold, bloomSmoothing, chromaticAberration, noiseIntensity, scanGlow, scanOpacity,
-    scanDirection, scanSoftness, scanPhaseTaper, scanDuration, scanDelay,
+    lineThickness,
+    linesColor,
+    scanColor,
+    gridScale,
+    lineStyle,
+    lineJitter,
+    bloomIntensity,
+    bloomThreshold,
+    bloomSmoothing,
+    chromaticAberration,
+    noiseIntensity,
+    scanGlow,
+    scanOpacity,
+    scanDirection,
+    scanSoftness,
+    scanPhaseTaper,
+    scanDuration,
+    scanDelay,
   ]);
 
   useEffect(() => {
@@ -583,10 +704,14 @@ export const GridScan = ({
           faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelsPath),
         ]);
         if (!canceled) setModelsReady(true);
-      } catch { if (!canceled) setModelsReady(false); }
+      } catch {
+        if (!canceled) setModelsReady(false);
+      }
     };
     load();
-    return () => { canceled = true; };
+    return () => {
+      canceled = true;
+    };
   }, [modelsPath]);
 
   useEffect(() => {
@@ -596,10 +721,15 @@ export const GridScan = ({
     const start = async () => {
       if (!enableWebcam || !modelsReady || !video) return;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false,
+        });
         video.srcObject = stream;
         await video.play();
-      } catch { return; }
+      } catch {
+        return;
+      }
 
       const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
       const detect = async (ts: number) => {
@@ -610,35 +740,54 @@ export const GridScan = ({
             const res = await faceapi.detectSingleFace(video, opts).withFaceLandmarks(true);
             if (res && res.detection) {
               const { box } = res.detection;
-              const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
-              const cx = box.x + box.width * 0.5, cy = box.y + box.height * 0.5;
-              const nx = (cx / vw) * 2 - 1, ny = (cy / vh) * 2 - 1;
-              medianPush(bufX.current, nx, 5); medianPush(bufY.current, ny, 5);
-              const nxm = median(bufX.current), nym = median(bufY.current);
+              const vw = video.videoWidth || 1,
+                vh = video.videoHeight || 1;
+              const cx = box.x + box.width * 0.5,
+                cy = box.y + box.height * 0.5;
+              const nx = (cx / vw) * 2 - 1,
+                ny = (cy / vh) * 2 - 1;
+              medianPush(bufX.current, nx, 5);
+              medianPush(bufY.current, ny, 5);
+              const nxm = median(bufX.current),
+                nym = median(bufY.current);
               const look = new THREE.Vector2(Math.tanh(nxm), Math.tanh(nym));
               const faceSize = Math.min(1, Math.hypot(box.width / vw, box.height / vh));
               const depthScale = 1 + depthResponse * (faceSize - 0.25);
               lookTarget.current.copy(look.multiplyScalar(depthScale));
-              const leftEye = res.landmarks.getLeftEye(), rightEye = res.landmarks.getRightEye();
-              const lc = centroid(leftEye), rc = centroid(rightEye);
+              const leftEye = res.landmarks.getLeftEye(),
+                rightEye = res.landmarks.getRightEye();
+              const lc = centroid(leftEye),
+                rc = centroid(rightEye);
               const tilt = Math.atan2(rc.y - lc.y, rc.x - lc.x);
-              medianPush(bufT.current, tilt, 5); tiltTarget.current = median(bufT.current);
+              medianPush(bufT.current, tilt, 5);
+              tiltTarget.current = median(bufT.current);
               const nose = res.landmarks.getNose();
               const tip = nose[nose.length - 1] || nose[Math.floor(nose.length / 2)];
               const jaw = res.landmarks.getJawOutline();
-              const leftCheek = jaw[3] || jaw[2], rightCheek = jaw[13] || jaw[14];
-              const dL = dist2(tip, leftCheek), dR = dist2(tip, rightCheek);
+              const leftCheek = jaw[3] || jaw[2],
+                rightCheek = jaw[13] || jaw[14];
+              const dL = dist2(tip, leftCheek),
+                dR = dist2(tip, rightCheek);
               const eyeDist = Math.hypot(rc.x - lc.x, rc.y - lc.y) + 1e-6;
               let yawSignal = THREE.MathUtils.clamp((dR - dL) / (eyeDist * 1.6), -1, 1);
               yawSignal = Math.tanh(yawSignal);
-              medianPush(bufYaw.current, yawSignal, 5); yawTarget.current = median(bufYaw.current);
+              medianPush(bufYaw.current, yawSignal, 5);
+              yawTarget.current = median(bufYaw.current);
               setUiFaceActive(true);
-            } else { setUiFaceActive(false); }
-          } catch { setUiFaceActive(false); }
+            } else {
+              setUiFaceActive(false);
+            }
+          } catch {
+            setUiFaceActive(false);
+          }
         }
         if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
-          (video as HTMLVideoElement & { requestVideoFrameCallback: (cb: () => void) => void }).requestVideoFrameCallback(() => detect(performance.now()));
-        } else { requestAnimationFrame(detect); }
+          (
+            video as HTMLVideoElement & { requestVideoFrameCallback: (cb: () => void) => void }
+          ).requestVideoFrameCallback(() => detect(performance.now()));
+        } else {
+          requestAnimationFrame(detect);
+        }
       };
       requestAnimationFrame(detect);
     };
@@ -647,8 +796,9 @@ export const GridScan = ({
       stop = true;
       if (video) {
         const stream = video.srcObject as MediaStream | null;
-        if (stream) stream.getTracks().forEach(t => t.stop());
-        video.pause(); video.srcObject = null;
+        if (stream) stream.getTracks().forEach((t) => t.stop());
+        video.pause();
+        video.srcObject = null;
       }
     };
   }, [enableWebcam, modelsReady, depthResponse]);
@@ -659,7 +809,13 @@ export const GridScan = ({
         <div className="gridscan__preview">
           <video ref={videoRef} muted playsInline autoPlay className="gridscan__video" />
           <div className="gridscan__badge">
-            {enableWebcam ? modelsReady ? uiFaceActive ? 'Face: tracking' : 'Face: searching' : 'Loading models' : 'Webcam disabled'}
+            {enableWebcam
+              ? modelsReady
+                ? uiFaceActive
+                  ? 'Face: tracking'
+                  : 'Face: searching'
+                : 'Loading models'
+              : 'Webcam disabled'}
           </div>
         </div>
       )}
@@ -671,12 +827,20 @@ function srgbColor(hex: string) {
   return new THREE.Color(hex).convertSRGBToLinear();
 }
 
-function smoothDampVec2(current: THREE.Vector2, target: THREE.Vector2, currentVelocity: THREE.Vector2, smoothTime: number, maxSpeed: number, deltaTime: number): THREE.Vector2 {
+function smoothDampVec2(
+  current: THREE.Vector2,
+  target: THREE.Vector2,
+  currentVelocity: THREE.Vector2,
+  smoothTime: number,
+  maxSpeed: number,
+  deltaTime: number,
+): THREE.Vector2 {
   const out = current.clone();
   smoothTime = Math.max(0.0001, smoothTime);
-  const omega = 2 / smoothTime, x = omega * deltaTime;
+  const omega = 2 / smoothTime,
+    x = omega * deltaTime;
   const exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
-  let change = current.clone().sub(target);
+  const change = current.clone().sub(target);
   const originalTo = target.clone();
   const maxChange = maxSpeed * smoothTime;
   if (change.length() > maxChange) change.setLength(maxChange);
@@ -684,13 +848,24 @@ function smoothDampVec2(current: THREE.Vector2, target: THREE.Vector2, currentVe
   const temp = currentVelocity.clone().addScaledVector(change, omega).multiplyScalar(deltaTime);
   currentVelocity.sub(temp.clone().multiplyScalar(omega)).multiplyScalar(exp);
   out.copy(target.clone().add(change.add(temp).multiplyScalar(exp)));
-  if (originalTo.clone().sub(current).dot(out.clone().sub(originalTo)) > 0) { out.copy(originalTo); currentVelocity.set(0, 0); }
+  if (originalTo.clone().sub(current).dot(out.clone().sub(originalTo)) > 0) {
+    out.copy(originalTo);
+    currentVelocity.set(0, 0);
+  }
   return out;
 }
 
-function smoothDampFloat(current: number, target: number, velRef: { v: number }, smoothTime: number, maxSpeed: number, deltaTime: number): { value: number; v: number } {
+function smoothDampFloat(
+  current: number,
+  target: number,
+  velRef: { v: number },
+  smoothTime: number,
+  maxSpeed: number,
+  deltaTime: number,
+): { value: number; v: number } {
   smoothTime = Math.max(0.0001, smoothTime);
-  const omega = 2 / smoothTime, x = omega * deltaTime;
+  const omega = 2 / smoothTime,
+    x = omega * deltaTime;
   const exp = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
   let change = current - target;
   const originalTo = target;
@@ -700,21 +875,31 @@ function smoothDampFloat(current: number, target: number, velRef: { v: number },
   const temp = (velRef.v + omega * change) * deltaTime;
   velRef.v = (velRef.v - omega * temp) * exp;
   let out = target + (change + temp) * exp;
-  if ((originalTo - current) * (out - originalTo) > 0) { out = originalTo; velRef.v = 0; }
+  if ((originalTo - current) * (out - originalTo) > 0) {
+    out = originalTo;
+    velRef.v = 0;
+  }
   return { value: out, v: velRef.v };
 }
 
 function medianPush(buf: number[], v: number, maxLen: number) {
-  buf.push(v); if (buf.length > maxLen) buf.shift();
+  buf.push(v);
+  if (buf.length > maxLen) buf.shift();
 }
 function median(buf: number[]): number {
   if (buf.length === 0) return 0;
-  const a = [...buf].sort((x, y) => x - y), mid = Math.floor(a.length / 2);
+  const a = [...buf].sort((x, y) => x - y),
+    mid = Math.floor(a.length / 2);
   return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) * 0.5;
 }
 function centroid(points: { x: number; y: number }[]) {
-  let x = 0, y = 0; const n = points.length || 1;
-  for (const p of points) { x += p.x; y += p.y; }
+  let x = 0,
+    y = 0;
+  const n = points.length || 1;
+  for (const p of points) {
+    x += p.x;
+    y += p.y;
+  }
   return { x: x / n, y: y / n };
 }
 function dist2(a: { x: number; y: number }, b: { x: number; y: number }) {
