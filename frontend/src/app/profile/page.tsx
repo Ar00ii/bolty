@@ -235,10 +235,10 @@ function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
   if (!msg) return null;
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl px-4 py-3 mb-5 text-sm animate-[fade-in_0.3s_ease] ${
+      className={`flex items-start gap-3 rounded-lg px-4 py-3 mb-6 text-sm font-light animate-[fade-in_0.3s_ease] ${
         type === 'success'
-          ? 'bg-emerald-500/8 border border-emerald-500/20 text-emerald-400'
-          : 'bg-red-500/8 border border-red-500/20 text-red-400'
+          ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+          : 'bg-red-500/10 border border-red-500/30 text-red-300'
       }`}
     >
       {type === 'success' ? (
