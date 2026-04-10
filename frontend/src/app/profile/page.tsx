@@ -4,12 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { TerminalCard } from '@/components/ui/TerminalCard';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity' | 'preferences';
 
 interface Friend {
   id: string;
@@ -235,10 +234,10 @@ function Alert({ type, msg }: { type: 'success' | 'error'; msg: string }) {
   if (!msg) return null;
   return (
     <div
-      className={`flex items-start gap-3 rounded-xl px-4 py-3 mb-5 text-sm animate-[fade-in_0.3s_ease] ${
+      className={`flex items-start gap-3 rounded-lg px-4 py-3 mb-6 text-sm font-light animate-[fade-in_0.3s_ease] ${
         type === 'success'
-          ? 'bg-emerald-500/8 border border-emerald-500/20 text-emerald-400'
-          : 'bg-red-500/8 border border-red-500/20 text-red-400'
+          ? 'bg-green-500/10 border border-green-500/30 text-green-300'
+          : 'bg-red-500/10 border border-red-500/30 text-red-300'
       }`}
     >
       {type === 'success' ? (
@@ -282,9 +281,9 @@ function Avatar({
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-6">
-      <h2 className="text-base font-light text-[var(--text)] tracking-tight">{title}</h2>
-      {subtitle && <p className="text-xs text-[var(--text-muted)] mt-0.5">{subtitle}</p>}
+    <div className="mb-8 mt-0">
+      <h2 className="text-lg font-light text-white tracking-tight">{title}</h2>
+      {subtitle && <p className="text-sm text-[var(--text-secondary)] mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -292,7 +291,7 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs font-light text-[var(--text-muted)] mb-1.5 uppercase tracking-widest">
+      <label className="block text-sm font-light text-[var(--text-secondary)] mb-2.5">
         {label}
       </label>
       {children}
@@ -304,7 +303,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -313,7 +312,7 @@ function Textarea({ ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text)] outline-none transition-all duration-200 focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] placeholder:text-[var(--text-muted)] resize-none ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] resize-none font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -323,7 +322,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      className="btn-primary w-full py-3 rounded-lg text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-purple-500/20"
     >
       {loading ? (
         <>
@@ -878,168 +877,54 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 animate-[fade-in_0.4s_ease]">
-      <div className="flex gap-5 items-start">
-        {/* ── Sidebar ──────────────────────────────────────────────── */}
-        <div className="w-56 flex-shrink-0 sticky top-24 space-y-3">
-          {/* User card */}
-          <div
-            className="rounded-2xl border border-[var(--border)] overflow-hidden"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            <div
-              className="h-px w-full"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent, rgba(131,110,249,0.35), transparent)',
-              }}
-            />
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="relative flex-shrink-0">
-                  <Avatar
-                    src={user?.avatarUrl}
-                    name={user?.displayName || user?.username}
-                    size="md"
-                  />
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[var(--bg-card)]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-light text-[var(--text)] truncate leading-tight">
-                    {user?.displayName || user?.username || 'New User'}
-                  </div>
-                  {username && (
-                    <div className="text-xs text-[var(--text-muted)] font-mono truncate">
-                      @{username}
-                    </div>
-                  )}
-                  {userTag && (
-                    <div className="text-xs font-mono text-monad-400/70 mt-0.5">#{userTag}</div>
-                  )}
-                </div>
-              </div>
+    <div className="profile-container min-h-screen pt-12 pb-40 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-0 animate-[fade-in_0.5s_ease]">
+          <h1 className="profile-title">Account Settings</h1>
+        </div>
 
-              {/* Extra info pills */}
-              <div className="space-y-1.5">
-                {githubLogin && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    <IconGitHub className="w-3 h-3 flex-shrink-0 text-white" />
-                    <span className="truncate font-mono">{githubLogin}</span>
-                  </div>
-                )}
-                {walletAddress && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-2.5 py-1.5">
-                    <img
-                      src="/metamask.png"
-                      alt=""
-                      className="w-3 h-3 object-contain flex-shrink-0"
-                    />
-                    <span className="truncate font-mono">
-                      {walletAddress.slice(0, 6)}…{walletAddress.slice(-4)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {profileUrl && (
-                <Link
-                  href={profileUrl}
-                  target="_blank"
-                  className="flex items-center justify-center gap-1.5 w-full text-xs text-[var(--text-muted)] hover:text-monad-400 border border-[var(--border)] hover:border-monad-500/30 px-3 py-2 rounded-xl transition-all duration-200"
-                >
-                  View profile <IconArrow className="w-3 h-3" />
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Nav list */}
-          <nav
-            className="rounded-2xl border border-[var(--border)] overflow-hidden"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            {(
-              [
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 -mt-8">
+          {/* ── Sidebar Menu ──────────────────────────────────────────── */}
+          <div className="lg:col-span-1">
+            <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+              {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+                { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
+                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
+                { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
                 { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+                { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
+                { id: 'preferences' as Tab, label: 'Preferences', Icon: IconUser },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
-              ] as Array<{
-                id: Tab;
-                label: string;
-                Icon: React.ComponentType<{ className?: string }>;
-              }>
-            ).map(({ id, label, Icon }, i, arr) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 text-left transition-all duration-150 ${i < arr.length - 1 ? 'border-b border-[var(--border)]' : ''} ${
-                  tab === id ? 'bg-monad-500/10' : 'hover:bg-white/[0.025]'
-                }`}
-              >
-                <div
-                  className={`w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
-                    tab === id
-                      ? 'bg-monad-500/20 border border-monad-500/25'
-                      : 'bg-[var(--bg-elevated)] border border-[var(--border)]'
-                  }`}
+              ].map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full`}
                 >
-                  <Icon
-                    className={`w-3.5 h-3.5 ${tab === id ? 'text-monad-400' : 'text-[var(--text-muted)]'}`}
-                  />
-                </div>
-                <span
-                  className={`text-sm flex-1 ${tab === id ? 'text-monad-300 font-light' : 'text-[var(--text)]'}`}
-                >
-                  {label}
-                </span>
-                {tab === id && <div className="w-1 h-4 rounded-full bg-monad-400 flex-shrink-0" />}
-              </button>
-            ))}
-          </nav>
+                  <div className="profile-menu-icon">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className="profile-menu-label hidden lg:inline">{label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
 
-          {/* Leaderboard link */}
-          <Link
-            href="/reputation/leaderboard"
-            className="flex items-center gap-3 px-3.5 py-3 rounded-2xl border border-[var(--border)] hover:border-monad-500/30 hover:bg-monad-500/5 transition-all duration-150 group"
-            style={{ background: 'var(--bg-card)' }}
-          >
-            <div className="w-6 h-6 rounded-md bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center flex-shrink-0 group-hover:border-monad-500/25 group-hover:bg-monad-500/10 transition-colors">
-              <svg
-                className="w-3.5 h-3.5 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"
-                />
-              </svg>
-            </div>
-            <span className="text-sm text-[var(--text)] group-hover:text-monad-300 transition-colors flex-1">
-              Leaderboard
-            </span>
-            <IconArrow className="w-3 h-3 text-[var(--text-muted)] group-hover:text-monad-400 transition-colors" />
-          </Link>
-        </div>
-
-        {/* ── Main content panel ───────────────────────────────────── */}
-        <div className="flex-1 min-w-0">
+          {/* ── Main content panel ───────────────────────────────────── */}
+          <div className="lg:col-span-3 profile-content">
           {/* ════════════════════════════════════════════
-          GENERAL  — monad purple tint
+          GENERAL
       ════════════════════════════════════════════ */}
           {tab === 'general' && (
-            <TerminalCard
-              title="profile.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(131,110,249,0.06)_0%,var(--bg-card)_40%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="General Information"
                 subtitle="Your public identity on Bolty."
@@ -1048,7 +933,7 @@ export default function ProfilePage() {
               <Alert type="error" msg={genErr} />
 
               {/* Avatar upload */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] mb-5">
+              <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
                 <div
                   className="relative group flex-shrink-0 cursor-pointer"
                   onClick={() => avatarInputRef.current?.click()}
@@ -1112,7 +997,7 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <form onSubmit={handleSaveGeneral} className="space-y-5">
+              <form onSubmit={handleSaveGeneral} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Username">
                     <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
@@ -1172,18 +1057,14 @@ export default function ProfilePage() {
 
                 <SaveButton loading={genSaving} />
               </form>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
           SOCIAL  — blue tint
       ════════════════════════════════════════════ */}
           {tab === 'social' && (
-            <TerminalCard
-              title="social-links.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(59,130,246,0.07)_0%,var(--bg-card)_45%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="Social Links"
                 subtitle="Connect your online presence to your Bolty profile."
@@ -1191,7 +1072,7 @@ export default function ProfilePage() {
               <Alert type="success" msg={socMsg} />
               <Alert type="error" msg={socErr} />
 
-              <form onSubmit={handleSaveSocial} className="space-y-4">
+              <form onSubmit={handleSaveSocial} className="space-y-6">
                 {(
                   [
                     {
@@ -1244,14 +1125,14 @@ export default function ProfilePage() {
                   }>
                 ).map((item) => (
                   <Field key={item.key} label={item.label}>
-                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
                       {item.icon}
                       <input
                         type="url"
                         value={item.value}
                         onChange={(e) => item.setter(e.target.value)}
                         placeholder={item.placeholder}
-                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
+                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
                       />
                       {item.value && (
                         <button
@@ -1266,11 +1147,11 @@ export default function ProfilePage() {
                   </Field>
                 ))}
 
-                <div className="pt-1">
+                <div className="pt-2">
                   <SaveButton loading={socSaving} label="Save social links" />
                 </div>
               </form>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
@@ -1311,11 +1192,7 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              <TerminalCard
-                title="metamask.connect"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,146,60,0.08)_0%,var(--bg-card)_50%)]"
-              >
+              <div className="profile-content-card">
                 <Alert type="success" msg={walletMsg} />
                 <Alert type="error" msg={walletErr} />
 
@@ -1390,7 +1267,7 @@ export default function ProfilePage() {
                     )}
                   </button>
                 )}
-              </TerminalCard>
+              </div>
             </div>
           )}
 
@@ -1398,11 +1275,7 @@ export default function ProfilePage() {
           CONNECTIONS
       ════════════════════════════════════════════ */}
           {tab === 'connections' && (
-            <TerminalCard
-              title="linked-accounts.json"
-              showDots
-              className="[background:linear-gradient(160deg,rgba(40,200,64,0.05)_0%,var(--bg-card)_45%)]"
-            >
+            <div className="profile-content-card">
               <SectionHeader
                 title="Connected Accounts"
                 subtitle="Link external services to unlock more Bolty features."
@@ -1455,7 +1328,7 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-            </TerminalCard>
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
@@ -1464,11 +1337,7 @@ export default function ProfilePage() {
           {tab === 'friends' && (
             <div className="space-y-4">
               {/* Search */}
-              <TerminalCard
-                title="user-search"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,191,36,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <SectionHeader
                   title="Find People"
                   subtitle="Search by @username or exact user ID — for example #1234."
@@ -1533,14 +1402,10 @@ export default function ProfilePage() {
                     No users found for &quot;{searchQuery}&quot;
                   </div>
                 )}
-              </TerminalCard>
+              </div>
 
               {/* Requests + list */}
-              <TerminalCard
-                title={`friends (${friends.length})`}
-                showDots
-                className="[background:linear-gradient(160deg,rgba(251,191,36,0.04)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 {friendsLoading ? (
                   <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
                     <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
@@ -1667,7 +1532,7 @@ export default function ProfilePage() {
                     ) : null}
                   </div>
                 )}
-              </TerminalCard>
+              </div>
             </div>
           )}
 
@@ -1680,11 +1545,7 @@ export default function ProfilePage() {
               <Alert type="error" msg={secErr} />
 
               {/* 2FA */}
-              <TerminalCard
-                title="two-factor-auth"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(16,185,129,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <div className="flex items-start gap-4">
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}
@@ -1791,14 +1652,10 @@ export default function ProfilePage() {
                     )}
                   </div>
                 </div>
-              </TerminalCard>
+              </div>
 
               {/* Email */}
-              <TerminalCard
-                title="email-address"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(59,130,246,0.06)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <div className="flex items-center justify-between mb-1">
                   <div>
                     <div className="text-sm font-light text-[var(--text)]">Email Address</div>
@@ -1911,7 +1768,7 @@ export default function ProfilePage() {
                     </div>
                   </form>
                 )}
-              </TerminalCard>
+              </div>
 
               {/* Delete account — danger zone */}
               <div
@@ -2082,11 +1939,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Endpoint form */}
-              <TerminalCard
-                title="agent-config.json"
-                showDots
-                className="[background:linear-gradient(160deg,rgba(131,110,249,0.07)_0%,var(--bg-card)_45%)]"
-              >
+              <div className="profile-content-card">
                 <Alert type="success" msg={agentMsg} />
                 <Alert type="error" msg={agentErr} />
 
@@ -2179,13 +2032,154 @@ export default function ProfilePage() {
 
                   <SaveButton loading={agentSaving} label="Save endpoint" />
                 </form>
-              </TerminalCard>
+              </div>
             </div>
           )}
+
+          {/* API KEYS */}
+          {tab === 'api-keys' && (
+            <div className="profile-content-card">
+              <SectionHeader title="API Keys" subtitle="Manage your API credentials for integrations." />
+              <div className="space-y-4">
+                <div className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-white">Production Key</p>
+                      <p className="text-xs text-gray-400 mt-1">sk_prod_••••••••••••</p>
+                    </div>
+                    <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Copy</button>
+                  </div>
+                </div>
+              </div>
+              <button className="mt-6 px-4 py-2 bg-black border border-gray-700 hover:border-gray-600 rounded-lg text-sm text-white">Generate New Key</button>
+            </div>
+          )}
+
+          {/* BILLING */}
+          {tab === 'billing' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Billing & Subscription" subtitle="Manage your subscription and payment methods." />
+              <div className="space-y-6">
+                <div className="p-4 border border-gray-700 rounded-lg">
+                  <p className="text-sm text-gray-400">Current Plan</p>
+                  <p className="text-xl font-medium text-white mt-2">Professional</p>
+                  <p className="text-xs text-gray-500 mt-1">$99/month • Renews Dec 15, 2024</p>
+                </div>
+                <button className="w-full px-4 py-2 bg-black border border-gray-700 hover:border-gray-600 rounded-lg text-white text-sm">Update Payment Method</button>
+              </div>
+            </div>
+          )}
+
+          {/* USAGE */}
+          {tab === 'usage' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Usage & Analytics" subtitle="Monitor your API usage and limits." />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">API Calls This Month</p>
+                  <p className="text-2xl font-medium text-white mt-2">24,582</p>
+                  <p className="text-xs text-gray-500 mt-1">of 100,000 limit</p>
+                </div>
+                <div className="p-4 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">Active Agents</p>
+                  <p className="text-2xl font-medium text-white mt-2">12</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFICATIONS */}
+          {tab === 'notifications' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Notification Preferences" subtitle="Choose how you want to be notified." />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 border border-gray-700 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-white">Email on API errors</p>
+                    <p className="text-xs text-gray-400">Get notified about failed requests</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+                <div className="flex items-center justify-between p-3 border border-gray-700 rounded-lg">
+                  <div>
+                    <p className="text-sm font-medium text-white">Weekly usage report</p>
+                    <p className="text-xs text-gray-400">Summary of your API usage</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* INTEGRATIONS */}
+          {tab === 'integrations' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Integrations" subtitle="Connect third-party services to Bolty." />
+              <div className="space-y-3">
+                <div className="p-4 border border-gray-700 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">Slack</p>
+                    <p className="text-xs text-gray-400">Send notifications to Slack</p>
+                  </div>
+                  <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connect</button>
+                </div>
+                <div className="p-4 border border-gray-700 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">GitHub</p>
+                    <p className="text-xs text-gray-400">Deploy from GitHub repos</p>
+                  </div>
+                  <button className="px-3 py-1 text-xs bg-gray-800 hover:bg-gray-700 rounded text-gray-300">Connected</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ACTIVITY LOG */}
+          {tab === 'activity' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Activity Log" subtitle="View your account activity history." />
+              <div className="space-y-2">
+                <div className="p-3 border border-gray-700 rounded-lg text-sm">
+                  <p className="text-gray-300">Profile updated</p>
+                  <p className="text-xs text-gray-500 mt-1">Dec 10, 2024 at 2:30 PM</p>
+                </div>
+                <div className="p-3 border border-gray-700 rounded-lg text-sm">
+                  <p className="text-gray-300">API key generated</p>
+                  <p className="text-xs text-gray-500 mt-1">Dec 8, 2024 at 10:15 AM</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PREFERENCES */}
+          {tab === 'preferences' && (
+            <div className="profile-content-card">
+              <SectionHeader title="Preferences" subtitle="Customize your experience." />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-300">Theme</label>
+                  <select className="mt-2 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
+                    <option>Dark (Default)</option>
+                    <option>Light</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-300">Language</label>
+                  <select className="mt-2 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded text-white text-sm">
+                    <option>English</option>
+                    <option>Spanish</option>
+                    <option>French</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+          </div>
+          {/* end main content panel */}
         </div>
-        {/* end main content panel */}
+        {/* end grid */}
       </div>
-      {/* end flex row */}
+      {/* end container */}
     </div>
   );
 }
