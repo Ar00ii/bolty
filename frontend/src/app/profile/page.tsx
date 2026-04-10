@@ -877,7 +877,7 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="profile-container min-h-screen pt-12 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="profile-container min-h-screen pt-12 pb-40 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-3 animate-[fade-in_0.5s_ease]">
@@ -913,7 +913,7 @@ export default function ProfilePage() {
               {/* Leaderboard */}
               <Link
                 href="/reputation/leaderboard"
-                className="profile-menu-item min-w-fit lg:w-full hover:text-white"
+                className="profile-menu-item min-w-fit lg:w-full hover:text-white lg:mb-24"
               >
                 <div className="profile-menu-icon">
                   <svg
