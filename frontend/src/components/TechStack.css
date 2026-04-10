@@ -72,8 +72,8 @@
 
 .tech-logo {
   flex-shrink: 0;
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -100,6 +100,6 @@
     transform: translateX(0);
   }
   100% {
-    transform: translateX(calc(-160px * 8 - 100px * 8));
+    transform: translateX(calc(-140px * 8 - 100px * 8));
   }
 }
