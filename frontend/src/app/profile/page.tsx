@@ -880,12 +880,12 @@ export default function ProfilePage() {
     <div className="profile-container min-h-screen pt-12 pb-40 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-3 animate-[fade-in_0.5s_ease]">
+        <div className="mb-0 animate-[fade-in_0.5s_ease]">
           <h1 className="profile-title">Account Settings</h1>
           <p className="profile-subtitle">Manage your profile, security, and preferences</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-2">
           {/* ── Sidebar Menu ──────────────────────────────────────────── */}
           <div className="lg:col-span-1">
             <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
