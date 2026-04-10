@@ -4,13 +4,21 @@ import { useState, useCallback } from 'react';
 
 import { validateForm } from '@/lib/utils/validation';
 
-export interface UseFormOptions<T> {
+/** Validator function type for form fields */
+export type FieldValidator = (value: unknown) => string | null;
+
+/** Form validation schema type */
+export type ValidationSchema<T extends Record<string, unknown>> = Partial<
+  Record<keyof T, FieldValidator>
+>;
+
+export interface UseFormOptions<T extends Record<string, unknown>> {
   initialValues: T;
-  validationSchema?: Record<keyof T, (value: any) => string | null>;
+  validationSchema?: ValidationSchema<T>;
   onSubmit: (values: T) => Promise<void> | void;
 }
 
-export function useForm<T extends Record<string, any>>({
+export function useForm<T extends Record<string, unknown>>({
   initialValues,
   validationSchema,
   onSubmit,
@@ -71,8 +79,9 @@ export function useForm<T extends Record<string, any>>({
       setIsSubmitting(true);
       try {
         await onSubmit(values);
-      } catch (error: any) {
-        setSubmitError(error.message || 'An error occurred');
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'An error occurred';
+        setSubmitError(message);
       } finally {
         setIsSubmitting(false);
       }
@@ -87,7 +96,7 @@ export function useForm<T extends Record<string, any>>({
     setSubmitError('');
   }, [initialValues]);
 
-  const setFieldValue = useCallback((field: keyof T, value: any) => {
+  const setFieldValue = useCallback(<K extends keyof T>(field: K, value: T[K]) => {
     setValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
