@@ -1,0 +1,118 @@
+.tech-stack-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 280px;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Corner brackets */
+.corner-bracket {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(120, 120, 120, 0.6);
+  z-index: 10;
+}
+
+.corner-bracket.top-left {
+  top: 24px;
+  left: 24px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-bracket.top-right {
+  top: 24px;
+  right: 24px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-bracket.bottom-left {
+  bottom: 24px;
+  left: 24px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-bracket.bottom-right {
+  bottom: 24px;
+  right: 24px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Carousel */
+.tech-stack-container {
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.tech-stack-track {
+  display: flex;
+  gap: 80px;
+  padding: 40px 20px;
+  animation: scroll-left-infinite 40s linear infinite;
+}
+
+.tech-logo {
+  flex-shrink: 0;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.tech-logo:hover {
+  transform: scale(1.15);
+}
+
+.tech-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
+}
+
+.tech-logo:hover img {
+  filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.8));
+}
+
+@keyframes scroll-left-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-220px * 8 - 80px * 8));
+  }
+}
+
+/* Fade effect on sides */
+.tech-stack-container::before,
+.tech-stack-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.tech-stack-container::before {
+  left: 0;
+  background: linear-gradient(to right, #000000, transparent);
+}
+
+.tech-stack-container::after {
+  right: 0;
+  background: linear-gradient(to left, #000000, transparent);
+}
