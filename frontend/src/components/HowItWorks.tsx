@@ -15,9 +15,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { memo } from 'react';
 import { ArrowRight, Zap, Trophy, ShoppingCart } from 'lucide-react';
 
-export const HowItWorks = () => {
+export const HowItWorks = memo(() => {
   return (
     <section className="py-24 px-4" style={{ borderColor: 'var(--border)' }}>
       <div className="max-w-7xl mx-auto">
@@ -212,4 +213,6 @@ export const HowItWorks = () => {
       </div>
     </section>
   );
-};
+});
+
+HowItWorks.displayName = 'HowItWorks';

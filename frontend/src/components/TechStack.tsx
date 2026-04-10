@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import './TechStack.css';
 
 const techLogos = [
@@ -13,7 +14,7 @@ const techLogos = [
   { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript' },
 ];
 
-export const TechStack = () => {
+export const TechStack = memo(() => {
   return (
     <div className="tech-stack-wrapper">
       {/* Corner brackets */}
@@ -40,4 +41,6 @@ export const TechStack = () => {
       </div>
     </div>
   );
-};
+});
+
+TechStack.displayName = 'TechStack';
