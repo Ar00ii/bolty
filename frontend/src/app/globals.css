@@ -1301,7 +1301,24 @@ p, span, a, li, button, input, textarea {
     pointer-events: none;
   }
 
+  /* ── Profile Menu ── */
+  .profile-menu-item {
+    @apply relative flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-700/30 hover:border-gray-600/60 hover:bg-gray-800/40 transition-all duration-200 text-gray-400 hover:text-white;
+  }
+
+  .profile-menu-item.active {
+    @apply border-gray-600 bg-gray-800/60 text-white;
+  }
+
+  .profile-menu-icon {
+    @apply w-5 h-5 flex-shrink-0;
+  }
+
+  .profile-menu-label {
+    @apply text-sm font-medium;
+  }
+
   /* ── Profile Content Card ── */
   .profile-content-card {
-    @apply p-3 border border-gray-700 rounded-lg bg-gray-900/30 backdrop-blur-sm;
+    @apply p-4 border border-gray-700 rounded-lg bg-gray-900/30 backdrop-blur-sm;
   }
