@@ -13,7 +13,7 @@ export const NestedBoxesBackground = () => {
 
       {/* Middle box */}
       <div
-        className="absolute inset-1 rounded-lg"
+        className="absolute inset-6 rounded-lg"
         style={{
           border: '1px solid rgba(255, 255, 255, 0.8)',
         }}
@@ -21,7 +21,7 @@ export const NestedBoxesBackground = () => {
 
       {/* Inner box */}
       <div
-        className="absolute inset-2 rounded-lg"
+        className="absolute inset-12 rounded-lg"
         style={{
           border: '1px solid rgba(255, 255, 255, 0.8)',
         }}
