@@ -613,30 +613,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS (SERVICES GRID) ── */}
+      {/* ── NESTED BOXES BACKGROUND ── */}
       <section className="py-24 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="w-full mx-auto">
-          {/* ONE Unified Container with all content */}
-          <div className="border" style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}>
-            {/* Title section - full width */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              className="p-8 lg:p-12 border-b"
-              style={{ borderColor: 'rgba(255, 255, 255, 0.15)' }}
-            >
-              <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">
-                Getting Started
-              </p>
-              <h2 className="text-4xl lg:text-5xl font-light">
-                Three steps to <GradientText gradient="purple">get started</GradientText>
-              </h2>
-            </motion.div>
-
-            {/* Background with 3 nested boxes */}
-            <NestedBoxesBackground />
-          </div>
+          {/* Background with 3 nested boxes */}
+          <NestedBoxesBackground />
         </div>
       </section>
 
