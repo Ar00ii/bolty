@@ -1,20 +1,21 @@
 'use client';
 
-import { Code2, Database, Cloud, Zap, Shield, GitBranch } from 'lucide-react';
 import { LogoLoop } from '@/components/ui/LogoLoop';
 
 const techLogos = [
-  { node: <Code2 className="w-24 h-24" />, title: 'TypeScript', href: '#' },
-  { node: <Cloud className="w-24 h-24" />, title: 'Next.js', href: '#' },
-  { node: <Database className="w-24 h-24" />, title: 'PostgreSQL', href: '#' },
-  { node: <GitBranch className="w-24 h-24" />, title: 'Git', href: '#' },
-  { node: <Zap className="w-24 h-24" />, title: 'Redis', href: '#' },
-  { node: <Shield className="w-24 h-24" />, title: 'Docker', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg', alt: 'JavaScript', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg', alt: 'Python', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg', alt: 'GitHub', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg', alt: 'Docker', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg', alt: 'PostgreSQL', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg', alt: 'React', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg', alt: 'Node.js', href: '#' },
+  { src: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg', alt: 'TypeScript', href: '#' },
 ];
 
 export const TechStack = () => {
   return (
-    <div className="relative py-16">
+    <div className="relative py-20 w-full">
       {/* Corner brackets */}
       <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-gray-700 pointer-events-none" />
       <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-gray-700 pointer-events-none" />
@@ -23,10 +24,11 @@ export const TechStack = () => {
 
       <LogoLoop
         logos={techLogos}
-        speed={60}
+        speed={50}
         direction="left"
-        logoHeight={120}
-        gap={100}
+        logoHeight={150}
+        gap={80}
+        width="100%"
         pauseOnHover={true}
         scaleOnHover={true}
         fadeOut={true}
