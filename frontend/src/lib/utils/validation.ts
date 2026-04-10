@@ -82,9 +82,11 @@ export function validateForm<T extends Record<string, any>>(
 
   for (const field in schema) {
     const validator = schema[field];
-    const error = validator(data[field]);
-    if (error) {
-      errors.push({ field, message: error });
+    if (typeof validator === 'function') {
+      const error = validator(data[field]);
+      if (error) {
+        errors.push({ field, message: error });
+      }
     }
   }
 
