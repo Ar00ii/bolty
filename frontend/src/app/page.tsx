@@ -614,7 +614,7 @@ export default function HomePage() {
       </section>
 
       {/* ── NESTED BOXES BACKGROUND ── */}
-      <section className="py-24 px-4" style={{ borderColor: 'var(--border)' }}>
+      <section className="py-48 px-4" style={{ borderColor: 'var(--border)' }}>
         <div className="w-full mx-auto">
           {/* Background with 3 nested boxes */}
           <NestedBoxesBackground />
