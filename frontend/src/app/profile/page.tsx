@@ -353,14 +353,6 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
 
 // ── Tab config ─────────────────────────────────────────────────────────────────
 
-const TABS: { id: Tab; label: string; Icon: React.FC<{ className?: string }> }[] = [
-  { id: 'general', label: 'General', Icon: IconUser },
-  { id: 'social', label: 'Social', Icon: IconGlobe },
-  { id: 'wallet', label: 'Wallet', Icon: IconWallet },
-  { id: 'connections', label: 'Connections', Icon: IconLink },
-  { id: 'friends', label: 'Friends', Icon: IconUsers },
-  { id: 'security', label: 'Security', Icon: IconShield },
-];
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Page
