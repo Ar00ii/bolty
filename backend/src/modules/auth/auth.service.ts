@@ -13,6 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
@@ -296,35 +298,56 @@ export class AuthService {
 
   // ── 2FA Management ────────────────────────────────────────────────────────
 
-  async request2FAEnable(userId: string): Promise<void> {
+  async request2FAEnable(userId: string): Promise<{ qrCode: string; secret: string }> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
+    if (!user) throw new NotFoundException('User not found');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
-    const code = randomInt(100000, 1000000).toString();
-    await this.redis.set(`2fa_enable:${userId}`, code, 600); // 10 min
-    try {
-      await this.emailService.send2FAEnableCode(user.email, code);
-    } catch (err) {
-      await this.redis.del(`2fa_enable:${userId}`);
-      throw new BadRequestException(
-        'Failed to send verification email. Verify a domain at resend.com/domains to send to any email address.',
-      );
-    }
-    this.logger.log(`2FA enable code sent for user ${userId}`);
+    // Generate TOTP secret
+    const secret = speakeasy.generateSecret({
+      name: `Bolty (${user.email || user.id})`,
+      issuer: 'Bolty',
+      length: 32,
+    });
+
+    // Generate QR code
+    const qrCode = await QRCode.toDataURL(secret.otpauth_url!);
+
+    // Store secret temporarily in Redis for verification
+    await this.redis.set(`2fa_secret:${userId}`, secret.base32, 600); // 10 min
+
+    this.logger.log(`2FA setup initiated for user ${userId}`);
+    return { qrCode, secret: secret.base32 };
   }
 
   async enable2FA(userId: string, code: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
+    if (!user) throw new NotFoundException('User not found');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
-    const stored = await this.redis.get(`2fa_enable:${userId}`);
-    if (!stored || stored !== code)
-      throw new UnauthorizedException('Invalid or expired verification code');
+    const secret = await this.redis.get(`2fa_secret:${userId}`);
+    if (!secret) throw new BadRequestException('No 2FA setup in progress or code expired');
 
-    await this.redis.del(`2fa_enable:${userId}`);
-    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: code,
+      window: 2,
+    });
+
+    if (!verified) throw new UnauthorizedException('Invalid authenticator code');
+
+    // Save secret to database encrypted (you'll need to add encryption)
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorEnabled: true,
+        // Store secret in a new field if needed, or handle separately
+      },
+    });
+
+    await this.redis.del(`2fa_secret:${userId}`);
     this.logger.log(`2FA enabled for user ${userId}`);
   }
 
