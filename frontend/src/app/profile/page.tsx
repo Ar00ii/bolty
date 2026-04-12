@@ -2025,15 +2025,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* API KEYS */}
-            <APIKeysSection
-              apiKeys={apiKeys}
-              onDelete={handleDeleteAPIKey}
-              onGenerate={handleGenerateAPIKey}
-              onCopy={handleCopyAPIKey}
-            />
-          )}
-
           {/* BILLING */}
           {tab === 'billing' && (
             <BillingSection
