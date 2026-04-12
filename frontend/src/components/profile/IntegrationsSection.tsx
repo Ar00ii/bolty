@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, X, AlertCircle } from 'lucide-react';
+import { Plus, X, AlertCircle, Shield } from 'lucide-react';
 import Image from 'next/image';
 
 interface Integration {
@@ -24,18 +24,29 @@ interface IntegrationsSectionProps {
 }
 
 const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
+  // Special icons for integrations without logos
+  if (id === 'two-factor') {
+    return <Shield className="w-8 h-8" />;
+  }
+
+  if (id === 'api-keys') {
+    return <span className="text-xl font-bold">API</span>;
+  }
+
+  if (id === 'ledger') {
+    return <span className="text-xl font-bold">LDG</span>;
+  }
+
   const logoMap: Record<string, string> = {
     'metamask': '/integrations/metamask.png',
     'walletconnect': '/integrations/walletconnect.png',
-    'ledger': '/integrations/metamask.png',
     'twitter': '/integrations/X.png',
     'discord': '/integrations/discord.png',
     'github-social': '/integrations/github.png',
-    'two-factor': '/integrations/metamask.png',
-    'api-keys': '/integrations/metamask.png',
   };
 
-  const logo = logoMap[id] || '/integrations/metamask.png';
+  const logo = logoMap[id];
+  if (!logo) return <span className="text-xl font-bold">?</span>;
 
   return (
     <div className="relative w-8 h-8">
@@ -72,6 +83,18 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     setLoading(id);
     setError(null);
     try {
+      // Special handling for 2FA
+      if (id === 'two-factor') {
+        const response = await fetch('/api/auth/2fa/enable/request', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to enable 2FA');
+        // In real app, would show modal for code entry
+        alert('Check your email for 2FA verification code');
+        return;
+      }
+
       await onConnect(id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect');
@@ -85,6 +108,16 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     setLoading(id);
     setError(null);
     try {
+      // Special handling for 2FA
+      if (id === 'two-factor') {
+        const response = await fetch('/api/auth/2fa/disable', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to disable 2FA');
+        return;
+      }
+
       await onDisconnect(id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to disconnect');
