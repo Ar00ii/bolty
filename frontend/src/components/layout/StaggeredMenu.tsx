@@ -98,8 +98,8 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Rays',
     href: '/profile?tab=agent',
     sub: [
-      { href: '/profile?tab=agent', label: 'My Rays', icon: Zap },
-      { href: '/#rays-marketplace', label: 'Marketplace', icon: ShoppingCart },
+      { href: '/profile?tab=agent', label: 'Buy Rays', icon: ShoppingCart },
+      { href: '/profile?tab=agent', label: 'My Agent Rays', icon: Zap },
     ],
   },
   {

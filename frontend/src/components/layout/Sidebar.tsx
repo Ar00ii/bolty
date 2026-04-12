@@ -110,8 +110,8 @@ export function Sidebar() {
       icon: Zap,
       href: '/profile?tab=agent',
       children: [
-        { label: 'My Rays', href: '/profile?tab=agent', icon: Zap },
-        { label: 'Marketplace', href: '/#rays-marketplace', icon: ShoppingCart },
+        { label: 'Buy Rays', href: '/profile?tab=agent', icon: ShoppingCart },
+        { label: 'My Agent Rays', href: '/profile?tab=agent', icon: Zap },
       ],
     },
     {
