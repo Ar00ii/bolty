@@ -91,6 +91,7 @@ model User {
   notificationPreference NotificationPreference?
   integrations           UserIntegration[]
   aiAgents               Agent[]
+  raysPurchases          RaysPurchase[]
 
   @@map("users")
 }
@@ -801,6 +802,8 @@ model Agent {
 
   metrics     AgentMetrics?
   activityLog AgentActivityLog[]
+  raysPurchases RaysPurchase[]
+  rays        AgentRays?
 
   @@index([userId])
   @@map("agents")
@@ -851,4 +854,86 @@ enum ActivityStatus {
   FAILED
   PENDING
   TIMEOUT
+}
+
+// ─── RAYOS SYSTEM ──────────────────────────────────────────────────────────────
+
+model RaysPurchase {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  agentId         String
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  raysPack        RaysPack  // 10, 25, 50, 120, 250
+  raysAmount      Int       // Actual rays purchased
+  boltyAmount     Decimal   // Amount paid in BOLTY
+
+  txHash          String?   // Blockchain transaction hash (optional, for tracking)
+  status          PurchaseStatus @default(COMPLETED)
+
+  @@index([userId, agentId])
+  @@index([createdAt])
+  @@map("rays_purchases")
+}
+
+enum RaysPack {
+  PACK_10
+  PACK_25
+  PACK_50
+  PACK_120
+  PACK_250
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model AgentRays {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  agentId             String    @unique
+  agent               Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  totalRaysAccumulated Int      @default(0)  // Total rayos de por vida
+  currentRank         AgentRank @default(HIERRO)
+
+  lastRankUpAt        DateTime?
+  rankHistory         RankHistory[]
+
+  @@map("agent_rays")
+}
+
+enum AgentRank {
+  HIERRO
+  BRONCE
+  PLATA
+  ORO
+  PLATINO
+  DIAMANTE
+  MAESTRIA
+  CAMPEON
+}
+
+model RankHistory {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  agentRaysId     String
+  agentRays       AgentRays @relation(fields: [agentRaysId], references: [id], onDelete: Cascade)
+
+  previousRank    AgentRank
+  newRank         AgentRank
+  totalRaysAt     Int
+
+  @@index([agentRaysId, createdAt])
+  @@map("rank_history")
 }
