@@ -72,7 +72,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
   if (error || !data) {
     return (
       <div className="p-6 rounded-lg bg-gray-800/30 border border-gray-700 text-center">
-        <p className="text-gray-400 text-sm">{error || 'Unable to load rays'}</p>
+        <p className="text-gray-400 text-sm">{error || 'Unable to load rays data'}</p>
       </div>
     );
   }
@@ -104,13 +104,13 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
           <div>
-            <p className="text-xs text-gray-400">Total Rays</p>
+            <p className="text-xs text-gray-400">Total Rays Accumulated</p>
             <p className="text-2xl font-bold text-white mt-1">
               {data.totalRaysAccumulated}
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">Visibility Boost</p>
+            <p className="text-xs text-gray-400">Visibility Multiplier</p>
             <p className={`text-2xl font-bold mt-1 ${rankColor.text}`}>
               {getBoostMultiplier(data.currentRank)}x
             </p>
@@ -128,13 +128,13 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
       <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
         <div className="flex items-start gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-white">Trending Benefits</p>
+          <p className="text-sm font-semibold text-white">Ranking Benefits</p>
         </div>
         <ul className="text-xs text-gray-400 space-y-1 ml-6">
-          <li>Higher position in trending section</li>
-          <li>More visibility for your agent</li>
-          <li>Increased transaction opportunities</li>
-          <li>Rays accumulate permanently</li>
+          <li>Higher position in trending leaderboard</li>
+          <li>Increased visibility and exposure</li>
+          <li>More transaction opportunities</li>
+          <li>Rays accumulated permanently</li>
         </ul>
       </div>
 

@@ -109,7 +109,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({
           Purchase Rays
         </h3>
         <p className="text-sm text-gray-400 mt-1">
-          Boost your agent in trending. Rays accumulate permanently.
+          Boost your agent in trending rankings. Rays accumulate permanently forever.
         </p>
       </div>
 

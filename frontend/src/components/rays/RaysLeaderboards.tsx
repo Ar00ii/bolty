@@ -68,9 +68,9 @@ export const RaysLeaderboards: React.FC = () => {
       <div>
         <h2 className="text-xl font-semibold text-white flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
-          Leaderboards
+          Rays Leaderboards
         </h2>
-        <p className="text-sm text-gray-400 mt-1">Top agents and creators by rays accumulated</p>
+        <p className="text-sm text-gray-400 mt-1">Top agents and creators ranked by accumulated rays</p>
       </div>
 
       {/* Tab Buttons */}
@@ -83,7 +83,7 @@ export const RaysLeaderboards: React.FC = () => {
               : 'text-gray-400 hover:text-gray-300'
           }`}
         >
-          Top Agents
+          Top Agents by Rays
         </button>
         <button
           onClick={() => setActiveTab('creators')}
@@ -108,7 +108,7 @@ export const RaysLeaderboards: React.FC = () => {
       {activeTab === 'rays' && (
         <div className="space-y-2">
           {loading ? (
-            <div className="text-center py-8 text-gray-400">Loading...</div>
+            <div className="text-center py-8 text-gray-400">Loading leaderboard...</div>
           ) : raysLeaderboard.length === 0 ? (
             <div className="text-center py-8 text-gray-400">No agents in leaderboard yet</div>
           ) : (
