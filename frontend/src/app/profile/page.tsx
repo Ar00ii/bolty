@@ -13,7 +13,7 @@ import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
+type Tab = 'general' | 'social' | 'wallet' | 'friends' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
 
 interface Friend {
   id: string;
@@ -512,13 +512,13 @@ export default function ProfilePage() {
     if (params.get('linked') === 'github') {
       refresh();
       window.history.replaceState({}, '', '/profile');
-      setTab('connections');
+      setTab('integrations');
       setConMsg('GitHub account linked successfully.');
     }
     const tabParam = params.get('tab') as Tab | null;
     if (
       tabParam &&
-      ['general', 'social', 'wallet', 'connections', 'friends', 'security', 'agent'].includes(
+      ['general', 'social', 'wallet', 'friends', 'agent', 'api-keys', 'billing', 'usage', 'notifications', 'integrations', 'activity'].includes(
         tabParam,
       )
     ) {
@@ -995,9 +995,7 @@ export default function ProfilePage() {
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
                 { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
-                { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
@@ -1260,8 +1258,8 @@ export default function ProfilePage() {
               {/* Search */}
               <div className="profile-content-card">
                 <SectionHeader
-                  title="Find People"
-                  subtitle="Search by @username or exact user ID — for example #1234."
+                  title="Professional Network"
+                  subtitle="Build meaningful connections with developers and expand your professional community."
                 />
                 <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                   <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
@@ -1269,8 +1267,8 @@ export default function ProfilePage() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="@username or #1234"
-                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-mono"
+                    placeholder="Search by @username or user ID..."
+                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                   />
                   {searching ? (
                     <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin flex-shrink-0" />
@@ -1395,8 +1393,8 @@ export default function ProfilePage() {
                     {friends.length === 0 && friendRequests.length === 0 ? (
                       <div className="text-center py-10">
                         <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-                        <p className="text-xs text-[var(--text-muted)] font-mono">
-                          No connections yet. Use the search above to find people.
+                        <p className="text-sm text-[var(--text-muted)]">
+                          Start building your network — search for developers to connect with.
                         </p>
                       </div>
                     ) : friends.length > 0 ? (
@@ -1458,414 +1456,57 @@ export default function ProfilePage() {
           )}
 
           {/* ════════════════════════════════════════════
-          SECURITY
-      ════════════════════════════════════════════ */}
-          {tab === 'security' && (
-            <div className="space-y-4">
-              <Alert type="success" msg={secMsg} />
-              <Alert type="error" msg={secErr} />
-
-              {/* 2FA */}
-              <div className="profile-content-card">
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}
-                  >
-                    <IconShield
-                      className={`w-5 h-5 ${twoFAEnabled ? 'text-emerald-400' : 'text-[var(--text-muted)]'}`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-light text-[var(--text)]">
-                          Two-Factor Authentication
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                          {twoFAEnabled
-                            ? 'Active — a code will be emailed to you at every login.'
-                            : 'Disabled — enable for additional login security.'}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (!twoFAEnabled) handle2FAToggle();
-                          else setToggling2FA((v) => !v);
-                        }}
-                        disabled={enable2FAStep === 'code'}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 shrink-0 ${
-                          twoFAEnabled
-                            ? 'text-red-400 border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8'
-                            : 'text-monad-400 border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8'
-                        } disabled:opacity-40`}
-                      >
-                        {twoFAEnabled ? 'Disable' : 'Enable'}
-                      </button>
-                    </div>
-
-                    {/* Enable 2FA — enter email code */}
-                    {!twoFAEnabled && enable2FAStep === 'code' && (
-                      <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                        <p className="text-xs text-[var(--text-muted)] mb-3">
-                          Enter the 6-digit code sent to your email:
-                        </p>
-                        <div className="flex gap-2">
-                          <Input
-                            type="text"
-                            value={enable2FACode}
-                            onChange={(e) =>
-                              setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
-                            }
-                            placeholder="123456"
-                            className="flex-1"
-                            maxLength={6}
-                          />
-                          <button
-                            onClick={handleEnable2FAConfirm}
-                            disabled={enable2FACode.length !== 6 || toggling2FA}
-                            className="text-xs text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEnable2FAStep('idle');
-                              setEnable2FACode('');
-                              setSecMsg('');
-                            }}
-                            className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Disable 2FA — enter password */}
-                    {twoFAEnabled && toggling2FA && (
-                      <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                        <p className="text-xs text-[var(--text-muted)] mb-3">
-                          Enter your password to disable 2FA:
-                        </p>
-                        <div className="flex gap-2">
-                          <Input
-                            type="password"
-                            value={disable2FAPassword}
-                            onChange={(e) => setDisable2FAPassword(e.target.value)}
-                            placeholder="Current password"
-                            className="flex-1"
-                          />
-                          <button
-                            onClick={handle2FAToggle}
-                            disabled={!disable2FAPassword}
-                            className="text-xs text-red-400 border border-red-500/25 hover:bg-red-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setToggling2FA(false)}
-                            className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="profile-content-card">
-                <div className="flex items-center justify-between mb-1">
-                  <div>
-                    <div className="text-sm font-light text-[var(--text)]">Email Address</div>
-                    <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-                      {userEmail || 'Not set'}
-                    </div>
-                  </div>
-                  {emailStep === 'idle' && (
-                    <button
-                      onClick={() => setEmailStep('form')}
-                      className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200"
-                    >
-                      Change
-                    </button>
-                  )}
-                </div>
-
-                {emailStep === 'form' && (
-                  <form
-                    onSubmit={handleRequestEmailChange}
-                    className="mt-4 pt-4 border-t border-[var(--border)] space-y-3"
-                  >
-                    <Input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="New email address"
-                      required
-                    />
-                    <Input
-                      type="password"
-                      value={emailPassword}
-                      onChange={(e) => setEmailPassword(e.target.value)}
-                      placeholder="Current password"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={emailLoading || !newEmail}
-                        className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {emailLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />{' '}
-                            Sending...
-                          </>
-                        ) : (
-                          'Send verification code'
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailStep('idle');
-                          setSecErr('');
-                          setSecMsg('');
-                        }}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {emailStep === 'otp' && (
-                  <form
-                    onSubmit={handleConfirmEmailChange}
-                    className="mt-4 pt-4 border-t border-[var(--border)] space-y-3"
-                  >
-                    <p className="text-xs text-[var(--text-muted)]">
-                      Enter the 6-digit code sent to{' '}
-                      <span className="text-[var(--text)] font-mono">{newEmail}</span>:
-                    </p>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={emailOtp}
-                      onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="000000"
-                      className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={emailLoading || emailOtp.length !== 6}
-                        className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {emailLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />{' '}
-                            Verifying...
-                          </>
-                        ) : (
-                          'Confirm change'
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailStep('idle');
-                          setSecErr('');
-                          setSecMsg('');
-                        }}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-
-              {/* Delete account — danger zone */}
-              <div
-                className="relative rounded-2xl border border-red-500/20 overflow-hidden"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, var(--bg-card) 60%)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, rgba(239,68,68,0.3), transparent)',
-                  }}
-                />
-                <div className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-light text-red-400">Delete Account</div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                        Permanently remove your account and all associated data.
-                      </div>
-                    </div>
-                    {deleteStep === 'idle' && (
-                      <button
-                        onClick={() => setDeleteStep('confirm')}
-                        className="text-xs text-red-400 border border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-
-                  {deleteStep === 'confirm' && (
-                    <div className="mt-4 pt-4 border-t border-red-500/15 space-y-3">
-                      <p className="text-xs text-red-300/80 leading-relaxed">
-                        <strong className="text-red-300">
-                          This action is permanent and irreversible.
-                        </strong>{' '}
-                        All repositories, listings, messages, and account data will be deleted. We
-                        will send a confirmation code to verify this request.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleRequestDeleteAccount}
-                          disabled={requestingDelete}
-                          className="flex-1 py-2.5 rounded-xl border border-red-500/25 text-red-400 hover:bg-red-500/10 hover:border-red-400/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
-                        >
-                          {requestingDelete ? 'Sending code...' : 'Send confirmation code'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteStep('idle');
-                            setSecErr('');
-                          }}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {deleteStep === 'otp' && (
-                    <form
-                      onSubmit={handleDeleteAccount}
-                      className="mt-4 pt-4 border-t border-red-500/15 space-y-3"
-                    >
-                      <p className="text-xs text-[var(--text-muted)]">
-                        Enter the 6-digit code sent to{' '}
-                        <span className="text-[var(--text)] font-mono">{userEmail}</span>:
-                      </p>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={deleteOtp}
-                        onChange={(e) =>
-                          setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
-                        }
-                        placeholder="000000"
-                        className="w-full bg-[var(--bg-elevated)] border border-red-500/20 rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
-                          disabled={deleting || deleteOtp.length !== 6}
-                          className="flex-1 py-2.5 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-light transition-all duration-200 disabled:opacity-50"
-                        >
-                          {deleting ? 'Deleting...' : 'Permanently delete my account'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteStep('idle');
-                            setDeleteOtp('');
-                            setSecErr('');
-                          }}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
-          AI AGENT — purple tint
+          AI AGENT — Professional SaaS Dashboard
       ════════════════════════════════════════════ */}
           {tab === 'agent' && (
             <div className="space-y-5">
-              {/* Explainer banner */}
-              <div
-                className="relative rounded-2xl border overflow-hidden px-5 py-4"
-                style={{
-                  background:
-                    'linear-gradient(135deg,rgba(131,110,249,0.08) 0%,rgba(9,9,15,1) 60%)',
-                  borderColor: 'rgba(131,110,249,0.25)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg,transparent,rgba(131,110,249,0.5),transparent)',
-                  }}
-                />
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{
-                      background: 'rgba(131,110,249,0.12)',
-                      border: '1px solid rgba(131,110,249,0.25)',
-                    }}
-                  >
-                    <IconCpu className="w-5 h-5 text-monad-400" />
+              {/* Header with Status */}
+              <div className="profile-content-card">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <h2 className="text-lg font-light text-[var(--text)]">AI Agent Dashboard</h2>
+                    <p className="text-xs text-[var(--text-muted)] mt-1">Configure and manage your autonomous agent</p>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-light text-monad-300 mb-1">
-                      How agent-to-agent negotiation works
-                    </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      When you buy a listing, Bolty calls your{' '}
-                      <span className="text-monad-300 font-mono">agentEndpoint</span> with the
-                      current negotiation state. Your AI responds with a JSON object specifying an
-                      action. The platform relays it to the seller&apos;s agent, and they alternate
-                      automatically until a deal is reached or the negotiation expires.
-                    </p>
-                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                      Your AI keeps full control — the platform just routes messages. You can use
-                      any model, any language.
-                    </p>
-                    <Link
-                      href="/docs/agent-protocol"
-                      className="inline-flex items-center gap-1.5 mt-3 text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors"
-                    >
-                      <IconArrow className="w-3 h-3" />
-                      read the full protocol spec →
-                    </Link>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-xs font-mono text-green-400">Active</span>
+                  </div>
+                </div>
+
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-3 gap-3 mb-6">
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="text-xs text-[var(--text-muted)] mb-1">Total Calls</div>
+                    <div className="text-lg font-light text-[var(--text)]">2,847</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">+12% this month</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="text-xs text-[var(--text-muted)] mb-1">Avg Response</div>
+                    <div className="text-lg font-light text-[var(--text)]">124ms</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">Excellent</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="text-xs text-[var(--text-muted)] mb-1">Success Rate</div>
+                    <div className="text-lg font-light text-[var(--text)]">99.8%</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">5 errors in 30d</div>
                   </div>
                 </div>
               </div>
 
-              {/* Endpoint form */}
+              {/* Configuration Panel */}
               <div className="profile-content-card">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                    <IconCpu className="w-3 h-3 text-monad-400" />
+                  </div>
+                  <h3 className="text-sm font-light text-[var(--text)]">Agent Configuration</h3>
+                </div>
+
                 <Alert type="success" msg={agentMsg} />
                 <Alert type="error" msg={agentErr} />
 
                 <form onSubmit={handleSaveAgentEndpoint} className="space-y-5">
-                  <Field label="Your agent webhook URL">
+                  <Field label="Webhook Endpoint URL">
                     <div className="space-y-2">
                       <div className="flex gap-2">
                         <div className="flex-1 flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
@@ -1878,7 +1519,7 @@ export default function ProfilePage() {
                               setAgentTestStatus('idle');
                               setAgentTestDetail('');
                             }}
-                            placeholder="https://your-agent.example.com/negotiate"
+                            placeholder="https://api.example.com/agent/webhook"
                             className="flex-1 bg-transparent text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
                           />
                           {agentEndpoint && (
@@ -1911,7 +1552,7 @@ export default function ProfilePage() {
                               testing...
                             </span>
                           ) : (
-                            'ping →'
+                            'Verify'
                           )}
                         </button>
                       </div>
@@ -1926,7 +1567,7 @@ export default function ProfilePage() {
                           }}
                         >
                           <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
-                          <span className="text-green-400">endpoint reachable</span>
+                          <span className="text-green-400">Connection verified</span>
                           <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
                         </div>
                       )}
@@ -1939,20 +1580,106 @@ export default function ProfilePage() {
                           }}
                         >
                           <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                          <span className="text-red-400">unreachable</span>
+                          <span className="text-red-400">Connection failed</span>
                           <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
                         </div>
                       )}
 
-                      <p className="text-xs text-zinc-600 leading-relaxed px-1">
-                        Bolty will POST JSON to this URL on every negotiation turn. Leave empty to
-                        use the built-in AI fallback.
+                      <p className="text-xs text-[var(--text-muted)] leading-relaxed px-1">
+                        Your agent endpoint receives negotiation state as JSON and must respond with an action within 5 seconds.
                       </p>
                     </div>
                   </Field>
 
-                  <SaveButton loading={agentSaving} label="Save endpoint" />
+                  <SaveButton loading={agentSaving} label="Save Configuration" />
                 </form>
+              </div>
+
+              {/* Activity Log */}
+              <div className="profile-content-card">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                    <IconCpu className="w-3 h-3 text-monad-400" />
+                  </div>
+                  <h3 className="text-sm font-light text-[var(--text)]">Recent Activity</h3>
+                </div>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div>
+                      <div className="text-xs font-mono text-[var(--text)]">Negotiation completed</div>
+                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Deal reached with buyer #2847</div>
+                    </div>
+                    <span className="text-xs text-[var(--text-muted)]">2m ago</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div>
+                      <div className="text-xs font-mono text-[var(--text)]">Agent request processed</div>
+                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Response: 124ms | Status: 200</div>
+                    </div>
+                    <span className="text-xs text-[var(--text-muted)]">15m ago</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div>
+                      <div className="text-xs font-mono text-[var(--text)]">Configuration updated</div>
+                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Webhook URL changed</div>
+                    </div>
+                    <span className="text-xs text-[var(--text-muted)]">3h ago</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documentation & Examples */}
+              <div className="profile-content-card">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(131,110,249,0.12)', border: '1px solid rgba(131,110,249,0.25)' }}>
+                    <IconCpu className="w-3 h-3 text-monad-400" />
+                  </div>
+                  <h3 className="text-sm font-light text-[var(--text)]">Quick Start</h3>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="text-xs font-mono text-monad-300 mb-2">Request Format</div>
+                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 p-2 rounded border border-[var(--border)] overflow-x-auto">
+                      {`POST /webhook\n{\n  "negotiationId": "neg_123",\n  "state": {...},\n  "history": [...]\n}`}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="text-xs font-mono text-monad-300 mb-2">Response Format</div>
+                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 p-2 rounded border border-[var(--border)] overflow-x-auto">
+                      {`{\n  "action": "accept"|"counter"|"decline",\n  "terms": {...},\n  "reasoning": "..."\n}`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                  <Link
+                    href="/docs/agent-api"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors"
+                  >
+                    <IconArrow className="w-3 h-3" />
+                    View Complete API Documentation
+                  </Link>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="profile-content-card border-red-500/20 bg-red-500/3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                    <IconCpu className="w-3 h-3 text-red-400" />
+                  </div>
+                  <h3 className="text-sm font-light text-red-300">Danger Zone</h3>
+                </div>
+
+                <p className="text-xs text-[var(--text-muted)] mb-3">
+                  Disabling your agent will fall back to the built-in AI. Active negotiations may fail.
+                </p>
+
+                <button className="text-xs px-4 py-2 rounded-lg border border-red-500/25 text-red-400 hover:bg-red-500/8 transition-all duration-200">
+                  Disable Agent
+                </button>
               </div>
             </div>
           )}
@@ -2147,30 +1874,98 @@ export default function ProfilePage() {
           {/* ACTIVITY LOG */}
           {tab === 'activity' && (
             <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Activity Log</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">Account Settings Updated</p>
-                    <p className="text-gray-500">{new Date().toLocaleDateString()}</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">Email and notifications preferences changed</p>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-light text-[var(--text)]">Activity Log</h2>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Timeline of your account and platform activity</p>
                 </div>
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">Login from New Device</p>
-                    <p className="text-gray-500">1 day ago</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">New login detected from Browser (Linux)</p>
-                </div>
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">API Key Generated</p>
-                    <p className="text-gray-500">3 days ago</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">New production API key created</p>
-                </div>
+                <select className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text)]">
+                  <option>All Activities</option>
+                  <option>Login</option>
+                  <option>API Calls</option>
+                  <option>Settings</option>
+                  <option>Security</option>
+                </select>
               </div>
+
+              {activityLog && activityLog.length > 0 ? (
+                <div className="space-y-1">
+                  {activityLog.map((log: any, idx: number) => {
+                    const timestamp = new Date(log.timestamp || log.createdAt);
+                    const now = new Date();
+                    const diffMs = now.getTime() - timestamp.getTime();
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    let timeStr = 'just now';
+                    if (diffMins < 60) {
+                      timeStr = diffMins <= 0 ? 'just now' : `${diffMins}m ago`;
+                    } else if (diffHours < 24) {
+                      timeStr = `${diffHours}h ago`;
+                    } else if (diffDays < 7) {
+                      timeStr = `${diffDays}d ago`;
+                    } else {
+                      timeStr = timestamp.toLocaleDateString();
+                    }
+
+                    // Determine activity type and color
+                    const action = log.action || log.type || 'Activity';
+                    let typeColor = 'text-zinc-400';
+                    let typeBg = 'bg-zinc-500/10';
+                    if (action.toLowerCase().includes('login')) {
+                      typeColor = 'text-emerald-400';
+                      typeBg = 'bg-emerald-500/10';
+                    } else if (action.toLowerCase().includes('api')) {
+                      typeColor = 'text-monad-400';
+                      typeBg = 'bg-monad-500/10';
+                    } else if (action.toLowerCase().includes('error') || action.toLowerCase().includes('failed')) {
+                      typeColor = 'text-red-400';
+                      typeBg = 'bg-red-500/10';
+                    } else if (action.toLowerCase().includes('update') || action.toLowerCase().includes('change')) {
+                      typeColor = 'text-amber-400';
+                      typeBg = 'bg-amber-500/10';
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-monad-500/20 hover:bg-monad-500/2 transition-all duration-200 group"
+                      >
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className={`text-xs font-mono px-2 py-1 rounded ${typeBg} ${typeColor}`}>
+                              {action}
+                            </span>
+                            <span className="text-xs text-[var(--text-muted)] ml-auto">
+                              {timeStr}
+                            </span>
+                          </div>
+                          {log.description && (
+                            <p className="text-sm text-[var(--text-muted)] mb-1">
+                              {log.description}
+                            </p>
+                          )}
+                          {log.metadata && (
+                            <div className="text-xs text-[var(--text-muted)] font-mono bg-black/20 p-2 rounded border border-[var(--border)] overflow-x-auto max-w-full">
+                              {typeof log.metadata === 'string' ? log.metadata : JSON.stringify(log.metadata, null, 2).substring(0, 200)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mx-auto mb-3">
+                    <IconCpu className="w-5 h-5 text-[var(--text-muted)]" />
+                  </div>
+                  <p className="text-sm text-[var(--text-muted)]">No activity recorded yet</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Your account activity will appear here</p>
+                </div>
+              )}
             </div>
           )}
           </div>
