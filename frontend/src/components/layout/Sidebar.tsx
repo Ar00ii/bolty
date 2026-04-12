@@ -17,6 +17,7 @@ import {
   Code2,
   Trophy,
   ChevronRight,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -105,12 +106,20 @@ export function Sidebar() {
       ],
     },
     {
+      label: 'Rays',
+      icon: Zap,
+      href: '/profile?tab=agent',
+      children: [
+        { label: 'My Rays', href: '/profile?tab=agent', icon: Zap },
+        { label: 'Marketplace', href: '/#rays-marketplace', icon: ShoppingCart },
+      ],
+    },
+    {
       label: 'Services',
       icon: Briefcase,
       href: '/services',
       children: [
         { label: 'Browse', href: '/services', icon: Briefcase },
-        { label: 'Leaderboard', href: '/reputation/leaderboard', icon: Trophy },
       ],
     },
     {

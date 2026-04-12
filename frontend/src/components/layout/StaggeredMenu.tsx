@@ -95,13 +95,20 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
+    label: 'Rays',
+    href: '/profile?tab=agent',
+    sub: [
+      { href: '/profile?tab=agent', label: 'My Rays', icon: Zap },
+      { href: '/#rays-marketplace', label: 'Marketplace', icon: ShoppingCart },
+    ],
+  },
+  {
     label: 'Hire',
     href: '/services',
     sub: [
       { href: '/services', label: 'Browse Services', icon: Briefcase },
       { href: '/services?category=AI_DEVELOPMENT', label: 'AI Development', icon: Cpu },
       { href: '/services?category=SMART_CONTRACTS', label: 'Smart Contracts', icon: Zap },
-      { href: '/reputation/leaderboard', label: 'Leaderboard', icon: Trophy },
     ],
   },
   {
