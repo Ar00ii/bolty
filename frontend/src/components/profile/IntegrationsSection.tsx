@@ -1,18 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CheckCircle2, Plus, Trash2, ExternalLink, Zap, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Plus, Trash2, ExternalLink, Zap, AlertCircle, MessageSquare, Github, CreditCard } from 'lucide-react';
 
 interface Integration {
   id: string;
   name: string;
   description: string;
-  icon: string;
+  icon?: string | React.ReactNode;
   connected: boolean;
   connectedAs?: string;
   url?: string;
   lastUsedAt?: string;
 }
+
+const getIntegrationIcon = (name: string) => {
+  const lower = name.toLowerCase();
+  if (lower === 'slack') return <MessageSquare className="w-6 h-6" />;
+  if (lower === 'github') return <Github className="w-6 h-6" />;
+  if (lower === 'stripe') return <CreditCard className="w-6 h-6" />;
+  return <Zap className="w-6 h-6" />;
+};
 
 interface IntegrationsSectionProps {
   integrations: Integration[];
@@ -106,8 +114,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className={`w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-2xl flex-shrink-0 group-hover:border-white/20 transition-colors`}>
-                          {integration.icon}
+                        <div className={`w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white flex-shrink-0 group-hover:border-white/20 transition-colors`}>
+                          {typeof integration.icon === 'string' ? integration.icon : getIntegrationIcon(integration.name)}
                         </div>
 
                         <div className="flex-1">
@@ -188,8 +196,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className={`w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-xl flex-shrink-0 group-hover:border-white/20 transition-colors`}>
-                          {integration.icon}
+                        <div className={`w-12 h-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white flex-shrink-0 group-hover:border-white/20 transition-colors`}>
+                          {typeof integration.icon === 'string' ? integration.icon : getIntegrationIcon(integration.name)}
                         </div>
 
                         <div className="flex-1 min-w-0">

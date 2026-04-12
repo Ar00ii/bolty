@@ -582,6 +582,14 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
 
+    if (tab === 'api-keys') {
+      api.get<any>('/market/api-keys')
+        .then((keys) => {
+          setApiKeys(Array.isArray(keys) ? keys : []);
+        })
+        .catch(() => setApiKeys([]));
+    }
+
     if (tab === 'activity') {
       api.get<any>('/users/activity-log?limit=50')
         .then((logs) => {
@@ -764,8 +772,7 @@ export default function ProfilePage() {
 
   const handleDeleteAPIKey = async (id: string) => {
     try {
-      // TODO: Call API endpoint to delete the key
-      // await api.delete(`/api-keys/${id}`);
+      await api.delete(`/market/api-keys/${id}`);
       setApiKeys(apiKeys.filter(k => k.id !== id));
     } catch (err) {
       console.error('Failed to delete API key:', err);
@@ -774,19 +781,7 @@ export default function ProfilePage() {
 
   const handleGenerateAPIKey = async (name: string) => {
     try {
-      // TODO: Call API endpoint to generate new key
-      // const newKey = await api.post('/api-keys', { name });
-      const newId = String(apiKeys.length + 1);
-      const userId = (user as { id?: string })?.id || 'user';
-      const newKey: APIKey = {
-        id: newId,
-        name,
-        key: `sk_prod_${Date.now().toString(36)}`,
-        preview: `sk_prod_${Date.now().toString(36).substring(0, 8)}`,
-        createdAt: new Date().toISOString(),
-        lastUsed: null,
-        scopes: ['read', 'write'],
-      };
+      const newKey = await api.post<APIKey>('/market/api-keys', { name });
       setApiKeys([...apiKeys, newKey]);
     } catch (err) {
       console.error('Failed to generate API key:', err);
@@ -2218,7 +2213,7 @@ export default function ProfilePage() {
                       id: int.id,
                       name: int.name || int.provider,
                       description: int.description || 'Connect this integration',
-                      icon: int.icon || (int.provider === 'slack' ? '💬' : int.provider === 'github' ? '🐙' : '🔗'),
+                      icon: int.icon,
                       connected: int.connected,
                       connectedAs: int.connectedAs,
                       lastUsedAt: int.lastUsedAt,
@@ -2228,14 +2223,12 @@ export default function ProfilePage() {
                         id: 'slack',
                         name: 'Slack',
                         description: 'Send API notifications to Slack',
-                        icon: '💬',
                         connected: false,
                       },
                       {
                         id: 'github',
                         name: 'GitHub',
                         description: 'Sync repositories and pull requests',
-                        icon: '🐙',
                         connected: !!githubLogin,
                         connectedAs: githubLogin || undefined,
                       },
@@ -2243,7 +2236,6 @@ export default function ProfilePage() {
                         id: 'stripe',
                         name: 'Stripe',
                         description: 'Handle payments and transactions',
-                        icon: '💳',
                         connected: false,
                       },
                     ]
