@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { APIKeysSection } from '@/components/profile/APIKeysSection';
+import { UsageSection } from '@/components/profile/UsageSection';
+import { BillingSection } from '@/components/profile/BillingSection';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -2133,49 +2135,29 @@ export default function ProfilePage() {
 
           {/* BILLING */}
           {tab === 'billing' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Billing</h2>
-              <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">Current Plan</p>
-                  <p className="text-base font-medium text-white mt-1 capitalize">{billingPlan === 'pro' ? 'Professional' : 'Free'}</p>
-                  <p className="text-xs text-gray-500">{billingPlan === 'pro' ? '$99/month • Next billing Dec 15' : 'No active subscription'}</p>
-                </div>
-                <div className="p-3 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">Billing Email</p>
-                  <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
-                </div>
-                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs">Manage Billing</button>
-              </div>
-            </div>
+            <BillingSection
+              data={{
+                plan: billingPlan as 'free' | 'pro' | 'enterprise',
+                email: billingEmail,
+                nextBillingDate: billingPlan === 'pro' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : undefined,
+                amount: billingPlan === 'pro' ? 99 : undefined,
+                status: 'active',
+                cardLast4: billingPlan === 'pro' ? '4242' : undefined,
+              }}
+            />
           )}
 
           {/* USAGE */}
           {tab === 'usage' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Usage & Analytics</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-xs text-gray-400">API Calls This Month</p>
-                    <p className="text-xs text-gray-500">24,582 / 100,000</p>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded h-1">
-                    <div className="bg-blue-500 h-1 rounded" style={{ width: '24.5%' }}></div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2 border border-gray-700 rounded text-center">
-                    <p className="text-xs text-gray-400">Active Agents</p>
-                    <p className="text-base font-medium text-white mt-1">12</p>
-                  </div>
-                  <div className="p-2 border border-gray-700 rounded text-center">
-                    <p className="text-xs text-gray-400">Last 24h Calls</p>
-                    <p className="text-base font-medium text-white mt-1">1,245</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <UsageSection
+              data={{
+                totalCalls: 24582,
+                maxCalls: 100000,
+                activeAgents: 12,
+                last24hCalls: 1245,
+                lastResetDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+              }}
+            />
           )}
 
           {/* NOTIFICATIONS */}
