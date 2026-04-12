@@ -23,23 +23,29 @@ interface IntegrationsSectionProps {
 }
 
 const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
-  const logos: Record<string, string> = {
-    'metamask': 'MM',
-    'walletconnect': 'WC',
-    'ledger': 'LDG',
-    'twitter': 'X',
-    'discord': 'DC',
-    'github-social': 'GH',
-    'two-factor': '2FA',
-    'api-keys': 'API',
+  const logoMap: Record<string, string> = {
+    'metamask': '/integrations/metamask.png',
+    'walletconnect': '/integrations/walletconnect.png',
+    'ledger': '/integrations/metamask.png', // Fallback
+    'twitter': '/integrations/X.png',
+    'discord': '/integrations/discord.png',
+    'github-social': '/integrations/github.png',
+    'two-factor': '/integrations/metamask.png', // Fallback
+    'api-keys': '/integrations/metamask.png', // Fallback
   };
 
-  const text = logos[id] || '⚙';
+  const logo = logoMap[id] || '/integrations/metamask.png';
 
   return (
-    <div className="flex items-center justify-center w-6 h-6 font-bold text-sm">
-      {text}
-    </div>
+    <img
+      src={logo}
+      alt={id}
+      className="w-6 h-6 object-contain"
+      onError={(e) => {
+        const target = e.target as HTMLImageElement;
+        target.style.display = 'none';
+      }}
+    />
   );
 };
 
