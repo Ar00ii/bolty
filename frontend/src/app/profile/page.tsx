@@ -7,12 +7,13 @@ import { APIKeysSection } from '@/components/profile/APIKeysSection';
 import { UsageSection } from '@/components/profile/UsageSection';
 import { BillingSection } from '@/components/profile/BillingSection';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
+import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity' | 'preferences';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
 
 interface Friend {
   id: string;
@@ -451,10 +452,6 @@ export default function ProfilePage() {
   // Notifications
   const [notifErrors, setNotifErrors] = useState(true);
   const [notifReports, setNotifReports] = useState(true);
-
-  // Preferences
-  const [theme, setTheme] = useState('dark');
-  const [language, setLanguage] = useState('en');
 
   // Init
   useEffect(() => {
@@ -988,7 +985,6 @@ export default function ProfilePage() {
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
-                { id: 'preferences' as Tab, label: 'Preferences', Icon: IconUser },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
                 <button
@@ -2233,42 +2229,6 @@ export default function ProfilePage() {
                   </div>
                   <p className="text-gray-400 mt-1">New production API key created</p>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* PREFERENCES */}
-          {tab === 'preferences' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Preferences</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-300">Theme</label>
-                  <select
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
-                  >
-                    <option value="dark">Dark (Default)</option>
-                    <option value="light">Light</option>
-                    <option value="auto">Auto</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-300">Language</label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
-                  >
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                  </select>
-                </div>
-                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs mt-2">
-                  Save Preferences
-                </button>
               </div>
             </div>
           )}
