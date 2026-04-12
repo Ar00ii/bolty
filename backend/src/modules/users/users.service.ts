@@ -227,13 +227,13 @@ export class UsersService {
     // Count this month's purchases
     const lastApiUse = await this.prisma.marketPurchase.findFirst({
       where: { buyerId: userId },
-      orderBy: { updatedAt: 'desc' },
-      select: { updatedAt: true },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
     });
 
     // Count active agents (market listings)
     const activeListings = await this.prisma.marketListing.count({
-      where: { sellerId: userId, deletedAt: null },
+      where: { sellerId: userId, status: 'ACTIVE' },
     });
 
     // Count last 24h activity
@@ -248,7 +248,7 @@ export class UsersService {
       activeAgents: activeListings,
       last24hCalls: last24hOrders,
       lastResetDate: monthStart.toISOString(),
-      lastUsedAt: lastApiUse?.updatedAt || null,
+      lastUsedAt: lastApiUse?.createdAt || null,
     };
   }
 
