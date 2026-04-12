@@ -78,6 +78,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
 }) => {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [twoFASetup, setTwoFASetup] = useState<{ qrCode: string; secret: string } | null>(null);
+  const [twoFACode, setTwoFACode] = useState('');
 
   const handleConnect = async (id: string) => {
     setLoading(id);
@@ -91,14 +93,43 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
           credentials: 'include',
         });
         if (!response.ok) throw new Error('Failed to enable 2FA');
-        // In real app, would show modal for code entry
-        alert('Check your email for 2FA verification code');
+        const data = await response.json();
+        setTwoFASetup(data);
+        setTwoFACode('');
         return;
       }
 
       await onConnect(id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to connect');
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleTwoFACodeSubmit = async () => {
+    if (!twoFACode || twoFACode.length !== 6) {
+      setError('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setLoading('two-factor');
+    setError(null);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+      const response = await fetch(`${apiUrl}/auth/2fa/enable`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: twoFACode }),
+      });
+      if (!response.ok) throw new Error('Invalid authenticator code');
+      setTwoFASetup(null);
+      setTwoFACode('');
+      // Refresh integrations
+      window.location.reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to verify code');
     } finally {
       setLoading(null);
     }
@@ -145,6 +176,67 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
         <div className="p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-start gap-3">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <p>{error}</p>
+        </div>
+      )}
+
+      {/* 2FA Setup Modal */}
+      {twoFASetup && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 border border-purple-500/30 rounded-lg p-8 max-w-md w-full mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-white">Set up Google Authenticator</h3>
+              <button
+                onClick={() => {
+                  setTwoFASetup(null);
+                  setTwoFACode('');
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-300 mb-4">
+                  Scan this QR code with Google Authenticator or any TOTP app:
+                </p>
+                <div className="bg-white p-4 rounded-lg flex justify-center">
+                  <img src={twoFASetup.qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-400 mb-2">Or enter this code manually:</p>
+                <code className="block bg-gray-800 p-3 rounded text-center font-mono text-sm text-purple-400 break-words">
+                  {twoFASetup.secret}
+                </code>
+              </div>
+
+              <div>
+                <label className="block text-sm text-gray-300 mb-2">
+                  Enter the 6-digit code from your authenticator app:
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  pattern="\d{6}"
+                  value={twoFACode}
+                  onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-center text-2xl tracking-widest font-mono"
+                />
+              </div>
+
+              <button
+                onClick={handleTwoFACodeSubmit}
+                disabled={loading === 'two-factor' || twoFACode.length !== 6}
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 rounded-lg transition-colors"
+              >
+                {loading === 'two-factor' ? 'Verifying...' : 'Verify and Enable'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
