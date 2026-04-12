@@ -8,6 +8,7 @@ import { UsageSection } from '@/components/profile/UsageSection';
 import { BillingSection } from '@/components/profile/BillingSection';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
 import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
+import { AgentDashboard } from '@/components/profile/AgentDashboard';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -1499,8 +1500,11 @@ export default function ProfilePage() {
           {/* ════════════════════════════════════════════
           AI AGENT — Professional SaaS Dashboard
       ════════════════════════════════════════════ */}
+          {tab === 'agent' && <AgentDashboard />}
+
+          {/* LEGACY AGENT CONTENT - KEPT FOR REFERENCE
           {tab === 'agent' && (
-            <div className="space-y-5">
+            <div className="space-y-5" style={{display: 'none'}}>
               {/* Header with Status */}
               <div className="profile-content-card">
                 <div className="flex items-start justify-between mb-6">
@@ -1731,6 +1735,7 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+          */}
 
           {/* BILLING */}
           {tab === 'billing' && (
