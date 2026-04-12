@@ -1253,66 +1253,6 @@ export default function ProfilePage() {
           )}
 
           {/* ════════════════════════════════════════════
-          {/* ════════════════════════════════════════════
-          CONNECTIONS
-      ════════════════════════════════════════════ */}
-            <div className="profile-content-card">
-              <SectionHeader
-                title="Connected Accounts"
-                subtitle="Link external services to unlock more Bolty features."
-              />
-              <Alert type="success" msg={conMsg} />
-              <Alert type="error" msg={conErr} />
-
-              <div className="space-y-3">
-                {/* GitHub */}
-                <div
-                  className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}
-                >
-                  <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
-                    <IconGitHub className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-light text-[var(--text)]">GitHub</span>
-                      {githubLogin && (
-                        <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">
-                          Linked
-                        </span>
-                      )}
-                    </div>
-                    {githubLogin ? (
-                      <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-                        @{githubLogin}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                        Required to import repositories and publish repo listings.
-                      </div>
-                    )}
-                  </div>
-                  {githubLogin ? (
-                    <button
-                      onClick={handleUnlinkGitHub}
-                      disabled={unlinkingGitHub}
-                      className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/30 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
-                    >
-                      {unlinkingGitHub ? 'Unlinking...' : 'Unlink'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleLinkGitHub}
-                      className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
-                    >
-                      Link
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
           FRIENDS
       ════════════════════════════════════════════ */}
           {tab === 'friends' && (
