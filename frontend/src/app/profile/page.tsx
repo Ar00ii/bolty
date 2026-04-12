@@ -13,7 +13,7 @@ import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
+type Tab = 'general' | 'social' | 'friends' | 'security' | 'agent' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
 
 interface Friend {
   id: string;
@@ -582,14 +582,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return;
 
-    if (tab === 'api-keys') {
-      api.get<any>('/market/api-keys')
-        .then((keys) => {
-          setApiKeys(Array.isArray(keys) ? keys : []);
-        })
-        .catch(() => setApiKeys([]));
-    }
-
     if (tab === 'activity') {
       api.get<any>('/users/activity-log?limit=50')
         .then((logs) => {
@@ -1005,15 +997,12 @@ export default function ProfilePage() {
               {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
-                { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
-                { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
-                { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
-                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
-                { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
+                { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
@@ -1267,69 +1256,6 @@ export default function ProfilePage() {
               </form>
             </div>
           )}
-
-          {/* ════════════════════════════════════════════
-          WALLET
-      ════════════════════════════════════════════ */}
-          {tab === 'wallet' && (
-            <div className="space-y-4">
-              {/* Info card */}
-              <div
-                className="relative rounded-2xl border border-[var(--border)] overflow-hidden px-5 py-4"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(251,146,60,0.05) 0%, rgba(24,24,27,1) 60%)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, rgba(251,146,60,0.3), transparent)',
-                  }}
-                />
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <IconWallet className="w-4.5 h-4.5 text-orange-400 w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-light text-[var(--text)] mb-0.5">
-                      Payment Wallet
-                    </div>
-                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                      Your Bolty account uses GitHub or email for authentication. Link MetaMask
-                      separately to buy and sell on the marketplace. Linking only requires a message
-                      signature —{' '}
-                      <span className="text-[var(--text)]">no blockchain transaction is made</span>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="profile-content-card">
-                <Alert type="success" msg={walletMsg} />
-                <Alert type="error" msg={walletErr} />
-
-                <div className="flex items-center gap-4 mb-5">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(251,146,60,0.05))',
-                      border: '1px solid rgba(251,146,60,0.2)',
-                    }}
-                  >
-                    <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-light text-[var(--text)]">MetaMask</div>
-                    {walletAddress ? (
-                      <div className="text-xs font-mono text-[var(--text-muted)] mt-0.5 truncate">
-                        {walletAddress}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Not connected</div>
-                    )}
                   </div>
                   {walletAddress ? (
                     <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono shrink-0">
@@ -1384,35 +1310,6 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
-
-          {/* ════════════════════════════════════════════
-          CONNECTIONS
-      ════════════════════════════════════════════ */}
-          {tab === 'connections' && (
-            <div className="profile-content-card">
-              <SectionHeader
-                title="Connected Accounts"
-                subtitle="Link external services to unlock more Bolty features."
-              />
-              <Alert type="success" msg={conMsg} />
-              <Alert type="error" msg={conErr} />
-
-              <div className="space-y-3">
-                {/* GitHub */}
-                <div
-                  className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}
-                >
-                  <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
-                    <IconGitHub className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-light text-[var(--text)]">GitHub</span>
-                      {githubLogin && (
-                        <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">
-                          Linked
-                        </span>
-                      )}
                     </div>
                     {githubLogin ? (
                       <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
@@ -2151,15 +2048,6 @@ export default function ProfilePage() {
           )}
 
           {/* API KEYS */}
-          {tab === 'api-keys' && (
-            <APIKeysSection
-              apiKeys={apiKeys}
-              onDelete={handleDeleteAPIKey}
-              onGenerate={handleGenerateAPIKey}
-              onCopy={handleCopyAPIKey}
-            />
-          )}
-
           {/* BILLING */}
           {tab === 'billing' && (
             <BillingSection
