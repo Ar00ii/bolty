@@ -85,7 +85,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     try {
       // Special handling for 2FA
       if (id === 'two-factor') {
-        const response = await fetch('/api/auth/2fa/enable/request', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+        const response = await fetch(`${apiUrl}/auth/2fa/enable/request`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -110,7 +111,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     try {
       // Special handling for 2FA
       if (id === 'two-factor') {
-        const response = await fetch('/api/auth/2fa/disable', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
+        const response = await fetch(`${apiUrl}/auth/2fa/disable`, {
           method: 'POST',
           credentials: 'include',
         });
