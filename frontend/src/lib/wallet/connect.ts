@@ -96,9 +96,10 @@ export async function switchToBase(provider: Eip1193Provider): Promise<boolean> 
       params: [{ chainId: hexChainId }],
     });
     return true;
-  } catch (err: any) {
+  } catch (err) {
     // Chain not added, try to add it
-    if (err.code === 4902) {
+    const error = err as { code?: number };
+    if (error?.code === 4902) {
       try {
         await provider.request({
           method: 'wallet_addEthereumChain',
