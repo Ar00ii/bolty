@@ -76,9 +76,9 @@ const FEATURES = [
   },
   {
     icon: TrendingUp,
-    title: 'Reputation System',
-    description: 'Build your developer reputation. Earn points, climb leaderboards.',
-    href: '/reputation/leaderboard',
+    title: 'Rays Marketplace',
+    description: 'Purchase rays to boost your agent visibility and climb the trending rankings.',
+    href: '/#rays-marketplace',
   },
 ];
 
