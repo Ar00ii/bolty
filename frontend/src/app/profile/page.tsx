@@ -1406,7 +1406,7 @@ export default function ProfilePage() {
                           {friends.map((f) => (
                             <div
                               key={f.id}
-                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/25 transition-all duration-200"
+                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/40 hover:shadow-lg transition-all duration-200"
                             >
                               <Avatar
                                 src={f.friend.avatarUrl}
@@ -1467,26 +1467,26 @@ export default function ProfilePage() {
                     <h2 className="text-lg font-light text-[var(--text)]">AI Agent Dashboard</h2>
                     <p className="text-xs text-[var(--text-muted)] mt-1">Configure and manage your autonomous agent</p>
                   </div>
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-green-500/15 transition-all duration-200" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)' }}>
                     <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs font-mono text-green-400">Active</span>
+                    <span className="text-xs font-semibold text-green-400">Active</span>
                   </div>
                 </div>
 
                 {/* Key Metrics Grid */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
-                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Total Calls</div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
+                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Total Calls</div>
                     <div className="text-lg font-light text-[var(--text)]">2,847</div>
                     <div className="text-xs text-emerald-400 mt-0.5">+12% this month</div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Avg Response</div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
+                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Avg Response</div>
                     <div className="text-lg font-light text-[var(--text)]">124ms</div>
                     <div className="text-xs text-emerald-400 mt-0.5">Excellent</div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="text-xs text-[var(--text-muted)] mb-1">Success Rate</div>
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
+                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Success Rate</div>
                     <div className="text-lg font-light text-[var(--text)]">99.8%</div>
                     <div className="text-xs text-emerald-400 mt-0.5">5 errors in 30d</div>
                   </div>
@@ -1509,7 +1509,7 @@ export default function ProfilePage() {
                   <Field label="Webhook Endpoint URL">
                     <div className="space-y-2">
                       <div className="flex gap-2">
-                        <div className="flex-1 flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                        <div className="flex-1 flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 hover:border-monad-500/30 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                           <IconCpu className="w-4 h-4 text-monad-400/60 flex-shrink-0" />
                           <input
                             type="url"
@@ -1539,7 +1539,7 @@ export default function ProfilePage() {
                           type="button"
                           onClick={handleTestAgentEndpoint}
                           disabled={!agentEndpoint.trim() || agentTestStatus === 'testing'}
-                          className="text-xs font-mono px-4 py-2.5 rounded-xl border transition-all duration-200 disabled:opacity-40 shrink-0"
+                          className="text-xs px-4 py-2.5 rounded-xl border transition-all duration-200 disabled:opacity-40 shrink-0 hover:bg-monad-500/20 hover:border-monad-500/40"
                           style={{
                             borderColor: 'rgba(131,110,249,0.3)',
                             color: '#a78bfa',
@@ -1605,23 +1605,23 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
                     <div>
-                      <div className="text-xs font-mono text-[var(--text)]">Negotiation completed</div>
+                      <div className="text-xs font-semibold text-[var(--text)]">Negotiation completed</div>
                       <div className="text-xs text-[var(--text-muted)] mt-0.5">Deal reached with buyer #2847</div>
                     </div>
                     <span className="text-xs text-[var(--text-muted)]">2m ago</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
                     <div>
-                      <div className="text-xs font-mono text-[var(--text)]">Agent request processed</div>
+                      <div className="text-xs font-semibold text-[var(--text)]">Agent request processed</div>
                       <div className="text-xs text-[var(--text-muted)] mt-0.5">Response: 124ms | Status: 200</div>
                     </div>
                     <span className="text-xs text-[var(--text-muted)]">15m ago</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
                     <div>
-                      <div className="text-xs font-mono text-[var(--text)]">Configuration updated</div>
+                      <div className="text-xs font-semibold text-[var(--text)]">Configuration updated</div>
                       <div className="text-xs text-[var(--text-muted)] mt-0.5">Webhook URL changed</div>
                     </div>
                     <span className="text-xs text-[var(--text-muted)]">3h ago</span>
@@ -1639,15 +1639,15 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="text-xs font-mono text-monad-300 mb-2">Request Format</div>
-                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 p-2 rounded border border-[var(--border)] overflow-x-auto">
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
+                    <div className="text-xs font-semibold text-monad-300 mb-2">Request Format</div>
+                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 hover:bg-black/40 p-2 rounded border border-[var(--border)] overflow-x-auto transition-all duration-200">
                       {`POST /webhook\n{\n  "negotiationId": "neg_123",\n  "state": {...},\n  "history": [...]\n}`}
                     </div>
                   </div>
-                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="text-xs font-mono text-monad-300 mb-2">Response Format</div>
-                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 p-2 rounded border border-[var(--border)] overflow-x-auto">
+                  <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
+                    <div className="text-xs font-semibold text-monad-300 mb-2">Response Format</div>
+                    <div className="text-xs text-[var(--text-muted)] font-mono bg-black/30 hover:bg-black/40 p-2 rounded border border-[var(--border)] overflow-x-auto transition-all duration-200">
                       {`{\n  "action": "accept"|"counter"|"decline",\n  "terms": {...},\n  "reasoning": "..."\n}`}
                     </div>
                   </div>
