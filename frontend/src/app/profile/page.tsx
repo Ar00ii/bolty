@@ -2209,22 +2209,37 @@ export default function ProfilePage() {
             <IntegrationsSection
               integrations={
                 integrations.length > 0
-                  ? integrations.map((int: any) => ({
-                      id: int.id,
-                      category: int.category || 'service',
-                      name: int.name || int.provider,
-                      description: int.description || 'Connect this integration',
-                      connected: int.connected,
-                      connectedAs: int.connectedAs,
-                      lastUsedAt: int.lastUsedAt,
-                      verified: int.verified,
-                    }))
+                  ? integrations.map((int: any) => {
+                      const integrationConfig: Record<string, any> = {
+                        'metamask': { category: 'wallet', icon: '⟠' },
+                        'walletconnect': { category: 'wallet', icon: '≡' },
+                        'ledger': { category: 'wallet', icon: '▭' },
+                        'twitter': { category: 'social', icon: '𝕏' },
+                        'discord': { category: 'social', icon: '◯' },
+                        'github-social': { category: 'social', icon: '◆' },
+                        'two-factor': { category: 'security', icon: '◍' },
+                        'api-keys': { category: 'security', icon: '◈' },
+                      };
+                      const config = integrationConfig[int.id] || { category: int.category || 'service', icon: '●' };
+                      return {
+                        id: int.id,
+                        category: config.category,
+                        name: int.name || int.provider,
+                        description: int.description || 'Connect this integration',
+                        icon: config.icon,
+                        connected: int.connected,
+                        connectedAs: int.connectedAs,
+                        lastUsedAt: int.lastUsedAt,
+                        verified: int.verified,
+                      };
+                    })
                   : [
                       {
                         id: 'metamask',
                         category: 'wallet',
                         name: 'MetaMask',
                         description: 'Connect your MetaMask wallet for transactions',
+                        icon: '⟠',
                         connected: !!walletAddress,
                         connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
                         verified: true,
@@ -2234,6 +2249,7 @@ export default function ProfilePage() {
                         category: 'wallet',
                         name: 'WalletConnect',
                         description: 'Connect via WalletConnect protocol',
+                        icon: '≡',
                         connected: false,
                       },
                       {
@@ -2241,6 +2257,7 @@ export default function ProfilePage() {
                         category: 'wallet',
                         name: 'Ledger',
                         description: 'Hardware wallet integration',
+                        icon: '▭',
                         connected: false,
                       },
                       {
@@ -2248,6 +2265,7 @@ export default function ProfilePage() {
                         category: 'social',
                         name: 'Twitter/X',
                         description: 'Share your achievements and activity',
+                        icon: '𝕏',
                         connected: !!twitterUrl,
                         connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
                       },
@@ -2256,6 +2274,7 @@ export default function ProfilePage() {
                         category: 'social',
                         name: 'Discord',
                         description: 'Join community updates and notifications',
+                        icon: '◯',
                         connected: false,
                       },
                       {
@@ -2263,6 +2282,7 @@ export default function ProfilePage() {
                         category: 'social',
                         name: 'GitHub',
                         description: 'Link your development profile',
+                        icon: '◆',
                         connected: !!githubLogin,
                         connectedAs: githubLogin || undefined,
                       },
@@ -2271,6 +2291,7 @@ export default function ProfilePage() {
                         category: 'security',
                         name: '2FA Authentication',
                         description: 'Enable two-factor authentication',
+                        icon: '◍',
                         connected: false,
                       },
                       {
@@ -2278,6 +2299,7 @@ export default function ProfilePage() {
                         category: 'security',
                         name: 'API Keys',
                         description: 'Manage API keys for programmatic access',
+                        icon: '◈',
                         connected: true,
                       },
                     ]
