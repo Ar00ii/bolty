@@ -2207,94 +2207,122 @@ export default function ProfilePage() {
           {/* INTEGRATIONS */}
           {tab === 'integrations' && (
             <IntegrationsSection
-              integrations={
-                integrations.length > 0
-                  ? integrations.map((int: any) => {
-                      const integrationConfig: Record<string, any> = {
-                        'metamask': { category: 'wallet' },
-                        'walletconnect': { category: 'wallet' },
-                        'ledger': { category: 'wallet' },
-                        'twitter': { category: 'social' },
-                        'discord': { category: 'social' },
-                        'github-social': { category: 'social' },
-                        'two-factor': { category: 'security' },
-                        'api-keys': { category: 'security' },
-                      };
-                      const config = integrationConfig[int.id] || { category: int.category || 'service' };
-                      return {
-                        id: int.id,
-                        category: config.category,
-                        name: int.name || int.provider,
-                        description: int.description || 'Connect this integration',
-                        connected: int.connected,
-                        connectedAs: int.connectedAs,
-                        lastUsedAt: int.lastUsedAt,
-                        verified: int.verified,
-                      };
-                    })
-                  : [
-                      {
-                        id: 'metamask',
-                        category: 'wallet',
-                        name: 'MetaMask',
-                        description: 'Connect your MetaMask wallet for transactions',
-                        connected: !!walletAddress,
-                        connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
-                        verified: true,
-                      },
-                      {
-                        id: 'walletconnect',
-                        category: 'wallet',
-                        name: 'WalletConnect',
-                        description: 'Connect via WalletConnect protocol',
-                        connected: false,
-                      },
-                      {
-                        id: 'ledger',
-                        category: 'wallet',
-                        name: 'Ledger',
-                        description: 'Hardware wallet integration',
-                        connected: false,
-                      },
-                      {
-                        id: 'twitter',
-                        category: 'social',
-                        name: 'Twitter/X',
-                        description: 'Share your achievements and activity',
-                        connected: !!twitterUrl,
-                        connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
-                      },
-                      {
-                        id: 'discord',
-                        category: 'social',
-                        name: 'Discord',
-                        description: 'Join community updates and notifications',
-                        connected: false,
-                      },
-                      {
-                        id: 'github-social',
-                        category: 'social',
-                        name: 'GitHub',
-                        description: 'Link your development profile',
-                        connected: !!githubLogin,
-                        connectedAs: githubLogin || undefined,
-                      },
-                      {
-                        id: 'two-factor',
-                        category: 'security',
-                        name: '2FA Authentication',
-                        description: 'Enable two-factor authentication',
-                        connected: false,
-                      },
-                      {
-                        id: 'api-keys',
-                        category: 'security',
-                        name: 'API Keys',
-                        description: 'Manage API keys for programmatic access',
-                        connected: true,
-                      },
-                    ]
-              }
+              integrations={(() => {
+                // Build default list with user's real state
+                const defaults = [
+                  {
+                    id: 'metamask',
+                    category: 'wallet',
+                    name: 'MetaMask',
+                    description: 'Connect your MetaMask wallet for transactions',
+                    connected: !!walletAddress,
+                    connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
+                    verified: true,
+                  },
+                  {
+                    id: 'walletconnect',
+                    category: 'wallet',
+                    name: 'WalletConnect',
+                    description: 'Connect via WalletConnect protocol',
+                    connected: false,
+                  },
+                  {
+                    id: 'ledger',
+                    category: 'wallet',
+                    name: 'Ledger',
+                    description: 'Hardware wallet integration',
+                    connected: false,
+                  },
+                  {
+                    id: 'twitter',
+                    category: 'social',
+                    name: 'Twitter/X',
+                    description: 'Share your achievements and activity',
+                    connected: !!twitterUrl,
+                    connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
+                  },
+                  {
+                    id: 'discord',
+                    category: 'social',
+                    name: 'Discord',
+                    description: 'Join community updates and notifications',
+                    connected: false,
+                  },
+                  {
+                    id: 'github-social',
+                    category: 'social',
+                    name: 'GitHub',
+                    description: 'Link your development profile',
+                    connected: !!githubLogin,
+                    connectedAs: githubLogin || undefined,
+                  },
+                  {
+                    id: 'two-factor',
+                    category: 'security',
+                    name: '2FA Authentication',
+                    description: 'Enable two-factor authentication',
+                    connected: twoFAEnabled,
+                  },
+                  {
+                    id: 'api-keys',
+                    category: 'security',
+                    name: 'API Keys',
+                    description: 'Manage API keys for programmatic access',
+                    connected: true,
+                  },
+                ];
+
+                // Deduplicate: use API data if available, otherwise use defaults
+                const seen = new Set<string>();
+                const merged: any[] = [];
+
+                // First add from API integrations
+                if (integrations.length > 0) {
+                  integrations.forEach((int: any) => {
+                    const integrationConfig: Record<string, any> = {
+                      'metamask': { category: 'wallet' },
+                      'walletconnect': { category: 'wallet' },
+                      'ledger': { category: 'wallet' },
+                      'twitter': { category: 'social' },
+                      'discord': { category: 'social' },
+                      'github-social': { category: 'social' },
+                      'two-factor': { category: 'security' },
+                      'api-keys': { category: 'security' },
+                    };
+                    const config = integrationConfig[int.id] || { category: int.category || 'service' };
+                    const item = {
+                      id: int.id,
+                      category: config.category,
+                      name: int.name || int.provider,
+                      description: int.description || 'Connect this integration',
+                      connected: int.connected,
+                      connectedAs: int.connectedAs,
+                      lastUsedAt: int.lastUsedAt,
+                      verified: int.verified,
+                    };
+                    if (!seen.has(int.id)) {
+                      merged.push(item);
+                      seen.add(int.id);
+                    }
+                  });
+                }
+
+                // Then add defaults that aren't already in merged list
+                defaults.forEach((def) => {
+                  if (!seen.has(def.id)) {
+                    merged.push(def);
+                    seen.add(def.id);
+                  } else {
+                    // Update with real state if default
+                    const idx = merged.findIndex((m) => m.id === def.id);
+                    if (idx !== -1 && !integrations.length) {
+                      merged[idx] = { ...merged[idx], ...def };
+                    }
+                  }
+                });
+
+                return merged;
+              })()}
               onConnect={async (id: string) => {
                 try {
                   await api.post('/users/integrations', {
