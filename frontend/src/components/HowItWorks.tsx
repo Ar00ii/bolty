@@ -20,7 +20,13 @@ import { ArrowRight, Zap, Trophy, ShoppingCart } from 'lucide-react';
 
 export const HowItWorks = memo(() => {
   return (
-    <section className="py-24 px-4" style={{ borderColor: 'var(--border)' }}>
+    <section
+      className="py-24 px-4 relative overflow-hidden"
+      style={{
+        borderColor: 'var(--border)',
+        background: 'linear-gradient(135deg, rgba(88, 28, 135, 0.1) 0%, rgba(20, 20, 30, 0.8) 50%, rgba(30, 10, 60, 0.1) 100%)',
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         {/* Main title */}
         <motion.div

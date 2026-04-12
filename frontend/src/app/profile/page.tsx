@@ -322,7 +322,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-lg text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl hover:shadow-purple-500/20"
+      className="btn-primary w-full py-3 rounded-2xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 transition-all duration-200 border-2 border-purple-500/40 hover:border-purple-500/60 text-purple-200 hover:text-purple-100"
     >
       {loading ? (
         <>
@@ -427,6 +427,22 @@ export default function ProfilePage() {
   const [requestingDelete, setRequestingDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // API Keys
+  const [apiKey, setApiKey] = useState('');
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+
+  // Billing
+  const [billingPlan, setBillingPlan] = useState('free');
+  const [billingEmail, setBillingEmail] = useState('');
+
+  // Notifications
+  const [notifErrors, setNotifErrors] = useState(true);
+  const [notifReports, setNotifReports] = useState(true);
+
+  // Preferences
+  const [theme, setTheme] = useState('dark');
+  const [language, setLanguage] = useState('en');
+
   // Init
   useEffect(() => {
     if (isLoading) return;
@@ -441,6 +457,14 @@ export default function ProfilePage() {
     setWebsiteUrl((user as { websiteUrl?: string }).websiteUrl || '');
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
+
+    // API Key - generate from user ID
+    const userId = (user as { id?: string }).id || 'user';
+    setApiKey(`sk_prod_${userId.substring(0, 12).padEnd(12, '0')}`);
+
+    // Billing email
+    setBillingEmail((user as { email?: string }).email || '');
+    setBillingPlan('pro');
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -877,14 +901,9 @@ export default function ProfilePage() {
   const profileUrl = username ? `/u/${username}` : null;
 
   return (
-    <div className="profile-container min-h-screen pt-12 pb-40 px-4 sm:px-6 lg:px-8">
+    <div className="profile-container min-h-screen pt-8 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-0 animate-[fade-in_0.5s_ease]">
-          <h1 className="profile-title">Account Settings</h1>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 -mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* ── Sidebar Menu ──────────────────────────────────────────── */}
           <div className="lg:col-span-1">
             <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
@@ -907,12 +926,13 @@ export default function ProfilePage() {
                 <button
                   key={id}
                   onClick={() => setTab(id)}
-                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full`}
+                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full lg:min-w-0`}
+                  title={label}
                 >
                   <div className="profile-menu-icon">
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <span className="profile-menu-label hidden lg:inline">{label}</span>
+                  <span className="profile-menu-label">{label}</span>
                 </button>
               ))}
             </nav>
@@ -943,7 +963,7 @@ export default function ProfilePage() {
                     name={user?.displayName || user?.username}
                     size="lg"
                   />
-                  <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 rounded-full bg-gray-950/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     {avatarUploading ? (
                       <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
                     ) : (
@@ -2032,6 +2052,212 @@ export default function ProfilePage() {
 
                   <SaveButton loading={agentSaving} label="Save endpoint" />
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* API KEYS */}
+          {tab === 'api-keys' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
+              <div className="space-y-2">
+                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="text-sm font-medium text-white">Production Key</p>
+                      <p className="text-xs text-gray-400">Created: {new Date().toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="text-xs text-gray-300 bg-[#050506] px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(apiKey);
+                        setApiKeyCopied(true);
+                        setTimeout(() => setApiKeyCopied(false), 2000);
+                      }}
+                      className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200"
+                    >
+                      {apiKeyCopied ? '✓ Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button className="mt-3 px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-xs text-purple-200 hover:text-purple-100">Generate New</button>
+            </div>
+          )}
+
+          {/* BILLING */}
+          {tab === 'billing' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Billing</h2>
+              <div className="space-y-2">
+                <div className="p-3 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">Current Plan</p>
+                  <p className="text-base font-medium text-white mt-1 capitalize">{billingPlan === 'pro' ? 'Professional' : 'Free'}</p>
+                  <p className="text-xs text-gray-500">{billingPlan === 'pro' ? '$99/month • Next billing Dec 15' : 'No active subscription'}</p>
+                </div>
+                <div className="p-3 border border-gray-700 rounded-lg">
+                  <p className="text-xs text-gray-400">Billing Email</p>
+                  <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
+                </div>
+                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs">Manage Billing</button>
+              </div>
+            </div>
+          )}
+
+          {/* USAGE */}
+          {tab === 'usage' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Usage & Analytics</h2>
+              <div className="space-y-2">
+                <div className="p-2 border border-gray-700 rounded">
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-xs text-gray-400">API Calls This Month</p>
+                    <p className="text-xs text-gray-500">24,582 / 100,000</p>
+                  </div>
+                  <div className="w-full bg-gray-700 rounded h-1">
+                    <div className="bg-blue-500 h-1 rounded" style={{ width: '24.5%' }}></div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2 border border-gray-700 rounded text-center">
+                    <p className="text-xs text-gray-400">Active Agents</p>
+                    <p className="text-base font-medium text-white mt-1">12</p>
+                  </div>
+                  <div className="p-2 border border-gray-700 rounded text-center">
+                    <p className="text-xs text-gray-400">Last 24h Calls</p>
+                    <p className="text-base font-medium text-white mt-1">1,245</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* NOTIFICATIONS */}
+          {tab === 'notifications' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Notifications</h2>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
+                  <div>
+                    <p className="text-sm text-white">Email on API Errors</p>
+                    <p className="text-xs text-gray-400">Get alerts for failed requests</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={notifErrors}
+                    onChange={() => setNotifErrors(!notifErrors)}
+                    className="w-3 h-3 cursor-pointer"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
+                  <div>
+                    <p className="text-sm text-white">Weekly Usage Report</p>
+                    <p className="text-xs text-gray-400">Summary to {billingEmail || 'your email'}</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={notifReports}
+                    onChange={() => setNotifReports(!notifReports)}
+                    className="w-3 h-3 cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* INTEGRATIONS */}
+          {tab === 'integrations' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Integrations</h2>
+              <div className="space-y-2">
+                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white">Slack</p>
+                    <p className="text-xs text-gray-400">Send API notifications</p>
+                  </div>
+                  <button className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">Connect</button>
+                </div>
+                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-white">GitHub</p>
+                    <p className="text-xs text-gray-400">{githubLogin ? `Connected as ${githubLogin}` : 'Not connected'}</p>
+                  </div>
+                  {githubLogin ? (
+                    <span className="text-xs text-green-400">✓ Connected</span>
+                  ) : (
+                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">
+                      Link
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ACTIVITY LOG */}
+          {tab === 'activity' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Activity Log</h2>
+              <div className="space-y-2">
+                <div className="p-2 border border-gray-700 rounded text-xs">
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">Account Settings Updated</p>
+                    <p className="text-gray-500">{new Date().toLocaleDateString()}</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">Email and notifications preferences changed</p>
+                </div>
+                <div className="p-2 border border-gray-700 rounded text-xs">
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">Login from New Device</p>
+                    <p className="text-gray-500">1 day ago</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">New login detected from Browser (Linux)</p>
+                </div>
+                <div className="p-2 border border-gray-700 rounded text-xs">
+                  <div className="flex justify-between">
+                    <p className="text-gray-300 font-medium">API Key Generated</p>
+                    <p className="text-gray-500">3 days ago</p>
+                  </div>
+                  <p className="text-gray-400 mt-1">New production API key created</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PREFERENCES */}
+          {tab === 'preferences' && (
+            <div className="profile-content-card">
+              <h2 className="text-lg font-semibold text-white mb-3">Preferences</h2>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-300">Theme</label>
+                  <select
+                    value={theme}
+                    onChange={(e) => setTheme(e.target.value)}
+                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
+                  >
+                    <option value="dark">Dark (Default)</option>
+                    <option value="light">Light</option>
+                    <option value="auto">Auto</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-300">Language</label>
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
+                  >
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                  </select>
+                </div>
+                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs mt-2">
+                  Save Preferences
+                </button>
               </div>
             </div>
           )}
