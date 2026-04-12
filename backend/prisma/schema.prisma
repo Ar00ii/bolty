@@ -63,7 +63,7 @@ model User {
   // Reputation
   reputationPoints Int @default(0)
 
-  // Personal buyer negotiation agent webhook URL
+  // Personal buyer negotiation agent webhook URL (legacy, kept for backward compatibility)
   agentEndpoint String?
 
   // Relations
@@ -90,6 +90,7 @@ model User {
   apiKeys                UserApiKey[]
   notificationPreference NotificationPreference?
   integrations           UserIntegration[]
+  aiAgents               Agent[]
 
   @@map("users")
 }
@@ -781,4 +782,73 @@ model UserIntegration {
   @@unique([userId, provider, name])
   @@index([userId, provider])
   @@map("user_integrations")
+}
+
+// ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────
+
+model Agent {
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  name        String           // e.g., "Negotiation Bot v2"
+  description String?          @db.Text
+  status      AgentStatus      @default(INACTIVE)
+  webhookUrl  String           @db.Text
+
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  metrics     AgentMetrics?
+  activityLog AgentActivityLog[]
+
+  @@index([userId])
+  @@map("agents")
+}
+
+enum AgentStatus {
+  ACTIVE
+  INACTIVE
+  TESTING
+  ERROR
+}
+
+model AgentMetrics {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  totalCalls      Int       @default(0)
+  successfulCalls Int       @default(0)
+  failedCalls     Int       @default(0)
+  avgResponseTime Int       @default(0)      // in milliseconds
+  lastCallAt      DateTime?
+
+  agentId         String    @unique
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@map("agent_metrics")
+}
+
+model AgentActivityLog {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  action          String    // e.g., "webhook_call", "negotiation_started", "agreement_reached"
+  status          ActivityStatus
+  metadata        Json?     // store context like negotiation details
+  responseTime    Int?      // in milliseconds
+
+  agentId         String
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, createdAt])
+  @@map("agent_activity_logs")
+}
+
+enum ActivityStatus {
+  SUCCESS
+  FAILED
+  PENDING
+  TIMEOUT
 }
