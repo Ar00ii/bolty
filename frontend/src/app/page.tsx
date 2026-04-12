@@ -36,6 +36,7 @@ import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
 import { HowItWorks } from '@/components/HowItWorks';
+import { RaysMarketplace } from '@/components/landing/RaysMarketplace';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -614,6 +615,11 @@ export default function HomePage() {
             <FeaturesGrid />
           </div>
         </div>
+      </section>
+
+      {/* ── RAYS MARKETPLACE ── */}
+      <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
+        <RaysMarketplace />
       </section>
 
       {/* ── TESTIMONIALS ── */}
