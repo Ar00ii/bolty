@@ -2211,31 +2211,65 @@ export default function ProfilePage() {
 
           {/* INTEGRATIONS */}
           {tab === 'integrations' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Integrations</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">Slack</p>
-                    <p className="text-xs text-gray-400">Send API notifications</p>
-                  </div>
-                  <button className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">Connect</button>
-                </div>
-                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">GitHub</p>
-                    <p className="text-xs text-gray-400">{githubLogin ? `Connected as ${githubLogin}` : 'Not connected'}</p>
-                  </div>
-                  {githubLogin ? (
-                    <span className="text-xs text-green-400">✓ Connected</span>
-                  ) : (
-                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">
-                      Link
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+            <IntegrationsSection
+              integrations={
+                integrations.length > 0
+                  ? integrations.map((int: any) => ({
+                      id: int.id,
+                      name: int.name || int.provider,
+                      description: int.description || 'Connect this integration',
+                      icon: int.icon || (int.provider === 'slack' ? '💬' : int.provider === 'github' ? '🐙' : '🔗'),
+                      connected: int.connected,
+                      connectedAs: int.connectedAs,
+                      lastUsedAt: int.lastUsedAt,
+                    }))
+                  : [
+                      {
+                        id: 'slack',
+                        name: 'Slack',
+                        description: 'Send API notifications to Slack',
+                        icon: '💬',
+                        connected: false,
+                      },
+                      {
+                        id: 'github',
+                        name: 'GitHub',
+                        description: 'Sync repositories and pull requests',
+                        icon: '🐙',
+                        connected: !!githubLogin,
+                        connectedAs: githubLogin || undefined,
+                      },
+                      {
+                        id: 'stripe',
+                        name: 'Stripe',
+                        description: 'Handle payments and transactions',
+                        icon: '💳',
+                        connected: false,
+                      },
+                    ]
+              }
+              onConnect={async (id: string) => {
+                try {
+                  await api.post('/users/integrations', {
+                    provider: id,
+                    name: id,
+                  });
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to connect:', err);
+                }
+              }}
+              onDisconnect={async (id: string) => {
+                try {
+                  await api.delete(`/users/integrations/${id}`);
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to disconnect:', err);
+                }
+              }}
+            />
           )}
 
           {/* ACTIVITY LOG */}
