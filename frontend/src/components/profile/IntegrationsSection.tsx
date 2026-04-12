@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Plus, X, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface Integration {
   id: string;
@@ -26,26 +27,26 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   const logoMap: Record<string, string> = {
     'metamask': '/integrations/metamask.png',
     'walletconnect': '/integrations/walletconnect.png',
-    'ledger': '/integrations/metamask.png', // Fallback
+    'ledger': '/integrations/metamask.png',
     'twitter': '/integrations/X.png',
     'discord': '/integrations/discord.png',
     'github-social': '/integrations/github.png',
-    'two-factor': '/integrations/metamask.png', // Fallback
-    'api-keys': '/integrations/metamask.png', // Fallback
+    'two-factor': '/integrations/metamask.png',
+    'api-keys': '/integrations/metamask.png',
   };
 
   const logo = logoMap[id] || '/integrations/metamask.png';
 
   return (
-    <img
-      src={logo}
-      alt={id}
-      className="w-6 h-6 object-contain"
-      onError={(e) => {
-        const target = e.target as HTMLImageElement;
-        target.style.display = 'none';
-      }}
-    />
+    <div className="relative w-8 h-8">
+      <Image
+        src={logo}
+        alt={id}
+        fill
+        className="object-contain"
+        unoptimized
+      />
+    </div>
   );
 };
 
@@ -148,10 +149,10 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                       </div>
                     )}
 
-                    {/* Icon */}
+                    {/* Logo */}
                     <div
                       className={`
-                        p-3 rounded-lg mb-3 transition-colors
+                        p-3 rounded-lg mb-3 transition-colors flex items-center justify-center
                         ${
                           integration.connected
                             ? 'bg-purple-500/20 text-purple-400'
