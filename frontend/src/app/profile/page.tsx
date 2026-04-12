@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { APIKeysSection } from '@/components/profile/APIKeysSection';
 import { UsageSection } from '@/components/profile/UsageSection';
 import { BillingSection } from '@/components/profile/BillingSection';
+import { NotificationsSection } from '@/components/profile/NotificationsSection';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -2162,35 +2163,19 @@ export default function ProfilePage() {
 
           {/* NOTIFICATIONS */}
           {tab === 'notifications' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Notifications</h2>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
-                  <div>
-                    <p className="text-sm text-white">Email on API Errors</p>
-                    <p className="text-xs text-gray-400">Get alerts for failed requests</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifErrors}
-                    onChange={() => setNotifErrors(!notifErrors)}
-                    className="w-3 h-3 cursor-pointer"
-                  />
-                </div>
-                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
-                  <div>
-                    <p className="text-sm text-white">Weekly Usage Report</p>
-                    <p className="text-xs text-gray-400">Summary to {billingEmail || 'your email'}</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifReports}
-                    onChange={() => setNotifReports(!notifReports)}
-                    className="w-3 h-3 cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
+            <NotificationsSection
+              settings={{
+                emailOnErrors: notifErrors,
+                weeklyReport: notifReports,
+                monthlyReport: false,
+                deploymentAlerts: true,
+              }}
+              billingEmail={billingEmail}
+              onUpdate={async (settings) => {
+                setNotifErrors(settings.emailOnErrors);
+                setNotifReports(settings.weeklyReport);
+              }}
+            />
           )}
 
           {/* INTEGRATIONS */}
