@@ -590,6 +590,18 @@ export default function ProfilePage() {
         .catch(() => {});
     }
 
+    if (tab === 'agent') {
+      // Load both usage stats and activity log for the agent tab
+      Promise.all([
+        api.get<any>('/users/usage-stats').catch(() => ({})),
+        api.get<any>('/users/activity-log?limit=50').catch(() => []),
+      ])
+        .then(([stats, logs]) => {
+          setUsageStats(stats || {});
+          setActivityLog(Array.isArray(logs) ? logs : []);
+        });
+    }
+
     if (tab === 'integrations') {
       api.get<any>('/users/integrations')
         .then((ints) => {
@@ -598,6 +610,35 @@ export default function ProfilePage() {
         .catch(() => setIntegrations([]));
     }
   }, [tab, user]);
+
+  // ── Formatting Utilities ──────────────────────────────────────────────────────
+
+  /**
+   * Format a number with comma separators (e.g., 2847 -> "2,847")
+   */
+  const formatNumber = (num: number | undefined): string => {
+    if (num === undefined || num === null) return 'N/A';
+    return num.toLocaleString();
+  };
+
+  /**
+   * Format a timestamp to relative time (e.g., "2m ago", "15m ago", "3h ago")
+   */
+  const formatTimeAgo = (dateString: string | Date | undefined): string => {
+    if (!dateString) return 'Unknown';
+
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -1477,18 +1518,22 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
                     <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Total Calls</div>
-                    <div className="text-lg font-light text-[var(--text)]">2,847</div>
-                    <div className="text-xs text-emerald-400 mt-0.5">+12% this month</div>
+                    <div className="text-lg font-light text-[var(--text)]">{formatNumber(usageStats.totalCallsThisMonth) || 'N/A'}</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">
+                      {usageStats.totalCallsThisMonth ?
+                        `${Math.round((usageStats.totalCallsThisMonth / (usageStats.maxCallsAllowed || 100000)) * 100)}% of limit this month`
+                        : 'No data yet'}
+                    </div>
                   </div>
                   <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
-                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Avg Response</div>
-                    <div className="text-lg font-light text-[var(--text)]">124ms</div>
-                    <div className="text-xs text-emerald-400 mt-0.5">Excellent</div>
+                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Active Agents</div>
+                    <div className="text-lg font-light text-[var(--text)]">{formatNumber(usageStats.activeAgents) || 'N/A'}</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">{usageStats.activeAgents > 0 ? 'Excellent' : 'No agents'}</div>
                   </div>
                   <div className="p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:border-monad-500/40 hover:shadow-lg transition-all duration-200">
-                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Success Rate</div>
-                    <div className="text-lg font-light text-[var(--text)]">99.8%</div>
-                    <div className="text-xs text-emerald-400 mt-0.5">5 errors in 30d</div>
+                    <div className="text-xs font-semibold text-[var(--text-muted)] mb-1">Last 24h Calls</div>
+                    <div className="text-lg font-light text-[var(--text)]">{formatNumber(usageStats.last24hCalls) || 'N/A'}</div>
+                    <div className="text-xs text-emerald-400 mt-0.5">{usageStats.last24hCalls > 0 ? 'Active' : 'Idle'}</div>
                   </div>
                 </div>
               </div>
@@ -1605,27 +1650,30 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
-                    <div>
-                      <div className="text-xs font-semibold text-[var(--text)]">Negotiation completed</div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Deal reached with buyer #2847</div>
+                  {activityLog && activityLog.length > 0 ? (
+                    activityLog.map((log: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer"
+                      >
+                        <div>
+                          <div className="text-xs font-semibold text-[var(--text)]">{log.action || 'Unknown Action'}</div>
+                          <div className="text-xs text-[var(--text-muted)] mt-0.5">
+                            {log.resource && log.resourceId
+                              ? `${log.resource}: ${log.resourceId}`
+                              : log.metadata
+                                ? JSON.stringify(log.metadata).substring(0, 100)
+                                : 'No details'}
+                          </div>
+                        </div>
+                        <span className="text-xs text-[var(--text-muted)]">{formatTimeAgo(log.createdAt)}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center justify-center p-4 text-center">
+                      <p className="text-xs text-[var(--text-muted)]">No recent activity</p>
                     </div>
-                    <span className="text-xs text-[var(--text-muted)]">2m ago</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
-                    <div>
-                      <div className="text-xs font-semibold text-[var(--text)]">Agent request processed</div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Response: 124ms | Status: 200</div>
-                    </div>
-                    <span className="text-xs text-[var(--text-muted)]">15m ago</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border)] hover:bg-[var(--bg-elevated)] transition-all duration-200 cursor-pointer">
-                    <div>
-                      <div className="text-xs font-semibold text-[var(--text)]">Configuration updated</div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Webhook URL changed</div>
-                    </div>
-                    <span className="text-xs text-[var(--text-muted)]">3h ago</span>
-                  </div>
+                  )}
                 </div>
               </div>
 
