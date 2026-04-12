@@ -28,6 +28,7 @@ model User {
   email            String?   @unique
   passwordHash     String?
   twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?   // TOTP secret for Authenticator apps
 
   // GitHub OAuth
   githubId      String?   @unique

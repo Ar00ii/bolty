@@ -249,12 +249,8 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    // 2FA required
-    if (user.twoFactorEnabled && user.email) {
-      const code = randomInt(100000, 1000000).toString();
-      await this.redis.set(`2fa:${user.id}`, code, 600); // 10 min
-      await this.emailService.send2FACode(user.email, code);
-
+    // 2FA required — using TOTP (Authenticator app)
+    if (user.twoFactorEnabled) {
       const tempToken = this.jwtService.sign(
         { sub: user.id, scope: 'pending_2fa' },
         { expiresIn: '10m' },
@@ -277,6 +273,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token scope');
     }
 
+    // Get user and their TOTP secret
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { twoFactorSecret: true },
+    });
+
+    if (!user || !user.twoFactorSecret) {
+      throw new UnauthorizedException('2FA not configured for this user');
+    }
+
     // Brute-force protection: max 5 attempts within the 10-minute code window
     const attemptsKey = `2fa_attempts:${payload.sub}`;
     const attemptsRaw = await this.redis.get(attemptsKey);
@@ -286,13 +292,20 @@ export class AuthService {
     }
     await this.redis.set(attemptsKey, String(attempts + 1), 600);
 
-    const stored = await this.redis.get(`2fa:${payload.sub}`);
-    if (!stored || stored !== code) {
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: code,
+      window: 2,
+    });
+
+    if (!verified) {
       throw new UnauthorizedException('Invalid or expired verification code');
     }
 
-    // Clear attempts and code on success
-    await Promise.all([this.redis.del(`2fa:${payload.sub}`), this.redis.del(attemptsKey)]);
+    // Clear attempts on success
+    await this.redis.del(attemptsKey);
     return this.generateTokens(payload.sub);
   }
 
@@ -338,12 +351,12 @@ export class AuthService {
 
     if (!verified) throw new UnauthorizedException('Invalid authenticator code');
 
-    // Save secret to database encrypted (you'll need to add encryption)
+    // Store secret in database
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         twoFactorEnabled: true,
-        // Store secret in a new field if needed, or handle separately
+        twoFactorSecret: secret,
       },
     });
 
@@ -361,7 +374,13 @@ export class AuthService {
       if (!valid) throw new UnauthorizedException('Invalid password');
     }
 
-    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorEnabled: false,
+        twoFactorSecret: null,
+      },
+    });
     this.logger.log(`2FA disabled for user ${userId}`);
   }
 
