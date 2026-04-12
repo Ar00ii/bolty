@@ -23,79 +23,24 @@ interface IntegrationsSectionProps {
 }
 
 const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
-  switch (id) {
-    case 'metamask':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <rect x="4" y="4" width="32" height="32" rx="8" fill="currentColor" fillOpacity="0.1" />
-          <path d="M20 8L28 16L24 20L28 24L20 32L16 28L12 32L4 24L8 20L4 16L12 8L16 12L20 8Z" fill="currentColor" />
-        </svg>
-      );
-    case 'walletconnect':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="16" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2" />
-          <path d="M12 20L20 12L28 20M20 12V28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      );
-    case 'ledger':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <rect x="8" y="8" width="24" height="24" rx="2" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="2" />
-          <line x1="14" y1="14" x2="26" y2="14" stroke="currentColor" strokeWidth="2" />
-          <line x1="14" y1="20" x2="26" y2="20" stroke="currentColor" strokeWidth="1.5" />
-          <line x1="14" y1="26" x2="26" y2="26" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      );
-    case 'twitter':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <path d="M8 10L16 18L8 26M32 10L24 18L32 26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          <line x1="16" y1="18" x2="24" y2="18" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      );
-    case 'discord':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="currentColor" fillOpacity="0.1">
-          <circle cx="14" cy="16" r="2" fill="currentColor" />
-          <circle cx="26" cy="16" r="2" fill="currentColor" />
-          <path d="M12 24C12 26 14 28 16 28L24 28C26 28 28 26 28 24" stroke="currentColor" strokeWidth="1.5" fill="none" />
-          <rect x="8" y="8" width="24" height="24" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-      );
-    case 'github-social':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="currentColor">
-          <path d="M20 4C11.2 4 4 11.2 4 20c0 7.1 4.6 13.1 11 15.2.8.1 1.1-.3 1.1-.8v-2.8c-4.5 1-5.5-2.2-5.5-2.2-.7-1.8-1.8-2.3-1.8-2.3-1.5-1 .1-1 .1-1 1.6.1 2.5 1.7 2.5 1.7 1.5 2.5 3.8 1.8 4.7 1.4.1-1.1.6-1.8 1-2.2-3.5-.4-7.2-1.8-7.2-7.9 0-1.7.6-3.2 1.6-4.3-.2-.4-.7-2 .2-4.2 0 0 1.3-.4 4.4 1.6 1.3-.4 2.6-.6 4-.6 1.3 0 2.7.2 4 .6 3.1-2.1 4.4-1.6 4.4-1.6.8 2.3.3 3.8.1 4.2 1 1.1 1.6 2.6 1.6 4.3 0 6.1-3.7 7.5-7.2 7.9.6.5 1.1 1.5 1.1 3v4.5c0 .5.3.9 1.1.8 6.5-2.1 11-8.1 11-15.2 0-8.8-7.2-16-16-16z" />
-        </svg>
-      );
-    case 'two-factor':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <rect x="10" y="14" width="12" height="14" rx="1" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5" />
-          <rect x="18" y="14" width="12" height="14" rx="1" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="16" cy="21" r="1.5" fill="currentColor" />
-          <circle cx="24" cy="21" r="1.5" fill="currentColor" />
-        </svg>
-      );
-    case 'api-keys':
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="currentColor" fillOpacity="0.1">
-          <path d="M8 12H32V14H8V12Z" fill="currentColor" />
-          <circle cx="14" cy="20" r="3" fill="currentColor" fillOpacity="0.3" />
-          <circle cx="20" cy="20" r="3" fill="currentColor" fillOpacity="0.3" />
-          <circle cx="26" cy="20" r="3" fill="currentColor" fillOpacity="0.3" />
-          <path d="M8 26H32V28H8V26Z" fill="currentColor" />
-        </svg>
-      );
-    default:
-      return (
-        <svg className="w-6 h-6" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="12" stroke="currentColor" strokeWidth="2" />
-          <path d="M20 12V28M12 20H28" stroke="currentColor" strokeWidth="2" />
-        </svg>
-      );
-  }
+  const logos: Record<string, string> = {
+    'metamask': 'MM',
+    'walletconnect': 'WC',
+    'ledger': 'LDG',
+    'twitter': 'X',
+    'discord': 'DC',
+    'github-social': 'GH',
+    'two-factor': '2FA',
+    'api-keys': 'API',
+  };
+
+  const text = logos[id] || '⚙';
+
+  return (
+    <div className="flex items-center justify-center w-6 h-6 font-bold text-sm">
+      {text}
+    </div>
+  );
 };
 
 const getCategoryLabel = (category: string) => {
