@@ -13,7 +13,7 @@ import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'friends' | 'security' | 'agent' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
+type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
 
 interface Friend {
   id: string;
@@ -997,12 +997,15 @@ export default function ProfilePage() {
               {[
                 { id: 'general' as Tab, label: 'General', Icon: IconUser },
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
-                { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
-                { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
-                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+                { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
                 { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
+                { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
+                { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
+                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
@@ -1256,60 +1259,35 @@ export default function ProfilePage() {
               </form>
             </div>
           )}
-                  </div>
-                  {walletAddress ? (
-                    <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono shrink-0">
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="security-badge shrink-0">Disconnected</span>
-                  )}
-                </div>
 
-                {walletAddress ? (
-                  <div className="space-y-3">
-                    <div className="bg-[var(--bg-elevated)] rounded-xl p-3 border border-[var(--border)]">
-                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-1">
-                        Full address
-                      </div>
-                      <div className="text-xs font-mono text-[var(--text)] break-all">
-                        {walletAddress}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleDisconnectWallet}
-                      disabled={walletLoading}
-                      className="w-full py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/8 hover:border-red-500/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
-                    >
-                      {walletLoading ? 'Removing...' : 'Remove wallet'}
-                    </button>
+          {/* ════════════════════════════════════════════
+          {/* ════════════════════════════════════════════
+          CONNECTIONS
+      ════════════════════════════════════════════ */}
+            <div className="profile-content-card">
+              <SectionHeader
+                title="Connected Accounts"
+                subtitle="Link external services to unlock more Bolty features."
+              />
+              <Alert type="success" msg={conMsg} />
+              <Alert type="error" msg={conErr} />
+
+              <div className="space-y-3">
+                {/* GitHub */}
+                <div
+                  className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}
+                >
+                  <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
+                    <IconGitHub className="w-5 h-5 text-white" />
                   </div>
-                ) : (
-                  <button
-                    onClick={handleConnectWallet}
-                    disabled={walletLoading}
-                    className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2.5"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(251,146,60,0.18), rgba(251,146,60,0.08))',
-                      border: '1px solid rgba(251,146,60,0.25)',
-                      color: '#fb923c',
-                      boxShadow: walletLoading ? 'none' : '0 4px 15px rgba(251,146,60,0.1)',
-                    }}
-                  >
-                    {walletLoading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />{' '}
-                        Connecting...
-                      </>
-                    ) : (
-                      'Connect MetaMask'
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-light text-[var(--text)]">GitHub</span>
+                      {githubLogin && (
+                        <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">
+                          Linked
+                        </span>
+                      )}
                     </div>
                     {githubLogin ? (
                       <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
@@ -2048,6 +2026,14 @@ export default function ProfilePage() {
           )}
 
           {/* API KEYS */}
+            <APIKeysSection
+              apiKeys={apiKeys}
+              onDelete={handleDeleteAPIKey}
+              onGenerate={handleGenerateAPIKey}
+              onCopy={handleCopyAPIKey}
+            />
+          )}
+
           {/* BILLING */}
           {tab === 'billing' && (
             <BillingSection
