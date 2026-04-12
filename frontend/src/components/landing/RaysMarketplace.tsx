@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, TrendingUp, Trophy, ArrowRight } from 'lucide-react';
+import { Zap, TrendingUp, Trophy, ArrowRight, Shield, Medal, Gem, Crown, Sparkles, Wand2 } from 'lucide-react';
 import Link from 'next/link';
 import { GradientText } from '@/components/ui/GradientText';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
@@ -47,14 +47,14 @@ export const RaysMarketplace = () => {
   ];
 
   const ranks = [
-    { name: 'Iron', rays: '0', multiplier: '1x', color: 'from-gray-600 to-gray-700' },
-    { name: 'Bronze', rays: '25', multiplier: '2.5x', color: 'from-amber-700 to-amber-800' },
-    { name: 'Silver', rays: '50', multiplier: '5x', color: 'from-slate-500 to-slate-600' },
-    { name: 'Gold', rays: '120', multiplier: '6x', color: 'from-yellow-500 to-yellow-600' },
-    { name: 'Platinum', rays: '250', multiplier: '10x', color: 'from-purple-500 to-purple-600' },
-    { name: 'Diamond', rays: '500', multiplier: '15x', color: 'from-cyan-500 to-cyan-600' },
-    { name: 'Mastery', rays: '1000', multiplier: '20x', color: 'from-blue-500 to-blue-600' },
-    { name: 'Champion', rays: '2000', multiplier: '25x', color: 'from-red-500 to-red-600' },
+    { name: 'Iron', rays: '0', multiplier: '1x', color: 'from-gray-600 to-gray-700', icon: Shield, iconColor: 'text-gray-400' },
+    { name: 'Bronze', rays: '25', multiplier: '2.5x', color: 'from-amber-700 to-amber-800', icon: Medal, iconColor: 'text-amber-600' },
+    { name: 'Silver', rays: '50', multiplier: '5x', color: 'from-slate-500 to-slate-600', icon: Medal, iconColor: 'text-slate-400' },
+    { name: 'Gold', rays: '120', multiplier: '6x', color: 'from-yellow-500 to-yellow-600', icon: Crown, iconColor: 'text-yellow-400' },
+    { name: 'Platinum', rays: '250', multiplier: '10x', color: 'from-purple-500 to-purple-600', icon: Gem, iconColor: 'text-purple-400' },
+    { name: 'Diamond', rays: '500', multiplier: '15x', color: 'from-cyan-500 to-cyan-600', icon: Gem, iconColor: 'text-cyan-400' },
+    { name: 'Mastery', rays: '1000', multiplier: '20x', color: 'from-blue-500 to-blue-600', icon: Wand2, iconColor: 'text-blue-400' },
+    { name: 'Champion', rays: '2000', multiplier: '25x', color: 'from-red-500 to-red-600', icon: Crown, iconColor: 'text-red-400' },
   ];
 
   const packs = [
@@ -66,9 +66,9 @@ export const RaysMarketplace = () => {
   ];
 
   return (
-    <section id="rays-marketplace" className="relative py-20 overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-gray-900 to-gray-900 pointer-events-none" />
+    <section id="rays-marketplace" className="relative py-20 overflow-hidden bg-black">
+      {/* Background with subtle gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-gray-950/30 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Header */}
@@ -113,7 +113,7 @@ export const RaysMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 hover:border-purple-500/30 hover:bg-gray-900/80 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
               >
                 <Icon className="w-8 h-8 text-purple-400 mb-3" />
                 <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
@@ -136,21 +136,25 @@ export const RaysMarketplace = () => {
           </motion.h3>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-            {ranks.map((rank, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                className={`p-4 rounded-lg border border-gray-800 bg-gradient-to-br ${rank.color} hover:shadow-lg hover:shadow-purple-500/20 transition-all duration-300 group cursor-pointer`}
-              >
-                <div className="text-xs font-bold text-white/90 group-hover:text-white transition-colors">
-                  {rank.name}
-                </div>
-                <div className="text-xs text-white/70 mt-2 leading-tight">
-                  <div>{rank.rays} rays</div>
-                  <div className="font-semibold text-white/90 mt-1">{rank.multiplier}</div>
-                </div>
-              </motion.div>
-            ))}
+            {ranks.map((rank, idx) => {
+              const RankIcon = rank.icon;
+              return (
+                <motion.div
+                  key={idx}
+                  variants={itemVariants}
+                  className={`p-4 rounded-lg border border-gray-700 bg-gradient-to-br ${rank.color} bg-opacity-80 hover:shadow-2xl hover:shadow-black/50 transition-all duration-300 group cursor-pointer flex flex-col items-center hover:scale-105`}
+                >
+                  <RankIcon className={`w-6 h-6 ${rank.iconColor} mb-2`} />
+                  <div className="text-xs font-bold text-white/90 group-hover:text-white transition-colors text-center">
+                    {rank.name}
+                  </div>
+                  <div className="text-xs text-white/70 mt-2 leading-tight text-center">
+                    <div>{rank.rays} rays</div>
+                    <div className="font-semibold text-white/90 mt-1">{rank.multiplier}</div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
 
           <p className="text-xs text-gray-500 text-center mt-4">
@@ -175,7 +179,7 @@ export const RaysMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-800 bg-gray-900/50 hover:border-purple-500/50 hover:bg-gray-900/80 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
               >
                 <h4 className="font-semibold text-white mb-3">{pack.name}</h4>
                 <div className="mb-4">
