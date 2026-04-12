@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { APIKeysSection } from '@/components/profile/APIKeysSection';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -40,6 +41,16 @@ interface UserSearchResult {
   displayName: string | null;
   avatarUrl: string | null;
   userTag: string | null;
+}
+
+interface APIKey {
+  id: string;
+  name: string;
+  key: string;
+  preview: string;
+  createdAt: string;
+  lastUsed: string | null;
+  scopes: string[];
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -428,8 +439,7 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
 
   // API Keys
-  const [apiKey, setApiKey] = useState('');
-  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
 
   // Billing
   const [billingPlan, setBillingPlan] = useState('free');
@@ -458,9 +468,29 @@ export default function ProfilePage() {
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
 
-    // API Key - generate from user ID
+    // Initialize with sample API keys
     const userId = (user as { id?: string }).id || 'user';
-    setApiKey(`sk_prod_${userId.substring(0, 12).padEnd(12, '0')}`);
+    const sampleKeys: APIKey[] = [
+      {
+        id: '1',
+        name: 'Production API',
+        key: `sk_prod_${userId.substring(0, 8).padEnd(12, '0')}`,
+        preview: `sk_prod_${userId.substring(0, 8)}`,
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        lastUsed: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        scopes: ['read', 'write'],
+      },
+      {
+        id: '2',
+        name: 'Testing API',
+        key: `sk_test_${userId.substring(0, 8).padEnd(12, '0')}`,
+        preview: `sk_test_${userId.substring(0, 8)}`,
+        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+        lastUsed: null,
+        scopes: ['read'],
+      },
+    ];
+    setApiKeys(sampleKeys);
 
     // Billing email
     setBillingEmail((user as { email?: string }).email || '');
@@ -690,6 +720,41 @@ export default function ProfilePage() {
       setConErr(err instanceof ApiError ? err.message : 'Failed to unlink GitHub.');
     } finally {
       setUnlinkingGitHub(false);
+    }
+  };
+
+  const handleCopyAPIKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+  };
+
+  const handleDeleteAPIKey = async (id: string) => {
+    try {
+      // TODO: Call API endpoint to delete the key
+      // await api.delete(`/api-keys/${id}`);
+      setApiKeys(apiKeys.filter(k => k.id !== id));
+    } catch (err) {
+      console.error('Failed to delete API key:', err);
+    }
+  };
+
+  const handleGenerateAPIKey = async (name: string) => {
+    try {
+      // TODO: Call API endpoint to generate new key
+      // const newKey = await api.post('/api-keys', { name });
+      const newId = String(apiKeys.length + 1);
+      const userId = (user as { id?: string })?.id || 'user';
+      const newKey: APIKey = {
+        id: newId,
+        name,
+        key: `sk_prod_${Date.now().toString(36)}`,
+        preview: `sk_prod_${Date.now().toString(36).substring(0, 8)}`,
+        createdAt: new Date().toISOString(),
+        lastUsed: null,
+        scopes: ['read', 'write'],
+      };
+      setApiKeys([...apiKeys, newKey]);
+    } catch (err) {
+      console.error('Failed to generate API key:', err);
     }
   };
 
@@ -2058,33 +2123,12 @@ export default function ProfilePage() {
 
           {/* API KEYS */}
           {tab === 'api-keys' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
-              <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-medium text-white">Production Key</p>
-                      <p className="text-xs text-gray-400">Created: {new Date().toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <code className="text-xs text-gray-300 bg-[#050506] px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(apiKey);
-                        setApiKeyCopied(true);
-                        setTimeout(() => setApiKeyCopied(false), 2000);
-                      }}
-                      className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200"
-                    >
-                      {apiKeyCopied ? '✓ Copied' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button className="mt-3 px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-xs text-purple-200 hover:text-purple-100">Generate New</button>
-            </div>
+            <APIKeysSection
+              apiKeys={apiKeys}
+              onDelete={handleDeleteAPIKey}
+              onGenerate={handleGenerateAPIKey}
+              onCopy={handleCopyAPIKey}
+            />
           )}
 
           {/* BILLING */}

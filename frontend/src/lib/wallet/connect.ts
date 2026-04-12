@@ -1,6 +1,6 @@
 'use client';
 
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, type Eip1193Provider } from 'ethers';
 import { api } from '@/lib/api/client';
 
 interface ConnectedAccount {
@@ -8,7 +8,18 @@ interface ConnectedAccount {
   chainId: number;
 }
 
-export async function connectWallet(provider: any): Promise<ConnectedAccount> {
+interface NonceResponse {
+  nonce: string;
+  message: string;
+}
+
+interface VerifyRequest {
+  address: string;
+  signature: string;
+  nonce: string;
+}
+
+export async function connectWallet(provider: Eip1193Provider): Promise<ConnectedAccount> {
   if (!provider) {
     throw new Error('No Web3 provider available');
   }
@@ -41,9 +52,9 @@ export async function connectWallet(provider: any): Promise<ConnectedAccount> {
   }
 
   // Get nonce from server
-  let nonceData: { nonce: string; message: string };
+  let nonceData: NonceResponse;
   try {
-    nonceData = await api.post<{ nonce: string; message: string }>('/auth/nonce/ethereum', {
+    nonceData = await api.post<NonceResponse>('/auth/nonce/ethereum', {
       address,
     });
   } catch (err) {
@@ -61,11 +72,12 @@ export async function connectWallet(provider: any): Promise<ConnectedAccount> {
 
   // Verify signature on server
   try {
-    await api.post('/auth/verify/ethereum', {
+    const verifyRequest: VerifyRequest = {
       address,
       signature,
       nonce: nonceData.nonce,
-    });
+    };
+    await api.post('/auth/verify/ethereum', verifyRequest);
   } catch (err) {
     throw new Error(err instanceof Error ? err.message : 'Signature verification failed');
   }
@@ -73,7 +85,7 @@ export async function connectWallet(provider: any): Promise<ConnectedAccount> {
   return { address, chainId };
 }
 
-export async function switchToBase(provider: any): Promise<boolean> {
+export async function switchToBase(provider: Eip1193Provider): Promise<boolean> {
   const baseChainId = 8453;
   const hexChainId = '0x' + baseChainId.toString(16);
 
@@ -113,8 +125,14 @@ export async function switchToBase(provider: any): Promise<boolean> {
   }
 }
 
+interface TransactionRequest {
+  to: string;
+  value: string;
+  data?: string;
+}
+
 export async function sendTransaction(
-  provider: any,
+  provider: Eip1193Provider,
   to: string,
   value: string,
   data?: string
@@ -127,11 +145,12 @@ export async function sendTransaction(
   const signer = await ethersProvider.getSigner();
 
   try {
-    const tx = await signer.sendTransaction({
+    const txRequest: TransactionRequest = {
       to,
       value,
       data,
-    });
+    };
+    const tx = await signer.sendTransaction(txRequest);
 
     return tx.hash;
   } catch (err) {
