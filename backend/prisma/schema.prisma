@@ -87,6 +87,8 @@ model User {
   serviceListings        ServiceListing[]
   certifications         UserCertification[]
   apiKeys                UserApiKey[]
+  notificationPreference NotificationPreference?
+  integrations           UserIntegration[]
 
   @@map("users")
 }
@@ -732,4 +734,50 @@ enum VerificationPurpose {
   DELETE_API_KEY
   SETUP_2FA
   CHANGE_EMAIL
+}
+
+// ─── Notification Preferences ─────────────────────────────────────────────────
+
+model NotificationPreference {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email notifications
+  emailOnErrors       Boolean   @default(true)      // API errors & failures
+  emailWeeklyReport   Boolean   @default(true)      // Weekly usage summary
+  emailMonthlyReport  Boolean   @default(false)     // Monthly newsletter
+  emailDeploymentAlerts Boolean @default(true)     // Agent deployments
+  emailOrderUpdates   Boolean   @default(true)      // Order status changes
+  emailMessages       Boolean   @default(true)      // New messages in orders/DMs
+
+  @@map("notification_preferences")
+}
+
+// ─── User Integrations ─────────────────────────────────────────────────────────
+
+model UserIntegration {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider  String    // e.g., "slack", "github", "webhook"
+  name      String    // e.g., "My Slack Workspace"
+  connected Boolean   @default(false)
+
+  // OAuth token or API key (encrypted)
+  credential String?   @db.Text  // would be encrypted in production
+
+  connectedAs String?  // e.g., username or email
+  lastUsedAt DateTime?
+
+  @@unique([userId, provider, name])
+  @@index([userId, provider])
+  @@map("user_integrations")
 }

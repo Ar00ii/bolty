@@ -161,4 +161,128 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
+
+  // ─── Notification Preferences ──────────────────────────────────────────────
+
+  async getNotificationPreferences(userId: string) {
+    let prefs = await this.prisma.notificationPreference.findUnique({
+      where: { userId },
+    });
+
+    // Create default if doesn't exist
+    if (!prefs) {
+      prefs = await this.prisma.notificationPreference.create({
+        data: { userId },
+      });
+    }
+
+    return prefs;
+  }
+
+  async updateNotificationPreferences(userId: string, data: {
+    emailOnErrors?: boolean;
+    emailWeeklyReport?: boolean;
+    emailMonthlyReport?: boolean;
+    emailDeploymentAlerts?: boolean;
+    emailOrderUpdates?: boolean;
+    emailMessages?: boolean;
+  }) {
+    return this.prisma.notificationPreference.upsert({
+      where: { userId },
+      create: { userId, ...data },
+      update: data,
+    });
+  }
+
+  // ─── Activity Log ──────────────────────────────────────────────────────────
+
+  async getActivityLog(userId: string, limit = 50) {
+    return this.prisma.auditLog.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        action: true,
+        resource: true,
+        resourceId: true,
+        metadata: true,
+        createdAt: true,
+        ipAddress: true,
+      },
+    });
+  }
+
+  // ─── Usage Statistics ──────────────────────────────────────────────────────
+
+  async getUsageStats(userId: string) {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Count API key uses (orders as proxy)
+    const totalOrders = await this.prisma.marketPurchase.count({
+      where: { buyerId: userId, createdAt: { gte: monthStart } },
+    });
+
+    // Count this month's purchases
+    const lastApiUse = await this.prisma.marketPurchase.findFirst({
+      where: { buyerId: userId },
+      orderBy: { updatedAt: 'desc' },
+      select: { updatedAt: true },
+    });
+
+    // Count active agents (market listings)
+    const activeListings = await this.prisma.marketListing.count({
+      where: { sellerId: userId, deletedAt: null },
+    });
+
+    // Count last 24h activity
+    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const last24hOrders = await this.prisma.marketPurchase.count({
+      where: { buyerId: userId, createdAt: { gte: last24h } },
+    });
+
+    return {
+      totalCallsThisMonth: totalOrders,
+      maxCallsAllowed: 100000,
+      activeAgents: activeListings,
+      last24hCalls: last24hOrders,
+      lastResetDate: monthStart.toISOString(),
+      lastUsedAt: lastApiUse?.updatedAt || null,
+    };
+  }
+
+  // ─── Integrations ──────────────────────────────────────────────────────────
+
+  async getUserIntegrations(userId: string) {
+    return this.prisma.userIntegration.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async addIntegration(userId: string, provider: string, name: string, connectedAs?: string) {
+    return this.prisma.userIntegration.upsert({
+      where: { userId_provider_name: { userId, provider, name } },
+      create: {
+        userId,
+        provider,
+        name,
+        connected: true,
+        connectedAs,
+        lastUsedAt: new Date(),
+      },
+      update: {
+        connected: true,
+        connectedAs,
+        lastUsedAt: new Date(),
+      },
+    });
+  }
+
+  async removeIntegration(userId: string, integrationId: string) {
+    return this.prisma.userIntegration.deleteMany({
+      where: { id: integrationId, userId },
+    });
+  }
 }
