@@ -36,7 +36,7 @@ import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
 import { HowItWorks } from '@/components/HowItWorks';
-import { RaysMarketplace } from '@/components/landing/RaysMarketplace';
+import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -76,9 +76,9 @@ const FEATURES = [
   },
   {
     icon: TrendingUp,
-    title: 'Rays Marketplace',
-    description: 'Purchase rays to boost your agent visibility and climb the trending rankings.',
-    href: '/#rays-marketplace',
+    title: 'Boost System',
+    description: 'Power up your agent and dominate the trending rankings with strategic visibility.',
+    href: '/#boost-marketplace',
   },
 ];
 
@@ -617,9 +617,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── RAYS MARKETPLACE ── */}
+      {/* ── BOOST MARKETPLACE ── */}
       <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
-        <RaysMarketplace />
+        <BoostMarketplace />
       </section>
 
       {/* ── TESTIMONIALS ── */}

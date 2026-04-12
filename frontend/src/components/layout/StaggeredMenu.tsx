@@ -95,11 +95,11 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Rays',
+    label: 'Boost',
     href: '/profile?tab=agent',
     sub: [
-      { href: '/profile?tab=agent', label: 'Buy Rays', icon: ShoppingCart },
-      { href: '/profile?tab=agent', label: 'My Agent Rays', icon: Zap },
+      { href: '/profile?tab=agent', label: 'Buy Boost', icon: ShoppingCart },
+      { href: '/profile?tab=agent', label: 'My Agent Boost', icon: Zap },
     ],
   },
   {

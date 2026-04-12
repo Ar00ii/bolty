@@ -106,12 +106,12 @@ export function Sidebar() {
       ],
     },
     {
-      label: 'Rays',
+      label: 'Boost',
       icon: Zap,
       href: '/profile?tab=agent',
       children: [
-        { label: 'Buy Rays', href: '/profile?tab=agent', icon: ShoppingCart },
-        { label: 'My Agent Rays', href: '/profile?tab=agent', icon: Zap },
+        { label: 'Buy Boost', href: '/profile?tab=agent', icon: ShoppingCart },
+        { label: 'My Agent Boost', href: '/profile?tab=agent', icon: Zap },
       ],
     },
     {
