@@ -8,6 +8,7 @@ import {
   AgentActivityLog,
   CreateAgentModal,
 } from '@/components/agents';
+import { RaysShop, RaysDisplay, RaysLeaderboards } from '@/components/rays';
 import { useAgentManagement } from '@/hooks/useAgentManagement';
 
 export const AgentDashboard: React.FC = () => {
@@ -32,6 +33,7 @@ export const AgentDashboard: React.FC = () => {
     responseTime: number;
     error?: string;
   } | null>(null);
+  const [raysRefreshTrigger, setRaysRefreshTrigger] = useState(0);
 
   const handleTestWebhook = async () => {
     if (!selectedAgentId) return;
@@ -162,6 +164,25 @@ export const AgentDashboard: React.FC = () => {
             <AgentMetricsDisplay metrics={metrics} loading={loading} />
           </div>
 
+          {/* Rays Section */}
+          <div className="space-y-6 pt-6 border-t border-gray-700">
+            {/* Rays Display */}
+            <div>
+              <RaysDisplay
+                agentId={selectedAgentId}
+                refreshTrigger={raysRefreshTrigger}
+              />
+            </div>
+
+            {/* Purchase Rays */}
+            <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
+              <RaysShop
+                agentId={selectedAgentId}
+                onPurchaseSuccess={() => setRaysRefreshTrigger(prev => prev + 1)}
+              />
+            </div>
+          </div>
+
           {/* Activity Log */}
           <div>
             <h3 className="text-lg font-semibold text-white mb-4">Activity Log</h3>
@@ -183,6 +204,11 @@ export const AgentDashboard: React.FC = () => {
           </button>
         </div>
       )}
+
+      {/* Rays Leaderboards */}
+      <div className="pt-6 border-t border-gray-700">
+        <RaysLeaderboards />
+      </div>
 
       {/* Create Agent Modal */}
       <CreateAgentModal
