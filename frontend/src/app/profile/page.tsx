@@ -453,6 +453,21 @@ export default function ProfilePage() {
   const [notifErrors, setNotifErrors] = useState(true);
   const [notifReports, setNotifReports] = useState(true);
 
+  // Usage stats
+  const [usageStats, setUsageStats] = useState<any>({
+    totalCallsThisMonth: 0,
+    maxCallsAllowed: 100000,
+    activeAgents: 0,
+    last24hCalls: 0,
+    lastResetDate: new Date().toISOString(),
+  });
+
+  // Activity log
+  const [activityLog, setActivityLog] = useState<any[]>([]);
+
+  // Integrations
+  const [integrations, setIntegrations] = useState<any[]>([]);
+
   // Init
   useEffect(() => {
     if (isLoading) return;
@@ -468,33 +483,24 @@ export default function ProfilePage() {
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
 
-    // Initialize with sample API keys
-    const userId = (user as { id?: string }).id || 'user';
-    const sampleKeys: APIKey[] = [
-      {
-        id: '1',
-        name: 'Production API',
-        key: `sk_prod_${userId.substring(0, 8).padEnd(12, '0')}`,
-        preview: `sk_prod_${userId.substring(0, 8)}`,
-        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-        lastUsed: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-        scopes: ['read', 'write'],
-      },
-      {
-        id: '2',
-        name: 'Testing API',
-        key: `sk_test_${userId.substring(0, 8).padEnd(12, '0')}`,
-        preview: `sk_test_${userId.substring(0, 8)}`,
-        createdAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
-        lastUsed: null,
-        scopes: ['read'],
-      },
-    ];
-    setApiKeys(sampleKeys);
-
     // Billing email
     setBillingEmail((user as { email?: string }).email || '');
     setBillingPlan('pro');
+
+    // Load real API keys from backend
+    api.get<any>('/market/api-keys').then((keys) => {
+      if (Array.isArray(keys)) {
+        setApiKeys(keys);
+      }
+    }).catch(() => setApiKeys([]));
+
+    // Load notification preferences
+    api.get<any>('/users/preferences/notifications')
+      .then((prefs) => {
+        setNotifErrors(prefs.emailOnErrors || true);
+        setNotifReports(prefs.emailWeeklyReport || true);
+      })
+      .catch(() => {});
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -571,6 +577,35 @@ export default function ProfilePage() {
     }, 350);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
+
+  // Load data based on active tab
+  useEffect(() => {
+    if (!user) return;
+
+    if (tab === 'activity') {
+      api.get<any>('/users/activity-log?limit=50')
+        .then((logs) => {
+          setActivityLog(Array.isArray(logs) ? logs : []);
+        })
+        .catch(() => setActivityLog([]));
+    }
+
+    if (tab === 'usage') {
+      api.get<any>('/users/usage-stats')
+        .then((stats) => {
+          setUsageStats(stats || {});
+        })
+        .catch(() => {});
+    }
+
+    if (tab === 'integrations') {
+      api.get<any>('/users/integrations')
+        .then((ints) => {
+          setIntegrations(Array.isArray(ints) ? ints : []);
+        })
+        .catch(() => setIntegrations([]));
+    }
+  }, [tab, user]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -2148,11 +2183,11 @@ export default function ProfilePage() {
           {tab === 'usage' && (
             <UsageSection
               data={{
-                totalCalls: 24582,
-                maxCalls: 100000,
-                activeAgents: 12,
-                last24hCalls: 1245,
-                lastResetDate: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),
+                totalCalls: usageStats.totalCallsThisMonth || 0,
+                maxCalls: usageStats.maxCallsAllowed || 100000,
+                activeAgents: usageStats.activeAgents || 0,
+                last24hCalls: usageStats.last24hCalls || 0,
+                lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
               }}
             />
           )}
