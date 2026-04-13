@@ -53,7 +53,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
               </motion.div>
             </AnimatePresence>
           </main>
-          {!isHome && <Footer />}
+          {!isHome && !isAuth && <Footer />}
         </div>
       </div>
     </div>
