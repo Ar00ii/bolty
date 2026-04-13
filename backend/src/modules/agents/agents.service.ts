@@ -71,7 +71,8 @@ export class AgentsService {
       return agent;
     } catch (error) {
       if (error instanceof BadRequestException) throw error;
-      this.logger.error(`Failed to create agent: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to create agent: ${errorMessage}`);
       throw error;
     }
   }
@@ -241,12 +242,13 @@ export class AgentsService {
           agentId,
           action,
           status,
-          metadata: metadata ? JSON.stringify(metadata) : null,
+          metadata: metadata || null,
           responseTime: metadata?.responseTime || null,
         },
       });
     } catch (error) {
-      this.logger.error(`Failed to log activity: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to log activity: ${errorMessage}`);
       // Don't throw, just log error
     }
   }
@@ -287,7 +289,8 @@ export class AgentsService {
         },
       });
     } catch (error) {
-      this.logger.error(`Failed to update metrics: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to update metrics: ${errorMessage}`);
       // Don't throw, just log error
     }
   }

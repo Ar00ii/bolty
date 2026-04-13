@@ -96,10 +96,7 @@ export class AgentsController {
   @Post(':id/test')
   async testWebhook(@Param('id') agentId: string, @CurrentUser() user: any) {
     const result = await this.agentsService.testWebhook(agentId, user.sub);
-    return {
-      success: result.success,
-      ...result,
-    };
+    return result;
   }
 
   /**
