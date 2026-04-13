@@ -75,7 +75,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
     <div className="profile-content-card space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-white">Notifications</h2>
+        <h2 className="text-xl font-light text-white">Notifications</h2>
         <p className="text-sm text-gray-400 mt-1">Manage how you receive updates and alerts</p>
       </div>
 
@@ -101,7 +101,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-2">
                   <div>
-                    <h3 className="text-sm font-medium text-white">{title}</h3>
+                    <h3 className="text-sm font-light text-white">{title}</h3>
                     <p className="text-xs text-gray-400 mt-1">{description}</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
@@ -123,7 +123,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
 
       {/* Email Preferences */}
       <div className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
-        <p className="text-sm font-medium text-white mb-2">Email Address</p>
+        <p className="text-sm font-light text-white mb-2">Email Address</p>
         <p className="text-sm text-gray-300 break-all">{billingEmail}</p>
         <p className="text-xs text-gray-500 mt-2">All notifications will be sent to this email address</p>
       </div>
@@ -134,14 +134,14 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
           <button
             onClick={handleSave}
             disabled={loading}
-            className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Save Preferences'}
           </button>
           <button
             onClick={() => setLocalSettings(settings)}
             disabled={loading}
-            className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

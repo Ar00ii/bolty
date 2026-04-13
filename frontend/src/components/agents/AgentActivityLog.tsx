@@ -81,14 +81,14 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
         >
           <div className="flex items-start gap-3">
             {/* Status Badge */}
-            <div className={`px-2 py-1 rounded border text-xs font-medium flex-shrink-0 mt-0.5 ${getStatusColor(activity.status)}`}>
+            <div className={`px-2 py-1 rounded border text-xs font-light flex-shrink-0 mt-0.5 ${getStatusColor(activity.status)}`}>
               {getStatusIcon(activity.status)}
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-medium text-white">{activity.action}</p>
+                <p className="text-sm font-light text-white">{activity.action}</p>
                 <span className="text-xs text-gray-500 flex-shrink-0">
                   {formatTime(activity.createdAt)}
                 </span>

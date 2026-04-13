@@ -61,7 +61,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
     <div className="profile-content-card space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-white">Billing & Subscription</h2>
+        <h2 className="text-xl font-light text-white">Billing & Subscription</h2>
         <p className="text-sm text-gray-400 mt-1">Manage your subscription and payment methods</p>
       </div>
 
@@ -69,19 +69,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
       <div className="p-6 border-2 border-purple-500/30 bg-purple-900/10 rounded-lg">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-2xl font-bold text-white">{currentPlan.name}</h3>
+            <h3 className="text-2xl font-light text-white">{currentPlan.name}</h3>
             <p className="text-sm text-gray-400 mt-1">Your current plan</p>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${status.bg}`}>
             <status.icon className={`w-4 h-4 ${status.color}`} />
-            <span className={`text-xs font-medium ${status.color}`}>{status.label}</span>
+            <span className={`text-xs font-light ${status.color}`}>{status.label}</span>
           </div>
         </div>
 
         {data.plan !== 'free' && (
           <div className="space-y-1 mb-4 pb-4 border-b border-gray-700">
             <p className="text-sm text-gray-400">Price</p>
-            <p className="text-lg font-semibold text-white">${currentPlan.price}</p>
+            <p className="text-lg font-light text-white">${currentPlan.price}</p>
             <p className="text-xs text-gray-500">billed monthly</p>
           </div>
         )}
@@ -108,7 +108,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
               }
             }}
             disabled={loading}
-            className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
           >
             {loading ? 'Processing...' : data.plan === 'free' ? 'Upgrade to Pro' : 'Upgrade to Enterprise'}
           </button>
@@ -117,19 +117,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
 
       {/* Billing Information */}
       <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Billing Information</h3>
+        <h3 className="text-sm font-light text-white uppercase tracking-wide">Billing Information</h3>
 
         {/* Email */}
         <div className="p-4 border border-gray-700 rounded-lg">
           <p className="text-xs text-gray-500 mb-2">Billing Email</p>
-          <p className="text-sm text-white font-medium">{data.email}</p>
+          <p className="text-sm text-white font-light">{data.email}</p>
         </div>
 
         {/* Next Billing Date */}
         {data.plan !== 'free' && data.nextBillingDate && (
           <div className="p-4 border border-gray-700 rounded-lg">
             <p className="text-xs text-gray-500 mb-2">Next Billing Date</p>
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-white font-light">
               {new Date(data.nextBillingDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -154,7 +154,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
                 Update
               </button>
             </div>
-            <p className="text-sm text-white font-medium">
+            <p className="text-sm text-white font-light">
               {data.cardLast4 ? `•••• •••• •••• ${data.cardLast4}` : 'No payment method on file'}
             </p>
           </div>
@@ -164,7 +164,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
       {/* Invoice History */}
       {data.plan !== 'free' && (
         <div className="space-y-3 pt-4 border-t border-gray-700">
-          <h3 className="text-sm font-semibold text-white uppercase tracking-wide">Invoice History</h3>
+          <h3 className="text-sm font-light text-white uppercase tracking-wide">Invoice History</h3>
           <button className="w-full flex items-center justify-between px-4 py-2 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors">
             <span className="text-sm text-gray-300">Invoice #INV-2025-04-001</span>
             <Download className="w-4 h-4 text-gray-400" />

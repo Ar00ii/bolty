@@ -70,7 +70,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
       <div className="bg-gray-900 border border-purple-500/30 rounded-lg p-6 max-w-md w-full mx-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-white">Create New Agent</h3>
+          <h3 className="text-xl font-light text-white">Create New Agent</h3>
           <button
             onClick={onClose}
             disabled={submitting}
@@ -91,7 +91,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-sm text-gray-300 mb-2 font-medium">
+            <label className="block text-sm text-gray-300 mb-2 font-light">
               Agent Name <span className="text-red-400">*</span>
             </label>
             <input
@@ -106,7 +106,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
 
           {/* Description */}
           <div>
-            <label className="block text-sm text-gray-300 mb-2 font-medium">Description</label>
+            <label className="block text-sm text-gray-300 mb-2 font-light">Description</label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
@@ -119,7 +119,7 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
 
           {/* Webhook URL */}
           <div>
-            <label className="block text-sm text-gray-300 mb-2 font-medium">
+            <label className="block text-sm text-gray-300 mb-2 font-light">
               Webhook URL <span className="text-red-400">*</span>
             </label>
             <input
@@ -141,14 +141,14 @@ export const CreateAgentModal: React.FC<CreateAgentModalProps> = ({
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="flex-1 px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white hover:border-gray-600 disabled:opacity-50 transition-colors font-medium"
+              className="flex-1 px-4 py-2 rounded-lg border border-gray-700 text-gray-300 hover:text-white hover:border-gray-600 disabled:opacity-50 transition-colors font-light"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-medium transition-colors flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-light transition-colors flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <>

@@ -61,7 +61,7 @@ export const Alert: React.FC<AlertProps> = ({
     >
       <Icon className={`w-5 h-5 ${config.iconColor} flex-shrink-0 mt-0.5`} />
       <div className="flex-1 min-w-0">
-        {title && <h3 className={`text-sm font-medium ${config.textColor}`}>{title}</h3>}
+        {title && <h3 className={`text-sm font-light ${config.textColor}`}>{title}</h3>}
         <p className={`text-sm ${config.textColor} ${title ? 'mt-1' : ''}`}>{message}</p>
       </div>
       {closeable && onClose && (

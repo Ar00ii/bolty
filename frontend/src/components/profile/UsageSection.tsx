@@ -24,7 +24,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
     <div className="profile-content-card space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-white">Usage & Analytics</h2>
+        <h2 className="text-xl font-light text-white">Usage & Analytics</h2>
         <p className="text-sm text-gray-400 mt-1">Monitor your API usage and activity</p>
       </div>
 
@@ -33,7 +33,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-400">API Calls This Month</p>
-            <p className="text-2xl font-semibold text-white mt-1">
+            <p className="text-2xl font-light text-white mt-1">
               {data.totalCalls.toLocaleString()}
             </p>
             <p className="text-xs text-gray-500 mt-1">
@@ -41,7 +41,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-bold text-purple-400">
+            <p className="text-3xl font-light text-purple-400">
               {Math.round(usagePercent)}%
             </p>
           </div>
@@ -84,7 +84,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         {/* Active Agents */}
         <div className="p-4 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors">
           <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Active Agents</p>
-          <p className="text-3xl font-bold text-white">{data.activeAgents}</p>
+          <p className="text-3xl font-light text-white">{data.activeAgents}</p>
           <p className="text-xs text-gray-400 mt-2">Currently deployed</p>
         </div>
 
@@ -94,7 +94,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             <p className="text-xs text-gray-500 uppercase tracking-wide">Last 24h</p>
             <TrendingUp className="w-4 h-4 text-purple-400" />
           </div>
-          <p className="text-3xl font-bold text-white">
+          <p className="text-3xl font-light text-white">
             {data.last24hCalls.toLocaleString()}
           </p>
           <p className="text-xs text-gray-400 mt-2">API calls</p>
@@ -104,11 +104,11 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
       {/* Upgrade Section */}
       {usagePercent > 80 && (
         <div className="p-4 border-2 border-purple-500/30 bg-purple-900/10 rounded-lg">
-          <p className="text-sm text-purple-200 font-medium mb-2">Need more capacity?</p>
+          <p className="text-sm text-purple-200 font-light mb-2">Need more capacity?</p>
           <p className="text-xs text-purple-300 mb-3">
             Upgrade to a higher plan to increase your API call limits
           </p>
-          <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors">
+          <button className="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-light transition-colors">
             View Plans
           </button>
         </div>

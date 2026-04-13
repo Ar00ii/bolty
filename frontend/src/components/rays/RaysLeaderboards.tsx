@@ -66,7 +66,7 @@ export const RaysLeaderboards: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+        <h2 className="text-xl font-light text-white flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
           Rays Leaderboards
         </h2>
@@ -77,7 +77,7 @@ export const RaysLeaderboards: React.FC = () => {
       <div className="flex gap-2 border-b border-gray-700">
         <button
           onClick={() => setActiveTab('rays')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
+          className={`px-4 py-2 text-sm font-light transition-colors ${
             activeTab === 'rays'
               ? 'text-purple-400 border-b-2 border-purple-500'
               : 'text-gray-400 hover:text-gray-300'
@@ -87,7 +87,7 @@ export const RaysLeaderboards: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveTab('creators')}
-          className={`px-4 py-2 text-sm font-medium transition-colors ${
+          className={`px-4 py-2 text-sm font-light transition-colors ${
             activeTab === 'creators'
               ? 'text-purple-400 border-b-2 border-purple-500'
               : 'text-gray-400 hover:text-gray-300'
@@ -119,16 +119,16 @@ export const RaysLeaderboards: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="text-2xl font-bold text-purple-400 w-10 text-center">
+                    <div className="text-2xl font-light text-purple-400 w-10 text-center">
                       #{entry.position}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-white truncate">{entry.agent}</p>
+                      <p className="font-light text-white truncate">{entry.agent}</p>
                       <p className="text-xs text-gray-400">@{entry.creator}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-white">{entry.totalRays}</p>
+                    <p className="text-lg font-light text-white">{entry.totalRays}</p>
                     <p className="text-xs text-gray-400">{entry.rank}</p>
                   </div>
                 </div>
@@ -153,11 +153,11 @@ export const RaysLeaderboards: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="text-2xl font-bold text-purple-400 w-10 text-center">
+                    <div className="text-2xl font-light text-purple-400 w-10 text-center">
                       #{entry.position}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-white">@{entry.creator}</p>
+                      <p className="font-light text-white">@{entry.creator}</p>
                       <p className="text-xs text-gray-400">
                         {entry.agentsCount} agent{entry.agentsCount !== 1 ? 's' : ''}
                       </p>
@@ -165,9 +165,9 @@ export const RaysLeaderboards: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-400 mb-1">
-                      Avg: <span className="text-white font-semibold">{entry.avgRaysPerAgent}</span> rays
+                      Avg: <span className="text-white font-light">{entry.avgRaysPerAgent}</span> rays
                     </p>
-                    <p className="text-lg font-bold text-purple-400">{entry.totalRays}</p>
+                    <p className="text-lg font-light text-purple-400">{entry.totalRays}</p>
                   </div>
                 </div>
               </div>

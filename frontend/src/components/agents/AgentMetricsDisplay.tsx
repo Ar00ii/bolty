@@ -74,10 +74,10 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
           key={item.label}
           className="p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-gray-600 transition-colors"
         >
-          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-2">
+          <p className="text-xs text-gray-400 uppercase tracking-widest font-light mb-2">
             {item.label}
           </p>
-          <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
+          <p className={`text-2xl font-light ${item.color}`}>{item.value}</p>
         </div>
       ))}
     </div>

@@ -66,12 +66,12 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">API Keys</h2>
+          <h2 className="text-xl font-light text-white">API Keys</h2>
           <p className="text-sm text-gray-400 mt-1">Manage your API keys for programmatic access</p>
         </div>
         <button
           onClick={() => setShowGenerateModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-light transition-colors"
         >
           <Plus className="w-4 h-4" />
           Generate New
@@ -94,7 +94,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-medium text-white truncate">{apiKey.name}</h3>
+                    <h3 className="font-light text-white truncate">{apiKey.name}</h3>
                     <span className="text-xs px-2 py-1 bg-gray-800 text-gray-300 rounded">
                       {apiKey.scopes[0] || 'read'}
                     </span>
@@ -162,14 +162,14 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                     <button
                       onClick={() => handleDelete(apiKey.id)}
                       disabled={loadingDelete === apiKey.id}
-                      className="flex-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium transition-colors disabled:opacity-50"
+                      className="flex-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-light transition-colors disabled:opacity-50"
                     >
                       {loadingDelete === apiKey.id ? 'Deleting...' : 'Delete'}
                     </button>
                     <button
                       onClick={() => setDeleteConfirm(null)}
                       disabled={loadingDelete === apiKey.id}
-                      className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm font-medium transition-colors disabled:opacity-50"
+                      className="flex-1 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm font-light transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -185,7 +185,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
       {showGenerateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 border-2 border-gray-700 rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold text-white mb-4">Generate New API Key</h3>
+            <h3 className="text-lg font-light text-white mb-4">Generate New API Key</h3>
 
             <div className="mb-4">
               <label className="block text-sm text-gray-300 mb-2">Key Name</label>
@@ -206,7 +206,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
               <button
                 onClick={handleGenerate}
                 disabled={!newKeyName.trim() || loadingGenerate}
-                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingGenerate ? 'Generating...' : 'Generate'}
               </button>
@@ -216,7 +216,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                   setNewKeyName('');
                 }}
                 disabled={loadingGenerate}
-                className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>

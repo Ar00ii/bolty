@@ -85,18 +85,18 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
       <div className={`p-6 rounded-lg border-2 ${rankColor.bg} ${rankColor.border}`}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
               Current Rank
             </p>
-            <h3 className={`text-3xl font-bold mt-1 ${rankColor.text}`}>
+            <h3 className={`text-3xl font-light mt-1 ${rankColor.text}`}>
               {data.currentRank}
             </h3>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
               Trending Position
             </p>
-            <p className={`text-3xl font-bold mt-1 ${rankColor.text}`}>
+            <p className={`text-3xl font-light mt-1 ${rankColor.text}`}>
               #{data.position}
             </p>
           </div>
@@ -105,13 +105,13 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
           <div>
             <p className="text-xs text-gray-400">Total Rays Accumulated</p>
-            <p className="text-2xl font-bold text-white mt-1">
+            <p className="text-2xl font-light text-white mt-1">
               {data.totalRaysAccumulated}
             </p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Visibility Multiplier</p>
-            <p className={`text-2xl font-bold mt-1 ${rankColor.text}`}>
+            <p className={`text-2xl font-light mt-1 ${rankColor.text}`}>
               {getBoostMultiplier(data.currentRank)}x
             </p>
           </div>
@@ -128,7 +128,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
       <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
         <div className="flex items-start gap-2 mb-3">
           <TrendingUp className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-white">Ranking Benefits</p>
+          <p className="text-sm font-light text-white">Ranking Benefits</p>
         </div>
         <ul className="text-xs text-gray-400 space-y-1 ml-6">
           <li>Higher position in trending leaderboard</li>
@@ -168,7 +168,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
   if (nextIndex >= rankOrder.length) {
     return (
       <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30 text-center">
-        <p className="text-sm font-semibold text-purple-400">You are at the highest rank!</p>
+        <p className="text-sm font-light text-purple-400">You are at the highest rank!</p>
       </div>
     );
   }
@@ -180,7 +180,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
   return (
     <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-gray-400 font-semibold">Next Rank: {nextRank}</p>
+        <p className="text-xs text-gray-400 font-light">Next Rank: {nextRank}</p>
         <p className="text-xs text-gray-400">
           {totalRays} / {nextThreshold} rays
         </p>

@@ -26,7 +26,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   return (
     <div className={`space-y-2 ${containerClassName}`}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-white">
+        <label htmlFor={id} className="block text-sm font-light text-white">
           {label}
           {required && <span className="ml-1 text-red-400">*</span>}
         </label>

@@ -106,13 +106,13 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-white">Activity Log</h2>
+          <h2 className="text-xl font-light text-white">Activity Log</h2>
           <p className="text-sm text-gray-400 mt-1">Your recent account activity</p>
         </div>
         {onExport && (
           <button
             onClick={onExport}
-            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg text-sm font-light transition-colors flex items-center gap-2"
           >
             <Download className="w-4 h-4" />
             Export
@@ -150,7 +150,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({
                   <div className="flex-1 min-w-0 pt-1">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-white">{event.title}</h3>
+                        <h3 className="text-sm font-light text-white">{event.title}</h3>
                         <p className="text-xs text-gray-400 mt-0.5">{event.description}</p>
                       </div>
                       <span className="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">

@@ -48,7 +48,7 @@ export const Modal: React.FC<ModalProps> = ({
         {title && (
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-white">{title}</h2>
+              <h2 className="text-lg font-light text-white">{title}</h2>
               {subtitle && <p className="text-sm text-gray-400 mt-1">{subtitle}</p>}
             </div>
             <button

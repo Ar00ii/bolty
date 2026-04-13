@@ -104,7 +104,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h3 className="text-lg font-light text-white flex items-center gap-2">
           <Zap className="w-5 h-5" />
           Purchase Rays
         </h3>
@@ -142,8 +142,8 @@ export const RaysShop: React.FC<RaysShopProps> = ({
                 : 'border-gray-700 bg-gray-800/30 hover:border-gray-600'
             } disabled:opacity-50`}
           >
-            <div className="font-semibold text-white">{pack.rays} Rays</div>
-            <div className="text-2xl font-bold text-purple-400 mt-2">{pack.boltyPrice}</div>
+            <div className="font-light text-white">{pack.rays} Rays</div>
+            <div className="text-2xl font-light text-purple-400 mt-2">{pack.boltyPrice}</div>
             <div className="text-xs text-gray-400 mt-1">BOLTY</div>
             <div className="text-xs text-gray-500 mt-2">
               {(pack.boltyPrice / pack.rays).toFixed(2)} per ray
@@ -157,16 +157,16 @@ export const RaysShop: React.FC<RaysShopProps> = ({
         <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
                 Rays
               </p>
-              <p className="text-2xl font-bold text-white mt-1">{selectedPackData.rays}</p>
+              <p className="text-2xl font-light text-white mt-1">{selectedPackData.rays}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
                 Price
               </p>
-              <p className="text-2xl font-bold text-purple-400 mt-1">{selectedPackData.boltyPrice} BOLTY</p>
+              <p className="text-2xl font-light text-purple-400 mt-1">{selectedPackData.boltyPrice} BOLTY</p>
             </div>
           </div>
 
@@ -188,7 +188,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({
       <button
         onClick={handlePurchase}
         disabled={!selectedPack || purchasing}
-        className={`w-full py-3 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+        className={`w-full py-3 rounded-lg font-light transition-all duration-200 flex items-center justify-center gap-2 ${
           selectedPack && !purchasing
             ? 'bg-purple-600 hover:bg-purple-700 text-white'
             : 'bg-gray-700 text-gray-400 cursor-not-allowed'

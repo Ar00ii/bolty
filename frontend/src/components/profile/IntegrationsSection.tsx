@@ -30,11 +30,11 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   }
 
   if (id === 'api-keys') {
-    return <span className="text-xl font-bold">API</span>;
+    return <span className="text-xl font-light">API</span>;
   }
 
   if (id === 'ledger') {
-    return <span className="text-xl font-bold">LDG</span>;
+    return <span className="text-xl font-light">LDG</span>;
   }
 
   const logoMap: Record<string, string> = {
@@ -46,7 +46,7 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   };
 
   const logo = logoMap[id];
-  if (!logo) return <span className="text-xl font-bold">?</span>;
+  if (!logo) return <span className="text-xl font-light">?</span>;
 
   return (
     <div className="relative w-8 h-8">
@@ -166,7 +166,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     <div className="profile-content-card space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-white">Integrations</h2>
+        <h2 className="text-xl font-light text-white">Integrations</h2>
         <p className="text-sm text-gray-400 mt-1">
           {connectedCount} of {integrations.length} connected
         </p>
@@ -184,7 +184,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-gray-900 border border-purple-500/30 rounded-lg p-8 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-white">Set up Google Authenticator</h3>
+              <h3 className="text-xl font-light text-white">Set up Google Authenticator</h3>
               <button
                 onClick={() => {
                   setTwoFASetup(null);
@@ -231,7 +231,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
               <button
                 onClick={handleTwoFACodeSubmit}
                 disabled={loading === 'two-factor' || twoFACode.length !== 6}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 rounded-lg transition-colors"
+                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-light py-2 rounded-lg transition-colors"
               >
                 {loading === 'two-factor' ? 'Verifying...' : 'Verify and Enable'}
               </button>
@@ -250,7 +250,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
             <div key={category} className="space-y-4">
               {/* Category Header */}
               <div className="px-1">
-                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
+                <h3 className="text-xs font-light text-gray-400 uppercase tracking-widest">
                   {getCategoryLabel(category)}
                 </h3>
               </div>
@@ -291,11 +291,11 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                     </div>
 
                     {/* Name */}
-                    <h4 className="text-sm font-semibold text-white mb-1">{integration.name}</h4>
+                    <h4 className="text-sm font-light text-white mb-1">{integration.name}</h4>
 
                     {/* Status */}
                     {integration.connected ? (
-                      <p className="text-xs text-emerald-400 font-medium mb-2">Active</p>
+                      <p className="text-xs text-emerald-400 font-light mb-2">Active</p>
                     ) : (
                       <p className="text-xs text-gray-500 mb-2">Not connected</p>
                     )}
@@ -318,7 +318,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                       }
                       disabled={loading === integration.id}
                       className={`
-                        w-full py-2 px-3 rounded-lg text-xs font-medium transition-all duration-200
+                        w-full py-2 px-3 rounded-lg text-xs font-light transition-all duration-200
                         flex items-center justify-center gap-1.5 mt-auto
                         disabled:opacity-50 disabled:cursor-not-allowed
                         ${
@@ -358,7 +358,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       {/* Security Notice */}
       <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/10">
         <p className="text-xs text-gray-300">
-          <span className="text-purple-400 font-semibold">Security:</span> Only connect integrations you trust.
+          <span className="text-purple-400 font-light">Security:</span> Only connect integrations you trust.
           Review and remove unused connections regularly.
         </p>
       </div>
