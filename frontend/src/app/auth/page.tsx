@@ -14,7 +14,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
-import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -473,29 +472,6 @@ export default function AuthPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="relative z-10 w-full max-w-md"
       >
-        {/* Logo */}
-        <motion.div
-          className="flex justify-center mb-10"
-          animate={{ y: [0, -8, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        >
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="relative"
-          >
-            <div
-              className="absolute inset-0 rounded-xl"
-              style={{
-                background: 'radial-gradient(circle, rgba(131,110,249,0.3) 0%, transparent 70%)',
-                filter: 'blur(20px)',
-              }}
-            />
-            <div className="relative p-3 rounded-xl border border-monad-500/20" style={{ background: 'rgba(131,110,249,0.08)' }}>
-              <BoltyLogoSVG size={48} color="#836EF9" />
-            </div>
-          </motion.div>
-        </motion.div>
-
         {/* Header */}
         <motion.div
           className="text-center mb-8"
