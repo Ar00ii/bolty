@@ -7,14 +7,14 @@ import {
   Eye,
   EyeOff,
   Mail,
-  User,
   KeyRound,
   Zap,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -92,31 +92,49 @@ function PasswordStrengthMeter({ password }: { password: string }) {
   const str = passwordStrength(password);
   const meta = STR_META[str];
   return (
-    <div className="mt-2 space-y-2">
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="mt-3 space-y-2"
+    >
       <div className="flex gap-1 items-center">
         {[1, 2, 3].map((n) => (
-          <div
+          <motion.div
             key={n}
-            className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-              n <= str ? meta.color : 'bg-zinc-800'
-            }`}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: n * 0.05, duration: 0.3 }}
+            className={`h-1 flex-1 rounded-full origin-left ${n <= str ? meta.color : 'bg-zinc-800'}`}
           />
         ))}
         {meta.label && (
-          <span
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
             className={`text-xs ml-1 font-light ${
               str === 1 ? 'text-red-400' : str === 2 ? 'text-yellow-400' : 'text-green-400'
             }`}
           >
             {meta.label}
-          </span>
+          </motion.span>
         )}
       </div>
       <div className="space-y-1">
-        {PWD_CHECKS.map((c) => (
-          <div key={c.label} className="flex items-center gap-1.5">
+        {PWD_CHECKS.map((c, idx) => (
+          <motion.div
+            key={c.label}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.03, duration: 0.2 }}
+            className="flex items-center gap-1.5"
+          >
             {c.test(password) ? (
-              <svg
+              <motion.svg
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                 className="w-3 h-3 text-green-400 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -124,17 +142,17 @@ function PasswordStrengthMeter({ password }: { password: string }) {
                 strokeWidth="3"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
+              </motion.svg>
             ) : (
               <div className="w-3 h-3 rounded-full border border-zinc-700 flex-shrink-0" />
             )}
             <span className={`text-xs ${c.test(password) ? 'text-zinc-400' : 'text-zinc-600'}`}>
               {c.label}
             </span>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -159,55 +177,82 @@ function Field({
   hint?: string;
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [focused, setFocused] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword && showToggle ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <div>
-      <label className="block text-sm font-light text-zinc-400 mb-1.5">{label}</label>
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+      <label className="block text-sm font-light text-zinc-400 mb-2">{label}</label>
       <div className="relative">
-        <input
+        <motion.input
           type={inputType}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800 text-white
-                     placeholder:text-zinc-700 text-sm
-                     focus:outline-none focus:border-monad-500/50 focus:ring-1 focus:ring-monad-500/20
+          className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-white
+                     placeholder:text-zinc-600 text-sm
+                     focus:outline-none focus:border-monad-500/60 focus:bg-zinc-900
                      transition-all duration-200"
+          animate={{
+            borderColor: focused ? 'rgba(131, 110, 249, 0.6)' : 'rgb(39, 39, 42)',
+            backgroundColor: focused ? 'rgba(9, 9, 11, 1)' : 'rgba(9, 9, 11, 0.5)',
+          }}
         />
         {showToggle && isPassword && (
-          <button
+          <motion.button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+            <motion.div animate={{ rotate: showPassword ? 0 : 180 }} transition={{ duration: 0.2 }}>
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </motion.div>
+          </motion.button>
         )}
       </div>
-      {hint && <p className="text-xs text-zinc-600 mt-1">{hint}</p>}
-    </div>
+      {hint && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-zinc-600 mt-1">
+          {hint}
+        </motion.p>
+      )}
+    </motion.div>
   );
 }
 
 // -- Error & Success Banners ----
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex gap-2.5 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-4">
-      <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" strokeWidth={2} />
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="flex gap-3 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-4"
+    >
+      <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
       <p className="text-red-400 text-sm leading-snug">{message}</p>
-    </div>
+    </motion.div>
   );
 }
 
 function SuccessBanner({ message }: { message: string }) {
   return (
-    <div className="flex gap-2.5 bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3 mb-4">
-      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" strokeWidth={2} />
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.3 }}
+      className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-3 mb-4"
+    >
+      <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
       <p className="text-green-400 text-sm leading-snug">{message}</p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -382,356 +427,466 @@ export default function AuthPage() {
   // -- Render ----
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center relative px-4 py-8"
+      className="min-h-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #000000 0%, #0f0f1e 50%, #1a0033 100%)',
+        background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(131,110,249,0.15) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-96 h-96 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(131,110,249,0.1) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-        />
-      </div>
+      {/* Animated background orbs */}
+      <motion.div
+        className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
+        animate={{
+          x: [0, 30, 0],
+          y: [0, -30, 0],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        style={{
+          background: 'radial-gradient(circle, rgba(131,110,249,0.12) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
+      <motion.div
+        className="absolute bottom-0 left-0 w-96 h-96 rounded-full pointer-events-none"
+        animate={{
+          x: [0, -30, 0],
+          y: [0, 30, 0],
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: 'easeInOut',
+        }}
+        style={{
+          background: 'radial-gradient(circle, rgba(131,110,249,0.08) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+        }}
+      />
 
       {/* Main container */}
-      <div className="relative z-10 w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="flex justify-center mb-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="relative z-10 w-full max-w-md"
+      >
+        {/* Logo */}
+        <motion.div
+          className="flex justify-center mb-10"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="relative"
+          >
             <div
-              className="p-3 rounded-xl"
-              style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}
-            >
-              <BoltyLogo size={40} />
+              className="absolute inset-0 rounded-xl"
+              style={{
+                background: 'radial-gradient(circle, rgba(131,110,249,0.3) 0%, transparent 70%)',
+                filter: 'blur(20px)',
+              }}
+            />
+            <div className="relative p-3 rounded-xl border border-monad-500/20" style={{ background: 'rgba(131,110,249,0.08)' }}>
+              <BoltyLogoSVG size={48} color="#836EF9" />
             </div>
-          </div>
-          <h1 className="text-3xl font-light text-white tracking-tight mb-2">
+          </motion.div>
+        </motion.div>
+
+        {/* Header */}
+        <motion.div
+          className="text-center mb-8"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          <h1 className="text-4xl font-light text-white tracking-tight mb-2">
             {twoFactorPending
-              ? 'Verify your identity'
+              ? 'Verify identity'
               : tab === 'login'
                 ? 'Welcome back'
                 : tab === 'register'
-                  ? 'Create account'
+                  ? 'Build with us'
                   : tab === 'forgot'
-                    ? 'Reset password'
-                    : 'Check your email'}
+                    ? 'Recover account'
+                    : 'Check inbox'}
           </h1>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-zinc-500 text-sm font-light">
             {twoFactorPending
-              ? 'Enter the 6-digit code sent to your email'
+              ? 'Enter the 6-digit code from your email'
               : tab === 'login'
-                ? 'Sign in to start building'
+                ? 'Sign in to your account'
                 : tab === 'register'
-                  ? 'Join the Bolty developer community'
+                  ? 'Create your developer account'
                   : tab === 'forgot'
-                    ? 'Enter your email or username'
-                    : 'A reset link has been sent to your inbox'}
+                    ? "We'll send you a reset link"
+                    : 'Password reset link sent'}
           </p>
-        </div>
+        </motion.div>
 
         {/* Tab switcher */}
-        {!twoFactorPending && tab !== 'forgot' && tab !== 'reset-sent' && (
-          <div className="flex gap-2 mb-8 bg-zinc-900/30 p-1.5 rounded-lg border border-zinc-800">
-            {(['login', 'register'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => {
-                  setTab(t);
-                  clearMessages();
-                }}
-                className={`flex-1 py-2 text-sm font-light rounded-md transition-all duration-200 ${
-                  tab === t
-                    ? 'bg-monad-500/30 text-monad-300 border border-monad-500/50'
-                    : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {t === 'login' ? 'Sign in' : 'Create account'}
-              </button>
-            ))}
-          </div>
-        )}
+        <AnimatePresence>
+          {!twoFactorPending && tab !== 'forgot' && tab !== 'reset-sent' && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex gap-2 mb-8 bg-zinc-900/20 p-1.5 rounded-lg border border-zinc-800/50"
+            >
+              {(['login', 'register'] as const).map((t) => (
+                <motion.button
+                  key={t}
+                  onClick={() => {
+                    setTab(t);
+                    clearMessages();
+                  }}
+                  className={`flex-1 py-2 text-sm font-light rounded-md transition-all ${
+                    tab === t ? 'bg-monad-500/30 text-monad-300 border border-monad-500/50' : 'text-zinc-500'
+                  }`}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {t === 'login' ? 'Sign in' : 'Create account'}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Content */}
-        <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl p-6 backdrop-blur-sm">
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 backdrop-blur-lg"
+        >
           {/* Error/Success messages */}
-          {error && <ErrorBanner message={error} />}
-          {success && <SuccessBanner message={success} />}
+          <AnimatePresence mode="wait">
+            {error && <ErrorBanner key="error" message={error} />}
+            {success && <SuccessBanner key="success" message={success} />}
+          </AnimatePresence>
 
           {/* 2FA Form */}
-          {twoFactorPending && (
-            <form onSubmit={handle2FAVerify} className="space-y-4">
-              <div
-                className="p-4 rounded-lg border border-monad-500/20"
-                style={{ background: 'rgba(131,110,249,0.05)' }}
+          <AnimatePresence mode="wait">
+            {twoFactorPending && (
+              <motion.form
+                key="2fa"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onSubmit={handle2FAVerify}
+                className="space-y-4"
               >
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Two-factor authentication is enabled. Enter the 6-digit code from your email. It expires in 10
-                  minutes.
-                </p>
-              </div>
-              <div>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={6}
-                  value={twoFactorCode}
-                  onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="000000"
-                  autoComplete="one-time-code"
-                  className="w-full px-4 py-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-white
-                           text-center text-2xl font-mono tracking-[0.3em] outline-none
-                           focus:border-monad-500/50 focus:ring-1 focus:ring-monad-500/20
-                           transition-all placeholder:text-zinc-700"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading === '2fa' || twoFactorCode.length !== 6}
-                className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {loading === '2fa' ? (
-                  <>
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  'Verify and sign in'
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  resetTwoFactor();
-                  clearMessages();
-                }}
-                className="w-full py-2 text-sm text-zinc-500 hover:text-zinc-400 transition-colors"
-              >
-                ← Back to sign in
-              </button>
-            </form>
-          )}
-
-          {/* Login Form */}
-          {!twoFactorPending && tab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <Field
-                label="Email or username"
-                type="text"
-                value={loginIdentifier}
-                onChange={setLoginIdentifier}
-                placeholder="you@email.com"
-                autoComplete="username"
-              />
-              <div>
-                <Field
-                  label="Password"
-                  type="password"
-                  value={loginPassword}
-                  onChange={setLoginPassword}
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  showToggle
-                />
-                <div className="mt-2 text-right">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTab('forgot');
-                      clearMessages();
-                    }}
-                    className="text-xs text-zinc-500 hover:text-monad-400 transition-colors font-light"
-                  >
-                    Forgot your password?
-                  </button>
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={anyLoading}
-                className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
-              >
-                {loading === 'email' ? (
-                  <>
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <KeyRound size={16} />
-                    Sign in
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* Register Form */}
-          {!twoFactorPending && tab === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <Field
-                label="Email"
-                type="email"
-                value={regEmail}
-                onChange={setRegEmail}
-                placeholder="you@email.com"
-                autoComplete="email"
-                hint="We'll never share your email"
-              />
-              <Field
-                label="Username"
-                type="text"
-                value={regUsername}
-                onChange={(v) => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
-                placeholder="your_username"
-                autoComplete="username"
-                hint="Letters, numbers, _ and -"
-              />
-              <div>
-                <Field
-                  label="Password"
-                  type="password"
-                  value={regPassword}
-                  onChange={setRegPassword}
-                  placeholder="Create a strong password"
-                  autoComplete="new-password"
-                  showToggle
-                />
-                <PasswordStrengthMeter password={regPassword} />
-              </div>
-              <Field
-                label="Confirm password"
-                type="password"
-                value={regConfirm}
-                onChange={setRegConfirm}
-                placeholder="Repeat your password"
-                autoComplete="new-password"
-                showToggle
-              />
-              <button
-                type="submit"
-                disabled={anyLoading}
-                className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
-              >
-                {loading === 'email' ? (
-                  <>
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Creating account...
-                  </>
-                ) : (
-                  <>
-                    <Zap size={16} />
-                    Create account
-                  </>
-                )}
-              </button>
-              <p className="text-xs text-center text-zinc-600 mt-4">
-                By creating an account you agree to our{' '}
-                <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
-                  Terms of Service
-                </span>{' '}
-                and{' '}
-                <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
-                  Privacy Policy
-                </span>
-                .
-              </p>
-            </form>
-          )}
-
-          {/* Forgot Password Form */}
-          {!twoFactorPending && tab === 'forgot' && (
-            <form onSubmit={handleForgotPassword} className="space-y-4">
-              <div
-                className="p-4 rounded-lg border border-white/10"
-                style={{ background: 'rgba(255,255,255,0.02)' }}
-              >
-                <p className="text-xs text-zinc-400 leading-relaxed">
-                  Enter your email or username and we'll send you a link to reset your password. The link expires in
-                  30 minutes.
-                </p>
-              </div>
-              <Field
-                label="Email or username"
-                type="text"
-                value={forgotIdentifier}
-                onChange={setForgotIdentifier}
-                placeholder="you@email.com"
-                autoComplete="username"
-              />
-              <button
-                type="submit"
-                disabled={loading === 'forgot'}
-                className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
-                         disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
-              >
-                {loading === 'forgot' ? (
-                  <>
-                    <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  <>
-                    <Mail size={16} />
-                    Send reset link
-                  </>
-                )}
-              </button>
-            </form>
-          )}
-
-          {/* Reset sent confirmation */}
-          {!twoFactorPending && tab === 'reset-sent' && (
-            <div className="space-y-4">
-              <div className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-4">
-                <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
-                <div>
-                  <p className="text-green-400 text-sm font-light">Check your email</p>
-                  <p className="text-zinc-400 text-xs mt-1">
-                    If an account exists, you'll receive a reset link within a few minutes. Don't forget to check your
-                    spam folder.
+                <div
+                  className="p-4 rounded-lg border border-monad-500/20"
+                  style={{ background: 'rgba(131,110,249,0.05)' }}
+                >
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Two-factor authentication enabled. Enter the 6-digit code from your email. Expires in 10 minutes.
                   </p>
                 </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setTab('login');
-                  clearMessages();
-                  setForgotIdentifier('');
-                }}
-                className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all"
-              >
-                Back to sign in
-              </button>
-            </div>
-          )}
-        </div>
+                <div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder="000000"
+                    autoComplete="one-time-code"
+                    className="w-full px-4 py-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-white
+                             text-center text-2xl font-mono tracking-[0.3em] outline-none
+                             focus:border-monad-500/50 focus:ring-1 focus:ring-monad-500/20
+                             transition-all placeholder:text-zinc-700"
+                  />
+                </div>
+                <motion.button
+                  type="submit"
+                  disabled={loading === '2fa' || twoFactorCode.length !== 6}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading === '2fa' ? (
+                    <>
+                      <motion.span
+                        className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      />
+                      Verifying...
+                    </>
+                  ) : (
+                    'Verify and sign in'
+                  )}
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    resetTwoFactor();
+                    clearMessages();
+                  }}
+                  whileHover={{ color: 'rgb(163, 230, 53)' }}
+                  className="w-full py-2 text-sm text-zinc-500 hover:text-zinc-400 transition-colors"
+                >
+                  ← Back to sign in
+                </motion.button>
+              </motion.form>
+            )}
 
-        {/* Footer info */}
-        <div className="text-center mt-8 text-xs text-zinc-600">
-          <p>
-            Need help?{' '}
-            <a href="mailto:support@bolty.network" className="text-monad-400 hover:text-monad-300 transition-colors">
-              Contact support
-            </a>
-          </p>
-        </div>
-      </div>
+            {/* Login Form */}
+            {!twoFactorPending && tab === 'login' && (
+              <motion.form
+                key="login"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onSubmit={handleLogin}
+                className="space-y-5"
+              >
+                <div className="space-y-4">
+                  <Field
+                    label="Email or username"
+                    type="text"
+                    value={loginIdentifier}
+                    onChange={setLoginIdentifier}
+                    placeholder="you@email.com"
+                    autoComplete="username"
+                  />
+                  <div>
+                    <Field
+                      label="Password"
+                      type="password"
+                      value={loginPassword}
+                      onChange={setLoginPassword}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      showToggle
+                    />
+                    <div className="mt-2 text-right">
+                      <motion.button
+                        type="button"
+                        onClick={() => {
+                          setTab('forgot');
+                          clearMessages();
+                        }}
+                        whileHover={{ color: '#a78bfa' }}
+                        className="text-xs text-zinc-600 hover:text-monad-400 transition-colors font-light"
+                      >
+                        Forgot password?
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+                <motion.button
+                  type="submit"
+                  disabled={anyLoading}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
+                >
+                  {loading === 'email' ? (
+                    <>
+                      <motion.span
+                        className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound size={16} />
+                      Sign in
+                    </>
+                  )}
+                </motion.button>
+              </motion.form>
+            )}
+
+            {/* Register Form */}
+            {!twoFactorPending && tab === 'register' && (
+              <motion.form
+                key="register"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onSubmit={handleRegister}
+                className="space-y-5"
+              >
+                <div className="space-y-4">
+                  <Field
+                    label="Email"
+                    type="email"
+                    value={regEmail}
+                    onChange={setRegEmail}
+                    placeholder="you@email.com"
+                    autoComplete="email"
+                    hint="We never share your email"
+                  />
+                  <Field
+                    label="Username"
+                    type="text"
+                    value={regUsername}
+                    onChange={(v) => setRegUsername(v.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+                    placeholder="your_username"
+                    autoComplete="username"
+                    hint="Letters, numbers, _, -"
+                  />
+                  <div>
+                    <Field
+                      label="Password"
+                      type="password"
+                      value={regPassword}
+                      onChange={setRegPassword}
+                      placeholder="Create a strong password"
+                      autoComplete="new-password"
+                      showToggle
+                    />
+                    <PasswordStrengthMeter password={regPassword} />
+                  </div>
+                  <Field
+                    label="Confirm password"
+                    type="password"
+                    value={regConfirm}
+                    onChange={setRegConfirm}
+                    placeholder="Repeat your password"
+                    autoComplete="new-password"
+                    showToggle
+                  />
+                </div>
+                <motion.button
+                  type="submit"
+                  disabled={anyLoading}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
+                >
+                  {loading === 'email' ? (
+                    <>
+                      <motion.span
+                        className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Zap size={16} />
+                      Create account
+                    </>
+                  )}
+                </motion.button>
+                <p className="text-xs text-center text-zinc-600 mt-4">
+                  By creating an account you agree to our{' '}
+                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                    Terms
+                  </span>
+                  {' '}and{' '}
+                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                    Privacy
+                  </span>
+                  .
+                </p>
+              </motion.form>
+            )}
+
+            {/* Forgot Password Form */}
+            {!twoFactorPending && tab === 'forgot' && (
+              <motion.form
+                key="forgot"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onSubmit={handleForgotPassword}
+                className="space-y-4"
+              >
+                <div
+                  className="p-4 rounded-lg border border-white/10"
+                  style={{ background: 'rgba(255,255,255,0.02)' }}
+                >
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    Enter your email or username. We'll send a reset link that expires in 30 minutes.
+                  </p>
+                </div>
+                <Field
+                  label="Email or username"
+                  type="text"
+                  value={forgotIdentifier}
+                  onChange={setForgotIdentifier}
+                  placeholder="you@email.com"
+                  autoComplete="username"
+                />
+                <motion.button
+                  type="submit"
+                  disabled={loading === 'forgot'}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                           disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
+                >
+                  {loading === 'forgot' ? (
+                    <>
+                      <motion.span
+                        className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Mail size={16} />
+                      Send reset link
+                    </>
+                  )}
+                </motion.button>
+              </motion.form>
+            )}
+
+            {/* Reset sent confirmation */}
+            {!twoFactorPending && tab === 'reset-sent' && (
+              <motion.div
+                key="reset-sent"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-4"
+              >
+                <div className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-4">
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <div>
+                    <p className="text-green-400 text-sm font-light">Check your email</p>
+                    <p className="text-zinc-400 text-xs mt-1">
+                      If an account exists, you'll receive a reset link. Check spam folder too.
+                    </p>
+                  </div>
+                </div>
+                <motion.button
+                  type="button"
+                  onClick={() => {
+                    setTab('login');
+                    clearMessages();
+                    setForgotIdentifier('');
+                  }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all"
+                >
+                  Back to sign in
+                </motion.button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }
