@@ -167,20 +167,24 @@ export const AgentDashboard: React.FC = () => {
           {/* Rays Section */}
           <div className="space-y-6 pt-6 border-t border-gray-700">
             {/* Rays Display */}
-            <div>
-              <RaysDisplay
-                agentId={selectedAgentId}
-                refreshTrigger={raysRefreshTrigger}
-              />
-            </div>
+            {selectedAgentId && (
+              <div>
+                <RaysDisplay
+                  agentId={selectedAgentId}
+                  refreshTrigger={raysRefreshTrigger}
+                />
+              </div>
+            )}
 
             {/* Purchase Rays */}
-            <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
-              <RaysShop
-                agentId={selectedAgentId}
-                onPurchaseSuccess={() => setRaysRefreshTrigger(prev => prev + 1)}
-              />
-            </div>
+            {selectedAgentId && (
+              <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
+                <RaysShop
+                  agentId={selectedAgentId}
+                  onPurchaseSuccess={() => setRaysRefreshTrigger(prev => prev + 1)}
+                />
+              </div>
+            )}
           </div>
 
           {/* Activity Log */}
