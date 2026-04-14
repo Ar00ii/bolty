@@ -18,6 +18,7 @@ import {
   Trophy,
   ChevronRight,
   Zap,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -71,6 +72,16 @@ export function Sidebar() {
   };
 
   const navSections: NavSection[] = [
+    {
+      label: 'Home',
+      icon: Home,
+      href: '/',
+    },
+    {
+      label: 'Profile',
+      icon: User,
+      href: '/profile',
+    },
     {
       label: 'Dashboard',
       icon: Home,
