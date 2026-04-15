@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import React, { useState } from 'react';
+
 import type { Agent } from '@/hooks/useAgentManagement';
 
 interface CreateAgentModalProps {

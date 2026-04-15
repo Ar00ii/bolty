@@ -1,7 +1,8 @@
 'use client';
 
-import { User } from '@/lib/auth/AuthProvider';
 import React from 'react';
+
+import { User } from '@/lib/auth/AuthProvider';
 
 interface ProfileSidebarProps {
   user: User | null;

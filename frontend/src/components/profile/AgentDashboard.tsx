@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import React, { useState } from 'react';
+
 import {
   AgentSelector,
   AgentMetricsDisplay,
@@ -101,10 +102,10 @@ export const AgentDashboard: React.FC = () => {
                       selectedAgent.status === 'ACTIVE'
                         ? 'bg-emerald-500'
                         : selectedAgent.status === 'ERROR'
-                        ? 'bg-red-500'
-                        : selectedAgent.status === 'TESTING'
-                        ? 'bg-yellow-500'
-                        : 'bg-gray-500'
+                          ? 'bg-red-500'
+                          : selectedAgent.status === 'TESTING'
+                            ? 'bg-yellow-500'
+                            : 'bg-gray-500'
                     }`}
                   />
                   <span className="text-sm text-gray-300">{selectedAgent.status}</span>
@@ -147,9 +148,7 @@ export const AgentDashboard: React.FC = () => {
                   }`}
                 >
                   {webhookTestResult.success ? (
-                    <>
-                      ✓ Connection successful ({webhookTestResult.responseTime}ms)
-                    </>
+                    <>✓ Connection successful ({webhookTestResult.responseTime}ms)</>
                   ) : (
                     <>✕ Connection failed: {webhookTestResult.error}</>
                   )}
@@ -169,10 +168,7 @@ export const AgentDashboard: React.FC = () => {
             {/* Rays Display */}
             {selectedAgentId && (
               <div>
-                <RaysDisplay
-                  agentId={selectedAgentId}
-                  refreshTrigger={raysRefreshTrigger}
-                />
+                <RaysDisplay agentId={selectedAgentId} refreshTrigger={raysRefreshTrigger} />
               </div>
             )}
 
@@ -181,7 +177,7 @@ export const AgentDashboard: React.FC = () => {
               <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
                 <RaysShop
                   agentId={selectedAgentId}
-                  onPurchaseSuccess={() => setRaysRefreshTrigger(prev => prev + 1)}
+                  onPurchaseSuccess={() => setRaysRefreshTrigger((prev) => prev + 1)}
                 />
               </div>
             )}

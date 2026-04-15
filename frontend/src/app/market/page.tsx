@@ -1,9 +1,9 @@
 'use client';
 
-import { Bot, X, GitBranch, Star, TrendingUp, Clock, Package, Zap, ArrowRight, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Star, TrendingUp, Package } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { api, ApiError } from '@/lib/api/client';
@@ -270,14 +270,19 @@ function NegotiationModal({
       setPaid(true);
     } catch (err: any) {
       const msg = err?.message || String(err);
-      setError(msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80));
+      setError(
+        msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80),
+      );
     }
   };
 
   const isSeller = neg?.listing?.sellerId === userId;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)' }}
+    >
       {consentData && (
         <PaymentConsentModal
           listingTitle={listing.title}
@@ -309,7 +314,9 @@ function NegotiationModal({
         <div className="p-6 space-y-4">
           <div>
             <h2 className="text-2xl font-light text-white">{listing.title}</h2>
-            <p className="text-sm text-zinc-400">Starting at {listing.price} {listing.currency}</p>
+            <p className="text-sm text-zinc-400">
+              Starting at {listing.price} {listing.currency}
+            </p>
           </div>
 
           {loading ? (
@@ -330,9 +337,14 @@ function NegotiationModal({
             <div className="space-y-4">
               <div className="max-h-[300px] overflow-y-auto space-y-3 p-3 rounded-lg bg-white/5 border border-white/10">
                 {neg.messages.map((msg) => (
-                  <div key={msg.id} className={`text-sm ${ROLE_COLORS[msg.fromRole] || ''} p-2.5 rounded-lg border`}>
+                  <div
+                    key={msg.id}
+                    className={`text-sm ${ROLE_COLORS[msg.fromRole] || ''} p-2.5 rounded-lg border`}
+                  >
                     <p className="font-light">{msg.content}</p>
-                    {msg.proposedPrice && <p className="text-xs mt-1">Price: {msg.proposedPrice}</p>}
+                    {msg.proposedPrice && (
+                      <p className="text-xs mt-1">Price: {msg.proposedPrice}</p>
+                    )}
                   </div>
                 ))}
                 <div ref={bottomRef} />
@@ -447,7 +459,10 @@ export default function MarketPage() {
   ] as const;
 
   return (
-    <div style={{ background: 'var(--bg)', height: 'calc(100vh - 5rem)' }} className="overflow-hidden flex flex-col">
+    <div
+      style={{ background: 'var(--bg)', height: 'calc(100vh - 5rem)' }}
+      className="overflow-hidden flex flex-col"
+    >
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
       )}
@@ -465,10 +480,16 @@ export default function MarketPage() {
               <p className="text-sm text-zinc-400">AI agents, tools, and repositories</p>
             </div>
             <div className="flex gap-2">
-              <Link href="/market/agents" className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all">
+              <Link
+                href="/market/agents"
+                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
+              >
                 Browse Agents
               </Link>
-              <Link href="/market/repos" className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all">
+              <Link
+                href="/market/repos"
+                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
+              >
                 Browse Repos
               </Link>
             </div>
@@ -517,7 +538,9 @@ export default function MarketPage() {
                         className="text-left p-4 rounded-xl border border-monad-500/15 hover:border-monad-500/30 bg-monad-500/5 hover:bg-monad-500/10 transition-all"
                       >
                         <p className="font-light text-white mb-1">{listing.title}</p>
-                        <p className="text-xs text-zinc-400">{listing.price} {listing.currency}</p>
+                        <p className="text-xs text-zinc-400">
+                          {listing.price} {listing.currency}
+                        </p>
                       </motion.button>
                     ))}
                   </div>
@@ -534,7 +557,9 @@ export default function MarketPage() {
                         className="text-left p-3 rounded-lg border border-white/10 hover:border-monad-500/20 bg-white/5 hover:bg-monad-500/5 transition-all"
                       >
                         <p className="text-sm font-light text-white">{listing.title}</p>
-                        <p className="text-xs text-zinc-500 mt-1">{listing.price} {listing.currency}</p>
+                        <p className="text-xs text-zinc-500 mt-1">
+                          {listing.price} {listing.currency}
+                        </p>
                       </motion.button>
                     ))}
                   </div>
@@ -576,7 +601,10 @@ export default function MarketPage() {
               >
                 <Package className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
                 <p className="text-zinc-400 font-light">No items yet</p>
-                <Link href="/profile?tab=listings" className="text-sm text-monad-400 hover:text-monad-300 mt-2 inline-block">
+                <Link
+                  href="/profile?tab=listings"
+                  className="text-sm text-monad-400 hover:text-monad-300 mt-2 inline-block"
+                >
                   Create your first listing →
                 </Link>
               </motion.div>

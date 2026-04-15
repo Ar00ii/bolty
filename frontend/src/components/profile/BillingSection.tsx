@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
 import { CreditCard, Download, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
 
 type Plan = 'free' | 'pro' | 'enterprise';
 
@@ -39,20 +39,35 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
       name: 'Professional',
       price: 99,
       calls: '1,000,000',
-      features: ['1,000,000 API calls/month', 'Email support', '10 active agents', 'Advanced analytics'],
+      features: [
+        '1,000,000 API calls/month',
+        'Email support',
+        '10 active agents',
+        'Advanced analytics',
+      ],
     },
     enterprise: {
       name: 'Enterprise',
       price: 999,
       calls: 'Custom',
-      features: ['Unlimited API calls', 'Priority support', 'Unlimited agents', 'Custom integrations'],
+      features: [
+        'Unlimited API calls',
+        'Priority support',
+        'Unlimited agents',
+        'Custom integrations',
+      ],
     },
   };
 
   const currentPlan = planDetails[data.plan];
   const statusConfig = {
     active: { color: 'text-green-400', bg: 'bg-green-900/20', icon: CheckCircle, label: 'Active' },
-    inactive: { color: 'text-gray-400', bg: 'bg-gray-900/20', icon: AlertCircle, label: 'Inactive' },
+    inactive: {
+      color: 'text-gray-400',
+      bg: 'bg-gray-900/20',
+      icon: AlertCircle,
+      label: 'Inactive',
+    },
     past_due: { color: 'text-red-400', bg: 'bg-red-900/20', icon: AlertCircle, label: 'Past Due' },
   };
   const status = statusConfig[data.status];
@@ -110,14 +125,20 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
             disabled={loading}
             className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
           >
-            {loading ? 'Processing...' : data.plan === 'free' ? 'Upgrade to Pro' : 'Upgrade to Enterprise'}
+            {loading
+              ? 'Processing...'
+              : data.plan === 'free'
+                ? 'Upgrade to Pro'
+                : 'Upgrade to Enterprise'}
           </button>
         )}
       </div>
 
       {/* Billing Information */}
       <div className="space-y-4">
-        <h3 className="text-sm font-light text-white uppercase tracking-wide">Billing Information</h3>
+        <h3 className="text-sm font-light text-white uppercase tracking-wide">
+          Billing Information
+        </h3>
 
         {/* Email */}
         <div className="p-4 border border-gray-700 rounded-lg">

@@ -20,7 +20,8 @@ export default function GlobalError({
           <div className="max-w-md w-full text-center">
             <h1 className="text-4xl font-light text-red-500 mb-4">Critical Error</h1>
             <p className="text-gray-300 mb-8">
-              The application encountered a critical error and cannot continue. Please refresh the page.
+              The application encountered a critical error and cannot continue. Please refresh the
+              page.
             </p>
             <button
               onClick={() => reset()}

@@ -15,7 +15,6 @@ import {
   Bot,
   GitBranch,
   Code2,
-  Trophy,
   ChevronRight,
   Zap,
   User,
@@ -129,9 +128,7 @@ export function Sidebar() {
       label: 'Services',
       icon: Briefcase,
       href: '/services',
-      children: [
-        { label: 'Browse', href: '/services', icon: Briefcase },
-      ],
+      children: [{ label: 'Browse', href: '/services', icon: Briefcase }],
     },
     {
       label: 'Docs',

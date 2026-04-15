@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { Button } from '../button';
 
 describe('Button Component', () => {
@@ -46,7 +47,7 @@ describe('Button Component', () => {
     render(
       <Button asChild>
         <a href="/test">Link Button</a>
-      </Button>
+      </Button>,
     );
     expect(screen.getByRole('link')).toBeInTheDocument();
   });

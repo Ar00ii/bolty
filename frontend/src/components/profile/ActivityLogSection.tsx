@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import {
   LogIn,
   KeyRound,
@@ -11,6 +10,7 @@ import {
   FileText,
   AlertCircle,
 } from 'lucide-react';
+import React from 'react';
 
 interface ActivityEvent {
   id: string;
@@ -77,10 +77,7 @@ const eventConfig = {
   },
 };
 
-export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({
-  events,
-  onExport,
-}) => {
+export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, onExport }) => {
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -142,7 +139,9 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({
                 {/* Event item */}
                 <div className="flex gap-4 pb-2">
                   {/* Icon circle */}
-                  <div className={`relative flex-shrink-0 w-12 h-12 rounded-full ${config.bg} flex items-center justify-center`}>
+                  <div
+                    className={`relative flex-shrink-0 w-12 h-12 rounded-full ${config.bg} flex items-center justify-center`}
+                  >
                     <Icon className={`w-5 h-5 ${config.color}`} />
                   </div>
 

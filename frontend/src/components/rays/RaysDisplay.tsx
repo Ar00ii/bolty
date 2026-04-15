@@ -1,7 +1,7 @@
 'use client';
 
+import { TrendingUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { Zap, TrendingUp } from 'lucide-react';
 
 interface AgentRaysData {
   agentId: string;
@@ -88,26 +88,20 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
               Current Rank
             </p>
-            <h3 className={`text-3xl font-light mt-1 ${rankColor.text}`}>
-              {data.currentRank}
-            </h3>
+            <h3 className={`text-3xl font-light mt-1 ${rankColor.text}`}>{data.currentRank}</h3>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
               Trending Position
             </p>
-            <p className={`text-3xl font-light mt-1 ${rankColor.text}`}>
-              #{data.position}
-            </p>
+            <p className={`text-3xl font-light mt-1 ${rankColor.text}`}>#{data.position}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
           <div>
             <p className="text-xs text-gray-400">Total Rays Accumulated</p>
-            <p className="text-2xl font-light text-white mt-1">
-              {data.totalRaysAccumulated}
-            </p>
+            <p className="text-2xl font-light text-white mt-1">{data.totalRaysAccumulated}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Visibility Multiplier</p>
@@ -161,7 +155,16 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
     CAMPEON: 2000,
   };
 
-  const rankOrder = ['HIERRO', 'BRONCE', 'PLATA', 'ORO', 'PLATINO', 'DIAMANTE', 'MAESTRIA', 'CAMPEON'];
+  const rankOrder = [
+    'HIERRO',
+    'BRONCE',
+    'PLATA',
+    'ORO',
+    'PLATINO',
+    'DIAMANTE',
+    'MAESTRIA',
+    'CAMPEON',
+  ];
   const currentIndex = rankOrder.indexOf(currentRank);
   const nextIndex = currentIndex + 1;
 

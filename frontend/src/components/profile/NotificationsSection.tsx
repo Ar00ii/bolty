@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Mail, AlertCircle, CheckCircle, Bell } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface NotificationSettings {
   emailOnErrors: boolean;
@@ -125,7 +125,9 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
       <div className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
         <p className="text-sm font-light text-white mb-2">Email Address</p>
         <p className="text-sm text-gray-300 break-all">{billingEmail}</p>
-        <p className="text-xs text-gray-500 mt-2">All notifications will be sent to this email address</p>
+        <p className="text-xs text-gray-500 mt-2">
+          All notifications will be sent to this email address
+        </p>
       </div>
 
       {/* Save Button */}

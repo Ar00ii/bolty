@@ -1,9 +1,20 @@
 'use client';
 
-import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, TrendingUp, Trophy, ArrowRight, Shield, Medal, Gem, Crown, Sparkles, Wand2 } from 'lucide-react';
+import {
+  Zap,
+  TrendingUp,
+  Trophy,
+  ArrowRight,
+  Shield,
+  Medal,
+  Gem,
+  Crown,
+  Wand2,
+} from 'lucide-react';
 import Link from 'next/link';
+import React from 'react';
+
 import { GradientText } from '@/components/ui/GradientText';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 
@@ -32,7 +43,8 @@ export const BoostMarketplace = () => {
     {
       icon: Zap,
       title: 'Amplify Reach',
-      description: 'Purchase Boost to elevate your agent in trending rankings. Higher tier = exponential visibility.',
+      description:
+        'Purchase Boost to elevate your agent in trending rankings. Higher tier = exponential visibility.',
     },
     {
       icon: TrendingUp,
@@ -47,14 +59,70 @@ export const BoostMarketplace = () => {
   ];
 
   const ranks = [
-    { name: 'Iron', boost: '0', multiplier: '1x', color: 'from-gray-600 to-gray-700', icon: Shield, iconColor: 'text-gray-400' },
-    { name: 'Bronze', boost: '25', multiplier: '2.5x', color: 'from-amber-700 to-amber-800', icon: Medal, iconColor: 'text-amber-600' },
-    { name: 'Silver', boost: '50', multiplier: '5x', color: 'from-slate-500 to-slate-600', icon: Medal, iconColor: 'text-slate-400' },
-    { name: 'Gold', boost: '120', multiplier: '6x', color: 'from-yellow-500 to-yellow-600', icon: Crown, iconColor: 'text-yellow-400' },
-    { name: 'Platinum', boost: '250', multiplier: '10x', color: 'from-purple-500 to-purple-600', icon: Gem, iconColor: 'text-purple-400' },
-    { name: 'Diamond', boost: '500', multiplier: '15x', color: 'from-cyan-500 to-cyan-600', icon: Gem, iconColor: 'text-cyan-400' },
-    { name: 'Mastery', boost: '1000', multiplier: '20x', color: 'from-blue-500 to-blue-600', icon: Wand2, iconColor: 'text-blue-400' },
-    { name: 'Champion', boost: '2000', multiplier: '25x', color: 'from-red-500 to-red-600', icon: Crown, iconColor: 'text-red-400' },
+    {
+      name: 'Iron',
+      boost: '0',
+      multiplier: '1x',
+      color: 'from-gray-600 to-gray-700',
+      icon: Shield,
+      iconColor: 'text-gray-400',
+    },
+    {
+      name: 'Bronze',
+      boost: '25',
+      multiplier: '2.5x',
+      color: 'from-amber-700 to-amber-800',
+      icon: Medal,
+      iconColor: 'text-amber-600',
+    },
+    {
+      name: 'Silver',
+      boost: '50',
+      multiplier: '5x',
+      color: 'from-slate-500 to-slate-600',
+      icon: Medal,
+      iconColor: 'text-slate-400',
+    },
+    {
+      name: 'Gold',
+      boost: '120',
+      multiplier: '6x',
+      color: 'from-yellow-500 to-yellow-600',
+      icon: Crown,
+      iconColor: 'text-yellow-400',
+    },
+    {
+      name: 'Platinum',
+      boost: '250',
+      multiplier: '10x',
+      color: 'from-purple-500 to-purple-600',
+      icon: Gem,
+      iconColor: 'text-purple-400',
+    },
+    {
+      name: 'Diamond',
+      boost: '500',
+      multiplier: '15x',
+      color: 'from-cyan-500 to-cyan-600',
+      icon: Gem,
+      iconColor: 'text-cyan-400',
+    },
+    {
+      name: 'Mastery',
+      boost: '1000',
+      multiplier: '20x',
+      color: 'from-blue-500 to-blue-600',
+      icon: Wand2,
+      iconColor: 'text-blue-400',
+    },
+    {
+      name: 'Champion',
+      boost: '2000',
+      multiplier: '25x',
+      color: 'from-red-500 to-red-600',
+      icon: Crown,
+      iconColor: 'text-red-400',
+    },
   ];
 
   const packs = [
@@ -87,15 +155,12 @@ export const BoostMarketplace = () => {
           </motion.div>
 
           <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-light mb-4">
-            Boost: Dominate the{' '}
-            <GradientText>Trending Market</GradientText>
+            Boost: Dominate the <GradientText>Trending Market</GradientText>
           </motion.h2>
 
-          <motion.p
-            variants={itemVariants}
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
-          >
-            Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
+          <motion.p variants={itemVariants} className="text-lg text-gray-400 max-w-2xl mx-auto">
+            Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and
+            unlock unlimited earning potential.
           </motion.p>
         </motion.div>
 
@@ -131,7 +196,10 @@ export const BoostMarketplace = () => {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <motion.h3 variants={itemVariants} className="text-2xl font-light text-white mb-8 text-center">
+          <motion.h3
+            variants={itemVariants}
+            className="text-2xl font-light text-white mb-8 text-center"
+          >
             8 Elite Tiers
           </motion.h3>
 
@@ -158,7 +226,8 @@ export const BoostMarketplace = () => {
           </div>
 
           <p className="text-xs text-gray-500 text-center mt-4">
-            Each tier unlocks exponential visibility multipliers. Rise through the ranks and dominate the trending feed.
+            Each tier unlocks exponential visibility multipliers. Rise through the ranks and
+            dominate the trending feed.
           </p>
         </motion.div>
 
@@ -170,7 +239,10 @@ export const BoostMarketplace = () => {
           whileInView="visible"
           viewport={{ once: true }}
         >
-          <motion.h3 variants={itemVariants} className="text-2xl font-light text-white mb-8 text-center">
+          <motion.h3
+            variants={itemVariants}
+            className="text-2xl font-light text-white mb-8 text-center"
+          >
             Boost Packages
           </motion.h3>
 
@@ -211,7 +283,10 @@ export const BoostMarketplace = () => {
             Ready to dominate the rankings?
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div
+            variants={itemVariants}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
             <Link href="/profile?tab=agent">
               <ShimmerButton className="flex items-center gap-2">
                 Start Boosting

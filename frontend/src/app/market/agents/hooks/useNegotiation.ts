@@ -3,6 +3,7 @@
  */
 import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
+
 import type { NegotiationMessage, Negotiation } from '../types';
 
 export function useNegotiation(
@@ -41,17 +42,14 @@ export function useNegotiation(
     };
   }, [negotiationId, onMessageReceived, onNegotiationUpdate]);
 
-  const sendMessage = useCallback(
-    (content: string, proposedPrice?: number) => {
-      if (!socketRef.current) return;
+  const sendMessage = useCallback((content: string, proposedPrice?: number) => {
+    if (!socketRef.current) return;
 
-      socketRef.current.emit('send_message', {
-        content,
-        proposedPrice,
-      });
-    },
-    [],
-  );
+    socketRef.current.emit('send_message', {
+      content,
+      proposedPrice,
+    });
+  }, []);
 
   return { sendMessage };
 }

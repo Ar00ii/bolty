@@ -40,7 +40,10 @@ class ApiClient {
     options: RequestOptions = {},
   ): Promise<Response> {
     try {
-      const headers: Record<string, string> = { 'Content-Type': 'application/json', ...options.headers };
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      };
 
       // Add CSRF token for mutations (POST, PUT, PATCH, DELETE)
       if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {

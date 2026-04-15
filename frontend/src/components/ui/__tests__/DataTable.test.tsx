@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { DataTable } from '../DataTable';
 
 interface TestData {
@@ -44,7 +45,7 @@ describe('DataTable Component', () => {
 
   it('handles sorting when sortable column is clicked', async () => {
     const { container } = render(
-      <DataTable columns={mockColumns} data={mockData} rowKey="id" sortable />
+      <DataTable columns={mockColumns} data={mockData} rowKey="id" sortable />,
     );
 
     const sortButton = screen.getByText('ID').closest('button');
@@ -57,7 +58,7 @@ describe('DataTable Component', () => {
 
   it('applies striped styling when striped prop is true', () => {
     const { container } = render(
-      <DataTable columns={mockColumns} data={mockData} rowKey="id" striped />
+      <DataTable columns={mockColumns} data={mockData} rowKey="id" striped />,
     );
     const table = container.querySelector('table');
     expect(table).toBeInTheDocument();

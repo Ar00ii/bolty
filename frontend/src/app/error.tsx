@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { useEffect } from 'react';
 
 export default function Error({
   error,
@@ -25,7 +25,8 @@ export default function Error({
           </div>
 
           <p className="text-red-200 text-sm mb-6">
-            An unexpected error occurred. Please try again or contact support if the problem persists.
+            An unexpected error occurred. Please try again or contact support if the problem
+            persists.
           </p>
 
           {process.env.NODE_ENV === 'development' && (

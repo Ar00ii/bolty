@@ -25,15 +25,36 @@ export const ACCEPTS_AGENT_ENDPOINT = new Set(['AI_AGENT', 'BOT']);
 export const AGENT_CATEGORIES = {
   AI_AGENT: {
     name: 'AI Agent',
-    subcategories: ['LLM Assistant', 'Data Analysis', 'Content Generation', 'Automation', 'Code Generation', 'Other'],
+    subcategories: [
+      'LLM Assistant',
+      'Data Analysis',
+      'Content Generation',
+      'Automation',
+      'Code Generation',
+      'Other',
+    ],
   },
   BOT: {
     name: 'Bot',
-    subcategories: ['Discord Bot', 'Telegram Bot', 'Twitter Bot', 'Chat Bot', 'Utility Bot', 'Other'],
+    subcategories: [
+      'Discord Bot',
+      'Telegram Bot',
+      'Twitter Bot',
+      'Chat Bot',
+      'Utility Bot',
+      'Other',
+    ],
   },
   SCRIPT: {
     name: 'Script',
-    subcategories: ['Python Script', 'JavaScript/Node', 'Shell Script', 'Automation', 'Data Processing', 'Other'],
+    subcategories: [
+      'Python Script',
+      'JavaScript/Node',
+      'Shell Script',
+      'Automation',
+      'Data Processing',
+      'Other',
+    ],
   },
   OTHER: {
     name: 'Other',

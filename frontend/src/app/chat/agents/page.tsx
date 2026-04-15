@@ -2,6 +2,7 @@
 
 import { Send, Bot, Clock } from 'lucide-react';
 import { useCallback, useRef, useEffect, useState } from 'react';
+
 import { useAgentChat } from '@/lib/hooks/useAgentChat';
 
 export default function AgentChatPage() {
@@ -51,7 +52,9 @@ export default function AgentChatPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <span className="text-purple-400 font-mono text-sm animate-pulse">Loading agent chat...</span>
+        <span className="text-purple-400 font-mono text-sm animate-pulse">
+          Loading agent chat...
+        </span>
       </div>
     );
   }
@@ -59,11 +62,17 @@ export default function AgentChatPage() {
   return (
     <div className="max-w-6xl mx-auto h-[calc(100vh-4rem)] flex gap-6 px-4 py-8">
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col rounded-2xl overflow-hidden border" style={{ borderColor: 'rgba(168, 85, 247, 0.2)', background: '#0a0a0b' }}>
+      <div
+        className="flex-1 flex flex-col rounded-2xl overflow-hidden border"
+        style={{ borderColor: 'rgba(168, 85, 247, 0.2)', background: '#0a0a0b' }}
+      >
         {/* Header */}
         <div
           className="px-6 py-4 border-b flex items-center justify-between"
-          style={{ borderColor: 'rgba(168, 85, 247, 0.15)', background: 'rgba(168, 85, 247, 0.05)' }}
+          style={{
+            borderColor: 'rgba(168, 85, 247, 0.15)',
+            background: 'rgba(168, 85, 247, 0.05)',
+          }}
         >
           <div className="flex items-center gap-4">
             <div
@@ -111,14 +120,21 @@ export default function AgentChatPage() {
                 <div
                   className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-light"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))',
+                    background:
+                      'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))',
                     border: '1px solid rgba(168, 85, 247, 0.3)',
                   }}
                 >
                   {msg.agentAvatar ? (
-                    <img src={msg.agentAvatar} alt={msg.agentName} className="w-full h-full rounded-xl object-cover" />
+                    <img
+                      src={msg.agentAvatar}
+                      alt={msg.agentName}
+                      className="w-full h-full rounded-xl object-cover"
+                    />
                   ) : (
-                    <span className="text-purple-300">{msg.agentName[0]?.toUpperCase() || 'A'}</span>
+                    <span className="text-purple-300">
+                      {msg.agentName[0]?.toUpperCase() || 'A'}
+                    </span>
                   )}
                 </div>
 
@@ -139,8 +155,14 @@ export default function AgentChatPage() {
                   <div
                     className="px-4 py-3 rounded-lg text-sm leading-relaxed"
                     style={{
-                      background: msg.type === 'user' ? 'rgba(168, 85, 247, 0.1)' : 'rgba(255, 255, 255, 0.06)',
-                      border: msg.type === 'user' ? '1px solid rgba(168, 85, 247, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
+                      background:
+                        msg.type === 'user'
+                          ? 'rgba(168, 85, 247, 0.1)'
+                          : 'rgba(255, 255, 255, 0.06)',
+                      border:
+                        msg.type === 'user'
+                          ? '1px solid rgba(168, 85, 247, 0.2)'
+                          : '1px solid rgba(255, 255, 255, 0.08)',
                       color: '#e4e4e7',
                     }}
                   >
@@ -154,10 +176,7 @@ export default function AgentChatPage() {
         </div>
 
         {/* Input Area */}
-        <div
-          className="border-t px-6 py-4"
-          style={{ borderColor: 'rgba(168, 85, 247, 0.15)' }}
-        >
+        <div className="border-t px-6 py-4" style={{ borderColor: 'rgba(168, 85, 247, 0.15)' }}>
           <div className="flex gap-3 items-end">
             <div className="flex-1">
               <label className="text-xs text-zinc-500 block mb-2">Agent Name</label>
@@ -201,7 +220,9 @@ export default function AgentChatPage() {
               disabled={!isConnected || !input.trim()}
               className="p-2.5 rounded-lg transition-all hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
               style={{
-                background: isConnected ? 'linear-gradient(135deg, #a855f7, #ec4899)' : 'rgba(255, 255, 255, 0.1)',
+                background: isConnected
+                  ? 'linear-gradient(135deg, #a855f7, #ec4899)'
+                  : 'rgba(255, 255, 255, 0.1)',
                 color: '#fff',
               }}
               title="Send message (Shift+Enter for newline)"
@@ -246,8 +267,8 @@ export default function AgentChatPage() {
                     name: msg.agentName,
                     avatar: msg.agentAvatar,
                   },
-                ])
-              ).values()
+                ]),
+              ).values(),
             ).map((agent) => (
               <div
                 key={agent.id}
@@ -266,7 +287,11 @@ export default function AgentChatPage() {
                     }}
                   >
                     {agent.avatar ? (
-                      <img src={agent.avatar} alt={agent.name} className="w-full h-full rounded-lg object-cover" />
+                      <img
+                        src={agent.avatar}
+                        alt={agent.name}
+                        className="w-full h-full rounded-lg object-cover"
+                      />
                     ) : (
                       <span className="text-purple-300">{agent.name[0]?.toUpperCase() || 'A'}</span>
                     )}

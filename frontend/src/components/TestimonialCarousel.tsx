@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface Testimonial {
   quote: string;
@@ -14,40 +14,43 @@ interface Testimonial {
 
 const TESTIMONIALS: Testimonial[] = [
   {
-    quote: "Easier than large clouds, more feature-rich than single-purpose hosting providers, Bolty lets me ship the entirety of my AI agents in one place.",
-    author: "MITCHELL HASHIMOTO",
-    role: "CO-FOUNDER",
-    company: "MARKETPLACE",
-    icon: <ShoppingCart className="w-6 h-6" />
+    quote:
+      'Easier than large clouds, more feature-rich than single-purpose hosting providers, Bolty lets me ship the entirety of my AI agents in one place.',
+    author: 'MITCHELL HASHIMOTO',
+    role: 'CO-FOUNDER',
+    company: 'MARKETPLACE',
+    icon: <ShoppingCart className="w-6 h-6" />,
   },
   {
-    quote: "The most intuitive platform we've used for deploying AI agents at scale. It just works.",
-    author: "SARAH CHEN",
-    role: "HEAD OF ENGINEERING",
-    company: "AI AGENTS",
-    icon: <Bot className="w-6 h-6" />
+    quote:
+      "The most intuitive platform we've used for deploying AI agents at scale. It just works.",
+    author: 'SARAH CHEN',
+    role: 'HEAD OF ENGINEERING',
+    company: 'AI AGENTS',
+    icon: <Bot className="w-6 h-6" />,
   },
   {
-    quote: "Zero operational overhead. We went from months of infrastructure setup to live in days.",
-    author: "ALEX RODRIGUEZ",
-    role: "FOUNDER & CEO",
-    company: "ZERO OPS",
-    icon: <Zap className="w-6 h-6" />
+    quote:
+      'Zero operational overhead. We went from months of infrastructure setup to live in days.',
+    author: 'ALEX RODRIGUEZ',
+    role: 'FOUNDER & CEO',
+    company: 'ZERO OPS',
+    icon: <Zap className="w-6 h-6" />,
   },
   {
-    quote: "The analytics capabilities are unmatched. Our insights improved 10x.",
-    author: "JAMES PARK",
-    role: "CTO",
-    company: "ANALYTICS",
-    icon: <TrendingUp className="w-6 h-6" />
+    quote: 'The analytics capabilities are unmatched. Our insights improved 10x.',
+    author: 'JAMES PARK',
+    role: 'CTO',
+    company: 'ANALYTICS',
+    icon: <TrendingUp className="w-6 h-6" />,
   },
   {
-    quote: "Finally, a platform that understands what builders need. Highly recommended.",
-    author: "ELENA VASQUEZ",
-    role: "PRODUCT LEAD",
-    company: "BOLTY",
-    icon: <Bot className="w-6 h-6" />
-  }
+    quote: 'Finally, a platform that understands what builders need. Highly recommended.',
+    author: 'ELENA VASQUEZ',
+    role: 'PRODUCT LEAD',
+    company: 'BOLTY',
+    icon: <Bot className="w-6 h-6" />,
+  },
 ];
 
 export const TestimonialCarousel = () => {
@@ -66,18 +69,18 @@ export const TestimonialCarousel = () => {
   const slideVariants = {
     enter: (dir: number) => ({
       x: dir > 0 ? 1000 : -1000,
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1
+      opacity: 1,
     },
     exit: (dir: number) => ({
       zIndex: 0,
       x: dir < 0 ? 1000 : -1000,
-      opacity: 0
-    })
+      opacity: 0,
+    }),
   };
 
   const current = TESTIMONIALS[currentIndex];
@@ -96,15 +99,12 @@ export const TestimonialCarousel = () => {
             }}
             animate={{
               opacity: idx === currentIndex ? 1 : 0.4,
-              scale: idx === currentIndex ? 1.1 : 1
+              scale: idx === currentIndex ? 1.1 : 1,
             }}
             transition={{ duration: 0.3 }}
           >
             {/* Icon */}
-            <div
-              className="mb-3"
-              style={{ color: 'rgba(59, 130, 246, 0.8)' }}
-            >
+            <div className="mb-3" style={{ color: 'rgba(59, 130, 246, 0.8)' }}>
               {testimonial.icon}
             </div>
 
@@ -120,9 +120,8 @@ export const TestimonialCarousel = () => {
             <motion.div
               className="w-12 h-px"
               style={{
-                backgroundColor: idx === currentIndex
-                  ? 'rgba(59, 130, 246, 0.8)'
-                  : 'rgba(255,255,255,0.15)'
+                backgroundColor:
+                  idx === currentIndex ? 'rgba(59, 130, 246, 0.8)' : 'rgba(255,255,255,0.15)',
               }}
               animate={{
                 scaleX: idx === currentIndex ? 1 : 1,
@@ -143,8 +142,8 @@ export const TestimonialCarousel = () => {
           animate="center"
           exit="exit"
           transition={{
-            x: { type: "spring", stiffness: 300, damping: 30 },
-            opacity: { duration: 0.5 }
+            x: { type: 'spring', stiffness: 300, damping: 30 },
+            opacity: { duration: 0.5 },
           }}
           className="text-center space-y-6"
         >
@@ -168,7 +167,7 @@ export const TestimonialCarousel = () => {
             style={{
               backgroundColor: 'rgba(59, 130, 246, 0.15)',
               color: '#3b82f6',
-              border: '1px solid rgba(59, 130, 246, 0.3)'
+              border: '1px solid rgba(59, 130, 246, 0.3)',
             }}
           >
             {current.author}, {current.role} OF {current.company}
@@ -183,12 +182,11 @@ export const TestimonialCarousel = () => {
             key={idx}
             className="h-1 rounded-full"
             style={{
-              backgroundColor: idx === currentIndex
-                ? 'rgba(59, 130, 246, 0.8)'
-                : 'rgba(255,255,255,0.2)'
+              backgroundColor:
+                idx === currentIndex ? 'rgba(59, 130, 246, 0.8)' : 'rgba(255,255,255,0.2)',
             }}
             animate={{
-              width: idx === currentIndex ? 32 : 8
+              width: idx === currentIndex ? 32 : 8,
             }}
             onClick={() => {
               setDirection(idx > currentIndex ? 1 : -1);

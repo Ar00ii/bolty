@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface RaysLeaderboardEntry {
   position: number;
@@ -70,7 +70,9 @@ export const RaysLeaderboards: React.FC = () => {
           <TrendingUp className="w-5 h-5" />
           Rays Leaderboards
         </h2>
-        <p className="text-sm text-gray-400 mt-1">Top agents and creators ranked by accumulated rays</p>
+        <p className="text-sm text-gray-400 mt-1">
+          Top agents and creators ranked by accumulated rays
+        </p>
       </div>
 
       {/* Tab Buttons */}
@@ -165,7 +167,8 @@ export const RaysLeaderboards: React.FC = () => {
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-400 mb-1">
-                      Avg: <span className="text-white font-light">{entry.avgRaysPerAgent}</span> rays
+                      Avg: <span className="text-white font-light">{entry.avgRaysPerAgent}</span>{' '}
+                      rays
                     </p>
                     <p className="text-lg font-light text-purple-400">{entry.totalRays}</p>
                   </div>

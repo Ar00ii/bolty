@@ -1,16 +1,7 @@
 'use client';
 
-import {
-  Lock,
-  CheckCircle,
-  AlertTriangle,
-  Eye,
-  EyeOff,
-  Mail,
-  KeyRound,
-  Zap,
-} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
@@ -35,11 +26,17 @@ function mapError(err: unknown): string {
     }
     if (
       msg.includes('email') &&
-      (msg.includes('exist') || msg.includes('taken') || msg.includes('use') || msg.includes('registered'))
+      (msg.includes('exist') ||
+        msg.includes('taken') ||
+        msg.includes('use') ||
+        msg.includes('registered'))
     ) {
       return 'This email is already in use.';
     }
-    if (msg.includes('username') && (msg.includes('exist') || msg.includes('taken') || msg.includes('use'))) {
+    if (
+      msg.includes('username') &&
+      (msg.includes('exist') || msg.includes('taken') || msg.includes('use'))
+    ) {
       return 'This username is already taken.';
     }
     if (msg.includes('not found') || msg.includes('no account')) {
@@ -181,7 +178,11 @@ function Field({
   const inputType = isPassword && showToggle ? (showPassword ? 'text' : 'password') : type;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <label className="block text-sm font-light text-zinc-400 mb-2">{label}</label>
       <div className="relative">
         <motion.input
@@ -216,7 +217,11 @@ function Field({
         )}
       </div>
       {hint && (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-zinc-600 mt-1">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-xs text-zinc-600 mt-1"
+        >
           {hint}
         </motion.p>
       )}
@@ -520,7 +525,9 @@ export default function AuthPage() {
                     clearMessages();
                   }}
                   className={`flex-1 py-2 text-sm font-light rounded-md transition-all ${
-                    tab === t ? 'bg-monad-500/30 text-monad-300 border border-monad-500/50' : 'text-zinc-500'
+                    tab === t
+                      ? 'bg-monad-500/30 text-monad-300 border border-monad-500/50'
+                      : 'text-zinc-500'
                   }`}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -561,7 +568,8 @@ export default function AuthPage() {
                   style={{ background: 'rgba(131,110,249,0.05)' }}
                 >
                   <p className="text-xs text-zinc-400 leading-relaxed">
-                    Two-factor authentication enabled. Enter the 6-digit code from your email. Expires in 10 minutes.
+                    Two-factor authentication enabled. Enter the 6-digit code from your email.
+                    Expires in 10 minutes.
                   </p>
                 </div>
                 <div>
@@ -570,7 +578,9 @@ export default function AuthPage() {
                     inputMode="numeric"
                     maxLength={6}
                     value={twoFactorCode}
-                    onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) =>
+                      setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                    }
                     placeholder="000000"
                     autoComplete="one-time-code"
                     className="w-full px-4 py-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-white
@@ -764,8 +774,8 @@ export default function AuthPage() {
                   By creating an account you agree to our{' '}
                   <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
                     Terms
-                  </span>
-                  {' '}and{' '}
+                  </span>{' '}
+                  and{' '}
                   <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
                     Privacy
                   </span>
@@ -789,7 +799,8 @@ export default function AuthPage() {
                   style={{ background: 'rgba(255,255,255,0.02)' }}
                 >
                   <p className="text-xs text-zinc-400 leading-relaxed">
-                    Enter your email or username. We'll send a reset link that expires in 30 minutes.
+                    Enter your email or username. We'll send a reset link that expires in 30
+                    minutes.
                   </p>
                 </div>
                 <Field
@@ -837,7 +848,10 @@ export default function AuthPage() {
                 className="space-y-4"
               >
                 <div className="flex gap-3 bg-green-500/10 border border-green-500/20 rounded-lg px-4 py-4">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" strokeWidth={2} />
+                  <CheckCircle
+                    className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5"
+                    strokeWidth={2}
+                  />
                   <div>
                     <p className="text-green-400 text-sm font-light">Check your email</p>
                     <p className="text-zinc-400 text-xs mt-1">
