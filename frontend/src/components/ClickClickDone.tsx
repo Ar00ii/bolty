@@ -97,147 +97,15 @@ export function ClickClickDone() {
               </div>
             </div>
 
-            {/* Image Container - Placeholder */}
+            {/* Image Container - Empty Placeholder */}
             <div
-              className="w-full rounded-lg border flex flex-col gap-2 p-4"
+              className="w-full rounded-lg border"
               style={{
                 aspectRatio: '9 / 10',
                 background: '#1a1a1a',
                 borderColor: '#272727',
-                fontSize: '13px',
-                color: '#888',
               }}
-            >
-              {/* Placeholder content based on step number */}
-              {step.number === '1' && (
-                <>
-                  <div style={{ color: '#666', fontSize: '12px', padding: '4px 12px' }}>
-                    📁 Your Projects
-                  </div>
-                  {[
-                    { name: 'AI Chat Agent', type: 'Agent', status: 'Live' },
-                    { name: 'Data Pipeline', type: 'Service', status: 'Live' },
-                    { name: 'API Toolkit', type: 'Repo', status: 'Live' },
-                  ].map((project, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2 p-2 rounded"
-                      style={{
-                        padding: '8px 12px',
-                        background: idx === 0 ? 'linear-gradient(90deg, #00d992, #00c9a7)' : 'transparent',
-                        color: idx === 0 ? '#000' : '#888',
-                      }}
-                    >
-                      <span>{project.name}</span>
-                      {idx !== 0 && (
-                        <span style={{ marginLeft: 'auto', color: '#00d992', fontSize: '11px' }}>
-                          ✓ {project.status}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </>
-              )}
-
-              {step.number === '2' && (
-                <>
-                  {[
-                    { label: 'Price (ETH)', value: '0.5 ETH' },
-                    { label: 'License', value: 'Commercial' },
-                    { label: 'Visibility', value: 'Public' },
-                  ].map((field, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-1.5" style={{ padding: '6px 12px' }}>
-                      <span style={{ color: '#666', fontSize: '12px', minWidth: '110px' }}>
-                        {field.label}
-                      </span>
-                      <span
-                        style={{
-                          background: '#2a2a2a',
-                          padding: '4px 10px',
-                          borderRadius: '4px',
-                          color: '#ccc',
-                          fontFamily: 'monospace',
-                          fontSize: '12px',
-                          flex: 1,
-                        }}
-                      >
-                        {field.value}
-                      </span>
-                    </div>
-                  ))}
-                  <div style={{ marginTop: 'auto', padding: '8px 12px' }}>
-                    <button
-                      style={{
-                        background: '#2a2a2a',
-                        color: '#ccc',
-                        padding: '4px 12px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        border: 'none',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Publish Now ▾
-                    </button>
-                  </div>
-                  <div style={{ color: '#00d992', fontSize: '11px', padding: '8px 12px' }}>
-                    ✓ Ready to publish
-                  </div>
-                </>
-              )}
-
-              {step.number === '3' && (
-                <>
-                  <div style={{ color: '#666', fontSize: '12px', padding: '4px 12px' }}>
-                    💰 Earnings
-                  </div>
-                  <div
-                    style={{
-                      background: '#1f1f1f',
-                      borderRadius: '6px',
-                      padding: '8px 12px',
-                      margin: '8px 12px 0 12px',
-                      fontSize: '12px',
-                    }}
-                  >
-                    <div style={{ color: '#00d992', fontSize: '18px', fontWeight: 600 }}>
-                      42.5 ETH
-                    </div>
-                    <div style={{ color: '#666', fontSize: '11px', marginTop: '4px' }}>
-                      Total earned this month
-                    </div>
-                  </div>
-                  <div style={{ height: '12px' }} />
-                  {[
-                    { buyer: 'User #2847', amount: '2.5 ETH', status: 'Completed' },
-                    { buyer: 'User #1923', amount: '5.0 ETH', status: 'Completed' },
-                    { buyer: 'User #8471', amount: '3.2 ETH', status: 'Pending' },
-                  ].map((transaction, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between"
-                      style={{ padding: '6px 12px', fontSize: '12px' }}
-                    >
-                      <div>
-                        <div style={{ color: '#ccc' }}>{transaction.buyer}</div>
-                        <div style={{ color: '#666', fontSize: '11px' }}>{transaction.amount}</div>
-                      </div>
-                      <span
-                        style={{
-                          color:
-                            transaction.status === 'Completed'
-                              ? '#00d992'
-                              : '#ffaa00',
-                          fontSize: '11px',
-                        }}
-                      >
-                        {transaction.status}
-                      </span>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
+            />
           </motion.div>
         ))}
       </div>
