@@ -1,7 +1,7 @@
 'use client';
 
 import { Send, Bot, Clock } from 'lucide-react';
-import { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState } from 'react';
 
 import { useAgentChat } from '@/lib/hooks/useAgentChat';
 

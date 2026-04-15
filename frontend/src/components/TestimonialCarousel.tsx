@@ -155,7 +155,7 @@ export const TestimonialCarousel = () => {
             className="text-2xl lg:text-3xl font-light leading-relaxed"
             style={{ color: '#ffffff' }}
           >
-            "{current.quote}"
+            &quot;{current.quote}&quot;
           </motion.p>
 
           {/* Author Tag */}

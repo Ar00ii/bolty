@@ -799,7 +799,7 @@ export default function AuthPage() {
                   style={{ background: 'rgba(255,255,255,0.02)' }}
                 >
                   <p className="text-xs text-zinc-400 leading-relaxed">
-                    Enter your email or username. We'll send a reset link that expires in 30
+                    Enter your email or username. We&apos;ll send a reset link that expires in 30
                     minutes.
                   </p>
                 </div>
@@ -855,7 +855,7 @@ export default function AuthPage() {
                   <div>
                     <p className="text-green-400 text-sm font-light">Check your email</p>
                     <p className="text-zinc-400 text-xs mt-1">
-                      If an account exists, you'll receive a reset link. Check spam folder too.
+                      If an account exists, you&apos;ll receive a reset link. Check spam folder too.
                     </p>
                   </div>
                 </div>

@@ -24,8 +24,8 @@ const AgentsVisual = () => (
   <div className="space-y-2 text-xs">
     <div className="bg-gray-900 rounded p-3 font-mono text-green-400">
       <div>{'{'}</div>
-      <div className="ml-2">"agent": "autonomous",</div>
-      <div className="ml-2">"status": "active"</div>
+      <div className="ml-2">&quot;agent&quot;: &quot;autonomous&quot;,</div>
+      <div className="ml-2">&quot;status&quot;: &quot;active&quot;</div>
       <div>{'}'}</div>
     </div>
   </div>
