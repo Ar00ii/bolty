@@ -20,6 +20,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly config: ConfigService) {
     const redisUrl = this.config.get<string>('REDIS_URL', 'redis://localhost:6379');
+    const useTls = redisUrl.startsWith('rediss://');
+
     this.client = new Redis(redisUrl, {
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
@@ -27,6 +29,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       },
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
+      ...(useTls && { tls: {} }),
+      enableOfflineQueue: false,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
     });
 
     this.client.on('error', (err) => {
