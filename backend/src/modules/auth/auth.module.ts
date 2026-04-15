@@ -18,13 +18,21 @@ import { WalletAuthService } from './wallet-auth.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') || 'changeme',
-        signOptions: {
-          expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m'),
-          algorithm: 'HS256',
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const jwtSecret = config.get<string>('JWT_SECRET');
+        if (!jwtSecret || jwtSecret.length < 32) {
+          throw new Error(
+            'CRITICAL: JWT_SECRET environment variable must be set and at least 32 characters',
+          );
+        }
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m'),
+            algorithm: 'HS256',
+          },
+        };
+      },
     }),
     UsersModule,
     EmailModule,
