@@ -25,8 +25,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { ClickClickDone } from '@/components/ClickClickDone';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { HowItWorks } from '@/components/HowItWorks';
 import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { TechStack } from '@/components/TechStack';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
@@ -321,8 +321,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <HowItWorks />
+      {/* ── CLICK CLICK DONE ── */}
+      <ClickClickDone />
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
       <section
