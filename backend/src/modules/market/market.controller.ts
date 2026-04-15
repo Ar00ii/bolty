@@ -17,6 +17,7 @@ import {
   UploadedFile,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -145,9 +146,13 @@ export class MarketController {
   }
 
   // Must be defined before :id to avoid route clash
-  @Public()
+  // Protected: only users who purchased the listing can download
   @Get('files/:key')
-  async serveFile(@Param('key') key: string, @Res() res: Response) {
+  async serveFile(
+    @Param('key') key: string,
+    @CurrentUser('id') userId: string,
+    @Res() res: Response,
+  ) {
     if (!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/.test(key)) {
       throw new NotFoundException();
     }
@@ -158,11 +163,19 @@ export class MarketController {
     }
     if (!fs.existsSync(filePath)) throw new NotFoundException('File not found');
     const meta = await this.marketService.getListingByFileKey(key);
+    if (!meta) throw new NotFoundException('Listing not found');
+
+    // Security: Verify user purchased this listing before allowing download
+    const hasPurchased = await this.marketService.userHasPurchasedListing(meta.id, userId);
+    if (!hasPurchased) {
+      throw new ForbiddenException('You do not have access to this file. Purchase the listing first.');
+    }
+
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`,
+      `attachment; filename="${(meta.fileName || key).replace(/"/g, '_')}"`,
     );
-    res.setHeader('Content-Type', meta?.fileMimeType || 'application/octet-stream');
+    res.setHeader('Content-Type', meta.fileMimeType || 'application/octet-stream');
     res.sendFile(filePath);
   }
 

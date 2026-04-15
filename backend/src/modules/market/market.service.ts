@@ -230,8 +230,15 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   async getListingByFileKey(fileKey: string) {
     return this.prisma.marketListing.findUnique({
       where: { fileKey },
-      select: { fileName: true, fileMimeType: true },
+      select: { id: true, fileName: true, fileMimeType: true },
     });
+  }
+
+  async userHasPurchasedListing(listingId: string, buyerId: string): Promise<boolean> {
+    const purchase = await this.prisma.marketPurchase.findFirst({
+      where: { listingId, buyerId },
+    });
+    return !!purchase;
   }
 
   async purchaseListing(
