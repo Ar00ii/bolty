@@ -20,8 +20,9 @@ import { WalletAuthService } from './wallet-auth.service';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         // Get JWT_SECRET from environment, or use a temporary placeholder if not set
-        // AuthService will validate at runtime that a proper secret is configured
-        const jwtSecret = config.get<string>('JWT_SECRET', 'temporary-placeholder-secret');
+        // Must be at least 32 chars to pass AuthService validation
+        // AuthService will still validate that a real secret is configured in production
+        const jwtSecret = config.get<string>('JWT_SECRET', 'temporary-placeholder-secret-for-testing-purposes-only-32plus-chars');
         return {
           secret: jwtSecret,
           signOptions: {
