@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { AuthModule } from '../auth/auth.module';
 import { DmModule } from '../dm/dm.module';
 import { EmailModule } from '../email/email.module';
 
@@ -14,7 +15,7 @@ import { NegotiationService } from './negotiation.service';
 import { NegotiationsGateway } from './negotiations.gateway';
 
 @Module({
-  imports: [EmailModule, DmModule],
+  imports: [AuthModule, EmailModule, DmModule],
   controllers: [AgentPostsController, MarketController],
   providers: [
     MarketService,
