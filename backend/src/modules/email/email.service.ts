@@ -422,4 +422,115 @@ export class EmailService {
     const text = `Your Bolty API key revocation code: ${code}\n\nExpires in 10 minutes.`;
     await this.send(to, subject, html, text);
   }
+
+  // ── Notification Emails ────────────────────────────────────────────────────
+
+  async sendApiErrorNotification(to: string, errors: Array<{ endpoint: string; error: string; timestamp: string }>): Promise<void> {
+    const subject = 'Alert: API Errors Detected on Your Bolty Account';
+    const errorsList = errors
+      .map(
+        (e) => `
+      <tr>
+        <td style="padding:12px;border-bottom:1px solid #e4e4e7;font-size:13px;">
+          <div style="color:#18181b;font-weight:600;">${e.endpoint}</div>
+          <div style="color:#71717a;margin-top:4px;">${e.error}</div>
+          <div style="color:#a1a1aa;font-size:12px;margin-top:4px;">${new Date(e.timestamp).toLocaleString()}</div>
+        </td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    const html = this.shell(
+      subject,
+      'Your API experienced errors in the last hour',
+      bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">⚠️ API Errors Detected</h1>
+      <p style="margin:0 0 16px;color:#71717a;font-size:15px;line-height:1.6;">
+        Your API experienced ${errors.length} error(s) in the last hour. Details below:
+      </p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e4e4e7;border-radius:8px;overflow:hidden;">
+        ${errorsList}
+      </table>
+      <p style="margin:16px 0 0;font-size:13px;color:#71717a;">
+        <a href="${this.appUrl}/profile?tab=usage" style="color:#a855f7;text-decoration:none;font-weight:600;">View API Dashboard →</a>
+      </p>
+    `),
+    );
+    const text = `API Errors: ${errors.length} errors detected. Check your Bolty dashboard for details.`;
+    await this.send(to, subject, html, text);
+  }
+
+  async sendWeeklyUsageReport(
+    to: string,
+    username: string,
+    stats: {
+      totalCalls: number;
+      activeAgents: number;
+      topEndpoint: string;
+      topError?: string;
+    },
+  ): Promise<void> {
+    const subject = `Weekly Usage Report — ${stats.totalCalls} API calls`;
+    const html = this.shell(
+      subject,
+      `${username}, here's your weekly Bolty usage summary`,
+      bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Weekly Usage Report</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        Hi ${username}, here's a summary of your API usage this week.
+      </p>
+      <div style="background:#f4f4f5;border-radius:10px;padding:20px;margin-bottom:20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div>
+            <div style="color:#a1a1aa;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Total API Calls</div>
+            <div style="color:#09090b;font-size:32px;font-weight:700;margin-top:8px;">${stats.totalCalls.toLocaleString()}</div>
+          </div>
+          <div>
+            <div style="color:#a1a1aa;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Active Agents</div>
+            <div style="color:#09090b;font-size:32px;font-weight:700;margin-top:8px;">${stats.activeAgents}</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#f9f5ff;border-left:4px solid #a855f7;padding:16px;border-radius:6px;margin-bottom:20px;">
+        <p style="margin:0;color:#5b21b6;font-size:13px;">
+          <strong>Top Endpoint:</strong> ${stats.topEndpoint || 'N/A'}
+        </p>
+        ${stats.topError ? `<p style="margin:8px 0 0;color:#5b21b6;font-size:13px;"><strong>Most Common Error:</strong> ${stats.topError}</p>` : ''}
+      </div>
+      <p style="margin:0;font-size:13px;color:#71717a;">
+        <a href="${this.appUrl}/profile?tab=usage" style="color:#a855f7;text-decoration:none;font-weight:600;">View Full Analytics →</a>
+      </p>
+    `),
+    );
+    const text = `Weekly Usage: ${stats.totalCalls} API calls, ${stats.activeAgents} active agents.`;
+    await this.send(to, subject, html, text);
+  }
+
+  async sendOrderUpdateNotification(
+    to: string,
+    username: string,
+    orderInfo: { orderId: string; status: string; message: string },
+  ): Promise<void> {
+    const subject = `Order Update: ${orderInfo.status}`;
+    const html = this.shell(
+      subject,
+      `Order #${orderInfo.orderId.substring(0, 8)} ${orderInfo.status.toLowerCase()}`,
+      bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">Order Update</h1>
+      <p style="margin:0 0 16px;color:#71717a;font-size:15px;line-height:1.6;">
+        Hi ${username}, your order has been updated:
+      </p>
+      <div style="background:#f4f4f5;border-radius:10px;padding:16px;margin-bottom:20px;">
+        <p style="margin:0;color:#09090b;font-weight:600;">Order #${orderInfo.orderId.substring(0, 12)}</p>
+        <p style="margin:8px 0 0;color:#71717a;font-size:14px;">${orderInfo.message}</p>
+      </div>
+      <p style="margin:0;font-size:13px;color:#71717a;">
+        <a href="${this.appUrl}/orders/${orderInfo.orderId}" style="color:#a855f7;text-decoration:none;font-weight:600;">View Order →</a>
+      </p>
+    `),
+    );
+    const text = `Order #${orderInfo.orderId.substring(0, 8)}: ${orderInfo.status}`;
+    await this.send(to, subject, html, text);
+  }
 }

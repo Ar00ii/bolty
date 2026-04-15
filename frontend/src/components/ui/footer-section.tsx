@@ -39,7 +39,7 @@ const footerLinks: FooterSection[] = [
     label: 'Community',
     links: [
       { title: 'Global Chat', href: '/chat' },
-      { title: 'Leaderboard', href: '/reputation/leaderboard' },
+      { title: 'Boost System', href: '/#boost-marketplace' },
       { title: 'GitHub', href: 'https://github.com/boltynetwork', external: true },
       { title: 'Twitter', href: 'https://x.com/boltynetwork', external: true },
     ],

@@ -17,6 +17,8 @@ import {
   Code2,
   Trophy,
   ChevronRight,
+  Zap,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -71,6 +73,16 @@ export function Sidebar() {
 
   const navSections: NavSection[] = [
     {
+      label: 'Home',
+      icon: Home,
+      href: '/',
+    },
+    {
+      label: 'Profile',
+      icon: User,
+      href: '/profile',
+    },
+    {
       label: 'Dashboard',
       icon: Home,
       href: '/market',
@@ -105,12 +117,20 @@ export function Sidebar() {
       ],
     },
     {
+      label: 'Boost',
+      icon: Zap,
+      href: '/profile?tab=agent',
+      children: [
+        { label: 'Buy Boost', href: '/profile?tab=agent', icon: ShoppingCart },
+        { label: 'My Agent Boost', href: '/profile?tab=agent', icon: Zap },
+      ],
+    },
+    {
       label: 'Services',
       icon: Briefcase,
       href: '/services',
       children: [
         { label: 'Browse', href: '/services', icon: Briefcase },
-        { label: 'Leaderboard', href: '/reputation/leaderboard', icon: Trophy },
       ],
     },
     {
@@ -205,7 +225,7 @@ export function Sidebar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <div className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+            <div className="text-sm font-light text-zinc-300 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-purple-500 shadow-lg shadow-purple-500/50" />
               Navigation
             </div>

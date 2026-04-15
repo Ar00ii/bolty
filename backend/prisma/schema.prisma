@@ -28,6 +28,7 @@ model User {
   email            String?   @unique
   passwordHash     String?
   twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?   // TOTP secret for Authenticator apps
 
   // GitHub OAuth
   githubId      String?   @unique
@@ -62,7 +63,7 @@ model User {
   // Reputation
   reputationPoints Int @default(0)
 
-  // Personal buyer negotiation agent webhook URL
+  // Personal buyer negotiation agent webhook URL (legacy, kept for backward compatibility)
   agentEndpoint String?
 
   // Relations
@@ -87,6 +88,10 @@ model User {
   serviceListings        ServiceListing[]
   certifications         UserCertification[]
   apiKeys                UserApiKey[]
+  notificationPreference NotificationPreference?
+  integrations           UserIntegration[]
+  aiAgents               Agent[]
+  raysPurchases          RaysPurchase[]
 
   @@map("users")
 }
@@ -732,4 +737,203 @@ enum VerificationPurpose {
   DELETE_API_KEY
   SETUP_2FA
   CHANGE_EMAIL
+}
+
+// ─── Notification Preferences ─────────────────────────────────────────────────
+
+model NotificationPreference {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email notifications
+  emailOnErrors       Boolean   @default(true)      // API errors & failures
+  emailWeeklyReport   Boolean   @default(true)      // Weekly usage summary
+  emailMonthlyReport  Boolean   @default(false)     // Monthly newsletter
+  emailDeploymentAlerts Boolean @default(true)     // Agent deployments
+  emailOrderUpdates   Boolean   @default(true)      // Order status changes
+  emailMessages       Boolean   @default(true)      // New messages in orders/DMs
+
+  @@map("notification_preferences")
+}
+
+// ─── User Integrations ─────────────────────────────────────────────────────────
+
+model UserIntegration {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  provider  String    // e.g., "slack", "github", "webhook"
+  name      String    // e.g., "My Slack Workspace"
+  connected Boolean   @default(false)
+
+  // OAuth token or API key (encrypted)
+  credential String?   @db.Text  // would be encrypted in production
+
+  connectedAs String?  // e.g., username or email
+  lastUsedAt DateTime?
+
+  @@unique([userId, provider, name])
+  @@index([userId, provider])
+  @@map("user_integrations")
+}
+
+// ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────
+
+model Agent {
+  id          String           @id @default(cuid())
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  name        String           // e.g., "Negotiation Bot v2"
+  description String?          @db.Text
+  status      AgentStatus      @default(INACTIVE)
+  webhookUrl  String           @db.Text
+
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  metrics     AgentMetrics?
+  activityLog AgentActivityLog[]
+  raysPurchases RaysPurchase[]
+  rays        AgentRays?
+
+  @@index([userId])
+  @@map("agents")
+}
+
+enum AgentStatus {
+  ACTIVE
+  INACTIVE
+  TESTING
+  ERROR
+}
+
+model AgentMetrics {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  totalCalls      Int       @default(0)
+  successfulCalls Int       @default(0)
+  failedCalls     Int       @default(0)
+  avgResponseTime Int       @default(0)      // in milliseconds
+  lastCallAt      DateTime?
+
+  agentId         String    @unique
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@map("agent_metrics")
+}
+
+model AgentActivityLog {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  action          String    // e.g., "webhook_call", "negotiation_started", "agreement_reached"
+  status          ActivityStatus
+  metadata        Json?     // store context like negotiation details
+  responseTime    Int?      // in milliseconds
+
+  agentId         String
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agentId, createdAt])
+  @@map("agent_activity_logs")
+}
+
+enum ActivityStatus {
+  SUCCESS
+  FAILED
+  PENDING
+  TIMEOUT
+}
+
+// ─── RAYOS SYSTEM ──────────────────────────────────────────────────────────────
+
+model RaysPurchase {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  agentId         String
+  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  raysPack        RaysPack  // 10, 25, 50, 120, 250
+  raysAmount      Int       // Actual rays purchased
+  boltyAmount     Decimal   // Amount paid in BOLTY
+
+  txHash          String?   // Blockchain transaction hash (optional, for tracking)
+  status          PurchaseStatus @default(COMPLETED)
+
+  @@index([userId, agentId])
+  @@index([createdAt])
+  @@map("rays_purchases")
+}
+
+enum RaysPack {
+  PACK_10
+  PACK_25
+  PACK_50
+  PACK_120
+  PACK_250
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model AgentRays {
+  id                  String    @id @default(cuid())
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  agentId             String    @unique
+  agent               Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  totalRaysAccumulated Int      @default(0)  // Total rayos de por vida
+  currentRank         AgentRank @default(HIERRO)
+
+  lastRankUpAt        DateTime?
+  rankHistory         RankHistory[]
+
+  @@map("agent_rays")
+}
+
+enum AgentRank {
+  HIERRO
+  BRONCE
+  PLATA
+  ORO
+  PLATINO
+  DIAMANTE
+  MAESTRIA
+  CAMPEON
+}
+
+model RankHistory {
+  id              String    @id @default(cuid())
+  createdAt       DateTime  @default(now())
+
+  agentRaysId     String
+  agentRays       AgentRays @relation(fields: [agentRaysId], references: [id], onDelete: Cascade)
+
+  previousRank    AgentRank
+  newRank         AgentRank
+  totalRaysAt     Int
+
+  @@index([agentRaysId, createdAt])
+  @@map("rank_history")
 }

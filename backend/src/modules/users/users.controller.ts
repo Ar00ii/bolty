@@ -7,6 +7,7 @@ import {
   Get,
   Patch,
   Post,
+  Delete,
   Param,
   Query,
   Body,
@@ -151,6 +152,61 @@ export class UsersController {
   @Get('search')
   searchUsers(@Query('q') q: string) {
     return this.usersService.search(q || '');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('preferences/notifications')
+  getNotificationPreferences(@CurrentUser('id') userId: string) {
+    return this.usersService.getNotificationPreferences(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('preferences/notifications')
+  updateNotificationPreferences(
+    @CurrentUser('id') userId: string,
+    @Body() data: {
+      emailOnErrors?: boolean;
+      emailWeeklyReport?: boolean;
+      emailMonthlyReport?: boolean;
+      emailDeploymentAlerts?: boolean;
+      emailOrderUpdates?: boolean;
+      emailMessages?: boolean;
+    },
+  ) {
+    return this.usersService.updateNotificationPreferences(userId, data);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('activity-log')
+  getActivityLog(@CurrentUser('id') userId: string, @Query('limit') limit?: string) {
+    return this.usersService.getActivityLog(userId, limit ? parseInt(limit) : 50);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('usage-stats')
+  getUsageStats(@CurrentUser('id') userId: string) {
+    return this.usersService.getUsageStats(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('integrations')
+  getUserIntegrations(@CurrentUser('id') userId: string) {
+    return this.usersService.getUserIntegrations(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('integrations')
+  addIntegration(
+    @CurrentUser('id') userId: string,
+    @Body() body: { provider: string; name: string; connectedAs?: string },
+  ) {
+    return this.usersService.addIntegration(userId, body.provider, body.name, body.connectedAs);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('integrations/:id')
+  removeIntegration(@CurrentUser('id') userId: string, @Param('id') integrationId: string) {
+    return this.usersService.removeIntegration(userId, integrationId);
   }
 
   @Public()
