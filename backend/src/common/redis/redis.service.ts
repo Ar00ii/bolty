@@ -30,9 +30,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
       ...(useTls && { tls: {} }),
-      enableOfflineQueue: false,
       connectTimeout: 10000,
-      commandTimeout: 5000,
     });
 
     this.client.on('error', (err) => {
