@@ -6,6 +6,8 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { CsrfGuard } from './common/guards/csrf.guard';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { AgentsModule } from './modules/agents/agents.module';
@@ -68,6 +70,16 @@ import { UsersModule } from './modules/users/users.module';
     ServicesModule,
   ],
   providers: [
+    // Global JWT authentication guard (default: all routes require auth, use @Public() to exempt)
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    // Global CSRF protection guard (double-submit cookie pattern)
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
+    },
     // Global rate limiting guard
     {
       provide: APP_GUARD,

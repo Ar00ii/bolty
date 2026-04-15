@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   WebSocketGateway,
@@ -67,6 +68,7 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly dmService: DmService,
     private readonly jwtService: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
   async handleConnection(client: Socket) {
@@ -83,7 +85,15 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      const payload = this.jwtService.verify<{ sub: string; username: string }>(token);
+      // Verify JWT with explicit secret
+      const jwtSecret = this.config.get<string>('JWT_SECRET');
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+
+      const payload = this.jwtService.verify<{ sub: string; username: string }>(token, {
+        secret: jwtSecret,
+      });
       (client as AuthenticatedSocket).userId = payload.sub;
       (client as AuthenticatedSocket).username = payload.username || 'anon';
 

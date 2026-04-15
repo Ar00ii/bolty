@@ -18,13 +18,18 @@ import { WalletAuthService } from './wallet-auth.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') || 'changeme',
-        signOptions: {
-          expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m'),
-          algorithm: 'HS256',
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        // Get JWT_SECRET from environment, or use a temporary placeholder if not set
+        // AuthService will validate at runtime that a proper secret is configured
+        const jwtSecret = config.get<string>('JWT_SECRET', 'temporary-placeholder-secret');
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: config.get<string>('JWT_EXPIRES_IN', '15m'),
+            algorithm: 'HS256',
+          },
+        };
+      },
     }),
     UsersModule,
     EmailModule,

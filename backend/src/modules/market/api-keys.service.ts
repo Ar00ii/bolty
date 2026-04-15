@@ -4,12 +4,16 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { RedisService } from '../../common/redis/redis.service';
 import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class ApiKeysService {
+  private readonly VERIFICATION_CODE_TTL = 600; // 10 minutes
+
   constructor(
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
     private readonly email: EmailService,
   ) {}
 
@@ -84,7 +88,7 @@ export class ApiKeysService {
 
   /**
    * Request a verification code to delete an API key
-   * TODO: Implement verification code storage (requires adding verificationCode table to Prisma schema)
+   * Code is sent via email and stored in Redis with 10-minute TTL
    */
   async requestDeleteVerification(userId: string, keyId: string, userEmail: string) {
     // Verify that the key belongs to the user
@@ -96,42 +100,34 @@ export class ApiKeysService {
       throw new BadRequestException('API key not found or does not belong to you');
     }
 
-    // Generate verification code
+    // Generate verification code (6 digits)
     const code = this.generateVerificationCode();
 
-    // TODO: Delete old codes for this purpose/email/key
-    // await this.prisma.verificationCode.deleteMany({...})
+    // Hash the code for storage (never store plaintext)
+    const hashedCode = await bcrypt.hash(code, 10);
 
-    // TODO: Create new verification code (valid for 10 minutes)
-    // const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    // await this.prisma.verificationCode.create({...})
+    // Store hashed code in Redis with TTL (key: `api-key-delete:${userId}:${keyId}`)
+    const redisKey = `api-key-delete:${userId}:${keyId}`;
+    await this.redis.set(redisKey, hashedCode);
+    await this.redis.expire(redisKey, this.VERIFICATION_CODE_TTL);
 
     // Send verification code email
     await this.email.sendApiKeyDeleteCode(userEmail, code);
 
     return {
       success: true,
-      message: 'Verification code sent to your email',
+      message: 'Verification code sent to your email. Valid for 10 minutes.',
     };
   }
 
   /**
    * Verify code and delete API key
-   * TODO: Implement verification code validation (requires adding verificationCode table to Prisma schema)
+   * Code must match the one sent to user's email, valid for 10 minutes
    */
-  async verifyAndDeleteApiKey(userId: string, keyId: string, _code: string) {
-    // Get user email
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { email: true },
-    });
-
-    if (!user?.email) {
-      throw new BadRequestException('User email not found');
+  async verifyAndDeleteApiKey(userId: string, keyId: string, code: string) {
+    if (!code || code.trim().length !== 6) {
+      throw new BadRequestException('Invalid verification code');
     }
-
-    // TODO: Find verification code
-    // const verificationCode = await this.prisma.verificationCode.findUnique({...})
 
     // Verify the key belongs to user
     const apiKey = await this.prisma.userApiKey.findUnique({
@@ -142,13 +138,27 @@ export class ApiKeysService {
       throw new BadRequestException('API key not found or does not belong to you');
     }
 
-    // Delete the key
+    // Retrieve stored hashed code from Redis
+    const redisKey = `api-key-delete:${userId}:${keyId}`;
+    const hashedCode = await this.redis.get(redisKey);
+
+    if (!hashedCode) {
+      throw new BadRequestException('Verification code expired or not found. Request a new one.');
+    }
+
+    // Verify code with timing-safe comparison
+    const isValid = await bcrypt.compare(code, hashedCode);
+    if (!isValid) {
+      throw new BadRequestException('Invalid verification code');
+    }
+
+    // Delete the API key
     await this.prisma.userApiKey.delete({
       where: { id: keyId },
     });
 
-    // TODO: Mark code as verified and delete it
-    // await this.prisma.verificationCode.delete({...})
+    // Clean up Redis (remove the used code)
+    await this.redis.del(redisKey);
 
     return { success: true, message: 'API key revoked successfully' };
   }

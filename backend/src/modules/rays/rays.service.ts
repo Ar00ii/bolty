@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AgentRank, RaysPack, PurchaseStatus } from '@prisma/client';
 
@@ -57,9 +58,18 @@ export class RaysService {
 
   /**
    * Purchase rays for an agent
-   * In production, this would verify wallet signature or handle payment
+   * SECURITY: Requires on-chain payment verification
+   * - Accepts txHash (blockchain transaction)
+   * - Verifies transaction succeeded and amount matches pack price
+   * - Only marks as COMPLETED after verification
    */
-  async purchaseRays(userId: string, agentId: string, pack: RaysPack) {
+  async purchaseRays(
+    userId: string,
+    agentId: string,
+    pack: RaysPack,
+    txHash: string,
+    amountWei: string,
+  ) {
     const packConfig = this.getPackConfig(pack);
 
     // Verify agent exists and belongs to user
@@ -70,7 +80,56 @@ export class RaysService {
     if (!agent) throw new BadRequestException('Agent not found');
     if (agent.userId !== userId) throw new BadRequestException('Not authorized');
 
-    // Create purchase record
+    // Check txHash not already used (prevent replay attacks)
+    const existingPurchase = await this.prisma.raysPurchase.findFirst({
+      where: { AND: [{ userId }, { txHash }] },
+    });
+    if (existingPurchase) {
+      throw new BadRequestException(
+        'This transaction has already been recorded for a Rays purchase',
+      );
+    }
+
+    // ── Verify blockchain transaction ────────────────────────────────────
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const paymentWallet = this.config.get<string>('PAYMENT_WALLET', '');
+
+    if (!paymentWallet) {
+      throw new BadRequestException('Payment wallet not configured');
+    }
+
+    try {
+      const provider = new ethers.JsonRpcProvider(rpcUrl);
+      const receipt = await provider.getTransactionReceipt(txHash);
+
+      // Verify transaction succeeded
+      if (!receipt || receipt.status !== 1) {
+        throw new BadRequestException('Transaction failed or not found on blockchain');
+      }
+
+      const tx = await provider.getTransaction(txHash);
+      if (!tx) throw new BadRequestException('Transaction not found');
+
+      // Verify payment was sent to correct wallet
+      if (tx.to?.toLowerCase() !== paymentWallet.toLowerCase()) {
+        throw new BadRequestException('Payment was not sent to the correct wallet');
+      }
+
+      // Verify amount matches pack price (in BOLTY wei)
+      const expectedAmountWei = ethers.parseEther(packConfig.boltyPrice.toString());
+      if (tx.value !== expectedAmountWei) {
+        throw new BadRequestException(
+          `Payment amount mismatch. Expected ${expectedAmountWei}, received ${tx.value}`,
+        );
+      }
+    } catch (err) {
+      if (err instanceof BadRequestException) throw err;
+      throw new BadRequestException(
+        `Blockchain verification failed: ${(err as Error).message}`,
+      );
+    }
+
+    // Create purchase record with COMPLETED status (verification succeeded)
     const purchase = await this.prisma.raysPurchase.create({
       data: {
         userId,
@@ -78,6 +137,7 @@ export class RaysService {
         raysPack: pack,
         raysAmount: packConfig.rays,
         boltyAmount: packConfig.boltyPrice.toString(),
+        txHash,
         status: PurchaseStatus.COMPLETED,
       },
     });

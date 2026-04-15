@@ -1,77 +1,113 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 
-interface CacheEntry {
-  value: string;
-  expiresAt: number | null;
-}
-
+/**
+ * Redis Service — wrapper around ioredis for cache, rate limiting, and session storage
+ *
+ * This service provides persistent, distributed storage across multiple server instances.
+ * Critical for:
+ * - Rate limiting (brute force protection, login attempts)
+ * - Nonce storage (replay attack prevention in wallet auth)
+ * - Session/token validation
+ * - Temporary verification codes (2FA, API key deletion)
+ * - WebSocket user tracking
+ */
 @Injectable()
-export class RedisService {
+export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  private readonly store = new Map<string, CacheEntry>();
+  private client: Redis;
 
-  constructor() {
-    // Cleanup expired entries every 60 seconds
-    setInterval(() => this.cleanup(), 60000);
-    this.logger.log('In-memory cache initialized (no Redis required)');
+  constructor(private readonly config: ConfigService) {
+    const redisUrl = this.config.get<string>('REDIS_URL', 'redis://localhost:6379');
+    this.client = new Redis(redisUrl, {
+      retryStrategy: (times: number) => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
+      maxRetriesPerRequest: 3,
+      enableReadyCheck: true,
+    });
+
+    this.client.on('error', (err) => {
+      this.logger.error(`Redis error: ${err.message}`);
+    });
+
+    this.client.on('connect', () => {
+      this.logger.log('Connected to Redis');
+    });
+
+    this.client.on('reconnecting', () => {
+      this.logger.warn('Reconnecting to Redis...');
+    });
+  }
+
+  async onModuleInit(): Promise<void> {
+    // Verify Redis connection at startup
+    try {
+      await this.client.ping();
+      this.logger.log('Redis service initialized and verified');
+    } catch (err) {
+      this.logger.error(`Failed to connect to Redis: ${(err as Error).message}`);
+      throw err;
+    }
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.client.quit();
+    this.logger.log('Redis connection closed');
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
-    this.store.set(key, {
-      value,
-      expiresAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : null,
-    });
+    if (ttlSeconds) {
+      await this.client.setex(key, ttlSeconds, value);
+    } else {
+      await this.client.set(key, value);
+    }
   }
 
   async get(key: string): Promise<string | null> {
-    const entry = this.store.get(key);
-    if (!entry) return null;
-    if (entry.expiresAt && Date.now() > entry.expiresAt) {
-      this.store.delete(key);
-      return null;
-    }
-    return entry.value;
+    return this.client.get(key);
   }
 
   async del(key: string): Promise<void> {
-    this.store.delete(key);
+    await this.client.del(key);
   }
 
   async exists(key: string): Promise<boolean> {
-    return (await this.get(key)) !== null;
+    const result = await this.client.exists(key);
+    return result > 0;
   }
 
   async incr(key: string): Promise<number> {
-    const current = await this.get(key);
-    const value = current ? parseInt(current, 10) + 1 : 1;
-    const entry = this.store.get(key);
-    this.store.set(key, {
-      value: String(value),
-      expiresAt: entry?.expiresAt ?? null,
-    });
-    return value;
+    return this.client.incr(key);
   }
 
   async expire(key: string, seconds: number): Promise<void> {
-    const entry = this.store.get(key);
-    if (entry) {
-      this.store.set(key, { ...entry, expiresAt: Date.now() + seconds * 1000 });
-    }
+    await this.client.expire(key, seconds);
   }
 
   async ttl(key: string): Promise<number> {
-    const entry = this.store.get(key);
-    if (!entry || !entry.expiresAt) return -1;
-    const remaining = Math.ceil((entry.expiresAt - Date.now()) / 1000);
-    return remaining > 0 ? remaining : -2;
+    return this.client.ttl(key);
   }
 
-  private cleanup(): void {
-    const now = Date.now();
-    for (const [key, entry] of this.store.entries()) {
-      if (entry.expiresAt && now > entry.expiresAt) {
-        this.store.delete(key);
-      }
-    }
+  /**
+   * Increment with automatic expiration (for rate limiting)
+   * Returns the new counter value
+   */
+  async incrWithExpire(key: string, seconds: number): Promise<number> {
+    const pipeline = this.client.pipeline();
+    pipeline.incr(key);
+    pipeline.expire(key, seconds);
+    const results = await pipeline.exec();
+    if (!results || !Array.isArray(results[0])) throw new Error('Redis pipeline failed');
+    return results[0][1] as number;
+  }
+
+  /**
+   * Get Redis client for advanced operations
+   */
+  getClient(): Redis {
+    return this.client;
   }
 }

@@ -17,6 +17,7 @@ import {
   UploadedFile,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -90,6 +91,14 @@ const ALLOWED_MIMETYPES = new Set([
   'text/x-toml',
 ]);
 
+// SVG files can contain embedded JavaScript — always reject them
+const BLOCKED_MIMETYPES = new Set([
+  'image/svg+xml',
+  'text/svg',
+  'application/svg',
+  'application/svg+xml',
+]);
+
 @UseGuards(JwtAuthGuard)
 @Controller('market')
 export class MarketController {
@@ -145,9 +154,13 @@ export class MarketController {
   }
 
   // Must be defined before :id to avoid route clash
-  @Public()
+  // Protected: only users who purchased the listing can download
   @Get('files/:key')
-  async serveFile(@Param('key') key: string, @Res() res: Response) {
+  async serveFile(
+    @Param('key') key: string,
+    @CurrentUser('id') userId: string,
+    @Res() res: Response,
+  ) {
     if (!/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/.test(key)) {
       throw new NotFoundException();
     }
@@ -158,11 +171,19 @@ export class MarketController {
     }
     if (!fs.existsSync(filePath)) throw new NotFoundException('File not found');
     const meta = await this.marketService.getListingByFileKey(key);
+    if (!meta) throw new NotFoundException('Listing not found');
+
+    // Security: Verify user purchased this listing before allowing download
+    const hasPurchased = await this.marketService.userHasPurchasedListing(meta.id, userId);
+    if (!hasPurchased) {
+      throw new ForbiddenException('You do not have access to this file. Purchase the listing first.');
+    }
+
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${(meta?.fileName || key).replace(/"/g, '_')}"`,
+      `attachment; filename="${(meta.fileName || key).replace(/"/g, '_')}"`,
     );
-    res.setHeader('Content-Type', meta?.fileMimeType || 'application/octet-stream');
+    res.setHeader('Content-Type', meta.fileMimeType || 'application/octet-stream');
     res.sendFile(filePath);
   }
 
@@ -196,6 +217,20 @@ export class MarketController {
       }),
       limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (_req, file, cb) => {
+        // Reject explicitly blocked MIME types (SVG, etc.)
+        if (BLOCKED_MIMETYPES.has(file.mimetype)) {
+          cb(new BadRequestException(`File type not allowed: ${file.mimetype}`), false);
+          return;
+        }
+
+        // Reject SVG file extensions even if MIME type is misclassified
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext === '.svg') {
+          cb(new BadRequestException('SVG files are not allowed (security risk)'), false);
+          return;
+        }
+
+        // Allow explicitly whitelisted MIME types or any text/* type (safe for text editors)
         if (ALLOWED_MIMETYPES.has(file.mimetype) || file.mimetype.startsWith('text/')) {
           cb(null, true);
         } else {

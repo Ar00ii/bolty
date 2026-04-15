@@ -152,6 +152,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
   @Post('2fa/enable/request')
   async request2FAEnable(@CurrentUser('id') userId: string) {
     const { qrCode, secret } = await this.authService.request2FAEnable(userId);
@@ -159,6 +162,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('2fa/enable')
   async enable2FA(@CurrentUser('id') userId: string, @Body() dto: Enable2FADto) {
@@ -167,6 +171,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('2fa/disable')
   async disable2FA(@CurrentUser('id') userId: string, @Body() dto: Toggle2FADto) {
@@ -186,6 +191,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('email/confirm')
   async confirmEmailChange(@CurrentUser('id') userId: string, @Body() dto: ConfirmEmailChangeDto) {
@@ -368,6 +374,9 @@ export class AuthController {
   // ── Token Refresh ─────────────────────────────────────────────────────────
 
   @Public()
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  @Throttle({ default: { limit: 30, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refreshToken(@Req() req: Request, @Res() res: Response) {

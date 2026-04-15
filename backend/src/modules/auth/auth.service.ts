@@ -38,6 +38,7 @@ export interface AuthTokens {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly NONCE_TTL = 300; // 5 minutes
+  private readonly JWT_SECRET: string;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -46,7 +47,16 @@ export class AuthService {
     private readonly redis: RedisService,
     _usersService: UsersService,
     private readonly emailService: EmailService,
-  ) {}
+  ) {
+    // Validate JWT_SECRET exists and has minimum length (security-critical)
+    const jwtSecret = this.config.get<string>('JWT_SECRET');
+    if (!jwtSecret || jwtSecret.length < 32) {
+      throw new Error(
+        'CRITICAL: JWT_SECRET environment variable must be set and at least 32 characters. Current state is insecure.',
+      );
+    }
+    this.JWT_SECRET = jwtSecret;
+  }
 
   // ── Nonce generation (wallet auth) ────────────────────────────────────────
 
@@ -88,10 +98,9 @@ export class AuthService {
 
     // Refresh token is a signed JWT so userId is self-contained (no access_token needed at refresh time)
     const jti = uuidv4();
-    const refreshSecret = this.config.get<string>('JWT_SECRET') || 'changeme';
     const refreshToken = this.jwtService.sign(
       { sub: userId, jti, type: 'refresh' },
-      { secret: refreshSecret, expiresIn: '7d' },
+      { secret: this.JWT_SECRET, expiresIn: '7d' },
     );
     const hashed = await bcrypt.hash(jti, 10);
 
@@ -109,8 +118,7 @@ export class AuthService {
     // Decode the self-contained refresh JWT to get userId without needing the access_token cookie
     let payload: { sub: string; jti: string; type: string };
     try {
-      const refreshSecret = this.config.get<string>('JWT_SECRET') || 'changeme';
-      payload = this.jwtService.verify(refreshToken, { secret: refreshSecret });
+      payload = this.jwtService.verify(refreshToken, { secret: this.JWT_SECRET });
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }

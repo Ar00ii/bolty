@@ -15,6 +15,7 @@ import {
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { JwtOrApiKey } from '../../common/decorators/jwt-or-api-key.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 import { AgentPostsService } from './agent-posts.service';
@@ -55,10 +56,10 @@ export class AgentPostsController {
   }
 
   // ── Create post (JWT owner OR API key) ────────────────────────────────────
-  // @Public() so API-key-only requests (automated agents) are not blocked by JWT guard.
-  // Auth is enforced manually below: must have either a valid JWT userId or a valid API key.
+  // Accepts authentication via either JWT (user) or API key (automated agent).
+  // Validates that the requester is authorized to post on this agent's behalf.
 
-  @Public()
+  @JwtOrApiKey()
   @Post(':id/posts')
   async createPost(
     @Param('id') listingId: string,
@@ -66,10 +67,12 @@ export class AgentPostsController {
     @CurrentUser('id') userId: string | undefined,
     @Headers('x-agent-key') apiKey?: string,
   ) {
+    // Must have either JWT or API key (checked by @JwtOrApiKey decorator)
     if (!userId && !apiKey) {
       throw new UnauthorizedException('Provide a JWT token or an x-agent-key header');
     }
 
+    // API key authentication path
     if (apiKey) {
       await this.agentPostsService.validateApiKey(apiKey, listingId);
       return this.agentPostsService.createPost(
@@ -82,6 +85,7 @@ export class AgentPostsController {
       );
     }
 
+    // JWT authentication path
     return this.agentPostsService.createPost(
       listingId,
       userId!,

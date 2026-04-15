@@ -2,10 +2,31 @@ import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 const SANDBOX_TIMEOUT_MS = 10_000;
+
+/**
+ * ⚠️ SECURITY: Agent Sandbox Limitations
+ *
+ * This sandbox uses simple process spawning without container isolation.
+ * It provides basic protection but is NOT suitable for untrusted code in production.
+ *
+ * Current limitations:
+ * - No memory/CPU limits (except timeout)
+ * - Filesystem access not isolated (can read other files)
+ * - Can make outbound network requests
+ * - No resource quotas
+ *
+ * For production use with untrusted agents, recommend:
+ * - Docker containers with resource limits
+ * - gVisor/Firecracker for stronger isolation
+ * - Network egress filtering
+ * - Filesystem mounts restricted to specific paths
+ *
+ * See SECURITY FIX #1 for container isolation plan.
+ */
 
 export interface SandboxContext {
   event: 'negotiation.start' | 'negotiation.message';
@@ -52,7 +73,17 @@ export class AgentSandboxService {
       return null;
     }
 
+    // ── Path traversal prevention ─────────────────────────────────────────
+    // Validate that fileKey doesn't escape the uploads directory
     const scriptPath = path.join(UPLOADS_DIR, fileKey);
+    const normalizedPath = path.normalize(scriptPath);
+    const normalizedDir = path.normalize(UPLOADS_DIR);
+
+    if (!normalizedPath.startsWith(normalizedDir)) {
+      this.logger.error(`Path traversal attempt detected: ${fileKey}`);
+      throw new BadRequestException('Invalid file key');
+    }
+
     if (!fs.existsSync(scriptPath)) {
       this.logger.warn(`Script file not found: ${fileKey}`);
       return null;

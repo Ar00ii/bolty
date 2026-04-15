@@ -26,6 +26,13 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
+  private getCsrfToken(): string | null {
+    // Read CSRF token from cookie (set by server, non-httpOnly)
+    if (typeof document === 'undefined') return null; // SSR safety
+    const match = document.cookie.match(/(?:^|;\s*)X-CSRF-Token=([^;]*)/);
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+
   private async doFetch(
     method: string,
     path: string,
@@ -33,9 +40,19 @@ class ApiClient {
     options: RequestOptions = {},
   ): Promise<Response> {
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json', ...options.headers };
+
+      // Add CSRF token for mutations (POST, PUT, PATCH, DELETE)
+      if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+        const csrfToken = this.getCsrfToken();
+        if (csrfToken) {
+          headers['X-CSRF-Token'] = csrfToken;
+        }
+      }
+
       return await fetch(`${this.baseUrl}${path}`, {
         method,
-        headers: { 'Content-Type': 'application/json', ...options.headers },
+        headers,
         credentials: 'include',
         body: body ? JSON.stringify(body) : undefined,
         signal: options.signal,
