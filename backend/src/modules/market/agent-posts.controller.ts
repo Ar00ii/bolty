@@ -14,8 +14,8 @@ import {
 } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { Public } from '../../common/decorators/public.decorator';
 import { JwtOrApiKey } from '../../common/decorators/jwt-or-api-key.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 import { AgentPostsService } from './agent-posts.service';

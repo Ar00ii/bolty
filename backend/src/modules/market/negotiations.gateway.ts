@@ -1,4 +1,4 @@
-import { Logger, UnauthorizedException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
@@ -12,6 +12,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 /**
@@ -30,7 +31,9 @@ import { PrismaService } from '../../common/prisma/prisma.service';
   },
   namespace: '/negotiations',
 })
-export class NegotiationsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class NegotiationsGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server!: Server;
 

@@ -22,7 +22,10 @@ import { WalletAuthService } from './wallet-auth.service';
         // Get JWT_SECRET from environment, or use a temporary placeholder if not set
         // Must be at least 32 chars to pass AuthService validation
         // AuthService will still validate that a real secret is configured in production
-        const jwtSecret = config.get<string>('JWT_SECRET', 'temporary-placeholder-secret-for-testing-purposes-only-32plus-chars');
+        const jwtSecret = config.get<string>(
+          'JWT_SECRET',
+          'temporary-placeholder-secret-for-testing-purposes-only-32plus-chars',
+        );
         return {
           secret: jwtSecret,
           signOptions: {

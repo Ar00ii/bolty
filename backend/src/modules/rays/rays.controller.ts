@@ -9,11 +9,12 @@ import {
   HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
-
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RaysService } from './rays.service';
 import { RaysPack } from '@prisma/client';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { RaysService } from './rays.service';
 
 @Controller('rays')
 @UseGuards(JwtAuthGuard)

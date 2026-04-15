@@ -179,14 +179,17 @@ export class UsersService {
     return prefs;
   }
 
-  async updateNotificationPreferences(userId: string, data: {
-    emailOnErrors?: boolean;
-    emailWeeklyReport?: boolean;
-    emailMonthlyReport?: boolean;
-    emailDeploymentAlerts?: boolean;
-    emailOrderUpdates?: boolean;
-    emailMessages?: boolean;
-  }) {
+  async updateNotificationPreferences(
+    userId: string,
+    data: {
+      emailOnErrors?: boolean;
+      emailWeeklyReport?: boolean;
+      emailMonthlyReport?: boolean;
+      emailDeploymentAlerts?: boolean;
+      emailOrderUpdates?: boolean;
+      emailMessages?: boolean;
+    },
+  ) {
     return this.prisma.notificationPreference.upsert({
       where: { userId },
       create: { userId, ...data },

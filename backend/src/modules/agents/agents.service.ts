@@ -1,10 +1,5 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Logger,
-} from '@nestjs/common';
-import { Prisma, AgentStatus, ActivityStatus } from '@prisma/client';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import { AgentStatus, ActivityStatus } from '@prisma/client';
 import * as axios from 'axios';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -152,7 +147,10 @@ export class AgentsService {
   /**
    * Test webhook by sending a test payload
    */
-  async testWebhook(agentId: string, userId: string): Promise<{
+  async testWebhook(
+    agentId: string,
+    userId: string,
+  ): Promise<{
     success: boolean;
     responseTime: number;
     statusCode?: number;
@@ -177,7 +175,10 @@ export class AgentsService {
       const responseTime = Date.now() - startTime;
 
       // Log the webhook test
-      await this.logActivity(agentId, 'webhook_test', 'SUCCESS', { responseTime, statusCode: response.status });
+      await this.logActivity(agentId, 'webhook_test', 'SUCCESS', {
+        responseTime,
+        statusCode: response.status,
+      });
 
       return {
         success: response.status >= 200 && response.status < 300,
@@ -189,7 +190,10 @@ export class AgentsService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
       // Log the failed webhook test
-      await this.logActivity(agentId, 'webhook_test', 'FAILED', { responseTime, error: errorMessage });
+      await this.logActivity(agentId, 'webhook_test', 'FAILED', {
+        responseTime,
+        error: errorMessage,
+      });
 
       return {
         success: false,
@@ -274,7 +278,7 @@ export class AgentsService {
       let newAvgResponseTime = metrics.avgResponseTime;
       if (responseTime !== undefined) {
         newAvgResponseTime = Math.round(
-          (metrics.avgResponseTime * metrics.totalCalls + responseTime) / newTotalCalls
+          (metrics.avgResponseTime * metrics.totalCalls + responseTime) / newTotalCalls,
         );
       }
 

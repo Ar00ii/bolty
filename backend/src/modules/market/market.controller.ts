@@ -176,7 +176,9 @@ export class MarketController {
     // Security: Verify user purchased this listing before allowing download
     const hasPurchased = await this.marketService.userHasPurchasedListing(meta.id, userId);
     if (!hasPurchased) {
-      throw new ForbiddenException('You do not have access to this file. Purchase the listing first.');
+      throw new ForbiddenException(
+        'You do not have access to this file. Purchase the listing first.',
+      );
     }
 
     res.setHeader(
