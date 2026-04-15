@@ -22,15 +22,21 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     const redisUrl = this.config.get<string>('REDIS_URL', 'redis://localhost:6379');
     const useTls = redisUrl.startsWith('rediss://');
 
+    // Log connection attempt (mask password)
+    const maskedUrl = redisUrl.replace(/:[^:@]+@/, ':***@');
+    this.logger.log(`Initializing Redis with URL: ${maskedUrl} (TLS: ${useTls})`);
+
     this.client = new Redis(redisUrl, {
       retryStrategy: (times: number) => {
-        const delay = Math.min(times * 50, 2000);
+        const delay = Math.min(times * 100, 3000);
+        this.logger.warn(`Redis retry attempt ${times}, delay ${delay}ms`);
         return delay;
       },
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 5,
       enableReadyCheck: true,
       ...(useTls && { tls: {} }),
       connectTimeout: 10000,
+      lazyConnect: false,
     });
 
     this.client.on('error', (err) => {
@@ -47,14 +53,41 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    // Verify Redis connection at startup
+    // Verify Redis connection at startup (non-fatal)
     try {
       await this.client.ping();
       this.logger.log('Redis service initialized and verified');
     } catch (err) {
-      this.logger.error(`Failed to connect to Redis: ${(err as Error).message}`);
-      throw err;
+      this.logger.warn(
+        `Redis connection failed at startup: ${(err as Error).message}. ` +
+        'Application will continue but some features (rate limiting, sessions) may be unavailable.',
+      );
+      // Don't throw - let the app start and retry in the background
+      this.reconnectInBackground();
     }
+  }
+
+  private reconnectInBackground(): void {
+    const maxAttempts = 30; // 5 minutes with 10s intervals
+    let attempt = 0;
+
+    const tryConnect = () => {
+      attempt++;
+      this.client
+        .ping()
+        .then(() => {
+          this.logger.log('Redis reconnected successfully');
+        })
+        .catch(() => {
+          if (attempt < maxAttempts) {
+            setTimeout(tryConnect, 10000);
+          } else {
+            this.logger.error('Redis failed to reconnect after 5 minutes');
+          }
+        });
+    };
+
+    setTimeout(tryConnect, 10000);
   }
 
   async onModuleDestroy(): Promise<void> {
