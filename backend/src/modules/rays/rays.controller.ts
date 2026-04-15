@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -37,19 +38,31 @@ export class RaysController {
   }
 
   /**
-   * Purchase rays for an agent
+   * Purchase rays for an agent with on-chain payment verification
    * POST /rays/purchase
+   *
+   * SECURITY: Requires blockchain transaction verification
+   * - txHash: Ethereum transaction hash confirming payment
+   * - amountWei: Amount paid (must match pack price exactly)
    */
   @Post('purchase')
   @HttpCode(HttpStatus.CREATED)
   async purchaseRays(
     @CurrentUser() user: any,
-    @Body() body: { agentId: string; pack: RaysPack },
+    @Body() body: { agentId: string; pack: RaysPack; txHash: string; amountWei: string },
   ) {
+    if (!body.txHash || !body.amountWei) {
+      throw new BadRequestException(
+        'txHash and amountWei are required for Rays purchase verification',
+      );
+    }
+
     const purchase = await this.raysService.purchaseRays(
       user.sub,
       body.agentId,
       body.pack,
+      body.txHash,
+      body.amountWei,
     );
 
     // Get updated agent rays info
@@ -62,6 +75,7 @@ export class RaysController {
         raysPack: purchase.raysPack,
         raysAmount: purchase.raysAmount,
         boltyAmount: purchase.boltyAmount,
+        txHash: purchase.txHash,
       },
       agentRays: {
         totalRaysAccumulated: agentRays.totalRaysAccumulated,
