@@ -1,6 +1,7 @@
 'use client';
 
 import { BrowserProvider, type Eip1193Provider } from 'ethers';
+
 import { api } from '@/lib/api/client';
 
 interface ConnectedAccount {
@@ -31,9 +32,7 @@ export async function connectWallet(provider: Eip1193Provider): Promise<Connecte
   try {
     accounts = (await provider.request({ method: 'eth_requestAccounts' })) as string[];
   } catch (err) {
-    throw new Error(
-      err instanceof Error ? err.message : 'Failed to get accounts from wallet'
-    );
+    throw new Error(err instanceof Error ? err.message : 'Failed to get accounts from wallet');
   }
 
   if (!accounts || accounts.length === 0) {
@@ -136,7 +135,7 @@ export async function sendTransaction(
   provider: Eip1193Provider,
   to: string,
   value: string,
-  data?: string
+  data?: string,
 ): Promise<string> {
   if (!provider) {
     throw new Error('No Web3 provider available');

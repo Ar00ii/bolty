@@ -1,6 +1,7 @@
+import * as crypto from 'crypto';
+
 import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Request, Response } from 'express';
-import * as crypto from 'crypto';
 
 /**
  * CSRF Guard — Double-submit cookie pattern

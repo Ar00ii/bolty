@@ -1,11 +1,11 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { Send, MessageSquare, Zap, Users, Clock, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MessageSquare, Zap, Users, Clock, Eye } from 'lucide-react';
 
 import { API_URL, WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -433,9 +433,7 @@ export default function DmPage() {
           ) : (
             <>
               {/* Chat header */}
-              <div
-                className="flex items-center justify-between px-6 py-4 border-b border-monad-500/10"
-              >
+              <div className="flex items-center justify-between px-6 py-4 border-b border-monad-500/10">
                 <div className="flex items-center gap-3">
                   <Avatar
                     name={activePeer.username}
@@ -474,90 +472,88 @@ export default function DmPage() {
               {/* Messages */}
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
                 <AnimatePresence mode="popLayout">
-                  {isAgentChat ? (
-                    // AI Agent negotiation view
-                    messages.map((msg, idx) => {
-                      const isMe = msg.senderId === user?.id;
-                      const isAgent = msg.isAgentMessage;
+                  {isAgentChat
+                    ? // AI Agent negotiation view
+                      messages.map((msg, idx) => {
+                        const isMe = msg.senderId === user?.id;
+                        const isAgent = msg.isAgentMessage;
 
-                      return (
-                        <motion.div
-                          key={msg.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.05 }}
-                          className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
-                        >
-                          {isAgent && (
-                            <div className="flex-shrink-0">
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="w-10 h-10 rounded-full bg-gradient-to-br from-monad-500 to-monad-600 flex items-center justify-center text-white text-xs font-light border-2 border-monad-400"
-                              >
-                                AI
-                              </motion.div>
-                            </div>
-                          )}
-                          <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                        return (
+                          <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
+                          >
                             {isAgent && (
-                              <p className="text-xs font-light text-monad-300 mb-1">
-                                {msg.agentName || 'Agent'} • {formatTime(msg.createdAt)}
-                              </p>
+                              <div className="flex-shrink-0">
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-monad-500 to-monad-600 flex items-center justify-center text-white text-xs font-light border-2 border-monad-400"
+                                >
+                                  AI
+                                </motion.div>
+                              </div>
                             )}
-                            {!isAgent && (
+                            <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                              {isAgent && (
+                                <p className="text-xs font-light text-monad-300 mb-1">
+                                  {msg.agentName || 'Agent'} • {formatTime(msg.createdAt)}
+                                </p>
+                              )}
+                              {!isAgent && (
+                                <p className="text-xs font-light text-zinc-400 mb-1">
+                                  {isMe ? 'You' : activePeer.username} • {formatTime(msg.createdAt)}
+                                </p>
+                              )}
+                              <div
+                                className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
+                                  isAgent
+                                    ? 'bg-monad-500/25 text-monad-100 border border-monad-500/30 rounded-2xl rounded-tl-lg'
+                                    : isMe
+                                      ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
+                                      : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
+                                }`}
+                              >
+                                {msg.content}
+                              </div>
+                            </div>
+                          </motion.div>
+                        );
+                      })
+                    : // Regular DM view
+                      messages.map((msg, idx) => {
+                        const isMe = msg.senderId === user?.id;
+                        return (
+                          <motion.div
+                            key={msg.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
+                          >
+                            {!isMe && (
+                              <Avatar name={msg.senderUsername} url={msg.senderAvatar} size={9} />
+                            )}
+                            <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               <p className="text-xs font-light text-zinc-400 mb-1">
-                                {isMe ? 'You' : activePeer.username} • {formatTime(msg.createdAt)}
+                                {isMe ? 'You' : msg.senderUsername} • {formatTime(msg.createdAt)}
                               </p>
-                            )}
-                            <div
-                              className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
-                                isAgent
-                                  ? 'bg-monad-500/25 text-monad-100 border border-monad-500/30 rounded-2xl rounded-tl-lg'
-                                  : isMe
+                              <div
+                                className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
+                                  isMe
                                     ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
                                     : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
-                              }`}
-                            >
-                              {msg.content}
+                                }`}
+                              >
+                                {msg.content}
+                              </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })
-                  ) : (
-                    // Regular DM view
-                    messages.map((msg, idx) => {
-                      const isMe = msg.senderId === user?.id;
-                      return (
-                        <motion.div
-                          key={msg.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.05 }}
-                          className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
-                        >
-                          {!isMe && (
-                            <Avatar name={msg.senderUsername} url={msg.senderAvatar} size={9} />
-                          )}
-                          <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                            <p className="text-xs font-light text-zinc-400 mb-1">
-                              {isMe ? 'You' : msg.senderUsername} • {formatTime(msg.createdAt)}
-                            </p>
-                            <div
-                              className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
-                                isMe
-                                  ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
-                                  : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
-                              }`}
-                            >
-                              {msg.content}
-                            </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })
-                  )}
+                          </motion.div>
+                        );
+                      })}
                 </AnimatePresence>
                 {messages.length === 0 && (
                   <motion.p
@@ -593,9 +589,7 @@ export default function DmPage() {
                     onKeyDown={handleKeyDown}
                     disabled={!connected}
                     placeholder={
-                      connected
-                        ? `Message ${activePeer.username || '...'}...`
-                        : 'Connecting...'
+                      connected ? `Message ${activePeer.username || '...'}...` : 'Connecting...'
                     }
                     maxLength={2000}
                     className="flex-1 px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white/5 border border-monad-500/20 text-white placeholder:text-zinc-500 focus:border-monad-400/50 focus:bg-white/8"

@@ -12,9 +12,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
-import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
+import * as speakeasy from 'speakeasy';
+import { v4 as uuidv4 } from 'uuid';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';

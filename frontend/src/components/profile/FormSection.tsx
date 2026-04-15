@@ -27,9 +27,7 @@ export function FormSection({
       </div>
 
       <div className="profile-card">
-        <div className="space-y-6">
-          {children}
-        </div>
+        <div className="space-y-6">{children}</div>
       </div>
 
       {onSubmit && (

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import type { Agent } from '@/hooks/useAgentManagement';
 
 interface AgentMetricsDisplayProps {
@@ -30,9 +31,8 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
     );
   }
 
-  const successRate = metrics.totalCalls > 0
-    ? Math.round((metrics.successfulCalls / metrics.totalCalls) * 100)
-    : 0;
+  const successRate =
+    metrics.totalCalls > 0 ? Math.round((metrics.successfulCalls / metrics.totalCalls) * 100) : 0;
 
   const metrics_items = [
     {

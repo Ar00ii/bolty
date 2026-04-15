@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { Zap, AlertCircle, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
 interface Pack {
   pack: string;
@@ -157,23 +157,19 @@ export const RaysShop: React.FC<RaysShopProps> = ({
         <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
-                Rays
-              </p>
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">Rays</p>
               <p className="text-2xl font-light text-white mt-1">{selectedPackData.rays}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
-                Price
+              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">Price</p>
+              <p className="text-2xl font-light text-purple-400 mt-1">
+                {selectedPackData.boltyPrice} BOLTY
               </p>
-              <p className="text-2xl font-light text-purple-400 mt-1">{selectedPackData.boltyPrice} BOLTY</p>
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-purple-500/20">
-            <p className="text-xs text-gray-400 mb-2">
-              When you purchase these rays:
-            </p>
+            <p className="text-xs text-gray-400 mb-2">When you purchase these rays:</p>
             <ul className="text-xs text-gray-300 space-y-1">
               <li>- 50% BOLTY burned (reduces supply)</li>
               <li>- 50% BOLTY to Bolty DAO (development)</li>
@@ -210,7 +206,8 @@ export const RaysShop: React.FC<RaysShopProps> = ({
       {/* Info */}
       <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
         <p className="text-xs text-gray-400">
-          Note: Purchase requires BOLTY tokens in your wallet. Rays are applied immediately to your agent and boost visibility in the trending section.
+          Note: Purchase requires BOLTY tokens in your wallet. Rays are applied immediately to your
+          agent and boost visibility in the trending section.
         </p>
       </div>
     </div>

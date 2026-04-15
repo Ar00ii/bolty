@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { TrendingUp, AlertCircle } from 'lucide-react';
+import React from 'react';
 
 interface UsageData {
   totalCalls: number;
@@ -41,9 +41,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             </p>
           </div>
           <div className="text-right">
-            <p className="text-3xl font-light text-purple-400">
-              {Math.round(usagePercent)}%
-            </p>
+            <p className="text-3xl font-light text-purple-400">{Math.round(usagePercent)}%</p>
           </div>
         </div>
 
@@ -52,11 +50,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
           <div className="w-full h-3 bg-gray-800 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all ${
-                isError
-                  ? 'bg-red-500'
-                  : isWarning
-                    ? 'bg-yellow-500'
-                    : 'bg-purple-500'
+                isError ? 'bg-red-500' : isWarning ? 'bg-yellow-500' : 'bg-purple-500'
               }`}
               style={{ width: `${Math.min(usagePercent, 100)}%` }}
             />
@@ -65,14 +59,17 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             <div className="flex items-center gap-2 p-3 bg-red-900/20 border border-red-800 rounded-lg">
               <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
               <p className="text-sm text-red-300">
-                {isError ? 'You have reached 95% of your usage limit' : 'You are approaching your usage limit'}
+                {isError
+                  ? 'You have reached 95% of your usage limit'
+                  : 'You are approaching your usage limit'}
               </p>
             </div>
           )}
         </div>
 
         <p className="text-xs text-gray-500">
-          Reset on {new Date(data.lastResetDate).toLocaleDateString('en-US', {
+          Reset on{' '}
+          {new Date(data.lastResetDate).toLocaleDateString('en-US', {
             month: 'long',
             day: 'numeric',
           })}
@@ -94,9 +91,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             <p className="text-xs text-gray-500 uppercase tracking-wide">Last 24h</p>
             <TrendingUp className="w-4 h-4 text-purple-400" />
           </div>
-          <p className="text-3xl font-light text-white">
-            {data.last24hCalls.toLocaleString()}
-          </p>
+          <p className="text-3xl font-light text-white">{data.last24hCalls.toLocaleString()}</p>
           <p className="text-xs text-gray-400 mt-2">API calls</p>
         </div>
       </div>

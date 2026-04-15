@@ -576,9 +576,7 @@ export class NegotiationService {
     };
   }
 
-  private async sellerAgentGreet(
-    neg: NegotiationType,
-  ): Promise<AgentResponse | null> {
+  private async sellerAgentGreet(neg: NegotiationType): Promise<AgentResponse | null> {
     const ctx = this.buildSandboxContext(neg, 'negotiation.start');
     if (neg.listing.agentEndpoint && isSafeUrl(neg.listing.agentEndpoint)) {
       return this.callWebhook(neg.listing.agentEndpoint, ctx);
@@ -613,7 +611,11 @@ export class NegotiationService {
       );
       if (result) return result;
     }
-    return this.claudeSellerNegotiate(neg as unknown as Record<string, unknown>, message, proposedPrice);
+    return this.claudeSellerNegotiate(
+      neg as unknown as Record<string, unknown>,
+      message,
+      proposedPrice,
+    );
   }
 
   // ── Buyer agent ───────────────────────────────────────────────────────────
@@ -634,7 +636,11 @@ export class NegotiationService {
       const result = await this.callWebhook(buyerEndpoint, ctx);
       if (result) return result;
     }
-    return this.claudeBuyerNegotiate(neg as unknown as Record<string, unknown>, sellerMessage, sellerProposedPrice);
+    return this.claudeBuyerNegotiate(
+      neg as unknown as Record<string, unknown>,
+      sellerMessage,
+      sellerProposedPrice,
+    );
   }
 
   // ── Webhook ───────────────────────────────────────────────────────────────

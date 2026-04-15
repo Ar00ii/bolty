@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+
 import type { Agent } from '@/hooks/useAgentManagement';
 
 interface AgentSelectorProps {
@@ -92,10 +93,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
       {isDropdownOpen && (
         <>
           {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsDropdownOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
 
           {/* Dropdown Menu */}
           <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-gray-900 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
@@ -118,15 +116,17 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                       <div className="text-sm font-light text-white truncate">{agent.name}</div>
                       <div className="text-xs text-gray-400 truncate mt-1">{agent.webhookUrl}</div>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className={`inline-block w-2 h-2 rounded-full ${
-                          agent.status === 'ACTIVE'
-                            ? 'bg-emerald-500'
-                            : agent.status === 'ERROR'
-                            ? 'bg-red-500'
-                            : agent.status === 'TESTING'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-500'
-                        }`} />
+                        <span
+                          className={`inline-block w-2 h-2 rounded-full ${
+                            agent.status === 'ACTIVE'
+                              ? 'bg-emerald-500'
+                              : agent.status === 'ERROR'
+                                ? 'bg-red-500'
+                                : agent.status === 'TESTING'
+                                  ? 'bg-yellow-500'
+                                  : 'bg-gray-500'
+                          }`}
+                        />
                         <span className="text-xs text-gray-500">{agent.status}</span>
                       </div>
                     </div>

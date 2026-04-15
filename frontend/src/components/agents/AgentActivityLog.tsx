@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
 import { Activity } from 'lucide-react';
+import React from 'react';
+
 import type { AgentActivityLogEntry } from '@/hooks/useAgentManagement';
 
 interface AgentActivityLogProps {
@@ -55,7 +56,10 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="p-4 rounded-lg bg-gray-800/50 border border-gray-700 animate-pulse">
+          <div
+            key={i}
+            className="p-4 rounded-lg bg-gray-800/50 border border-gray-700 animate-pulse"
+          >
             <div className="h-4 bg-gray-700 rounded w-3/4" />
           </div>
         ))}
@@ -81,7 +85,9 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
         >
           <div className="flex items-start gap-3">
             {/* Status Badge */}
-            <div className={`px-2 py-1 rounded border text-xs font-light flex-shrink-0 mt-0.5 ${getStatusColor(activity.status)}`}>
+            <div
+              className={`px-2 py-1 rounded border text-xs font-light flex-shrink-0 mt-0.5 ${getStatusColor(activity.status)}`}
+            >
               {getStatusIcon(activity.status)}
             </div>
 
@@ -102,14 +108,16 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
               )}
 
               {/* Metadata */}
-              {activity.metadata && typeof activity.metadata === 'object' && Object.keys(activity.metadata).length > 0 && (
-                <details className="mt-2 cursor-pointer">
-                  <summary className="text-xs text-gray-500 hover:text-gray-400">Details</summary>
-                  <pre className="mt-2 p-2 bg-gray-900 rounded text-xs text-gray-300 overflow-auto max-h-40">
-                    {JSON.stringify(activity.metadata, null, 2)}
-                  </pre>
-                </details>
-              )}
+              {activity.metadata &&
+                typeof activity.metadata === 'object' &&
+                Object.keys(activity.metadata).length > 0 && (
+                  <details className="mt-2 cursor-pointer">
+                    <summary className="text-xs text-gray-500 hover:text-gray-400">Details</summary>
+                    <pre className="mt-2 p-2 bg-gray-900 rounded text-xs text-gray-300 overflow-auto max-h-40">
+                      {JSON.stringify(activity.metadata, null, 2)}
+                    </pre>
+                  </details>
+                )}
             </div>
           </div>
         </div>

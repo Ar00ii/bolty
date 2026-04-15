@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Plus, X, AlertCircle, Shield } from 'lucide-react';
 import Image from 'next/image';
+import React, { useState } from 'react';
 
 interface Integration {
   id: string;
@@ -38,10 +38,10 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   }
 
   const logoMap: Record<string, string> = {
-    'metamask': '/integrations/metamask.png',
-    'walletconnect': '/integrations/walletconnect.png',
-    'twitter': '/integrations/X.png',
-    'discord': '/integrations/discord.png',
+    metamask: '/integrations/metamask.png',
+    walletconnect: '/integrations/walletconnect.png',
+    twitter: '/integrations/X.png',
+    discord: '/integrations/discord.png',
     'github-social': '/integrations/github.png',
   };
 
@@ -50,13 +50,7 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
 
   return (
     <div className="relative w-8 h-8">
-      <Image
-        src={logo}
-        alt={id}
-        fill
-        className="object-contain"
-        unoptimized
-      />
+      <Image src={logo} alt={id} fill className="object-contain" unoptimized />
     </div>
   );
 };
@@ -160,7 +154,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
   };
 
   const categories = ['wallet', 'social', 'security', 'service'] as const;
-  const connectedCount = integrations.filter(i => i.connected).length;
+  const connectedCount = integrations.filter((i) => i.connected).length;
 
   return (
     <div className="profile-content-card space-y-8">
@@ -243,7 +237,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       {/* Categories */}
       <div className="space-y-8">
         {categories.map((category) => {
-          const categoryIntegrations = integrations.filter(i => i.category === category);
+          const categoryIntegrations = integrations.filter((i) => i.category === category);
           if (categoryIntegrations.length === 0) return null;
 
           return (
@@ -358,8 +352,8 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       {/* Security Notice */}
       <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/10">
         <p className="text-xs text-gray-300">
-          <span className="text-purple-400 font-light">Security:</span> Only connect integrations you trust.
-          Review and remove unused connections regularly.
+          <span className="text-purple-400 font-light">Security:</span> Only connect integrations
+          you trust. Review and remove unused connections regularly.
         </p>
       </div>
     </div>

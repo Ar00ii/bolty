@@ -121,15 +121,36 @@ const ACCEPTS_AGENT_ENDPOINT = new Set(['AI_AGENT', 'BOT']);
 const AGENT_CATEGORIES = {
   AI_AGENT: {
     name: 'AI Agent',
-    subcategories: ['LLM Assistant', 'Data Analysis', 'Content Generation', 'Automation', 'Code Generation', 'Other'],
+    subcategories: [
+      'LLM Assistant',
+      'Data Analysis',
+      'Content Generation',
+      'Automation',
+      'Code Generation',
+      'Other',
+    ],
   },
   BOT: {
     name: 'Bot',
-    subcategories: ['Discord Bot', 'Telegram Bot', 'Twitter Bot', 'Chat Bot', 'Utility Bot', 'Other'],
+    subcategories: [
+      'Discord Bot',
+      'Telegram Bot',
+      'Twitter Bot',
+      'Chat Bot',
+      'Utility Bot',
+      'Other',
+    ],
   },
   SCRIPT: {
     name: 'Script',
-    subcategories: ['Python Script', 'JavaScript/Node', 'Shell Script', 'Automation', 'Data Processing', 'Other'],
+    subcategories: [
+      'Python Script',
+      'JavaScript/Node',
+      'Shell Script',
+      'Automation',
+      'Data Processing',
+      'Other',
+    ],
   },
   OTHER: {
     name: 'Other',
@@ -165,9 +186,10 @@ const AGENT_TYPE_INFO: Record<string, { description: string; examples: string[] 
 
 // Generate README content
 const generateReadme = (form: any, tiers?: any[]): string => {
-  const tierSection = tiers && tiers.length > 0
-    ? `\n${tiers.map((tier) => `- **${tier.name}**: $${tier.price}/month`).join('\n')}`
-    : `- **Basic**: $${form.price}/month`;
+  const tierSection =
+    tiers && tiers.length > 0
+      ? `\n${tiers.map((tier) => `- **${tier.name}**: $${tier.price}/month`).join('\n')}`
+      : `- **Basic**: $${form.price}/month`;
 
   return `# ${form.title || 'Agent'}
 
@@ -267,15 +289,17 @@ const generateSecurityScan = (fileName: string): SecurityScan => {
     }
   }
 
-  const score = 100 - issues.reduce((acc, i) => {
-    const weights: Record<'critical' | 'high' | 'medium' | 'low', number> = {
-      critical: 30,
-      high: 20,
-      medium: 10,
-      low: 5,
-    };
-    return acc - (weights[i.severity] || 0);
-  }, 0);
+  const score =
+    100 -
+    issues.reduce((acc, i) => {
+      const weights: Record<'critical' | 'high' | 'medium' | 'low', number> = {
+        critical: 30,
+        high: 20,
+        medium: 10,
+        low: 5,
+      };
+      return acc - (weights[i.severity] || 0);
+    }, 0);
 
   return {
     passed: score >= 70,
@@ -299,9 +323,9 @@ const generateAnalyticsData = (agentName: string) => {
       requests: Math.floor(Math.random() * 60 + 20),
     })),
     pricingTiers: {
-      'Free': 35,
-      'Pro': 45,
-      'Enterprise': 20,
+      Free: 35,
+      Pro: 45,
+      Enterprise: 20,
     },
   };
 };
@@ -431,7 +455,8 @@ const FIELD_HELP = {
   webhook:
     'Endpoint for AI-to-AI negotiations. Buyers can negotiate directly with your agent through this webhook.',
   category: 'Choose the primary category for better discoverability in the marketplace.',
-  keywords: 'Help people find your agent. Use terms that describe what it does (analytics, nlp, automation).',
+  keywords:
+    'Help people find your agent. Use terms that describe what it does (analytics, nlp, automation).',
   tags: 'Multiple tags increase visibility. Use 4-6 relevant tags separated by commas.',
   price: 'Base price for your agent. Set to 0 for free or use pricing models for flexible pricing.',
   floorPrice: 'Minimum acceptable price. Leave empty to allow any price in negotiations.',
@@ -465,7 +490,8 @@ const validators = {
 const getTips = {
   tags: (count: number): string | null => {
     if (count === 0) return 'Add tags to improve discoverability in search';
-    if (count < 4) return `Add ${4 - count} more tag${4 - count > 1 ? 's' : ''} for optimal visibility (4-6 recommended)`;
+    if (count < 4)
+      return `Add ${4 - count} more tag${4 - count > 1 ? 's' : ''} for optimal visibility (4-6 recommended)`;
     if (count > 6) return `Consider using ${count - 2}-${count - 1} tags for cleaner presentation`;
     return null;
   },
@@ -530,11 +556,7 @@ function Tip({ message, variant = 'info' }: TipProps) {
     success: 'text-green-300',
     warning: 'text-yellow-300',
   };
-  return (
-    <p className={`text-xs font-light mt-2 ${colorMap[variant]}`}>
-      💡 {message}
-    </p>
-  );
+  return <p className={`text-xs font-light mt-2 ${colorMap[variant]}`}>💡 {message}</p>;
 }
 
 interface CodeBlockProps {
@@ -552,7 +574,10 @@ function CodeBlock({ code, language = 'json' }: CodeBlockProps) {
   };
 
   return (
-    <div className="rounded-lg overflow-hidden border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+    <div
+      className="rounded-lg overflow-hidden border"
+      style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+    >
       <div
         className="flex items-center justify-between px-3 py-2 text-xs"
         style={{ background: 'rgba(255,255,255,0.02)' }}
@@ -1798,18 +1823,22 @@ function CreateListingForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [showApiDocs, setShowApiDocs] = useState(false);
   const [showCodeSnippets, setShowCodeSnippets] = useState(false);
-  const [selectedSnippet, setSelectedSnippet] = useState<'python' | 'javascript' | 'curl'>('python');
+  const [selectedSnippet, setSelectedSnippet] = useState<'python' | 'javascript' | 'curl'>(
+    'python',
+  );
   const [showSandbox, setShowSandbox] = useState(false);
   const [sandboxInput, setSandboxInput] = useState('');
   const [sandboxLoading, setSandboxLoading] = useState(false);
-  const [sandboxResult, setSandboxResult] = useState<{ output?: string; error?: string } | null>(null);
+  const [sandboxResult, setSandboxResult] = useState<{ output?: string; error?: string } | null>(
+    null,
+  );
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showTeam, setShowTeam] = useState(false);
   const [teamEmail, setTeamEmail] = useState('');
   const [teamRole, setTeamRole] = useState<'Owner' | 'Editor' | 'Viewer'>('Editor');
-  const [teamMembers, setTeamMembers] = useState<Array<{ email: string; role: 'Owner' | 'Editor' | 'Viewer' }>>([
-    { email: 'You (Owner)', role: 'Owner' },
-  ]);
+  const [teamMembers, setTeamMembers] = useState<
+    Array<{ email: string; role: 'Owner' | 'Editor' | 'Viewer' }>
+  >([{ email: 'You (Owner)', role: 'Owner' }]);
   const [showIntegrations, setShowIntegrations] = useState(false);
   const [integrations, setIntegrations] = useState<Record<string, boolean>>({
     slack: false,
@@ -1821,9 +1850,7 @@ function CreateListingForm({
   const [showTiers, setShowTiers] = useState(false);
   const [pricingTiers, setPricingTiers] = useState<
     Array<{ name: string; price: string; features: string; users: string }>
-  >([
-    { name: 'Basic', price: form.price, features: 'Core features', users: '1' },
-  ]);
+  >([{ name: 'Basic', price: form.price, features: 'Core features', users: '1' }]);
   const [newTierName, setNewTierName] = useState('');
   const [showReadme, setShowReadme] = useState(false);
   const [deploySuccess, setDeploySuccess] = useState(false);
@@ -2010,14 +2037,20 @@ function CreateListingForm({
         <div>
           <h2 className="text-2xl font-light text-zinc-100">Deploy New Agent</h2>
           <div className="flex items-center gap-3 mt-2">
-            <p className="text-xs text-zinc-600">Step {step} of {steps.length}</p>
+            <p className="text-xs text-zinc-600">
+              Step {step} of {steps.length}
+            </p>
             <div className="flex items-center gap-2">
-              <div className="w-20 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <div
+                className="w-20 h-1.5 rounded-full"
+                style={{ background: 'rgba(255,255,255,0.1)' }}
+              >
                 <div
                   className="h-1.5 rounded-full transition-all"
                   style={{
                     width: `${completion}%`,
-                    background: 'linear-gradient(90deg, rgba(131,110,249,0.6), rgba(99,102,241,0.6))',
+                    background:
+                      'linear-gradient(90deg, rgba(131,110,249,0.6), rgba(99,102,241,0.6))',
                   }}
                 />
               </div>
@@ -2049,7 +2082,11 @@ function CreateListingForm({
         {step === 1 && (
           <>
             <div>
-              <HelpLabel label="Agent Type" required help="Choose the type that best describes your product" />
+              <HelpLabel
+                label="Agent Type"
+                required
+                help="Choose the type that best describes your product"
+              />
               <div className="flex gap-2 flex-wrap mb-3">
                 {(['AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'] as const).map((t) => (
                   <button
@@ -2076,7 +2113,9 @@ function CreateListingForm({
                   </p>
                   <p className="text-xs text-zinc-600">
                     Examples:{' '}
-                    {AGENT_TYPE_INFO[form.type as keyof typeof AGENT_TYPE_INFO]?.examples.join(', ')}
+                    {AGENT_TYPE_INFO[form.type as keyof typeof AGENT_TYPE_INFO]?.examples.join(
+                      ', ',
+                    )}
                   </p>
                 </div>
               )}
@@ -2118,7 +2157,11 @@ function CreateListingForm({
             </div>
 
             <div>
-              <HelpLabel label="Description" required help="What does your agent do? What problems does it solve?" />
+              <HelpLabel
+                label="Description"
+                required
+                help="What does your agent do? What problems does it solve?"
+              />
               <textarea
                 placeholder="What does your agent do? What problems does it solve?"
                 value={form.description}
@@ -2147,10 +2190,7 @@ function CreateListingForm({
           <>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <HelpLabel
-                  label="Category"
-                  help={FIELD_HELP.category}
-                />
+                <HelpLabel label="Category" help={FIELD_HELP.category} />
                 <select
                   value={form.category}
                   onChange={(e) => field('category', e.target.value)}
@@ -2191,10 +2231,7 @@ function CreateListingForm({
             </div>
 
             <div>
-              <HelpLabel
-                label="Keywords"
-                help={FIELD_HELP.keywords}
-              />
+              <HelpLabel label="Keywords" help={FIELD_HELP.keywords} />
               <input
                 type="text"
                 placeholder="e.g., analytics, nlp, automation"
@@ -2211,10 +2248,7 @@ function CreateListingForm({
             </div>
 
             <div>
-              <HelpLabel
-                label="Tags"
-                help={FIELD_HELP.tags}
-              />
+              <HelpLabel label="Tags" help={FIELD_HELP.tags} />
               <input
                 type="text"
                 placeholder="e.g., ai, data, python, api"
@@ -2238,11 +2272,7 @@ function CreateListingForm({
           <>
             {ACCEPTS_AGENT_ENDPOINT.has(form.type) && (
               <div>
-                <HelpLabel
-                  label="AI Negotiation Webhook"
-                  required
-                  help={FIELD_HELP.webhook}
-                />
+                <HelpLabel label="AI Negotiation Webhook" required help={FIELD_HELP.webhook} />
                 <input
                   type="url"
                   placeholder="https://your-api.com/webhook"
@@ -2304,7 +2334,9 @@ function CreateListingForm({
                           <ShieldAlert className="w-6 h-6 text-yellow-400" />
                         )}
                         <div className="text-left">
-                          <p className="text-xs font-light text-zinc-300">{uploadedFile.fileName}</p>
+                          <p className="text-xs font-light text-zinc-300">
+                            {uploadedFile.fileName}
+                          </p>
                           <p className="text-xs font-light text-zinc-600">
                             {formatBytes(uploadedFile.fileSize)}
                           </p>
@@ -2338,7 +2370,9 @@ function CreateListingForm({
                                   }}
                                 />
                               </div>
-                              <span className="text-xs font-light text-zinc-400">{securityScan.score}%</span>
+                              <span className="text-xs font-light text-zinc-400">
+                                {securityScan.score}%
+                              </span>
                             </div>
                           </div>
 
@@ -2439,11 +2473,7 @@ function CreateListingForm({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <HelpLabel
-                  label="Price"
-                  required
-                  help={FIELD_HELP.price}
-                />
+                <HelpLabel label="Price" required help={FIELD_HELP.price} />
                 <input
                   type="number"
                   placeholder="0.00"
@@ -2474,7 +2504,9 @@ function CreateListingForm({
                     outline: 'none',
                   }}
                 />
-                {fieldErrors.price && <p className="text-xs text-red-400 mt-1">{fieldErrors.price}</p>}
+                {fieldErrors.price && (
+                  <p className="text-xs text-red-400 mt-1">{fieldErrors.price}</p>
+                )}
               </div>
 
               <div>
@@ -2500,10 +2532,7 @@ function CreateListingForm({
             </div>
 
             <div>
-              <HelpLabel
-                label="Floor Price"
-                help={FIELD_HELP.floorPrice}
-              />
+              <HelpLabel label="Floor Price" help={FIELD_HELP.floorPrice} />
               <input
                 type="number"
                 placeholder="Leave empty if no minimum"
@@ -2533,7 +2562,9 @@ function CreateListingForm({
                   outline: 'none',
                 }}
               />
-              {fieldErrors.minPrice && <p className="text-xs text-red-400 mt-1">{fieldErrors.minPrice}</p>}
+              {fieldErrors.minPrice && (
+                <p className="text-xs text-red-400 mt-1">{fieldErrors.minPrice}</p>
+              )}
             </div>
 
             {/* Pricing Tiers Builder Button */}
@@ -2554,9 +2585,14 @@ function CreateListingForm({
         {/* Step 5: Versioning */}
         {step === 5 && (
           <>
-            <div className="rounded-lg p-4 border mb-4" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)' }}>
+            <div
+              className="rounded-lg p-4 border mb-4"
+              style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)' }}
+            >
               <p className="text-xs font-light text-zinc-400 mb-1">First Deployment</p>
-              <p className="text-sm font-light text-zinc-300">Version will be locked at v1.0.0 for your initial release</p>
+              <p className="text-sm font-light text-zinc-300">
+                Version will be locked at v1.0.0 for your initial release
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -2694,7 +2730,9 @@ function CreateListingForm({
                           <Bot className="w-5 h-5 text-monad-300" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-light text-zinc-100 truncate">{form.title || 'Agent Title'}</h4>
+                          <h4 className="text-sm font-light text-zinc-100 truncate">
+                            {form.title || 'Agent Title'}
+                          </h4>
                           <div className="flex gap-2 mt-1">
                             <Badge className="text-xs">{TYPE_LABELS[form.type]}</Badge>
                             {form.category && (
@@ -2744,7 +2782,10 @@ function CreateListingForm({
                       )}
 
                       {/* Footer with price */}
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                      <div
+                        className="flex items-center justify-between mt-4 pt-3 border-t"
+                        style={{ borderColor: 'rgba(255,255,255,0.05)' }}
+                      >
                         <span className="text-xs text-zinc-600">Starting at</span>
                         <span className="text-lg font-light text-monad-300">
                           {form.price || '0'} {form.currency}
@@ -2757,8 +2798,17 @@ function CreateListingForm({
             </div>
 
             {/* Summary */}
-            <div className="rounded-lg p-4" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)', border: '1px solid' }}>
-              <h4 className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">Deployment Summary</h4>
+            <div
+              className="rounded-lg p-4"
+              style={{
+                background: 'rgba(131,110,249,0.05)',
+                borderColor: 'rgba(131,110,249,0.2)',
+                border: '1px solid',
+              }}
+            >
+              <h4 className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">
+                Deployment Summary
+              </h4>
               <div className="space-y-2 text-xs font-light">
                 <div className="flex justify-between">
                   <span className="text-zinc-600">Type:</span>
@@ -2776,12 +2826,16 @@ function CreateListingForm({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-600">Price:</span>
-                  <span className="text-zinc-300">{form.price} {form.currency}</span>
+                  <span className="text-zinc-300">
+                    {form.price} {form.currency}
+                  </span>
                 </div>
                 {form.minPrice && (
                   <div className="flex justify-between">
                     <span className="text-zinc-600">Floor Price:</span>
-                    <span className="text-zinc-300">{form.minPrice} {form.currency}</span>
+                    <span className="text-zinc-300">
+                      {form.minPrice} {form.currency}
+                    </span>
                   </div>
                 )}
                 {form.tags && (
@@ -2806,7 +2860,14 @@ function CreateListingForm({
             </div>
 
             {error && (
-              <div className="rounded-lg p-3" style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', border: '1px solid' }}>
+              <div
+                className="rounded-lg p-3"
+                style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  borderColor: 'rgba(239,68,68,0.3)',
+                  border: '1px solid',
+                }}
+              >
                 <p className="text-red-400 font-light text-xs">{error}</p>
               </div>
             )}
@@ -2873,9 +2934,7 @@ function CreateListingForm({
         )}
 
         {/* Error */}
-        {error && step !== 5 && (
-          <p className="text-red-400 font-light text-xs">{error}</p>
-        )}
+        {error && step !== 5 && <p className="text-red-400 font-light text-xs">{error}</p>}
 
         {/* Navigation */}
         <div className="flex gap-3 pt-4">
@@ -2947,8 +3006,12 @@ function CreateListingForm({
 
               {/* Title */}
               <div>
-                <h2 className="text-2xl font-light text-zinc-100 mb-2">Agent Deployed Successfully!</h2>
-                <p className="text-sm text-zinc-600">Your {form.title} is now live on the Bolty marketplace.</p>
+                <h2 className="text-2xl font-light text-zinc-100 mb-2">
+                  Agent Deployed Successfully!
+                </h2>
+                <p className="text-sm text-zinc-600">
+                  Your {form.title} is now live on the Bolty marketplace.
+                </p>
               </div>
 
               {/* Stats */}
@@ -2981,7 +3044,9 @@ function CreateListingForm({
                   borderColor: 'rgba(131,110,249,0.2)',
                 }}
               >
-                <p className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">Next Steps</p>
+                <p className="text-xs font-light text-zinc-400 mb-3 uppercase tracking-wide">
+                  Next Steps
+                </p>
                 <div className="space-y-2 text-xs font-light text-zinc-400">
                   <div className="flex items-start gap-2">
                     <span className="text-monad-300 mt-1">→</span>
@@ -3019,7 +3084,8 @@ function CreateListingForm({
                   }}
                   className="py-2 px-4 rounded-lg text-xs font-light border transition-all"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                    background:
+                      'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
                     border: '1px solid rgba(131,110,249,0.4)',
                     color: '#e2d9ff',
                   }}
@@ -3044,7 +3110,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b sticky top-0"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Generated README.md</h3>
               <button
                 onClick={() => setShowReadme(false)}
@@ -3056,7 +3125,8 @@ function CreateListingForm({
 
             <div className="p-4 space-y-4">
               <p className="text-xs text-zinc-600">
-                This README will be displayed on your agent's marketplace page. You can edit it after deployment.
+                This README will be displayed on your agent&apos;s marketplace page. You can edit it
+                after deployment.
               </p>
 
               <CodeBlock code={generateReadme(form, pricingTiers)} language="markdown" />
@@ -3079,7 +3149,10 @@ function CreateListingForm({
                 <button
                   onClick={() => {
                     const element = document.createElement('a');
-                    element.setAttribute('href', `data:text/plain;charset=utf-8,${encodeURIComponent(generateReadme(form, pricingTiers))}`);
+                    element.setAttribute(
+                      'href',
+                      `data:text/plain;charset=utf-8,${encodeURIComponent(generateReadme(form, pricingTiers))}`,
+                    );
                     element.setAttribute('download', 'README.md');
                     element.style.display = 'none';
                     document.body.appendChild(element);
@@ -3123,7 +3196,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b sticky top-0"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Pricing Tiers</h3>
               <button
                 onClick={() => setShowTiers(false)}
@@ -3151,7 +3227,14 @@ function CreateListingForm({
 
                   {/* Tier Rows */}
                   {pricingTiers.map((tier, idx) => (
-                    <div key={idx} className="grid grid-cols-4 gap-3 p-3 rounded-lg border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.05)' }}>
+                    <div
+                      key={idx}
+                      className="grid grid-cols-4 gap-3 p-3 rounded-lg border"
+                      style={{
+                        background: 'rgba(255,255,255,0.02)',
+                        borderColor: 'rgba(255,255,255,0.05)',
+                      }}
+                    >
                       <input
                         type="text"
                         value={tier.name}
@@ -3214,7 +3297,13 @@ function CreateListingForm({
               </div>
 
               {/* Add Tier Form */}
-              <div className="p-4 rounded-lg border" style={{ background: 'rgba(131,110,249,0.05)', borderColor: 'rgba(131,110,249,0.2)' }}>
+              <div
+                className="p-4 rounded-lg border"
+                style={{
+                  background: 'rgba(131,110,249,0.05)',
+                  borderColor: 'rgba(131,110,249,0.2)',
+                }}
+              >
                 <p className="text-xs font-light text-zinc-400 mb-3">Add New Tier</p>
                 <div className="flex gap-2">
                   <input
@@ -3266,13 +3355,27 @@ function CreateListingForm({
               >
                 <p className="text-xs font-light text-zinc-400 mb-3">Preview</p>
                 <div className="text-xs">
-                  <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${pricingTiers.length}, 1fr)` }}>
+                  <div
+                    className="grid gap-4"
+                    style={{ gridTemplateColumns: `repeat(${pricingTiers.length}, 1fr)` }}
+                  >
                     {pricingTiers.map((tier, idx) => (
-                      <div key={idx} className="p-3 rounded border" style={{ borderColor: 'rgba(131,110,249,0.3)', background: 'rgba(131,110,249,0.05)' }}>
+                      <div
+                        key={idx}
+                        className="p-3 rounded border"
+                        style={{
+                          borderColor: 'rgba(131,110,249,0.3)',
+                          background: 'rgba(131,110,249,0.05)',
+                        }}
+                      >
                         <p className="font-light text-zinc-300 mb-2">{tier.name}</p>
-                        <p className="text-lg font-light text-monad-300 mb-2">${tier.price || '0'}</p>
+                        <p className="text-lg font-light text-monad-300 mb-2">
+                          ${tier.price || '0'}
+                        </p>
                         <p className="text-zinc-600 text-xs mb-2">{tier.features || '—'}</p>
-                        <p className="text-zinc-600 text-xs">Up to {tier.users || '1'} user{parseInt(tier.users || '1') > 1 ? 's' : ''}</p>
+                        <p className="text-zinc-600 text-xs">
+                          Up to {tier.users || '1'} user{parseInt(tier.users || '1') > 1 ? 's' : ''}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -3305,7 +3408,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b sticky top-0"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Setup Integrations</h3>
               <button
                 onClick={() => setShowIntegrations(false)}
@@ -3321,18 +3427,45 @@ function CreateListingForm({
               </p>
 
               {[
-                { id: 'slack', name: 'Slack', description: 'Send agent notifications to Slack channels', icon: '💬' },
-                { id: 'discord', name: 'Discord', description: 'Post agent events to Discord webhooks', icon: '🎮' },
-                { id: 'webhook', name: 'Custom Webhook', description: 'Send data to your custom endpoint', icon: '🔗' },
-                { id: 'email', name: 'Email Alerts', description: 'Receive email notifications on errors', icon: '📧' },
-                { id: 'datadog', name: 'Datadog', description: 'Send metrics to Datadog monitoring', icon: '📊' },
+                {
+                  id: 'slack',
+                  name: 'Slack',
+                  description: 'Send agent notifications to Slack channels',
+                  icon: '💬',
+                },
+                {
+                  id: 'discord',
+                  name: 'Discord',
+                  description: 'Post agent events to Discord webhooks',
+                  icon: '🎮',
+                },
+                {
+                  id: 'webhook',
+                  name: 'Custom Webhook',
+                  description: 'Send data to your custom endpoint',
+                  icon: '🔗',
+                },
+                {
+                  id: 'email',
+                  name: 'Email Alerts',
+                  description: 'Receive email notifications on errors',
+                  icon: '📧',
+                },
+                {
+                  id: 'datadog',
+                  name: 'Datadog',
+                  description: 'Send metrics to Datadog monitoring',
+                  icon: '📊',
+                },
               ].map((integration) => (
                 <div
                   key={integration.id}
                   className="rounded-lg p-4 border"
                   style={{
                     background: 'rgba(255,255,255,0.02)',
-                    borderColor: integrations[integration.id] ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.05)',
+                    borderColor: integrations[integration.id]
+                      ? 'rgba(131,110,249,0.3)'
+                      : 'rgba(255,255,255,0.05)',
                   }}
                 >
                   <div className="flex items-start justify-between">
@@ -3427,7 +3560,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b sticky top-0"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Team Management</h3>
               <button
                 onClick={() => {
@@ -3456,7 +3592,9 @@ function CreateListingForm({
               >
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-light text-zinc-400 mb-2 block">Email Address</label>
+                    <label className="text-xs font-light text-zinc-400 mb-2 block">
+                      Email Address
+                    </label>
                     <input
                       type="email"
                       placeholder="colleague@company.com"
@@ -3493,10 +3631,7 @@ function CreateListingForm({
                   <button
                     onClick={() => {
                       if (teamEmail.trim()) {
-                        setTeamMembers([
-                          ...teamMembers,
-                          { email: teamEmail, role: teamRole },
-                        ]);
+                        setTeamMembers([...teamMembers, { email: teamEmail, role: teamRole }]);
                         setTeamEmail('');
                         setTeamRole('Editor');
                       }
@@ -3504,7 +3639,8 @@ function CreateListingForm({
                     disabled={!teamEmail.trim()}
                     className="w-full py-2 px-4 rounded-lg text-xs font-light transition-all disabled:opacity-40"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
                       border: '1px solid rgba(131,110,249,0.4)',
                       color: '#e2d9ff',
                     }}
@@ -3516,7 +3652,9 @@ function CreateListingForm({
 
               {/* Team Members List */}
               <div>
-                <p className="text-xs font-light text-zinc-400 mb-3">Team Members ({teamMembers.length})</p>
+                <p className="text-xs font-light text-zinc-400 mb-3">
+                  Team Members ({teamMembers.length})
+                </p>
                 <div className="space-y-2">
                   {teamMembers.map((member, idx) => (
                     <div
@@ -3562,7 +3700,8 @@ function CreateListingForm({
                 }}
               >
                 <p className="text-xs font-light text-green-300">
-                  ✨ Team members will receive an invitation email and can collaborate on this agent after accepting.
+                  ✨ Team members will receive an invitation email and can collaborate on this agent
+                  after accepting.
                 </p>
               </div>
 
@@ -3595,7 +3734,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b sticky top-0" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b sticky top-0"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Analytics Template</h3>
               <button
                 onClick={() => setShowAnalytics(false)}
@@ -3607,16 +3749,33 @@ function CreateListingForm({
 
             <div className="p-6 space-y-6">
               <p className="text-xs text-zinc-600">
-                This is a preview of your agent analytics dashboard after deployment. Real data will populate here.
+                This is a preview of your agent analytics dashboard after deployment. Real data will
+                populate here.
               </p>
 
               {/* Key Metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: 'Revenue', value: `$${generateAnalyticsData(form.title).totalRevenue}`, icon: '💰' },
-                  { label: 'Requests', value: generateAnalyticsData(form.title).requestsMonth.toLocaleString(), icon: '📈' },
-                  { label: 'Response Time', value: `${generateAnalyticsData(form.title).avgResponseTime}ms`, icon: '⚡' },
-                  { label: 'Success Rate', value: `${generateAnalyticsData(form.title).successRate.toFixed(1)}%`, icon: '✅' },
+                  {
+                    label: 'Revenue',
+                    value: `$${generateAnalyticsData(form.title).totalRevenue}`,
+                    icon: '💰',
+                  },
+                  {
+                    label: 'Requests',
+                    value: generateAnalyticsData(form.title).requestsMonth.toLocaleString(),
+                    icon: '📈',
+                  },
+                  {
+                    label: 'Response Time',
+                    value: `${generateAnalyticsData(form.title).avgResponseTime}ms`,
+                    icon: '⚡',
+                  },
+                  {
+                    label: 'Success Rate',
+                    value: `${generateAnalyticsData(form.title).successRate.toFixed(1)}%`,
+                    icon: '✅',
+                  },
                 ].map((metric, i) => (
                   <div
                     key={i}
@@ -3643,7 +3802,9 @@ function CreateListingForm({
                     borderColor: 'rgba(255,255,255,0.05)',
                   }}
                 >
-                  <p className="text-xs font-light text-zinc-400 mb-3">Requests Over Last 30 Days</p>
+                  <p className="text-xs font-light text-zinc-400 mb-3">
+                    Requests Over Last 30 Days
+                  </p>
                   <div className="flex items-end gap-1 h-32">
                     {generateAnalyticsData(form.title)
                       .dailyRequests.slice(-30)
@@ -3672,23 +3833,28 @@ function CreateListingForm({
                   >
                     <p className="text-xs font-light text-zinc-400 mb-3">Users by Tier</p>
                     <div className="space-y-2">
-                      {Object.entries(generateAnalyticsData(form.title).pricingTiers).map(([tier, count]) => (
-                        <div key={tier} className="flex items-center justify-between">
-                          <span className="text-xs text-zinc-500">{tier}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 h-2 rounded-full bg-zinc-800">
-                              <div
-                                className="h-2 rounded-full"
-                                style={{
-                                  width: `${count}%`,
-                                  background: tier === 'Enterprise' ? 'rgba(131,110,249,0.6)' : 'rgba(131,110,249,0.4)',
-                                }}
-                              />
+                      {Object.entries(generateAnalyticsData(form.title).pricingTiers).map(
+                        ([tier, count]) => (
+                          <div key={tier} className="flex items-center justify-between">
+                            <span className="text-xs text-zinc-500">{tier}</span>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 h-2 rounded-full bg-zinc-800">
+                                <div
+                                  className="h-2 rounded-full"
+                                  style={{
+                                    width: `${count}%`,
+                                    background:
+                                      tier === 'Enterprise'
+                                        ? 'rgba(131,110,249,0.6)'
+                                        : 'rgba(131,110,249,0.4)',
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-zinc-400 w-6">{count}%</span>
                             </div>
-                            <span className="text-xs text-zinc-400 w-6">{count}%</span>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                     </div>
                   </div>
 
@@ -3702,12 +3868,16 @@ function CreateListingForm({
                     <p className="text-xs font-light text-zinc-400 mb-3">Top Integration</p>
                     <div className="space-y-3 mt-4">
                       <div>
-                        <p className="text-sm text-zinc-300">{generateAnalyticsData(form.title).topIntegration}</p>
+                        <p className="text-sm text-zinc-300">
+                          {generateAnalyticsData(form.title).topIntegration}
+                        </p>
                         <p className="text-xs text-zinc-600 mt-1">Most used integration method</p>
                       </div>
                       <div>
                         <p className="text-xs text-zinc-600">Active Users</p>
-                        <p className="text-2xl font-light text-monad-300">{generateAnalyticsData(form.title).users}</p>
+                        <p className="text-2xl font-light text-monad-300">
+                          {generateAnalyticsData(form.title).users}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -3722,7 +3892,8 @@ function CreateListingForm({
                 }}
               >
                 <p className="text-xs font-light text-green-300">
-                  ✨ Your analytics dashboard will be live immediately after deployment. Access it from your agent settings.
+                  ✨ Your analytics dashboard will be live immediately after deployment. Access it
+                  from your agent settings.
                 </p>
               </div>
 
@@ -3752,7 +3923,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="sticky top-0 flex items-center justify-between p-4 border-b"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Integration Examples</h3>
               <button
                 onClick={() => setShowCodeSnippets(false)}
@@ -3797,7 +3971,8 @@ function CreateListingForm({
                 }}
               >
                 <p className="text-xs font-light text-zinc-300">
-                  💡 Replace <code className="text-monad-300">YOUR_API_KEY</code> with your actual API key from your dashboard.
+                  💡 Replace <code className="text-monad-300">YOUR_API_KEY</code> with your actual
+                  API key from your dashboard.
                 </p>
               </div>
             </div>
@@ -3815,7 +3990,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="sticky top-0 flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}>
+            <div
+              className="sticky top-0 flex items-center justify-between p-4 border-b"
+              style={{ borderColor: 'rgba(255,255,255,0.1)', background: '#0a0a12' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">OpenAPI Documentation</h3>
               <button
                 onClick={() => setShowApiDocs(false)}
@@ -3826,7 +4004,8 @@ function CreateListingForm({
             </div>
             <div className="p-4">
               <p className="text-xs text-zinc-600 mb-4">
-                Auto-generated API specification for your agent. This helps developers integrate with your agent.
+                Auto-generated API specification for your agent. This helps developers integrate
+                with your agent.
               </p>
               <CodeBlock code={generateApiDocs(form)} />
             </div>
@@ -3844,7 +4023,10 @@ function CreateListingForm({
               borderColor: 'rgba(131,110,249,0.2)',
             }}
           >
-            <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div
+              className="flex items-center justify-between p-4 border-b"
+              style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+            >
               <h3 className="text-lg font-light text-zinc-100">Test Agent in Sandbox</h3>
               <button
                 onClick={() => {
@@ -3907,7 +4089,8 @@ function CreateListingForm({
                   disabled={sandboxLoading || !sandboxInput.trim()}
                   className="flex-1 py-2 px-3 rounded-lg text-xs font-light transition-all disabled:opacity-40"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
+                    background:
+                      'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
                     border: '1px solid rgba(131,110,249,0.4)',
                     color: '#e2d9ff',
                   }}

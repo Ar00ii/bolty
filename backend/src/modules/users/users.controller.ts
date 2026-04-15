@@ -164,7 +164,8 @@ export class UsersController {
   @Patch('preferences/notifications')
   updateNotificationPreferences(
     @CurrentUser('id') userId: string,
-    @Body() data: {
+    @Body()
+    data: {
       emailOnErrors?: boolean;
       emailWeeklyReport?: boolean;
       emailMonthlyReport?: boolean;

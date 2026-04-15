@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { AlertCircle, CheckCircle, Info, AlertTriangle, X } from 'lucide-react';
+import React from 'react';
 
 type AlertType = 'error' | 'success' | 'info' | 'warning';
 

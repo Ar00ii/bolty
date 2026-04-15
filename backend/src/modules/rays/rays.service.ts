@@ -1,8 +1,9 @@
 import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ethers } from 'ethers';
-import { PrismaService } from '../../common/prisma/prisma.service';
 import { AgentRank, RaysPack, PurchaseStatus } from '@prisma/client';
+import { ethers } from 'ethers';
+
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 interface RaysPackConfig {
   pack: RaysPack;
@@ -68,7 +69,7 @@ export class RaysService {
     agentId: string,
     pack: RaysPack,
     txHash: string,
-    amountWei: string,
+    _amountWei: string,
   ) {
     const packConfig = this.getPackConfig(pack);
 
@@ -124,9 +125,7 @@ export class RaysService {
       }
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
-      throw new BadRequestException(
-        `Blockchain verification failed: ${(err as Error).message}`,
-      );
+      throw new BadRequestException(`Blockchain verification failed: ${(err as Error).message}`);
     }
 
     // Create purchase record with COMPLETED status (verification succeeded)
@@ -191,9 +190,7 @@ export class RaysService {
           },
         });
 
-        this.logger.log(
-          `Agent ${agentId} ranked up from ${previousRank} to ${newRank}`,
-        );
+        this.logger.log(`Agent ${agentId} ranked up from ${previousRank} to ${newRank}`);
       }
     }
   }
@@ -202,8 +199,7 @@ export class RaysService {
    * Calculate rank based on total rays
    */
   private getRankForRays(totalRays: number): AgentRank {
-    const ranks = Object.entries(this.RANK_REQUIREMENTS)
-      .sort((a, b) => b[1] - a[1]);
+    const ranks = Object.entries(this.RANK_REQUIREMENTS).sort((a, b) => b[1] - a[1]);
 
     for (const [rank, required] of ranks) {
       if (totalRays >= required) {

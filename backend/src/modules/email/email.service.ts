@@ -425,7 +425,10 @@ export class EmailService {
 
   // ── Notification Emails ────────────────────────────────────────────────────
 
-  async sendApiErrorNotification(to: string, errors: Array<{ endpoint: string; error: string; timestamp: string }>): Promise<void> {
+  async sendApiErrorNotification(
+    to: string,
+    errors: Array<{ endpoint: string; error: string; timestamp: string }>,
+  ): Promise<void> {
     const subject = 'Alert: API Errors Detected on Your Bolty Account';
     const errorsList = errors
       .map(

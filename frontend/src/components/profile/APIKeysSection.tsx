@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
 import { Copy, Trash2, RefreshCw, Plus } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface APIKey {
   id: string;
@@ -110,9 +110,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                     <div>
                       <p className="text-xs text-gray-500">Last Used</p>
                       <p className="text-sm text-gray-300">
-                        {apiKey.lastUsed
-                          ? new Date(apiKey.lastUsed).toLocaleDateString()
-                          : 'Never'}
+                        {apiKey.lastUsed ? new Date(apiKey.lastUsed).toLocaleDateString() : 'Never'}
                       </p>
                     </div>
                   </div>
@@ -197,9 +195,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                 className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
                 disabled={loadingGenerate}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Choose a descriptive name for this key
-              </p>
+              <p className="text-xs text-gray-500 mt-1">Choose a descriptive name for this key</p>
             </div>
 
             <div className="flex gap-2">

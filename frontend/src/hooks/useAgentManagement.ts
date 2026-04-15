@@ -139,60 +139,60 @@ export function useAgentManagement(): UseAgentManagementResult {
         throw err;
       }
     },
-    []
+    [],
   );
 
   // Update agent
-  const updateAgent = useCallback(
-    async (agentId: string, data: Partial<Agent>): Promise<Agent> => {
+  const updateAgent = useCallback(async (agentId: string, data: Partial<Agent>): Promise<Agent> => {
+    try {
+      setError(null);
+      const response = await fetch(`${API_URL}/agents/${agentId}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update agent');
+      const result = await response.json();
+      const updatedAgent = result.agent;
+      setAgents((prev) => prev.map((a) => (a.id === agentId ? updatedAgent : a)));
+      return updatedAgent;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update agent';
+      setError(message);
+      throw err;
+    }
+  }, []);
+
+  // Delete agent
+  const deleteAgent = useCallback(
+    async (agentId: string) => {
       try {
         setError(null);
         const response = await fetch(`${API_URL}/agents/${agentId}`, {
-          method: 'PATCH',
+          method: 'DELETE',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
         });
-        if (!response.ok) throw new Error('Failed to update agent');
-        const result = await response.json();
-        const updatedAgent = result.agent;
-        setAgents((prev) =>
-          prev.map((a) => (a.id === agentId ? updatedAgent : a))
-        );
-        return updatedAgent;
+        if (!response.ok) throw new Error('Failed to delete agent');
+        setAgents((prev) => prev.filter((a) => a.id !== agentId));
+        // Clear selection if deleted agent was selected
+        if (selectedAgentId === agentId) {
+          setSelectedAgentId(null);
+        }
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to update agent';
+        const message = err instanceof Error ? err.message : 'Failed to delete agent';
         setError(message);
         throw err;
       }
     },
-    []
+    [selectedAgentId],
   );
-
-  // Delete agent
-  const deleteAgent = useCallback(async (agentId: string) => {
-    try {
-      setError(null);
-      const response = await fetch(`${API_URL}/agents/${agentId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('Failed to delete agent');
-      setAgents((prev) => prev.filter((a) => a.id !== agentId));
-      // Clear selection if deleted agent was selected
-      if (selectedAgentId === agentId) {
-        setSelectedAgentId(null);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to delete agent';
-      setError(message);
-      throw err;
-    }
-  }, [selectedAgentId]);
 
   // Test webhook
   const testWebhook = useCallback(
-    async (agentId: string): Promise<{ success: boolean; responseTime: number; error?: string }> => {
+    async (
+      agentId: string,
+    ): Promise<{ success: boolean; responseTime: number; error?: string }> => {
       try {
         setError(null);
         const response = await fetch(`${API_URL}/agents/${agentId}/test`, {
@@ -208,7 +208,7 @@ export function useAgentManagement(): UseAgentManagementResult {
         throw err;
       }
     },
-    []
+    [],
   );
 
   // Initial fetch

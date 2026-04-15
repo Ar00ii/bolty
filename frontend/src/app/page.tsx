@@ -25,18 +25,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { FeaturesGrid } from '@/components/FeaturesGrid';
+import { HowItWorks } from '@/components/HowItWorks';
+import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
+import { TechStack } from '@/components/TechStack';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { GradientText } from '@/components/ui/GradientText';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { RenderHero } from '@/components/ui/RenderHero';
-import { ScrollVelocityRow } from '@/components/ui/ScrollVelocity';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
-import { TestimonialCarousel } from '@/components/TestimonialCarousel';
-import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { TechStack } from '@/components/TechStack';
-import { HowItWorks } from '@/components/HowItWorks';
-import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -77,7 +75,8 @@ const FEATURES = [
   {
     icon: TrendingUp,
     title: 'Boost System',
-    description: 'Power up your agent and dominate the trending rankings with strategic visibility.',
+    description:
+      'Power up your agent and dominate the trending rankings with strategic visibility.',
     href: '/#boost-marketplace',
   },
 ];

@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { AlertCircle } from 'lucide-react';
+import React, { useRef } from 'react';
 
 interface FormFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -21,7 +21,12 @@ export const FormField: React.FC<FormFieldProps> = ({
   disabled,
   ...props
 }) => {
-  const id = props.id || `field-${Math.random().toString(36).substr(2, 9)}`;
+  const idRef = useRef<string>();
+  if (!idRef.current) {
+    // eslint-disable-next-line react-hooks/purity
+    idRef.current = props.id || `field-${Math.random().toString(36).substr(2, 9)}`;
+  }
+  const id = idRef.current;
 
   return (
     <div className={`space-y-2 ${containerClassName}`}>

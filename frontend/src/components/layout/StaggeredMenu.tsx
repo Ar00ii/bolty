@@ -24,7 +24,6 @@ import {
   Percent,
   Coins,
   Briefcase,
-  Trophy,
   ShoppingCart,
   BookOpen,
   type LucideIcon,
