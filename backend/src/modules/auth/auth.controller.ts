@@ -154,8 +154,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('2fa/enable/request')
   async request2FAEnable(@CurrentUser('id') userId: string) {
-    await this.authService.request2FAEnable(userId);
-    return { success: true, message: 'Verification code sent to your email' };
+    const { qrCode, secret } = await this.authService.request2FAEnable(userId);
+    return { success: true, qrCode, secret, message: 'Scan QR code with your authenticator app' };
   }
 
   @UseGuards(JwtAuthGuard)

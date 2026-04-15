@@ -13,6 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
@@ -247,12 +249,8 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    // 2FA required
-    if (user.twoFactorEnabled && user.email) {
-      const code = randomInt(100000, 1000000).toString();
-      await this.redis.set(`2fa:${user.id}`, code, 600); // 10 min
-      await this.emailService.send2FACode(user.email, code);
-
+    // 2FA required — using TOTP (Authenticator app)
+    if (user.twoFactorEnabled) {
       const tempToken = this.jwtService.sign(
         { sub: user.id, scope: 'pending_2fa' },
         { expiresIn: '10m' },
@@ -275,6 +273,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid token scope');
     }
 
+    // Get user and their TOTP secret
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { twoFactorSecret: true },
+    });
+
+    if (!user || !user.twoFactorSecret) {
+      throw new UnauthorizedException('2FA not configured for this user');
+    }
+
     // Brute-force protection: max 5 attempts within the 10-minute code window
     const attemptsKey = `2fa_attempts:${payload.sub}`;
     const attemptsRaw = await this.redis.get(attemptsKey);
@@ -284,47 +292,75 @@ export class AuthService {
     }
     await this.redis.set(attemptsKey, String(attempts + 1), 600);
 
-    const stored = await this.redis.get(`2fa:${payload.sub}`);
-    if (!stored || stored !== code) {
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: user.twoFactorSecret,
+      encoding: 'base32',
+      token: code,
+      window: 2,
+    });
+
+    if (!verified) {
       throw new UnauthorizedException('Invalid or expired verification code');
     }
 
-    // Clear attempts and code on success
-    await Promise.all([this.redis.del(`2fa:${payload.sub}`), this.redis.del(attemptsKey)]);
+    // Clear attempts on success
+    await this.redis.del(attemptsKey);
     return this.generateTokens(payload.sub);
   }
 
   // ── 2FA Management ────────────────────────────────────────────────────────
 
-  async request2FAEnable(userId: string): Promise<void> {
+  async request2FAEnable(userId: string): Promise<{ qrCode: string; secret: string }> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
+    if (!user) throw new NotFoundException('User not found');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
-    const code = randomInt(100000, 1000000).toString();
-    await this.redis.set(`2fa_enable:${userId}`, code, 600); // 10 min
-    try {
-      await this.emailService.send2FAEnableCode(user.email, code);
-    } catch (err) {
-      await this.redis.del(`2fa_enable:${userId}`);
-      throw new BadRequestException(
-        'Failed to send verification email. Verify a domain at resend.com/domains to send to any email address.',
-      );
-    }
-    this.logger.log(`2FA enable code sent for user ${userId}`);
+    // Generate TOTP secret
+    const secret = speakeasy.generateSecret({
+      name: `Bolty (${user.email || user.id})`,
+      issuer: 'Bolty',
+      length: 32,
+    });
+
+    // Generate QR code
+    const qrCode = await QRCode.toDataURL(secret.otpauth_url!);
+
+    // Store secret temporarily in Redis for verification
+    await this.redis.set(`2fa_secret:${userId}`, secret.base32, 600); // 10 min
+
+    this.logger.log(`2FA setup initiated for user ${userId}`);
+    return { qrCode, secret: secret.base32 };
   }
 
   async enable2FA(userId: string, code: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user?.email) throw new BadRequestException('You need an email address to enable 2FA');
+    if (!user) throw new NotFoundException('User not found');
     if (user.twoFactorEnabled) throw new BadRequestException('2FA is already enabled');
 
-    const stored = await this.redis.get(`2fa_enable:${userId}`);
-    if (!stored || stored !== code)
-      throw new UnauthorizedException('Invalid or expired verification code');
+    const secret = await this.redis.get(`2fa_secret:${userId}`);
+    if (!secret) throw new BadRequestException('No 2FA setup in progress or code expired');
 
-    await this.redis.del(`2fa_enable:${userId}`);
-    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: true } });
+    // Verify TOTP code
+    const verified = speakeasy.totp.verify({
+      secret: secret,
+      encoding: 'base32',
+      token: code,
+      window: 2,
+    });
+
+    if (!verified) throw new UnauthorizedException('Invalid authenticator code');
+
+    // Store secret in database
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorEnabled: true,
+        twoFactorSecret: secret,
+      },
+    });
+
+    await this.redis.del(`2fa_secret:${userId}`);
     this.logger.log(`2FA enabled for user ${userId}`);
   }
 
@@ -338,7 +374,13 @@ export class AuthService {
       if (!valid) throw new UnauthorizedException('Invalid password');
     }
 
-    await this.prisma.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorEnabled: false,
+        twoFactorSecret: null,
+      },
+    });
     this.logger.log(`2FA disabled for user ${userId}`);
   }
 

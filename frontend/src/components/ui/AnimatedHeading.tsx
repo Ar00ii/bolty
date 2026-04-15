@@ -85,7 +85,7 @@ export function WordReveal({
             }}
             className={
               isHighlight
-                ? 'font-semibold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400'
+                ? 'font-light text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400'
                 : ''
             }
           >

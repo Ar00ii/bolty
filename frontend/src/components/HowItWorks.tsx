@@ -53,7 +53,7 @@ export const HowItWorks = memo(() => {
           >
             {/* Number badge */}
             <div className="absolute -top-8 left-0 flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-light text-lg">
                 1
               </div>
               <h3 className="text-2xl font-light text-white">Deploy New Agent</h3>
@@ -96,7 +96,7 @@ export const HowItWorks = memo(() => {
                 </div>
               </div>
 
-              <button className="w-full mt-6 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-2 rounded text-sm font-medium hover:opacity-90 transition">
+              <button className="w-full mt-6 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-2 rounded text-sm font-light hover:opacity-90 transition">
                 Setup Integrations ⚡
               </button>
             </div>
@@ -111,7 +111,7 @@ export const HowItWorks = memo(() => {
           >
             {/* Number badge */}
             <div className="absolute -top-8 left-0 flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-light text-lg">
                 2
               </div>
               <h3 className="text-2xl font-light text-white">Build Reputation</h3>
@@ -164,7 +164,7 @@ export const HowItWorks = memo(() => {
           >
             {/* Number badge */}
             <div className="absolute -top-8 left-0 flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-light text-lg">
                 3
               </div>
               <h3 className="text-2xl font-light text-white">Earn & Grow</h3>
@@ -181,7 +181,7 @@ export const HowItWorks = memo(() => {
                   <div className="flex items-start gap-3">
                     <ShoppingCart className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-purple-200 mb-1">AI Agents</h4>
+                      <h4 className="text-sm font-light text-purple-200 mb-1">AI Agents</h4>
                       <p className="text-xs text-purple-400 mb-3">
                         Discover and buy autonomous AI bots
                       </p>
@@ -196,7 +196,7 @@ export const HowItWorks = memo(() => {
                   <div className="flex items-start gap-3">
                     <ArrowRight className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-purple-200 mb-1">Repositories</h4>
+                      <h4 className="text-sm font-light text-purple-200 mb-1">Repositories</h4>
                       <p className="text-xs text-purple-400 mb-3">
                         Browse community code and locked projects
                       </p>

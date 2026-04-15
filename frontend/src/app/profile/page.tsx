@@ -3,12 +3,18 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { APIKeysSection } from '@/components/profile/APIKeysSection';
+import { UsageSection } from '@/components/profile/UsageSection';
+import { BillingSection } from '@/components/profile/BillingSection';
+import { NotificationsSection } from '@/components/profile/NotificationsSection';
+import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
+import { AgentDashboard } from '@/components/profile/AgentDashboard';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-type Tab = 'general' | 'social' | 'wallet' | 'connections' | 'friends' | 'security' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity' | 'preferences';
+type Tab = 'general' | 'social' | 'wallet' | 'friends' | 'agent' | 'api-keys' | 'billing' | 'usage' | 'notifications' | 'integrations' | 'activity';
 
 interface Friend {
   id: string;
@@ -40,6 +46,16 @@ interface UserSearchResult {
   displayName: string | null;
   avatarUrl: string | null;
   userTag: string | null;
+}
+
+interface APIKey {
+  id: string;
+  name: string;
+  key: string;
+  preview: string;
+  createdAt: string;
+  lastUsed: string | null;
+  scopes: string[];
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
@@ -338,14 +354,6 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
 
 // ── Tab config ─────────────────────────────────────────────────────────────────
 
-const TABS: { id: Tab; label: string; Icon: React.FC<{ className?: string }> }[] = [
-  { id: 'general', label: 'General', Icon: IconUser },
-  { id: 'social', label: 'Social', Icon: IconGlobe },
-  { id: 'wallet', label: 'Wallet', Icon: IconWallet },
-  { id: 'connections', label: 'Connections', Icon: IconLink },
-  { id: 'friends', label: 'Friends', Icon: IconUsers },
-  { id: 'security', label: 'Security', Icon: IconShield },
-];
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Page
@@ -428,8 +436,7 @@ export default function ProfilePage() {
   const [deleting, setDeleting] = useState(false);
 
   // API Keys
-  const [apiKey, setApiKey] = useState('');
-  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
 
   // Billing
   const [billingPlan, setBillingPlan] = useState('free');
@@ -439,9 +446,20 @@ export default function ProfilePage() {
   const [notifErrors, setNotifErrors] = useState(true);
   const [notifReports, setNotifReports] = useState(true);
 
-  // Preferences
-  const [theme, setTheme] = useState('dark');
-  const [language, setLanguage] = useState('en');
+  // Usage stats
+  const [usageStats, setUsageStats] = useState<any>({
+    totalCallsThisMonth: 0,
+    maxCallsAllowed: 100000,
+    activeAgents: 0,
+    last24hCalls: 0,
+    lastResetDate: new Date().toISOString(),
+  });
+
+  // Activity log
+  const [activityLog, setActivityLog] = useState<any[]>([]);
+
+  // Integrations
+  const [integrations, setIntegrations] = useState<any[]>([]);
 
   // Init
   useEffect(() => {
@@ -458,13 +476,24 @@ export default function ProfilePage() {
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
 
-    // API Key - generate from user ID
-    const userId = (user as { id?: string }).id || 'user';
-    setApiKey(`sk_prod_${userId.substring(0, 12).padEnd(12, '0')}`);
-
     // Billing email
     setBillingEmail((user as { email?: string }).email || '');
     setBillingPlan('pro');
+
+    // Load real API keys from backend
+    api.get<any>('/market/api-keys').then((keys) => {
+      if (Array.isArray(keys)) {
+        setApiKeys(keys);
+      }
+    }).catch(() => setApiKeys([]));
+
+    // Load notification preferences
+    api.get<any>('/users/preferences/notifications')
+      .then((prefs) => {
+        setNotifErrors(prefs.emailOnErrors || true);
+        setNotifReports(prefs.emailWeeklyReport || true);
+      })
+      .catch(() => {});
   }, [user, isLoading, router]);
 
   useEffect(() => {
@@ -484,13 +513,13 @@ export default function ProfilePage() {
     if (params.get('linked') === 'github') {
       refresh();
       window.history.replaceState({}, '', '/profile');
-      setTab('connections');
+      setTab('integrations');
       setConMsg('GitHub account linked successfully.');
     }
     const tabParam = params.get('tab') as Tab | null;
     if (
       tabParam &&
-      ['general', 'social', 'wallet', 'connections', 'friends', 'security', 'agent'].includes(
+      ['general', 'social', 'wallet', 'friends', 'agent', 'api-keys', 'billing', 'usage', 'notifications', 'integrations', 'activity'].includes(
         tabParam,
       )
     ) {
@@ -541,6 +570,76 @@ export default function ProfilePage() {
     }, 350);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
+
+  // Load data based on active tab
+  useEffect(() => {
+    if (!user) return;
+
+    if (tab === 'activity') {
+      api.get<any>('/users/activity-log?limit=50')
+        .then((logs) => {
+          setActivityLog(Array.isArray(logs) ? logs : []);
+        })
+        .catch(() => setActivityLog([]));
+    }
+
+    if (tab === 'usage') {
+      api.get<any>('/users/usage-stats')
+        .then((stats) => {
+          setUsageStats(stats || {});
+        })
+        .catch(() => {});
+    }
+
+    if (tab === 'agent') {
+      // Load both usage stats and activity log for the agent tab
+      Promise.all([
+        api.get<any>('/users/usage-stats').catch(() => ({})),
+        api.get<any>('/users/activity-log?limit=50').catch(() => []),
+      ])
+        .then(([stats, logs]) => {
+          setUsageStats(stats || {});
+          setActivityLog(Array.isArray(logs) ? logs : []);
+        });
+    }
+
+    if (tab === 'integrations') {
+      api.get<any>('/users/integrations')
+        .then((ints) => {
+          setIntegrations(Array.isArray(ints) ? ints : []);
+        })
+        .catch(() => setIntegrations([]));
+    }
+  }, [tab, user]);
+
+  // ── Formatting Utilities ──────────────────────────────────────────────────────
+
+  /**
+   * Format a number with comma separators (e.g., 2847 -> "2,847")
+   */
+  const formatNumber = (num: number | undefined): string => {
+    if (num === undefined || num === null) return 'N/A';
+    return num.toLocaleString();
+  };
+
+  /**
+   * Format a timestamp to relative time (e.g., "2m ago", "15m ago", "3h ago")
+   */
+  const formatTimeAgo = (dateString: string | Date | undefined): string => {
+    if (!dateString) return 'Unknown';
+
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -690,6 +789,28 @@ export default function ProfilePage() {
       setConErr(err instanceof ApiError ? err.message : 'Failed to unlink GitHub.');
     } finally {
       setUnlinkingGitHub(false);
+    }
+  };
+
+  const handleCopyAPIKey = (key: string) => {
+    navigator.clipboard.writeText(key);
+  };
+
+  const handleDeleteAPIKey = async (id: string) => {
+    try {
+      await api.delete(`/market/api-keys/${id}`);
+      setApiKeys(apiKeys.filter(k => k.id !== id));
+    } catch (err) {
+      console.error('Failed to delete API key:', err);
+    }
+  };
+
+  const handleGenerateAPIKey = async (name: string) => {
+    try {
+      const newKey = await api.post<APIKey>('/market/api-keys', { name });
+      setApiKeys([...apiKeys, newKey]);
+    } catch (err) {
+      console.error('Failed to generate API key:', err);
     }
   };
 
@@ -916,11 +1037,8 @@ export default function ProfilePage() {
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
                 { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
-                { id: 'connections' as Tab, label: 'Connections', Icon: IconLink },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
-                { id: 'preferences' as Tab, label: 'Preferences', Icon: IconUser },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => (
                 <button
@@ -1175,183 +1293,6 @@ export default function ProfilePage() {
           )}
 
           {/* ════════════════════════════════════════════
-          WALLET
-      ════════════════════════════════════════════ */}
-          {tab === 'wallet' && (
-            <div className="space-y-4">
-              {/* Info card */}
-              <div
-                className="relative rounded-2xl border border-[var(--border)] overflow-hidden px-5 py-4"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(251,146,60,0.05) 0%, rgba(24,24,27,1) 60%)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, rgba(251,146,60,0.3), transparent)',
-                  }}
-                />
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <IconWallet className="w-4.5 h-4.5 text-orange-400 w-5 h-5" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-light text-[var(--text)] mb-0.5">
-                      Payment Wallet
-                    </div>
-                    <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                      Your Bolty account uses GitHub or email for authentication. Link MetaMask
-                      separately to buy and sell on the marketplace. Linking only requires a message
-                      signature —{' '}
-                      <span className="text-[var(--text)]">no blockchain transaction is made</span>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="profile-content-card">
-                <Alert type="success" msg={walletMsg} />
-                <Alert type="error" msg={walletErr} />
-
-                <div className="flex items-center gap-4 mb-5">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(251,146,60,0.15), rgba(251,146,60,0.05))',
-                      border: '1px solid rgba(251,146,60,0.2)',
-                    }}
-                  >
-                    <img src="/metamask.png" alt="MetaMask" className="w-7 h-7 object-contain" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-light text-[var(--text)]">MetaMask</div>
-                    {walletAddress ? (
-                      <div className="text-xs font-mono text-[var(--text-muted)] mt-0.5 truncate">
-                        {walletAddress}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">Not connected</div>
-                    )}
-                  </div>
-                  {walletAddress ? (
-                    <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg font-mono shrink-0">
-                      Connected
-                    </span>
-                  ) : (
-                    <span className="security-badge shrink-0">Disconnected</span>
-                  )}
-                </div>
-
-                {walletAddress ? (
-                  <div className="space-y-3">
-                    <div className="bg-[var(--bg-elevated)] rounded-xl p-3 border border-[var(--border)]">
-                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-1">
-                        Full address
-                      </div>
-                      <div className="text-xs font-mono text-[var(--text)] break-all">
-                        {walletAddress}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleDisconnectWallet}
-                      disabled={walletLoading}
-                      className="w-full py-2.5 rounded-xl border border-red-500/20 text-red-400 hover:bg-red-500/8 hover:border-red-500/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
-                    >
-                      {walletLoading ? 'Removing...' : 'Remove wallet'}
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleConnectWallet}
-                    disabled={walletLoading}
-                    className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2.5"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(251,146,60,0.18), rgba(251,146,60,0.08))',
-                      border: '1px solid rgba(251,146,60,0.25)',
-                      color: '#fb923c',
-                      boxShadow: walletLoading ? 'none' : '0 4px 15px rgba(251,146,60,0.1)',
-                    }}
-                  >
-                    {walletLoading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-orange-400/30 border-t-orange-400 animate-spin" />{' '}
-                        Connecting...
-                      </>
-                    ) : (
-                      'Connect MetaMask'
-                    )}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
-          CONNECTIONS
-      ════════════════════════════════════════════ */}
-          {tab === 'connections' && (
-            <div className="profile-content-card">
-              <SectionHeader
-                title="Connected Accounts"
-                subtitle="Link external services to unlock more Bolty features."
-              />
-              <Alert type="success" msg={conMsg} />
-              <Alert type="error" msg={conErr} />
-
-              <div className="space-y-3">
-                {/* GitHub */}
-                <div
-                  className={`flex items-center gap-4 rounded-xl p-4 border transition-all duration-200 ${githubLogin ? 'bg-[var(--bg-elevated)] border-emerald-500/20' : 'bg-[var(--bg-elevated)] border-[var(--border)]'}`}
-                >
-                  <div className="w-11 h-11 rounded-xl bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center flex-shrink-0">
-                    <IconGitHub className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-light text-[var(--text)]">GitHub</span>
-                      {githubLogin && (
-                        <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono">
-                          Linked
-                        </span>
-                      )}
-                    </div>
-                    {githubLogin ? (
-                      <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-                        @{githubLogin}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                        Required to import repositories and publish repo listings.
-                      </div>
-                    )}
-                  </div>
-                  {githubLogin ? (
-                    <button
-                      onClick={handleUnlinkGitHub}
-                      disabled={unlinkingGitHub}
-                      className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/30 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
-                    >
-                      {unlinkingGitHub ? 'Unlinking...' : 'Unlink'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handleLinkGitHub}
-                      className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
-                    >
-                      Link
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
           FRIENDS
       ════════════════════════════════════════════ */}
           {tab === 'friends' && (
@@ -1359,8 +1300,8 @@ export default function ProfilePage() {
               {/* Search */}
               <div className="profile-content-card">
                 <SectionHeader
-                  title="Find People"
-                  subtitle="Search by @username or exact user ID — for example #1234."
+                  title="Professional Network"
+                  subtitle="Build meaningful connections with developers and expand your professional community."
                 />
                 <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                   <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
@@ -1368,8 +1309,8 @@ export default function ProfilePage() {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="@username or #1234"
-                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-mono"
+                    placeholder="Search by @username or user ID..."
+                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                   />
                   {searching ? (
                     <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin flex-shrink-0" />
@@ -1494,8 +1435,8 @@ export default function ProfilePage() {
                     {friends.length === 0 && friendRequests.length === 0 ? (
                       <div className="text-center py-10">
                         <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-                        <p className="text-xs text-[var(--text-muted)] font-mono">
-                          No connections yet. Use the search above to find people.
+                        <p className="text-sm text-[var(--text-muted)]">
+                          Start building your network — search for developers to connect with.
                         </p>
                       </div>
                     ) : friends.length > 0 ? (
@@ -1507,7 +1448,7 @@ export default function ProfilePage() {
                           {friends.map((f) => (
                             <div
                               key={f.id}
-                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/25 transition-all duration-200"
+                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/40 hover:shadow-lg transition-all duration-200"
                             >
                               <Avatar
                                 src={f.friend.avatarUrl}
@@ -1557,708 +1498,291 @@ export default function ProfilePage() {
           )}
 
           {/* ════════════════════════════════════════════
-          SECURITY
+          AI AGENT — Professional SaaS Dashboard
       ════════════════════════════════════════════ */}
-          {tab === 'security' && (
-            <div className="space-y-4">
-              <Alert type="success" msg={secMsg} />
-              <Alert type="error" msg={secErr} />
-
-              {/* 2FA */}
-              <div className="profile-content-card">
-                <div className="flex items-start gap-4">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${twoFAEnabled ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-[var(--bg-elevated)] border border-[var(--border)]'}`}
-                  >
-                    <IconShield
-                      className={`w-5 h-5 ${twoFAEnabled ? 'text-emerald-400' : 'text-[var(--text-muted)]'}`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-sm font-light text-[var(--text)]">
-                          Two-Factor Authentication
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                          {twoFAEnabled
-                            ? 'Active — a code will be emailed to you at every login.'
-                            : 'Disabled — enable for additional login security.'}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (!twoFAEnabled) handle2FAToggle();
-                          else setToggling2FA((v) => !v);
-                        }}
-                        disabled={enable2FAStep === 'code'}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 shrink-0 ${
-                          twoFAEnabled
-                            ? 'text-red-400 border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8'
-                            : 'text-monad-400 border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8'
-                        } disabled:opacity-40`}
-                      >
-                        {twoFAEnabled ? 'Disable' : 'Enable'}
-                      </button>
-                    </div>
-
-                    {/* Enable 2FA — enter email code */}
-                    {!twoFAEnabled && enable2FAStep === 'code' && (
-                      <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                        <p className="text-xs text-[var(--text-muted)] mb-3">
-                          Enter the 6-digit code sent to your email:
-                        </p>
-                        <div className="flex gap-2">
-                          <Input
-                            type="text"
-                            value={enable2FACode}
-                            onChange={(e) =>
-                              setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
-                            }
-                            placeholder="123456"
-                            className="flex-1"
-                            maxLength={6}
-                          />
-                          <button
-                            onClick={handleEnable2FAConfirm}
-                            disabled={enable2FACode.length !== 6 || toggling2FA}
-                            className="text-xs text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => {
-                              setEnable2FAStep('idle');
-                              setEnable2FACode('');
-                              setSecMsg('');
-                            }}
-                            className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Disable 2FA — enter password */}
-                    {twoFAEnabled && toggling2FA && (
-                      <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                        <p className="text-xs text-[var(--text-muted)] mb-3">
-                          Enter your password to disable 2FA:
-                        </p>
-                        <div className="flex gap-2">
-                          <Input
-                            type="password"
-                            value={disable2FAPassword}
-                            onChange={(e) => setDisable2FAPassword(e.target.value)}
-                            placeholder="Current password"
-                            className="flex-1"
-                          />
-                          <button
-                            onClick={handle2FAToggle}
-                            disabled={!disable2FAPassword}
-                            className="text-xs text-red-400 border border-red-500/25 hover:bg-red-500/8 px-4 rounded-xl transition-all duration-200 disabled:opacity-40 shrink-0"
-                          >
-                            Confirm
-                          </button>
-                          <button
-                            onClick={() => setToggling2FA(false)}
-                            className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-2 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Email */}
-              <div className="profile-content-card">
-                <div className="flex items-center justify-between mb-1">
-                  <div>
-                    <div className="text-sm font-light text-[var(--text)]">Email Address</div>
-                    <div className="text-xs text-[var(--text-muted)] font-mono mt-0.5">
-                      {userEmail || 'Not set'}
-                    </div>
-                  </div>
-                  {emailStep === 'idle' && (
-                    <button
-                      onClick={() => setEmailStep('form')}
-                      className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200"
-                    >
-                      Change
-                    </button>
-                  )}
-                </div>
-
-                {emailStep === 'form' && (
-                  <form
-                    onSubmit={handleRequestEmailChange}
-                    className="mt-4 pt-4 border-t border-[var(--border)] space-y-3"
-                  >
-                    <Input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      placeholder="New email address"
-                      required
-                    />
-                    <Input
-                      type="password"
-                      value={emailPassword}
-                      onChange={(e) => setEmailPassword(e.target.value)}
-                      placeholder="Current password"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={emailLoading || !newEmail}
-                        className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {emailLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />{' '}
-                            Sending...
-                          </>
-                        ) : (
-                          'Send verification code'
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailStep('idle');
-                          setSecErr('');
-                          setSecMsg('');
-                        }}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {emailStep === 'otp' && (
-                  <form
-                    onSubmit={handleConfirmEmailChange}
-                    className="mt-4 pt-4 border-t border-[var(--border)] space-y-3"
-                  >
-                    <p className="text-xs text-[var(--text-muted)]">
-                      Enter the 6-digit code sent to{' '}
-                      <span className="text-[var(--text)] font-mono">{newEmail}</span>:
-                    </p>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      value={emailOtp}
-                      onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="000000"
-                      className="w-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-monad-500/50 focus:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="submit"
-                        disabled={emailLoading || emailOtp.length !== 6}
-                        className="btn-primary flex-1 py-2.5 rounded-xl text-sm font-light disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {emailLoading ? (
-                          <>
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />{' '}
-                            Verifying...
-                          </>
-                        ) : (
-                          'Confirm change'
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEmailStep('idle');
-                          setSecErr('');
-                          setSecMsg('');
-                        }}
-                        className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
-
-              {/* Delete account — danger zone */}
-              <div
-                className="relative rounded-2xl border border-red-500/20 overflow-hidden"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(239,68,68,0.04) 0%, var(--bg-card) 60%)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, rgba(239,68,68,0.3), transparent)',
-                  }}
-                />
-                <div className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-light text-red-400">Delete Account</div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">
-                        Permanently remove your account and all associated data.
-                      </div>
-                    </div>
-                    {deleteStep === 'idle' && (
-                      <button
-                        onClick={() => setDeleteStep('confirm')}
-                        className="text-xs text-red-400 border border-red-500/25 hover:border-red-400/50 hover:bg-red-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 shrink-0"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-
-                  {deleteStep === 'confirm' && (
-                    <div className="mt-4 pt-4 border-t border-red-500/15 space-y-3">
-                      <p className="text-xs text-red-300/80 leading-relaxed">
-                        <strong className="text-red-300">
-                          This action is permanent and irreversible.
-                        </strong>{' '}
-                        All repositories, listings, messages, and account data will be deleted. We
-                        will send a confirmation code to verify this request.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleRequestDeleteAccount}
-                          disabled={requestingDelete}
-                          className="flex-1 py-2.5 rounded-xl border border-red-500/25 text-red-400 hover:bg-red-500/10 hover:border-red-400/40 text-sm font-light transition-all duration-200 disabled:opacity-50"
-                        >
-                          {requestingDelete ? 'Sending code...' : 'Send confirmation code'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteStep('idle');
-                            setSecErr('');
-                          }}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {deleteStep === 'otp' && (
-                    <form
-                      onSubmit={handleDeleteAccount}
-                      className="mt-4 pt-4 border-t border-red-500/15 space-y-3"
-                    >
-                      <p className="text-xs text-[var(--text-muted)]">
-                        Enter the 6-digit code sent to{' '}
-                        <span className="text-[var(--text)] font-mono">{userEmail}</span>:
-                      </p>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={deleteOtp}
-                        onChange={(e) =>
-                          setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
-                        }
-                        placeholder="000000"
-                        className="w-full bg-[var(--bg-elevated)] border border-red-500/20 rounded-xl px-3 py-3 text-[var(--text)] text-center text-2xl font-mono tracking-[0.6em] outline-none focus:border-red-500/50 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.08)] transition-all duration-200 placeholder:text-[var(--text-muted)] placeholder:tracking-normal"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
-                          disabled={deleting || deleteOtp.length !== 6}
-                          className="flex-1 py-2.5 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-light transition-all duration-200 disabled:opacity-50"
-                        >
-                          {deleting ? 'Deleting...' : 'Permanently delete my account'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteStep('idle');
-                            setDeleteOtp('');
-                            setSecErr('');
-                          }}
-                          className="text-xs text-[var(--text-muted)] hover:text-[var(--text)] px-3 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ════════════════════════════════════════════
-          AI AGENT — purple tint
-      ════════════════════════════════════════════ */}
-          {tab === 'agent' && (
-            <div className="space-y-5">
-              {/* Explainer banner */}
-              <div
-                className="relative rounded-2xl border overflow-hidden px-5 py-4"
-                style={{
-                  background:
-                    'linear-gradient(135deg,rgba(131,110,249,0.08) 0%,rgba(9,9,15,1) 60%)',
-                  borderColor: 'rgba(131,110,249,0.25)',
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 right-0 h-px"
-                  style={{
-                    background:
-                      'linear-gradient(90deg,transparent,rgba(131,110,249,0.5),transparent)',
-                  }}
-                />
-                <div className="flex items-start gap-4">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{
-                      background: 'rgba(131,110,249,0.12)',
-                      border: '1px solid rgba(131,110,249,0.25)',
-                    }}
-                  >
-                    <IconCpu className="w-5 h-5 text-monad-400" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-light text-monad-300 mb-1">
-                      How agent-to-agent negotiation works
-                    </div>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      When you buy a listing, Bolty calls your{' '}
-                      <span className="text-monad-300 font-mono">agentEndpoint</span> with the
-                      current negotiation state. Your AI responds with a JSON object specifying an
-                      action. The platform relays it to the seller&apos;s agent, and they alternate
-                      automatically until a deal is reached or the negotiation expires.
-                    </p>
-                    <p className="text-xs text-zinc-500 mt-2 leading-relaxed">
-                      Your AI keeps full control — the platform just routes messages. You can use
-                      any model, any language.
-                    </p>
-                    <Link
-                      href="/docs/agent-protocol"
-                      className="inline-flex items-center gap-1.5 mt-3 text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors"
-                    >
-                      <IconArrow className="w-3 h-3" />
-                      read the full protocol spec →
-                    </Link>
-                  </div>
-                </div>
-              </div>
-
-              {/* Endpoint form */}
-              <div className="profile-content-card">
-                <Alert type="success" msg={agentMsg} />
-                <Alert type="error" msg={agentErr} />
-
-                <form onSubmit={handleSaveAgentEndpoint} className="space-y-5">
-                  <Field label="Your agent webhook URL">
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <div className="flex-1 flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                          <IconCpu className="w-4 h-4 text-monad-400/60 flex-shrink-0" />
-                          <input
-                            type="url"
-                            value={agentEndpoint}
-                            onChange={(e) => {
-                              setAgentEndpoint(e.target.value);
-                              setAgentTestStatus('idle');
-                              setAgentTestDetail('');
-                            }}
-                            placeholder="https://your-agent.example.com/negotiate"
-                            className="flex-1 bg-transparent text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
-                          />
-                          {agentEndpoint && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAgentEndpoint('');
-                                setAgentTestStatus('idle');
-                              }}
-                              className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors flex-shrink-0"
-                            >
-                              <IconX className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleTestAgentEndpoint}
-                          disabled={!agentEndpoint.trim() || agentTestStatus === 'testing'}
-                          className="text-xs font-mono px-4 py-2.5 rounded-xl border transition-all duration-200 disabled:opacity-40 shrink-0"
-                          style={{
-                            borderColor: 'rgba(131,110,249,0.3)',
-                            color: '#a78bfa',
-                            background: 'rgba(131,110,249,0.08)',
-                          }}
-                        >
-                          {agentTestStatus === 'testing' ? (
-                            <span className="flex items-center gap-1.5">
-                              <span className="w-3 h-3 rounded-full border border-monad-400 border-t-transparent animate-spin" />
-                              testing...
-                            </span>
-                          ) : (
-                            'ping →'
-                          )}
-                        </button>
-                      </div>
-
-                      {/* Test result */}
-                      {agentTestStatus === 'ok' && (
-                        <div
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
-                          style={{
-                            background: 'rgba(34,197,94,0.07)',
-                            border: '1px solid rgba(34,197,94,0.2)',
-                          }}
-                        >
-                          <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
-                          <span className="text-green-400">endpoint reachable</span>
-                          <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
-                        </div>
-                      )}
-                      {agentTestStatus === 'fail' && (
-                        <div
-                          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-mono"
-                          style={{
-                            background: 'rgba(239,68,68,0.07)',
-                            border: '1px solid rgba(239,68,68,0.2)',
-                          }}
-                        >
-                          <span className="w-2 h-2 rounded-full bg-red-400 flex-shrink-0" />
-                          <span className="text-red-400">unreachable</span>
-                          <span className="text-zinc-500 ml-1">{agentTestDetail}</span>
-                        </div>
-                      )}
-
-                      <p className="text-xs text-zinc-600 leading-relaxed px-1">
-                        Bolty will POST JSON to this URL on every negotiation turn. Leave empty to
-                        use the built-in AI fallback.
-                      </p>
-                    </div>
-                  </Field>
-
-                  <SaveButton loading={agentSaving} label="Save endpoint" />
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* API KEYS */}
-          {tab === 'api-keys' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
-              <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg bg-gray-900/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <p className="text-sm font-medium text-white">Production Key</p>
-                      <p className="text-xs text-gray-400">Created: {new Date().toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <code className="text-xs text-gray-300 bg-[#050506] px-2 py-1 rounded flex-1 truncate">{apiKey}</code>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(apiKey);
-                        setApiKeyCopied(true);
-                        setTimeout(() => setApiKeyCopied(false), 2000);
-                      }}
-                      className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200"
-                    >
-                      {apiKeyCopied ? '✓ Copied' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button className="mt-3 px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-xs text-purple-200 hover:text-purple-100">Generate New</button>
-            </div>
-          )}
-
+          {tab === 'agent' && <AgentDashboard />}
           {/* BILLING */}
           {tab === 'billing' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Billing</h2>
-              <div className="space-y-2">
-                <div className="p-3 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">Current Plan</p>
-                  <p className="text-base font-medium text-white mt-1 capitalize">{billingPlan === 'pro' ? 'Professional' : 'Free'}</p>
-                  <p className="text-xs text-gray-500">{billingPlan === 'pro' ? '$99/month • Next billing Dec 15' : 'No active subscription'}</p>
-                </div>
-                <div className="p-3 border border-gray-700 rounded-lg">
-                  <p className="text-xs text-gray-400">Billing Email</p>
-                  <p className="text-sm text-white mt-1">{billingEmail || 'No email on file'}</p>
-                </div>
-                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs">Manage Billing</button>
-              </div>
-            </div>
+            <BillingSection
+              data={{
+                plan: billingPlan as 'free' | 'pro' | 'enterprise',
+                email: billingEmail,
+                nextBillingDate: billingPlan === 'pro' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() : undefined,
+                amount: billingPlan === 'pro' ? 99 : undefined,
+                status: 'active',
+                cardLast4: billingPlan === 'pro' ? '4242' : undefined,
+              }}
+            />
           )}
 
           {/* USAGE */}
           {tab === 'usage' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Usage & Analytics</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded">
-                  <div className="flex justify-between items-center mb-1">
-                    <p className="text-xs text-gray-400">API Calls This Month</p>
-                    <p className="text-xs text-gray-500">24,582 / 100,000</p>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded h-1">
-                    <div className="bg-blue-500 h-1 rounded" style={{ width: '24.5%' }}></div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2 border border-gray-700 rounded text-center">
-                    <p className="text-xs text-gray-400">Active Agents</p>
-                    <p className="text-base font-medium text-white mt-1">12</p>
-                  </div>
-                  <div className="p-2 border border-gray-700 rounded text-center">
-                    <p className="text-xs text-gray-400">Last 24h Calls</p>
-                    <p className="text-base font-medium text-white mt-1">1,245</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <UsageSection
+              data={{
+                totalCalls: usageStats.totalCallsThisMonth || 0,
+                maxCalls: usageStats.maxCallsAllowed || 100000,
+                activeAgents: usageStats.activeAgents || 0,
+                last24hCalls: usageStats.last24hCalls || 0,
+                lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
+              }}
+            />
           )}
 
           {/* NOTIFICATIONS */}
           {tab === 'notifications' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Notifications</h2>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
-                  <div>
-                    <p className="text-sm text-white">Email on API Errors</p>
-                    <p className="text-xs text-gray-400">Get alerts for failed requests</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifErrors}
-                    onChange={() => setNotifErrors(!notifErrors)}
-                    className="w-3 h-3 cursor-pointer"
-                  />
-                </div>
-                <div className="flex items-center justify-between p-2 border border-gray-700 rounded">
-                  <div>
-                    <p className="text-sm text-white">Weekly Usage Report</p>
-                    <p className="text-xs text-gray-400">Summary to {billingEmail || 'your email'}</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={notifReports}
-                    onChange={() => setNotifReports(!notifReports)}
-                    className="w-3 h-3 cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
+            <NotificationsSection
+              settings={{
+                emailOnErrors: notifErrors,
+                weeklyReport: notifReports,
+                monthlyReport: false,
+                deploymentAlerts: true,
+              }}
+              billingEmail={billingEmail}
+              onUpdate={async (settings) => {
+                setNotifErrors(settings.emailOnErrors);
+                setNotifReports(settings.weeklyReport);
+              }}
+            />
           )}
 
           {/* INTEGRATIONS */}
           {tab === 'integrations' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Integrations</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">Slack</p>
-                    <p className="text-xs text-gray-400">Send API notifications</p>
-                  </div>
-                  <button className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">Connect</button>
-                </div>
-                <div className="p-2 border border-gray-700 rounded flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-white">GitHub</p>
-                    <p className="text-xs text-gray-400">{githubLogin ? `Connected as ${githubLogin}` : 'Not connected'}</p>
-                  </div>
-                  {githubLogin ? (
-                    <span className="text-xs text-green-400">✓ Connected</span>
-                  ) : (
-                    <button onClick={handleLinkGitHub} className="px-2 py-1 text-xs bg-purple-600/15 hover:bg-purple-600/25 rounded-lg text-purple-300 hover:text-purple-200">
-                      Link
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+            <IntegrationsSection
+              integrations={(() => {
+                // Build default list with user's real state
+                const defaults = [
+                  {
+                    id: 'metamask',
+                    category: 'wallet',
+                    name: 'MetaMask',
+                    description: 'Connect your MetaMask wallet for transactions',
+                    connected: !!walletAddress,
+                    connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
+                    verified: true,
+                  },
+                  {
+                    id: 'walletconnect',
+                    category: 'wallet',
+                    name: 'WalletConnect',
+                    description: 'Connect via WalletConnect protocol',
+                    connected: false,
+                  },
+                  {
+                    id: 'ledger',
+                    category: 'wallet',
+                    name: 'Ledger',
+                    description: 'Hardware wallet integration',
+                    connected: false,
+                  },
+                  {
+                    id: 'twitter',
+                    category: 'social',
+                    name: 'Twitter/X',
+                    description: 'Share your achievements and activity',
+                    connected: !!twitterUrl,
+                    connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
+                  },
+                  {
+                    id: 'discord',
+                    category: 'social',
+                    name: 'Discord',
+                    description: 'Join community updates and notifications',
+                    connected: false,
+                  },
+                  {
+                    id: 'github-social',
+                    category: 'social',
+                    name: 'GitHub',
+                    description: 'Link your development profile',
+                    connected: !!githubLogin,
+                    connectedAs: githubLogin || undefined,
+                  },
+                  {
+                    id: 'two-factor',
+                    category: 'security',
+                    name: '2FA Authentication',
+                    description: 'Enable two-factor authentication',
+                    connected: twoFAEnabled,
+                  },
+                  {
+                    id: 'api-keys',
+                    category: 'security',
+                    name: 'API Keys',
+                    description: 'Manage API keys for programmatic access',
+                    connected: true,
+                  },
+                ];
+
+                // Deduplicate: use API data if available, otherwise use defaults
+                const seen = new Set<string>();
+                const merged: any[] = [];
+
+                // First add from API integrations
+                if (integrations.length > 0) {
+                  integrations.forEach((int: any) => {
+                    const integrationConfig: Record<string, any> = {
+                      'metamask': { category: 'wallet' },
+                      'walletconnect': { category: 'wallet' },
+                      'ledger': { category: 'wallet' },
+                      'twitter': { category: 'social' },
+                      'discord': { category: 'social' },
+                      'github-social': { category: 'social' },
+                      'two-factor': { category: 'security' },
+                      'api-keys': { category: 'security' },
+                    };
+                    const config = integrationConfig[int.id] || { category: int.category || 'service' };
+                    const item = {
+                      id: int.id,
+                      category: config.category,
+                      name: int.name || int.provider,
+                      description: int.description || 'Connect this integration',
+                      connected: int.connected,
+                      connectedAs: int.connectedAs,
+                      lastUsedAt: int.lastUsedAt,
+                      verified: int.verified,
+                    };
+                    if (!seen.has(int.id)) {
+                      merged.push(item);
+                      seen.add(int.id);
+                    }
+                  });
+                }
+
+                // Then add defaults that aren't already in merged list
+                defaults.forEach((def) => {
+                  if (!seen.has(def.id)) {
+                    merged.push(def);
+                    seen.add(def.id);
+                  } else {
+                    // Update with real state if default
+                    const idx = merged.findIndex((m) => m.id === def.id);
+                    if (idx !== -1 && !integrations.length) {
+                      merged[idx] = { ...merged[idx], ...def };
+                    }
+                  }
+                });
+
+                return merged;
+              })()}
+              onConnect={async (id: string) => {
+                try {
+                  await api.post('/users/integrations', {
+                    provider: id,
+                    name: id,
+                  });
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to connect:', err);
+                }
+              }}
+              onDisconnect={async (id: string) => {
+                try {
+                  await api.delete(`/users/integrations/${id}`);
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to disconnect:', err);
+                }
+              }}
+            />
           )}
 
           {/* ACTIVITY LOG */}
           {tab === 'activity' && (
             <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Activity Log</h2>
-              <div className="space-y-2">
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">Account Settings Updated</p>
-                    <p className="text-gray-500">{new Date().toLocaleDateString()}</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">Email and notifications preferences changed</p>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-light text-[var(--text)]">Activity Log</h2>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Timeline of your account and platform activity</p>
                 </div>
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">Login from New Device</p>
-                    <p className="text-gray-500">1 day ago</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">New login detected from Browser (Linux)</p>
-                </div>
-                <div className="p-2 border border-gray-700 rounded text-xs">
-                  <div className="flex justify-between">
-                    <p className="text-gray-300 font-medium">API Key Generated</p>
-                    <p className="text-gray-500">3 days ago</p>
-                  </div>
-                  <p className="text-gray-400 mt-1">New production API key created</p>
-                </div>
+                <select className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text)]">
+                  <option>All Activities</option>
+                  <option>Login</option>
+                  <option>API Calls</option>
+                  <option>Settings</option>
+                  <option>Security</option>
+                </select>
               </div>
-            </div>
-          )}
 
-          {/* PREFERENCES */}
-          {tab === 'preferences' && (
-            <div className="profile-content-card">
-              <h2 className="text-lg font-semibold text-white mb-3">Preferences</h2>
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs font-medium text-gray-300">Theme</label>
-                  <select
-                    value={theme}
-                    onChange={(e) => setTheme(e.target.value)}
-                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
-                  >
-                    <option value="dark">Dark (Default)</option>
-                    <option value="light">Light</option>
-                    <option value="auto">Auto</option>
-                  </select>
+              {activityLog && activityLog.length > 0 ? (
+                <div className="space-y-1">
+                  {activityLog.map((log: any, idx: number) => {
+                    const timestamp = new Date(log.timestamp || log.createdAt);
+                    const now = new Date();
+                    const diffMs = now.getTime() - timestamp.getTime();
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    let timeStr = 'just now';
+                    if (diffMins < 60) {
+                      timeStr = diffMins <= 0 ? 'just now' : `${diffMins}m ago`;
+                    } else if (diffHours < 24) {
+                      timeStr = `${diffHours}h ago`;
+                    } else if (diffDays < 7) {
+                      timeStr = `${diffDays}d ago`;
+                    } else {
+                      timeStr = timestamp.toLocaleDateString();
+                    }
+
+                    // Determine activity type and color
+                    const action = log.action || log.type || 'Activity';
+                    let typeColor = 'text-zinc-400';
+                    let typeBg = 'bg-zinc-500/10';
+                    if (action.toLowerCase().includes('login')) {
+                      typeColor = 'text-emerald-400';
+                      typeBg = 'bg-emerald-500/10';
+                    } else if (action.toLowerCase().includes('api')) {
+                      typeColor = 'text-monad-400';
+                      typeBg = 'bg-monad-500/10';
+                    } else if (action.toLowerCase().includes('error') || action.toLowerCase().includes('failed')) {
+                      typeColor = 'text-red-400';
+                      typeBg = 'bg-red-500/10';
+                    } else if (action.toLowerCase().includes('update') || action.toLowerCase().includes('change')) {
+                      typeColor = 'text-amber-400';
+                      typeBg = 'bg-amber-500/10';
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-monad-500/20 hover:bg-monad-500/2 transition-all duration-200 group"
+                      >
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className={`text-xs font-mono px-2 py-1 rounded ${typeBg} ${typeColor}`}>
+                              {action}
+                            </span>
+                            <span className="text-xs text-[var(--text-muted)] ml-auto">
+                              {timeStr}
+                            </span>
+                          </div>
+                          {log.description && (
+                            <p className="text-sm text-[var(--text-muted)] mb-1">
+                              {log.description}
+                            </p>
+                          )}
+                          {log.metadata && (
+                            <div className="text-xs text-[var(--text-muted)] font-mono bg-black/20 p-2 rounded border border-[var(--border)] overflow-x-auto max-w-full">
+                              {typeof log.metadata === 'string' ? log.metadata : JSON.stringify(log.metadata, null, 2).substring(0, 200)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="text-xs font-medium text-gray-300">Language</label>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="mt-1 w-full px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white text-xs"
-                  >
-                    <option value="en">English</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                  </select>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mx-auto mb-3">
+                    <IconCpu className="w-5 h-5 text-[var(--text-muted)]" />
+                  </div>
+                  <p className="text-sm text-[var(--text-muted)]">No activity recorded yet</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">Your account activity will appear here</p>
                 </div>
-                <button className="w-full px-3 py-1 bg-purple-600/20 border-2 border-purple-500/40 hover:border-purple-500/60 rounded-xl text-purple-200 hover:text-purple-100 text-xs mt-2">
-                  Save Preferences
-                </button>
-              </div>
+              )}
             </div>
           )}
           </div>

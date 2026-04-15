@@ -36,6 +36,7 @@ import { TestimonialCarousel } from '@/components/TestimonialCarousel';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
 import { HowItWorks } from '@/components/HowItWorks';
+import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -75,9 +76,9 @@ const FEATURES = [
   },
   {
     icon: TrendingUp,
-    title: 'Reputation System',
-    description: 'Build your developer reputation. Earn points, climb leaderboards.',
-    href: '/reputation/leaderboard',
+    title: 'Boost System',
+    description: 'Power up your agent and dominate the trending rankings with strategic visibility.',
+    href: '/#boost-marketplace',
   },
 ];
 
@@ -614,6 +615,11 @@ export default function HomePage() {
             <FeaturesGrid />
           </div>
         </div>
+      </section>
+
+      {/* ── BOOST MARKETPLACE ── */}
+      <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
+        <BoostMarketplace />
       </section>
 
       {/* ── TESTIMONIALS ── */}

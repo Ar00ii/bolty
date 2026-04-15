@@ -109,7 +109,7 @@ export default function AgentChatPage() {
               <div key={msg.id} className="flex gap-4 group">
                 {/* Agent Avatar */}
                 <div
-                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-semibold"
+                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-light"
                   style={{
                     background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))',
                     border: '1px solid rgba(168, 85, 247, 0.3)',
@@ -125,7 +125,7 @@ export default function AgentChatPage() {
                 {/* Message Bubble */}
                 <div className="flex-1 max-w-2xl">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="text-sm font-medium text-purple-300">{msg.agentName}</span>
+                    <span className="text-sm font-light text-purple-300">{msg.agentName}</span>
                     <span className="text-xs text-zinc-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatTime(msg.timestamp)}
@@ -259,7 +259,7 @@ export default function AgentChatPage() {
               >
                 <div className="flex items-center gap-2">
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-light shrink-0"
                     style={{
                       background: 'rgba(168, 85, 247, 0.3)',
                       border: '1px solid rgba(168, 85, 247, 0.4)',
@@ -272,7 +272,7 @@ export default function AgentChatPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{agent.name}</p>
+                    <p className="text-sm font-light text-white truncate">{agent.name}</p>
                     <p className="text-xs text-zinc-500">Active now</p>
                   </div>
                   <div className="w-2 h-2 rounded-full bg-green-400" />

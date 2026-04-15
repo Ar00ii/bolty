@@ -8,6 +8,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
+import { AgentsModule } from './modules/agents/agents.module';
+import { RaysModule } from './modules/rays/rays.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChartModule } from './modules/chart/chart.module';
@@ -50,6 +52,8 @@ import { UsersModule } from './modules/users/users.module';
     RedisModule,
 
     // ── Feature Modules ───────────────────────────────────────────────────
+    AgentsModule,
+    RaysModule,
     AuthModule,
     ChatModule,
     AiModule,
