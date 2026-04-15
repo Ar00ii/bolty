@@ -40,7 +40,7 @@ export function ClickClickDone() {
           letterSpacing: '-1.28px',
         }}
       >
-        Click, click, done.
+        Publish, earn, grow.
       </motion.h2>
 
       {/* Grid */}
