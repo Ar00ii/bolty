@@ -1,8 +1,8 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
 
 interface RenderHeroProps {
   isAuthenticated?: boolean;
@@ -24,19 +24,23 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
       setWordIndex((prev) => (prev + 1) % words.length);
     }, 2200);
     return () => clearInterval(interval);
-  }, [words.length]);
+  }, []);
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden border-b"
+      className="relative overflow-hidden border-b"
       style={{
-        background: 'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
-        borderColor: 'rgba(255,255,255,0.1)',
+        background:
+          'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
+        borderColor: 'rgba(39,39,39)',
+        minHeight: 'calc(100vh - 90px)',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(16, 1fr)',
       }}
     >
-      {/* Grid overlay */}
+      {/* Grid lines overlay */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
             'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
@@ -44,113 +48,216 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-20 md:py-32 items-center min-h-screen">
-          {/* LEFT: Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8 z-10"
+      {/* LEFT COLUMN - Text Content */}
+      <motion.div
+        initial={{ opacity: 0, x: -30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8 }}
+        className="relative z-10"
+        style={{
+          gridColumn: '2 / 9',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          padding: '80px 0',
+          gap: '40px',
+        }}
+      >
+        {/* Hero Text Group */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <h1
+            className="text-white font-light"
+            style={{
+              fontSize: '80px',
+              lineHeight: '80px',
+              letterSpacing: '-2.4px',
+            }}
           >
-            <div className="space-y-6">
-              <h1 className="text-6xl md:text-7xl font-light leading-tight text-white">
-                Your fastest path to
-                <br />
-                production for
-                <div className="relative h-20 md:h-24">
-                  <motion.div
-                    key={wordIndex}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute left-0 top-0"
-                  >
-                    <span
-                      style={{
-                        background: 'linear-gradient(to right, #9b52fb, #b8ffd7)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                      }}
-                      className="text-6xl md:text-7xl font-light"
-                    >
-                      {words[wordIndex]}
-                    </span>
-                    <span
-                      className="ml-2 inline-block text-6xl md:text-7xl font-light text-white animate-pulse"
-                      style={{
-                        background: 'linear-gradient(to top, #373145, rgba(55,49,69,0.5))',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        backgroundClip: 'text',
-                      }}
-                    >
-                      ▌
-                    </span>
-                  </motion.div>
-                </div>
-              </h1>
-
-              <p className="text-xl text-white/70 max-w-xl leading-relaxed font-light">
-                Intuitive infrastructure to scale any app or agent from your first user to your
-                billionth.
-              </p>
-            </div>
-
-            <div className="flex gap-3 flex-wrap">
-              {!isAuthenticated ? (
-                <>
-                  <Link
-                    href="/auth?tab=register"
-                    className="px-6 md:px-8 py-3 bg-white text-black font-light rounded hover:bg-gray-100 transition-colors text-sm md:text-base flex items-center gap-2"
-                  >
-                    Start for free <span>›</span>
-                  </Link>
-                  <Link
-                    href="/contact"
-                    className="px-6 md:px-8 py-3 border border-white text-white font-light rounded hover:bg-white/10 transition-colors text-sm md:text-base"
-                  >
-                    Get in touch
-                  </Link>
-                </>
-              ) : (
-                <Link
-                  href="/market"
-                  className="px-8 py-3 bg-white text-black font-light rounded hover:bg-gray-100 transition-colors flex items-center gap-2"
-                >
-                  Go to dashboard <span>›</span>
-                </Link>
-              )}
-            </div>
-          </motion.div>
-
-          {/* RIGHT: Visual area */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative h-96 md:h-full flex items-center justify-center"
-          >
+            Your fastest path to
+            <br />
+            production for
             <div
-              className="absolute inset-0 rounded-xl opacity-30"
               style={{
-                background:
-                  'radial-gradient(circle at 50% 50%, #9b52fb 0%, transparent 70%)',
-                filter: 'blur(60px)',
+                display: 'block',
+                position: 'relative',
+                minHeight: '80px',
+                marginTop: '8px',
               }}
-            />
-            {/* Lottie player would go here */}
-            <div className="relative z-10 flex items-center justify-center w-full h-full">
-              <div className="text-white/20 text-center">
-                <div className="text-6xl mb-4">⚡</div>
-                <p className="font-light">Interactive dashboard preview</p>
-              </div>
+            >
+              <motion.div
+                key={wordIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span
+                  style={{
+                    background: 'linear-gradient(to right, #9b52fb, #b8ffd7)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: '80px',
+                    lineHeight: '80px',
+                    fontWeight: 300,
+                    letterSpacing: '-2.4px',
+                  }}
+                >
+                  {words[wordIndex]}
+                </span>
+                <motion.span
+                  animate={{ opacity: [1, 1, 0, 0] }}
+                  transition={{ duration: 1.1, repeat: Infinity }}
+                  style={{
+                    display: 'inline-flex',
+                    height: '1em',
+                    width: '0.6ch',
+                    alignItems: 'center',
+                    background: 'linear-gradient(to top, #373145, rgba(55,49,69,0.5))',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: '80px',
+                  }}
+                >
+                  ▌
+                </motion.span>
+              </motion.div>
             </div>
-          </motion.div>
+          </h1>
+
+          <p
+            className="text-white/70"
+            style={{
+              fontSize: '20px',
+              lineHeight: '1.5',
+              maxWidth: '480px',
+            }}
+          >
+            Intuitive infrastructure to scale any app or agent from your first user to your
+            billionth.
+          </p>
         </div>
-      </div>
+
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          {!isAuthenticated ? (
+            <>
+              <Link
+                href="/auth?tab=register"
+                className="hover:opacity-85 transition-opacity"
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 400,
+                  padding: '20px 24px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: '#fff',
+                  color: '#0d0d0d',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                }}
+              >
+                Start for free <span style={{ fontSize: '18px' }}>›</span>
+              </Link>
+              <Link
+                href="/contact"
+                className="hover:opacity-85 transition-opacity"
+                style={{
+                  fontSize: '20px',
+                  fontWeight: 400,
+                  padding: '20px 24px',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  background: 'transparent',
+                  color: '#fff',
+                  border: '1px solid #fff',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                }}
+              >
+                Get in touch
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/market"
+              className="hover:opacity-85 transition-opacity"
+              style={{
+                fontSize: '20px',
+                fontWeight: 400,
+                padding: '20px 24px',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                background: '#fff',
+                color: '#0d0d0d',
+                whiteSpace: 'nowrap',
+                cursor: 'pointer',
+              }}
+            >
+              Go to dashboard <span style={{ fontSize: '18px' }}>›</span>
+            </Link>
+          )}
+        </div>
+      </motion.div>
+
+      {/* RIGHT COLUMN - Visual/Lottie */}
+      <motion.div
+        initial={{ opacity: 0, x: 30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="relative"
+        style={{
+          gridColumn: '9 / 18',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
+      >
+        {/* Placeholder for Lottie animation */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '100%',
+            aspectRatio: '630 / 591',
+            background: 'radial-gradient(circle at 50% 50%, #9b52fb 0%, transparent 70%)',
+            filter: 'blur(60px)',
+            opacity: 0.3,
+          }}
+        />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'rgba(255,255,255,0.2)',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ fontSize: '14px', fontWeight: 300 }}>Interactive preview</p>
+        </div>
+      </motion.div>
     </div>
   );
 }
