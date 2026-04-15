@@ -91,6 +91,14 @@ const ALLOWED_MIMETYPES = new Set([
   'text/x-toml',
 ]);
 
+// SVG files can contain embedded JavaScript — always reject them
+const BLOCKED_MIMETYPES = new Set([
+  'image/svg+xml',
+  'text/svg',
+  'application/svg',
+  'application/svg+xml',
+]);
+
 @UseGuards(JwtAuthGuard)
 @Controller('market')
 export class MarketController {
@@ -209,6 +217,20 @@ export class MarketController {
       }),
       limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (_req, file, cb) => {
+        // Reject explicitly blocked MIME types (SVG, etc.)
+        if (BLOCKED_MIMETYPES.has(file.mimetype)) {
+          cb(new BadRequestException(`File type not allowed: ${file.mimetype}`), false);
+          return;
+        }
+
+        // Reject SVG file extensions even if MIME type is misclassified
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (ext === '.svg') {
+          cb(new BadRequestException('SVG files are not allowed (security risk)'), false);
+          return;
+        }
+
+        // Allow explicitly whitelisted MIME types or any text/* type (safe for text editors)
         if (ALLOWED_MIMETYPES.has(file.mimetype) || file.mimetype.startsWith('text/')) {
           cb(null, true);
         } else {
