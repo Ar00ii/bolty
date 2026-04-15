@@ -16,7 +16,7 @@
 
 import { motion } from 'framer-motion';
 import { ArrowRight, ShoppingCart } from 'lucide-react';
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 export const HowItWorks = memo(() => {
   return (
