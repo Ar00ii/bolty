@@ -49,12 +49,13 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {
     // Validate JWT_SECRET exists and has minimum length (security-critical)
-    this.JWT_SECRET = this.config.get<string>('JWT_SECRET');
-    if (!this.JWT_SECRET || this.JWT_SECRET.length < 32) {
+    const jwtSecret = this.config.get<string>('JWT_SECRET');
+    if (!jwtSecret || jwtSecret.length < 32) {
       throw new Error(
         'CRITICAL: JWT_SECRET environment variable must be set and at least 32 characters. Current state is insecure.',
       );
     }
+    this.JWT_SECRET = jwtSecret;
   }
 
   // ── Nonce generation (wallet auth) ────────────────────────────────────────

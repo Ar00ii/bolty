@@ -105,7 +105,7 @@ export class NegotiationsGateway implements OnGatewayInit, OnGatewayConnection, 
     // Verify user is a participant in this negotiation
     const negotiation = await this.prisma.agentNegotiation.findUnique({
       where: { id: negotiationId },
-      select: { buyerId: true, sellerId: true },
+      select: { buyerId: true, listing: { select: { sellerId: true } } },
     });
 
     if (!negotiation) {
@@ -113,7 +113,7 @@ export class NegotiationsGateway implements OnGatewayInit, OnGatewayConnection, 
       return;
     }
 
-    if (negotiation.buyerId !== userId && negotiation.sellerId !== userId) {
+    if (negotiation.buyerId !== userId && negotiation.listing.sellerId !== userId) {
       client.emit('error', { message: 'Unauthorized: you are not a participant' });
       this.logger.warn(`Unauthorized join attempt: user ${userId} on negotiation ${negotiationId}`);
       return;
