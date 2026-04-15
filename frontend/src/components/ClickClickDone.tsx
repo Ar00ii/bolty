@@ -25,7 +25,7 @@ export function ClickClickDone() {
   return (
     <section
       className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
-      style={{ background: '#0d0d0d', borderLeft: '1px solid rgba(255, 255, 255, 0.1)', borderRight: '1px solid rgba(255, 255, 255, 0.1)' }}
+      style={{ background: '#0d0d0d', border: '1px solid rgba(255, 255, 255, 0.1)' }}
     >
       {/* Heading */}
       <motion.h2
