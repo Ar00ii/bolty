@@ -4,6 +4,19 @@ import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
 import React, { useRef, useCallback } from 'react';
 
+/* ─── CSS for animated dashed lines (marching ants) ─── */
+const dashAnimationCSS = `
+@keyframes dashMove {
+  to { stroke-dashoffset: -40; }
+}
+.dash-animate {
+  animation: dashMove 4s linear infinite;
+}
+.dash-animate-slow {
+  animation: dashMove 6s linear infinite;
+}
+`;
+
 /* ─────────── Geometric Figure with Parallax ─────────── */
 const GeometricFigure = ({ variant }: { variant: number }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,10 +33,10 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       const rect = containerRef.current.getBoundingClientRect();
       const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
       const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-      dottedX.set(nx * 5);
-      dottedY.set(ny * 5);
-      greeblesX.set(nx * 10);
-      greeblesY.set(ny * 10);
+      dottedX.set(nx * 6);
+      dottedY.set(ny * 6);
+      greeblesX.set(nx * 12);
+      greeblesY.set(ny * 12);
     },
     [dottedX, dottedY, greeblesX, greeblesY],
   );
@@ -35,37 +48,38 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
     greeblesY.set(0);
   }, [dottedX, dottedY, greeblesX, greeblesY]);
 
+  // Bigger shapes (viewBox 0 0 400 400, shapes scaled up)
   const shapes = [
     // 0: Diamond
-    <rect key="s0" x="130" y="130" width="140" height="140" fill="none" stroke="#9333ea" strokeWidth="1.5" transform="rotate(45 200 200)" opacity="0.8" />,
+    <rect key="s0" x="105" y="105" width="190" height="190" fill="none" stroke="#9333ea" strokeWidth="1.5" transform="rotate(45 200 200)" opacity="0.85" />,
     // 1: Circle
-    <circle key="s1" cx="200" cy="200" r="85" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.8" />,
+    <circle key="s1" cx="200" cy="200" r="110" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
     // 2: Triangle
-    <polygon key="s2" points="200,110 290,290 110,290" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.8" />,
+    <polygon key="s2" points="200,75 320,310 80,310" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
     // 3: Hexagon
-    <polygon key="s3" points="200,115 270,155 270,245 200,285 130,245 130,155" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.8" />,
+    <polygon key="s3" points="200,85 290,140 290,260 200,315 110,260 110,140" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
   ];
 
   const dashedShapes = [
     // 0: Dashed square + inner diamond
     <>
-      <rect key="d0a" x="110" y="110" width="180" height="180" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="7 5" opacity="0.4" />
-      <rect key="d0b" x="155" y="155" width="90" height="90" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="5 4" transform="rotate(45 200 200)" opacity="0.3" />
+      <rect key="d0a" x="80" y="80" width="240" height="240" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
+      <rect key="d0b" x="140" y="140" width="120" height="120" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" transform="rotate(45 200 200)" opacity="0.35" className="dash-animate-slow" />
     </>,
     // 1: Dashed square + inner circle
     <>
-      <rect key="d1a" x="115" y="115" width="170" height="170" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="7 5" opacity="0.4" />
-      <circle key="d1b" cx="200" cy="200" r="50" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="5 4" opacity="0.3" />
+      <rect key="d1a" x="85" y="85" width="230" height="230" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
+      <circle key="d1b" cx="200" cy="200" r="65" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
     </>,
     // 2: Dashed circle + inner triangle
     <>
-      <circle key="d2a" cx="200" cy="200" r="105" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="7 5" opacity="0.4" />
-      <polygon key="d2b" points="200,145 255,260 145,260" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="5 4" opacity="0.3" />
+      <circle key="d2a" cx="200" cy="200" r="130" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
+      <polygon key="d2b" points="200,120 275,275 125,275" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
     </>,
     // 3: Dashed diamond + inner hexagon
     <>
-      <rect key="d3a" x="135" y="135" width="130" height="130" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="7 5" transform="rotate(45 200 200)" opacity="0.4" />
-      <polygon key="d3b" points="200,150 240,175 240,225 200,250 160,225 160,175" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="5 4" opacity="0.3" />
+      <rect key="d3a" x="115" y="115" width="170" height="170" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" transform="rotate(45 200 200)" opacity="0.45" className="dash-animate" />
+      <polygon key="d3b" points="200,125 260,165 260,235 200,275 140,235 140,165" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
     </>,
   ];
 
@@ -77,7 +91,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="relative w-full flex items-center justify-center"
-      style={{ height: '220px' }}
+      style={{ height: '300px' }}
     >
       {/* Dot grid */}
       <div
@@ -94,31 +108,31 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       <div
         className="absolute rounded-full"
         style={{
-          width: '55%',
-          height: '55%',
+          width: '60%',
+          height: '60%',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(147,51,234,0.35) 0%, rgba(124,58,237,0.2) 35%, rgba(88,28,135,0.08) 65%, transparent 100%)',
-          filter: 'blur(20px)',
+          background: 'radial-gradient(circle, rgba(147,51,234,0.4) 0%, rgba(124,58,237,0.22) 35%, rgba(88,28,135,0.08) 65%, transparent 100%)',
+          filter: 'blur(22px)',
         }}
       />
       <div
         className="absolute rounded-full"
         style={{
-          width: '30%',
-          height: '30%',
+          width: '35%',
+          height: '35%',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(192,132,252,0.15) 50%, transparent 100%)',
-          filter: 'blur(12px)',
+          background: 'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(192,132,252,0.18) 50%, transparent 100%)',
+          filter: 'blur(14px)',
         }}
       />
 
       {/* Fade edges */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #1a1a1a 0%, transparent 15%, transparent 85%, #1a1a1a 100%)' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #1a1a1a 0%, transparent 15%, transparent 85%, #1a1a1a 100%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)' }} />
 
       {/* Layer 0: Base shape */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -127,7 +141,7 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         </svg>
       </div>
 
-      {/* Layer 1: Dashed (parallax 1x) */}
+      {/* Layer 1: Dashed with marching animation (parallax 1x) */}
       <motion.div
         className="absolute inset-0"
         style={{ x: dottedX, y: dottedY }}
@@ -143,10 +157,10 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
         style={{ x: greeblesX, y: greeblesY }}
       >
         <svg viewBox="0 0 400 400" className="w-full h-full">
-          <path d="M 75 115 L 75 75 L 115 75" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.45" />
-          <path d="M 285 75 L 325 75 L 325 115" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.45" />
-          <path d="M 75 285 L 75 325 L 115 325" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.45" />
-          <path d="M 285 325 L 325 325 L 325 285" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.45" />
+          <path d="M 55 100 L 55 55 L 100 55" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
+          <path d="M 300 55 L 345 55 L 345 100" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
+          <path d="M 55 300 L 55 345 L 100 345" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
+          <path d="M 300 345 L 345 345 L 345 300" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
         </svg>
       </motion.div>
     </div>
@@ -188,6 +202,9 @@ export const FeaturesGrid = () => {
       className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
       style={{ background: '#0d0d0d' }}
     >
+      {/* Inject dash animation keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: dashAnimationCSS }} />
+
       {/* Heading */}
       <motion.h2
         initial={{ opacity: 0, y: 20 }}
@@ -229,37 +246,38 @@ export const FeaturesGrid = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: idx * 0.1 }}
-              className="group flex flex-col rounded-lg border overflow-hidden cursor-pointer transition-all duration-500"
+              className="group flex flex-col rounded-lg border overflow-hidden cursor-pointer"
               style={{
                 borderColor: '#272727',
                 background: '#1a1a1a',
               }}
               whileHover={{
-                borderColor: 'rgba(147, 51, 234, 0.5)',
-                boxShadow: '0 0 40px rgba(147, 51, 234, 0.15), 0 0 80px rgba(147, 51, 234, 0.05)',
-                scale: 1.02,
-                y: -4,
+                borderColor: 'rgba(147, 51, 234, 0.6)',
+                boxShadow: '0 0 50px rgba(147, 51, 234, 0.2), 0 0 100px rgba(147, 51, 234, 0.08), inset 0 0 30px rgba(147, 51, 234, 0.03)',
+                scale: 1.03,
+                y: -6,
               }}
             >
               {/* Geometric figure */}
-              <div className="relative overflow-hidden" style={{ background: '#141414' }}>
+              <div className="relative overflow-hidden transition-all duration-500 group-hover:brightness-125" style={{ background: '#141414' }}>
                 <GeometricFigure variant={idx} />
               </div>
+
+              {/* Divider line */}
+              <div className="h-px bg-[#272727] group-hover:bg-purple-600/40 transition-colors duration-500" />
 
               {/* Content */}
               <div className="flex flex-col gap-4 p-6">
                 {/* Icon + Title */}
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_16px_rgba(147,51,234,0.4)]"
-                    style={{
-                      background: '#9333ea',
-                    }}
+                    className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] group-hover:scale-110"
+                    style={{ background: '#9333ea' }}
                   >
                     <Icon className="w-4 h-4 text-white" />
                   </div>
                   <h3
-                    className="text-white font-normal"
+                    className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
                     style={{
                       fontSize: '22px',
                       lineHeight: 1.2,
@@ -284,8 +302,8 @@ export const FeaturesGrid = () => {
                 {/* Details */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2">
                   {feature.details.map((detail, i) => (
-                    <div key={i} className="flex items-center gap-1.5 text-xs text-white/35">
-                      <div className="w-1 h-1 rounded-full bg-purple-600/60" />
+                    <div key={i} className="flex items-center gap-1.5 text-xs text-white/35 group-hover:text-white/50 transition-colors duration-300">
+                      <div className="w-1 h-1 rounded-full bg-purple-600/60 group-hover:bg-purple-400/80 transition-colors duration-300" />
                       {detail}
                     </div>
                   ))}
