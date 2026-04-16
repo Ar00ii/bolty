@@ -29,10 +29,8 @@ import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { TechStack } from '@/components/TechStack';
-import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { GradientText } from '@/components/ui/GradientText';
-import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { RenderHero } from '@/components/ui/RenderHero';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -324,275 +322,94 @@ export default function HomePage() {
       {/* ── CLICK CLICK DONE ── */}
       <ClickClickDone />
 
-      {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
+      {/* ── DEPLOY APPS WITH ZERO OPS ── */}
       <section
-        className="py-24 px-4 relative overflow-hidden"
-        style={{
-          borderColor: 'var(--border)',
-          background: '#000000',
-        }}
+        className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
+        style={{ background: '#0d0d0d' }}
       >
-        {/* Hexagon Pattern Background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <HexagonPattern className="w-full h-full" />
+        {/* Heading */}
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-white"
+          style={{
+            fontSize: '64px',
+            fontWeight: 300,
+            lineHeight: 1.05,
+            letterSpacing: '-1.28px',
+          }}
+        >
+          Deploy apps and agents
+          <br />
+          with zero ops.
+        </motion.h2>
+
+        <p
+          className="text-white/60"
+          style={{
+            fontSize: '20px',
+            lineHeight: '1.5',
+            maxWidth: '520px',
+            marginTop: '16px',
+          }}
+        >
+          Ship to production in seconds. No servers, no config, no headaches.
+        </p>
+
+        {/* Feature cards grid */}
+        <div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          style={{ paddingTop: '60px' }}
+        >
+          {FEATURES.map((f, i) => {
+            const Icon = f.icon;
+            return (
+              <motion.div
+                key={f.href}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="group flex flex-col gap-5 rounded-lg border p-6 cursor-pointer transition-all duration-500 hover:border-purple-600/50 hover:shadow-[0_0_40px_rgba(147,51,234,0.12)]"
+                style={{
+                  borderColor: '#272727',
+                  background: '#1a1a1a',
+                }}
+              >
+                {/* Icon */}
+                <div
+                  className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] group-hover:scale-110"
+                  style={{ background: '#9333ea' }}
+                >
+                  <Icon className="w-5 h-5 text-white" />
+                </div>
+
+                {/* Title */}
+                <h3
+                  className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
+                  style={{
+                    fontSize: '22px',
+                    lineHeight: 1.2,
+                    letterSpacing: '-0.5px',
+                  }}
+                >
+                  {f.title}
+                </h3>
+
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: '15px',
+                    lineHeight: 1.5,
+                    color: '#a0a0a0',
+                  }}
+                >
+                  {f.description}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Big box: border + black bg + corner brackets inside + title + cards */}
-          <div
-            className="relative rounded-lg overflow-hidden"
-            style={{
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              background: 'rgba(0, 0, 0, 0.6)',
-            }}
-          >
-            {/* Corner Brackets - inside the big box */}
-            <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-white/30 pointer-events-none z-20" />
-            <div className="absolute top-3 right-3 w-8 h-8 border-t-2 border-r-2 border-white/30 pointer-events-none z-20" />
-            <div className="absolute bottom-3 left-3 w-8 h-8 border-b-2 border-l-2 border-white/30 pointer-events-none z-20" />
-            <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-white/30 pointer-events-none z-20" />
-
-            {/* Title */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="p-10 md:p-14 pb-8"
-            >
-              <h2 className="text-5xl md:text-6xl font-light text-white leading-tight">
-                Deploy apps and agents
-                <br />
-                with{' '}
-                <GradientText gradient="purple" animated={false}>
-                  zero ops
-                </GradientText>
-              </h2>
-            </motion.div>
-
-            {/* Feature cards grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 auto-rows-max gap-0 relative z-10">
-              {FEATURES.map((f, i) => {
-                const Icon = f.icon;
-                const accentColors = ['cyan', 'emerald', 'pink', 'yellow', 'blue', 'purple'];
-                const accentColor = accentColors[i % accentColors.length];
-                const accentTextColors = [
-                  'text-cyan-400',
-                  'text-emerald-400',
-                  'text-pink-400',
-                  'text-yellow-400',
-                  'text-blue-400',
-                  'text-purple-400',
-                ];
-                const accentTextColor = accentTextColors[i % accentTextColors.length];
-
-                const accentBgMap: { [key: string]: string } = {
-                  cyan: 'rgba(34, 211, 238, 0.1)',
-                  emerald: 'rgba(16, 185, 129, 0.1)',
-                  pink: 'rgba(236, 72, 153, 0.1)',
-                  yellow: 'rgba(234, 179, 8, 0.1)',
-                  blue: 'rgba(59, 130, 246, 0.1)',
-                  purple: 'rgba(168, 85, 247, 0.1)',
-                };
-
-                const accentBorderMap: { [key: string]: string } = {
-                  cyan: 'rgba(255, 255, 255, 0.2)',
-                  emerald: 'rgba(255, 255, 255, 0.2)',
-                  pink: 'rgba(255, 255, 255, 0.2)',
-                  yellow: 'rgba(255, 255, 255, 0.2)',
-                  blue: 'rgba(255, 255, 255, 0.2)',
-                  purple: 'rgba(255, 255, 255, 0.2)',
-                };
-
-                // Reputation System (index 5) spans 2 rows AND 2 columns (full width)
-                const isReputationCard = i === 5;
-                const gridClass = isReputationCard
-                  ? 'lg:col-span-2 lg:row-span-2'
-                  : f.featured
-                    ? 'lg:col-span-2'
-                    : '';
-
-                return (
-                  <motion.div
-                    key={f.href}
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                    className={`group relative ${gridClass}`}
-                    style={{
-                      borderRight:
-                        !f.featured && !isReputationCard && i > 0 && (i - 1) % 2 === 0
-                          ? '1px solid rgba(255, 255, 255, 0.2)'
-                          : 'none',
-                      borderBottom:
-                        i < FEATURES.length - 1 ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
-                    }}
-                  >
-                    {/* Card Background with Gradient */}
-                    <div
-                      className="relative h-full backdrop-blur-sm overflow-hidden p-8 md:p-12"
-                      style={{
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        boxShadow: `inset 0 1px 1px ${accentBorderMap[accentColor]}, inset 0 -1px 1px rgba(0, 0, 0, 0.3)`,
-                        minHeight: isReputationCard ? 'auto' : 'auto',
-                      }}
-                    >
-                      <div className="relative z-10 h-full flex flex-col justify-between">
-                        {/* Header with Icon */}
-                        <div>
-                          <div className="flex items-start gap-4 mb-6">
-                            <div
-                              className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${accentTextColor}`}
-                              style={{
-                                background: accentBgMap[accentColor],
-                                boxShadow:
-                                  'inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 12px rgba(255, 255, 255, 0.1)',
-                              }}
-                            >
-                              <Icon className="w-6 h-6" />
-                            </div>
-                          </div>
-                          <h3 className="text-xl font-light text-white mb-4 leading-snug">
-                            {f.title}
-                          </h3>
-                          <p className="text-gray-300 text-sm leading-relaxed font-light">
-                            {f.description}
-                          </p>
-                        </div>
-
-                        {/* Visual Content - Different for each card */}
-                        {i === 0 && (
-                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-gray-400">Active Agents</span>
-                              <motion.span
-                                initial={{ opacity: 0, x: 10 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2 }}
-                                className="text-cyan-400 font-light"
-                              >
-                                <AnimatedCounter value={2847} />
-                              </motion.span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-gray-400">Total Revenue</span>
-                              <motion.span
-                                initial={{ opacity: 0, x: 10 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3 }}
-                                className="text-cyan-400 font-light"
-                              >
-                                <AnimatedCounter value={243} suffix="K ETH" duration={2.5} />
-                              </motion.span>
-                            </div>
-                            <div className="flex justify-between items-center text-sm">
-                              <span className="text-gray-400">Success Rate</span>
-                              <motion.span
-                                initial={{ opacity: 0, x: 10 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 }}
-                                className="text-cyan-400 font-light"
-                              >
-                                <AnimatedCounter
-                                  value={98.7}
-                                  suffix="%"
-                                  decimals={1}
-                                  duration={2.5}
-                                />
-                              </motion.span>
-                            </div>
-                          </div>
-                        )}
-
-                        {i === 2 && (
-                          <div className="mt-6 pt-6 border-t border-white/10">
-                            <div className="space-y-2">
-                              {['Production', 'Development', 'Testing'].map((env, idx) => (
-                                <div key={idx} className="flex items-center gap-2">
-                                  <div
-                                    className="w-2 h-2 rounded-full"
-                                    style={{
-                                      background: ['#06b6d4', '#10b981', '#f97316'][idx],
-                                    }}
-                                  />
-                                  <span className="text-xs text-gray-400">{env}</span>
-                                  <div className="flex-1 h-1 bg-white/5 rounded-full ml-2">
-                                    <div
-                                      className="h-full rounded-full"
-                                      style={{
-                                        width: ['65%', '42%', '28%'][idx],
-                                        background: ['#06b6d4', '#10b981', '#f97316'][idx],
-                                        opacity: 0.6,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {i === 4 && (
-                          <div className="mt-6 pt-6 border-t border-white/10 space-y-2">
-                            <div className="flex gap-2">
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
-                                A
-                              </div>
-                              <div className="flex-1 bg-white/5 rounded-lg p-2 text-xs text-gray-300">
-                                Connected to WebSocket
-                              </div>
-                            </div>
-                            <div className="flex gap-2 justify-end">
-                              <div className="flex-1 max-w-xs bg-blue-500/20 rounded-lg p-2 text-xs text-blue-300 text-right">
-                                Real-time sync enabled
-                              </div>
-                              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-xs text-blue-400">
-                                U
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {i === 5 && (
-                          <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-xs">
-                                <span className="text-gray-400">Your Rank</span>
-                                <motion.span
-                                  initial={{ opacity: 0, x: 10 }}
-                                  whileInView={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: 0.5 }}
-                                  className="text-purple-400 font-light"
-                                >
-                                  #<AnimatedCounter value={342} />
-                                </motion.span>
-                              </div>
-                              <div className="flex gap-1 mt-3">
-                                {[...Array(7)].map((_, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="flex-1 h-8 bg-white/5 rounded-sm overflow-hidden"
-                                  >
-                                    <div
-                                      className="h-full bg-purple-500/40"
-                                      style={{
-                                        height: `${[45, 60, 70, 85, 75, 65, 55][idx]}%`,
-                                      }}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
       </section>
 
       {/* ── FEATURES GRID ── */}
