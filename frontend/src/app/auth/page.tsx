@@ -433,7 +433,8 @@ export default function AuthPage() {
     <div
       className="min-h-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
+        background: 'url(/login-bg.png) center/cover no-repeat',
+        backgroundAttachment: 'fixed',
       }}
     >
       {/* Animated background orbs */}
