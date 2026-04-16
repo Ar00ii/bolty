@@ -25,10 +25,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { HowItWorks } from '@/components/HowItWorks';
-import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { TechStack } from '@/components/TechStack';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
@@ -322,8 +321,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── HOW IT WORKS ── */}
-      <HowItWorks />
+      {/* ── CLICK CLICK DONE ── */}
+      <ClickClickDone />
 
       {/* ── FEATURES (PERFECT RENDER STYLE) ── */}
       <section
@@ -619,11 +618,6 @@ export default function HomePage() {
 
       {/* ── ELITE BOOST ── */}
       <EliteBoost />
-
-      {/* ── BOOST MARKETPLACE ── */}
-      <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
-        <BoostMarketplace />
-      </section>
 
       {/* ── TESTIMONIALS ── */}
       <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
