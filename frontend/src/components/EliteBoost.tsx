@@ -6,6 +6,59 @@ import { motion } from 'framer-motion';
 
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
 
+// Tier Visualization Component
+const TierVisualization = ({ tier }: { tier: string }) => {
+  const tiers = ['Iron', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Mastery', 'Champion'];
+  const tierIndex = tiers.indexOf(tier);
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="relative w-20 h-20">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-0 rounded-full border border-transparent border-t-purple-400 border-r-cyan-400"
+        />
+        <div className="absolute inset-2 rounded-full border border-purple-500/30 flex items-center justify-center">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="text-xl font-light text-purple-400"
+          >
+            {tierIndex + 1}/8
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Package Visualization Component
+const PackageVisualization = ({ boost }: { boost: number }) => {
+  const percentage = (boost / 250) * 100;
+
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-4">
+      <motion.div
+        animate={{ scale: [0.8, 1, 0.8] }}
+        transition={{ duration: 2, repeat: Infinity }}
+        className="text-center"
+      >
+        <div className="text-2xl font-light text-cyan-400">{boost}</div>
+        <div className="text-[11px] text-gray-400">Boost</div>
+      </motion.div>
+      <div className="w-12 h-1 bg-gray-700 rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          whileInView={{ width: `${percentage}%` }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="h-full bg-gradient-to-r from-purple-500 to-cyan-400"
+        />
+      </div>
+    </div>
+  );
+};
+
 export function EliteBoost() {
   const features = [
     {
@@ -35,22 +88,100 @@ export function EliteBoost() {
   ];
 
   const tiers = [
-    { name: 'Iron', description: '0 Boost • 1x multiplier', Icon: Shield, className: 'col-span-1' },
-    { name: 'Bronze', description: '25 Boost • 2.5x multiplier', Icon: Medal, className: 'col-span-1' },
-    { name: 'Silver', description: '50 Boost • 5x multiplier', Icon: Medal, className: 'col-span-1' },
-    { name: 'Gold', description: '120 Boost • 6x multiplier', Icon: Crown, className: 'col-span-1' },
-    { name: 'Platinum', description: '250 Boost • 10x multiplier', Icon: Gem, className: 'col-span-1' },
-    { name: 'Diamond', description: '500 Boost • 15x multiplier', Icon: Gem, className: 'col-span-1' },
-    { name: 'Mastery', description: '1000 Boost • 20x multiplier', Icon: Wand2, className: 'col-span-1' },
-    { name: 'Champion', description: '2000 Boost • 25x multiplier', Icon: Crown, className: 'col-span-1' },
+    {
+      name: 'Iron',
+      description: '0 Boost • 1x multiplier',
+      Icon: Shield,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Iron" />,
+    },
+    {
+      name: 'Bronze',
+      description: '25 Boost • 2.5x multiplier',
+      Icon: Medal,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Bronze" />,
+    },
+    {
+      name: 'Silver',
+      description: '50 Boost • 5x multiplier',
+      Icon: Medal,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Silver" />,
+    },
+    {
+      name: 'Gold',
+      description: '120 Boost • 6x multiplier',
+      Icon: Crown,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Gold" />,
+    },
+    {
+      name: 'Platinum',
+      description: '250 Boost • 10x multiplier',
+      Icon: Gem,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Platinum" />,
+    },
+    {
+      name: 'Diamond',
+      description: '500 Boost • 15x multiplier',
+      Icon: Gem,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Diamond" />,
+    },
+    {
+      name: 'Mastery',
+      description: '1000 Boost • 20x multiplier',
+      Icon: Wand2,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Mastery" />,
+    },
+    {
+      name: 'Champion',
+      description: '2000 Boost • 25x multiplier',
+      Icon: Crown,
+      className: 'col-span-1',
+      background: <TierVisualization tier="Champion" />,
+    },
   ];
 
   const packages = [
-    { name: 'Starter', description: '10 Boost • 12 BOLTY', Icon: Zap, className: 'col-span-1' },
-    { name: 'Growth', description: '25 Boost • 28 BOLTY', Icon: TrendingUp, className: 'col-span-1' },
-    { name: 'Professional', description: '50 Boost • 48 BOLTY', Icon: Trophy, className: 'col-span-1' },
-    { name: 'Premium', description: '120 Boost • 110 BOLTY', Icon: Crown, className: 'col-span-1' },
-    { name: 'Elite', description: '250 Boost • 230 BOLTY', Icon: Gem, className: 'col-span-1' },
+    {
+      name: 'Starter',
+      description: '10 Boost • 12 BOLTY',
+      Icon: Zap,
+      className: 'col-span-1',
+      background: <PackageVisualization boost={10} />,
+    },
+    {
+      name: 'Growth',
+      description: '25 Boost • 28 BOLTY',
+      Icon: TrendingUp,
+      className: 'col-span-1',
+      background: <PackageVisualization boost={25} />,
+    },
+    {
+      name: 'Professional',
+      description: '50 Boost • 48 BOLTY',
+      Icon: Trophy,
+      className: 'col-span-1',
+      background: <PackageVisualization boost={50} />,
+    },
+    {
+      name: 'Premium',
+      description: '120 Boost • 110 BOLTY',
+      Icon: Crown,
+      className: 'col-span-1',
+      background: <PackageVisualization boost={120} />,
+    },
+    {
+      name: 'Elite',
+      description: '250 Boost • 230 BOLTY',
+      Icon: Gem,
+      className: 'col-span-1',
+      background: <PackageVisualization boost={250} />,
+    },
   ];
 
   return (
@@ -96,7 +227,7 @@ export function EliteBoost() {
           </p>
           <BentoGrid>
             {tiers.map((tier, idx) => (
-              <BentoCard key={idx} {...tier} href="#" cta="View details" />
+              <BentoCard key={idx} {...tier} href="#" cta="View tier" />
             ))}
           </BentoGrid>
         </div>
