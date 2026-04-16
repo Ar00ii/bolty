@@ -2,6 +2,7 @@
 
 import { Zap, TrendingUp, Trophy, Crown, Shield, Gem, Wand2, Medal, GitBranch, Bot, MessageSquare, Users } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 
 import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
 
