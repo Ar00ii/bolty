@@ -98,17 +98,26 @@ export function ClickClickDone() {
               </div>
             </div>
 
-            {/* Image Container - Placeholder */}
-            <div
-              className="w-full rounded-lg border flex flex-col gap-3 p-4"
-              style={{
-                aspectRatio: '9 / 10',
-                background: '#1a1a1a',
-                borderColor: '#272727',
-                fontSize: '13px',
-                color: '#888',
-              }}
-            >
+            {/* Image Container */}
+            <div className="relative flex-1 flex flex-col justify-end mt-auto">
+              {/* Fade overlay at top */}
+              <div
+                className="absolute top-0 left-0 right-0 z-10 pointer-events-none"
+                style={{
+                  height: '120px',
+                  background: 'linear-gradient(to bottom, #0d0d0d 0%, transparent 100%)',
+                }}
+              />
+
+              <div
+                className="w-full rounded-lg border flex flex-col gap-3 p-4"
+                style={{
+                  background: '#1a1a1a',
+                  borderColor: '#272727',
+                  fontSize: '13px',
+                  color: '#888',
+                }}
+              >
               {step.number === '1' && (
                 <>
                   <p style={{ fontSize: '13px', color: '#999', lineHeight: 1.4 }}>
@@ -202,6 +211,7 @@ export function ClickClickDone() {
                   </div>
                 </>
               )}
+              </div>
             </div>
           </motion.div>
         ))}
