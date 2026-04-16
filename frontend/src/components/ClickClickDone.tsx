@@ -100,12 +100,12 @@ export function ClickClickDone() {
 
             {/* Image Container */}
             <div className="relative flex-1 flex flex-col justify-end mt-auto">
-              {/* Fade overlay at top */}
+              {/* Fade overlay at bottom */}
               <div
-                className="absolute top-0 left-0 right-0 z-10 pointer-events-none"
+                className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
                 style={{
                   height: '120px',
-                  background: 'linear-gradient(to bottom, #0d0d0d 0%, transparent 100%)',
+                  background: 'linear-gradient(to top, #0d0d0d 0%, transparent 100%)',
                 }}
               />
 
