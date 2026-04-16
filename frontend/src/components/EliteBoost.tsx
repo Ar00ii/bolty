@@ -387,88 +387,299 @@ export function EliteBoost() {
         Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
       </p>
 
-      {/* Platform Features Grid */}
+      {/* Platform Features - Masonry Grid */}
       <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-20"
-        style={{ paddingTop: '60px', gap: '40px' }}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '24px',
+          paddingTop: '60px',
+        }}
       >
-        {features.map((feature, i) => {
-          const Icon = feature.Icon;
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="flex flex-col gap-8 rounded-lg border p-6"
+        {/* 1. Publish Repository - Large (top-left) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0 }}
+          className="flex flex-col gap-8 rounded-lg border p-6"
+          style={{
+            borderColor: '#272727',
+            background: '#1a1a1a',
+            gridColumn: '1 / 2',
+            gridRow: '1 / 3',
+            minHeight: '500px',
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex items-center justify-center text-white font-normal"
               style={{
-                borderColor: '#272727',
-                background: '#1a1a1a',
+                width: '40px',
+                height: '40px',
+                background: '#9333ea',
+                fontSize: '18px',
+                lineHeight: 1,
+                borderRadius: '50%',
               }}
             >
-              {/* Title and Description */}
-              <div className="flex flex-col gap-4">
-                <div
-                  className="flex items-center justify-center text-white font-normal"
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    background: '#9333ea',
-                    fontSize: '18px',
-                    lineHeight: 1,
-                    borderRadius: '50%',
-                  }}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-
-                <div className="flex flex-col gap-3">
-                  <h3
-                    className="text-white font-normal"
-                    style={{
-                      fontSize: '24px',
-                      lineHeight: 1.15,
-                      letterSpacing: '-0.8px',
-                    }}
-                  >
-                    {feature.name}
-                  </h3>
-                  <p
-                    className="font-normal"
-                    style={{
-                      fontSize: '16px',
-                      lineHeight: 1.38,
-                      color: '#e3e3e3',
-                    }}
-                  >
-                    {feature.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Animation Container */}
-              <div
-                className="w-full rounded-lg border flex items-center justify-center p-4 relative"
+              <GitBranch className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <h3
+                className="text-white font-normal"
                 style={{
-                  aspectRatio: '16 / 9',
-                  background: '#0d0d0d',
-                  borderColor: '#333',
-                  minHeight: '200px',
-                  overflow: 'hidden',
+                  fontSize: '24px',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.8px',
                 }}
               >
-                {feature.background}
-              </div>
-
-              <a
-                href={feature.href}
-                className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+                {features[0].name}
+              </h3>
+              <p
+                className="font-normal"
+                style={{
+                  fontSize: '16px',
+                  lineHeight: 1.38,
+                  color: '#e3e3e3',
+                }}
               >
-                {feature.cta} →
-              </a>
-            </motion.div>
-          );
-        })}
+                {features[0].description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="w-full rounded-lg border flex items-center justify-center p-4 relative flex-1"
+            style={{
+              background: '#0d0d0d',
+              borderColor: '#333',
+              overflow: 'hidden',
+            }}
+          >
+            {features[0].background}
+          </div>
+
+          <a
+            href={features[0].href}
+            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            {features[0].cta} →
+          </a>
+        </motion.div>
+
+        {/* 2. Deploy AI Agent - Medium (top-right) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="flex flex-col gap-8 rounded-lg border p-6"
+          style={{
+            borderColor: '#272727',
+            background: '#1a1a1a',
+            gridColumn: '2 / 4',
+            gridRow: '1 / 2',
+            minHeight: '280px',
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex items-center justify-center text-white font-normal"
+              style={{
+                width: '40px',
+                height: '40px',
+                background: '#9333ea',
+                fontSize: '18px',
+                lineHeight: 1,
+                borderRadius: '50%',
+              }}
+            >
+              <Bot className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <h3
+                className="text-white font-normal"
+                style={{
+                  fontSize: '24px',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.8px',
+                }}
+              >
+                {features[1].name}
+              </h3>
+              <p
+                className="font-normal"
+                style={{
+                  fontSize: '16px',
+                  lineHeight: 1.38,
+                  color: '#e3e3e3',
+                }}
+              >
+                {features[1].description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="w-full rounded-lg border flex items-center justify-center p-4 relative"
+            style={{
+              background: '#0d0d0d',
+              borderColor: '#333',
+              height: '150px',
+              overflow: 'hidden',
+            }}
+          >
+            {features[1].background}
+          </div>
+
+          <a
+            href={features[1].href}
+            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            {features[1].cta} →
+          </a>
+        </motion.div>
+
+        {/* 3. Global AI Chat - Small (middle-right) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col gap-8 rounded-lg border p-6"
+          style={{
+            borderColor: '#272727',
+            background: '#1a1a1a',
+            gridColumn: '2 / 4',
+            gridRow: '2 / 3',
+            minHeight: '280px',
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex items-center justify-center text-white font-normal"
+              style={{
+                width: '40px',
+                height: '40px',
+                background: '#9333ea',
+                fontSize: '18px',
+                lineHeight: 1,
+                borderRadius: '50%',
+              }}
+            >
+              <MessageSquare className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <h3
+                className="text-white font-normal"
+                style={{
+                  fontSize: '24px',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.8px',
+                }}
+              >
+                {features[3].name}
+              </h3>
+              <p
+                className="font-normal"
+                style={{
+                  fontSize: '16px',
+                  lineHeight: 1.38,
+                  color: '#e3e3e3',
+                }}
+              >
+                {features[3].description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="w-full rounded-lg border flex items-center justify-center p-4 relative flex-1"
+            style={{
+              background: '#0d0d0d',
+              borderColor: '#333',
+              overflow: 'hidden',
+            }}
+          >
+            {features[3].background}
+          </div>
+
+          <a
+            href={features[3].href}
+            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            {features[3].cta} →
+          </a>
+        </motion.div>
+
+        {/* 4. Agent Negotiation - Large (bottom-full) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.45 }}
+          className="flex flex-col gap-8 rounded-lg border p-6"
+          style={{
+            borderColor: '#272727',
+            background: '#1a1a1a',
+            gridColumn: '1 / 4',
+            gridRow: '3 / 4',
+            minHeight: '350px',
+          }}
+        >
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex items-center justify-center text-white font-normal"
+              style={{
+                width: '40px',
+                height: '40px',
+                background: '#9333ea',
+                fontSize: '18px',
+                lineHeight: 1,
+                borderRadius: '50%',
+              }}
+            >
+              <Users className="w-5 h-5" />
+            </div>
+            <div className="flex flex-col gap-3">
+              <h3
+                className="text-white font-normal"
+                style={{
+                  fontSize: '24px',
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.8px',
+                }}
+              >
+                {features[2].name}
+              </h3>
+              <p
+                className="font-normal"
+                style={{
+                  fontSize: '16px',
+                  lineHeight: 1.38,
+                  color: '#e3e3e3',
+                }}
+              >
+                {features[2].description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="w-full rounded-lg border flex items-center justify-center p-4 relative flex-1"
+            style={{
+              background: '#0d0d0d',
+              borderColor: '#333',
+              overflow: 'hidden',
+            }}
+          >
+            {features[2].background}
+          </div>
+
+          <a
+            href={features[2].href}
+            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+          >
+            {features[2].cta} →
+          </a>
+        </motion.div>
       </div>
 
 
