@@ -46,7 +46,7 @@ export function ClickClickDone() {
       {/* Grid */}
       <div
         className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-15"
-        style={{ paddingTop: '60px' }}
+        style={{ paddingTop: '60px', gap: '80px' }}
       >
         {steps.map((step, i) => (
           <motion.div
@@ -57,7 +57,7 @@ export function ClickClickDone() {
             className="flex flex-col gap-8"
           >
             {/* Card Text Area */}
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {/* Badge */}
               <div
                 className="flex items-center justify-center text-white font-normal"
@@ -78,7 +78,7 @@ export function ClickClickDone() {
                 <h3
                   className="text-white font-normal"
                   style={{
-                    fontSize: '32px',
+                    fontSize: '36px',
                     lineHeight: 1.15,
                     letterSpacing: '-0.8px',
                   }}
@@ -88,7 +88,7 @@ export function ClickClickDone() {
                 <p
                   className="font-normal"
                   style={{
-                    fontSize: '18px',
+                    fontSize: '20px',
                     lineHeight: 1.38,
                     color: '#e3e3e3',
                   }}
