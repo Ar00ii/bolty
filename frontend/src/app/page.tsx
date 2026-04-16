@@ -159,6 +159,14 @@ export default function HomePage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
@@ -204,33 +212,46 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative pt-16" style={{ background: 'var(--bg)' }}>
-      {/* Navbar - Clean and Simple */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 border-b border-zinc-800 backdrop-blur-sm">
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <BoltyLogoSVG size={24} />
-            <span className="text-white font-light text-sm md:text-base hidden sm:inline">
-              BoltyNetwork
-            </span>
+      {/* Navbar - React Bits style */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+        style={{
+          background: scrolled
+            ? 'linear-gradient(180deg, rgba(88,28,135,0.25) 0%, rgba(10,10,10,0.95) 70%)'
+            : 'transparent',
+          backdropFilter: scrolled ? 'blur(12px)' : 'none',
+        }}
+      >
+        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
+          {/* Left: Logo + divider + links */}
+          <div className="flex items-center gap-5">
+            <Link href="/" className="flex items-center gap-2">
+              <BoltyLogoSVG size={22} />
+              <span className="text-white font-normal text-sm hidden sm:inline">Bolty</span>
+            </Link>
+
+            <span className="text-white/20 text-lg font-extralight hidden md:inline">/</span>
+
+            <div className="hidden md:flex items-center gap-6">
+              {simpleNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-[11px] font-medium tracking-[0.12em] uppercase text-white/50 hover:text-white transition-colors duration-200"
+                  style={{ fontFamily: 'monospace' }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-8">
-            {simpleNavLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-gray-300 hover:text-white transition-colors"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right: Auth Buttons */}
-          <div className="flex items-center gap-4 md:gap-6">
-            <button className="md:hidden text-zinc-400 hover:text-white">
+          {/* Right: Auth */}
+          <div className="flex items-center gap-3">
+            <button
+              className="md:hidden text-white/50 hover:text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
               <Menu className="w-5 h-5" />
             </button>
 
@@ -238,75 +259,104 @@ export default function HomePage() {
               <>
                 <Link
                   href="/auth"
-                  className="hidden sm:block text-sm text-gray-300 hover:text-white transition-colors"
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/15 text-[11px] font-medium tracking-[0.1em] uppercase text-white/60 hover:text-white hover:border-white/30 transition-all duration-200"
+                  style={{ fontFamily: 'monospace' }}
                 >
                   Sign in
                 </Link>
-                <ShimmerButton
-                  as={Link}
+                <Link
                   href="/auth?tab=register"
-                  className="text-white text-xs md:text-sm px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition-all"
+                  className="flex items-center px-5 py-1.5 rounded-full text-[11px] font-medium tracking-[0.1em] uppercase text-white transition-all duration-200 hover:opacity-90"
+                  style={{
+                    fontFamily: 'monospace',
+                    background: 'linear-gradient(135deg, #9333ea, #c026d3)',
+                  }}
                 >
                   Get started
-                </ShimmerButton>
+                </Link>
               </>
             ) : (
-              <>
-                {/* Profile Dropdown */}
-                <div ref={profileRef} className="relative">
-                  <button
-                    onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-2 px-2 py-1"
-                  >
-                    {user?.avatarUrl ? (
-                      <img src={user.avatarUrl} alt="profile" className="w-8 h-8 rounded-full" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs font-light">
-                        {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
-                      </div>
-                    )}
-                    <ChevronDown className="w-4 h-4 text-zinc-400" />
-                  </button>
-
-                  {profileOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-56 bg-zinc-900 border border-zinc-700 rounded-lg shadow-lg z-50">
-                      <div className="p-3 border-b border-zinc-700">
-                        <p className="text-sm font-light text-white">
-                          {user?.displayName || user?.username}
-                        </p>
-                        <p className="text-xs text-zinc-400">{user?.email}</p>
-                      </div>
-                      <Link
-                        href="/profile"
-                        onClick={() => setProfileOpen(false)}
-                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        href="/api-keys"
-                        onClick={() => setProfileOpen(false)}
-                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
-                      >
-                        API Keys
-                      </Link>
-                      <Link
-                        href="/settings"
-                        onClick={() => setProfileOpen(false)}
-                        className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
-                      >
-                        Settings
-                      </Link>
-                      <button className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 border-t border-zinc-700">
-                        Sign out
-                      </button>
+              <div ref={profileRef} className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="flex items-center gap-2"
+                >
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt="profile" className="w-8 h-8 rounded-full border border-white/10" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border border-purple-500/30 flex items-center justify-center text-purple-400 text-xs"
+                      style={{ background: 'rgba(147,51,234,0.15)' }}
+                    >
+                      {(user?.displayName || user?.username || 'u')[0]?.toUpperCase()}
                     </div>
                   )}
-                </div>
-              </>
+                  <ChevronDown className="w-3.5 h-3.5 text-white/40" />
+                </button>
+
+                {profileOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-3 w-52 rounded-lg border border-white/10 shadow-xl shadow-black/50 overflow-hidden"
+                    style={{ background: '#1a1a1a' }}
+                  >
+                    <div className="p-3 border-b border-white/[0.06]">
+                      <p className="text-sm text-white font-light">
+                        {user?.displayName || user?.username}
+                      </p>
+                      <p className="text-[11px] text-white/40 mt-0.5">{user?.email}</p>
+                    </div>
+                    {[
+                      { href: '/profile', label: 'Profile' },
+                      { href: '/api-keys', label: 'API Keys' },
+                      { href: '/settings', label: 'Settings' },
+                    ].map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setProfileOpen(false)}
+                        className="block px-4 py-2.5 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
+                    <button className="w-full text-left px-4 py-2.5 text-[12px] text-white/50 hover:text-white hover:bg-white/[0.04] transition-colors border-t border-white/[0.06]">
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
+
+        {/* Bottom border - dotted when not scrolled, gradient line when scrolled */}
+        <div
+          className="w-full transition-all duration-500"
+          style={{
+            height: '1px',
+            background: scrolled
+              ? 'linear-gradient(90deg, transparent, rgba(147,51,234,0.4), rgba(192,38,211,0.3), transparent)'
+              : 'repeating-linear-gradient(90deg, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.12) 4px, transparent 4px, transparent 8px)',
+          }}
+        />
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/[0.06]" style={{ background: '#0d0d0d' }}>
+            <div className="flex flex-col py-3 px-4">
+              {simpleNavLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="py-3 text-[11px] font-medium tracking-[0.12em] uppercase text-white/50 hover:text-white transition-colors"
+                  style={{ fontFamily: 'monospace' }}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── HERO (RENDER STYLE) ── */}
