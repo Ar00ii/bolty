@@ -1,11 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, TrendingUp, Package } from 'lucide-react';
+import { X, Star, TrendingUp, Package, Bot, GitBranch, Zap, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
 
+import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -77,6 +79,14 @@ const TYPE_COLORS: Record<string, string> = {
   AI_AGENT: 'text-violet-400 border-violet-400/20 bg-violet-400/5',
   SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
+};
+
+const TYPE_ACCENTS: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
+  REPO: { color: '#3b82f6', icon: GitBranch },
+  BOT: { color: '#836EF9', icon: Bot },
+  AI_AGENT: { color: '#a855f7', icon: Bot },
+  SCRIPT: { color: '#06B6D4', icon: Zap },
+  OTHER: { color: '#64748b', icon: Package },
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -458,66 +468,108 @@ export default function MarketPage() {
     { id: 'my-items', label: 'My Items', icon: <Package size={16} /> },
   ] as const;
 
+  const featured = recentListings.slice(0, 2);
+  const recent = recentListings.slice(2, 4);
+
   return (
     <div
       style={{ background: 'var(--bg)', height: 'calc(100vh - 5rem)' }}
-      className="overflow-hidden flex flex-col"
+      className="relative overflow-hidden flex flex-col"
     >
+      {/* Ambient background glow */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          background:
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(131,110,249,0.12), transparent 60%), radial-gradient(ellipse 60% 40% at 85% 100%, rgba(6,182,212,0.06), transparent 60%)',
+        }}
+      />
+
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
       )}
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="relative flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="px-6 md:px-8 pt-6 pb-4 border-b border-monad-500/10 flex-shrink-0"
+          className="relative px-6 md:px-10 pt-10 pb-6 border-b flex-shrink-0"
+          style={{ borderColor: 'rgba(255,255,255,0.08)' }}
         >
-          <div className="flex items-center justify-between mb-4">
+          {/* Corner brackets */}
+          <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-white/20 pointer-events-none" />
+          <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-white/20 pointer-events-none" />
+
+          <div className="flex items-start md:items-center justify-between gap-4 flex-col md:flex-row">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-light text-white">Marketplace</h1>
-              <p className="text-sm text-zinc-400">AI agents, tools, and repositories</p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
+                <span className="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-light">
+                  Dashboard
+                </span>
+              </div>
+              <h1 className="text-4xl lg:text-5xl font-light text-white leading-tight">
+                <GradientText gradient="purple">Marketplace</GradientText>
+              </h1>
+              <p className="text-sm text-zinc-400 font-light mt-2 max-w-lg">
+                Discover, publish, and sell AI agents, repositories, and services.
+              </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Link
                 href="/market/agents"
-                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
+                className="group inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 bg-white/[0.02] hover:bg-purple-500/[0.06] text-white font-light transition-all"
               >
+                <Bot className="w-4 h-4 text-purple-400" />
                 Browse Agents
+                <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
               </Link>
-              <Link
+              <ShimmerButton
+                as={Link}
                 href="/market/repos"
-                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
+                className="text-white text-sm px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all inline-flex items-center gap-2"
               >
+                <GitBranch className="w-4 h-4" />
                 Browse Repos
-              </Link>
+              </ShimmerButton>
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2">
-            {TABS.map((tab) => (
-              <motion.button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`px-4 py-2 rounded-lg text-sm font-light flex items-center gap-2 transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </motion.button>
-            ))}
+          <div className="flex gap-1 mt-6 border-b border-white/5 -mb-6 pb-0">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`relative px-4 py-2.5 text-sm font-light flex items-center gap-2 transition-colors ${
+                    isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  <span className={isActive ? 'text-purple-400' : ''}>{tab.icon}</span>
+                  {tab.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="tab-indicator"
+                      className="absolute left-0 right-0 -bottom-px h-0.5"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, transparent, #a855f7 30%, #836EF9 70%, transparent)',
+                      }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
         </motion.div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-6 md:px-10 py-8">
           <AnimatePresence mode="wait">
             {activeTab === 'browse' && (
               <motion.div
@@ -525,45 +577,53 @@ export default function MarketPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="space-y-6"
+                className="space-y-10 max-w-6xl mx-auto"
               >
-                <div>
-                  <h2 className="text-lg font-light text-white mb-3">Featured</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recentListings.slice(0, 2).map((listing) => (
-                      <motion.button
-                        key={listing.id}
-                        onClick={() => setActiveNeg(listing)}
-                        whileHover={{ y: -2 }}
-                        className="text-left p-4 rounded-xl border border-monad-500/15 hover:border-monad-500/30 bg-monad-500/5 hover:bg-monad-500/10 transition-all"
-                      >
-                        <p className="font-light text-white mb-1">{listing.title}</p>
-                        <p className="text-xs text-zinc-400">
-                          {listing.price} {listing.currency}
-                        </p>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                {/* Featured */}
+                <section>
+                  <SectionHeading title="Featured" subtitle="Handpicked this week" />
+                  {featured.length === 0 ? (
+                    <EmptyState
+                      icon={Star}
+                      title="No featured listings yet"
+                      description="Top picks from the community will appear here soon."
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {featured.map((listing, i) => (
+                        <FeaturedCard
+                          key={listing.id}
+                          listing={listing}
+                          index={i}
+                          onOpen={() => setActiveNeg(listing)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
 
-                <div>
-                  <h2 className="text-lg font-light text-white mb-3">Recent</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {recentListings.slice(2, 4).map((listing) => (
-                      <motion.button
-                        key={listing.id}
-                        onClick={() => setActiveNeg(listing)}
-                        whileHover={{ y: -2 }}
-                        className="text-left p-3 rounded-lg border border-white/10 hover:border-monad-500/20 bg-white/5 hover:bg-monad-500/5 transition-all"
-                      >
-                        <p className="text-sm font-light text-white">{listing.title}</p>
-                        <p className="text-xs text-zinc-500 mt-1">
-                          {listing.price} {listing.currency}
-                        </p>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
+                {/* Recent */}
+                <section>
+                  <SectionHeading title="Recent" subtitle="Just published" />
+                  {recent.length === 0 ? (
+                    <EmptyState
+                      icon={TrendingUp}
+                      title="No recent activity"
+                      description="New listings will show up here as they launch."
+                    />
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {recent.map((listing, i) => (
+                        <RecentCard
+                          key={listing.id}
+                          listing={listing}
+                          index={i}
+                          onOpen={() => setActiveNeg(listing)}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
               </motion.div>
             )}
 
@@ -573,21 +633,52 @@ export default function MarketPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="space-y-3"
+                className="space-y-4 max-w-4xl mx-auto"
               >
-                <h2 className="text-lg font-light text-white mb-4">Recent Activity</h2>
-                {feedPosts.map((post) => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-3 rounded-lg border border-white/10 bg-white/5"
-                  >
-                    <p className="text-sm font-light text-white">{post.listing.title}</p>
-                    <p className="text-xs text-zinc-400 mt-1">{post.content}</p>
-                    <p className="text-xs text-zinc-600 mt-2">{timeAgo(post.createdAt)}</p>
-                  </motion.div>
-                ))}
+                <SectionHeading title="Recent Activity" subtitle="Live from the network" />
+                {feedPosts.length === 0 ? (
+                  <EmptyState
+                    icon={TrendingUp}
+                    title="No activity yet"
+                    description="Deals, price updates and announcements will appear here."
+                  />
+                ) : (
+                  feedPosts.map((post, i) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      className="relative p-5 rounded-xl border overflow-hidden"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.08)',
+                        background: 'rgba(0,0,0,0.35)',
+                      }}
+                    >
+                      <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-white/15" />
+                      <div className="flex items-start gap-3">
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background: 'rgba(131,110,249,0.1)',
+                            border: '1px solid rgba(131,110,249,0.2)',
+                          }}
+                        >
+                          <TrendingUp className="w-4 h-4 text-purple-300" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-light text-white truncate">
+                            {post.listing.title}
+                          </p>
+                          <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{post.content}</p>
+                          <p className="text-[11px] text-zinc-600 mt-2 uppercase tracking-wider">
+                            {timeAgo(post.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                )}
               </motion.div>
             )}
 
@@ -597,21 +688,259 @@ export default function MarketPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
-                className="text-center py-12"
+                className="max-w-4xl mx-auto"
               >
-                <Package className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                <p className="text-zinc-400 font-light">No items yet</p>
-                <Link
-                  href="/profile?tab=listings"
-                  className="text-sm text-monad-400 hover:text-monad-300 mt-2 inline-block"
-                >
-                  Create your first listing →
-                </Link>
+                <EmptyState
+                  icon={Package}
+                  title="No items yet"
+                  description="Publish your first agent or repository to get started."
+                  action={
+                    <Link
+                      href="/profile?tab=listings"
+                      className="inline-flex items-center gap-2 text-sm text-purple-300 hover:text-purple-200 transition-colors"
+                    >
+                      Create your first listing
+                      <ArrowUpRight className="w-3.5 h-3.5" />
+                    </Link>
+                  }
+                />
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Reusable UI pieces ────────────────────────────────────────────────────────
+
+function SectionHeading({ title, subtitle }: { title: string; subtitle?: string }) {
+  return (
+    <div className="flex items-end justify-between mb-5">
+      <div>
+        <div className="flex items-center gap-2">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-purple-500/60" />
+          <h2 className="text-xs uppercase tracking-[0.25em] text-purple-300/80 font-light">
+            {title}
+          </h2>
+        </div>
+        {subtitle && <p className="text-lg text-white font-light mt-2">{subtitle}</p>}
+      </div>
+    </div>
+  );
+}
+
+function FeaturedCard({
+  listing,
+  index,
+  onOpen,
+}: {
+  listing: MarketListing;
+  index: number;
+  onOpen: () => void;
+}) {
+  const accent = TYPE_ACCENTS[listing.type] ?? TYPE_ACCENTS.OTHER;
+  const Icon = accent.icon;
+  return (
+    <motion.button
+      onClick={onOpen}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.08 }}
+      whileHover={{ y: -3 }}
+      className="group relative text-left p-6 md:p-8 rounded-xl overflow-hidden"
+      style={{
+        border: `1px solid ${accent.color}22`,
+        background: 'rgba(0,0,0,0.55)',
+        boxShadow: `inset 0 1px 1px ${accent.color}10`,
+      }}
+    >
+      {/* Corner brackets */}
+      <div
+        className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2"
+        style={{ borderColor: `${accent.color}66` }}
+      />
+      <div
+        className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2"
+        style={{ borderColor: `${accent.color}66` }}
+      />
+      <div
+        className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2"
+        style={{ borderColor: `${accent.color}66` }}
+      />
+      <div
+        className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2"
+        style={{ borderColor: `${accent.color}66` }}
+      />
+
+      {/* Hover glow */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{
+          background: `radial-gradient(ellipse at top right, ${accent.color}14, transparent 60%)`,
+        }}
+      />
+
+      <div className="relative">
+        <div className="flex items-start gap-4 mb-5">
+          <div
+            className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${accent.color}12`,
+              border: `1px solid ${accent.color}33`,
+            }}
+          >
+            <Icon className="w-6 h-6" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span
+                className="text-[10px] uppercase tracking-[0.2em] font-light px-2 py-0.5 rounded"
+                style={{
+                  color: accent.color,
+                  background: `${accent.color}10`,
+                  border: `1px solid ${accent.color}30`,
+                }}
+              >
+                {listing.type}
+              </span>
+            </div>
+            <h3 className="text-lg md:text-xl font-light text-white leading-snug truncate">
+              {listing.title}
+            </h3>
+          </div>
+        </div>
+
+        {listing.description && (
+          <p className="text-sm text-zinc-400 font-light line-clamp-2 mb-5">
+            {listing.description}
+          </p>
+        )}
+
+        <div
+          className="flex items-center justify-between pt-4 border-t"
+          style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+        >
+          <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-light">
+            From
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-light text-white">
+              <GradientText gradient="purple">
+                {listing.price} {listing.currency}
+              </GradientText>
+            </span>
+            <ArrowUpRight className="w-4 h-4 text-zinc-500 group-hover:text-purple-300 transition-colors" />
+          </div>
+        </div>
+      </div>
+    </motion.button>
+  );
+}
+
+function RecentCard({
+  listing,
+  index,
+  onOpen,
+}: {
+  listing: MarketListing;
+  index: number;
+  onOpen: () => void;
+}) {
+  const accent = TYPE_ACCENTS[listing.type] ?? TYPE_ACCENTS.OTHER;
+  const Icon = accent.icon;
+  return (
+    <motion.button
+      onClick={onOpen}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.06 }}
+      whileHover={{ y: -2 }}
+      className="group relative text-left p-5 rounded-xl overflow-hidden transition-colors"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.35)',
+      }}
+    >
+      <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-white/15 group-hover:border-white/30 transition-colors" />
+      <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-white/15 group-hover:border-white/30 transition-colors" />
+
+      <div className="flex items-start gap-3">
+        <div
+          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            background: `${accent.color}10`,
+            border: `1px solid ${accent.color}25`,
+          }}
+        >
+          <Icon className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <p className="text-sm font-light text-white truncate">{listing.title}</p>
+            <span
+              className="text-[10px] uppercase tracking-wider font-light px-1.5 py-0.5 rounded flex-shrink-0"
+              style={{
+                color: accent.color,
+                background: `${accent.color}10`,
+                border: `1px solid ${accent.color}25`,
+              }}
+            >
+              {listing.type}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
+            <span className="text-[11px] text-zinc-500 uppercase tracking-wider">From</span>
+            <span className="text-sm font-light text-white">
+              {listing.price} <span className="text-zinc-400">{listing.currency}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </motion.button>
+  );
+}
+
+function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  action,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="relative rounded-2xl px-8 py-14 text-center overflow-hidden"
+      style={{
+        border: '1px dashed rgba(255,255,255,0.1)',
+        background: 'rgba(0,0,0,0.3)',
+      }}
+    >
+      <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-white/10" />
+      <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-white/10" />
+      <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-white/10" />
+      <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-white/10" />
+
+      <div
+        className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
+        style={{
+          background: 'rgba(131,110,249,0.08)',
+          border: '1px solid rgba(131,110,249,0.2)',
+        }}
+      >
+        <Icon className="w-7 h-7 text-purple-300" />
+      </div>
+      <p className="text-white font-light text-base">{title}</p>
+      <p className="text-sm text-zinc-500 font-light mt-2 max-w-sm mx-auto">{description}</p>
+      {action && <div className="mt-4">{action}</div>}
+    </motion.div>
   );
 }
