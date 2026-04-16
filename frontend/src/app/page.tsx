@@ -28,7 +28,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { TechStack } from '@/components/TechStack';
+import { AvatarCircles } from '@/components/ui/AvatarCircles';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { GradientText } from '@/components/ui/GradientText';
 import { RenderHero } from '@/components/ui/RenderHero';
@@ -312,11 +312,34 @@ export default function HomePage() {
       {/* ── HERO (RENDER STYLE) ── */}
       <RenderHero isAuthenticated={isAuthenticated} />
 
-      {/* ── TECHNOLOGIES STACK ── */}
-      <section className="py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <TechStack />
-        </div>
+      {/* ── COMMUNITY AVATARS ── */}
+      <section className="py-16 px-[7%] max-w-[1810px] mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center gap-6"
+        >
+          <AvatarCircles
+            numPeople={12400}
+            avatarUrls={[
+              { imageUrl: 'https://avatars.githubusercontent.com/u/16860528', profileUrl: '#' },
+              { imageUrl: 'https://avatars.githubusercontent.com/u/20110627', profileUrl: '#' },
+              { imageUrl: 'https://avatars.githubusercontent.com/u/106103625', profileUrl: '#' },
+              { imageUrl: 'https://avatars.githubusercontent.com/u/59228569', profileUrl: '#' },
+              { imageUrl: 'https://avatars.githubusercontent.com/u/89768406', profileUrl: '#' },
+              { imageUrl: 'https://avatars.githubusercontent.com/u/3084745', profileUrl: '#' },
+            ]}
+          />
+          <p
+            className="text-white/50 text-center"
+            style={{ fontSize: '16px', fontWeight: 300 }}
+          >
+            Share your work with{' '}
+            <span className="text-white font-normal">millions</span>{' '}
+            of developers and agents worldwide.
+          </p>
+        </motion.div>
       </section>
 
       {/* ── CLICK CLICK DONE ── */}
