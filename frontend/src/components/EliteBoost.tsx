@@ -524,7 +524,7 @@ export function EliteBoost() {
             style={{
               background: '#0d0d0d',
               borderColor: '#333',
-              height: '150px',
+              minHeight: '250px',
               overflow: 'hidden',
             }}
           >
@@ -592,10 +592,11 @@ export function EliteBoost() {
           </div>
 
           <div
-            className="w-full rounded-lg border flex items-center justify-center p-4 relative flex-1"
+            className="w-full rounded-lg border flex items-center justify-center p-4 relative"
             style={{
               background: '#0d0d0d',
               borderColor: '#333',
+              minHeight: '250px',
               overflow: 'hidden',
             }}
           >
