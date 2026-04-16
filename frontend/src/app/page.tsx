@@ -593,27 +593,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── FEATURES GRID SECTION ── */}
-        <div className="py-24 px-6" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-          <div className="max-w-7xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-16"
-            >
-              <h2 className="text-4xl lg:text-5xl font-light text-white mb-4">
-                Powerful features built for <GradientText gradient="purple">builders</GradientText>
-              </h2>
-              <p className="text-gray-400 max-w-2xl">
-                Everything you need to deploy, manage, and monetize AI agents at scale.
-              </p>
-            </motion.div>
-
-            {/* Features Grid */}
-            <FeaturesGrid />
-          </div>
-        </div>
+        {/* ── FEATURES GRID SECTION (Monad-style) ── */}
+        <FeaturesGrid />
       </section>
 
       {/* ── ELITE BOOST ── */}
