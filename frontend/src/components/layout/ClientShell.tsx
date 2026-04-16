@@ -16,6 +16,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
+  const isMarket = pathname === '/market' || pathname.startsWith('/market/');
   const showSidebar = !isHome && !isAuth;
 
   // Show loading bar on route change
@@ -53,7 +54,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
               </motion.div>
             </AnimatePresence>
           </main>
-          {!isHome && !isAuth && <Footer />}
+          {!isHome && !isAuth && !isMarket && <Footer />}
         </div>
       </div>
     </div>
