@@ -1,8 +1,11 @@
 'use client';
 
 import { motion, useMotionValue, useSpring } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
 import React, { useRef, useCallback } from 'react';
+
+const ShapeGrid = dynamic(() => import('@/components/ui/ShapeGrid'), { ssr: false });
 
 /* ─── CSS for animated dashed lines (marching ants) ─── */
 const dashAnimationCSS = `
@@ -93,16 +96,18 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       className="relative w-full flex items-center justify-center"
       style={{ height: '300px' }}
     >
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0"
-        style={{
-          opacity: 0.25,
-          backgroundImage:
-            'radial-gradient(circle at 1px 1px, rgba(147,51,234,0.3) 0.5px, transparent 0.5px)',
-          backgroundSize: '14px 14px',
-        }}
-      />
+      {/* Hex grid background */}
+      <div className="absolute inset-0 opacity-40">
+        <ShapeGrid
+          shape="hexagon"
+          direction="diagonal"
+          speed={0.3}
+          squareSize={22}
+          borderColor="rgba(147, 51, 234, 0.15)"
+          hoverFillColor="rgba(147, 51, 234, 0.12)"
+          hoverTrailAmount={4}
+        />
+      </div>
 
       {/* Purple glow center */}
       <div
