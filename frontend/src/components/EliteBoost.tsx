@@ -110,10 +110,11 @@ function DeployAgentAnimation() {
 
 // ── Negotiating Agents Animation ─────────────────────────────────────────────
 const NEGOTIATION_MESSAGES = [
-  { role: 'agent1', text: 'Offering 150 Boost for 120 BOLTY', agent: 'Market Agent' },
-  { role: 'agent2', text: 'Counter: 180 Boost for 150 BOLTY', agent: 'Growth Agent' },
-  { role: 'agent1', text: 'Accepting 160 Boost at 135 BOLTY', agent: 'Market Agent' },
-  { role: 'agent2', text: '✓ Deal confirmed on-chain', agent: 'Growth Agent' },
+  { role: 'agent1', text: 'Offering 0.28 ETH for Trading Bot', agent: 'Market Agent', price: '0.28 ETH' },
+  { role: 'agent2', text: 'Counter: 0.42 ETH for Trading Bot', agent: 'Growth Agent', price: '0.42 ETH' },
+  { role: 'agent1', text: 'Meet me at 0.34 ETH', agent: 'Market Agent', price: '0.34 ETH' },
+  { role: 'agent2', text: 'Deal at 0.38 ETH', agent: 'Growth Agent', price: '0.38 ETH' },
+  { role: 'agent1', text: '✓ Deal confirmed on-chain', agent: 'Market Agent', price: null },
 ];
 
 function NegotiatingAgentsAnimation() {
@@ -470,122 +471,6 @@ export function EliteBoost() {
         })}
       </div>
 
-      {/* Elite Tiers Section */}
-      <div style={{ paddingTop: '80px' }}>
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '28px',
-            fontWeight: 400,
-            marginBottom: '40px',
-            letterSpacing: '-0.6px',
-          }}
-        >
-          8 Elite Tiers
-        </motion.h3>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-            gap: '12px',
-            marginBottom: '60px',
-          }}
-        >
-          {tiers.map((tier, i) => {
-            const Icon = tier.Icon;
-            return (
-              <motion.div
-                key={tier.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.05 }}
-                className="rounded-lg p-4 text-center border"
-                style={{
-                  background: '#1a1a1a',
-                  borderColor: '#272727',
-                  color: '#fff',
-                  fontSize: '14px',
-                }}
-              >
-                <Icon className="w-5 h-5 text-purple-400 mx-auto mb-2" />
-                <div style={{ fontWeight: 400, marginBottom: '8px' }}>{tier.name}</div>
-                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
-                  {tier.description}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Boost Packages Section */}
-      <div>
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '28px',
-            fontWeight: 400,
-            marginBottom: '40px',
-            letterSpacing: '-0.6px',
-          }}
-        >
-          Boost Packages
-        </motion.h3>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '20px',
-            marginBottom: '60px',
-          }}
-        >
-          {packages.map((pkg, i) => {
-            const Icon = pkg.Icon;
-            return (
-              <motion.div
-                key={pkg.name}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="rounded-lg border p-6"
-                style={{
-                  borderColor: '#272727',
-                  background: '#1a1a1a',
-                }}
-              >
-                <Icon className="w-5 h-5 text-cyan-400 mb-4" />
-                <div
-                  className="text-white"
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 400,
-                    marginBottom: '16px',
-                  }}
-                >
-                  {pkg.name}
-                </div>
-
-                <div
-                  className="text-white/60"
-                  style={{
-                    fontSize: '12px',
-                  }}
-                >
-                  {pkg.description}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
 
       {/* CTA */}
       <div
