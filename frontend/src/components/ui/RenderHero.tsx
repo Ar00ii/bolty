@@ -149,69 +149,25 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
 
         {/* Buttons */}
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          {!isAuthenticated ? (
-            <>
-              <Link
-                href="/auth?tab=register"
-                className="hover:opacity-85 transition-opacity"
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 400,
-                  padding: '20px 24px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  background: '#fff',
-                  color: '#0d0d0d',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                }}
-              >
-                Start for free <span style={{ fontSize: '18px' }}>›</span>
-              </Link>
-              <Link
-                href="/contact"
-                className="hover:opacity-85 transition-opacity"
-                style={{
-                  fontSize: '20px',
-                  fontWeight: 400,
-                  padding: '20px 24px',
-                  textDecoration: 'none',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  background: 'transparent',
-                  color: '#fff',
-                  border: '1px solid #fff',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer',
-                }}
-              >
-                Get in touch
-              </Link>
-            </>
-          ) : (
-            <Link
-              href="/market"
-              className="hover:opacity-85 transition-opacity"
-              style={{
-                fontSize: '20px',
-                fontWeight: 400,
-                padding: '20px 24px',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                background: '#fff',
-                color: '#0d0d0d',
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-              }}
-            >
-              Go to dashboard <span style={{ fontSize: '18px' }}>›</span>
-            </Link>
-          )}
+          <Link
+            href={isAuthenticated ? "/market" : "/auth?tab=register"}
+            className="hover:opacity-85 transition-opacity"
+            style={{
+              fontSize: '20px',
+              fontWeight: 400,
+              padding: '20px 24px',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: '#fff',
+              color: '#0d0d0d',
+              whiteSpace: 'nowrap',
+              cursor: 'pointer',
+            }}
+          >
+            Dashboard <span style={{ fontSize: '18px' }}>›</span>
+          </Link>
         </div>
       </motion.div>
 
