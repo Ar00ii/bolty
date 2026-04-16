@@ -6,6 +6,7 @@ import Link from 'next/link';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
+import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
@@ -476,13 +477,46 @@ export default function MarketPage() {
       style={{ background: 'var(--bg)', height: 'calc(100vh - 5rem)' }}
       className="relative overflow-hidden flex flex-col"
     >
+      {/* Hexagon pattern backdrop */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.25]">
+        <HexagonPattern />
+      </div>
+
+      {/* Grid overlay */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-0 w-full h-full opacity-[0.08]"
+      >
+        <defs>
+          <pattern id="market-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+            <path
+              d="M 80 0 L 0 0 0 80"
+              fill="none"
+              stroke="rgba(255,255,255,0.6)"
+              strokeWidth="1"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#market-grid)" />
+      </svg>
+
       {/* Ambient background glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
+        className="pointer-events-none absolute inset-0 opacity-70"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(131,110,249,0.12), transparent 60%), radial-gradient(ellipse 60% 40% at 85% 100%, rgba(6,182,212,0.06), transparent 60%)',
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(131,110,249,0.18), transparent 60%), radial-gradient(ellipse 60% 40% at 85% 100%, rgba(6,182,212,0.1), transparent 60%), radial-gradient(ellipse 50% 40% at 10% 80%, rgba(236,72,153,0.05), transparent 60%)',
+        }}
+      />
+
+      {/* Scan line decoration */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute top-0 left-0 right-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent, rgba(131,110,249,0.6), rgba(6,182,212,0.4), transparent)',
         }}
       />
 

@@ -25,7 +25,10 @@ import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react
 
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
+import { GradientText } from '@/components/ui/GradientText';
+import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -1373,34 +1376,85 @@ function ReposMarketPageContent() {
   }));
 
   return (
-    <div className="page-container py-8">
-      {/* Header */}
-      <div className="page-header">
-        <div className="flex items-center gap-2 text-xs text-zinc-600 mb-3">
-          <Link href="/market" className="hover:text-zinc-400 transition-colors">
-            Market
-          </Link>
-          <span>/</span>
-          <span className="text-zinc-400">Repositories</span>
+    <div className="page-container py-8 relative">
+      {/* Ambient background */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.22]">
+          <HexagonPattern />
         </div>
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-light text-white tracking-tight">Repositories</h1>
-            <p className="text-sm text-zinc-500 mt-1">
-              Discover, vote on, and download community code repositories.
-            </p>
+        <svg className="absolute inset-0 w-full h-full opacity-[0.07]">
+          <defs>
+            <pattern id="repos-grid" width="80" height="80" patternUnits="userSpaceOnUse">
+              <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#repos-grid)" />
+        </svg>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 60% 40% at 80% 0%, rgba(59,130,246,0.16), transparent 60%), radial-gradient(ellipse 50% 40% at 15% 30%, rgba(131,110,249,0.12), transparent 60%)',
+          }}
+        />
+        <div
+          className="absolute top-0 left-0 right-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(59,130,246,0.5), rgba(131,110,249,0.3), transparent)',
+          }}
+        />
+      </div>
+
+      {/* Header */}
+      <div className="page-header relative">
+        <div className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
+          style={{
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(0,0,0,0.35)',
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-white/20 pointer-events-none" />
+          <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-white/20 pointer-events-none" />
+          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-white/20 pointer-events-none" />
+          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 pointer-events-none" />
+
+          <div className="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+            <Link href="/market" className="hover:text-blue-300 transition-colors uppercase tracking-[0.2em]">
+              Market
+            </Link>
+            <span className="text-zinc-700">/</span>
+            <span className="text-blue-300/80 uppercase tracking-[0.2em]">Repositories</span>
           </div>
-          {isAuthenticated && (
-            <button
-              onClick={() => {
-                switchTab('mine');
-                loadGhRepos();
-              }}
-              className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2"
-            >
-              <Plus className="w-4 h-4" /> Publish Repo
-            </button>
-          )}
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="max-w-2xl">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+                <span className="text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-light">
+                  Open source marketplace
+                </span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
+                <GradientText gradient="blue">Repositories</GradientText>
+              </h1>
+              <p className="text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
+                Discover, vote on, and download community code repositories. Publish your own
+                and monetize access with built-in escrow.
+              </p>
+            </div>
+            {isAuthenticated && (
+              <ShimmerButton
+                onClick={() => {
+                  switchTab('mine');
+                  loadGhRepos();
+                }}
+                className="text-white text-sm px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all inline-flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> Publish Repo
+              </ShimmerButton>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1473,9 +1527,30 @@ function ReposMarketPageContent() {
               ))}
             </div>
           ) : repos.length === 0 ? (
-            <div className="card text-center py-16">
-              <GitBranch className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-              <p className="text-zinc-500 text-sm">No repositories found matching your search.</p>
+            <div
+              className="relative rounded-2xl px-8 py-16 text-center overflow-hidden"
+              style={{
+                border: '1px dashed rgba(255,255,255,0.1)',
+                background: 'rgba(0,0,0,0.3)',
+              }}
+            >
+              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-white/10" />
+              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-white/10" />
+              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-white/10" />
+              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-white/10" />
+              <div
+                className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                style={{
+                  background: 'rgba(59,130,246,0.08)',
+                  border: '1px solid rgba(59,130,246,0.2)',
+                }}
+              >
+                <GitBranch className="w-7 h-7 text-blue-300" strokeWidth={1.5} />
+              </div>
+              <p className="text-white font-light text-base">No repositories found</p>
+              <p className="text-sm text-zinc-500 font-light mt-2 max-w-sm mx-auto">
+                Try tweaking the filters, or explore popular languages below.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
