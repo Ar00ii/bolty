@@ -63,23 +63,23 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
   const dashedShapes = [
     // 0: Dashed square + inner diamond
     <>
-      <rect key="d0a" x="80" y="80" width="240" height="240" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
-      <rect key="d0b" x="140" y="140" width="120" height="120" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" transform="rotate(45 200 200)" opacity="0.35" className="dash-animate-slow" />
+      <rect key="d0a" x="80" y="80" width="240" height="240" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
+      <rect key="d0b" x="140" y="140" width="120" height="120" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" transform="rotate(45 200 200)" opacity="0.5" className="dash-animate-slow" />
     </>,
     // 1: Dashed square + inner circle
     <>
-      <rect key="d1a" x="85" y="85" width="230" height="230" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
-      <circle key="d1b" cx="200" cy="200" r="65" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
+      <rect key="d1a" x="85" y="85" width="230" height="230" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
+      <circle key="d1b" cx="200" cy="200" r="65" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
     </>,
     // 2: Dashed circle + inner triangle
     <>
-      <circle key="d2a" cx="200" cy="200" r="130" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" opacity="0.45" className="dash-animate" />
-      <polygon key="d2b" points="200,120 275,275 125,275" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
+      <circle key="d2a" cx="200" cy="200" r="130" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
+      <polygon key="d2b" points="200,120 275,275 125,275" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
     </>,
     // 3: Dashed diamond + inner hexagon
     <>
-      <rect key="d3a" x="115" y="115" width="170" height="170" fill="none" stroke="#7c3aed" strokeWidth="0.8" strokeDasharray="8 6" transform="rotate(45 200 200)" opacity="0.45" className="dash-animate" />
-      <polygon key="d3b" points="200,125 260,165 260,235 200,275 140,235 140,165" fill="none" stroke="#a855f7" strokeWidth="0.8" strokeDasharray="6 5" opacity="0.35" className="dash-animate-slow" />
+      <rect key="d3a" x="115" y="115" width="170" height="170" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" transform="rotate(45 200 200)" opacity="0.65" className="dash-animate" />
+      <polygon key="d3b" points="200,125 260,165 260,235 200,275 140,235 140,165" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
     </>,
   ];
 
@@ -252,14 +252,14 @@ export const FeaturesGrid = () => {
                 background: '#1a1a1a',
               }}
               whileHover={{
-                borderColor: 'rgba(147, 51, 234, 0.6)',
-                boxShadow: '0 0 50px rgba(147, 51, 234, 0.2), 0 0 100px rgba(147, 51, 234, 0.08), inset 0 0 30px rgba(147, 51, 234, 0.03)',
-                scale: 1.03,
-                y: -6,
+                borderColor: 'rgba(147, 51, 234, 0.7)',
+                boxShadow: '0 0 60px rgba(147, 51, 234, 0.3), 0 0 120px rgba(147, 51, 234, 0.12), inset 0 1px 40px rgba(147, 51, 234, 0.06)',
+                scale: 1.04,
+                y: -8,
               }}
             >
               {/* Geometric figure */}
-              <div className="relative overflow-hidden transition-all duration-500 group-hover:brightness-125" style={{ background: '#141414' }}>
+              <div className="relative overflow-hidden transition-all duration-500 group-hover:brightness-150" style={{ background: '#141414' }}>
                 <GeometricFigure variant={idx} />
               </div>
 
@@ -271,7 +271,7 @@ export const FeaturesGrid = () => {
                 {/* Icon + Title */}
                 <div className="flex items-center gap-3">
                   <div
-                    className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(147,51,234,0.5)] group-hover:scale-110"
+                    className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_28px_rgba(147,51,234,0.6)] group-hover:scale-125"
                     style={{ background: '#9333ea' }}
                   >
                     <Icon className="w-4 h-4 text-white" />
