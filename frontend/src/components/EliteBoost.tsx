@@ -355,7 +355,7 @@ export function EliteBoost() {
 
   return (
     <section className="py-20 px-4 md:px-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -371,12 +371,45 @@ export function EliteBoost() {
           </p>
         </motion.div>
 
-        {/* Platform Features with Animations */}
-        <BentoGrid>
-          {features.map((feature, idx) => (
-            <BentoCard key={idx} {...feature} />
-          ))}
-        </BentoGrid>
+        {/* Platform Features - Custom Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+          {features.map((feature, idx) => {
+            const Icon = feature.Icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                className="relative rounded-2xl overflow-hidden h-80 border border-white/10 bg-zinc-900/50 backdrop-blur-sm"
+              >
+                {/* Background Animation */}
+                <div className="absolute inset-0">{feature.background}</div>
+
+                {/* Content Overlay */}
+                <div className="relative z-10 h-full flex flex-col justify-between p-6">
+                  <div>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-purple-400" />
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-light text-white mb-2">{feature.name}</h3>
+                    <p className="text-sm text-gray-400">{feature.description}</p>
+                  </div>
+
+                  <a
+                    href={feature.href}
+                    className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+                  >
+                    {feature.cta}
+                    <span>→</span>
+                  </a>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* Elite Tiers */}
         <motion.h3
@@ -390,11 +423,24 @@ export function EliteBoost() {
         <p className="text-gray-400 text-sm mb-8">
           Each tier unlocks exponential visibility multipliers. Rise through the ranks and dominate the trending feed.
         </p>
-        <BentoGrid>
-          {tiers.map((tier, idx) => (
-            <BentoCard key={idx} {...tier} />
-          ))}
-        </BentoGrid>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          {tiers.map((tier, idx) => {
+            const Icon = tier.Icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.05 }}
+                className="p-4 rounded-lg border border-white/10 bg-zinc-900/50 text-center hover:border-purple-400/50 transition-colors cursor-pointer"
+              >
+                <Icon className="w-5 h-5 text-purple-400 mx-auto mb-2" />
+                <div className="text-sm font-light text-white mb-2">{tier.name}</div>
+                <div className="text-xs text-gray-500">{tier.description}</div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* Boost Packages */}
         <motion.h3
@@ -408,11 +454,32 @@ export function EliteBoost() {
         <p className="text-gray-400 text-sm mb-8">
           Boost accumulates permanently. Your investment in visibility compounds forever.
         </p>
-        <BentoGrid>
-          {packages.map((pkg, idx) => (
-            <BentoCard key={idx} {...pkg} />
-          ))}
-        </BentoGrid>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          {packages.map((pkg, idx) => {
+            const Icon = pkg.Icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: idx * 0.05 }}
+                className="p-6 rounded-lg border border-white/10 bg-zinc-900/50 hover:border-cyan-400/50 transition-colors cursor-pointer"
+              >
+                <Icon className="w-5 h-5 text-cyan-400 mb-4" />
+                <div className="text-lg font-light text-white mb-2">{pkg.name}</div>
+                <div className="text-xs text-gray-500 mb-4">{pkg.description}</div>
+                <div className="pt-4 border-t border-white/5">
+                  <a
+                    href={pkg.href}
+                    className="text-xs font-light text-cyan-400 hover:text-cyan-300 transition-colors"
+                  >
+                    {pkg.cta} →
+                  </a>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* CTA */}
         <motion.div
