@@ -593,9 +593,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ── FEATURES GRID SECTION (Monad-style) ── */}
-        <FeaturesGrid />
       </section>
+
+      {/* ── FEATURES GRID ── */}
+      <FeaturesGrid />
 
       {/* ── ELITE BOOST ── */}
       <EliteBoost />
