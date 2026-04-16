@@ -354,150 +354,291 @@ export function EliteBoost() {
   ];
 
   return (
-    <section className="py-20 px-4 md:px-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-16"
-        >
-          <h2 className="text-5xl md:text-6xl font-light text-white mb-4">
-            Boost: Dominate the <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Trending Market</span>
-          </h2>
-          <p className="text-lg text-gray-400 max-w-2xl">
-            Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
-          </p>
-        </motion.div>
+    <section
+      className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
+      style={{ background: '#0d0d0d', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+    >
+      {/* Heading */}
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-white"
+        style={{
+          fontSize: '64px',
+          fontWeight: 300,
+          lineHeight: 1.05,
+          letterSpacing: '-1.28px',
+        }}
+      >
+        Boost: Dominate the Trending Market.
+      </motion.h2>
 
-        {/* Platform Features - Custom Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
-          {features.map((feature, idx) => {
-            const Icon = feature.Icon;
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="relative rounded-2xl overflow-hidden h-80 border border-white/10 bg-zinc-900/50 backdrop-blur-sm"
-              >
-                {/* Background Animation */}
-                <div className="absolute inset-0">{feature.background}</div>
+      <p
+        className="text-white/70"
+        style={{
+          fontSize: '20px',
+          lineHeight: '1.5',
+          maxWidth: '480px',
+          marginTop: '16px',
+        }}
+      >
+        Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
+      </p>
 
-                {/* Content Overlay */}
-                <div className="relative z-10 h-full flex flex-col justify-between p-6">
-                  <div>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center">
-                        <Icon className="w-5 h-5 text-purple-400" />
-                      </div>
-                    </div>
-                    <h3 className="text-xl font-light text-white mb-2">{feature.name}</h3>
-                    <p className="text-sm text-gray-400">{feature.description}</p>
-                  </div>
-
-                  <a
-                    href={feature.href}
-                    className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
-                  >
-                    {feature.cta}
-                    <span>→</span>
-                  </a>
+      {/* Platform Features Grid */}
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-20"
+        style={{ paddingTop: '60px', gap: '40px' }}
+      >
+        {features.map((feature, i) => {
+          const Icon = feature.Icon;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
+              className="flex flex-col gap-8 rounded-lg border p-6"
+              style={{
+                borderColor: '#272727',
+                background: '#1a1a1a',
+              }}
+            >
+              {/* Title and Description */}
+              <div className="flex flex-col gap-4">
+                <div
+                  className="flex items-center justify-center text-white font-normal"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    background: '#9333ea',
+                    fontSize: '18px',
+                    lineHeight: 1,
+                    borderRadius: '50%',
+                  }}
+                >
+                  <Icon className="w-5 h-5" />
                 </div>
-              </motion.div>
-            );
-          })}
-        </div>
 
-        {/* Elite Tiers */}
+                <div className="flex flex-col gap-3">
+                  <h3
+                    className="text-white font-normal"
+                    style={{
+                      fontSize: '24px',
+                      lineHeight: 1.15,
+                      letterSpacing: '-0.8px',
+                    }}
+                  >
+                    {feature.name}
+                  </h3>
+                  <p
+                    className="font-normal"
+                    style={{
+                      fontSize: '16px',
+                      lineHeight: 1.38,
+                      color: '#e3e3e3',
+                    }}
+                  >
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+
+              {/* Animation Container */}
+              <div
+                className="w-full rounded-lg border flex items-center justify-center p-4 relative"
+                style={{
+                  aspectRatio: '16 / 9',
+                  background: '#0d0d0d',
+                  borderColor: '#333',
+                  minHeight: '200px',
+                  overflow: 'hidden',
+                }}
+              >
+                {feature.background}
+              </div>
+
+              <a
+                href={feature.href}
+                className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+              >
+                {feature.cta} →
+              </a>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Elite Tiers Section */}
+      <div style={{ paddingTop: '80px' }}>
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-2xl font-light text-white mt-20 mb-4"
+          className="text-white"
+          style={{
+            fontSize: '28px',
+            fontWeight: 400,
+            marginBottom: '40px',
+            letterSpacing: '-0.6px',
+          }}
         >
           8 Elite Tiers
         </motion.h3>
-        <p className="text-gray-400 text-sm mb-8">
-          Each tier unlocks exponential visibility multipliers. Rise through the ranks and dominate the trending feed.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-          {tiers.map((tier, idx) => {
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+            gap: '12px',
+            marginBottom: '60px',
+          }}
+        >
+          {tiers.map((tier, i) => {
             const Icon = tier.Icon;
             return (
               <motion.div
-                key={idx}
+                key={tier.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.05 }}
-                className="p-4 rounded-lg border border-white/10 bg-zinc-900/50 text-center hover:border-purple-400/50 transition-colors cursor-pointer"
+                transition={{ duration: 0.6, delay: i * 0.05 }}
+                className="rounded-lg p-4 text-center border"
+                style={{
+                  background: '#1a1a1a',
+                  borderColor: '#272727',
+                  color: '#fff',
+                  fontSize: '14px',
+                }}
               >
                 <Icon className="w-5 h-5 text-purple-400 mx-auto mb-2" />
-                <div className="text-sm font-light text-white mb-2">{tier.name}</div>
-                <div className="text-xs text-gray-500">{tier.description}</div>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Boost Packages */}
-        <motion.h3
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-2xl font-light text-white mt-20 mb-4"
-        >
-          Boost Packages
-        </motion.h3>
-        <p className="text-gray-400 text-sm mb-8">
-          Boost accumulates permanently. Your investment in visibility compounds forever.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {packages.map((pkg, idx) => {
-            const Icon = pkg.Icon;
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: idx * 0.05 }}
-                className="p-6 rounded-lg border border-white/10 bg-zinc-900/50 hover:border-cyan-400/50 transition-colors cursor-pointer"
-              >
-                <Icon className="w-5 h-5 text-cyan-400 mb-4" />
-                <div className="text-lg font-light text-white mb-2">{pkg.name}</div>
-                <div className="text-xs text-gray-500 mb-4">{pkg.description}</div>
-                <div className="pt-4 border-t border-white/5">
-                  <a
-                    href={pkg.href}
-                    className="text-xs font-light text-cyan-400 hover:text-cyan-300 transition-colors"
-                  >
-                    {pkg.cta} →
-                  </a>
+                <div style={{ fontWeight: 400, marginBottom: '8px' }}>{tier.name}</div>
+                <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>
+                  {tier.description}
                 </div>
               </motion.div>
             );
           })}
         </div>
+      </div>
 
-        {/* CTA */}
-        <motion.div
+      {/* Boost Packages Section */}
+      <div>
+        <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-16 text-center"
+          transition={{ duration: 0.6 }}
+          className="text-white"
+          style={{
+            fontSize: '28px',
+            fontWeight: 400,
+            marginBottom: '40px',
+            letterSpacing: '-0.6px',
+          }}
         >
-          <p className="text-gray-400 mb-6">Ready to dominate the rankings?</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 bg-white text-black rounded-lg font-light hover:bg-gray-100 transition-colors">
-              Start Boosting →
-            </button>
-            <button className="px-8 py-3 border border-white/20 text-white rounded-lg font-light hover:border-white/40 transition-colors">
-              Explore Features
-            </button>
-          </div>
-        </motion.div>
+          Boost Packages
+        </motion.h3>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '20px',
+            marginBottom: '60px',
+          }}
+        >
+          {packages.map((pkg, i) => {
+            const Icon = pkg.Icon;
+            return (
+              <motion.div
+                key={pkg.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="rounded-lg border p-6"
+                style={{
+                  borderColor: '#272727',
+                  background: '#1a1a1a',
+                }}
+              >
+                <Icon className="w-5 h-5 text-cyan-400 mb-4" />
+                <div
+                  className="text-white"
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 400,
+                    marginBottom: '16px',
+                  }}
+                >
+                  {pkg.name}
+                </div>
+
+                <div
+                  className="text-white/60"
+                  style={{
+                    fontSize: '12px',
+                  }}
+                >
+                  {pkg.description}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div
+        style={{
+          textAlign: 'center',
+          paddingTop: '40px',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        }}
+      >
+        <p
+          className="text-white/70"
+          style={{
+            fontSize: '16px',
+            marginBottom: '20px',
+          }}
+        >
+          Ready to dominate the rankings?
+        </p>
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            style={{
+              fontSize: '16px',
+              fontWeight: 400,
+              padding: '16px 32px',
+              background: '#fff',
+              color: '#0d0d0d',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+            className="hover:opacity-85 transition-opacity"
+          >
+            Start Boosting →
+          </button>
+          <button
+            style={{
+              fontSize: '16px',
+              fontWeight: 400,
+              padding: '16px 32px',
+              background: 'transparent',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+            className="hover:bg-white/5 transition-colors"
+          >
+            Explore Features
+          </button>
+        </div>
       </div>
     </section>
   );
