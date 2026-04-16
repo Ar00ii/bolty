@@ -1,331 +1,143 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Zap, TrendingUp, Trophy } from 'lucide-react';
+import { Zap, TrendingUp, Trophy, Crown, Shield, Gem, Wand2, Medal } from 'lucide-react';
 import React from 'react';
+import { motion } from 'framer-motion';
+
+import { BentoCard, BentoGrid } from '@/components/ui/bento-grid';
 
 export function EliteBoost() {
   const features = [
     {
-      icon: Zap,
-      title: 'Amplify Reach',
-      description:
-        'Purchase Boost to elevate your agent in trending rankings. Higher tier = exponential visibility.',
+      Icon: Zap,
+      name: 'Amplify Reach',
+      description: 'Purchase Boost to elevate your agent in trending rankings. Higher tier = exponential visibility.',
+      href: '#',
+      cta: 'Learn more',
+      className: 'col-span-1',
     },
     {
-      icon: TrendingUp,
-      title: 'Permanent Momentum',
+      Icon: TrendingUp,
+      name: 'Permanent Momentum',
       description: 'Boost accumulates forever. Build unstoppable growth for your AI agent.',
+      href: '#',
+      cta: 'Learn more',
+      className: 'col-span-1',
     },
     {
-      icon: Trophy,
-      title: 'Exclusive Rankings',
+      Icon: Trophy,
+      name: 'Exclusive Rankings',
       description: '8 elite tiers from Iron to Champion. Compete at the highest level.',
+      href: '#',
+      cta: 'Learn more',
+      className: 'col-span-1',
     },
   ];
 
   const tiers = [
-    { name: 'Iron', boost: '0', multiplier: '1x' },
-    { name: 'Bronze', boost: '25', multiplier: '2.5x' },
-    { name: 'Silver', boost: '50', multiplier: '5x' },
-    { name: 'Gold', boost: '120', multiplier: '6x' },
-    { name: 'Platinum', boost: '250', multiplier: '10x' },
-    { name: 'Diamond', boost: '500', multiplier: '15x' },
-    { name: 'Mastery', boost: '1000', multiplier: '20x' },
-    { name: 'Champion', boost: '2000', multiplier: '25x' },
+    { name: 'Iron', description: '0 Boost • 1x multiplier', Icon: Shield, className: 'col-span-1' },
+    { name: 'Bronze', description: '25 Boost • 2.5x multiplier', Icon: Medal, className: 'col-span-1' },
+    { name: 'Silver', description: '50 Boost • 5x multiplier', Icon: Medal, className: 'col-span-1' },
+    { name: 'Gold', description: '120 Boost • 6x multiplier', Icon: Crown, className: 'col-span-1' },
+    { name: 'Platinum', description: '250 Boost • 10x multiplier', Icon: Gem, className: 'col-span-1' },
+    { name: 'Diamond', description: '500 Boost • 15x multiplier', Icon: Gem, className: 'col-span-1' },
+    { name: 'Mastery', description: '1000 Boost • 20x multiplier', Icon: Wand2, className: 'col-span-1' },
+    { name: 'Champion', description: '2000 Boost • 25x multiplier', Icon: Crown, className: 'col-span-1' },
   ];
 
   const packages = [
-    { name: 'Starter', boost: 10, bolty: 12 },
-    { name: 'Growth', boost: 25, bolty: 28 },
-    { name: 'Professional', boost: 50, bolty: 48 },
-    { name: 'Premium', boost: 120, bolty: 110 },
-    { name: 'Elite', boost: 250, bolty: 230 },
+    { name: 'Starter', description: '10 Boost • 12 BOLTY', Icon: Zap, className: 'col-span-1' },
+    { name: 'Growth', description: '25 Boost • 28 BOLTY', Icon: TrendingUp, className: 'col-span-1' },
+    { name: 'Professional', description: '50 Boost • 48 BOLTY', Icon: Trophy, className: 'col-span-1' },
+    { name: 'Premium', description: '120 Boost • 110 BOLTY', Icon: Crown, className: 'col-span-1' },
+    { name: 'Elite', description: '250 Boost • 230 BOLTY', Icon: Gem, className: 'col-span-1' },
   ];
 
-  const tierColors = ['#475569', '#ea580c', '#64748b', '#eab308', '#a855f7', '#06b6d4', '#3b82f6', '#ef4444'];
-
   return (
-    <section
-      className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
-      style={{ background: '#0d0d0d', border: '1px solid rgba(255, 255, 255, 0.1)' }}
-    >
-      {/* Heading */}
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-white"
-        style={{
-          fontSize: '64px',
-          fontWeight: 300,
-          lineHeight: 1.05,
-          letterSpacing: '-1.28px',
-        }}
-      >
-        Boost: Dominate the Trending Market.
-      </motion.h2>
-
-      {/* Features Grid */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-20"
-        style={{ gap: '40px', paddingTop: '60px' }}
-      >
-        {features.map((feature, i) => {
-          const Icon = feature.icon;
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="flex flex-col gap-4"
-            >
-              <Icon style={{ width: '32px', height: '32px', color: '#a855f7' }} />
-              <div>
-                <h3
-                  className="text-white"
-                  style={{
-                    fontSize: '20px',
-                    fontWeight: 400,
-                    marginBottom: '12px',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {feature.title}
-                </h3>
-                <p
-                  className="text-white/60"
-                  style={{
-                    fontSize: '16px',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {feature.description}
-                </p>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Elite Tiers Section */}
-      <div style={{ paddingTop: '80px' }}>
-        <motion.h3
+    <section className="py-20 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '28px',
-            fontWeight: 400,
-            marginBottom: '40px',
-            letterSpacing: '-0.6px',
-          }}
+          className="mb-16"
         >
-          8 Elite Tiers
-        </motion.h3>
+          <h2 className="text-5xl md:text-6xl font-light text-white mb-4">
+            Boost: Dominate the <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">Trending Market</span>
+          </h2>
+          <p className="text-lg text-gray-400 max-w-2xl">
+            Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
+          </p>
+        </motion.div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(8, 1fr)',
-            gap: '12px',
-            marginBottom: '40px',
-          }}
-        >
-          {tiers.map((tier, i) => (
-            <motion.div
-              key={tier.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.05 }}
-              className="rounded-lg p-4"
-              style={{
-                background: tierColors[i],
-                color: '#fff',
-                textAlign: 'center',
-                fontSize: '14px',
-              }}
-            >
-              <div style={{ fontWeight: 500, marginBottom: '8px' }}>{tier.name}</div>
-              <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                {tier.boost} Boost
-              </div>
-              <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
-                {tier.multiplier}
-              </div>
-            </motion.div>
-          ))}
+        {/* Features */}
+        <div className="mb-20">
+          <h3 className="text-2xl font-light text-white mb-8">How It Works</h3>
+          <BentoGrid>
+            {features.map((feature, idx) => (
+              <BentoCard key={idx} {...feature} />
+            ))}
+          </BentoGrid>
         </div>
 
-        <p
-          className="text-white/60"
-          style={{
-            fontSize: '14px',
-            marginBottom: '80px',
-            textAlign: 'center',
-          }}
-        >
-          Each tier unlocks exponential visibility multipliers. Rise through the ranks and dominate the trending feed.
-        </p>
-      </div>
+        {/* Elite Tiers */}
+        <div className="mb-20">
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-2xl font-light text-white mb-8"
+          >
+            8 Elite Tiers
+          </motion.h3>
+          <p className="text-gray-400 text-sm mb-8">
+            Each tier unlocks exponential visibility multipliers. Rise through the ranks and dominate the trending feed.
+          </p>
+          <BentoGrid>
+            {tiers.map((tier, idx) => (
+              <BentoCard key={idx} {...tier} href="#" cta="View details" />
+            ))}
+          </BentoGrid>
+        </div>
 
-      {/* Boost Packages Section */}
-      <div>
-        <motion.h3
+        {/* Boost Packages */}
+        <div>
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-2xl font-light text-white mb-8"
+          >
+            Boost Packages
+          </motion.h3>
+          <p className="text-gray-400 text-sm mb-8">
+            Boost accumulates permanently. Your investment in visibility compounds forever.
+          </p>
+          <BentoGrid>
+            {packages.map((pkg, idx) => (
+              <BentoCard key={idx} {...pkg} href="#" cta="Get started" />
+            ))}
+          </BentoGrid>
+        </div>
+
+        {/* CTA */}
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '28px',
-            fontWeight: 400,
-            marginBottom: '40px',
-            letterSpacing: '-0.6px',
-          }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-16 text-center"
         >
-          Boost Packages
-        </motion.h3>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(5, 1fr)',
-            gap: '20px',
-            marginBottom: '60px',
-          }}
-        >
-          {packages.map((pkg, i) => (
-            <motion.div
-              key={pkg.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="rounded-lg border p-6"
-              style={{
-                borderColor: '#333',
-                background: '#0d0d0d',
-              }}
-            >
-              <div
-                className="text-white"
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 400,
-                  marginBottom: '20px',
-                }}
-              >
-                {pkg.name}
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <div
-                  className="text-white"
-                  style={{
-                    fontSize: '32px',
-                    fontWeight: 300,
-                  }}
-                >
-                  {pkg.boost}
-                </div>
-                <div
-                  className="text-white/60"
-                  style={{
-                    fontSize: '12px',
-                    marginTop: '4px',
-                  }}
-                >
-                  Boost
-                </div>
-              </div>
-
-              <div
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 300,
-                  color: '#a855f7',
-                }}
-              >
-                {pkg.bolty}
-              </div>
-              <div
-                className="text-white/60"
-                style={{
-                  fontSize: '12px',
-                  marginTop: '4px',
-                }}
-              >
-                BOLTY
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        <p
-          className="text-white/60"
-          style={{
-            fontSize: '14px',
-            marginBottom: '40px',
-            textAlign: 'center',
-          }}
-        >
-          Boost accumulates permanently. Your investment in visibility compounds forever.
-        </p>
-      </div>
-
-      {/* CTA Section */}
-      <div
-        style={{
-          textAlign: 'center',
-          paddingTop: '40px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-        }}
-      >
-        <p
-          className="text-white/70"
-          style={{
-            fontSize: '16px',
-            marginBottom: '20px',
-          }}
-        >
-          Ready to dominate the rankings?
-        </p>
-
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            style={{
-              fontSize: '16px',
-              fontWeight: 400,
-              padding: '16px 32px',
-              background: '#fff',
-              color: '#0d0d0d',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-            className="hover:opacity-85 transition-opacity"
-          >
-            Start Boosting <span style={{ marginLeft: '6px' }}>→</span>
-          </button>
-          <button
-            style={{
-              fontSize: '16px',
-              fontWeight: 400,
-              padding: '16px 32px',
-              background: 'transparent',
-              color: '#fff',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-            }}
-            className="hover:bg-white/5 transition-colors"
-          >
-            Explore Features
-          </button>
-        </div>
+          <p className="text-gray-400 mb-6">Ready to dominate the rankings?</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button className="px-8 py-3 bg-white text-black rounded-lg font-light hover:bg-gray-100 transition-colors">
+              Start Boosting →
+            </button>
+            <button className="px-8 py-3 border border-white/20 text-white rounded-lg font-light hover:border-white/40 transition-colors">
+              Explore Features
+            </button>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
