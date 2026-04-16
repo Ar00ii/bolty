@@ -312,13 +312,13 @@ export default function HomePage() {
       {/* ── HERO (RENDER STYLE) ── */}
       <RenderHero isAuthenticated={isAuthenticated} />
 
-      {/* ── COMMUNITY AVATARS ── */}
-      <section className="py-16 px-[7%] max-w-[1810px] mx-auto">
+      {/* ── COMMUNITY SOCIAL PROOF ── */}
+      <div className="py-8 px-[7%] max-w-[1810px] mx-auto border-b border-white/[0.06]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col items-center gap-6"
+          transition={{ duration: 0.5 }}
+          className="flex items-center justify-center gap-4"
         >
           <AvatarCircles
             numPeople={12400}
@@ -331,16 +331,13 @@ export default function HomePage() {
               { imageUrl: 'https://avatars.githubusercontent.com/u/3084745', profileUrl: '#' },
             ]}
           />
-          <p
-            className="text-white/50 text-center"
-            style={{ fontSize: '16px', fontWeight: 300 }}
-          >
+          <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
             Share your work with{' '}
-            <span className="text-white font-normal">millions</span>{' '}
-            of developers and agents worldwide.
+            <span className="text-white/70 font-normal">millions</span>{' '}
+            of developers worldwide.
           </p>
         </motion.div>
-      </section>
+      </div>
 
       {/* ── CLICK CLICK DONE ── */}
       <ClickClickDone />

@@ -19,7 +19,7 @@ const AvatarCircles = ({
 }: AvatarCirclesProps) => {
   return (
     <div className="flex items-center">
-      <div className="flex -space-x-3">
+      <div className="flex -space-x-4">
         {avatarUrls.map((avatar, i) => (
           <a
             key={i}
@@ -32,14 +32,14 @@ const AvatarCircles = ({
             <img
               src={avatar.imageUrl}
               alt="User avatar"
-              className="w-10 h-10 rounded-full border-2 border-[#0d0d0d] object-cover hover:scale-110 transition-transform duration-200"
+              className="w-12 h-12 rounded-full border-2 border-[#0d0d0d] object-cover hover:scale-110 transition-transform duration-200"
             />
           </a>
         ))}
       </div>
       {numPeople > 0 && (
         <div
-          className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-[#0d0d0d] text-xs font-medium text-white -ml-3"
+          className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#0d0d0d] text-xs font-medium text-white -ml-4"
           style={{
             background: 'linear-gradient(135deg, #9333ea, #7c3aed)',
             zIndex: 0,
