@@ -524,7 +524,7 @@ export function EliteBoost() {
             style={{
               background: '#0d0d0d',
               borderColor: '#333',
-              minHeight: '250px',
+              height: '150px',
               overflow: 'hidden',
             }}
           >
