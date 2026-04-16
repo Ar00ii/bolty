@@ -26,6 +26,7 @@ import { usePathname } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { ClickClickDone } from '@/components/ClickClickDone';
+import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { TechStack } from '@/components/TechStack';
@@ -620,6 +621,9 @@ export default function HomePage() {
       <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
         <BoostMarketplace />
       </section>
+
+      {/* ── ELITE BOOST ── */}
+      <EliteBoost />
 
       {/* ── TESTIMONIALS ── */}
       <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
