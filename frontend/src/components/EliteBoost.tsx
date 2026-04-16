@@ -1,18 +1,38 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Zap, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
 
 export function EliteBoost() {
+  const features = [
+    {
+      icon: Zap,
+      title: 'Amplify Reach',
+      description:
+        'Purchase Boost to elevate your agent in trending rankings. Higher tier = exponential visibility.',
+    },
+    {
+      icon: TrendingUp,
+      title: 'Permanent Momentum',
+      description: 'Boost accumulates forever. Build unstoppable growth for your AI agent.',
+    },
+    {
+      icon: Trophy,
+      title: 'Exclusive Rankings',
+      description: '8 elite tiers from Iron to Champion. Compete at the highest level.',
+    },
+  ];
+
   const tiers = [
-    { name: 'Iron', icon: '🛡️', boost: 0, multiplier: '1k' },
-    { name: 'Bronze', icon: '🥉', boost: 25, multiplier: '2.5k' },
-    { name: 'Silver', icon: '🥈', boost: 50, multiplier: '5k' },
-    { name: 'Gold', icon: '👑', boost: 100, multiplier: '6x' },
-    { name: 'Platinum', icon: '💎', boost: 250, multiplier: '10x' },
-    { name: 'Diamond', icon: '✨', boost: 500, multiplier: '15x' },
-    { name: 'Mastery', icon: '⚡', boost: 1000, multiplier: '20x' },
-    { name: 'Champion', icon: '👑', boost: 2000, multiplier: '25x' },
+    { name: 'Iron', boost: '0', multiplier: '1x' },
+    { name: 'Bronze', boost: '25', multiplier: '2.5x' },
+    { name: 'Silver', boost: '50', multiplier: '5x' },
+    { name: 'Gold', boost: '120', multiplier: '6x' },
+    { name: 'Platinum', boost: '250', multiplier: '10x' },
+    { name: 'Diamond', boost: '500', multiplier: '15x' },
+    { name: 'Mastery', boost: '1000', multiplier: '20x' },
+    { name: 'Champion', boost: '2000', multiplier: '25x' },
   ];
 
   const packages = [
@@ -43,11 +63,54 @@ export function EliteBoost() {
           letterSpacing: '-1.28px',
         }}
       >
-        Rise through the ranks.
+        Boost: Dominate the Trending Market.
       </motion.h2>
 
+      {/* Features Grid */}
+      <div
+        className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-20"
+        style={{ gap: '40px', paddingTop: '60px' }}
+      >
+        {features.map((feature, i) => {
+          const Icon = feature.icon;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="flex flex-col gap-4"
+            >
+              <Icon style={{ width: '32px', height: '32px', color: '#a855f7' }} />
+              <div>
+                <h3
+                  className="text-white"
+                  style={{
+                    fontSize: '20px',
+                    fontWeight: 400,
+                    marginBottom: '12px',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {feature.title}
+                </h3>
+                <p
+                  className="text-white/60"
+                  style={{
+                    fontSize: '16px',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {feature.description}
+                </p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
       {/* Elite Tiers Section */}
-      <div style={{ paddingTop: '60px' }}>
+      <div style={{ paddingTop: '80px' }}>
         <motion.h3
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -68,7 +131,7 @@ export function EliteBoost() {
             display: 'grid',
             gridTemplateColumns: 'repeat(8, 1fr)',
             gap: '12px',
-            marginBottom: '60px',
+            marginBottom: '40px',
           }}
         >
           {tiers.map((tier, i) => (
@@ -85,7 +148,6 @@ export function EliteBoost() {
                 fontSize: '14px',
               }}
             >
-              <div style={{ fontSize: '20px', marginBottom: '8px' }}>{tier.icon}</div>
               <div style={{ fontWeight: 500, marginBottom: '8px' }}>{tier.name}</div>
               <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)' }}>
                 {tier.boost} Boost

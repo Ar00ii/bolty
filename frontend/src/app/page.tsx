@@ -28,7 +28,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { BoostMarketplace } from '@/components/landing/BoostMarketplace';
 import { TechStack } from '@/components/TechStack';
 import { AnimatedCounter } from '@/components/ui/AnimatedCounter';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
@@ -615,11 +614,6 @@ export default function HomePage() {
             <FeaturesGrid />
           </div>
         </div>
-      </section>
-
-      {/* ── BOOST MARKETPLACE ── */}
-      <section className="py-20 px-4 border-t border-b" style={{ borderColor: 'var(--border)' }}>
-        <BoostMarketplace />
       </section>
 
       {/* ── ELITE BOOST ── */}
