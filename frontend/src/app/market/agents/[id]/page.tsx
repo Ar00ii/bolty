@@ -88,6 +88,18 @@ interface ReviewsResponse {
   count: number;
 }
 
+interface RelatedListing {
+  id: string;
+  title: string;
+  type: MarketListing['type'];
+  price: number;
+  currency: string;
+  tags: string[];
+  seller: { id: string; username: string | null; avatarUrl: string | null };
+  reviewAverage?: number | null;
+  reviewCount?: number;
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const TYPE_META: Record<
@@ -147,6 +159,7 @@ export default function AgentDetailPage() {
     average: null,
     count: 0,
   });
+  const [related, setRelated] = useState<RelatedListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
@@ -162,11 +175,13 @@ export default function AgentDetailPage() {
     try {
       const data = await api.get<MarketListing>(`/market/${id}`);
       setListing(data);
-      const [postsData] = await Promise.all([
+      const [postsData, relatedData] = await Promise.all([
         api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => [] as AgentPost[]),
+        api.get<RelatedListing[]>(`/market/${id}/related`).catch(() => [] as RelatedListing[]),
         loadReviews(),
       ]);
       setPosts(postsData || []);
+      setRelated(relatedData || []);
     } catch (err) {
       if (err instanceof ApiError) setNotFound(true);
     } finally {
@@ -400,6 +415,48 @@ export default function AgentDetailPage() {
                 onCreated={loadReviews}
               />
             </Section>
+
+            {related.length > 0 && (
+              <Section title="Related" icon={Package}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {related.map((r) => {
+                    const meta = TYPE_META[r.type] || TYPE_META.OTHER;
+                    return (
+                      <Link
+                        key={r.id}
+                        href={`/market/agents/${r.id}`}
+                        className="group flex items-start gap-3 rounded-lg border border-white/8 bg-zinc-950/40 p-3 hover:border-purple-400/30 hover:bg-purple-500/5 transition-colors"
+                      >
+                        <div
+                          className="w-9 h-9 rounded-md flex items-center justify-center shrink-0"
+                          style={{ background: `${meta.color}18` }}
+                        >
+                          <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium text-white truncate">{r.title}</div>
+                          <div className="text-[11px] text-zinc-500 mt-0.5 flex items-center gap-2">
+                            <span>
+                              {r.price} {r.currency}
+                            </span>
+                            {r.reviewAverage !== null &&
+                              r.reviewAverage !== undefined &&
+                              (r.reviewCount ?? 0) > 0 && (
+                                <span className="inline-flex items-center gap-1">
+                                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                  {r.reviewAverage.toFixed(1)}
+                                </span>
+                              )}
+                            <span className="text-zinc-600">· @{r.seller.username || 'anon'}</span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-purple-300 transition-colors mt-1" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </Section>
+            )}
           </main>
 
           {/* RIGHT — sidebar */}

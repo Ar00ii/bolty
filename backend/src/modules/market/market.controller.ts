@@ -255,6 +255,12 @@ export class MarketController {
   }
 
   @Public()
+  @Get(':id/related')
+  getRelated(@Param('id') id: string) {
+    return this.marketService.getRelatedListings(id);
+  }
+
+  @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post(':id/invoke')
   @HttpCode(HttpStatus.OK)

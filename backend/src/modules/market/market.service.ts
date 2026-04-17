@@ -383,6 +383,46 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     });
   }
 
+  async getRelatedListings(id: string, limit = 6) {
+    const src = await this.prisma.marketListing.findUnique({
+      where: { id },
+      select: { id: true, type: true, tags: true, sellerId: true },
+    });
+    if (!src) return [];
+
+    const sameTypeTagged = await this.prisma.marketListing.findMany({
+      where: {
+        status: 'ACTIVE',
+        id: { not: id },
+        OR: [
+          { type: src.type, tags: { hasSome: src.tags } },
+          { type: src.type },
+        ],
+      },
+      take: limit * 2,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        seller: { select: { id: true, username: true, avatarUrl: true } },
+      },
+    });
+
+    // Rank: tag overlap first, then same seller, then recency.
+    const ranked = sameTypeTagged
+      .map((l) => {
+        const overlap = l.tags.filter((t) => src.tags.includes(t)).length;
+        const sameSeller = l.sellerId === src.sellerId ? 1 : 0;
+        return { l, score: overlap * 10 + sameSeller };
+      })
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return b.l.createdAt.getTime() - a.l.createdAt.getTime();
+      })
+      .slice(0, limit)
+      .map((r) => r.l);
+
+    return this.attachReviewStats(ranked);
+  }
+
   async invokeAgent(listingId: string, prompt: string): Promise<{ reply: string }> {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
