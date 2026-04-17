@@ -17,7 +17,6 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useState, useEffect, useRef } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
-import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -311,7 +310,7 @@ function NegotiationModal({
 
 export default function MarketPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--bg)' }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: '#000' }} />}>
       <MarketPageContent />
     </Suspense>
   );
@@ -385,52 +384,7 @@ function MarketPageContent() {
   });
 
   return (
-    <div style={{ background: 'var(--bg)' }} className="relative min-h-screen overflow-hidden">
-      {/* Hexagon pattern backdrop */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-[0.2]"
-      >
-        <HexagonPattern />
-      </div>
-
-      {/* Grid overlay */}
-      <svg
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[780px] w-full opacity-[0.07]"
-      >
-        <defs>
-          <pattern id="market-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-            <path
-              d="M 80 0 L 0 0 0 80"
-              fill="none"
-              stroke="rgba(255,255,255,0.6)"
-              strokeWidth="1"
-            />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#market-grid)" />
-      </svg>
-
-      {/* Ambient background glow */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-70"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(131,110,249,0.18), transparent 60%), radial-gradient(ellipse 60% 40% at 85% 100%, rgba(6,182,212,0.1), transparent 60%), radial-gradient(ellipse 50% 40% at 10% 80%, rgba(236,72,153,0.05), transparent 60%)',
-        }}
-      />
-
-      {/* Scan line decoration */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-0 left-0 right-0 h-px"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent, rgba(131,110,249,0.6), rgba(6,182,212,0.4), transparent)',
-        }}
-      />
+    <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
 
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />

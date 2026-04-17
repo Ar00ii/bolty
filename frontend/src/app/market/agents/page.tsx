@@ -30,7 +30,6 @@ import { io, Socket } from 'socket.io-client';
 
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
-import { HexagonPattern } from '@/components/ui/HexagonPattern';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
@@ -4335,7 +4334,7 @@ function DeveloperQuickstart() {
 
 export default function AgentsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--bg)' }} />}>
+    <Suspense fallback={<div className="min-h-screen" style={{ background: '#000' }} />}>
       <AgentsPageContent />
     </Suspense>
   );
@@ -4408,44 +4407,7 @@ function AgentsPageContent() {
   };
 
   return (
-    <div className="page-container py-8 relative">
-      {/* Ambient background */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden"
-      >
-        <div className="absolute inset-0 opacity-[0.22]">
-          <HexagonPattern />
-        </div>
-        <svg className="absolute inset-0 w-full h-full opacity-[0.07]">
-          <defs>
-            <pattern id="agents-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-              <path
-                d="M 80 0 L 0 0 0 80"
-                fill="none"
-                stroke="rgba(255,255,255,0.6)"
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#agents-grid)" />
-        </svg>
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 60% 40% at 20% 0%, rgba(131,110,249,0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 90% 20%, rgba(6,182,212,0.1), transparent 60%)',
-          }}
-        />
-        <div
-          className="absolute top-0 left-0 right-0 h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(131,110,249,0.5), rgba(6,182,212,0.3), transparent)',
-          }}
-        />
-      </div>
-
+    <div className="page-container py-8 relative" style={{ background: '#000' }}>
       {/* Header */}
       <div className="page-header relative">
         <div
