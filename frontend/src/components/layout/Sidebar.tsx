@@ -18,6 +18,11 @@ import {
   ChevronRight,
   Zap,
   User,
+  Users,
+  Hash,
+  Heart,
+  Library,
+  BarChart3,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -113,6 +118,11 @@ export function Sidebar() {
       children: [
         { label: 'AI Agents', href: '/market/agents', icon: Bot },
         { label: 'Repositories', href: '/market/repos', icon: GitBranch },
+        { label: 'Top sellers', href: '/market/sellers', icon: Users },
+        { label: 'Browse by tag', href: '/market/tags', icon: Hash },
+        { label: 'Saved', href: '/market/favorites', icon: Heart },
+        { label: 'Library', href: '/market/library', icon: Library },
+        { label: 'Seller dashboard', href: '/market/seller', icon: BarChart3 },
       ],
     },
     {
@@ -262,12 +272,23 @@ export function Sidebar() {
 
           {/* Footer info */}
           <motion.div
-            className="px-4 py-4 text-xs text-zinc-500"
+            className="px-4 py-4 space-y-2 text-xs text-zinc-500"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.3 }}
           >
-            <p>© Bolty Network</p>
+            <div className="flex items-center justify-between">
+              <span>Quick search</span>
+              <span className="inline-flex items-center gap-1 text-zinc-400">
+                <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none">
+                  ⌘
+                </kbd>
+                <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none">
+                  K
+                </kbd>
+              </span>
+            </div>
+            <p className="text-zinc-600">© Bolty Network</p>
           </motion.div>
         </motion.aside>
       </AnimatePresence>
