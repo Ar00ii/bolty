@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { api } from '@/lib/api/client';
+import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 
 interface NavCommand {
   kind: 'nav';
@@ -178,6 +179,7 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const { items: recent } = useRecentlyViewed();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -244,8 +246,18 @@ export function CommandPalette() {
       hint: `@${l.seller?.username || 'anonymous'} · ${l.type.toLowerCase().replace('_', ' ')}`,
       href: `/market/agents/${l.id}`,
     }));
+    if (!q) {
+      const recentCmds: ListingCommand[] = recent.slice(0, 5).map((r) => ({
+        kind: 'listing',
+        id: `recent:${r.id}`,
+        title: r.title,
+        hint: `Recently viewed · @${r.seller || 'anonymous'}`,
+        href: `/market/agents/${r.id}`,
+      }));
+      return [...recentCmds, ...navs, ...listingCmds];
+    }
     return [...navs, ...listingCmds];
-  }, [query, listings]);
+  }, [query, listings, recent]);
 
   useEffect(() => {
     setActiveIndex(0);
