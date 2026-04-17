@@ -160,8 +160,18 @@ export class MarketController {
     @Query('type') type?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
+    @Query('sortBy') sortBy?: string,
   ) {
-    return this.marketService.getListings({ type, search, page: page ? Number(page) : 1 });
+    const allowed = ['recent', 'trending', 'price-low', 'price-high'] as const;
+    const normalizedSort = allowed.includes(sortBy as (typeof allowed)[number])
+      ? (sortBy as (typeof allowed)[number])
+      : 'recent';
+    return this.marketService.getListings({
+      type,
+      search,
+      page: page ? Number(page) : 1,
+      sortBy: normalizedSort,
+    });
   }
 
   // Must be defined before :id to avoid route clash

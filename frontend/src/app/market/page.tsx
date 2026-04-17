@@ -92,7 +92,7 @@ function MarketPageContent() {
     const load = async () => {
       setLoading(true);
       try {
-        const qs = new URLSearchParams({ page: '1' });
+        const qs = new URLSearchParams({ page: '1', sortBy });
         if (search) qs.set('search', search);
         const [listingsData, feedData] = await Promise.all([
           api.get<{ data: MarketListing[]; total: number; page: number; pages: number }>(
@@ -109,7 +109,7 @@ function MarketPageContent() {
       }
     };
     load();
-  }, [search]);
+  }, [search, sortBy]);
 
   if (isLoading || loading) {
     return (

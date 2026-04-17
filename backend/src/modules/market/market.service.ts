@@ -182,10 +182,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     });
   }
 
-  async getListings(params: { type?: string; search?: string; page?: number }) {
+  async getListings(params: {
+    type?: string;
+    search?: string;
+    page?: number;
+    sortBy?: 'recent' | 'trending' | 'price-low' | 'price-high';
+  }) {
     const page = Math.max(1, params.page || 1);
     const take = 20;
     const skip = (page - 1) * take;
+    const sortBy = params.sortBy || 'recent';
 
     const where: Record<string, unknown> = { status: 'ACTIVE' };
     if (params.type && params.type !== 'ALL') where.type = params.type;
@@ -197,12 +203,23 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       ];
     }
 
+    if (sortBy === 'trending') {
+      return this.getTrendingListings(where, page, take, skip);
+    }
+
+    const orderBy =
+      sortBy === 'price-low'
+        ? { price: 'asc' as const }
+        : sortBy === 'price-high'
+          ? { price: 'desc' as const }
+          : { createdAt: 'desc' as const };
+
     const [data, total] = await Promise.all([
       this.prisma.marketListing.findMany({
         where,
         skip,
         take,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           seller: { select: { id: true, username: true, avatarUrl: true } },
           repository: { select: { id: true, name: true, githubUrl: true, language: true } },
@@ -210,6 +227,57 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       }),
       this.prisma.marketListing.count({ where }),
     ]);
+
+    return { data, total, page, pages: Math.ceil(total / take) };
+  }
+
+  private async getTrendingListings(
+    where: Record<string, unknown>,
+    page: number,
+    take: number,
+    skip: number,
+  ) {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [purchaseStats, negotiationStats, total] = await Promise.all([
+      this.prisma.marketPurchase.groupBy({
+        by: ['listingId'],
+        where: { createdAt: { gte: since } },
+        _count: { _all: true },
+      }),
+      this.prisma.agentNegotiation.groupBy({
+        by: ['listingId'],
+        where: { createdAt: { gte: since } },
+        _count: { _all: true },
+      }),
+      this.prisma.marketListing.count({ where }),
+    ]);
+
+    const scores = new Map<string, number>();
+    for (const p of purchaseStats) {
+      scores.set(p.listingId, (scores.get(p.listingId) || 0) + p._count._all * 3);
+    }
+    for (const n of negotiationStats) {
+      scores.set(n.listingId, (scores.get(n.listingId) || 0) + n._count._all * 1);
+    }
+
+    const listings = await this.prisma.marketListing.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        seller: { select: { id: true, username: true, avatarUrl: true } },
+        repository: { select: { id: true, name: true, githubUrl: true, language: true } },
+      },
+    });
+
+    const ranked = listings
+      .map((l) => ({ listing: l, score: scores.get(l.id) || 0 }))
+      .sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return b.listing.createdAt.getTime() - a.listing.createdAt.getTime();
+      });
+
+    const data = ranked.slice(skip, skip + take).map((r) => r.listing);
 
     return { data, total, page, pages: Math.ceil(total / take) };
   }
