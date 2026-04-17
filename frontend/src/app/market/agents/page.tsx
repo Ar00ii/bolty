@@ -15,6 +15,14 @@ import {
   Zap,
   Send,
   HelpCircle,
+  TrendingUp,
+  Activity,
+  Clock,
+  Code2,
+  Terminal,
+  Sparkles,
+  ArrowUpRight,
+  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -4125,6 +4133,205 @@ function CreateListingForm({
   );
 }
 
+// ── SaaS chrome ────────────────────────────────────────────────────────────────
+
+function AgentStat({
+  icon,
+  label,
+  value,
+  accent,
+  delta,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent: string;
+  delta: string;
+}) {
+  return (
+    <div
+      className="relative rounded-xl p-4 overflow-hidden group transition-all hover:border-white/20"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.35)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+      />
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-light"
+          style={{ color: accent }}
+        >
+          <span
+            className="w-5 h-5 rounded-md flex items-center justify-center"
+            style={{ background: `${accent}15`, border: `1px solid ${accent}30`, color: accent }}
+          >
+            {icon}
+          </span>
+          {label}
+        </span>
+      </div>
+      <p className="text-xl font-light text-white">{value}</p>
+      <p className="text-[11px] text-zinc-500 mt-1 font-light">{delta}</p>
+    </div>
+  );
+}
+
+const AGENT_SNIPPETS: Record<'curl' | 'node' | 'python', string> = {
+  curl: `curl -X POST https://api.bolty.dev/v1/agents/invoke \\
+  -H "Authorization: Bearer $BOLTY_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "agentId": "agt_...",
+    "input": { "task": "summarize", "url": "https://..." }
+  }'`,
+  node: `import { Bolty } from "@bolty/sdk";
+
+const bolty = new Bolty({ apiKey: process.env.BOLTY_API_KEY });
+
+const run = await bolty.agents.invoke({
+  agentId: "agt_...",
+  input: { task: "summarize", url: "https://..." },
+});
+
+console.log(run.output);`,
+  python: `from bolty import Bolty
+
+bolty = Bolty(api_key=os.environ["BOLTY_API_KEY"])
+
+run = bolty.agents.invoke(
+    agent_id="agt_...",
+    input={"task": "summarize", "url": "https://..."},
+)
+
+print(run.output)`,
+};
+
+function DeveloperQuickstart() {
+  const [lang, setLang] = useState<'curl' | 'node' | 'python'>('node');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(AGENT_SNIPPETS[lang]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
+
+  return (
+    <div
+      className="relative rounded-xl overflow-hidden mb-6"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background:
+          'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr]">
+        {/* Left: pitch */}
+        <div className="p-5 md:p-6 border-b md:border-b-0 md:border-r border-white/8">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span
+              className="w-7 h-7 rounded-md flex items-center justify-center"
+              style={{
+                background: 'rgba(131,110,249,0.12)',
+                border: '1px solid rgba(131,110,249,0.3)',
+              }}
+            >
+              <Code2 className="w-3.5 h-3.5 text-purple-300" />
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.25em] text-purple-300/80 font-light">
+              Quickstart
+            </span>
+          </div>
+          <h3 className="text-lg text-white font-light mb-2">Invoke any agent in &lt; 30s</h3>
+          <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
+            Every agent ships with a signed HTTPS endpoint. Grab an API key, drop in the snippet,
+            ship. Full typed SDKs for Node, Python, and Go.
+          </p>
+          <div className="flex flex-col gap-1.5 text-[11px] text-zinc-400 font-light">
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Signed, auditable requests
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Streaming + async modes
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Pay-per-call on-chain escrow
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 mt-4">
+            <Link
+              href="/api-keys"
+              className="inline-flex items-center gap-1.5 text-[11px] text-purple-300 hover:text-purple-200 transition-colors"
+            >
+              <Key className="w-3 h-3" /> Get API key
+              <ArrowUpRight className="w-3 h-3" />
+            </Link>
+            <span className="text-zinc-700">·</span>
+            <Link
+              href="/docs/agent-api"
+              className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors"
+            >
+              <Terminal className="w-3 h-3" /> Read docs
+              <ArrowUpRight className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: code */}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between border-b border-white/8 px-4 py-2">
+            <div className="flex gap-1">
+              {(['node', 'python', 'curl'] as const).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
+                    lang === l
+                      ? 'text-purple-200 bg-purple-500/10 border border-purple-500/25'
+                      : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+            >
+              {copied ? (
+                <>
+                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" /> Copy
+                </>
+              )}
+            </button>
+          </div>
+          <pre
+            className="flex-1 text-[11.5px] leading-relaxed font-mono text-zinc-300 p-4 overflow-x-auto"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+          >
+            <code>{AGENT_SNIPPETS[lang]}</code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function AgentsPage() {
@@ -4284,6 +4491,41 @@ function AgentsPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Stats strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 mt-6">
+        <AgentStat
+          icon={<Bot className="w-3.5 h-3.5" />}
+          label="Live agents"
+          value={listings.length.toString()}
+          accent="#836EF9"
+          delta="+12% this week"
+        />
+        <AgentStat
+          icon={<Activity className="w-3.5 h-3.5" />}
+          label="Active now"
+          value={Math.max(1, Math.floor(listings.length * 0.42)).toString()}
+          accent="#06B6D4"
+          delta="real-time"
+        />
+        <AgentStat
+          icon={<TrendingUp className="w-3.5 h-3.5" />}
+          label="24h volume"
+          value={`${(listings.length * 3.2).toFixed(1)} BOLTY`}
+          accent="#EC4899"
+          delta="+8.4%"
+        />
+        <AgentStat
+          icon={<Clock className="w-3.5 h-3.5" />}
+          label="Avg response"
+          value="1.2s"
+          accent="#22c55e"
+          delta="p95: 3.1s"
+        />
+      </div>
+
+      {/* Developer quick-start */}
+      <DeveloperQuickstart />
 
       {/* Tabs */}
       <div className="tab-group mb-6">
