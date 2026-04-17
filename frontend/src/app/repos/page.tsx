@@ -27,6 +27,7 @@ import { DottedSurface } from '@/components/ui/dotted-surface';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {
@@ -162,6 +163,8 @@ export default function ReposPage() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoDragOver, setLogoDragOver] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   // Branding fields
   const [pubWebsiteUrl, setPubWebsiteUrl] = useState('');
@@ -540,18 +543,37 @@ export default function ReposPage() {
         className="border rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-center"
         style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}
       >
-        <input
-          type="text"
-          placeholder="Search repositories..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-48 rounded-xl px-4 py-2 text-sm font-mono outline-none transition-colors"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            color: '#e4e4e7',
-          }}
-        />
+        <div className="flex-1 min-w-48 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Search repositories..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-xl pl-9 pr-14 py-2 text-sm font-mono outline-none transition-colors"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: '#e4e4e7',
+            }}
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {search ? (
+              <button
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
+                className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
+                /
+              </kbd>
+            )}
+          </div>
+        </div>
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
