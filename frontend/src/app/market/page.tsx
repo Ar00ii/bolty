@@ -16,6 +16,7 @@ import {
   Heart,
   Clock,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -218,61 +219,20 @@ function MarketPageContent() {
                 Access {listings.length} AI agents, repositories, and services from the community.
               </p>
             </div>
-            <div className="flex gap-3">
-              <Link
-                href="/market/agents"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
-              >
-                <Bot className="w-4 h-4" />
-                Agents
-              </Link>
-              <Link
-                href="/market/repos"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-blue-500/40 text-white hover:bg-blue-500/5 transition-all"
-              >
-                <GitBranch className="w-4 h-4" />
-                Repos
-              </Link>
-              <Link
-                href="/market/sellers"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
-              >
-                <Users className="w-4 h-4" />
-                Sellers
-              </Link>
-              <Link
-                href="/market/tags"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-pink-500/40 text-white hover:bg-pink-500/5 transition-all"
-              >
-                <Hash className="w-4 h-4" />
-                Tags
-              </Link>
-              <Link
+            <div className="flex flex-wrap gap-1.5">
+              <NavChip href="/market/agents" icon={Bot} label="Agents" />
+              <NavChip href="/market/repos" icon={GitBranch} label="Repos" />
+              <NavChip href="/market/sellers" icon={Users} label="Sellers" />
+              <NavChip href="/market/tags" icon={Hash} label="Tags" />
+              <NavChip
                 href="/market/favorites"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-pink-500/40 text-white hover:bg-pink-500/5 transition-all"
-              >
-                <Heart className="w-4 h-4" />
-                Saved
-                {favoriteIds.length > 0 && (
-                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-medium bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                    {favoriteIds.length > 99 ? '99+' : favoriteIds.length}
-                  </span>
-                )}
-              </Link>
-              <Link
-                href="/market/library"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
-              >
-                <Library className="w-4 h-4" />
-                Library
-              </Link>
-              <Link
-                href="/market/seller"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
-              >
-                <BarChart3 className="w-4 h-4" />
-                Seller
-              </Link>
+                icon={Heart}
+                label="Saved"
+                badge={favoriteIds.length > 0 ? favoriteIds.length : undefined}
+                accent="#EC4899"
+              />
+              <NavChip href="/market/library" icon={Library} label="Library" />
+              <NavChip href="/market/seller" icon={BarChart3} label="Seller" />
             </div>
           </div>
 
@@ -540,20 +500,37 @@ function MarketPageContent() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-white/8 mb-8">
-          {(['all', 'featured', 'activity'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-3 text-sm font-light border-b-2 transition-colors ${
-                activeTab === tab
-                  ? 'border-purple-500 text-white'
-                  : 'border-transparent text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              {tab === 'all' ? 'All Listings' : tab === 'featured' ? 'Featured' : 'Activity'}
-            </button>
-          ))}
+        <div
+          className="inline-flex items-center gap-0.5 p-1 mb-8 rounded-xl"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.5) 0%, rgba(10,10,14,0.5) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.055), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
+        >
+          {(['all', 'featured', 'activity'] as const).map((tab) => {
+            const active = activeTab === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`relative px-4 h-8 text-[12.5px] font-medium rounded-lg transition-colors ${
+                  active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                style={
+                  active
+                    ? {
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      }
+                    : undefined
+                }
+              >
+                {tab === 'all' ? 'All Listings' : tab === 'featured' ? 'Featured' : 'Activity'}
+              </button>
+            );
+          })}
         </div>
 
         {/* Content */}
@@ -650,6 +627,49 @@ function MarketPageContent() {
 }
 
 // ─── Components ────────────────────────────────────────────────────
+
+function NavChip({
+  href,
+  icon: Icon,
+  label,
+  badge,
+  accent = '#836EF9',
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  badge?: number;
+  accent?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group inline-flex items-center gap-2 px-3 h-9 text-[12.5px] font-normal text-zinc-300 hover:text-white rounded-lg transition-colors"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <Icon
+        className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-200 transition-colors"
+        strokeWidth={1.75}
+      />
+      <span>{label}</span>
+      {badge !== undefined && (
+        <span
+          className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-semibold"
+          style={{
+            color: accent,
+            background: `${accent}14`,
+            border: `1px solid ${accent}32`,
+          }}
+        >
+          {badge > 99 ? '99+' : badge}
+        </span>
+      )}
+    </Link>
+  );
+}
 
 function StatCard({
   label,
