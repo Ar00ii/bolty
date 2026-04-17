@@ -531,6 +531,78 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     };
   }
 
+  async getTopSellers(limit = 12) {
+    const salesGroup = await this.prisma.marketPurchase.groupBy({
+      by: ['sellerId'],
+      _count: { _all: true },
+      orderBy: { _count: { sellerId: 'desc' } },
+      take: limit,
+    });
+    if (salesGroup.length === 0) return [];
+
+    const sellerIds = salesGroup.map((s) => s.sellerId);
+    const [sellers, reviewAggs, listingCounts] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { id: { in: sellerIds } },
+        select: {
+          id: true,
+          username: true,
+          avatarUrl: true,
+          bio: true,
+          githubLogin: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.marketReview.groupBy({
+        by: ['listingId'],
+        where: { listing: { sellerId: { in: sellerIds } } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+      this.prisma.marketListing.groupBy({
+        by: ['sellerId'],
+        where: { sellerId: { in: sellerIds }, status: 'ACTIVE' },
+        _count: { _all: true },
+      }),
+    ]);
+
+    const sellerReviews = await this.prisma.marketListing.findMany({
+      where: { sellerId: { in: sellerIds } },
+      select: { id: true, sellerId: true },
+    });
+    const listingToSeller = new Map(sellerReviews.map((l) => [l.id, l.sellerId]));
+    const reviewBySeller = new Map<string, { sum: number; count: number }>();
+    for (const r of reviewAggs) {
+      const sellerId = listingToSeller.get(r.listingId);
+      if (!sellerId) continue;
+      const agg = reviewBySeller.get(sellerId) || { sum: 0, count: 0 };
+      agg.sum += (r._avg.rating || 0) * r._count._all;
+      agg.count += r._count._all;
+      reviewBySeller.set(sellerId, agg);
+    }
+    const listingCountBySeller = new Map(
+      listingCounts.map((l) => [l.sellerId, l._count._all]),
+    );
+    const salesBySeller = new Map(salesGroup.map((s) => [s.sellerId, s._count._all]));
+    const sellerById = new Map(sellers.map((s) => [s.id, s]));
+
+    return sellerIds
+      .map((id) => {
+        const seller = sellerById.get(id);
+        if (!seller) return null;
+        const rev = reviewBySeller.get(id);
+        const avg = rev && rev.count > 0 ? rev.sum / rev.count : null;
+        return {
+          ...seller,
+          sales: salesBySeller.get(id) || 0,
+          activeListings: listingCountBySeller.get(id) || 0,
+          avgRating: avg !== null ? Number(avg.toFixed(2)) : null,
+          reviewCount: rev?.count || 0,
+        };
+      })
+      .filter((s): s is NonNullable<typeof s> => s !== null);
+  }
+
   async getMyLibrary(buyerId: string) {
     const purchases = await this.prisma.marketPurchase.findMany({
       where: { buyerId },

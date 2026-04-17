@@ -197,6 +197,14 @@ export class MarketController {
     return this.marketService.getListingFacets();
   }
 
+  @Public()
+  @Get('top-sellers')
+  getTopSellers(@Query('limit') limit?: string) {
+    const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 12;
+    const bounded = Math.min(48, Math.max(1, parsed));
+    return this.marketService.getTopSellers(bounded);
+  }
+
   // Must be defined before :id to avoid route clash
   // Protected: only users who purchased the listing can download
   @Get('files/:key')

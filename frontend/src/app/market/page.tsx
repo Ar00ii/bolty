@@ -12,6 +12,8 @@ import {
   MoreVertical,
   BarChart3,
   Library,
+  Users,
+  Hash,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -221,6 +223,20 @@ function MarketPageContent() {
               >
                 <GitBranch className="w-4 h-4" />
                 Repos
+              </Link>
+              <Link
+                href="/market/sellers"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
+              >
+                <Users className="w-4 h-4" />
+                Sellers
+              </Link>
+              <Link
+                href="/market/tags"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-pink-500/40 text-white hover:bg-pink-500/5 transition-all"
+              >
+                <Hash className="w-4 h-4" />
+                Tags
               </Link>
               <Link
                 href="/market/library"
