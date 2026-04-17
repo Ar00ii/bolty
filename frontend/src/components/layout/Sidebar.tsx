@@ -274,12 +274,25 @@ export function Sidebar() {
 
           {/* Footer info */}
           <motion.div
-            className="px-4 py-4 space-y-2 text-xs text-zinc-500"
+            className="px-4 py-4 space-y-1 text-xs text-zinc-500"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.3 }}
           >
-            <div className="flex items-center justify-between">
+            <button
+              onClick={() => {
+                if (typeof window === 'undefined') return;
+                window.dispatchEvent(
+                  new KeyboardEvent('keydown', {
+                    key: 'k',
+                    ctrlKey: true,
+                    metaKey: true,
+                    bubbles: true,
+                  }),
+                );
+              }}
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/5 hover:text-zinc-300 transition-colors"
+            >
               <span>Quick search</span>
               <span className="inline-flex items-center gap-1 text-zinc-400">
                 <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none">
@@ -289,14 +302,20 @@ export function Sidebar() {
                   K
                 </kbd>
               </span>
-            </div>
-            <div className="flex items-center justify-between">
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window === 'undefined') return;
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }));
+              }}
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/5 hover:text-zinc-300 transition-colors"
+            >
               <span>Shortcuts</span>
               <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none text-zinc-400">
                 ?
               </kbd>
-            </div>
-            <p className="text-zinc-600">© Bolty Network</p>
+            </button>
+            <p className="text-zinc-600 px-2 pt-2">© Bolty Network</p>
           </motion.div>
         </motion.aside>
       </AnimatePresence>
