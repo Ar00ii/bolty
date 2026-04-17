@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
+import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
@@ -28,6 +29,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <ProgressBar isLoading={isLoading} />
+      <CommandPalette />
       <FloatingTopBar />
       {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
