@@ -10,7 +10,9 @@ import {
   Truck,
   Copy,
   Check,
+  FileText,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
@@ -362,6 +364,25 @@ export default function OrderDetailPage() {
         >
           {STATUS_LABEL[order.status]}
         </span>
+        <Link
+          href={`/orders/${order.id}/receipt`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            fontSize: '0.72rem',
+            fontWeight: 500,
+            color: 'var(--text-muted)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            padding: '0.4rem 0.7rem',
+            textDecoration: 'none',
+            transition: 'all 0.15s',
+          }}
+        >
+          <FileText style={{ width: 13, height: 13 }} strokeWidth={2} /> Receipt
+        </Link>
       </div>
 
       <div

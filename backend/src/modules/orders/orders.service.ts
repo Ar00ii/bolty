@@ -95,7 +95,7 @@ export class OrdersService {
           updated.escrowStatus === 'FUNDED'
             ? 'Review the delivery and release escrow to complete the order.'
             : 'Review the delivery and mark the order complete when ready.',
-        url: `/market/orders/${updated.id}`,
+        url: `/orders/${updated.id}`,
         meta: { orderId: updated.id, listingId: updated.listingId },
       });
     } catch {
@@ -145,7 +145,7 @@ export class OrdersService {
           completed.escrowStatus === 'RELEASED'
             ? 'Escrow has been released. Funds are on their way to your wallet.'
             : 'The buyer confirmed delivery. Thanks for shipping!',
-        url: `/market/orders/${completed.id}`,
+        url: `/orders/${completed.id}`,
         meta: { orderId: completed.id, listingId: completed.listingId },
       });
     } catch {

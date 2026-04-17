@@ -974,7 +974,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         type: 'MARKET_NEW_SALE',
         title: `New sale: "${listing.title}"`,
         body: `Your listing just sold. ${useEscrow ? 'Funds are in escrow — mark the order as delivered to release them.' : 'The order is ready to be fulfilled.'}`,
-        url: `/market/orders/${purchase.id}`,
+        url: `/orders/${purchase.id}`,
         meta: { listingId, orderId: purchase.id, buyerId },
       });
     } catch (err) {
