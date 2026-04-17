@@ -248,6 +248,11 @@ export class MarketController {
     return this.marketService.getSellerAnalytics(userId);
   }
 
+  @Get('library')
+  getMyLibrary(@CurrentUser('id') userId: string) {
+    return this.marketService.getMyLibrary(userId);
+  }
+
   @Public()
   @Get(':id')
   getListing(@Param('id') id: string) {

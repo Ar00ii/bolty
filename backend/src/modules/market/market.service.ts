@@ -473,6 +473,51 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return !!purchase;
   }
 
+  async getMyLibrary(buyerId: string) {
+    const purchases = await this.prisma.marketPurchase.findMany({
+      where: { buyerId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        listing: {
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            price: true,
+            currency: true,
+            tags: true,
+            agentUrl: true,
+            agentEndpoint: true,
+            fileKey: true,
+            fileName: true,
+            fileSize: true,
+            fileMimeType: true,
+            status: true,
+            seller: { select: { id: true, username: true, avatarUrl: true } },
+          },
+        },
+      },
+    });
+    const listingIds = purchases.map((p) => p.listing?.id).filter((id): id is string => !!id);
+    const myReviews =
+      listingIds.length > 0
+        ? await this.prisma.marketReview.findMany({
+            where: { authorId: buyerId, listingId: { in: listingIds } },
+            select: { listingId: true, rating: true },
+          })
+        : [];
+    const reviewMap = new Map(myReviews.map((r) => [r.listingId, r.rating]));
+
+    return purchases.map((p) => ({
+      orderId: p.id,
+      purchasedAt: p.createdAt,
+      status: p.status,
+      escrowStatus: p.escrowStatus,
+      listing: p.listing,
+      myRating: p.listing ? (reviewMap.get(p.listing.id) ?? null) : null,
+    }));
+  }
+
   // ── Reviews ────────────────────────────────────────────────────────────────
 
   async createReview(listingId: string, authorId: string, rating: number, content?: string | null) {
