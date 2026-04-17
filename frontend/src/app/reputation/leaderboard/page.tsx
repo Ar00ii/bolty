@@ -1,12 +1,13 @@
 'use client';
 
-import { Trophy, GitBranch, Package } from 'lucide-react';
+import { Trophy, GitBranch, Package, Search, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { DottedSurface } from '@/components/ui/dotted-surface';
 import { ReputationBadge } from '@/components/ui/reputation-badge';
 import { api } from '@/lib/api/client';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface LeaderboardEntry {
   id: string;
@@ -92,6 +93,10 @@ function PositionBadge({ idx }: { idx: number }) {
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [rankFilter, setRankFilter] = useState<string>('ALL');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     api
@@ -100,6 +105,25 @@ export default function LeaderboardPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const rankCounts = useMemo(() => {
+    return leaderboard.reduce<Record<string, number>>((acc, e) => {
+      acc[e.rank] = (acc[e.rank] || 0) + 1;
+      return acc;
+    }, {});
+  }, [leaderboard]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return leaderboard.filter((e) => {
+      if (rankFilter !== 'ALL' && e.rank !== rankFilter) return false;
+      if (!q) return true;
+      const hay = [e.username ?? '', e.displayName ?? '', e.occupation ?? '']
+        .join(' ')
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }, [leaderboard, query, rankFilter]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -187,6 +211,81 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
+      {/* Search + rank filter */}
+      {!loading && leaderboard.length > 0 && (
+        <div className="mb-4 space-y-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600 pointer-events-none" />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search developers…"
+              className="w-full bg-white/[0.02] border border-white/[0.06] rounded-xl pl-9 pr-14 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#836EF9]/40 transition-colors"
+            />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {query ? (
+                <button
+                  onClick={() => setQuery('')}
+                  aria-label="Clear search"
+                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded border border-white/10 bg-white/[0.04] text-[9px] text-zinc-500 font-mono leading-none">
+                  /
+                </kbd>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              onClick={() => setRankFilter('ALL')}
+              className={`px-2.5 py-1 rounded-full text-[10px] font-light border transition-all ${
+                rankFilter === 'ALL'
+                  ? 'text-white border-[#836EF9]/50 bg-[#836EF9]/10'
+                  : 'text-zinc-500 border-white/[0.06] hover:text-zinc-300 hover:border-white/10'
+              }`}
+            >
+              All
+              <span className="ml-1 text-[9px] text-zinc-600">{leaderboard.length}</span>
+            </button>
+            {RANK_INFO.slice()
+              .reverse()
+              .map((r) => {
+                const count = rankCounts[r.rank] || 0;
+                if (count === 0) return null;
+                const active = rankFilter === r.rank;
+                return (
+                  <button
+                    key={r.rank}
+                    onClick={() => setRankFilter(r.rank)}
+                    className="px-2.5 py-1 rounded-full text-[10px] font-light border transition-all"
+                    style={
+                      active
+                        ? {
+                            color: r.color,
+                            borderColor: `${r.color}60`,
+                            background: `${r.color}14`,
+                          }
+                        : {
+                            color: 'rgba(161,161,170,0.65)',
+                            borderColor: 'rgba(255,255,255,0.06)',
+                            background: 'transparent',
+                          }
+                    }
+                  >
+                    {r.label}
+                    <span className="ml-1 text-[9px] opacity-60">{count}</span>
+                  </button>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
       {/* Leaderboard table */}
       {loading ? (
         <div className="text-center py-20">
@@ -198,16 +297,20 @@ export default function LeaderboardPage() {
             No rankings yet. Be the first to earn reputation.
           </p>
         </div>
+      ) : visible.length === 0 ? (
+        <div className="text-center py-16 border border-dashed border-white/[0.06] rounded-2xl">
+          <p className="text-zinc-600 font-mono text-sm">No developers match your filter.</p>
+        </div>
       ) : (
         <div className="border border-white/[0.06] rounded-2xl overflow-hidden">
-          {leaderboard.map((entry, idx) => (
+          {visible.map((entry) => (
             <div
               key={entry.id}
               className="flex items-center gap-4 px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.015] transition-colors last:border-0"
             >
               {/* Position */}
               <div className="w-8 flex-shrink-0 flex items-center justify-center">
-                <PositionBadge idx={idx} />
+                <PositionBadge idx={(entry.position || 1) - 1} />
               </div>
 
               {/* Avatar */}
