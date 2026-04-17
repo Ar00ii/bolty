@@ -129,7 +129,7 @@ const PROFILE_ITEM: NavItem = {
     { href: '/profile?tab=wallet', label: 'Wallet', icon: Wallet },
     { href: '/api-keys', label: 'API Keys', icon: Key },
     { href: '/profile?tab=agent', label: 'AI Agent', icon: Cpu },
-    { href: '/profile?tab=security', label: 'Security', icon: Settings },
+    { href: '/profile?tab=notifications', label: 'Settings', icon: Settings },
   ],
 };
 

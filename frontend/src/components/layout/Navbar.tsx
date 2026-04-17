@@ -239,7 +239,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                       <Key className="w-4 h-4" /> API Keys
                     </Link>
                     <Link
-                      href="/profile?tab=security"
+                      href="/profile?tab=notifications"
                       className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
                     >
                       <Settings className="w-4 h-4" /> Settings
