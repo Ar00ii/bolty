@@ -60,7 +60,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     } catch (err) {
       this.logger.warn(
         `Redis connection failed at startup: ${(err as Error).message}. ` +
-        'Application will continue but some features (rate limiting, sessions) may be unavailable.',
+          'Application will continue but some features (rate limiting, sessions) may be unavailable.',
       );
       // Don't throw - let the app start and retry in the background
       this.reconnectInBackground();
