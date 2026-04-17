@@ -10,6 +10,7 @@ import {
   MessageSquare,
   DollarSign,
   ArrowUpRight,
+  Download,
   Plus,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -68,6 +69,54 @@ function timeAgo(d: string) {
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}h ago`;
   return `${Math.floor(h / 24)}d ago`;
+}
+
+function csvEscape(value: unknown) {
+  const s = value === null || value === undefined ? '' : String(value);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadListingsCsv(listings: SellerListing[]) {
+  const header = [
+    'id',
+    'title',
+    'type',
+    'status',
+    'price',
+    'currency',
+    'sales',
+    'revenue',
+    'avgRating',
+    'reviewCount',
+    'createdAt',
+  ];
+  const rows = listings.map((l) =>
+    [
+      l.id,
+      l.title,
+      l.type,
+      l.status,
+      l.price,
+      l.currency,
+      l.sales,
+      l.revenue,
+      l.reviewAverage ?? '',
+      l.reviewCount,
+      l.createdAt,
+    ]
+      .map(csvEscape)
+      .join(','),
+  );
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bolty-listings-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 export default function SellerDashboardPage() {
@@ -243,7 +292,19 @@ export default function SellerDashboardPage() {
                       Listing performance
                     </h2>
                   </div>
-                  <span className="text-xs text-zinc-500">{listings.length} listings</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-zinc-500">{listings.length} listings</span>
+                    {listings.length > 0 && (
+                      <button
+                        onClick={() => downloadListingsCsv(listings)}
+                        className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md border border-white/10 hover:border-white/20"
+                        aria-label="Download listings as CSV"
+                      >
+                        <Download className="w-3 h-3" />
+                        CSV
+                      </button>
+                    )}
+                  </div>
                 </header>
                 <div className="divide-y divide-white/5">
                   {listings.map((l) => (
