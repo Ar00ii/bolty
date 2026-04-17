@@ -46,8 +46,15 @@ const GROUPS: ShortcutGroup[] = [
 function KeyBadge({ children }: { children: React.ReactNode }) {
   return (
     <kbd
-      className="inline-flex items-center justify-center min-w-[22px] h-6 px-1.5 rounded border border-white/15 bg-white/[0.04] text-[11px] text-zinc-200 font-mono leading-none"
-      style={{ letterSpacing: 0 }}
+      className="inline-flex items-center justify-center min-w-[24px] h-[22px] px-1.5 rounded-md text-[10.5px] font-medium text-zinc-200 leading-none"
+      style={{
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
+        letterSpacing: 0,
+        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+      }}
     >
       {children}
     </kbd>
@@ -122,8 +129,8 @@ export function ShortcutsModal() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="absolute inset-0 backdrop-blur-sm"
-        style={{ background: 'rgba(0,0,0,0.65)' }}
+        className="absolute inset-0 backdrop-blur-md"
+        style={{ background: 'rgba(3, 3, 8, 0.72)' }}
       />
       <div
         ref={dialogRef}
@@ -131,13 +138,36 @@ export function ShortcutsModal() {
         aria-modal="true"
         aria-labelledby="shortcuts-modal-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
-        style={{ background: 'rgba(15, 15, 17, 0.98)' }}
+        className="relative w-full max-w-md rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
+          boxShadow:
+            '0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <Keyboard className="w-4 h-4 text-[#836EF9]" />
-            <p id="shortcuts-modal-title" className="text-sm font-light text-white">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
+            <span
+              className="inline-flex items-center justify-center w-7 h-7 rounded-lg"
+              style={{
+                background: 'rgba(131,110,249,0.12)',
+                border: '1px solid rgba(131,110,249,0.22)',
+              }}
+            >
+              <Keyboard className="w-3.5 h-3.5 text-[#a89dff]" strokeWidth={1.75} />
+            </span>
+            <p
+              id="shortcuts-modal-title"
+              className="text-[13px] font-medium text-white tracking-[0.005em]"
+            >
               Keyboard shortcuts
             </p>
           </div>
@@ -146,24 +176,29 @@ export function ShortcutsModal() {
             aria-label="Close shortcuts"
             className="w-7 h-7 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" strokeWidth={1.75} />
           </button>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto divide-y divide-white/5">
+        <div className="max-h-[70vh] overflow-y-auto divide-y divide-white/[0.04]">
           {GROUPS.map((group) => (
             <div key={group.title} className="px-5 py-4">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-3">
                 {group.title}
               </p>
-              <ul className="space-y-2.5">
+              <ul className="space-y-2">
                 {group.items.map((item) => (
-                  <li key={item.description} className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-light text-zinc-300">{item.description}</span>
+                  <li
+                    key={item.description}
+                    className="flex items-center justify-between gap-3 py-1"
+                  >
+                    <span className="text-[13px] font-normal text-zinc-300 leading-relaxed">
+                      {item.description}
+                    </span>
                     <span className="flex items-center gap-1 shrink-0">
                       {item.keys.map((k, i) => (
                         <React.Fragment key={i}>
-                          {i > 0 && <span className="text-[10px] text-zinc-600">+</span>}
+                          {i > 0 && <span className="text-[10px] text-zinc-600 px-0.5">then</span>}
                           <KeyBadge>{k}</KeyBadge>
                         </React.Fragment>
                       ))}
@@ -175,17 +210,20 @@ export function ShortcutsModal() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3 border-t border-white/10 text-[11px] text-zinc-500">
-          <span className="flex items-center gap-2">
-            Press
+        <div
+          className="flex items-center justify-between px-5 py-3 border-t border-white/[0.06] text-[11px] text-zinc-500"
+          style={{ background: 'rgba(255,255,255,0.015)' }}
+        >
+          <span className="flex items-center gap-1.5 flex-wrap">
+            <span>Press</span>
             <KeyBadge>
               <Slash className="w-3 h-3" />
             </KeyBadge>
-            to jump into the search box,
+            <span>to search,</span>
             <KeyBadge>
               <Command className="w-3 h-3" />K
             </KeyBadge>
-            for anything else.
+            <span>for everything.</span>
           </span>
         </div>
       </div>

@@ -194,6 +194,7 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
   const { items: recent, clear: clearRecent } = useRecentlyViewed();
 
   useEffect(() => {
@@ -212,9 +213,13 @@ export function CommandPalette() {
 
   useEffect(() => {
     if (open) {
+      previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
       setQuery('');
       setActiveIndex(0);
       setTimeout(() => inputRef.current?.focus(), 20);
+      return () => {
+        previouslyFocusedRef.current?.focus?.();
+      };
     }
   }, [open]);
 
@@ -307,29 +312,44 @@ export function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[14vh] px-4"
       onClick={() => setOpen(false)}
     >
       <div
-        className="absolute inset-0 backdrop-blur-sm"
-        style={{ background: 'rgba(0,0,0,0.6)' }}
+        className="absolute inset-0 backdrop-blur-md"
+        style={{ background: 'rgba(3, 3, 8, 0.72)' }}
       />
       <div
-        className="relative w-full max-w-xl rounded-2xl overflow-hidden border border-white/10 shadow-2xl"
-        style={{ background: 'rgba(15, 15, 17, 0.98)' }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        className="relative w-full max-w-xl rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
+          boxShadow:
+            '0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-          <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
+          <Search className="w-4 h-4 text-zinc-500 shrink-0" strokeWidth={1.75} />
           <input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Search listings, jump to pages…"
-            className="flex-1 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+            className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-600 focus:outline-none tracking-[0.005em]"
           />
-          <kbd className="text-[10px] text-zinc-600 border border-zinc-700/60 rounded px-1.5 py-0.5">
+          <kbd className="text-[10px] font-medium text-zinc-500 border border-white/10 bg-white/[0.03] rounded px-1.5 py-0.5 leading-none">
             Esc
           </kbd>
         </div>
