@@ -1436,7 +1436,7 @@ function AgentCard({
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <Link href={`/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">
+          <Link href={`/market/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">
             View
           </Link>
           <button
@@ -1736,7 +1736,7 @@ function MyAgentCard({
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <Link
-            href={`/agents/${listing.id}`}
+            href={`/market/agents/${listing.id}`}
             className="text-xs font-mono px-2.5 py-1.5 rounded-lg text-zinc-500 border border-dashed border-zinc-700/40 hover:text-zinc-300 hover:border-zinc-600/60 transition-all"
           >
             view
@@ -4363,6 +4363,24 @@ function AgentsPageContent() {
     if (tab === 'mine') setActiveTab('mine');
     else setActiveTab('market');
   }, [searchParams]);
+
+  // Open negotiation modal when detail page redirects with ?negotiate=id
+  useEffect(() => {
+    const negotiateId = searchParams.get('negotiate');
+    if (!negotiateId || !isAuthenticated) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await api.get<MarketListing>(`/market/${negotiateId}`);
+        if (!cancelled) setNegotiatingListing(data);
+      } catch {
+        /* listing missing — ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, isAuthenticated]);
 
   const fetchListings = useCallback(async () => {
     setLoading(true);

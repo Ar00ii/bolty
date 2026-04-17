@@ -1,0 +1,550 @@
+'use client';
+
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Bot,
+  ChevronRight,
+  Clock,
+  Copy,
+  ExternalLink,
+  FileText,
+  GitBranch,
+  MessageSquare,
+  Package,
+  Play,
+  Shield,
+  Tag,
+  Terminal,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { api, ApiError } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+interface MarketListing {
+  id: string;
+  createdAt: string;
+  title: string;
+  description: string;
+  type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+  price: number;
+  currency: string;
+  minPrice?: number | null;
+  tags: string[];
+  status: string;
+  agentUrl?: string | null;
+  agentEndpoint?: string | null;
+  fileKey?: string | null;
+  fileName?: string | null;
+  fileSize?: number | null;
+  seller: {
+    id: string;
+    username: string | null;
+    avatarUrl: string | null;
+    walletAddress?: string | null;
+  };
+  repository?: {
+    id: string;
+    name: string;
+    githubUrl: string;
+    language: string | null;
+    stars: number;
+  } | null;
+}
+
+interface AgentPost {
+  id: string;
+  createdAt: string;
+  content: string;
+  postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL';
+  price: number | null;
+  currency: string | null;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const TYPE_META: Record<
+  MarketListing['type'],
+  {
+    label: string;
+    color: string;
+    Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  }
+> = {
+  AI_AGENT: { label: 'AI Agent', color: '#a855f7', Icon: Bot },
+  BOT: { label: 'Bot', color: '#836EF9', Icon: Bot },
+  SCRIPT: { label: 'Script', color: '#06B6D4', Icon: Zap },
+  REPO: { label: 'Repo', color: '#3b82f6', Icon: GitBranch },
+  OTHER: { label: 'Other', color: '#64748b', Icon: Package },
+};
+
+const POST_META: Record<
+  AgentPost['postType'],
+  { label: string; tone: string }
+> = {
+  GENERAL: { label: 'Update', tone: 'text-zinc-400 bg-zinc-800/60' },
+  PRICE_UPDATE: { label: 'Price', tone: 'text-amber-300 bg-amber-400/10' },
+  ANNOUNCEMENT: { label: 'Announcement', tone: 'text-violet-300 bg-violet-400/10' },
+  DEAL: { label: 'Deal', tone: 'text-emerald-300 bg-emerald-400/10' },
+};
+
+function timeAgo(d: string) {
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function formatBytes(b: number) {
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function shortenAddress(addr: string) {
+  if (addr.length < 10) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────────
+
+export default function AgentDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  const [listing, setListing] = useState<MarketListing | null>(null);
+  const [posts, setPosts] = useState<AgentPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await api.get<MarketListing>(`/market/${id}`);
+      setListing(data);
+      const postsData = await api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => []);
+      setPosts(postsData || []);
+    } catch (err) {
+      if (err instanceof ApiError) setNotFound(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleNegotiate = () => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+    router.push(`/market/agents?negotiate=${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (notFound || !listing) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        style={{ background: '#000' }}
+      >
+        <p className="text-6xl font-mono text-zinc-800">404</p>
+        <p className="text-zinc-400">Listing not found</p>
+        <Link
+          href="/market"
+          className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to marketplace
+        </Link>
+      </div>
+    );
+  }
+
+  const meta = TYPE_META[listing.type] ?? TYPE_META.OTHER;
+  const TypeIcon = meta.Icon;
+  const isFree = listing.price === 0;
+
+  return (
+    <div className="min-h-screen" style={{ background: '#000' }}>
+      {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
+      <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-black/70">
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 text-xs text-zinc-500">
+          <Link href="/market" className="hover:text-zinc-200 transition-colors">
+            Marketplace
+          </Link>
+          <ChevronRight className="w-3 h-3 text-zinc-700" />
+          <Link href="/market/agents" className="hover:text-zinc-200 transition-colors">
+            Agents
+          </Link>
+          <ChevronRight className="w-3 h-3 text-zinc-700" />
+          <span className="text-zinc-300 truncate max-w-md">{listing.title}</span>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* ── Hero ──────────────────────────────────────────────────────────── */}
+        <header className="mb-10">
+          <div className="flex items-start gap-5 flex-wrap">
+            <div
+              className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+              style={{
+                background: `${meta.color}14`,
+                border: `1px solid ${meta.color}33`,
+              }}
+            >
+              <TypeIcon className="w-6 h-6" style={{ color: meta.color }} />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+                <span style={{ color: meta.color }}>{meta.label}</span>
+                {listing.agentEndpoint && (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live endpoint
+                    </span>
+                  </>
+                )}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight">
+                {listing.title}
+              </h1>
+              <div className="flex items-center gap-3 mt-3 text-sm text-zinc-400">
+                <Link
+                  href={`/u/${listing.seller.username || listing.seller.id}`}
+                  className="inline-flex items-center gap-2 hover:text-white transition-colors"
+                >
+                  {listing.seller.avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={listing.seller.avatarUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-400">
+                      {(listing.seller.username || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span>@{listing.seller.username || 'anonymous'}</span>
+                </Link>
+                <span className="text-zinc-700">·</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" /> Published {timeAgo(listing.createdAt)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleNegotiate}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                {isFree ? 'Get it' : 'Negotiate'}
+              </button>
+            </div>
+          </div>
+
+          {/* Tags */}
+          {listing.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-5 ml-[76px]">
+              {listing.tags.map((t) => (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs text-zinc-400 bg-white/[0.03] border border-white/[0.06]"
+                >
+                  <Tag className="w-2.5 h-2.5 text-zinc-600" />
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </header>
+
+        {/* ── Body: 2-col grid ──────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          {/* LEFT — main content */}
+          <main className="space-y-8 min-w-0">
+            <Section title="About" icon={FileText}>
+              {listing.description ? (
+                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                  {listing.description}
+                </p>
+              ) : (
+                <p className="text-sm text-zinc-500 italic">
+                  No description provided by the seller.
+                </p>
+              )}
+            </Section>
+
+            <Section title="Live demo" icon={Play}>
+              <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
+                <Terminal className="w-8 h-8 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
+                <p className="text-sm text-zinc-400 mb-1">Interactive playground coming soon</p>
+                <p className="text-xs text-zinc-600">
+                  Send an input, see the response — right from this page.
+                </p>
+              </div>
+            </Section>
+
+            <Section title={`Activity (${posts.length})`} icon={TrendingUp}>
+              {posts.length === 0 ? (
+                <p className="text-sm text-zinc-500 italic">
+                  No updates from the seller yet. Check back later.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {posts.slice(0, 10).map((p) => {
+                    const pm = POST_META[p.postType] ?? POST_META.GENERAL;
+                    return (
+                      <article
+                        key={p.id}
+                        className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4"
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span
+                            className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded ${pm.tone}`}
+                          >
+                            {pm.label}
+                          </span>
+                          <span className="text-[11px] text-zinc-600">{timeAgo(p.createdAt)}</span>
+                        </div>
+                        <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                          {p.content}
+                        </p>
+                        {p.postType === 'PRICE_UPDATE' && p.price != null && (
+                          <p className="mt-2 text-xs font-mono text-amber-300">
+                            New price: {p.price} {p.currency || ''}
+                          </p>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </Section>
+          </main>
+
+          {/* RIGHT — sidebar */}
+          <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+            <PricingCard listing={listing} onNegotiate={handleNegotiate} />
+            <SellerCard seller={listing.seller} />
+            <MetaCard listing={listing} />
+            {listing.repository && <RepositoryCard repo={listing.repository} />}
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sections ───────────────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/[0.06]">
+        <Icon className="w-4 h-4 text-zinc-500" />
+        <h2 className="text-sm font-medium text-zinc-200 tracking-wide">{title}</h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function PricingCard({
+  listing,
+  onNegotiate,
+}: {
+  listing: MarketListing;
+  onNegotiate: () => void;
+}) {
+  const isFree = listing.price === 0;
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-2">Price</p>
+      {isFree ? (
+        <p className="text-3xl font-medium text-emerald-400">Free</p>
+      ) : (
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-medium text-white tabular-nums">{listing.price}</p>
+          <p className="text-sm text-zinc-500">{listing.currency}</p>
+        </div>
+      )}
+      {listing.minPrice != null && listing.minPrice > 0 && (
+        <p className="text-xs text-zinc-500 mt-1">
+          Floor · {listing.minPrice} {listing.currency}
+        </p>
+      )}
+      <button
+        onClick={onNegotiate}
+        className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium transition-colors"
+      >
+        <MessageSquare className="w-4 h-4" />
+        {isFree ? 'Get it' : 'Negotiate with seller'}
+      </button>
+      <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
+        Payment held in escrow until you approve delivery.
+      </p>
+    </div>
+  );
+}
+
+function SellerCard({ seller }: { seller: MarketListing['seller'] }) {
+  const [copied, setCopied] = useState(false);
+  const copyWallet = async () => {
+    if (!seller.walletAddress) return;
+    await navigator.clipboard.writeText(seller.walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">Seller</p>
+      <div className="flex items-center gap-3">
+        {seller.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={seller.avatarUrl}
+            alt=""
+            className="w-10 h-10 rounded-full object-cover border border-white/10"
+          />
+        ) : (
+          <div className="w-10 h-10 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-sm text-zinc-300">
+            {(seller.username || 'A').charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white truncate">
+            @{seller.username || 'anonymous'}
+          </p>
+          <Link
+            href={`/u/${seller.username || seller.id}`}
+            className="text-xs text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-1"
+          >
+            View profile <ArrowUpRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+      {seller.walletAddress && (
+        <button
+          onClick={copyWallet}
+          className="w-full mt-3 inline-flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-black/40 border border-white/[0.06] hover:border-white/15 transition-colors group"
+          title={seller.walletAddress}
+        >
+          <span className="text-[11px] font-mono text-zinc-500 group-hover:text-zinc-300">
+            {shortenAddress(seller.walletAddress)}
+          </span>
+          <Copy className="w-3 h-3 text-zinc-600 group-hover:text-zinc-300" />
+          {copied && <span className="text-[10px] text-emerald-400">copied</span>}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function MetaCard({ listing }: { listing: MarketListing }) {
+  const meta = useMemo(
+    () => [
+      { label: 'Type', value: TYPE_META[listing.type]?.label || 'Other' },
+      { label: 'Status', value: listing.status.toLowerCase() },
+      listing.agentEndpoint
+        ? { label: 'Endpoint', value: 'configured', tone: 'emerald' as const }
+        : null,
+      listing.fileKey && listing.fileName
+        ? {
+            label: 'File',
+            value: `${listing.fileName}${listing.fileSize ? ` · ${formatBytes(listing.fileSize)}` : ''}`,
+          }
+        : null,
+      { label: 'Listing ID', value: listing.id.slice(0, 8), mono: true },
+    ],
+    [listing],
+  );
+
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">Details</p>
+      <dl className="space-y-2">
+        {meta.filter(Boolean).map((row) => {
+          if (!row) return null;
+          return (
+            <div
+              key={row.label}
+              className="flex items-center justify-between gap-2 text-xs"
+            >
+              <dt className="text-zinc-500">{row.label}</dt>
+              <dd
+                className={`${row.mono ? 'font-mono' : ''} ${
+                  row.tone === 'emerald' ? 'text-emerald-300' : 'text-zinc-300'
+                } truncate`}
+              >
+                {row.value}
+              </dd>
+            </div>
+          );
+        })}
+      </dl>
+      <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center gap-1.5 text-[11px] text-zinc-500">
+        <Shield className="w-3 h-3 text-zinc-600" />
+        Sales protected by on-chain escrow
+      </div>
+    </div>
+  );
+}
+
+function RepositoryCard({
+  repo,
+}: {
+  repo: NonNullable<MarketListing['repository']>;
+}) {
+  return (
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
+      <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">Repository</p>
+      <div className="flex items-center gap-2 mb-2">
+        <GitBranch className="w-4 h-4 text-blue-400" />
+        <p className="text-sm font-medium text-white truncate">{repo.name}</p>
+      </div>
+      {repo.language && <p className="text-xs text-zinc-500 mb-3">{repo.language}</p>}
+      <a
+        href={repo.githubUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 hover:border-white/20 text-xs text-zinc-300 transition-colors"
+      >
+        <ExternalLink className="w-3 h-3" /> Open on GitHub
+      </a>
+    </div>
+  );
+}
