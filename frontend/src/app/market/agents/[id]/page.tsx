@@ -85,10 +85,7 @@ const TYPE_META: Record<
   OTHER: { label: 'Other', color: '#64748b', Icon: Package },
 };
 
-const POST_META: Record<
-  AgentPost['postType'],
-  { label: string; tone: string }
-> = {
+const POST_META: Record<AgentPost['postType'], { label: string; tone: string }> = {
   GENERAL: { label: 'Update', tone: 'text-zinc-400 bg-zinc-800/60' },
   PRICE_UPDATE: { label: 'Price', tone: 'text-amber-300 bg-amber-400/10' },
   ANNOUNCEMENT: { label: 'Announcement', tone: 'text-violet-300 bg-violet-400/10' },
@@ -237,7 +234,6 @@ export default function AgentDetailPage() {
                   className="inline-flex items-center gap-2 hover:text-white transition-colors"
                 >
                   {listing.seller.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={listing.seller.avatarUrl}
                       alt=""
@@ -335,7 +331,7 @@ export default function AgentDetailPage() {
                         <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
                           {p.content}
                         </p>
-                        {p.postType === 'PRICE_UPDATE' && p.price != null && (
+                        {p.postType === 'PRICE_UPDATE' && p.price !== null && p.price !== undefined && (
                           <p className="mt-2 text-xs font-mono text-amber-300">
                             New price: {p.price} {p.currency || ''}
                           </p>
@@ -402,7 +398,7 @@ function PricingCard({
           <p className="text-sm text-zinc-500">{listing.currency}</p>
         </div>
       )}
-      {listing.minPrice != null && listing.minPrice > 0 && (
+      {listing.minPrice !== null && listing.minPrice !== undefined && listing.minPrice > 0 && (
         <p className="text-xs text-zinc-500 mt-1">
           Floor · {listing.minPrice} {listing.currency}
         </p>
@@ -434,7 +430,6 @@ function SellerCard({ seller }: { seller: MarketListing['seller'] }) {
       <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">Seller</p>
       <div className="flex items-center gap-3">
         {seller.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={seller.avatarUrl}
             alt=""
@@ -500,10 +495,7 @@ function MetaCard({ listing }: { listing: MarketListing }) {
         {meta.filter(Boolean).map((row) => {
           if (!row) return null;
           return (
-            <div
-              key={row.label}
-              className="flex items-center justify-between gap-2 text-xs"
-            >
+            <div key={row.label} className="flex items-center justify-between gap-2 text-xs">
               <dt className="text-zinc-500">{row.label}</dt>
               <dd
                 className={`${row.mono ? 'font-mono' : ''} ${
@@ -524,11 +516,7 @@ function MetaCard({ listing }: { listing: MarketListing }) {
   );
 }
 
-function RepositoryCard({
-  repo,
-}: {
-  repo: NonNullable<MarketListing['repository']>;
-}) {
+function RepositoryCard({ repo }: { repo: NonNullable<MarketListing['repository']> }) {
   return (
     <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-5">
       <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-500 mb-3">Repository</p>

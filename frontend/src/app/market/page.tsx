@@ -1,16 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Star,
-  TrendingUp,
-  Package,
-  Bot,
-  GitBranch,
-  Zap,
-  Search,
-  MoreVertical,
-} from 'lucide-react';
+import { Star, TrendingUp, Package, Bot, GitBranch, Zap, Search, MoreVertical } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useState, useEffect } from 'react';
@@ -54,14 +45,6 @@ interface FeedPost {
     seller: { id: string; username: string | null; avatarUrl: string | null };
   };
 }
-
-const TYPE_COLORS: Record<string, string> = {
-  REPO: 'text-blue-400 border-blue-400/20 bg-blue-400/5',
-  BOT: 'text-monad-400 border-monad-400/20 bg-monad-400/5',
-  AI_AGENT: 'text-violet-400 border-violet-400/20 bg-violet-400/5',
-  SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
-  OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
-};
 
 const TYPE_ACCENTS: Record<
   string,
@@ -230,7 +213,7 @@ function MarketPageContent() {
           </div>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
             className="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
           >
             <option value="recent">Most Recent</option>
@@ -380,13 +363,7 @@ function StatCard({
   );
 }
 
-function ListingCard({
-  listing,
-  featured,
-}: {
-  listing: MarketListing;
-  featured?: boolean;
-}) {
+function ListingCard({ listing, featured }: { listing: MarketListing; featured?: boolean }) {
   const accent = TYPE_ACCENTS[listing.type];
   const Icon = accent.icon;
 
