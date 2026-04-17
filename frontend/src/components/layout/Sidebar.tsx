@@ -288,6 +288,12 @@ export function Sidebar() {
                 </kbd>
               </span>
             </div>
+            <div className="flex items-center justify-between">
+              <span>Shortcuts</span>
+              <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none text-zinc-400">
+                ?
+              </kbd>
+            </div>
             <p className="text-zinc-600">© Bolty Network</p>
           </motion.div>
         </motion.aside>

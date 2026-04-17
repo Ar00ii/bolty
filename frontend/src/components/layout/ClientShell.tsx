@@ -6,6 +6,7 @@ import React, { useState, useEffect } from 'react';
 
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
+import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -30,6 +31,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <ProgressBar isLoading={isLoading} />
       <CommandPalette />
+      <ShortcutsModal />
       <FloatingTopBar />
       {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
