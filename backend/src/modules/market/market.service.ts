@@ -473,6 +473,65 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return !!purchase;
   }
 
+  async getSellerProfile(username: string) {
+    const seller = await this.prisma.user.findFirst({
+      where: { username },
+      select: {
+        id: true,
+        username: true,
+        avatarUrl: true,
+        bio: true,
+        githubLogin: true,
+        walletAddress: true,
+        twitterUrl: true,
+        linkedinUrl: true,
+        websiteUrl: true,
+        createdAt: true,
+      },
+    });
+    if (!seller) throw new NotFoundException('Seller not found');
+
+    const [listings, salesCount, reviewAgg, recentReviews] = await Promise.all([
+      this.prisma.marketListing.findMany({
+        where: { sellerId: seller.id, status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        take: 30,
+        include: {
+          repository: { select: { id: true, name: true, githubUrl: true, language: true } },
+        },
+      }),
+      this.prisma.marketPurchase.count({ where: { sellerId: seller.id } }),
+      this.prisma.marketReview.aggregate({
+        where: { listing: { sellerId: seller.id } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+      this.prisma.marketReview.findMany({
+        where: { listing: { sellerId: seller.id } },
+        orderBy: { createdAt: 'desc' },
+        take: 6,
+        include: {
+          author: { select: { id: true, username: true, avatarUrl: true } },
+          listing: { select: { id: true, title: true } },
+        },
+      }),
+    ]);
+
+    const listingsWithStats = await this.attachReviewStats(listings);
+
+    return {
+      seller,
+      listings: listingsWithStats,
+      stats: {
+        listings: listings.length,
+        salesAllTime: salesCount,
+        avgRating: reviewAgg._avg.rating ? Number(reviewAgg._avg.rating.toFixed(2)) : null,
+        reviewCount: reviewAgg._count._all,
+      },
+      recentReviews,
+    };
+  }
+
   async getMyLibrary(buyerId: string) {
     const purchases = await this.prisma.marketPurchase.findMany({
       where: { buyerId },

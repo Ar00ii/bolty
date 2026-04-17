@@ -817,12 +817,22 @@ function SellerCard({ seller }: { seller: MarketListing['seller'] }) {
           <p className="text-sm font-medium text-white truncate">
             @{seller.username || 'anonymous'}
           </p>
-          <Link
-            href={`/u/${seller.username || seller.id}`}
-            className="text-xs text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-1"
-          >
-            View profile <ArrowUpRight className="w-3 h-3" />
-          </Link>
+          <div className="flex items-center gap-3 mt-0.5">
+            {seller.username && (
+              <Link
+                href={`/market/sellers/${seller.username}`}
+                className="text-xs text-purple-300 hover:text-purple-200 inline-flex items-center gap-1"
+              >
+                Storefront <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            )}
+            <Link
+              href={`/u/${seller.username || seller.id}`}
+              className="text-xs text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-1"
+            >
+              Profile <ArrowUpRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </div>
       {seller.walletAddress && (

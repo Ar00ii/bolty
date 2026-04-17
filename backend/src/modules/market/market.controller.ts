@@ -254,6 +254,12 @@ export class MarketController {
   }
 
   @Public()
+  @Get('sellers/:username')
+  getSellerProfile(@Param('username') username: string) {
+    return this.marketService.getSellerProfile(username);
+  }
+
+  @Public()
   @Get(':id')
   getListing(@Param('id') id: string) {
     return this.marketService.getListing(id);
