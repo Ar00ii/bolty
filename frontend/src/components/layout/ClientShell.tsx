@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
+import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
@@ -33,6 +34,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <CommandPalette />
       <ShortcutsModal />
       <FloatingTopBar />
+      {!isAuth && <BackToTop />}
       {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
 

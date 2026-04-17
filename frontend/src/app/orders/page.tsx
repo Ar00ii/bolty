@@ -328,15 +328,15 @@ export default function OrdersPage() {
       {/* Search */}
       {baseOrders.length > 0 && (
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
           <input
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, counterparty, or order id… (press /)"
-            className="w-full pl-9 pr-9 py-2 text-sm rounded-lg bg-white/[0.04] border border-white/10 focus:border-white/20 focus:outline-none text-white placeholder-zinc-600 font-light"
+            placeholder="Search by title, counterparty, or order id"
+            className="w-full pl-9 pr-16 py-2 text-sm rounded-lg bg-white/[0.04] border border-white/10 focus:border-white/20 focus:outline-none text-white placeholder-zinc-600 font-light"
           />
-          {search && (
+          {search ? (
             <button
               onClick={() => setSearch('')}
               aria-label="Clear search"
@@ -344,6 +344,10 @@ export default function OrdersPage() {
             >
               <X className="w-3.5 h-3.5" />
             </button>
+          ) : (
+            <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 border border-zinc-700/60 rounded px-1.5 py-0.5">
+              /
+            </kbd>
           )}
         </div>
       )}
