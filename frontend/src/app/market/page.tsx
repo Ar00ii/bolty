@@ -385,7 +385,6 @@ function MarketPageContent() {
 
   return (
     <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
-
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
       )}
