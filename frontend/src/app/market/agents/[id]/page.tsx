@@ -10,9 +10,11 @@ import {
   ExternalLink,
   FileText,
   GitBranch,
+  Loader2,
   MessageSquare,
   Package,
   Play,
+  Send,
   Shield,
   Tag,
   Terminal,
@@ -297,13 +299,17 @@ export default function AgentDetailPage() {
             </Section>
 
             <Section title="Live demo" icon={Play}>
-              <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
-                <Terminal className="w-8 h-8 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
-                <p className="text-sm text-zinc-400 mb-1">Interactive playground coming soon</p>
-                <p className="text-xs text-zinc-600">
-                  Send an input, see the response — right from this page.
-                </p>
-              </div>
+              {listing.agentEndpoint ? (
+                <DemoWidget listingId={listing.id} />
+              ) : (
+                <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.02] p-6 text-center">
+                  <Terminal className="w-8 h-8 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
+                  <p className="text-sm text-zinc-400 mb-1">No live endpoint on this listing</p>
+                  <p className="text-xs text-zinc-600">
+                    Ask the seller to connect a webhook to enable the playground.
+                  </p>
+                </div>
+              )}
             </Section>
 
             <Section title={`Activity (${posts.length})`} icon={TrendingUp}>
@@ -376,6 +382,92 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+function DemoWidget({ listingId }: { listingId: string }) {
+  const [prompt, setPrompt] = useState('');
+  const [reply, setReply] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const canSend = prompt.trim().length > 0 && !loading;
+
+  const handleSend = async () => {
+    if (!canSend) return;
+    setLoading(true);
+    setError(null);
+    setReply(null);
+    try {
+      const data = await api.post<{ reply: string }>(`/market/${listingId}/invoke`, {
+        prompt: prompt.trim(),
+      });
+      setReply(data.reply || '');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Request failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] overflow-hidden">
+      <div className="p-4 border-b border-white/[0.06] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs text-zinc-400">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+          </span>
+          <span className="font-mono text-[11px] text-zinc-500">agent.invoke</span>
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">5 / min</span>
+      </div>
+      <div className="p-4">
+        <textarea
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value.slice(0, 1000))}
+          onKeyDown={handleKeyDown}
+          placeholder="Try a prompt — e.g. summarize this URL..."
+          rows={3}
+          className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none font-mono"
+          disabled={loading}
+        />
+        <div className="flex items-center justify-between gap-2 mt-3">
+          <p className="text-[10px] text-zinc-600 font-mono">
+            {prompt.length}/1000 · ⌘+↵ to send
+          </p>
+          <button
+            onClick={handleSend}
+            disabled={!canSend}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/[0.06] hover:bg-white/[0.1] disabled:opacity-40 disabled:cursor-not-allowed text-xs text-zinc-200 font-medium transition-colors"
+          >
+            {loading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Send className="w-3.5 h-3.5" />
+            )}
+            {loading ? 'Invoking...' : 'Run'}
+          </button>
+        </div>
+      </div>
+      {(reply !== null || error) && (
+        <div className="border-t border-white/[0.06] bg-black/20 p-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600 mb-2">
+            {error ? 'Error' : 'Response'}
+          </p>
+          <pre className="text-xs text-zinc-300 font-mono whitespace-pre-wrap break-words leading-relaxed">
+            {error || reply}
+          </pre>
+        </div>
+      )}
+    </div>
   );
 }
 

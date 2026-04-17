@@ -22,6 +22,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
 
@@ -213,6 +214,14 @@ export class MarketController {
   @Get(':id')
   getListing(@Param('id') id: string) {
     return this.marketService.getListing(id);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post(':id/invoke')
+  @HttpCode(HttpStatus.OK)
+  invokeAgent(@Param('id') id: string, @Body() body: { prompt: string }) {
+    return this.marketService.invokeAgent(id, body?.prompt || '');
   }
 
   // ── Create / delete listings ───────────────────────────────────────────────

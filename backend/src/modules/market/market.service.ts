@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import { ethers } from 'ethers';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -232,6 +233,49 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       where: { fileKey },
       select: { id: true, fileName: true, fileMimeType: true },
     });
+  }
+
+  async invokeAgent(listingId: string, prompt: string): Promise<{ reply: string }> {
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      select: { id: true, status: true, agentEndpoint: true },
+    });
+    if (!listing || listing.status === 'REMOVED') {
+      throw new NotFoundException('Listing not found');
+    }
+    if (!listing.agentEndpoint || !isSafeUrl(listing.agentEndpoint)) {
+      throw new BadRequestException('This listing has no live endpoint');
+    }
+    const cleanPrompt = String(prompt || '').trim().slice(0, 1000);
+    if (!cleanPrompt) {
+      throw new BadRequestException('Prompt required');
+    }
+    try {
+      const resp = await axios.post(
+        listing.agentEndpoint,
+        { event: 'demo_invoke', prompt: cleanPrompt },
+        {
+          timeout: 10000,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Bolty-Event': 'demo_invoke',
+          },
+          maxBodyLength: 8192,
+          maxContentLength: 8192,
+        },
+      );
+      const raw = resp.data;
+      const reply =
+        typeof raw === 'string'
+          ? raw
+          : String(raw?.reply ?? raw?.output ?? raw?.message ?? '');
+      const trimmed = reply.trim();
+      return { reply: trimmed ? trimmed.slice(0, 4000) : 'Agent responded with no content.' };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Demo invoke failed for ${listingId}: ${msg}`);
+      throw new BadRequestException('Agent endpoint did not respond. Try again later.');
+    }
   }
 
   async userHasPurchasedListing(listingId: string, buyerId: string): Promise<boolean> {
