@@ -214,7 +214,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           ? { price: 'desc' as const }
           : { createdAt: 'desc' as const };
 
-    const [data, total] = await Promise.all([
+    const [rawListings, total] = await Promise.all([
       this.prisma.marketListing.findMany({
         where,
         skip,
@@ -228,7 +228,27 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.marketListing.count({ where }),
     ]);
 
+    const data = await this.attachReviewStats(rawListings);
     return { data, total, page, pages: Math.ceil(total / take) };
+  }
+
+  private async attachReviewStats<T extends { id: string }>(listings: T[]) {
+    if (listings.length === 0) return listings;
+    const stats = await this.prisma.marketReview.groupBy({
+      by: ['listingId'],
+      where: { listingId: { in: listings.map((l) => l.id) } },
+      _avg: { rating: true },
+      _count: { _all: true },
+    });
+    const byId = new Map(stats.map((s) => [s.listingId, s]));
+    return listings.map((l) => {
+      const s = byId.get(l.id);
+      return {
+        ...l,
+        reviewAverage: s?._avg.rating ? Number(s._avg.rating.toFixed(2)) : null,
+        reviewCount: s?._count._all ?? 0,
+      };
+    });
   }
 
   private async getTrendingListings(
@@ -277,7 +297,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         return b.listing.createdAt.getTime() - a.listing.createdAt.getTime();
       });
 
-    const data = ranked.slice(skip, skip + take).map((r) => r.listing);
+    const data = await this.attachReviewStats(
+      ranked.slice(skip, skip + take).map((r) => r.listing),
+    );
 
     return { data, total, page, pages: Math.ceil(total / take) };
   }
@@ -293,7 +315,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       },
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
-    return listing;
+    const agg = await this.prisma.marketReview.aggregate({
+      where: { listingId: id },
+      _avg: { rating: true },
+      _count: { _all: true },
+    });
+    return {
+      ...listing,
+      reviewAverage: agg._avg.rating ? Number(agg._avg.rating.toFixed(2)) : null,
+      reviewCount: agg._count._all,
+    };
   }
 
   async getListingByFileKey(fileKey: string) {
@@ -351,6 +382,73 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       where: { listingId, buyerId },
     });
     return !!purchase;
+  }
+
+  // ── Reviews ────────────────────────────────────────────────────────────────
+
+  async createReview(listingId: string, authorId: string, rating: number, content?: string | null) {
+    const r = Math.round(Number(rating));
+    if (!Number.isFinite(r) || r < 1 || r > 5) {
+      throw new BadRequestException('Rating must be between 1 and 5');
+    }
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      select: { id: true, sellerId: true, status: true },
+    });
+    if (!listing || listing.status === 'REMOVED') {
+      throw new NotFoundException('Listing not found');
+    }
+    if (listing.sellerId === authorId) {
+      throw new BadRequestException('Sellers cannot review their own listing');
+    }
+    const hasPurchased = await this.userHasPurchasedListing(listingId, authorId);
+    if (!hasPurchased) {
+      throw new ForbiddenException('Only buyers can review a listing');
+    }
+    const cleanContent = content ? sanitizeText(content).slice(0, 2000) : null;
+
+    return this.prisma.marketReview.upsert({
+      where: { listingId_authorId: { listingId, authorId } },
+      create: { listingId, authorId, rating: r, content: cleanContent },
+      update: { rating: r, content: cleanContent },
+      include: {
+        author: { select: { id: true, username: true, avatarUrl: true } },
+      },
+    });
+  }
+
+  async getReviews(listingId: string) {
+    const [reviews, agg] = await Promise.all([
+      this.prisma.marketReview.findMany({
+        where: { listingId },
+        orderBy: { createdAt: 'desc' },
+        take: 50,
+        include: {
+          author: { select: { id: true, username: true, avatarUrl: true } },
+        },
+      }),
+      this.prisma.marketReview.aggregate({
+        where: { listingId },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+    ]);
+    return {
+      reviews,
+      average: agg._avg.rating ? Number(agg._avg.rating.toFixed(2)) : null,
+      count: agg._count._all,
+    };
+  }
+
+  async deleteReview(reviewId: string, userId: string) {
+    const review = await this.prisma.marketReview.findUnique({
+      where: { id: reviewId },
+      select: { id: true, authorId: true },
+    });
+    if (!review) throw new NotFoundException('Review not found');
+    if (review.authorId !== userId) throw new ForbiddenException('Not your review');
+    await this.prisma.marketReview.delete({ where: { id: reviewId } });
+    return { ok: true };
   }
 
   async purchaseListing(

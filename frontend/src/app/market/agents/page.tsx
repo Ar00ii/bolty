@@ -22,6 +22,7 @@ import {
   Terminal,
   ArrowUpRight,
   CheckCircle2,
+  Star,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -57,6 +58,8 @@ interface MarketListing {
   fileSize?: number | null;
   fileMimeType?: string | null;
   seller: { id: string; username: string | null; avatarUrl: string | null };
+  reviewAverage?: number | null;
+  reviewCount?: number;
 }
 
 interface ApiKeyInfo {
@@ -1400,6 +1403,19 @@ function AgentCard({
       <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-3 flex-1">
         {listing.description || 'No description provided.'}
       </p>
+
+      {/* Rating */}
+      {listing.reviewAverage !== null &&
+        listing.reviewAverage !== undefined &&
+        (listing.reviewCount ?? 0) > 0 && (
+          <div className="inline-flex items-center gap-1 text-[11px] text-zinc-400 mb-3">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            <span className="font-medium">{listing.reviewAverage.toFixed(1)}</span>
+            <span className="text-zinc-600">
+              ({listing.reviewCount} review{listing.reviewCount === 1 ? '' : 's'})
+            </span>
+          </div>
+        )}
 
       {/* Tags */}
       {listing.tags.length > 0 && (

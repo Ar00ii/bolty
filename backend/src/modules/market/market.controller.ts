@@ -234,6 +234,30 @@ export class MarketController {
     return this.marketService.invokeAgent(id, body?.prompt || '');
   }
 
+  // ── Reviews ────────────────────────────────────────────────────────────────
+
+  @Public()
+  @Get(':id/reviews')
+  getReviews(@Param('id') id: string) {
+    return this.marketService.getReviews(id);
+  }
+
+  @Post(':id/reviews')
+  @HttpCode(HttpStatus.CREATED)
+  createReview(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { rating: number; content?: string | null },
+  ) {
+    return this.marketService.createReview(id, userId, body?.rating, body?.content);
+  }
+
+  @Delete('reviews/:reviewId')
+  @HttpCode(HttpStatus.OK)
+  deleteReview(@Param('reviewId') reviewId: string, @CurrentUser('id') userId: string) {
+    return this.marketService.deleteReview(reviewId, userId);
+  }
+
   // ── Create / delete listings ───────────────────────────────────────────────
 
   @Post('upload')

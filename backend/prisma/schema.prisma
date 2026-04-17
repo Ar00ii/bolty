@@ -14,52 +14,52 @@ datasource db {
 // ─── Users ───────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Identity
-  username      String?   @unique
-  avatarUrl     String?
-  bio           String?   @db.Text
-  gender        String?
-  occupation    String?
+  username   String? @unique
+  avatarUrl  String?
+  bio        String? @db.Text
+  gender     String?
+  occupation String?
 
   // Email / Password auth
-  email            String?   @unique
+  email            String? @unique
   passwordHash     String?
-  twoFactorEnabled Boolean   @default(false)
-  twoFactorSecret  String?   // TOTP secret for Authenticator apps
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String? // TOTP secret for Authenticator apps
 
   // GitHub OAuth
-  githubId      String?   @unique
-  githubLogin   String?
-  githubToken   String?   // encrypted
+  githubId    String? @unique
+  githubLogin String?
+  githubToken String? // encrypted
 
   // Wallet addresses
-  walletAddress String?   @unique  // Ethereum (MetaMask)
-  walletNonce   String?            // current nonce for wallet auth
-  nonceExpiry   DateTime?          // nonce expiration
+  walletAddress String?   @unique // Ethereum (MetaMask)
+  walletNonce   String? // current nonce for wallet auth
+  nonceExpiry   DateTime? // nonce expiration
 
   // Sessions
-  refreshToken  String?
-  lastLoginAt   DateTime?
-  lastLoginIp   String?
+  refreshToken String?
+  lastLoginAt  DateTime?
+  lastLoginIp  String?
 
   // Profile
-  displayName   String?
-  twitterUrl    String?
-  linkedinUrl   String?
-  websiteUrl    String?
-  profileSetup  Boolean   @default(false)
+  displayName  String?
+  twitterUrl   String?
+  linkedinUrl  String?
+  websiteUrl   String?
+  profileSetup Boolean @default(false)
 
   // Short numeric tag for finding friends (e.g. #4821)
-  userTag       String?   @unique
+  userTag String? @unique
 
   // Roles & Status
-  role          UserRole  @default(USER)
-  isBanned      Boolean   @default(false)
-  banReason     String?
+  role      UserRole @default(USER)
+  isBanned  Boolean  @default(false)
+  banReason String?
 
   // Reputation
   reputationPoints Int @default(0)
@@ -68,22 +68,23 @@ model User {
   agentEndpoint String?
 
   // Relations
-  messages       ChatMessage[]
-  repositories   Repository[]
-  votes          Vote[]
-  reports        Report[]
-  aiSessions     AiSession[]
-  auditLogs      AuditLog[]
-  sentDMs        DirectMessage[]  @relation("SentDMs")
-  receivedDMs    DirectMessage[]  @relation("ReceivedDMs")
-  marketListings      MarketListing[]      @relation("MarketSeller")
-  purchasesMade       RepoPurchase[]       @relation("Buyer")
-  marketPurchasesMade MarketPurchase[]     @relation("MarketBuyer")
-  marketSales         MarketPurchase[]     @relation("OrderSeller")
-  orderMessagesSent   OrderMessage[]       @relation("OrderMessageSender")
-  buyerNegotiations   AgentNegotiation[]   @relation("NegotiationBuyer")
-  sentFriendRequests     Friendship[]  @relation("FriendSent")
-  receivedFriendRequests Friendship[]  @relation("FriendReceived")
+  messages               ChatMessage[]
+  repositories           Repository[]
+  votes                  Vote[]
+  reports                Report[]
+  aiSessions             AiSession[]
+  auditLogs              AuditLog[]
+  sentDMs                DirectMessage[]         @relation("SentDMs")
+  receivedDMs            DirectMessage[]         @relation("ReceivedDMs")
+  marketListings         MarketListing[]         @relation("MarketSeller")
+  purchasesMade          RepoPurchase[]          @relation("Buyer")
+  marketPurchasesMade    MarketPurchase[]        @relation("MarketBuyer")
+  marketSales            MarketPurchase[]        @relation("OrderSeller")
+  marketReviews          MarketReview[]          @relation("MarketReviewAuthor")
+  orderMessagesSent      OrderMessage[]          @relation("OrderMessageSender")
+  buyerNegotiations      AgentNegotiation[]      @relation("NegotiationBuyer")
+  sentFriendRequests     Friendship[]            @relation("FriendSent")
+  receivedFriendRequests Friendship[]            @relation("FriendReceived")
   reputationEvents       ReputationEvent[]
   repoCollaborations     RepoCollaborator[]
   serviceListings        ServiceListing[]
@@ -106,18 +107,18 @@ enum UserRole {
 // ─── Chat ────────────────────────────────────────────────────────────────────
 
 model ChatMessage {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  content     String    @db.Text  // sanitized
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content String @db.Text // sanitized
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  isDeleted   Boolean   @default(false)
-  deletedAt   DateTime?
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
   deleteReason String?
 
-  reports     Report[]
+  reports Report[]
 
   @@index([userId, createdAt])
   @@map("chat_messages")
@@ -126,37 +127,37 @@ model ChatMessage {
 // ─── Repositories ────────────────────────────────────────────────────────────
 
 model Repository {
-  id            String    @id @default(cuid())
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // GitHub data
-  githubRepoId  String    @unique
-  name          String
-  fullName      String
-  description   String?   @db.Text
-  language      String?
-  stars         Int       @default(0)
-  forks         Int       @default(0)
-  githubUrl     String
-  cloneUrl      String
-  topics        String[]
-  isPrivate     Boolean   @default(false)
+  githubRepoId String   @unique
+  name         String
+  fullName     String
+  description  String?  @db.Text
+  language     String?
+  stars        Int      @default(0)
+  forks        Int      @default(0)
+  githubUrl    String
+  cloneUrl     String
+  topics       String[]
+  isPrivate    Boolean  @default(false)
 
   // Platform data
   userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  featured      Boolean   @default(false)
-  downloadCount Int       @default(0)
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  featured      Boolean @default(false)
+  downloadCount Int     @default(0)
 
   // Locked repo / monetization
-  isLocked      Boolean   @default(false)
+  isLocked       Boolean @default(false)
   lockedPriceUsd Float?
 
   // Publisher branding
-  logoUrl        String?
-  websiteUrl     String?
-  twitterUrl     String?
+  logoUrl    String?
+  websiteUrl String?
+  twitterUrl String?
 
   votes          Vote[]
   marketListings MarketListing[]
@@ -169,23 +170,23 @@ model Repository {
 // ─── Repo Purchases (locked repo payments) ───────────────────────────────────
 
 model RepoPurchase {
-  id           String     @id @default(cuid())
-  createdAt    DateTime   @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  txHash       String     @unique          // Ethereum tx hash (seller payment, 97.5%)
-  verified     Boolean    @default(false)
-  amountWei    String     @default("0")    // stored as string to avoid precision loss
+  txHash    String  @unique // Ethereum tx hash (seller payment, 97.5%)
+  verified  Boolean @default(false)
+  amountWei String  @default("0") // stored as string to avoid precision loss
 
   // Platform commission (2.5%)
-  platformFeeTxHash String?              // Bolty commission tx hash
-  platformFeeWei    String?              // commission amount in wei
+  platformFeeTxHash String? // Bolty commission tx hash
+  platformFeeWei    String? // commission amount in wei
 
   // Consent document (EIP-191 signed)
-  consentSignature  String?  @db.Text    // buyer's personal_sign signature
-  consentMessage    String?  @db.Text    // exact message that was signed
+  consentSignature String? @db.Text // buyer's personal_sign signature
+  consentMessage   String? @db.Text // exact message that was signed
 
-  buyerId      String
-  buyer        User       @relation("Buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId String
+  buyer   User   @relation("Buyer", fields: [buyerId], references: [id], onDelete: Cascade)
 
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
@@ -197,46 +198,46 @@ model RepoPurchase {
 // ─── Market Purchases / Orders (agent/listing payments) ──────────────────────
 
 model MarketPurchase {
-  id            String        @id @default(cuid())
-  createdAt     DateTime      @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  txHash        String        @unique       // escrow deposit tx (or legacy direct payment)
-  amountWei     String        @default("0")
-  verified      Boolean       @default(false)
+  txHash    String  @unique // escrow deposit tx (or legacy direct payment)
+  amountWei String  @default("0")
+  verified  Boolean @default(false)
 
   // Platform commission (2.5%)
   platformFeeTxHash String?
   platformFeeWei    String?
 
   // Consent document (EIP-191 signed)
-  consentSignature  String?   @db.Text
-  consentMessage    String?   @db.Text
+  consentSignature String? @db.Text
+  consentMessage   String? @db.Text
 
   // Escrow fields
-  escrowContract    String?               // escrow contract address used
-  escrowStatus      EscrowStatus @default(NONE)
-  escrowReleaseTx   String?               // tx hash of release/refund
-  escrowDisputedAt  DateTime?
-  escrowResolvedAt  DateTime?
+  escrowContract   String? // escrow contract address used
+  escrowStatus     EscrowStatus @default(NONE)
+  escrowReleaseTx  String? // tx hash of release/refund
+  escrowDisputedAt DateTime?
+  escrowResolvedAt DateTime?
 
   // Order lifecycle
-  status        OrderStatus   @default(PENDING_DELIVERY)
-  deliveryNote  String?       @db.Text
-  completedAt   DateTime?
+  status       OrderStatus @default(PENDING_DELIVERY)
+  deliveryNote String?     @db.Text
+  completedAt  DateTime?
 
-  buyerId       String
-  buyer         User          @relation("MarketBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  buyerId String
+  buyer   User   @relation("MarketBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
 
   // Denormalized seller for fast seller-side order queries
-  sellerId      String
-  seller        User          @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId String
+  seller   User   @relation("OrderSeller", fields: [sellerId], references: [id], onDelete: Cascade)
 
-  listingId     String
-  listing       MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   negotiationId String?
 
-  messages      OrderMessage[]
+  messages OrderMessage[]
 
   @@index([buyerId, listingId])
   @@index([sellerId, status])
@@ -244,12 +245,12 @@ model MarketPurchase {
 }
 
 enum EscrowStatus {
-  NONE       // legacy direct payment (no escrow)
-  FUNDED     // ETH locked in escrow contract
-  RELEASED   // funds released to seller
-  DISPUTED   // dispute opened
-  RESOLVED   // admin resolved dispute (seller paid)
-  REFUNDED   // admin resolved dispute (buyer refunded)
+  NONE // legacy direct payment (no escrow)
+  FUNDED // ETH locked in escrow contract
+  RELEASED // funds released to seller
+  DISPUTED // dispute opened
+  RESOLVED // admin resolved dispute (seller paid)
+  REFUNDED // admin resolved dispute (buyer refunded)
 }
 
 enum OrderStatus {
@@ -278,11 +279,11 @@ model OrderMessage {
 // ─── Votes ───────────────────────────────────────────────────────────────────
 
 model Vote {
-  id           String    @id @default(cuid())
-  createdAt    DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
   userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   repositoryId String
   repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
   value        VoteValue
@@ -299,17 +300,17 @@ enum VoteValue {
 // ─── Reports ─────────────────────────────────────────────────────────────────
 
 model Report {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  reason      String    @db.Text
-  status      ReportStatus @default(PENDING)
+  reason String       @db.Text
+  status ReportStatus @default(PENDING)
 
-  reporterId  String
-  reporter    User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reporterId String
+  reporter   User   @relation(fields: [reporterId], references: [id], onDelete: Cascade)
 
-  messageId   String?
-  message     ChatMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  messageId String?
+  message   ChatMessage? @relation(fields: [messageId], references: [id], onDelete: SetNull)
 
   @@map("reports")
 }
@@ -324,25 +325,25 @@ enum ReportStatus {
 // ─── AI Sessions ─────────────────────────────────────────────────────────────
 
 model AiSession {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  messages    AiMessage[]
+  messages AiMessage[]
 
   @@map("ai_sessions")
 }
 
 model AiMessage {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  role        AiRole
-  content     String    @db.Text
-  sessionId   String
-  session     AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      AiRole
+  content   String    @db.Text
+  sessionId String
+  session   AiSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@map("ai_messages")
 }
@@ -355,18 +356,18 @@ enum AiRole {
 // ─── Audit Logs ──────────────────────────────────────────────────────────────
 
 model AuditLog {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  action      String
-  resource    String
-  resourceId  String?
-  metadata    Json?
-  ipAddress   String?
-  userAgent   String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
 
-  userId      String?
-  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId, createdAt])
   @@index([action, createdAt])
@@ -376,16 +377,16 @@ model AuditLog {
 // ─── Direct Messages ─────────────────────────────────────────────────────────
 
 model DirectMessage {
-  id         String   @id @default(cuid())
-  createdAt  DateTime @default(now())
-  content    String   @db.Text
-  isRead     Boolean  @default(false)
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
 
-  senderId   String
-  sender     User     @relation("SentDMs", fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String
+  sender   User   @relation("SentDMs", fields: [senderId], references: [id], onDelete: Cascade)
 
   receiverId String
-  receiver   User     @relation("ReceivedDMs", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver   User   @relation("ReceivedDMs", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@index([senderId, receiverId])
   @@index([receiverId, createdAt])
@@ -395,37 +396,54 @@ model DirectMessage {
 // ─── Market ───────────────────────────────────────────────────────────────────
 
 model MarketListing {
-  id           String        @id @default(cuid())
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  title        String
-  description  String        @db.Text
-  type         ListingType
-  price        Float         @default(0)
-  currency     String        @default("SOL")
-  tags         String[]
-  repositoryId String?
-  repository   Repository?   @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
-  sellerId     String
-  seller       User          @relation("MarketSeller", fields: [sellerId], references: [id], onDelete: Cascade)
-  status       ListingStatus @default(PENDING_REVIEW)
-  scanPassed   Boolean       @default(false)
-  scanNote     String?
-  agentUrl     String?       // URL for AI agents (OpenAI, Claude, custom endpoint)
-  fileKey       String?       @unique  // stored filename on disk (UUID, no extension)
-  fileName      String?       // original filename shown to users
-  fileSize      Int?          // bytes
-  fileMimeType  String?       // MIME type
-  agentEndpoint String?       // Webhook URL — seller's bot receives negotiation messages here
-  minPrice      Float?        // seller's minimum acceptable negotiation price
+  id            String             @id @default(cuid())
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  title         String
+  description   String             @db.Text
+  type          ListingType
+  price         Float              @default(0)
+  currency      String             @default("SOL")
+  tags          String[]
+  repositoryId  String?
+  repository    Repository?        @relation(fields: [repositoryId], references: [id], onDelete: SetNull)
+  sellerId      String
+  seller        User               @relation("MarketSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  status        ListingStatus      @default(PENDING_REVIEW)
+  scanPassed    Boolean            @default(false)
+  scanNote      String?
+  agentUrl      String? // URL for AI agents (OpenAI, Claude, custom endpoint)
+  fileKey       String?            @unique // stored filename on disk (UUID, no extension)
+  fileName      String? // original filename shown to users
+  fileSize      Int? // bytes
+  fileMimeType  String? // MIME type
+  agentEndpoint String? // Webhook URL — seller's bot receives negotiation messages here
+  minPrice      Float? // seller's minimum acceptable negotiation price
   negotiations  AgentNegotiation[]
   posts         AgentPost[]
   apiKeys       AgentApiKey[]
   purchases     MarketPurchase[]
+  reviews       MarketReview[]
 
   @@index([sellerId, status])
   @@index([status, createdAt])
   @@map("market_listings")
+}
+
+model MarketReview {
+  id        String        @id @default(cuid())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  rating    Int // 1..5
+  content   String?       @db.Text
+  listingId String
+  listing   MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation("MarketReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, authorId])
+  @@index([listingId, createdAt])
+  @@map("market_reviews")
 }
 
 enum ListingType {
@@ -446,22 +464,22 @@ enum ListingStatus {
 // ─── Agent Negotiations ───────────────────────────────────────────────────────
 
 model AgentNegotiation {
-  id          String             @id @default(cuid())
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id          String               @id @default(cuid())
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
   listingId   String
-  listing     MarketListing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listing     MarketListing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
   buyerId     String
-  buyer       User               @relation("NegotiationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
-  status      NegotiationStatus  @default(ACTIVE)
+  buyer       User                 @relation("NegotiationBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  status      NegotiationStatus    @default(ACTIVE)
   agreedPrice Float?
   messages    NegotiationMessage[]
 
   // AI-vs-AI mode fields
-  mode                   NegotiationMode  @default(AI_AI)
-  turnCount              Int              @default(0)
-  humanSwitchRequestedBy String?          // userId who requested human mode
-  humanSwitchAcceptedBy  String[]         // userIds who accepted the switch
+  mode                   NegotiationMode @default(AI_AI)
+  turnCount              Int             @default(0)
+  humanSwitchRequestedBy String? // userId who requested human mode
+  humanSwitchAcceptedBy  String[] // userIds who accepted the switch
 
   @@index([buyerId])
   @@index([listingId, status])
@@ -478,7 +496,7 @@ model NegotiationMessage {
   createdAt     DateTime         @default(now())
   negotiationId String
   negotiation   AgentNegotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
-  fromRole      String           // 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent'
+  fromRole      String // 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent'
   content       String           @db.Text
   proposedPrice Float?
 
@@ -495,14 +513,14 @@ enum NegotiationStatus {
 // ─── Price Cache ──────────────────────────────────────────────────────────────
 
 model PriceSnapshot {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  price       Float
-  volume24h   Float?
-  marketCap   Float?
-  change24h   Float?
-  source      String
+  price     Float
+  volume24h Float?
+  marketCap Float?
+  change24h Float?
+  source    String
 
   @@map("price_snapshots")
 }
@@ -510,16 +528,16 @@ model PriceSnapshot {
 // ─── Agent Posts (agent feed / announcements) ─────────────────────────────────
 
 model AgentPost {
-  id          String        @id @default(cuid())
-  createdAt   DateTime      @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  content     String        @db.Text   // text content of the post
-  postType    AgentPostType @default(GENERAL)
-  price       Float?                   // for PRICE_UPDATE posts
-  currency    String?                  // e.g. SOL, ETH, USD
+  content  String        @db.Text // text content of the post
+  postType AgentPostType @default(GENERAL)
+  price    Float? // for PRICE_UPDATE posts
+  currency String? // e.g. SOL, ETH, USD
 
-  listingId   String
-  listing     MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId, createdAt])
   @@map("agent_posts")
@@ -535,16 +553,16 @@ enum AgentPostType {
 // ─── Agent API Keys ────────────────────────────────────────────────────────────
 
 model AgentApiKey {
-  id          String        @id @default(cuid())
-  createdAt   DateTime      @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  keyHash     String        @unique    // bcrypt hash of the actual key
-  keyLastFour String?                 // last 4 chars of the key for UI identification
-  label       String?                 // optional label
+  keyHash     String    @unique // bcrypt hash of the actual key
+  keyLastFour String? // last 4 chars of the key for UI identification
+  label       String? // optional label
   lastUsedAt  DateTime?
 
-  listingId   String
-  listing     MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@index([listingId])
   @@map("agent_api_keys")
@@ -553,17 +571,17 @@ model AgentApiKey {
 // ─── Friendships ──────────────────────────────────────────────────────────────
 
 model Friendship {
-  id         String           @id @default(cuid())
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  senderId   String
-  sender     User             @relation("FriendSent",     fields: [senderId],   references: [id], onDelete: Cascade)
+  senderId String
+  sender   User   @relation("FriendSent", fields: [senderId], references: [id], onDelete: Cascade)
 
   receiverId String
-  receiver   User             @relation("FriendReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiver   User   @relation("FriendReceived", fields: [receiverId], references: [id], onDelete: Cascade)
 
-  status     FriendshipStatus @default(PENDING)
+  status FriendshipStatus @default(PENDING)
 
   @@unique([senderId, receiverId])
   @@index([receiverId])
@@ -579,16 +597,16 @@ enum FriendshipStatus {
 // ─── Reputation Events ────────────────────────────────────────────────────────
 
 model ReputationEvent {
-  id          String              @id @default(cuid())
-  createdAt   DateTime            @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  userId      String
-  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  points      Int
-  reason      ReputationReason
-  resourceId  String?             // ID of related resource (repoId, listingId, etc.)
-  note        String?
+  points     Int
+  reason     ReputationReason
+  resourceId String? // ID of related resource (repoId, listingId, etc.)
+  note       String?
 
   @@index([userId, createdAt])
   @@map("reputation_events")
@@ -608,19 +626,19 @@ enum ReputationReason {
 // ─── Repo Collaborators ────────────────────────────────────────────────────────
 
 model RepoCollaborator {
-  id           String           @id @default(cuid())
-  createdAt    DateTime         @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
   repositoryId String
-  repository   Repository       @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
 
-  userId       String?
-  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  name         String           // display name (for non-user collaborators)
-  type         CollaboratorType @default(USER)
-  url          String?          // optional profile/agent link
-  role         String?          // e.g. "Backend Developer", "AI Model"
+  name String // display name (for non-user collaborators)
+  type CollaboratorType @default(USER)
+  url  String? // optional profile/agent link
+  role String? // e.g. "Backend Developer", "AI Model"
 
   @@unique([repositoryId, userId])
   @@index([repositoryId])
@@ -636,25 +654,25 @@ enum CollaboratorType {
 // ─── Service Listings (Freelance / Hire Section) ──────────────────────────────
 
 model ServiceListing {
-  id           String          @id @default(cuid())
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  title        String
-  description  String          @db.Text
-  category     ServiceCategory
-  skills       String[]
+  title       String
+  description String          @db.Text
+  category    ServiceCategory
+  skills      String[]
 
   minBudget    Float?
   maxBudget    Float?
-  currency     String          @default("USD")
+  currency     String @default("USD")
   deliveryDays Int?
 
-  userId       String
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  status       ServiceStatus   @default(ACTIVE)
-  imageUrl     String?         // Optional banner/portfolio image
+  status   ServiceStatus @default(ACTIVE)
+  imageUrl String? // Optional banner/portfolio image
 
   @@index([userId, status])
   @@index([category, status])
@@ -682,16 +700,16 @@ enum ServiceStatus {
 // ─── User Certifications ──────────────────────────────────────────────────────
 
 model UserCertification {
-  id            String    @id @default(cuid())
-  createdAt     DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  certId        String    // slug from the predefined catalog (e.g. "oscp", "ccna")
-  credentialUrl String?   // optional link to verify credential
-  issueDate     String?   // "2024-03" (month precision is enough)
-  expiryDate    String?   // null = doesn't expire
+  certId        String // slug from the predefined catalog (e.g. "oscp", "ccna")
+  credentialUrl String? // optional link to verify credential
+  issueDate     String? // "2024-03" (month precision is enough)
+  expiryDate    String? // null = doesn't expire
 
   @@unique([userId, certId])
   @@index([userId])
@@ -701,16 +719,16 @@ model UserCertification {
 // ─── User API Keys ────────────────────────────────────────────────────────────
 
 model UserApiKey {
-  id          String        @id @default(cuid())
-  createdAt   DateTime      @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  keyHash     String        @unique    // bcrypt hash of the actual key
-  keyLastFour String?                 // last 4 chars of the key for UI identification
-  label       String?                 // optional label (e.g., "Production", "CI/CD")
+  keyHash     String    @unique // bcrypt hash of the actual key
+  keyLastFour String? // last 4 chars of the key for UI identification
+  label       String? // optional label (e.g., "Production", "CI/CD")
   lastUsedAt  DateTime?
 
-  userId      String
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("user_api_keys")
@@ -719,18 +737,18 @@ model UserApiKey {
 // ─── Verification Codes (OTP for email verification) ─────────────────────────
 
 model VerificationCode {
-  id          String        @id @default(cuid())
-  createdAt   DateTime      @default(now())
-  expiresAt   DateTime
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 
-  email       String
-  code        String        @unique    // 6-digit code
-  purpose     VerificationPurpose      // what this code is for (e.g., delete_api_key)
-  data        Json?                    // store context (e.g., keyId to delete)
+  email   String
+  code    String              @unique // 6-digit code
+  purpose VerificationPurpose // what this code is for (e.g., delete_api_key)
+  data    Json? // store context (e.g., keyId to delete)
 
-  attempts    Int           @default(0)
-  maxAttempts Int           @default(5)
-  verified    Boolean       @default(false)
+  attempts    Int     @default(0)
+  maxAttempts Int     @default(5)
+  verified    Boolean @default(false)
 
   @@index([email, purpose])
   @@map("verification_codes")
@@ -745,20 +763,20 @@ enum VerificationPurpose {
 // ─── Notification Preferences ─────────────────────────────────────────────────
 
 model NotificationPreference {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId    String    @unique
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Email notifications
-  emailOnErrors       Boolean   @default(true)      // API errors & failures
-  emailWeeklyReport   Boolean   @default(true)      // Weekly usage summary
-  emailMonthlyReport  Boolean   @default(false)     // Monthly newsletter
-  emailDeploymentAlerts Boolean @default(true)     // Agent deployments
-  emailOrderUpdates   Boolean   @default(true)      // Order status changes
-  emailMessages       Boolean   @default(true)      // New messages in orders/DMs
+  emailOnErrors         Boolean @default(true) // API errors & failures
+  emailWeeklyReport     Boolean @default(true) // Weekly usage summary
+  emailMonthlyReport    Boolean @default(false) // Monthly newsletter
+  emailDeploymentAlerts Boolean @default(true) // Agent deployments
+  emailOrderUpdates     Boolean @default(true) // Order status changes
+  emailMessages         Boolean @default(true) // New messages in orders/DMs
 
   @@map("notification_preferences")
 }
@@ -766,22 +784,22 @@ model NotificationPreference {
 // ─── User Integrations ─────────────────────────────────────────────────────────
 
 model UserIntegration {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  provider  String    // e.g., "slack", "github", "webhook"
-  name      String    // e.g., "My Slack Workspace"
-  connected Boolean   @default(false)
+  provider  String // e.g., "slack", "github", "webhook"
+  name      String // e.g., "My Slack Workspace"
+  connected Boolean @default(false)
 
   // OAuth token or API key (encrypted)
-  credential String?   @db.Text  // would be encrypted in production
+  credential String? @db.Text // would be encrypted in production
 
-  connectedAs String?  // e.g., username or email
-  lastUsedAt DateTime?
+  connectedAs String? // e.g., username or email
+  lastUsedAt  DateTime?
 
   @@unique([userId, provider, name])
   @@index([userId, provider])
@@ -791,22 +809,22 @@ model UserIntegration {
 // ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────
 
 model Agent {
-  id          String           @id @default(cuid())
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  name        String           // e.g., "Negotiation Bot v2"
-  description String?          @db.Text
-  status      AgentStatus      @default(INACTIVE)
-  webhookUrl  String           @db.Text
+  name        String // e.g., "Negotiation Bot v2"
+  description String?     @db.Text
+  status      AgentStatus @default(INACTIVE)
+  webhookUrl  String      @db.Text
 
-  userId      String
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  metrics     AgentMetrics?
-  activityLog AgentActivityLog[]
+  metrics       AgentMetrics?
+  activityLog   AgentActivityLog[]
   raysPurchases RaysPurchase[]
-  rays        AgentRays?
+  rays          AgentRays?
 
   @@index([userId])
   @@map("agents")
@@ -820,33 +838,33 @@ enum AgentStatus {
 }
 
 model AgentMetrics {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   totalCalls      Int       @default(0)
   successfulCalls Int       @default(0)
   failedCalls     Int       @default(0)
-  avgResponseTime Int       @default(0)      // in milliseconds
+  avgResponseTime Int       @default(0) // in milliseconds
   lastCallAt      DateTime?
 
-  agentId         String    @unique
-  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String @unique
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
   @@map("agent_metrics")
 }
 
 model AgentActivityLog {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  action          String    // e.g., "webhook_call", "negotiation_started", "agreement_reached"
-  status          ActivityStatus
-  metadata        Json?     // store context like negotiation details
-  responseTime    Int?      // in milliseconds
+  action       String // e.g., "webhook_call", "negotiation_started", "agreement_reached"
+  status       ActivityStatus
+  metadata     Json? // store context like negotiation details
+  responseTime Int? // in milliseconds
 
-  agentId         String
-  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
   @@index([agentId, createdAt])
   @@map("agent_activity_logs")
@@ -862,21 +880,21 @@ enum ActivityStatus {
 // ─── RAYOS SYSTEM ──────────────────────────────────────────────────────────────
 
 model RaysPurchase {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  agentId         String
-  agent           Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  raysPack        RaysPack  // 10, 25, 50, 120, 250
-  raysAmount      Int       // Actual rays purchased
-  boltyAmount     Decimal   // Amount paid in BOLTY
+  raysPack    RaysPack // 10, 25, 50, 120, 250
+  raysAmount  Int // Actual rays purchased
+  boltyAmount Decimal // Amount paid in BOLTY
 
-  txHash          String?   // Blockchain transaction hash (optional, for tracking)
-  status          PurchaseStatus @default(COMPLETED)
+  txHash String? // Blockchain transaction hash (optional, for tracking)
+  status PurchaseStatus @default(COMPLETED)
 
   @@index([userId, agentId])
   @@index([createdAt])
@@ -899,18 +917,18 @@ enum PurchaseStatus {
 }
 
 model AgentRays {
-  id                  String    @id @default(cuid())
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  agentId             String    @unique
-  agent               Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentId String @unique
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
 
-  totalRaysAccumulated Int      @default(0)  // Total rayos de por vida
-  currentRank         AgentRank @default(HIERRO)
+  totalRaysAccumulated Int       @default(0) // Total rayos de por vida
+  currentRank          AgentRank @default(HIERRO)
 
-  lastRankUpAt        DateTime?
-  rankHistory         RankHistory[]
+  lastRankUpAt DateTime?
+  rankHistory  RankHistory[]
 
   @@map("agent_rays")
 }
@@ -927,15 +945,15 @@ enum AgentRank {
 }
 
 model RankHistory {
-  id              String    @id @default(cuid())
-  createdAt       DateTime  @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
-  agentRaysId     String
-  agentRays       AgentRays @relation(fields: [agentRaysId], references: [id], onDelete: Cascade)
+  agentRaysId String
+  agentRays   AgentRays @relation(fields: [agentRaysId], references: [id], onDelete: Cascade)
 
-  previousRank    AgentRank
-  newRank         AgentRank
-  totalRaysAt     Int
+  previousRank AgentRank
+  newRank      AgentRank
+  totalRaysAt  Int
 
   @@index([agentRaysId, createdAt])
   @@map("rank_history")

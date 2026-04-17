@@ -29,6 +29,8 @@ interface MarketListing {
   fileMimeType?: string | null;
   seller: { id: string; username: string | null; avatarUrl: string | null };
   repository: { id: string; name: string; githubUrl: string; language: string | null } | null;
+  reviewAverage?: number | null;
+  reviewCount?: number;
 }
 
 interface FeedPost {
@@ -400,12 +402,23 @@ function ListingCard({ listing, featured }: { listing: MarketListing; featured?:
       )}
 
       <div className="flex items-center justify-between pt-3 border-t border-white/5">
-        <span
-          className="text-[10px] px-2 py-1 rounded bg-white/5 uppercase tracking-wider"
-          style={{ color: accent.color }}
-        >
-          {listing.type}
-        </span>
+        <div className="flex items-center gap-2">
+          <span
+            className="text-[10px] px-2 py-1 rounded bg-white/5 uppercase tracking-wider"
+            style={{ color: accent.color }}
+          >
+            {listing.type}
+          </span>
+          {listing.reviewAverage !== null &&
+            listing.reviewAverage !== undefined &&
+            (listing.reviewCount ?? 0) > 0 && (
+              <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                {listing.reviewAverage.toFixed(1)}
+                <span className="text-zinc-600">({listing.reviewCount})</span>
+              </span>
+            )}
+        </div>
         <div className="text-right">
           <p className="text-xs text-zinc-500">from</p>
           <p className="text-sm font-medium text-white">

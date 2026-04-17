@@ -16,6 +16,7 @@ import {
   Play,
   Send,
   Shield,
+  Star,
   Tag,
   Terminal,
   TrendingUp,
@@ -59,6 +60,8 @@ interface MarketListing {
     language: string | null;
     stars: number;
   } | null;
+  reviewAverage?: number | null;
+  reviewCount?: number;
 }
 
 interface AgentPost {
@@ -68,6 +71,20 @@ interface AgentPost {
   postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL';
   price: number | null;
   currency: string | null;
+}
+
+interface Review {
+  id: string;
+  createdAt: string;
+  rating: number;
+  content: string | null;
+  author: { id: string; username: string | null; avatarUrl: string | null };
+}
+
+interface ReviewsResponse {
+  reviews: Review[];
+  average: number | null;
+  count: number;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -124,22 +141,37 @@ export default function AgentDetailPage() {
 
   const [listing, setListing] = useState<MarketListing | null>(null);
   const [posts, setPosts] = useState<AgentPost[]>([]);
+  const [reviews, setReviews] = useState<ReviewsResponse>({
+    reviews: [],
+    average: null,
+    count: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+
+  const loadReviews = useCallback(async () => {
+    const data = await api
+      .get<ReviewsResponse>(`/market/${id}/reviews`)
+      .catch(() => ({ reviews: [], average: null, count: 0 }) as ReviewsResponse);
+    setReviews(data);
+  }, [id]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.get<MarketListing>(`/market/${id}`);
       setListing(data);
-      const postsData = await api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => []);
+      const [postsData] = await Promise.all([
+        api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => [] as AgentPost[]),
+        loadReviews(),
+      ]);
       setPosts(postsData || []);
     } catch (err) {
       if (err instanceof ApiError) setNotFound(true);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, loadReviews]);
 
   useEffect(() => {
     load();
@@ -252,6 +284,16 @@ export default function AgentDetailPage() {
                 <span className="inline-flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5" /> Published {timeAgo(listing.createdAt)}
                 </span>
+                {listing.reviewAverage !== null && listing.reviewAverage !== undefined && (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      {listing.reviewAverage.toFixed(1)}
+                      <span className="text-zinc-600">({listing.reviewCount})</span>
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -349,6 +391,15 @@ export default function AgentDetailPage() {
                   })}
                 </div>
               )}
+            </Section>
+
+            <Section title={`Reviews (${reviews.count})`} icon={Star}>
+              <ReviewsWidget
+                listingId={listing.id}
+                reviews={reviews}
+                canReview={isAuthenticated && listing.seller.id !== undefined}
+                onCreated={loadReviews}
+              />
             </Section>
           </main>
 
@@ -465,6 +516,180 @@ function DemoWidget({ listingId }: { listingId: string }) {
           <pre className="text-xs text-zinc-300 font-mono whitespace-pre-wrap break-words leading-relaxed">
             {error || reply}
           </pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Stars({ value, size = 14 }: { value: number; size?: number }) {
+  const full = Math.round(value);
+  return (
+    <div className="inline-flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          style={{ width: size, height: size }}
+          className={n <= full ? 'fill-amber-400 text-amber-400' : 'text-zinc-700'}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ReviewsWidget({
+  listingId,
+  reviews,
+  canReview,
+  onCreated,
+}: {
+  listingId: string;
+  reviews: ReviewsResponse;
+  canReview: boolean;
+  onCreated: () => void;
+}) {
+  const [rating, setRating] = useState(0);
+  const [content, setContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const submit = async () => {
+    if (!rating || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await api.post(`/market/${listingId}/reviews`, {
+        rating,
+        content: content.trim() || null,
+      });
+      setContent('');
+      setRating(0);
+      setShowForm(false);
+      onCreated();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to submit review');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {reviews.count > 0 && reviews.average !== null ? (
+        <div className="flex items-center gap-4 pb-3 border-b border-white/[0.06]">
+          <div>
+            <p className="text-2xl font-medium text-white tabular-nums leading-none">
+              {reviews.average.toFixed(1)}
+            </p>
+            <p className="text-[10px] text-zinc-500 uppercase tracking-[0.18em] mt-1">out of 5</p>
+          </div>
+          <div>
+            <Stars value={reviews.average} size={16} />
+            <p className="text-xs text-zinc-500 mt-1">
+              Based on {reviews.count} review{reviews.count === 1 ? '' : 's'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-zinc-500 italic">
+          No reviews yet. Buyers can leave one after purchasing.
+        </p>
+      )}
+
+      {canReview && !showForm && (
+        <button
+          onClick={() => setShowForm(true)}
+          className="text-xs text-purple-300 hover:text-purple-200 transition-colors"
+        >
+          Write a review
+        </button>
+      )}
+
+      {canReview && showForm && (
+        <div className="rounded-lg border border-white/[0.08] bg-white/[0.02] p-4">
+          <div className="flex items-center gap-2 mb-3">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                onClick={() => setRating(n)}
+                className="p-0.5 transition-transform hover:scale-110"
+                type="button"
+                aria-label={`${n} stars`}
+              >
+                <Star
+                  className={
+                    n <= rating ? 'w-6 h-6 fill-amber-400 text-amber-400' : 'w-6 h-6 text-zinc-600'
+                  }
+                />
+              </button>
+            ))}
+            {rating > 0 && <span className="text-xs text-zinc-500 ml-2">{rating} / 5</span>}
+          </div>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value.slice(0, 2000))}
+            placeholder="Share what worked, what didn't — help other buyers."
+            rows={3}
+            className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none border-b border-white/[0.06] focus:border-white/[0.12] pb-2"
+          />
+          <div className="flex items-center justify-between gap-2 mt-3">
+            <p className="text-[10px] text-zinc-600 font-mono">{content.length}/2000</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setError(null);
+                }}
+                className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submit}
+                disabled={!rating || submitting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs text-white font-medium transition-colors"
+              >
+                {submitting ? 'Submitting…' : 'Publish review'}
+              </button>
+            </div>
+          </div>
+          {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+        </div>
+      )}
+
+      {reviews.reviews.length > 0 && (
+        <div className="space-y-3">
+          {reviews.reviews.map((r) => (
+            <article
+              key={r.id}
+              className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4"
+            >
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 text-xs text-zinc-300">
+                  {r.author.avatarUrl ? (
+                    <img
+                      src={r.author.avatarUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-400">
+                      {(r.author.username || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span className="font-medium">{r.author.username || 'Anonymous'}</span>
+                  <Stars value={r.rating} size={12} />
+                </div>
+                <span className="text-[11px] text-zinc-600">{timeAgo(r.createdAt)}</span>
+              </div>
+              {r.content && (
+                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                  {r.content}
+                </p>
+              )}
+            </article>
+          ))}
         </div>
       )}
     </div>
