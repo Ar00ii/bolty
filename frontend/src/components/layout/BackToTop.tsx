@@ -4,6 +4,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+function prefersReducedMotion() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 export function BackToTop({ threshold = 500 }: { threshold?: number }) {
   const [visible, setVisible] = useState(false);
 
@@ -16,13 +21,21 @@ export function BackToTop({ threshold = 500 }: { threshold?: number }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, [threshold]);
 
+  const handleClick = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+    });
+  };
+
   return (
     <AnimatePresence>
       {visible && (
         <motion.button
           type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          onClick={handleClick}
           aria-label="Back to top"
+          title="Back to top"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
