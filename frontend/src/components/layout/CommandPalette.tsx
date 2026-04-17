@@ -41,9 +41,23 @@ interface ListingCommand {
   hint: string;
   href: string;
   group: 'recent' | 'search';
+  icon: LucideIcon;
 }
 
 type Command = NavCommand | ListingCommand;
+
+const LISTING_TYPE_ICON: Record<string, LucideIcon> = {
+  AI_AGENT: Bot,
+  BOT: Bot,
+  SCRIPT: Sparkles,
+  REPO: GitBranch,
+  OTHER: Package,
+};
+
+function iconForType(type: string | undefined): LucideIcon {
+  if (!type) return Package;
+  return LISTING_TYPE_ICON[type.toUpperCase()] ?? Package;
+}
 
 const NAV_COMMANDS: NavCommand[] = [
   {
@@ -247,6 +261,7 @@ export function CommandPalette() {
       hint: `@${l.seller?.username || 'anonymous'} · ${l.type.toLowerCase().replace('_', ' ')}`,
       href: `/market/agents/${l.id}`,
       group: 'search',
+      icon: iconForType(l.type),
     }));
     if (!q) {
       const recentCmds: ListingCommand[] = recent.slice(0, 5).map((r) => ({
@@ -256,6 +271,7 @@ export function CommandPalette() {
         hint: `@${r.seller || 'anonymous'}`,
         href: `/market/agents/${r.id}`,
         group: 'recent',
+        icon: iconForType(r.type),
       }));
       return [...recentCmds, ...navs, ...listingCmds];
     }
@@ -327,7 +343,7 @@ export function CommandPalette() {
           ) : (
             commands.map((cmd, idx) => {
               const active = idx === activeIndex;
-              const Icon = cmd.kind === 'nav' ? cmd.icon : Package;
+              const Icon = cmd.icon;
               const prev = commands[idx - 1];
               const groupOf = (c: Command) =>
                 c.kind === 'nav' ? 'nav' : c.group === 'recent' ? 'recent' : 'search';
