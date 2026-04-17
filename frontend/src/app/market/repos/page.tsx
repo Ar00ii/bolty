@@ -35,6 +35,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -1352,6 +1353,8 @@ function ReposMarketPageContent() {
   const [language, setLanguage] = useState('');
   const [sortBy, setSortBy] = useState<'recent' | 'votes' | 'stars' | 'downloads'>('recent');
   const [error, setError] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   // My repos tab state
   const [myRepos, setMyRepos] = useState<Repository[]>([]);
@@ -1688,12 +1691,26 @@ function ReposMarketPageContent() {
             <div className="relative flex-1 min-w-[220px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
               <input
+                ref={searchRef}
                 type="text"
                 placeholder="Search repositories..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input w-full pl-9"
+                className="input w-full pl-9 pr-16"
               />
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
+                  /
+                </kbd>
+              )}
             </div>
             <select
               value={language}
