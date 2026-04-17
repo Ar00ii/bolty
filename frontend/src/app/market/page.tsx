@@ -303,50 +303,99 @@ function MarketPageContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div
+            className="group relative flex-1 rounded-xl transition-colors focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
+            <Search
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-[#b4a7ff] transition-colors"
+              strokeWidth={1.75}
+            />
             <input
               ref={searchRef}
               type="text"
               placeholder="Search agents, repos, services…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+              className="w-full pl-10 pr-10 py-2.5 bg-transparent text-white placeholder-zinc-500 text-[13px] focus:outline-none tracking-[0.005em]"
             />
             {search ? (
               <button
                 onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-white/5 transition-colors"
                 aria-label="Clear search"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3.5 h-3.5" strokeWidth={1.75} />
               </button>
             ) : (
-              <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 border border-white/10 rounded px-1.5 py-0.5 leading-none">
+              <kbd
+                className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-medium text-zinc-500 rounded px-1.5 py-0.5 leading-none"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
                 /
               </kbd>
             )}
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-            className="px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
-          >
-            <option value="recent">Most Recent</option>
-            <option value="trending">Trending</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-          </select>
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              className="appearance-none pl-4 pr-9 py-2.5 rounded-xl text-white text-[13px] cursor-pointer focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <option value="recent">Most Recent</option>
+              <option value="trending">Trending</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+            </select>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                <path
+                  d="M2 3.5 L5 6.5 L8 3.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+          </div>
         </div>
 
         {/* Advanced filters */}
-        <div className="mb-8 rounded-lg border border-white/8 bg-zinc-950/50 p-4">
+        <div
+          className="mb-8 rounded-xl p-4"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.4) 0%, rgba(10,10,14,0.4) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.055), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
+        >
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-zinc-500">
+            <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
               Filters
               {activeFilterCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-purple-500/20 text-purple-200 text-[10px] font-medium px-1">
+                <span
+                  className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full text-[10px] font-medium px-1 text-[#b4a7ff]"
+                  style={{
+                    background: 'rgba(131,110,249,0.14)',
+                    border: '1px solid rgba(131,110,249,0.28)',
+                  }}
+                >
                   {activeFilterCount}
                 </span>
               )}
@@ -359,7 +408,11 @@ function MarketPageContent() {
                 placeholder="Min price"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="w-28 px-2.5 py-1.5 rounded-md bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-purple-500/50"
+                className="w-28 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.08)',
+                }}
               />
               <span className="text-zinc-600 text-xs">–</span>
               <input
@@ -369,22 +422,26 @@ function MarketPageContent() {
                 placeholder="Max price"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-28 px-2.5 py-1.5 rounded-md bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-purple-500/50"
+                className="w-28 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.08)',
+                }}
               />
             </div>
-            <label className="inline-flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+            <label className="inline-flex items-center gap-2 text-[12px] text-zinc-300 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={hasDemo}
                 onChange={(e) => setHasDemo(e.target.checked)}
-                className="w-3.5 h-3.5 accent-purple-500"
+                className="w-3.5 h-3.5 accent-[#836EF9]"
               />
               Live demo available
             </label>
             {activeFilterCount > 0 && (
               <button
                 onClick={clearFilters}
-                className="ml-auto text-xs text-zinc-400 hover:text-white"
+                className="ml-auto text-[11px] text-zinc-400 hover:text-white px-2 py-1 rounded-md hover:bg-white/5 transition-colors"
               >
                 Clear all
               </button>
@@ -398,14 +455,27 @@ function MarketPageContent() {
                   <button
                     key={t.tag}
                     onClick={() => toggleTag(t.tag)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] border transition-colors ${
-                      active
-                        ? 'bg-purple-500/20 text-purple-100 border-purple-400/40'
-                        : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:border-white/20'
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-normal transition-colors ${
+                      active ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-white'
                     }`}
+                    style={
+                      active
+                        ? {
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 12px -2px rgba(131,110,249,0.35)',
+                          }
+                        : {
+                            background: 'rgba(255,255,255,0.03)',
+                            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                          }
+                    }
                   >
                     #{t.tag}
-                    <span className="ml-1 text-zinc-500">{t.count}</span>
+                    <span className={`ml-1 ${active ? 'text-[#9b88ff]' : 'text-zinc-500'}`}>
+                      {t.count}
+                    </span>
                   </button>
                 );
               })}
