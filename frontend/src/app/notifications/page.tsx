@@ -33,10 +33,21 @@ function formatTime(iso: string) {
   });
 }
 
+const TYPE_FILTERS: { value: NotificationType | 'ALL'; label: string }[] = [
+  { value: 'ALL', label: 'All types' },
+  { value: 'MARKET_NEW_SALE', label: 'Sales' },
+  { value: 'MARKET_NEW_REVIEW', label: 'Reviews' },
+  { value: 'MARKET_ORDER_DELIVERED', label: 'Deliveries' },
+  { value: 'MARKET_ORDER_COMPLETED', label: 'Completed' },
+  { value: 'MARKET_NEGOTIATION_MESSAGE', label: 'Messages' },
+  { value: 'SYSTEM', label: 'System' },
+];
+
 export default function NotificationsPage() {
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unread, setUnread] = useState(0);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [typeFilter, setTypeFilter] = useState<NotificationType | 'ALL'>('ALL');
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -78,6 +89,8 @@ export default function NotificationsPage() {
     setUnread(0);
   };
 
+  const visible = typeFilter === 'ALL' ? items : items.filter((n) => n.type === typeFilter);
+
   return (
     <div className="relative max-w-3xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
       <div
@@ -102,7 +115,7 @@ export default function NotificationsPage() {
         )}
       </div>
 
-      <div className="flex gap-1 mb-6">
+      <div className="flex gap-1 mb-3">
         {(['all', 'unread'] as const).map((f) => (
           <button
             key={f}
@@ -118,19 +131,37 @@ export default function NotificationsPage() {
         ))}
       </div>
 
+      <div className="flex flex-wrap gap-1.5 mb-6">
+        {TYPE_FILTERS.map((t) => (
+          <button
+            key={t.value}
+            onClick={() => setTypeFilter(t.value)}
+            className={`px-2.5 py-1 rounded-full text-[11px] font-light border transition-all ${
+              typeFilter === t.value
+                ? 'text-white border-[#836EF9]/60 bg-[#836EF9]/10'
+                : 'text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {loading && items.length === 0 ? (
         <div className="text-center py-20 text-sm text-zinc-500">Loading…</div>
-      ) : items.length === 0 ? (
+      ) : visible.length === 0 ? (
         <div className="border border-zinc-800 rounded-2xl py-16 text-center">
           <Bell className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-          <p className="text-sm text-zinc-400 font-light">Nothing here yet</p>
+          <p className="text-sm text-zinc-400 font-light">
+            {typeFilter === 'ALL' ? 'Nothing here yet' : 'No notifications of that type'}
+          </p>
           <p className="text-xs text-zinc-600 mt-1 max-w-sm mx-auto">
             Sales, reviews, delivery updates and marketplace messages will show up in this feed.
           </p>
         </div>
       ) : (
         <ul className="border border-zinc-800 rounded-2xl overflow-hidden divide-y divide-zinc-800">
-          {items.map((n) => {
+          {visible.map((n) => {
             const meta = TYPE_META[n.type] ?? TYPE_META.SYSTEM;
             const Icon = meta.icon;
             const inner = (
