@@ -12,14 +12,17 @@ import {
   Play,
   ExternalLink,
   Clock,
+  Search,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 
@@ -84,6 +87,9 @@ export default function LibraryPage() {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'AI_AGENT' | 'BOT' | 'SCRIPT' | 'REPO'>('all');
+  const [query, setQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -116,10 +122,17 @@ export default function LibraryPage() {
     );
   }
 
+  const q = query.trim().toLowerCase();
   const visible = items.filter((i) => {
     if (!i.listing) return false;
-    if (filter === 'all') return true;
-    return i.listing.type === filter;
+    if (filter !== 'all' && i.listing.type !== filter) return false;
+    if (q) {
+      const haystack = [i.listing.title, i.listing.seller.username ?? '', ...(i.listing.tags || [])]
+        .join(' ')
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
   });
 
   const counts = items.reduce(
@@ -169,6 +182,34 @@ export default function LibraryPage() {
           <EmptyState />
         ) : (
           <>
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search your library…"
+                className="w-full bg-zinc-950/50 border border-white/8 rounded-lg pl-10 pr-16 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#836EF9]/40 transition-colors"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {query ? (
+                  <button
+                    onClick={() => setQuery('')}
+                    aria-label="Clear search"
+                    className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
+                    /
+                  </kbd>
+                )}
+              </div>
+            </div>
+
             {/* Filter pills */}
             <div className="flex flex-wrap gap-2">
               <FilterChip
@@ -301,7 +342,7 @@ export default function LibraryPage() {
               })}
               {visible.length === 0 && (
                 <div className="text-sm text-zinc-500 py-8 text-center">
-                  No items match this filter.
+                  {query ? `No items match "${query}".` : 'No items match this filter.'}
                 </div>
               )}
             </div>
