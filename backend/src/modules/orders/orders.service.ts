@@ -171,11 +171,27 @@ export class OrdersService {
       data.escrowDisputedAt = new Date();
     }
 
-    return this.prisma.marketPurchase.update({
+    const updated = await this.prisma.marketPurchase.update({
       where: { id: orderId },
       data,
       include: ORDER_INCLUDE,
     });
+
+    const recipientId = userId === updated.buyerId ? updated.sellerId : updated.buyerId;
+    try {
+      await this.notifications.create({
+        userId: recipientId,
+        type: 'SYSTEM',
+        title: `Dispute opened on "${updated.listing.title}"`,
+        body: 'The other party opened a dispute. Review the order chat and resolve, or contact support.',
+        url: `/orders/${updated.id}`,
+        meta: { orderId: updated.id, listingId: updated.listingId, openedBy: userId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return updated;
   }
 
   /** Get order chat messages */
@@ -198,9 +214,9 @@ export class OrdersService {
       throw new BadRequestException(`Message must be 1-${MAX_MSG_LENGTH} characters`);
     }
 
-    await this.getOrder(orderId, senderId); // auth check
+    const order = await this.getOrder(orderId, senderId); // auth check
 
-    return this.prisma.orderMessage.create({
+    const message = await this.prisma.orderMessage.create({
       data: {
         orderId,
         senderId,
@@ -210,6 +226,38 @@ export class OrdersService {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
+
+    const recipientId = senderId === order.buyerId ? order.sellerId : order.buyerId;
+    // Throttle: only notify if recipient doesn't already have an unread
+    // message notification from this order in the last 10 minutes.
+    try {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const existing = await this.prisma.notification.findFirst({
+        where: {
+          userId: recipientId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          readAt: null,
+          createdAt: { gte: tenMinutesAgo },
+          meta: { path: ['orderId'], equals: orderId },
+        },
+        select: { id: true },
+      });
+      if (!existing) {
+        const senderName = message.sender.username || 'Someone';
+        await this.notifications.create({
+          userId: recipientId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          title: `New message from @${senderName} on "${order.listing.title}"`,
+          body: trimmed.slice(0, 200),
+          url: `/orders/${orderId}`,
+          meta: { orderId, senderId },
+        });
+      }
+    } catch {
+      /* notification failures must not block chat flow */
+    }
+
+    return message;
   }
 
   /** System message when order is created */
