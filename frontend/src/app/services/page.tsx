@@ -20,11 +20,12 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { ReputationBadge } from '@/components/ui/reputation-badge';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface ServiceUser {
   id: string;
@@ -114,6 +115,8 @@ export default function ServicesPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -222,12 +225,28 @@ export default function ServicesPage() {
           <div className="flex-1 min-w-48 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
             <input
+              ref={searchRef}
               type="text"
               placeholder="Search services, skills..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input w-full pl-9"
+              className="input w-full pl-9 pr-16"
             />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
+                  /
+                </kbd>
+              )}
+            </div>
           </div>
 
           {/* Category pills */}
