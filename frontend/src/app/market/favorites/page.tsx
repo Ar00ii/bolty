@@ -1,13 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Bot, GitBranch, Heart, Package, Star, Zap } from 'lucide-react';
+import { ArrowLeft, Bot, GitBranch, Heart, Package, Search, Star, X, Zap } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api, ApiError } from '@/lib/api/client';
 import { useFavorites } from '@/lib/hooks/useFavorites';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface Listing {
   id: string;
@@ -39,6 +40,9 @@ export default function FavoritesPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [missing, setMissing] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +72,17 @@ export default function FavoritesPage() {
       cancelled = true;
     };
   }, [ids]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return listings;
+    return listings.filter((l) => {
+      const haystack = [l.title, l.description, l.seller.username ?? '', ...(l.tags || [])]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [listings, query]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-page)' }}>
@@ -101,6 +116,33 @@ export default function FavoritesPage() {
               : `${ids.length} saved listing${ids.length === 1 ? '' : 's'} — stored in this browser.`}
           </p>
         </div>
+
+        {!loading && listings.length > 0 && (
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search saved listings…"
+              className="w-full pl-9 pr-16 py-2.5 bg-zinc-900/40 border border-zinc-800 rounded-lg text-sm font-light text-white placeholder-zinc-600 outline-none focus:border-[#836EF9]/40 transition-colors"
+            />
+            {query ? (
+              <button
+                onClick={() => setQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
+                /
+              </kbd>
+            )}
+          </div>
+        )}
 
         {missing.length > 0 && !loading && (
           <div className="mb-6 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-3 text-xs text-yellow-300 flex items-center justify-between gap-3">
@@ -143,9 +185,20 @@ export default function FavoritesPage() {
               Browse listings
             </Link>
           </div>
+        ) : visible.length === 0 ? (
+          <div
+            className="rounded-xl border border-white/10 p-12 text-center"
+            style={{ background: 'var(--bg-card)' }}
+          >
+            <Search className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+            <p className="text-sm text-zinc-300 font-light">No matches</p>
+            <p className="text-xs text-zinc-500 mt-1 font-light">
+              Try a different keyword or clear the search.
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {listings.map((l, i) => {
+            {visible.map((l, i) => {
               const meta = TYPE_META[l.type] ?? TYPE_META.OTHER;
               const Icon = meta.icon;
               return (
