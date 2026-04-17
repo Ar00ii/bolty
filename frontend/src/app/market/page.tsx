@@ -23,6 +23,7 @@ import React, { Suspense, useState, useEffect } from 'react';
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useFavorites } from '@/lib/hooks/useFavorites';
 
 interface MarketListing {
   id: string;
@@ -102,6 +103,7 @@ function MarketPageContent() {
   const { isLoading } = useAuth();
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
+  const { ids: favoriteIds } = useFavorites();
   const [activeTab, setActiveTab] = useState<'all' | 'featured' | 'activity'>('all');
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
@@ -245,6 +247,11 @@ function MarketPageContent() {
               >
                 <Heart className="w-4 h-4" />
                 Saved
+                {favoriteIds.length > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1.5 rounded-full text-[10px] font-medium bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                    {favoriteIds.length > 99 ? '99+' : favoriteIds.length}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/market/library"
