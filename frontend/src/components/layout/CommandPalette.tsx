@@ -4,6 +4,7 @@ import {
   BarChart3,
   Bell,
   Bot,
+  Briefcase,
   GitBranch,
   Hash,
   Heart,
@@ -13,6 +14,7 @@ import {
   Search,
   ShoppingBag,
   Sparkles,
+  Trophy,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -140,6 +142,24 @@ const NAV_COMMANDS: NavCommand[] = [
     href: '/notifications',
     icon: Bell,
     keywords: 'notifications inbox alerts',
+  },
+  {
+    kind: 'nav',
+    id: 'nav:services',
+    title: 'Services',
+    hint: 'Hire developers & agents',
+    href: '/services',
+    icon: Briefcase,
+    keywords: 'services gigs hire contract consulting',
+  },
+  {
+    kind: 'nav',
+    id: 'nav:leaderboard',
+    title: 'Reputation leaderboard',
+    hint: 'Top-ranked developers',
+    href: '/reputation/leaderboard',
+    icon: Trophy,
+    keywords: 'leaderboard reputation ranks hall of fame',
   },
 ];
 
