@@ -28,15 +28,20 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
     this.client = new Redis(redisUrl, {
       retryStrategy: (times: number) => {
-        const delay = Math.min(times * 100, 3000);
-        this.logger.warn(`Redis retry attempt ${times}, delay ${delay}ms`);
-        return delay;
+        if (times > 20) {
+          if (times % 60 === 0) {
+            this.logger.warn(`Redis still unreachable after ${times} attempts`);
+          }
+          return 30000;
+        }
+        return Math.min(times * 200, 5000);
       },
-      maxRetriesPerRequest: 5,
+      maxRetriesPerRequest: 3,
       enableReadyCheck: true,
+      enableOfflineQueue: false,
       ...(useTls && { tls: {} }),
       connectTimeout: 10000,
-      lazyConnect: false,
+      lazyConnect: true,
     });
 
     this.client.on('error', (err) => {
@@ -53,46 +58,24 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    // Verify Redis connection at startup (non-fatal)
-    try {
-      await this.client.ping();
-      this.logger.log('Redis service initialized and verified');
-    } catch (err) {
+    // Kick off the connection without blocking bootstrap. If Redis is down the
+    // HTTP server must still bind its port so the platform health-check passes.
+    this.client.connect().catch((err) => {
       this.logger.warn(
         `Redis connection failed at startup: ${(err as Error).message}. ` +
-          'Application will continue but some features (rate limiting, sessions) may be unavailable.',
+          'Application will continue; rate limiting, sessions and nonces will be unavailable until Redis recovers.',
       );
-      // Don't throw - let the app start and retry in the background
-      this.reconnectInBackground();
-    }
-  }
-
-  private reconnectInBackground(): void {
-    const maxAttempts = 30; // 5 minutes with 10s intervals
-    let attempt = 0;
-
-    const tryConnect = () => {
-      attempt++;
-      this.client
-        .ping()
-        .then(() => {
-          this.logger.log('Redis reconnected successfully');
-        })
-        .catch(() => {
-          if (attempt < maxAttempts) {
-            setTimeout(tryConnect, 10000);
-          } else {
-            this.logger.error('Redis failed to reconnect after 5 minutes');
-          }
-        });
-    };
-
-    setTimeout(tryConnect, 10000);
+    });
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.client.quit();
-    this.logger.log('Redis connection closed');
+    try {
+      await this.client.quit();
+      this.logger.log('Redis connection closed');
+    } catch (err) {
+      this.client.disconnect();
+      this.logger.warn(`Redis quit failed, forced disconnect: ${(err as Error).message}`);
+    }
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
