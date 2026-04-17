@@ -9,7 +9,6 @@ import {
   GitBranch,
   Zap,
   Search,
-  MoreVertical,
   BarChart3,
   Library,
   Users,
@@ -603,6 +602,8 @@ function StatCard({
 function ListingCard({ listing, featured }: { listing: MarketListing; featured?: boolean }) {
   const accent = TYPE_ACCENTS[listing.type];
   const Icon = accent.icon;
+  const { has, toggle } = useFavorites();
+  const saved = has(listing.id);
 
   return (
     <Link
@@ -610,9 +611,22 @@ function ListingCard({ listing, featured }: { listing: MarketListing; featured?:
       className="group relative block text-left p-5 rounded-lg border border-white/8 bg-white/3 hover:bg-white/5 hover:border-white/15 transition-all"
       data-featured={featured ? 'true' : undefined}
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-        <MoreVertical className="w-4 h-4 text-zinc-500" />
-      </div>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggle(listing.id);
+        }}
+        aria-pressed={saved}
+        aria-label={saved ? 'Remove from saved' : 'Save for later'}
+        className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+          saved
+            ? 'text-pink-400 bg-pink-500/10 opacity-100'
+            : 'text-zinc-500 hover:text-pink-300 hover:bg-white/5 opacity-0 group-hover:opacity-100'
+        }`}
+      >
+        <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-pink-400' : ''}`} />
+      </button>
 
       <div className="flex items-start gap-3 mb-4">
         <div
