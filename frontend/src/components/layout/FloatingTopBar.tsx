@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 
+import { NotificationsBell } from '@/components/layout/NotificationsBell';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 export function FloatingTopBar() {
@@ -85,6 +86,11 @@ export function FloatingTopBar() {
           {modKey}K
         </kbd>
       </motion.button>
+
+      {/* Notifications */}
+      <div className="rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 hover:border-white/20 transition-all duration-200 px-1">
+        <NotificationsBell isAuthenticated={isAuthenticated} />
+      </div>
 
       {/* Profile Section */}
       <div ref={profileRef} className="relative">
