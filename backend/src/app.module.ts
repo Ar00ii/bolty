@@ -17,6 +17,7 @@ import { ChartModule } from './modules/chart/chart.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DmModule } from './modules/dm/dm.module';
 import { MarketModule } from './modules/market/market.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { RaysModule } from './modules/rays/rays.module';
 import { ReposModule } from './modules/repos/repos.module';
@@ -65,6 +66,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     DmModule,
     MarketModule,
+    NotificationsModule,
     OrdersModule,
     ReputationModule,
     ServicesModule,

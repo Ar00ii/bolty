@@ -7,6 +7,7 @@ import {
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const MAX_MSG_LENGTH = 2000;
 
@@ -18,7 +19,10 @@ const ORDER_INCLUDE = {
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** All orders where the user is the buyer */
   async getBuyerOrders(userId: string) {
@@ -73,7 +77,7 @@ export class OrdersService {
     if (!['PENDING_DELIVERY', 'IN_PROGRESS'].includes(order.status)) {
       throw new BadRequestException('Invalid status transition');
     }
-    return this.prisma.marketPurchase.update({
+    const updated = await this.prisma.marketPurchase.update({
       where: { id: orderId },
       data: {
         status: 'DELIVERED',
@@ -81,6 +85,24 @@ export class OrdersService {
       },
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await this.notifications.create({
+        userId: updated.buyerId,
+        type: 'MARKET_ORDER_DELIVERED',
+        title: `"${updated.listing.title}" has been delivered`,
+        body:
+          updated.escrowStatus === 'FUNDED'
+            ? 'Review the delivery and release escrow to complete the order.'
+            : 'Review the delivery and mark the order complete when ready.',
+        url: `/market/orders/${updated.id}`,
+        meta: { orderId: updated.id, listingId: updated.listingId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return updated;
   }
 
   /**
@@ -108,11 +130,29 @@ export class OrdersService {
       data.escrowResolvedAt = new Date();
     }
 
-    return this.prisma.marketPurchase.update({
+    const completed = await this.prisma.marketPurchase.update({
       where: { id: orderId },
       data,
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await this.notifications.create({
+        userId: completed.sellerId,
+        type: 'MARKET_ORDER_COMPLETED',
+        title: `Order completed: "${completed.listing.title}"`,
+        body:
+          completed.escrowStatus === 'RELEASED'
+            ? 'Escrow has been released. Funds are on their way to your wallet.'
+            : 'The buyer confirmed delivery. Thanks for shipping!',
+        url: `/market/orders/${completed.id}`,
+        meta: { orderId: completed.id, listingId: completed.listingId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return completed;
   }
 
   /**

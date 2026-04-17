@@ -12,6 +12,7 @@ import { ethers } from 'ethers';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { NotificationsService } from '../notifications/notifications.service';
 
 interface CreateListingDto {
   title: string;
@@ -38,6 +39,7 @@ export class MarketService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly notifications: NotificationsService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -394,10 +396,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       where: {
         status: 'ACTIVE',
         id: { not: id },
-        OR: [
-          { type: src.type, tags: { hasSome: src.tags } },
-          { type: src.type },
-        ],
+        OR: [{ type: src.type, tags: { hasSome: src.tags } }, { type: src.type }],
       },
       take: limit * 2,
       orderBy: { createdAt: 'desc' },
@@ -600,14 +599,34 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
     const cleanContent = content ? sanitizeText(content).slice(0, 2000) : null;
 
-    return this.prisma.marketReview.upsert({
+    const review = await this.prisma.marketReview.upsert({
       where: { listingId_authorId: { listingId, authorId } },
       create: { listingId, authorId, rating: r, content: cleanContent },
       update: { rating: r, content: cleanContent },
       include: {
         author: { select: { id: true, username: true, avatarUrl: true } },
+        listing: { select: { id: true, title: true } },
       },
     });
+
+    if (listing.sellerId !== authorId) {
+      try {
+        await this.notifications.create({
+          userId: listing.sellerId,
+          type: 'MARKET_NEW_REVIEW',
+          title: `New ${r}-star review on "${review.listing.title}"`,
+          body: cleanContent ? cleanContent.slice(0, 200) : null,
+          url: `/market/agents/${listingId}`,
+          meta: { listingId, rating: r, authorId },
+        });
+      } catch (err) {
+        this.logger.warn(
+          `Failed to emit review notification: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+
+    return review;
   }
 
   async getReviews(listingId: string) {
@@ -947,6 +966,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       });
     } catch (err) {
       this.logger.error('Failed to create order welcome message', err);
+    }
+
+    try {
+      await this.notifications.create({
+        userId: listing.sellerId,
+        type: 'MARKET_NEW_SALE',
+        title: `New sale: "${listing.title}"`,
+        body: `Your listing just sold. ${useEscrow ? 'Funds are in escrow — mark the order as delivered to release them.' : 'The order is ready to be fulfilled.'}`,
+        url: `/market/orders/${purchase.id}`,
+        meta: { listingId, orderId: purchase.id, buyerId },
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Failed to emit sale notification: ${err instanceof Error ? err.message : err}`,
+      );
     }
 
     return { success: true, purchase, orderId: purchase.id, escrow: useEscrow };

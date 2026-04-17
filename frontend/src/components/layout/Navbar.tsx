@@ -4,7 +4,6 @@ import {
   Search,
   Sun,
   Moon,
-  Bell,
   ChevronDown,
   LogOut,
   User,
@@ -20,6 +19,8 @@ import React, { useState, useEffect, useRef } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
+
+import { NotificationsBell } from './NotificationsBell';
 
 interface NavbarProps {
   menuOpen: boolean;
@@ -181,9 +182,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
 
         {isAuthenticated ? (
           <>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all relative">
-              <Bell className="w-4 h-4" />
-            </button>
+            <NotificationsBell isAuthenticated={isAuthenticated} />
 
             <div ref={profileRef} className="relative">
               <button

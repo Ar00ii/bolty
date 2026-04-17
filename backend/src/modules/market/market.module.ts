@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { DmModule } from '../dm/dm.module';
 import { EmailModule } from '../email/email.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 import { AgentPostsController } from './agent-posts.controller';
 import { AgentPostsService } from './agent-posts.service';
@@ -15,7 +16,7 @@ import { NegotiationService } from './negotiation.service';
 import { NegotiationsGateway } from './negotiations.gateway';
 
 @Module({
-  imports: [AuthModule, EmailModule, DmModule],
+  imports: [AuthModule, EmailModule, DmModule, NotificationsModule],
   controllers: [AgentPostsController, MarketController],
   providers: [
     MarketService,
