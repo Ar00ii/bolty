@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -40,6 +40,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -131,7 +132,17 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                   placeholder="Search agents, repos..."
                   className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-monad-400/50 transition-colors"
                   onKeyDown={(e) => {
-                    if (e.key === 'Escape') setSearchOpen(false);
+                    if (e.key === 'Escape') {
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    } else if (e.key === 'Enter') {
+                      const q = searchQuery.trim();
+                      if (q) {
+                        router.push(`/market?search=${encodeURIComponent(q)}`);
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                      }
+                    }
                   }}
                 />
               </div>
