@@ -161,17 +161,40 @@ export class MarketController {
     @Query('search') search?: string,
     @Query('page') page?: string,
     @Query('sortBy') sortBy?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('tags') tags?: string,
+    @Query('hasDemo') hasDemo?: string,
   ) {
     const allowed = ['recent', 'trending', 'price-low', 'price-high'] as const;
     const normalizedSort = allowed.includes(sortBy as (typeof allowed)[number])
       ? (sortBy as (typeof allowed)[number])
       : 'recent';
+    const parsedMin = minPrice && !Number.isNaN(Number(minPrice)) ? Number(minPrice) : undefined;
+    const parsedMax = maxPrice && !Number.isNaN(Number(maxPrice)) ? Number(maxPrice) : undefined;
+    const parsedTags = tags
+      ? tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 10)
+      : undefined;
     return this.marketService.getListings({
       type,
       search,
       page: page ? Number(page) : 1,
       sortBy: normalizedSort,
+      minPrice: parsedMin,
+      maxPrice: parsedMax,
+      tags: parsedTags,
+      hasDemo: hasDemo === '1' || hasDemo === 'true',
     });
+  }
+
+  @Public()
+  @Get('facets')
+  getFacets() {
+    return this.marketService.getListingFacets();
   }
 
   // Must be defined before :id to avoid route clash

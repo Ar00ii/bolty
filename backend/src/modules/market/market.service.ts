@@ -187,6 +187,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     search?: string;
     page?: number;
     sortBy?: 'recent' | 'trending' | 'price-low' | 'price-high';
+    minPrice?: number;
+    maxPrice?: number;
+    tags?: string[];
+    hasDemo?: boolean;
   }) {
     const page = Math.max(1, params.page || 1);
     const take = 20;
@@ -201,6 +205,18 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         { description: { contains: params.search, mode: 'insensitive' } },
         { tags: { has: params.search.toLowerCase() } },
       ];
+    }
+    if (typeof params.minPrice === 'number' || typeof params.maxPrice === 'number') {
+      const priceFilter: Record<string, number> = {};
+      if (typeof params.minPrice === 'number') priceFilter.gte = params.minPrice;
+      if (typeof params.maxPrice === 'number') priceFilter.lte = params.maxPrice;
+      where.price = priceFilter;
+    }
+    if (params.tags && params.tags.length > 0) {
+      where.tags = { hasSome: params.tags.map((t) => t.toLowerCase()) };
+    }
+    if (params.hasDemo) {
+      where.agentEndpoint = { not: null };
     }
 
     if (sortBy === 'trending') {
@@ -230,6 +246,39 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     const data = await this.attachReviewStats(rawListings);
     return { data, total, page, pages: Math.ceil(total / take) };
+  }
+
+  async getListingFacets() {
+    const listings = await this.prisma.marketListing.findMany({
+      where: { status: 'ACTIVE' },
+      select: { tags: true, price: true, type: true },
+    });
+    const tagCounts = new Map<string, number>();
+    const typeCounts = new Map<string, number>();
+    let minPrice = Infinity;
+    let maxPrice = -Infinity;
+    for (const l of listings) {
+      for (const t of l.tags || []) {
+        tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+      }
+      typeCounts.set(l.type, (typeCounts.get(l.type) || 0) + 1);
+      if (l.price < minPrice) minPrice = l.price;
+      if (l.price > maxPrice) maxPrice = l.price;
+    }
+    const topTags = Array.from(tagCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([tag, count]) => ({ tag, count }));
+    const types = Array.from(typeCounts.entries()).map(([type, count]) => ({ type, count }));
+    return {
+      tags: topTags,
+      types,
+      priceRange: {
+        min: Number.isFinite(minPrice) ? minPrice : 0,
+        max: Number.isFinite(maxPrice) ? maxPrice : 0,
+      },
+      totalActive: listings.length,
+    };
   }
 
   private async attachReviewStats<T extends { id: string }>(listings: T[]) {

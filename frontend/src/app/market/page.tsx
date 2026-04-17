@@ -87,6 +87,13 @@ export default function MarketPage() {
   );
 }
 
+interface Facets {
+  tags: { tag: string; count: number }[];
+  types: { type: string; count: number }[];
+  priceRange: { min: number; max: number };
+  totalActive: number;
+}
+
 function MarketPageContent() {
   const { isLoading } = useAuth();
   const searchParams = useSearchParams();
@@ -99,6 +106,18 @@ function MarketPageContent() {
   const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trending'>(
     'recent',
   );
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [hasDemo, setHasDemo] = useState(false);
+  const [facets, setFacets] = useState<Facets | null>(null);
+
+  useEffect(() => {
+    api
+      .get<Facets>('/market/facets')
+      .then((f) => setFacets(f))
+      .catch(() => void 0);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -106,6 +125,10 @@ function MarketPageContent() {
       try {
         const qs = new URLSearchParams({ page: '1', sortBy });
         if (search) qs.set('search', search);
+        if (selectedTags.length > 0) qs.set('tags', selectedTags.join(','));
+        if (minPrice) qs.set('minPrice', minPrice);
+        if (maxPrice) qs.set('maxPrice', maxPrice);
+        if (hasDemo) qs.set('hasDemo', '1');
         const [listingsData, feedData] = await Promise.all([
           api.get<{ data: MarketListing[]; total: number; page: number; pages: number }>(
             `/market?${qs.toString()}`,
@@ -121,7 +144,23 @@ function MarketPageContent() {
       }
     };
     load();
-  }, [search, sortBy]);
+  }, [search, sortBy, selectedTags, minPrice, maxPrice, hasDemo]);
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedTags([]);
+    setMinPrice('');
+    setMaxPrice('');
+    setHasDemo(false);
+  };
+
+  const activeFilterCount =
+    selectedTags.length + (minPrice ? 1 : 0) + (maxPrice ? 1 : 0) + (hasDemo ? 1 : 0);
 
   if (isLoading || loading) {
     return (
@@ -219,7 +258,7 @@ function MarketPageContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
@@ -240,6 +279,79 @@ function MarketPageContent() {
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
           </select>
+        </div>
+
+        {/* Advanced filters */}
+        <div className="mb-8 rounded-lg border border-white/8 bg-zinc-950/50 p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-zinc-500">
+              Filters
+              {activeFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-purple-500/20 text-purple-200 text-[10px] font-medium px-1">
+                  {activeFilterCount}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                placeholder="Min price"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                className="w-28 px-2.5 py-1.5 rounded-md bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-purple-500/50"
+              />
+              <span className="text-zinc-600 text-xs">–</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                placeholder="Max price"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                className="w-28 px-2.5 py-1.5 rounded-md bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-xs focus:outline-none focus:border-purple-500/50"
+              />
+            </div>
+            <label className="inline-flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={hasDemo}
+                onChange={(e) => setHasDemo(e.target.checked)}
+                className="w-3.5 h-3.5 accent-purple-500"
+              />
+              Live demo available
+            </label>
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearFilters}
+                className="ml-auto text-xs text-zinc-400 hover:text-white"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+          {facets && facets.tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {facets.tags.map((t) => {
+                const active = selectedTags.includes(t.tag);
+                return (
+                  <button
+                    key={t.tag}
+                    onClick={() => toggleTag(t.tag)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] border transition-colors ${
+                      active
+                        ? 'bg-purple-500/20 text-purple-100 border-purple-400/40'
+                        : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:border-white/20'
+                    }`}
+                  >
+                    #{t.tag}
+                    <span className="ml-1 text-zinc-500">{t.count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Tabs */}
