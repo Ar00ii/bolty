@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Home, User, LogOut, Settings, ChevronDown, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -14,7 +14,21 @@ export function FloatingTopBar() {
   const { user, isAuthenticated, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [modKey, setModKey] = useState('Ctrl');
   const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)) {
+      setModKey('⌘');
+    }
+  }, []);
+
+  const openPalette = () => {
+    if (typeof window === 'undefined') return;
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, metaKey: true, bubbles: true }),
+    );
+  };
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
@@ -56,6 +70,21 @@ export function FloatingTopBar() {
           <Home className="w-5 h-5" />
         </Link>
       </motion.div>
+
+      {/* Command Palette Trigger */}
+      <motion.button
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.97 }}
+        onClick={openPalette}
+        title={`Open command palette (${modKey}K)`}
+        className="hidden md:inline-flex items-center gap-2 pl-2.5 pr-2 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 hover:border-white/20 text-zinc-400 hover:text-white transition-all duration-200"
+      >
+        <Search className="w-4 h-4" />
+        <span className="text-xs font-light">Search</span>
+        <kbd className="text-[10px] text-zinc-500 border border-white/10 rounded px-1 py-0.5 leading-none">
+          {modKey}K
+        </kbd>
+      </motion.button>
 
       {/* Profile Section */}
       <div ref={profileRef} className="relative">
