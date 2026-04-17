@@ -3,6 +3,8 @@
 import { Command, Keyboard, Slash, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
+import { GOTO_SHORTCUTS } from '@/lib/hooks/useGoToShortcuts';
+
 interface Shortcut {
   keys: string[];
   description: string;
@@ -30,6 +32,10 @@ const GROUPS: ShortcutGroup[] = [
       { keys: ['↓'], description: 'Move down' },
       { keys: ['↵'], description: 'Run selected command' },
     ],
+  },
+  {
+    title: 'Jump to page',
+    items: GOTO_SHORTCUTS,
   },
   {
     title: 'Global',

@@ -11,10 +11,12 @@ import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useGoToShortcuts } from '@/lib/hooks/useGoToShortcuts';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
+  useGoToShortcuts();
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
