@@ -35,41 +35,57 @@ export function Pagination({
   if (endPage < totalPages) pages.push(totalPages);
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-2 mt-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
+        aria-label="Previous page"
         className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeft className="w-4 h-4" />
       </button>
 
-      <div className="flex gap-1">
-        {pages.map((page, idx) => (
-          <button
-            key={idx}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...' || isLoading}
-            className={`px-3 py-1.5 rounded-lg text-sm font-light transition-all ${
-              page === currentPage
-                ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
-                : page === '...'
-                  ? 'text-zinc-600 cursor-default'
-                  : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      <ol className="flex gap-1 list-none m-0 p-0">
+        {pages.map((page, idx) => {
+          const isCurrent = page === currentPage;
+          const isEllipsis = page === '...';
+          return (
+            <li key={idx}>
+              <button
+                onClick={() => typeof page === 'number' && onPageChange(page)}
+                disabled={isEllipsis || isLoading}
+                aria-label={
+                  isEllipsis
+                    ? undefined
+                    : isCurrent
+                      ? `Page ${page}, current`
+                      : `Go to page ${page}`
+                }
+                aria-current={isCurrent ? 'page' : undefined}
+                aria-hidden={isEllipsis ? 'true' : undefined}
+                className={`px-3 py-1.5 rounded-lg text-sm font-light transition-all ${
+                  isCurrent
+                    ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
+                    : isEllipsis
+                      ? 'text-zinc-600 cursor-default'
+                      : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
+                }`}
+              >
+                {page}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
 
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
+        aria-label="Next page"
         className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronRight className="w-4 h-4" />
       </button>
-    </div>
+    </nav>
   );
 }
