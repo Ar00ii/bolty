@@ -124,7 +124,7 @@ export function UnifiedHeader() {
                     API Keys
                   </Link>
                   <Link
-                    href="/settings"
+                    href="/profile?tab=notifications"
                     onClick={() => setProfileOpen(false)}
                     className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50"
                   >

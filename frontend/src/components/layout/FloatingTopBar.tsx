@@ -149,7 +149,7 @@ export function FloatingTopBar() {
                 </Link>
 
                 <Link
-                  href="/profile?tab=security"
+                  href="/profile?tab=notifications"
                   onClick={() => setProfileOpen(false)}
                   className="flex items-center gap-3 px-4 py-2.5 text-sm font-light text-zinc-300 hover:text-white hover:bg-white/10 transition-all duration-200"
                 >
