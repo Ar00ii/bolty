@@ -32,6 +32,7 @@ import { Markdown } from '@/components/ui/Markdown';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
+import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -224,6 +225,7 @@ export default function AgentDetailPage() {
   const [related, setRelated] = useState<RelatedListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { record: recordRecent } = useRecentlyViewed();
 
   const loadReviews = useCallback(async () => {
     const data = await api
@@ -237,6 +239,14 @@ export default function AgentDetailPage() {
     try {
       const data = await api.get<MarketListing>(`/market/${id}`);
       setListing(data);
+      if (data && data.status !== 'REMOVED') {
+        recordRecent({
+          id: data.id,
+          title: data.title,
+          type: data.type,
+          seller: data.seller?.username ?? null,
+        });
+      }
       const [postsData, relatedData] = await Promise.all([
         api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => [] as AgentPost[]),
         api.get<RelatedListing[]>(`/market/${id}/related`).catch(() => [] as RelatedListing[]),
@@ -249,7 +259,7 @@ export default function AgentDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, loadReviews]);
+  }, [id, loadReviews, recordRecent]);
 
   useEffect(() => {
     load();

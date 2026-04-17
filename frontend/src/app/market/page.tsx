@@ -15,6 +15,8 @@ import {
   Users,
   Hash,
   Heart,
+  Clock,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -24,6 +26,7 @@ import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
+import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 
 interface MarketListing {
   id: string;
@@ -104,6 +107,7 @@ function MarketPageContent() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
   const { ids: favoriteIds } = useFavorites();
+  const { items: recentItems, clear: clearRecent, remove: removeRecent } = useRecentlyViewed();
   const [activeTab, setActiveTab] = useState<'all' | 'featured' | 'activity'>('all');
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
@@ -392,6 +396,62 @@ function MarketPageContent() {
             </div>
           )}
         </div>
+
+        {recentItems.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500">
+                <Clock className="w-3.5 h-3.5" />
+                Recently viewed
+              </div>
+              <button
+                onClick={clearRecent}
+                className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-thin">
+              {recentItems.slice(0, 12).map((r) => {
+                const accent = TYPE_ACCENTS[r.type] || TYPE_ACCENTS.OTHER;
+                const Icon = accent.icon;
+                return (
+                  <div
+                    key={r.id}
+                    className="group relative shrink-0 w-56 rounded-lg border border-white/8 hover:border-white/20 transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.02)' }}
+                  >
+                    <Link
+                      href={`/market/agents/${r.id}`}
+                      className="block p-3 pr-8"
+                      title={r.title}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <div
+                          className="w-6 h-6 rounded flex items-center justify-center shrink-0"
+                          style={{ background: `${accent.color}18` }}
+                        >
+                          <Icon className="w-3 h-3" style={{ color: accent.color }} />
+                        </div>
+                        <p className="text-xs font-light text-white truncate flex-1">{r.title}</p>
+                      </div>
+                      <p className="text-[10px] text-zinc-500 truncate">
+                        @{r.seller || 'anonymous'}
+                      </p>
+                    </Link>
+                    <button
+                      onClick={() => removeRecent(r.id)}
+                      aria-label="Remove from recently viewed"
+                      className="absolute top-2 right-2 w-5 h-5 rounded flex items-center justify-center text-zinc-600 hover:text-zinc-200 hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-white/8 mb-8">
