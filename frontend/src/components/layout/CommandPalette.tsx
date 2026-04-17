@@ -180,7 +180,7 @@ export function CommandPalette() {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const { items: recent } = useRecentlyViewed();
+  const { items: recent, clear: clearRecent } = useRecentlyViewed();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -342,8 +342,21 @@ export function CommandPalette() {
               return (
                 <React.Fragment key={cmd.id}>
                   {showHeader && (
-                    <div className="px-4 pt-2 pb-1 text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                      {headerLabel}
+                    <div className="flex items-center justify-between px-4 pt-2 pb-1">
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                        {headerLabel}
+                      </span>
+                      {currentGroup === 'recent' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearRecent();
+                          }}
+                          className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 hover:text-zinc-300 transition-colors"
+                        >
+                          Clear
+                        </button>
+                      )}
                     </div>
                   )}
                   <button
