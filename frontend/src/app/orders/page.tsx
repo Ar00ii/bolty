@@ -12,6 +12,8 @@ import {
   Download,
   TrendingUp,
   Lock,
+  Search,
+  X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
@@ -199,6 +201,7 @@ export default function OrdersPage() {
   const router = useRouter();
   const [tab, setTab] = useState<'buying' | 'selling'>('buying');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [search, setSearch] = useState('');
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
@@ -235,9 +238,20 @@ export default function OrdersPage() {
   }
 
   const baseOrders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const q = search.trim().toLowerCase();
+  const searched = q
+    ? baseOrders.filter((o) => {
+        const counterparty = tab === 'buying' ? o.seller.username : o.buyer.username;
+        return (
+          o.listing.title.toLowerCase().includes(q) ||
+          (counterparty || '').toLowerCase().includes(q) ||
+          o.id.toLowerCase().includes(q)
+        );
+      })
+    : baseOrders;
   const orders =
-    statusFilter === 'ALL' ? baseOrders : baseOrders.filter((o) => o.status === statusFilter);
-  const statusCounts = baseOrders.reduce<Record<string, number>>((acc, o) => {
+    statusFilter === 'ALL' ? searched : searched.filter((o) => o.status === statusFilter);
+  const statusCounts = searched.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] || 0) + 1;
     return acc;
   }, {});
@@ -290,6 +304,7 @@ export default function OrdersPage() {
           onClick={() => {
             setTab('buying');
             setStatusFilter('ALL');
+            setSearch('');
           }}
           className={`tab-item ${tab === 'buying' ? 'active' : ''}`}
         >
@@ -299,12 +314,35 @@ export default function OrdersPage() {
           onClick={() => {
             setTab('selling');
             setStatusFilter('ALL');
+            setSearch('');
           }}
           className={`tab-item ${tab === 'selling' ? 'active' : ''}`}
         >
           <TrendingUp className="w-3.5 h-3.5" /> Selling ({sellerOrders.length})
         </button>
       </div>
+
+      {/* Search */}
+      {baseOrders.length > 0 && (
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by title, counterparty, or order id…"
+            className="w-full pl-9 pr-9 py-2 text-sm rounded-lg bg-white/[0.04] border border-white/10 focus:border-white/20 focus:outline-none text-white placeholder-zinc-600 font-light"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/10 transition-colors"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Status filter */}
       <div className="flex flex-wrap gap-2 mb-6">
