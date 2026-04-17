@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import {
   Bot,
   GitBranch,
-  ArrowRight,
   Shield,
   Key,
   Star,
@@ -15,16 +14,14 @@ import {
   Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
 import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { AvatarCircles } from '@/components/ui/AvatarCircles';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
-import { GradientText } from '@/components/ui/GradientText';
 import { RenderHero } from '@/components/ui/RenderHero';
-import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 // Data
@@ -110,42 +107,8 @@ const TESTIMONIALS = [
   },
 ];
 
-const FAQ = [
-  {
-    question: 'How do I publish my AI agent?',
-    answer:
-      'Simply connect your GitHub repository or upload your agent files directly. Our platform handles deployment, versioning, and scaling automatically.',
-  },
-  {
-    question: 'How do I get paid?',
-    answer:
-      'Earnings are processed directly to your Ethereum wallet. We handle payment processing through smart contracts with zero middleman fees.',
-  },
-  {
-    question: 'What programming languages are supported?',
-    answer:
-      'We support any language and framework. Just containerize it with Docker, and our platform handles the rest.',
-  },
-  {
-    question: 'How does the reputation system work?',
-    answer:
-      'Your reputation grows with positive transactions, community contributions, and uptime. Higher reputation unlocks premium features and visibility.',
-  },
-  {
-    question: 'Can I test my agent before publishing?',
-    answer:
-      'Yes! Use our sandbox environment to test API endpoints, chat interactions, and integrations before going live.',
-  },
-  {
-    question: 'What are the fees?',
-    answer:
-      'We take a 5% commission on transactions. No setup fees, no hidden charges. Transparent pricing for everyone.',
-  },
-];
-
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuth();
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
@@ -316,138 +279,6 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* ── FAQ SECTION ── */}
-      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12 text-center"
-          >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Questions</p>
-            <h2 className="text-5xl font-light text-white">Frequently asked</h2>
-          </motion.div>
-
-          <div className="space-y-3">
-            {FAQ.map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="border rounded-lg transition-all"
-                style={{
-                  borderColor:
-                    openFaqIndex === i ? 'rgba(168, 85, 247, 0.4)' : 'rgba(255, 255, 255, 0.1)',
-                  background: openFaqIndex === i ? 'rgba(168, 85, 247, 0.05)' : 'transparent',
-                }}
-              >
-                <button
-                  onClick={() => setOpenFaqIndex(openFaqIndex === i ? null : i)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
-                  aria-expanded={openFaqIndex === i}
-                  aria-controls={`faq-answer-${i}`}
-                >
-                  <h3 className="text-lg font-light text-white">{item.question}</h3>
-                  <motion.div
-                    animate={{ rotate: openFaqIndex === i ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ArrowRight className="w-5 h-5 text-purple-400" />
-                  </motion.div>
-                </button>
-                <motion.div
-                  id={`faq-answer-${i}`}
-                  initial={false}
-                  animate={{
-                    height: openFaqIndex === i ? 'auto' : 0,
-                    opacity: openFaqIndex === i ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.3 }}
-                  className="overflow-hidden"
-                >
-                  <p className="px-6 pb-4 text-gray-400">{item.answer}</p>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── NEWSLETTER SIGNUP ── */}
-      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-3xl font-light text-white mb-2">Stay updated</h2>
-            <p className="text-gray-400 mb-8">
-              Get the latest news about new agents, features, and opportunities.
-            </p>
-            <div className="flex gap-2 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 transition-colors"
-                aria-label="Email address for newsletter"
-              />
-              <button className="px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-light transition-colors">
-                Subscribe
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── CTA FINAL ── */}
-      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-5xl font-light mb-4">
-              Ready to <GradientText gradient="purple">start building</GradientText>?
-            </h2>
-            <p className="text-lg text-gray-400 mb-8">
-              Join the platform where code meets commerce. Publish, sell, and earn — all in one
-              place.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {!isAuthenticated ? (
-                <>
-                  <ShimmerButton
-                    as={Link}
-                    href="/auth?tab=register"
-                    className="text-white text-sm px-8 py-3 rounded-lg flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    Create free account <ArrowRight className="w-4 h-4" />
-                  </ShimmerButton>
-                  <Link
-                    href="/docs/agent-protocol"
-                    className="text-gray-300 text-sm px-8 py-3 rounded-lg border border-gray-600 hover:border-gray-400 hover:text-white transition-all"
-                  >
-                    Read the docs
-                  </Link>
-                </>
-              ) : (
-                <ShimmerButton
-                  as={Link}
-                  href="/market"
-                  className="text-white text-sm px-8 py-3 rounded-lg inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 transition-all shadow-lg hover:shadow-xl"
-                >
-                  Go to dashboard <ArrowRight className="w-4 h-4" />
-                </ShimmerButton>
-              )}
-            </div>
-          </motion.div>
         </div>
       </section>
 
