@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Package, ShoppingCart, Star, Users } from 'lucide-react';
+import { ArrowLeft, Package, Search, ShoppingCart, Star, Users, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface TopSeller {
   id: string;
@@ -43,9 +44,15 @@ function Avatar({ url, username }: { url: string | null; username: string | null
   );
 }
 
+type SellerSort = 'sales' | 'rating' | 'listings';
+
 export default function TopSellersPage() {
   const [sellers, setSellers] = useState<TopSeller[]>([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState<SellerSort>('sales');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     (async () => {
@@ -59,6 +66,22 @@ export default function TopSellersPage() {
       }
     })();
   }, []);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? sellers.filter((s) =>
+          [s.username ?? '', s.bio ?? '', s.githubLogin ?? ''].join(' ').toLowerCase().includes(q),
+        )
+      : sellers;
+    if (sort === 'rating') {
+      return [...filtered].sort((a, b) => (b.avgRating ?? 0) - (a.avgRating ?? 0));
+    }
+    if (sort === 'listings') {
+      return [...filtered].sort((a, b) => b.activeListings - a.activeListings);
+    }
+    return filtered;
+  }, [sellers, query, sort]);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-page)' }}>
@@ -96,6 +119,65 @@ export default function TopSellersPage() {
           </p>
         </div>
 
+        {!loading && sellers.length > 0 && (
+          <div
+            className="mb-6 rounded-xl border border-white/5 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+            style={{ background: 'var(--bg-card)' }}
+          >
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+              <input
+                ref={searchRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Find a creator…"
+                className="w-full bg-transparent border border-white/8 rounded-lg pl-9 pr-14 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#836EF9]/40 transition-colors"
+              />
+              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {query ? (
+                  <button
+                    onClick={() => setQuery('')}
+                    aria-label="Clear search"
+                    className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                ) : (
+                  <kbd className="hidden sm:inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded border border-white/10 bg-white/[0.04] text-[9px] text-zinc-500 font-mono leading-none">
+                    /
+                  </kbd>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mr-2">
+                Sort
+              </span>
+              {(
+                [
+                  { k: 'sales', label: 'Sales', Icon: ShoppingCart },
+                  { k: 'rating', label: 'Rating', Icon: Star },
+                  { k: 'listings', label: 'Listings', Icon: Package },
+                ] as const
+              ).map(({ k, label, Icon }) => (
+                <button
+                  key={k}
+                  onClick={() => setSort(k)}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
+                    sort === k
+                      ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
+                      : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
@@ -123,9 +205,19 @@ export default function TopSellersPage() {
               Browse listings
             </Link>
           </div>
+        ) : visible.length === 0 ? (
+          <div
+            className="rounded-xl border border-white/10 p-12 text-center"
+            style={{ background: 'var(--bg-card)' }}
+          >
+            <Users className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
+            <p className="text-sm text-zinc-300 font-light">
+              {query ? `No creators match "${query}"` : 'No matches'}
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sellers.map((s, i) => (
+            {visible.map((s, i) => (
               <motion.div
                 key={s.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -144,7 +236,7 @@ export default function TopSellersPage() {
                         <p className="text-sm font-light text-white truncate">
                           @{s.username || 'unknown'}
                         </p>
-                        {i < 3 && (
+                        {sort === 'sales' && !query.trim() && i < 3 && (
                           <span
                             className="text-[10px] font-medium px-2 py-0.5 rounded-full"
                             style={{
