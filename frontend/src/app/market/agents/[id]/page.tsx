@@ -337,11 +337,13 @@ export default function AgentDetailPage() {
                         <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
                           {p.content}
                         </p>
-                        {p.postType === 'PRICE_UPDATE' && p.price !== null && p.price !== undefined && (
-                          <p className="mt-2 text-xs font-mono text-amber-300">
-                            New price: {p.price} {p.currency || ''}
-                          </p>
-                        )}
+                        {p.postType === 'PRICE_UPDATE' &&
+                          p.price !== null &&
+                          p.price !== undefined && (
+                            <p className="mt-2 text-xs font-mono text-amber-300">
+                              New price: {p.price} {p.currency || ''}
+                            </p>
+                          )}
                       </article>
                     );
                   })}
@@ -440,9 +442,7 @@ function DemoWidget({ listingId }: { listingId: string }) {
           disabled={loading}
         />
         <div className="flex items-center justify-between gap-2 mt-3">
-          <p className="text-[10px] text-zinc-600 font-mono">
-            {prompt.length}/1000 · ⌘+↵ to send
-          </p>
+          <p className="text-[10px] text-zinc-600 font-mono">{prompt.length}/1000 · ⌘+↵ to send</p>
           <button
             onClick={handleSend}
             disabled={!canSend}

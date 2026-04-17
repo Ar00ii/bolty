@@ -314,7 +314,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (!listing.agentEndpoint || !isSafeUrl(listing.agentEndpoint)) {
       throw new BadRequestException('This listing has no live endpoint');
     }
-    const cleanPrompt = String(prompt || '').trim().slice(0, 1000);
+    const cleanPrompt = String(prompt || '')
+      .trim()
+      .slice(0, 1000);
     if (!cleanPrompt) {
       throw new BadRequestException('Prompt required');
     }
@@ -334,9 +336,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       );
       const raw = resp.data;
       const reply =
-        typeof raw === 'string'
-          ? raw
-          : String(raw?.reply ?? raw?.output ?? raw?.message ?? '');
+        typeof raw === 'string' ? raw : String(raw?.reply ?? raw?.output ?? raw?.message ?? '');
       const trimmed = reply.trim();
       return { reply: trimmed ? trimmed.slice(0, 4000) : 'Agent responded with no content.' };
     } catch (err) {
