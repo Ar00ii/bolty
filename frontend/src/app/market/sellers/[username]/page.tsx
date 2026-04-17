@@ -14,6 +14,7 @@ import {
   Calendar,
   ShoppingCart,
   ChevronRight,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -22,6 +23,7 @@ import React, { useEffect, useState } from 'react';
 import { GradientText } from '@/components/ui/GradientText';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError } from '@/lib/api/client';
+import { useFavorites } from '@/lib/hooks/useFavorites';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 
@@ -100,6 +102,7 @@ export default function SellerProfilePage() {
   const [data, setData] = useState<SellerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const { has, toggle } = useFavorites();
 
   useEffect(() => {
     if (!username) return;
@@ -288,12 +291,29 @@ export default function SellerProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {listings.map((l) => {
                 const meta = TYPE_META[l.type] || TYPE_META.OTHER;
+                const saved = has(l.id);
                 return (
                   <Link
                     key={l.id}
                     href={`/market/agents/${l.id}`}
-                    className="group border border-white/8 rounded-lg bg-zinc-950/50 p-4 hover:border-purple-400/30 hover:bg-purple-500/5 transition-colors"
+                    className="group relative border border-white/8 rounded-lg bg-zinc-950/50 p-4 hover:border-purple-400/30 hover:bg-purple-500/5 transition-colors"
                   >
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggle(l.id);
+                      }}
+                      aria-pressed={saved}
+                      aria-label={saved ? 'Remove from saved' : 'Save for later'}
+                      className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+                        saved
+                          ? 'text-pink-400 bg-pink-500/10 opacity-100'
+                          : 'text-zinc-500 hover:text-pink-300 hover:bg-white/5 opacity-0 group-hover:opacity-100'
+                      }`}
+                    >
+                      <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-pink-400' : ''}`} />
+                    </button>
                     <div className="flex items-start gap-3 mb-3">
                       <div
                         className="w-9 h-9 rounded-md flex items-center justify-center"
@@ -301,7 +321,7 @@ export default function SellerProfilePage() {
                       >
                         <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
                       </div>
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 pr-7">
                         <div className="text-sm font-medium text-white truncate">{l.title}</div>
                         <div className="text-[11px] text-zinc-500 mt-0.5">
                           {meta.label} · {timeAgo(l.createdAt)}
