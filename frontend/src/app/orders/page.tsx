@@ -125,10 +125,31 @@ function OrderCard({
   );
 }
 
+type StatusFilter = 'ALL' | OrderStatus;
+
+const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+  ALL: 'All',
+  PENDING_DELIVERY: 'Pending',
+  IN_PROGRESS: 'In progress',
+  DELIVERED: 'Delivered',
+  COMPLETED: 'Completed',
+  DISPUTED: 'Disputed',
+};
+
+const STATUS_FILTER_ORDER: StatusFilter[] = [
+  'ALL',
+  'PENDING_DELIVERY',
+  'IN_PROGRESS',
+  'DELIVERED',
+  'COMPLETED',
+  'DISPUTED',
+];
+
 export default function OrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<'buying' | 'selling'>('buying');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
@@ -164,7 +185,13 @@ export default function OrdersPage() {
     );
   }
 
-  const orders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const baseOrders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const orders =
+    statusFilter === 'ALL' ? baseOrders : baseOrders.filter((o) => o.status === statusFilter);
+  const statusCounts = baseOrders.reduce<Record<string, number>>((acc, o) => {
+    acc[o.status] = (acc[o.status] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="page-container py-8">
@@ -197,19 +224,47 @@ export default function OrdersPage() {
       )}
 
       {/* Tabs */}
-      <div className="tab-group mb-6">
+      <div className="tab-group mb-4">
         <button
-          onClick={() => setTab('buying')}
+          onClick={() => {
+            setTab('buying');
+            setStatusFilter('ALL');
+          }}
           className={`tab-item ${tab === 'buying' ? 'active' : ''}`}
         >
           <ShoppingBag className="w-3.5 h-3.5" /> Buying ({buyerOrders.length})
         </button>
         <button
-          onClick={() => setTab('selling')}
+          onClick={() => {
+            setTab('selling');
+            setStatusFilter('ALL');
+          }}
           className={`tab-item ${tab === 'selling' ? 'active' : ''}`}
         >
           <TrendingUp className="w-3.5 h-3.5" /> Selling ({sellerOrders.length})
         </button>
+      </div>
+
+      {/* Status filter */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {STATUS_FILTER_ORDER.map((s) => {
+          const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
+          const active = statusFilter === s;
+          return (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                active
+                  ? 'border-monad-500/60 bg-monad-500/10 text-monad-300'
+                  : 'border-white/10 text-zinc-400 hover:text-white hover:border-white/20'
+              }`}
+            >
+              {STATUS_FILTER_LABELS[s]}
+              <span className="ml-1.5 text-[10px] text-zinc-600">{count}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Orders list */}
