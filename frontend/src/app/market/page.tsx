@@ -593,18 +593,42 @@ function StatCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="p-4 rounded-lg border border-white/8 bg-white/3 hover:bg-white/5 transition-colors">
+    <div
+      className="group relative p-4 rounded-xl overflow-hidden transition-colors hover:bg-white/[0.02]"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -12px rgba(0,0,0,0.55)',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+        }}
+      />
       <div className="flex items-center gap-3 mb-3">
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-purple-300"
-          style={{ background: 'rgba(131,110,249,0.1)' }}
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-[#b4a7ff]"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.06) 100%)',
+            border: '1px solid rgba(131,110,249,0.2)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}
         >
           {icon}
         </div>
-        <span className="text-xs text-zinc-400 uppercase tracking-wider">{label}</span>
+        <span className="text-[10.5px] text-zinc-500 uppercase tracking-[0.18em] font-medium">
+          {label}
+        </span>
       </div>
-      <p className="text-2xl font-light text-white mb-1">{value}</p>
-      <p className="text-[11px] text-zinc-500">{trend}</p>
+      <p className="text-[26px] font-light text-white leading-none mb-2 tracking-[-0.01em]">
+        {value}
+      </p>
+      <p className="text-[11px] text-zinc-500 tracking-wide">{trend}</p>
     </div>
   );
 }
@@ -618,9 +642,27 @@ function ListingCard({ listing, featured }: { listing: MarketListing; featured?:
   return (
     <Link
       href={`/market/agents/${listing.id}`}
-      className="group relative block text-left p-5 rounded-lg border border-white/8 bg-white/3 hover:bg-white/5 hover:border-white/15 transition-all"
+      className="group relative block text-left p-5 rounded-xl overflow-hidden transition-colors"
       data-featured={featured ? 'true' : undefined}
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 30px -16px rgba(0,0,0,0.5)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent.color} 50%, transparent 100%)`,
+        }}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
+        style={{ background: `${accent.color}25` }}
+      />
+
       <button
         onClick={(e) => {
           e.preventDefault();
@@ -629,44 +671,61 @@ function ListingCard({ listing, featured }: { listing: MarketListing; featured?:
         }}
         aria-pressed={saved}
         aria-label={saved ? 'Remove from saved' : 'Save for later'}
-        className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+        className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all z-10 ${
           saved
-            ? 'text-pink-400 bg-pink-500/10 opacity-100'
+            ? 'text-pink-300 opacity-100'
             : 'text-zinc-500 hover:text-pink-300 hover:bg-white/5 opacity-0 group-hover:opacity-100'
         }`}
+        style={
+          saved
+            ? {
+                background: 'rgba(236,72,153,0.1)',
+                border: '1px solid rgba(236,72,153,0.22)',
+              }
+            : undefined
+        }
       >
-        <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-pink-400' : ''}`} />
+        <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-pink-300' : ''}`} strokeWidth={1.75} />
       </button>
 
-      <div className="flex items-start gap-3 mb-4">
+      <div className="relative flex items-start gap-3 mb-4">
         <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+          className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{
-            background: `${accent.color}15`,
-            border: `1px solid ${accent.color}30`,
+            background: `linear-gradient(135deg, ${accent.color}22 0%, ${accent.color}08 100%)`,
+            border: `1px solid ${accent.color}38`,
+            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${accent.color}30`,
           }}
         >
-          <Icon className="w-5 h-5" style={{ color: accent.color }} />
+          <Icon className="w-[18px] h-[18px]" style={{ color: accent.color }} />
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-white truncate">{listing.title}</h3>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
-            by {listing.seller.username || 'Anonymous'}
+        <div className="flex-1 min-w-0 pt-0.5">
+          <h3 className="text-[14px] font-medium text-white truncate tracking-[-0.005em]">
+            {listing.title}
+          </h3>
+          <p className="text-[11px] text-zinc-500 mt-1">
+            by <span className="text-zinc-400">@{listing.seller.username || 'anonymous'}</span>
           </p>
         </div>
       </div>
 
       {listing.description && (
-        <p className="text-xs text-zinc-400 mb-3 line-clamp-2">{listing.description}</p>
+        <p className="relative text-[12px] text-zinc-400 mb-4 line-clamp-2 leading-relaxed">
+          {listing.description}
+        </p>
       )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-white/5">
+      <div className="relative flex items-center justify-between pt-3 border-t border-white/[0.05]">
         <div className="flex items-center gap-2">
           <span
-            className="text-[10px] px-2 py-1 rounded bg-white/5 uppercase tracking-wider"
-            style={{ color: accent.color }}
+            className="text-[9.5px] font-semibold px-2 py-1 rounded uppercase tracking-[0.12em]"
+            style={{
+              color: accent.color,
+              background: `${accent.color}14`,
+              border: `1px solid ${accent.color}26`,
+            }}
           >
-            {listing.type}
+            {listing.type.replace('_', ' ')}
           </span>
           {listing.reviewAverage !== null &&
             listing.reviewAverage !== undefined &&
@@ -678,10 +737,11 @@ function ListingCard({ listing, featured }: { listing: MarketListing; featured?:
               </span>
             )}
         </div>
-        <div className="text-right">
-          <p className="text-xs text-zinc-500">from</p>
-          <p className="text-sm font-medium text-white">
-            {listing.price} {listing.currency}
+        <div className="text-right leading-none">
+          <p className="text-[10px] text-zinc-500 uppercase tracking-[0.12em] mb-1">from</p>
+          <p className="text-[14px] font-medium text-white tracking-[-0.005em]">
+            {listing.price}
+            <span className="text-zinc-500 font-normal ml-1">{listing.currency}</span>
           </p>
         </div>
       </div>
