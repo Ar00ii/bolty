@@ -23,6 +23,7 @@ import {
   Heart,
   Library,
   BarChart3,
+  Trophy,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -99,6 +100,7 @@ export function Sidebar() {
         { label: 'Global Chat', href: '/chat', icon: MessageSquare },
         { label: 'Trending', href: '/chat?tab=trending', icon: Flame },
         { label: 'Discover', href: '/chat?tab=discover', icon: Star },
+        { label: 'Leaderboard', href: '/reputation/leaderboard', icon: Trophy },
       ],
     },
     {
