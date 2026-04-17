@@ -1,7 +1,17 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, TrendingUp, Package, Bot, GitBranch, Zap, Search, MoreVertical } from 'lucide-react';
+import {
+  Star,
+  TrendingUp,
+  Package,
+  Bot,
+  GitBranch,
+  Zap,
+  Search,
+  MoreVertical,
+  BarChart3,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useState, useEffect } from 'react';
@@ -171,6 +181,13 @@ function MarketPageContent() {
               >
                 <GitBranch className="w-4 h-4" />
                 Repos
+              </Link>
+              <Link
+                href="/market/seller"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-purple-500/40 text-white hover:bg-purple-500/5 transition-all"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Seller
               </Link>
             </div>
           </div>

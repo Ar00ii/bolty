@@ -220,6 +220,11 @@ export class MarketController {
     return this.negotiationService.getNegotiation(id, userId);
   }
 
+  @Get('seller/analytics')
+  getSellerAnalytics(@CurrentUser('id') userId: string) {
+    return this.marketService.getSellerAnalytics(userId);
+  }
+
   @Public()
   @Get(':id')
   getListing(@Param('id') id: string) {

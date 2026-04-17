@@ -451,6 +451,164 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return { ok: true };
   }
 
+  // ── Seller analytics ──────────────────────────────────────────────────────
+
+  async getSellerAnalytics(sellerId: string) {
+    const since30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const since7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const listings = await this.prisma.marketListing.findMany({
+      where: { sellerId, status: { not: 'REMOVED' } },
+      select: {
+        id: true,
+        title: true,
+        type: true,
+        price: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    const listingIds = listings.map((l) => l.id);
+
+    if (listingIds.length === 0) {
+      return {
+        totals: {
+          listings: 0,
+          activeListings: 0,
+          salesAllTime: 0,
+          salesLast30: 0,
+          salesLast7: 0,
+          revenueAllTime: 0,
+          revenueLast30: 0,
+          negotiationsOpenLast30: 0,
+          avgRating: null as number | null,
+          reviewCount: 0,
+        },
+        listings: [],
+        recentSales: [],
+        salesByDay: [],
+      };
+    }
+
+    const [
+      purchaseAllTime,
+      purchaseLast30,
+      purchaseLast7,
+      negotiationStats,
+      reviewAgg,
+      reviewPerListing,
+      salesPerListing,
+      recentSales,
+      salesRaw,
+    ] = await Promise.all([
+      this.prisma.marketPurchase.aggregate({
+        where: { listingId: { in: listingIds } },
+        _count: { _all: true },
+      }),
+      this.prisma.marketPurchase.findMany({
+        where: { listingId: { in: listingIds }, createdAt: { gte: since30 } },
+        select: { listingId: true, createdAt: true },
+      }),
+      this.prisma.marketPurchase.count({
+        where: { listingId: { in: listingIds }, createdAt: { gte: since7 } },
+      }),
+      this.prisma.agentNegotiation.count({
+        where: { listingId: { in: listingIds }, createdAt: { gte: since30 } },
+      }),
+      this.prisma.marketReview.aggregate({
+        where: { listingId: { in: listingIds } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+      this.prisma.marketReview.groupBy({
+        by: ['listingId'],
+        where: { listingId: { in: listingIds } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      }),
+      this.prisma.marketPurchase.groupBy({
+        by: ['listingId'],
+        where: { listingId: { in: listingIds } },
+        _count: { _all: true },
+      }),
+      this.prisma.marketPurchase.findMany({
+        where: { listingId: { in: listingIds } },
+        orderBy: { createdAt: 'desc' },
+        take: 10,
+        select: {
+          id: true,
+          createdAt: true,
+          status: true,
+          listing: { select: { id: true, title: true } },
+          buyer: { select: { id: true, username: true, avatarUrl: true } },
+        },
+      }),
+      this.prisma.marketPurchase.findMany({
+        where: { listingId: { in: listingIds }, createdAt: { gte: since30 } },
+        select: { createdAt: true, listingId: true },
+      }),
+    ]);
+
+    // Revenue: sum price * sales count per listing (price captured on listing,
+    // since amountWei may be 0 for legacy rows). Good enough for dashboard.
+    const salesByListing = new Map<string, number>();
+    for (const s of salesPerListing) salesByListing.set(s.listingId, s._count._all);
+    const revenueAllTime = listings.reduce(
+      (sum, l) => sum + (salesByListing.get(l.id) || 0) * (l.price || 0),
+      0,
+    );
+    const last30ByListing = new Map<string, number>();
+    for (const p of purchaseLast30) {
+      last30ByListing.set(p.listingId, (last30ByListing.get(p.listingId) || 0) + 1);
+    }
+    const revenueLast30 = listings.reduce(
+      (sum, l) => sum + (last30ByListing.get(l.id) || 0) * (l.price || 0),
+      0,
+    );
+
+    const reviewByListing = new Map(reviewPerListing.map((r) => [r.listingId, r]));
+
+    // Sales by day (last 30 days, ISO date key)
+    const byDay = new Map<string, number>();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      byDay.set(d.toISOString().slice(0, 10), 0);
+    }
+    for (const s of salesRaw) {
+      const key = s.createdAt.toISOString().slice(0, 10);
+      if (byDay.has(key)) byDay.set(key, (byDay.get(key) || 0) + 1);
+    }
+
+    return {
+      totals: {
+        listings: listings.length,
+        activeListings: listings.filter((l) => l.status === 'ACTIVE').length,
+        salesAllTime: purchaseAllTime._count._all,
+        salesLast30: purchaseLast30.length,
+        salesLast7: purchaseLast7,
+        revenueAllTime: Number(revenueAllTime.toFixed(4)),
+        revenueLast30: Number(revenueLast30.toFixed(4)),
+        negotiationsOpenLast30: negotiationStats,
+        avgRating: reviewAgg._avg.rating ? Number(reviewAgg._avg.rating.toFixed(2)) : null,
+        reviewCount: reviewAgg._count._all,
+      },
+      listings: listings.map((l) => {
+        const r = reviewByListing.get(l.id);
+        return {
+          ...l,
+          sales: salesByListing.get(l.id) || 0,
+          revenue: Number(((salesByListing.get(l.id) || 0) * (l.price || 0)).toFixed(4)),
+          reviewAverage: r?._avg.rating ? Number(r._avg.rating.toFixed(2)) : null,
+          reviewCount: r?._count._all ?? 0,
+        };
+      }),
+      recentSales,
+      salesByDay: Array.from(byDay.entries()).map(([date, sales]) => ({ date, sales })),
+    };
+  }
+
   async purchaseListing(
     listingId: string,
     buyerId: string,
