@@ -43,13 +43,34 @@ function Section({
   title: string;
   children: React.ReactNode;
 }) {
+  const [copied, setCopied] = useState(false);
+  const copyLink = () => {
+    if (typeof window === 'undefined') return;
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        window.history.replaceState(null, '', `#${id}`);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  };
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <h2
-        className="text-lg font-light text-zinc-100 font-mono border-b pb-3"
+        className="text-lg font-light text-zinc-100 font-mono border-b pb-3 flex items-center gap-2"
         style={{ borderColor: 'rgba(131,110,249,0.15)' }}
       >
-        <span className="text-monad-400">#</span> {title}
+        <button
+          onClick={copyLink}
+          aria-label={`Copy link to ${title}`}
+          title={copied ? 'Link copied' : 'Copy link to section'}
+          className="text-monad-400 opacity-60 hover:opacity-100 transition-opacity"
+        >
+          {copied ? '✓' : '#'}
+        </button>
+        {title}
       </h2>
       {children}
     </section>
