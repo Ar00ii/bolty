@@ -48,8 +48,15 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
     const onClick = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
     document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onClick);
+      document.removeEventListener('keydown', onKey);
+    };
   }, []);
 
   const load = useCallback(async () => {
@@ -103,13 +110,16 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
       <button
         onClick={() => setOpen((v) => !v)}
         className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all relative"
-        aria-label="Notifications"
+        aria-label={count > 0 ? `Notifications (${count} unread)` : 'Notifications'}
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <Bell className="w-4 h-4" />
         {count > 0 && (
           <span
             className="absolute -top-0.5 -right-0.5 min-w-[16px] h-[16px] px-1 rounded-full text-[10px] font-medium flex items-center justify-center"
             style={{ background: '#836EF9', color: 'white' }}
+            aria-hidden="true"
           >
             {count > 9 ? '9+' : count}
           </span>
