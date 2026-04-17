@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import { useActiveSection } from '@/lib/hooks/useActiveSection';
 
 function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
   const [copied, setCopied] = useState(false);
@@ -122,6 +124,8 @@ const NAV = [
 ];
 
 export default function AgentApiPage() {
+  const ids = useMemo(() => NAV.map((n) => n.id), []);
+  const active = useActiveSection(ids);
   return (
     <div className="min-h-screen" style={{ background: '#07070f' }}>
       {/* Header */}
@@ -155,15 +159,22 @@ export default function AgentApiPage() {
             <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 mb-4">
               On this page
             </div>
-            {NAV.map(({ id, label }) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                className="block text-xs font-mono text-zinc-500 hover:text-monad-300 py-1 transition-colors"
-              >
-                {label}
-              </a>
-            ))}
+            {NAV.map(({ id, label }) => {
+              const isActive = active === id;
+              return (
+                <a
+                  key={id}
+                  href={`#${id}`}
+                  className={`block text-xs font-mono py-1 pl-3 -ml-3 border-l transition-colors ${
+                    isActive
+                      ? 'text-monad-300 border-monad-400'
+                      : 'text-zinc-500 border-transparent hover:text-monad-300 hover:border-monad-400/40'
+                  }`}
+                >
+                  {label}
+                </a>
+              );
+            })}
           </div>
         </aside>
 

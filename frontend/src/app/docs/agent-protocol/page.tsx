@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import { useActiveSection } from '@/lib/hooks/useActiveSection';
 
 // ── Code block with copy ────────────────────────────────────────────────────
 
@@ -105,6 +107,8 @@ const NAV = [
 ];
 
 export default function AgentProtocolPage() {
+  const ids = useMemo(() => NAV.map((n) => n.id), []);
+  const active = useActiveSection(ids);
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Header */}
@@ -133,15 +137,22 @@ export default function AgentProtocolPage() {
               On this page
             </div>
             <div className="space-y-0.5">
-              {NAV.map(({ id, label }) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200"
-                >
-                  {label}
-                </a>
-              ))}
+              {NAV.map(({ id, label }) => {
+                const isActive = active === id;
+                return (
+                  <a
+                    key={id}
+                    href={`#${id}`}
+                    className={`block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-all duration-200 ${
+                      isActive
+                        ? 'text-monad-300 bg-monad-500/10'
+                        : 'text-zinc-500 hover:text-monad-400 hover:bg-monad-500/5'
+                    }`}
+                  >
+                    {label}
+                  </a>
+                );
+              })}
             </div>
           </div>
         </aside>
