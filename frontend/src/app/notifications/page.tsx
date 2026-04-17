@@ -90,6 +90,10 @@ export default function NotificationsPage() {
   };
 
   const visible = typeFilter === 'ALL' ? items : items.filter((n) => n.type === typeFilter);
+  const typeCounts = items.reduce<Record<string, number>>((acc, n) => {
+    acc[n.type] = (acc[n.type] || 0) + 1;
+    return acc;
+  }, {});
 
   return (
     <div className="relative max-w-3xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
@@ -132,19 +136,24 @@ export default function NotificationsPage() {
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-6">
-        {TYPE_FILTERS.map((t) => (
-          <button
-            key={t.value}
-            onClick={() => setTypeFilter(t.value)}
-            className={`px-2.5 py-1 rounded-full text-[11px] font-light border transition-all ${
-              typeFilter === t.value
-                ? 'text-white border-[#836EF9]/60 bg-[#836EF9]/10'
-                : 'text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+        {TYPE_FILTERS.map((t) => {
+          const count = t.value === 'ALL' ? items.length : typeCounts[t.value] || 0;
+          if (t.value !== 'ALL' && count === 0) return null;
+          return (
+            <button
+              key={t.value}
+              onClick={() => setTypeFilter(t.value)}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-light border transition-all ${
+                typeFilter === t.value
+                  ? 'text-white border-[#836EF9]/60 bg-[#836EF9]/10'
+                  : 'text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
+              }`}
+            >
+              {t.label}
+              <span className="ml-1.5 text-[10px] text-zinc-600">{count}</span>
+            </button>
+          );
+        })}
       </div>
 
       {loading && items.length === 0 ? (

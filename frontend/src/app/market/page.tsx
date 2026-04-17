@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
@@ -108,6 +108,22 @@ function MarketPageContent() {
   const initialSearch = searchParams.get('search') || '';
   const { ids: favoriteIds } = useFavorites();
   const { items: recentItems, clear: clearRecent, remove: removeRecent } = useRecentlyViewed();
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const target = e.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable)
+        return;
+      e.preventDefault();
+      searchRef.current?.focus();
+      searchRef.current?.select();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
   const [activeTab, setActiveTab] = useState<'all' | 'featured' | 'activity'>('all');
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
@@ -305,12 +321,16 @@ function MarketPageContent() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
+              ref={searchRef}
               type="text"
-              placeholder="Search agents, repos, services..."
+              placeholder="Search agents, repos, services… (press /)"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
+              className="w-full pl-9 pr-10 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50 transition-colors"
             />
+            <kbd className="hidden sm:inline-flex absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-500 border border-white/10 rounded px-1.5 py-0.5 leading-none">
+              /
+            </kbd>
           </div>
           <select
             value={sortBy}
