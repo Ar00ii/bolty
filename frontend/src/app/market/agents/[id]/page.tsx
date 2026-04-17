@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { Markdown } from '@/components/ui/Markdown';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -330,9 +331,7 @@ export default function AgentDetailPage() {
           <main className="space-y-8 min-w-0">
             <Section title="About" icon={FileText}>
               {listing.description ? (
-                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
-                  {listing.description}
-                </p>
+                <Markdown source={listing.description} className="text-sm" />
               ) : (
                 <p className="text-sm text-zinc-500 italic">
                   No description provided by the seller.
