@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import React from 'react';
 
 interface AvatarInfo {
@@ -13,10 +12,7 @@ interface AvatarCirclesProps {
   avatarUrls?: AvatarInfo[];
 }
 
-const AvatarCircles = ({
-  numPeople = 99,
-  avatarUrls = [],
-}: AvatarCirclesProps) => {
+const AvatarCircles = ({ numPeople = 99, avatarUrls = [] }: AvatarCirclesProps) => {
   return (
     <div className="flex items-center">
       <div className="flex -space-x-4">

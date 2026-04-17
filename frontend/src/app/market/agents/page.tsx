@@ -20,7 +20,6 @@ import {
   Clock,
   Code2,
   Terminal,
-  Sparkles,
   ArrowUpRight,
   CheckCircle2,
 } from 'lucide-react';
@@ -4411,14 +4410,22 @@ function AgentsPageContent() {
   return (
     <div className="page-container py-8 relative">
       {/* Ambient background */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden"
+      >
         <div className="absolute inset-0 opacity-[0.22]">
           <HexagonPattern />
         </div>
         <svg className="absolute inset-0 w-full h-full opacity-[0.07]">
           <defs>
             <pattern id="agents-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-              <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+              <path
+                d="M 80 0 L 0 0 0 80"
+                fill="none"
+                stroke="rgba(255,255,255,0.6)"
+                strokeWidth="1"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#agents-grid)" />
@@ -4441,7 +4448,8 @@ function AgentsPageContent() {
 
       {/* Header */}
       <div className="page-header relative">
-        <div className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
+        <div
+          className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
           style={{
             border: '1px solid rgba(255,255,255,0.08)',
             background: 'rgba(0,0,0,0.35)',
@@ -4455,7 +4463,10 @@ function AgentsPageContent() {
           <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 pointer-events-none" />
 
           <div className="flex items-center gap-2 text-xs text-zinc-500 mb-4">
-            <Link href="/market" className="hover:text-purple-300 transition-colors uppercase tracking-[0.2em]">
+            <Link
+              href="/market"
+              className="hover:text-purple-300 transition-colors uppercase tracking-[0.2em]"
+            >
               Market
             </Link>
             <span className="text-zinc-700">/</span>

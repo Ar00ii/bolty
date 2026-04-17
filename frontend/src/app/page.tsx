@@ -13,7 +13,6 @@ import {
   UserPlus,
   Upload,
   Rocket,
-  CheckCircle2,
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
@@ -173,9 +172,8 @@ export default function HomePage() {
             ]}
           />
           <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
-            Share your work with{' '}
-            <span className="text-white/70 font-normal">millions</span>{' '}
-            of developers worldwide.
+            Share your work with <span className="text-white/70 font-normal">millions</span> of
+            developers worldwide.
           </p>
         </motion.div>
       </div>

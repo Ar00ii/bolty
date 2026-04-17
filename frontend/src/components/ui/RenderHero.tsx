@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 
 interface RenderHeroProps {
   isAuthenticated?: boolean;
@@ -30,8 +30,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
     <div
       className="relative overflow-hidden border-b"
       style={{
-        background:
-          'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
+        background: 'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
         borderColor: 'rgba(39,39,39)',
         minHeight: 'calc(100vh - 90px)',
         display: 'grid',
@@ -150,7 +149,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         {/* Buttons */}
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <Link
-            href={isAuthenticated ? "/market" : "/auth?tab=register"}
+            href={isAuthenticated ? '/market' : '/auth?tab=register'}
             className="hover:opacity-85 transition-opacity"
             style={{
               fontSize: '20px',

@@ -9,12 +9,8 @@ import {
   Bot,
   GitBranch,
   Zap,
-  ArrowUpRight,
   Search,
-  Filter,
   MoreVertical,
-  Copy,
-  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -22,11 +18,8 @@ import React, { Suspense, useState, useEffect, useRef } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface MarketListing {
   id: string;
@@ -97,7 +90,10 @@ const TYPE_COLORS: Record<string, string> = {
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
 
-const TYPE_ACCENTS: Record<string, { color: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
+const TYPE_ACCENTS: Record<
+  string,
+  { color: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
+> = {
   REPO: { color: '#3b82f6', icon: GitBranch },
   BOT: { color: '#836EF9', icon: Bot },
   AI_AGENT: { color: '#a855f7', icon: Bot },
@@ -271,9 +267,7 @@ function NegotiationModal({
           <div ref={messagesEndRef} />
         </div>
 
-        {error && (
-          <div className="px-6 pb-2 text-xs text-red-400">{error}</div>
-        )}
+        {error && <div className="px-6 pb-2 text-xs text-red-400">{error}</div>}
 
         <div className="border-t border-white/10 p-4">
           <div className="flex gap-2 mb-2">
@@ -333,7 +327,9 @@ function MarketPageContent() {
   const [activeNeg, setActiveNeg] = useState<MarketListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(initialSearch);
-  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trending'>('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trending'>(
+    'recent',
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -371,7 +367,7 @@ function MarketPageContent() {
   }
 
   const filteredListings = listings.filter((l) =>
-    search ? l.title.toLowerCase().includes(search.toLowerCase()) : true
+    search ? l.title.toLowerCase().includes(search.toLowerCase()) : true,
   );
 
   const sortedListings = [...filteredListings].sort((a, b) => {
@@ -391,7 +387,10 @@ function MarketPageContent() {
   return (
     <div style={{ background: 'var(--bg)' }} className="relative min-h-screen overflow-hidden">
       {/* Hexagon pattern backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-[0.2]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-[0.2]"
+      >
         <HexagonPattern />
       </div>
 
@@ -432,7 +431,6 @@ function MarketPageContent() {
             'linear-gradient(90deg, transparent, rgba(131,110,249,0.6), rgba(6,182,212,0.4), transparent)',
         }}
       />
-
 
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
@@ -655,7 +653,10 @@ function StatCard({
   return (
     <div className="p-4 rounded-lg border border-white/8 bg-white/3 hover:bg-white/5 transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-purple-300" style={{ background: 'rgba(131,110,249,0.1)' }}>
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-purple-300"
+          style={{ background: 'rgba(131,110,249,0.1)' }}
+        >
           {icon}
         </div>
         <span className="text-xs text-zinc-400 uppercase tracking-wider">{label}</span>

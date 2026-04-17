@@ -37,10 +37,7 @@ export function StepShowcase({ steps, title }: StepShowcaseProps) {
       </motion.h2>
 
       {/* Grid */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-15"
-        style={{ paddingTop: '60px' }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pt-15" style={{ paddingTop: '60px' }}>
         {steps.map((step, i) => (
           <motion.div
             key={step.number}
@@ -107,27 +104,35 @@ export function StepShowcase({ steps, title }: StepShowcaseProps) {
                   <div style={{ color: '#666', fontSize: '12px', padding: '4px 12px' }}>
                     + New service
                   </div>
-                  {['Static site', 'Web service', 'Private service', 'Workflow', 'Background Worker', 'Cron Job'].map(
-                    (service, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-2 p-2 rounded"
-                        style={{
-                          padding: '8px 12px',
-                          background:
-                            service === 'Web service'
-                              ? 'linear-gradient(90deg, #00d992, #00c9a7)'
-                              : 'transparent',
-                          color: service === 'Web service' ? '#000' : '#888',
-                        }}
-                      >
-                        <span>{service === 'Web service' ? '⚡ ' : ''}{service}</span>
-                        {service !== 'Web service' && service !== 'Background Worker' && (
-                          <span style={{ marginLeft: 'auto', color: '#00d992' }}>✓</span>
-                        )}
-                      </div>
-                    ),
-                  )}
+                  {[
+                    'Static site',
+                    'Web service',
+                    'Private service',
+                    'Workflow',
+                    'Background Worker',
+                    'Cron Job',
+                  ].map((service, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 p-2 rounded"
+                      style={{
+                        padding: '8px 12px',
+                        background:
+                          service === 'Web service'
+                            ? 'linear-gradient(90deg, #00d992, #00c9a7)'
+                            : 'transparent',
+                        color: service === 'Web service' ? '#000' : '#888',
+                      }}
+                    >
+                      <span>
+                        {service === 'Web service' ? '⚡ ' : ''}
+                        {service}
+                      </span>
+                      {service !== 'Web service' && service !== 'Background Worker' && (
+                        <span style={{ marginLeft: 'auto', color: '#00d992' }}>✓</span>
+                      )}
+                    </div>
+                  ))}
                 </>
               )}
 
@@ -138,8 +143,14 @@ export function StepShowcase({ steps, title }: StepShowcaseProps) {
                     { label: 'Build Command', value: 'npm build' },
                     { label: 'Start Command', value: 'npm start' },
                   ].map((field, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-1.5" style={{ padding: '6px 12px' }}>
-                      <span style={{ color: '#666', fontSize: '12px', minWidth: '100px' }}>{field.label}</span>
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 p-1.5"
+                      style={{ padding: '6px 12px' }}
+                    >
+                      <span style={{ color: '#666', fontSize: '12px', minWidth: '100px' }}>
+                        {field.label}
+                      </span>
                       <span
                         style={{
                           background: '#2a2a2a',
@@ -180,10 +191,24 @@ export function StepShowcase({ steps, title }: StepShowcaseProps) {
 
               {step.number === '3' && (
                 <>
-                  <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#888', padding: '2px 12px' }}>
+                  <div
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '12px',
+                      color: '#888',
+                      padding: '2px 12px',
+                    }}
+                  >
                     [main 4f2c9ab] Final tweaks
                   </div>
-                  <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#ccc', padding: '2px 12px' }}>
+                  <div
+                    style={{
+                      fontFamily: 'monospace',
+                      fontSize: '12px',
+                      color: '#ccc',
+                      padding: '2px 12px',
+                    }}
+                  >
                     ~/site $ git push
                   </div>
                   <div style={{ height: '12px' }} />
@@ -202,7 +227,7 @@ export function StepShowcase({ steps, title }: StepShowcaseProps) {
                   <div style={{ height: '8px' }} />
                   {[
                     { name: 'Automatic Deploy live: Final tweaks', color: '#00d992' },
-                    { name: 'Automatic Deploy live: Fix Claude\'s code', color: '#4f90ff' },
+                    { name: "Automatic Deploy live: Fix Claude's code", color: '#4f90ff' },
                     { name: 'Manual Deploy live', color: '#00d992' },
                   ].map((item, idx) => (
                     <div

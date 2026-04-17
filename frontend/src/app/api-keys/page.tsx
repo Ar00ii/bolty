@@ -6,8 +6,6 @@ import {
   Trash2,
   Copy,
   Check,
-  Eye,
-  EyeOff,
   AlertTriangle,
   Shield,
   TrendingUp,
@@ -290,14 +288,15 @@ function KeyListItem({
     await onDelete(keyInfo.id);
   };
 
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
   const status = keyInfo.lastUsedAt
-    ? new Date(keyInfo.lastUsedAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
+    ? new Date(keyInfo.lastUsedAt).getTime() > now - 30 * 24 * 60 * 60 * 1000
       ? 'Active'
       : 'Idle'
     : 'Unused';
 
-  const statusColor =
-    status === 'Active' ? '#22c55e' : status === 'Idle' ? '#f59e0b' : '#6b7280';
+  const statusColor = status === 'Active' ? '#22c55e' : status === 'Idle' ? '#f59e0b' : '#6b7280';
 
   return (
     <div
@@ -337,9 +336,7 @@ function KeyListItem({
             </div>
           ) : (
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-sm font-light text-white">
-                {keyInfo.label || 'Unnamed key'}
-              </h3>
+              <h3 className="text-sm font-light text-white">{keyInfo.label || 'Unnamed key'}</h3>
               <button
                 onClick={() => setIsEditing(true)}
                 className="p-1 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/10 transition-colors"
@@ -604,11 +601,11 @@ export default function ApiKeysPage() {
   }
 
   const activeCount = keys.filter(
-    (k) => k.lastUsedAt && new Date(k.lastUsedAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000
+    (k) => k.lastUsedAt && new Date(k.lastUsedAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
   ).length;
   const idleCount = keys.filter(
     (k) =>
-      k.lastUsedAt && new Date(k.lastUsedAt).getTime() <= Date.now() - 30 * 24 * 60 * 60 * 1000
+      k.lastUsedAt && new Date(k.lastUsedAt).getTime() <= Date.now() - 30 * 24 * 60 * 60 * 1000,
   ).length;
   const unusedCount = keys.filter((k) => !k.lastUsedAt).length;
 
@@ -665,14 +662,20 @@ export default function ApiKeysPage() {
           >
             <AlertTriangle className="w-4 h-4 flex-shrink-0" />
             {error}
-            <button onClick={() => setError('')} className="ml-auto text-red-400/60 hover:text-red-400">
+            <button
+              onClick={() => setError('')}
+              className="ml-auto text-red-400/60 hover:text-red-400"
+            >
               ×
             </button>
           </div>
         )}
 
         {newlyCreatedKey && (
-          <KeyCreationBanner keyValue={newlyCreatedKey} onDismiss={() => setNewlyCreatedKey(null)} />
+          <KeyCreationBanner
+            keyValue={newlyCreatedKey}
+            onDismiss={() => setNewlyCreatedKey(null)}
+          />
         )}
 
         {showCreate && (
@@ -716,7 +719,7 @@ export default function ApiKeysPage() {
             <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
             <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
-              Create your first API key to start building with Bolty's agents and services
+              Create your first API key to start building with Bolty&apos;s agents and services
               programmatically.
             </p>
           </div>

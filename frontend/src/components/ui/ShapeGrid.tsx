@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import './ShapeGrid.css';
 
 interface ShapeGridProps {
@@ -100,8 +100,7 @@ const ShapeGrid = ({
         for (let col = -2; col < cols; col++) {
           for (let row = -2; row < rows; row++) {
             const cx = col * hexHoriz + offsetX;
-            const cy =
-              row * hexVert + ((col + colShift) % 2 !== 0 ? hexVert / 2 : 0) + offsetY;
+            const cy = row * hexVert + ((col + colShift) % 2 !== 0 ? hexVert / 2 : 0) + offsetY;
 
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
@@ -132,7 +131,7 @@ const ShapeGrid = ({
           for (let row = -2; row < rows; row++) {
             const cx = col * halfW + offsetX;
             const cy = row * squareSize + squareSize / 2 + offsetY;
-            const flip = ((col + colShift + row + rowShift) % 2 + 2) % 2 !== 0;
+            const flip = (((col + colShift + row + rowShift) % 2) + 2) % 2 !== 0;
 
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
