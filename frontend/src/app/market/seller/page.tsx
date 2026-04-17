@@ -12,14 +12,17 @@ import {
   ArrowUpRight,
   Download,
   Plus,
+  Search,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface SellerListing {
   id: string;
@@ -128,6 +131,9 @@ export default function SellerDashboardPage() {
   const [listingSort, setListingSort] = useState<'sales' | 'revenue' | 'rating' | 'recent'>(
     'sales',
   );
+  const [listingQuery, setListingQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -172,7 +178,16 @@ export default function SellerDashboardPage() {
 
   const { totals, listings, recentSales, salesByDay } = data;
   const maxDay = Math.max(1, ...salesByDay.map((d) => d.sales));
-  const sortedListings = [...listings].sort((a, b) => {
+  const q = listingQuery.trim().toLowerCase();
+  const filteredListings = q
+    ? listings.filter(
+        (l) =>
+          l.title.toLowerCase().includes(q) ||
+          l.type.toLowerCase().includes(q) ||
+          l.status.toLowerCase().includes(q),
+      )
+    : listings;
+  const sortedListings = [...filteredListings].sort((a, b) => {
     switch (listingSort) {
       case 'revenue':
         return b.revenue - a.revenue;
@@ -324,7 +339,11 @@ export default function SellerDashboardPage() {
                         </button>
                       ))}
                     </div>
-                    <span className="text-xs text-zinc-500">{listings.length} listings</span>
+                    <span className="text-xs text-zinc-500">
+                      {q
+                        ? `${sortedListings.length} of ${listings.length}`
+                        : `${listings.length} listings`}
+                    </span>
                     {listings.length > 0 && (
                       <button
                         onClick={() => downloadListingsCsv(sortedListings)}
@@ -337,7 +356,39 @@ export default function SellerDashboardPage() {
                     )}
                   </div>
                 </header>
+                {listings.length > 0 && (
+                  <div className="px-5 py-3 border-b border-white/5">
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+                      <input
+                        ref={searchRef}
+                        value={listingQuery}
+                        onChange={(e) => setListingQuery(e.target.value)}
+                        placeholder="Filter listings by title, type, or status"
+                        className="w-full bg-zinc-950/70 border border-white/10 rounded-md pl-9 pr-16 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-purple-400/40"
+                      />
+                      {listingQuery ? (
+                        <button
+                          onClick={() => setListingQuery('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                          aria-label="Clear search"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 border border-zinc-700/60 rounded px-1.5 py-0.5">
+                          /
+                        </kbd>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="divide-y divide-white/5">
+                  {sortedListings.length === 0 && q && (
+                    <div className="px-5 py-8 text-center text-xs text-zinc-500">
+                      No listings match “{listingQuery}”.
+                    </div>
+                  )}
                   {sortedListings.map((l) => (
                     <Link
                       key={l.id}
