@@ -40,6 +40,7 @@ interface ListingCommand {
   title: string;
   hint: string;
   href: string;
+  group: 'recent' | 'search';
 }
 
 type Command = NavCommand | ListingCommand;
@@ -245,14 +246,16 @@ export function CommandPalette() {
       title: l.title,
       hint: `@${l.seller?.username || 'anonymous'} · ${l.type.toLowerCase().replace('_', ' ')}`,
       href: `/market/agents/${l.id}`,
+      group: 'search',
     }));
     if (!q) {
       const recentCmds: ListingCommand[] = recent.slice(0, 5).map((r) => ({
         kind: 'listing',
         id: `recent:${r.id}`,
         title: r.title,
-        hint: `Recently viewed · @${r.seller || 'anonymous'}`,
+        hint: `@${r.seller || 'anonymous'}`,
         href: `/market/agents/${r.id}`,
+        group: 'recent',
       }));
       return [...recentCmds, ...navs, ...listingCmds];
     }
@@ -325,39 +328,56 @@ export function CommandPalette() {
             commands.map((cmd, idx) => {
               const active = idx === activeIndex;
               const Icon = cmd.kind === 'nav' ? cmd.icon : Package;
+              const prev = commands[idx - 1];
+              const groupOf = (c: Command) =>
+                c.kind === 'nav' ? 'nav' : c.group === 'recent' ? 'recent' : 'search';
+              const currentGroup = groupOf(cmd);
+              const showHeader = !prev || groupOf(prev) !== currentGroup;
+              const headerLabel =
+                currentGroup === 'recent'
+                  ? 'Recently viewed'
+                  : currentGroup === 'nav'
+                    ? 'Jump to'
+                    : 'Listings';
               return (
-                <button
-                  key={cmd.id}
-                  onMouseEnter={() => setActiveIndex(idx)}
-                  onClick={() => runCommand(cmd)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                    active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
-                  }`}
-                >
-                  <div
-                    className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
-                    style={{
-                      borderColor: 'rgba(255,255,255,0.08)',
-                      background:
-                        cmd.kind === 'listing'
-                          ? 'rgba(131,110,249,0.08)'
-                          : 'rgba(255,255,255,0.03)',
-                    }}
-                  >
-                    <Icon
-                      className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-light text-white truncate">{cmd.title}</p>
-                    <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
-                  </div>
-                  {cmd.kind === 'listing' && (
-                    <span className="text-[10px] text-zinc-600 uppercase tracking-wider">
-                      Listing
-                    </span>
+                <React.Fragment key={cmd.id}>
+                  {showHeader && (
+                    <div className="px-4 pt-2 pb-1 text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                      {headerLabel}
+                    </div>
                   )}
-                </button>
+                  <button
+                    onMouseEnter={() => setActiveIndex(idx)}
+                    onClick={() => runCommand(cmd)}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                      active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                    }`}
+                  >
+                    <div
+                      className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.08)',
+                        background:
+                          cmd.kind === 'listing'
+                            ? 'rgba(131,110,249,0.08)'
+                            : 'rgba(255,255,255,0.03)',
+                      }}
+                    >
+                      <Icon
+                        className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-light text-white truncate">{cmd.title}</p>
+                      <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
+                    </div>
+                    {cmd.kind === 'listing' && (
+                      <span className="text-[10px] text-zinc-600 uppercase tracking-wider">
+                        {cmd.group === 'recent' ? 'Recent' : 'Listing'}
+                      </span>
+                    )}
+                  </button>
+                </React.Fragment>
               );
             })
           )}
