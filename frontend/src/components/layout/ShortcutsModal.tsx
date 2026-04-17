@@ -1,7 +1,7 @@
 'use client';
 
 import { Command, Keyboard, Slash, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { GOTO_SHORTCUTS } from '@/lib/hooks/useGoToShortcuts';
 
@@ -56,6 +56,8 @@ function KeyBadge({ children }: { children: React.ReactNode }) {
 
 export function ShortcutsModal() {
   const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -74,6 +76,44 @@ export function ShortcutsModal() {
     return () => window.removeEventListener('keydown', handler);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const getFocusable = () =>
+      Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute('inert'));
+
+    const focusables = getFocusable();
+    focusables[0]?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const list = getFocusable();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    dialog.addEventListener('keydown', onKeyDown);
+    return () => {
+      dialog.removeEventListener('keydown', onKeyDown);
+      previouslyFocusedRef.current?.focus?.();
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
@@ -86,6 +126,10 @@ export function ShortcutsModal() {
         style={{ background: 'rgba(0,0,0,0.65)' }}
       />
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-modal-title"
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-md rounded-2xl border border-white/10 shadow-2xl overflow-hidden"
         style={{ background: 'rgba(15, 15, 17, 0.98)' }}
@@ -93,7 +137,9 @@ export function ShortcutsModal() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Keyboard className="w-4 h-4 text-[#836EF9]" />
-            <p className="text-sm font-light text-white">Keyboard shortcuts</p>
+            <p id="shortcuts-modal-title" className="text-sm font-light text-white">
+              Keyboard shortcuts
+            </p>
           </div>
           <button
             onClick={() => setOpen(false)}
