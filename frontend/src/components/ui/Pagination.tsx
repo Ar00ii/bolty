@@ -35,14 +35,14 @@ export function Pagination({
   if (endPage < totalPages) pages.push(totalPages);
 
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-center gap-2 mt-8">
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-1.5 mt-8">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
         aria-label="Previous page"
-        className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
       </button>
 
       <ol className="flex gap-1 list-none m-0 p-0">
@@ -63,13 +63,23 @@ export function Pagination({
                 }
                 aria-current={isCurrent ? 'page' : undefined}
                 aria-hidden={isEllipsis ? 'true' : undefined}
-                className={`px-3 py-1.5 rounded-lg text-sm font-light transition-all ${
+                className={`min-w-9 h-9 px-3 rounded-lg text-[13px] font-medium tracking-[0.01em] transition-colors ${
                   isCurrent
-                    ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
+                    ? 'text-white'
                     : isEllipsis
                       ? 'text-zinc-600 cursor-default'
-                      : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                 }`}
+                style={
+                  isCurrent
+                    ? {
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.08) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 16px -4px rgba(131,110,249,0.4)',
+                      }
+                    : undefined
+                }
               >
                 {page}
               </button>
@@ -82,9 +92,9 @@ export function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
         aria-label="Next page"
-        className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
       </button>
     </nav>
   );
