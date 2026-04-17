@@ -16,10 +16,11 @@ import {
   X,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import { API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 const API = API_URL;
 
@@ -202,6 +203,8 @@ export default function OrdersPage() {
   const [tab, setTab] = useState<'buying' | 'selling'>('buying');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
@@ -327,9 +330,10 @@ export default function OrdersPage() {
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
           <input
+            ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, counterparty, or order id…"
+            placeholder="Search by title, counterparty, or order id… (press /)"
             className="w-full pl-9 pr-9 py-2 text-sm rounded-lg bg-white/[0.04] border border-white/10 focus:border-white/20 focus:outline-none text-white placeholder-zinc-600 font-light"
           />
           {search && (

@@ -26,6 +26,7 @@ import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 
 interface MarketListing {
@@ -109,21 +110,7 @@ function MarketPageContent() {
   const { ids: favoriteIds } = useFavorites();
   const { items: recentItems, clear: clearRecent, remove: removeRecent } = useRecentlyViewed();
   const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-      const target = e.target as HTMLElement | null;
-      const tag = target?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable)
-        return;
-      e.preventDefault();
-      searchRef.current?.focus();
-      searchRef.current?.select();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, []);
+  useKeyboardFocus(searchRef);
   const [activeTab, setActiveTab] = useState<'all' | 'featured' | 'activity'>('all');
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
