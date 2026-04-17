@@ -1,9 +1,20 @@
 'use client';
 
-import { Bell, Check, DollarSign, MessageSquare, Package, PartyPopper, Star } from 'lucide-react';
+import {
+  Bell,
+  Check,
+  DollarSign,
+  MessageSquare,
+  Package,
+  PartyPopper,
+  Search,
+  Star,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import {
   fetchNotifications,
   markAllNotificationsRead,
@@ -49,6 +60,9 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [typeFilter, setTypeFilter] = useState<NotificationType | 'ALL'>('ALL');
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -89,7 +103,15 @@ export default function NotificationsPage() {
     setUnread(0);
   };
 
-  const visible = typeFilter === 'ALL' ? items : items.filter((n) => n.type === typeFilter);
+  const q = query.trim().toLowerCase();
+  const visible = useMemo(() => {
+    return items.filter((n) => {
+      if (typeFilter !== 'ALL' && n.type !== typeFilter) return false;
+      if (!q) return true;
+      const haystack = `${n.title} ${n.body || ''}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [items, typeFilter, q]);
   const typeCounts = items.reduce<Record<string, number>>((acc, n) => {
     acc[n.type] = (acc[n.type] || 0) + 1;
     return acc;
@@ -116,6 +138,31 @@ export default function NotificationsPage() {
           >
             <Check className="w-3.5 h-3.5" /> Mark all read
           </button>
+        )}
+      </div>
+
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+        <input
+          ref={searchRef}
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search notifications…"
+          className="w-full pl-9 pr-16 py-2 bg-zinc-900/40 border border-zinc-800 rounded-lg text-sm font-light text-white placeholder-zinc-600 outline-none focus:border-[#836EF9]/40 transition-colors"
+        />
+        {query ? (
+          <button
+            onClick={() => setQuery('')}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        ) : (
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
+            /
+          </kbd>
         )}
       </div>
 
@@ -162,10 +209,16 @@ export default function NotificationsPage() {
         <div className="border border-zinc-800 rounded-2xl py-16 text-center">
           <Bell className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
           <p className="text-sm text-zinc-400 font-light">
-            {typeFilter === 'ALL' ? 'Nothing here yet' : 'No notifications of that type'}
+            {q
+              ? 'No notifications match your search'
+              : typeFilter === 'ALL'
+                ? 'Nothing here yet'
+                : 'No notifications of that type'}
           </p>
           <p className="text-xs text-zinc-600 mt-1 max-w-sm mx-auto">
-            Sales, reviews, delivery updates and marketplace messages will show up in this feed.
+            {q
+              ? 'Try a different keyword or clear the search to see everything.'
+              : 'Sales, reviews, delivery updates and marketplace messages will show up in this feed.'}
           </p>
         </div>
       ) : (
