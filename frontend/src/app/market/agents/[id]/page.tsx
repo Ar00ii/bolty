@@ -16,7 +16,6 @@ import {
   Package,
   Play,
   Send,
-  Share2,
   Shield,
   Star,
   Tag,
@@ -29,6 +28,7 @@ import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Markdown } from '@/components/ui/Markdown';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
@@ -165,45 +165,6 @@ function FavoriteButton({ listingId }: { listingId: string }) {
     >
       <Heart className={`w-4 h-4 ${saved ? 'fill-pink-400 text-pink-400' : ''}`} />
       {saved ? 'Saved' : 'Save'}
-    </button>
-  );
-}
-
-function ShareButton({ title }: { title: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleShare = async () => {
-    if (typeof window === 'undefined') return;
-    const url = window.location.href;
-    const shareText = `Check out "${title}" on Bolty`;
-    const nav = window.navigator as Navigator & {
-      share?: (d: { title?: string; text?: string; url?: string }) => Promise<void>;
-    };
-    if (nav.share) {
-      try {
-        await nav.share({ title, text: shareText, url });
-        return;
-      } catch {
-        /* user cancelled or share unavailable — fall through to clipboard */
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* clipboard blocked */
-    }
-  };
-
-  return (
-    <button
-      onClick={handleShare}
-      className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white text-sm transition-colors"
-      aria-label="Share listing"
-    >
-      <Share2 className="w-4 h-4" />
-      {copied ? 'Copied!' : 'Share'}
     </button>
   );
 }

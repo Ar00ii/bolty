@@ -20,6 +20,7 @@ import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError } from '@/lib/api/client';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
@@ -246,12 +247,19 @@ export default function SellerProfilePage() {
             </div>
           </div>
 
-          <Link
-            href={`/u/${seller.username}`}
-            className="text-xs text-zinc-400 hover:text-white underline underline-offset-4"
-          >
-            View full profile →
-          </Link>
+          <div className="flex flex-col items-end gap-2">
+            <ShareButton
+              title={`@${seller.username} on Bolty`}
+              text={`Check out @${seller.username}'s listings on Bolty`}
+              ariaLabel="Share seller profile"
+            />
+            <Link
+              href={`/u/${seller.username}`}
+              className="text-xs text-zinc-400 hover:text-white underline underline-offset-4"
+            >
+              View full profile →
+            </Link>
+          </div>
         </section>
 
         {/* Stats */}
