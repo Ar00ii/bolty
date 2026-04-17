@@ -30,6 +30,12 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:rounded-md focus:border focus:border-purple-400/40 focus:bg-zinc-950 focus:px-4 focus:py-2 focus:text-xs focus:text-purple-200 focus:shadow-xl"
+      >
+        Skip to main content
+      </a>
       <ProgressBar isLoading={isLoading} />
       <CommandPalette />
       <ShortcutsModal />
@@ -42,7 +48,11 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         {showSidebar && <Sidebar />}
 
         <div className="flex-1 w-full">
-          <main className="flex-1 relative min-h-screen">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="flex-1 relative min-h-screen focus:outline-none"
+          >
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}

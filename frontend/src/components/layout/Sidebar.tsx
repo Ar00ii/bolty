@@ -399,6 +399,7 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
                     <Link
                       href={child.href}
                       onClick={onNavigate}
+                      aria-current={childActive ? 'page' : undefined}
                       className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-light transition-all duration-200 relative ${
                         childActive
                           ? 'text-purple-300 bg-white/5 border border-purple-500/20'
@@ -447,6 +448,7 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
       <Link
         href={section.href}
         onClick={onNavigate}
+        aria-current={active ? 'page' : undefined}
         className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-light transition-all duration-200 relative ${
           active
             ? 'text-white bg-white/10 border border-white/10'
