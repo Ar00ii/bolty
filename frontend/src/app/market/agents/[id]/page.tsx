@@ -10,6 +10,7 @@ import {
   ExternalLink,
   FileText,
   GitBranch,
+  Heart,
   Loader2,
   MessageSquare,
   Package,
@@ -30,6 +31,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Markdown } from '@/components/ui/Markdown';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useFavorites } from '@/lib/hooks/useFavorites';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -144,6 +146,26 @@ function formatBytes(b: number) {
 function shortenAddress(addr: string) {
   if (addr.length < 10) return addr;
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
+function FavoriteButton({ listingId }: { listingId: string }) {
+  const { has, toggle } = useFavorites();
+  const saved = has(listingId);
+  return (
+    <button
+      onClick={() => toggle(listingId)}
+      aria-label={saved ? 'Remove from favorites' : 'Save to favorites'}
+      aria-pressed={saved}
+      className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-lg border text-sm transition-colors ${
+        saved
+          ? 'border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/15'
+          : 'border-white/10 hover:border-white/20 text-zinc-300 hover:text-white'
+      }`}
+    >
+      <Heart className={`w-4 h-4 ${saved ? 'fill-pink-400 text-pink-400' : ''}`} />
+      {saved ? 'Saved' : 'Save'}
+    </button>
+  );
 }
 
 function ShareButton({ title }: { title: string }) {
@@ -354,6 +376,7 @@ export default function AgentDetailPage() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              <FavoriteButton listingId={listing.id} />
               <ShareButton title={listing.title} />
               <button
                 onClick={handleNegotiate}

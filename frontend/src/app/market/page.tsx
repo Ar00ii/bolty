@@ -14,6 +14,7 @@ import {
   Library,
   Users,
   Hash,
+  Heart,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -237,6 +238,13 @@ function MarketPageContent() {
               >
                 <Hash className="w-4 h-4" />
                 Tags
+              </Link>
+              <Link
+                href="/market/favorites"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-white/10 hover:border-pink-500/40 text-white hover:bg-pink-500/5 transition-all"
+              >
+                <Heart className="w-4 h-4" />
+                Saved
               </Link>
               <Link
                 href="/market/library"
