@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MessageSquare, Zap, Users, Clock, Eye } from 'lucide-react';
+import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -107,6 +107,7 @@ export default function DmPage() {
   const [error, setError] = useState('');
   const [showNewDm, setShowNewDm] = useState(false);
   const [activeCategory, setActiveCategory] = useState<ContactCategory>('all');
+  const [contactQuery, setContactQuery] = useState('');
   const [bothViewing, setBothViewing] = useState(false);
   const [isAgentChat, setIsAgentChat] = useState(false);
   const socketRef = useRef<Socket | null>(null);
@@ -121,8 +122,11 @@ export default function DmPage() {
   ];
 
   const filteredContacts = contacts.filter((c) => {
-    if (activeCategory === 'all') return true;
-    return c.type === activeCategory;
+    if (activeCategory !== 'all' && c.type !== activeCategory) return false;
+    const q = contactQuery.trim().toLowerCase();
+    if (!q) return true;
+    const haystack = `${c.user.username || ''} ${c.lastMessage || ''}`.toLowerCase();
+    return haystack.includes(q);
   });
 
   useEffect(() => {
@@ -322,6 +326,27 @@ export default function DmPage() {
             )}
           </AnimatePresence>
 
+          {/* Contact search */}
+          <div className="relative px-2">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+            <input
+              type="text"
+              value={contactQuery}
+              onChange={(e) => setContactQuery(e.target.value)}
+              placeholder="Search conversations…"
+              className="w-full pl-8 pr-8 py-2 text-xs bg-zinc-900/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 outline-none focus:border-monad-400/40 transition-colors font-light"
+            />
+            {contactQuery && (
+              <button
+                onClick={() => setContactQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
           {/* Category tabs */}
           <div className="flex gap-1.5 px-2 flex-wrap">
             {CATEGORIES.map((cat) => (
@@ -391,9 +416,11 @@ export default function DmPage() {
                 animate={{ opacity: 1 }}
                 className="text-xs text-center py-8 text-zinc-500"
               >
-                {activeCategory === 'all'
-                  ? 'No conversations yet. Start a new one.'
-                  : `No ${activeCategory} conversations.`}
+                {contactQuery.trim()
+                  ? 'No conversations match your search.'
+                  : activeCategory === 'all'
+                    ? 'No conversations yet. Start a new one.'
+                    : `No ${activeCategory} conversations.`}
               </motion.p>
             )}
           </div>
