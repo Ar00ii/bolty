@@ -143,6 +143,7 @@ export default function AgentProtocolPage() {
                   <a
                     key={id}
                     href={`#${id}`}
+                    aria-current={isActive ? 'location' : undefined}
                     className={`block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-all duration-200 ${
                       isActive
                         ? 'text-monad-300 bg-monad-500/10'

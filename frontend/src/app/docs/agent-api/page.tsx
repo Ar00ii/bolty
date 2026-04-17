@@ -165,6 +165,7 @@ export default function AgentApiPage() {
                 <a
                   key={id}
                   href={`#${id}`}
+                  aria-current={isActive ? 'location' : undefined}
                   className={`block text-xs font-mono py-1 pl-3 -ml-3 border-l transition-colors ${
                     isActive
                       ? 'text-monad-300 border-monad-400'
