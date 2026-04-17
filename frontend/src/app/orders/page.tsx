@@ -9,6 +9,7 @@ import {
   Truck,
   ArrowRight,
   BarChart3,
+  Download,
   TrendingUp,
   Lock,
 } from 'lucide-react';
@@ -125,6 +126,54 @@ function OrderCard({
   );
 }
 
+function csvEscape(v: unknown) {
+  const s = v === null || v === undefined ? '' : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadOrdersCsv(orders: Order[], kind: 'buying' | 'selling') {
+  const header = [
+    'orderId',
+    'createdAt',
+    'status',
+    'escrowStatus',
+    'listingTitle',
+    'listingType',
+    'priceEth',
+    'amountWei',
+    'counterparty',
+    'txHash',
+  ];
+  const rows = orders.map((o) => {
+    const peer = kind === 'selling' ? o.buyer : o.seller;
+    const eth = o.amountWei ? (parseFloat(o.amountWei) / 1e18).toString() : '';
+    return [
+      o.id,
+      o.createdAt,
+      o.status,
+      o.escrowStatus,
+      o.listing.title,
+      o.listing.type,
+      eth,
+      o.amountWei,
+      peer?.username || '',
+      o.txHash,
+    ]
+      .map(csvEscape)
+      .join(',');
+  });
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bolty-orders-${kind}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 type StatusFilter = 'ALL' | OrderStatus;
 
 const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
@@ -196,11 +245,23 @@ export default function OrdersPage() {
   return (
     <div className="page-container py-8">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="text-2xl font-light text-white tracking-tight">Orders</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Track all your purchases and sales in one place.
-        </p>
+      <div className="page-header flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-light text-white tracking-tight">Orders</h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            Track all your purchases and sales in one place.
+          </p>
+        </div>
+        {baseOrders.length > 0 && (
+          <button
+            onClick={() => downloadOrdersCsv(baseOrders, tab)}
+            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
+            aria-label="Export orders as CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export CSV
+          </button>
+        )}
       </div>
 
       {/* Seller Stats */}
