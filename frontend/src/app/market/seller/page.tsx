@@ -125,6 +125,9 @@ export default function SellerDashboardPage() {
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [listingSort, setListingSort] = useState<'sales' | 'revenue' | 'rating' | 'recent'>(
+    'sales',
+  );
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -169,6 +172,19 @@ export default function SellerDashboardPage() {
 
   const { totals, listings, recentSales, salesByDay } = data;
   const maxDay = Math.max(1, ...salesByDay.map((d) => d.sales));
+  const sortedListings = [...listings].sort((a, b) => {
+    switch (listingSort) {
+      case 'revenue':
+        return b.revenue - a.revenue;
+      case 'rating':
+        return (b.reviewAverage ?? 0) - (a.reviewAverage ?? 0);
+      case 'recent':
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      case 'sales':
+      default:
+        return b.sales - a.sales;
+    }
+  });
 
   return (
     <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
@@ -285,7 +301,7 @@ export default function SellerDashboardPage() {
             {/* Two-column: listings + recent sales */}
             <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
               <section className="border border-white/8 rounded-lg bg-zinc-950/50">
-                <header className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+                <header className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-b border-white/8">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-purple-300" />
                     <h2 className="text-sm uppercase tracking-widest text-zinc-400">
@@ -293,10 +309,25 @@ export default function SellerDashboardPage() {
                     </h2>
                   </div>
                   <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
+                      {(['sales', 'revenue', 'rating', 'recent'] as const).map((k) => (
+                        <button
+                          key={k}
+                          onClick={() => setListingSort(k)}
+                          className={`text-[11px] px-2 py-1 rounded-md border transition-colors ${
+                            listingSort === k
+                              ? 'border-purple-500/40 bg-purple-500/10 text-purple-200'
+                              : 'border-transparent text-zinc-500 hover:text-zinc-200'
+                          }`}
+                        >
+                          {k === 'recent' ? 'Newest' : k.charAt(0).toUpperCase() + k.slice(1)}
+                        </button>
+                      ))}
+                    </div>
                     <span className="text-xs text-zinc-500">{listings.length} listings</span>
                     {listings.length > 0 && (
                       <button
-                        onClick={() => downloadListingsCsv(listings)}
+                        onClick={() => downloadListingsCsv(sortedListings)}
                         className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors px-2.5 py-1 rounded-md border border-white/10 hover:border-white/20"
                         aria-label="Download listings as CSV"
                       >
@@ -307,7 +338,7 @@ export default function SellerDashboardPage() {
                   </div>
                 </header>
                 <div className="divide-y divide-white/5">
-                  {listings.map((l) => (
+                  {sortedListings.map((l) => (
                     <Link
                       key={l.id}
                       href={`/market/agents/${l.id}`}
