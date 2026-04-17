@@ -1,12 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Hash, Tag } from 'lucide-react';
+import { ArrowLeft, ArrowDownAZ, BarChart3, Hash, Tag, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface TagFacet {
   tag: string;
@@ -20,10 +21,15 @@ interface Facets {
   totalActive: number;
 }
 
+type TagSort = 'popular' | 'alpha';
+
 export default function MarketTagsPage() {
   const [facets, setFacets] = useState<Facets | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<TagSort>('popular');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
 
   useEffect(() => {
     (async () => {
@@ -41,9 +47,12 @@ export default function MarketTagsPage() {
   const filtered = useMemo(() => {
     if (!facets) return [];
     const q = search.trim().toLowerCase();
-    if (!q) return facets.tags;
-    return facets.tags.filter((t) => t.tag.toLowerCase().includes(q));
-  }, [facets, search]);
+    const base = q ? facets.tags.filter((t) => t.tag.toLowerCase().includes(q)) : facets.tags;
+    if (sort === 'alpha') {
+      return [...base].sort((a, b) => a.tag.localeCompare(b.tag));
+    }
+    return base;
+  }, [facets, search, sort]);
 
   const maxCount = facets?.tags[0]?.count || 1;
 
@@ -85,16 +94,61 @@ export default function MarketTagsPage() {
         </div>
 
         <div
-          className="rounded-xl border border-white/5 p-4 mb-6"
+          className="rounded-xl border border-white/5 p-4 mb-6 space-y-3"
           style={{ background: 'var(--bg-card)' }}
         >
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filter tags…"
-            className="w-full bg-transparent border-b border-white/10 px-1 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#836EF9] transition-colors"
-          />
+          <div className="relative">
+            <input
+              ref={searchRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Filter tags…"
+              className="w-full bg-transparent border-b border-white/10 pl-1 pr-16 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#836EF9] transition-colors"
+            />
+            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear filter"
+                  className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
+                  /
+                </kbd>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] uppercase tracking-[0.15em] text-zinc-500">Sort</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setSort('popular')}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
+                  sort === 'popular'
+                    ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
+                    : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
+                }`}
+              >
+                <BarChart3 className="w-3 h-3" />
+                Popular
+              </button>
+              <button
+                onClick={() => setSort('alpha')}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
+                  sort === 'alpha'
+                    ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
+                    : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
+                }`}
+              >
+                <ArrowDownAZ className="w-3 h-3" />
+                A–Z
+              </button>
+            </div>
+          </div>
         </div>
 
         {loading ? (
