@@ -223,20 +223,41 @@ export function Sidebar() {
             stiffness: 300,
             damping: 30,
           }}
-          className={`fixed lg:relative top-0 left-0 h-screen w-60 bg-gradient-to-b from-zinc-900 via-zinc-950 to-black border-r border-white/5 overflow-y-auto z-40 flex flex-col ${
+          className={`fixed lg:relative top-0 left-0 h-screen w-60 overflow-y-auto z-40 flex flex-col ${
             isMobile ? 'will-change-transform' : ''
           }`}
+          style={{
+            background: 'linear-gradient(180deg, #0e0e12 0%, #08080b 100%)',
+            boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.05)',
+          }}
         >
           {/* Header */}
           <motion.div
-            className="px-4 py-6 border-b border-white/5"
+            className="px-5 pt-6 pb-4 border-b border-white/[0.05]"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <div className="text-sm font-light text-zinc-300 flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-500 shadow-lg shadow-purple-500/50" />
-              Navigation
+            <div className="flex items-center gap-2.5">
+              <span
+                className="inline-flex w-7 h-7 items-center justify-center rounded-lg"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(236,72,153,0.18) 100%)',
+                  border: '1px solid rgba(131,110,249,0.28)',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                }}
+              >
+                <Zap className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={2} />
+              </span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[13px] font-semibold text-white tracking-[0.005em]">
+                  Bolty
+                </span>
+                <span className="text-[10px] text-zinc-500 mt-1 tracking-[0.18em] uppercase">
+                  Network
+                </span>
+              </div>
             </div>
           </motion.div>
 
@@ -274,7 +295,7 @@ export function Sidebar() {
 
           {/* Footer info */}
           <motion.div
-            className="px-4 py-4 space-y-1 text-xs text-zinc-500"
+            className="px-3 py-3 space-y-0.5 text-[12px] text-zinc-500"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.3 }}
@@ -291,16 +312,12 @@ export function Sidebar() {
                   }),
                 );
               }}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/5 hover:text-zinc-300 transition-colors"
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
             >
               <span>Quick search</span>
-              <span className="inline-flex items-center gap-1 text-zinc-400">
-                <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none">
-                  ⌘
-                </kbd>
-                <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none">
-                  K
-                </kbd>
+              <span className="inline-flex items-center gap-1">
+                <SidebarKbd>⌘</SidebarKbd>
+                <SidebarKbd>K</SidebarKbd>
               </span>
             </button>
             <button
@@ -308,18 +325,34 @@ export function Sidebar() {
                 if (typeof window === 'undefined') return;
                 window.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }));
               }}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/5 hover:text-zinc-300 transition-colors"
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
             >
               <span>Shortcuts</span>
-              <kbd className="border border-white/10 rounded px-1 py-0.5 text-[10px] leading-none text-zinc-400">
-                ?
-              </kbd>
+              <SidebarKbd>?</SidebarKbd>
             </button>
-            <p className="text-zinc-600 px-2 pt-2">© Bolty Network</p>
+            <p className="text-zinc-600 px-2 pt-2 text-[10.5px] tracking-[0.12em] uppercase">
+              © Bolty Network
+            </p>
           </motion.div>
         </motion.aside>
       </AnimatePresence>
     </>
+  );
+}
+
+function SidebarKbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd
+      className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded text-[10px] font-medium text-zinc-400 leading-none"
+      style={{
+        background: 'rgba(255,255,255,0.035)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: 'inset 0 -1px 0 rgba(0,0,0,0.35)',
+        fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+      }}
+    >
+      {children}
+    </kbd>
   );
 }
 
@@ -340,31 +373,37 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
     return (
       <div className="group">
         <motion.button
-          whileHover={{ x: 2 }}
-          whileTap={{ scale: 0.98 }}
+          whileTap={{ scale: 0.99 }}
           onClick={onToggle}
-          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-light transition-all duration-200 relative ${
-            active
-              ? 'text-white bg-white/10 border border-white/10'
-              : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5'
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-normal transition-colors relative ${
+            active ? 'text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.035]'
           }`}
+          style={
+            active
+              ? {
+                  background:
+                    'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                }
+              : undefined
+          }
         >
           {active && (
             <motion.div
               layoutId="activeIndicator"
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-r"
+              className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r"
+              style={{
+                background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
+                boxShadow: '0 0 12px rgba(131,110,249,0.6)',
+              }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
             />
           )}
 
-          <motion.div
-            initial={{ scale: 1 }}
-            whileHover={{ scale: 1.15 }}
-            transition={{ duration: 0.2 }}
-            className={`flex-shrink-0 ml-1 transition-colors ${active ? 'text-purple-400' : ''}`}
-          >
-            <Icon className="w-4 h-4" />
-          </motion.div>
+          <Icon
+            className={`w-4 h-4 shrink-0 transition-colors ${active ? 'text-[#b4a7ff]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
+            strokeWidth={1.75}
+          />
 
           <span className="flex-1 text-left">{section.label}</span>
 
@@ -384,54 +423,45 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
               animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
               exit={{ opacity: 0, height: 0, marginTop: 0 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="space-y-1 border-l-2 border-purple-500/20 ml-2 pl-2 py-1"
+              className="space-y-0.5 ml-[22px] pl-3 py-1 border-l border-white/[0.06]"
             >
               {section.children!.map((child, idx) => {
                 const childActive = isActive(child.href);
                 return (
                   <motion.div
                     key={child.href}
-                    initial={{ opacity: 0, x: -15 }}
+                    initial={{ opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -15 }}
-                    transition={{ delay: idx * 0.05, duration: 0.2 }}
+                    exit={{ opacity: 0, x: -8 }}
+                    transition={{ delay: idx * 0.03, duration: 0.18 }}
                   >
                     <Link
                       href={child.href}
                       onClick={onNavigate}
                       aria-current={childActive ? 'page' : undefined}
-                      className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-xs font-light transition-all duration-200 relative ${
+                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[12px] font-normal transition-colors relative ${
                         childActive
-                          ? 'text-purple-300 bg-white/5 border border-purple-500/20'
-                          : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5 border border-transparent'
+                          ? 'text-white bg-white/[0.045]'
+                          : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]'
                       }`}
                     >
                       {childActive && (
                         <motion.div
                           layoutId={`subActive-${child.href}`}
-                          className="absolute -left-1.5 w-1 h-3.5 bg-purple-500 rounded-r"
+                          className="absolute -left-[13px] top-1/2 -translate-y-1/2 w-[2px] h-3.5 rounded-r"
+                          style={{
+                            background: '#836EF9',
+                            boxShadow: '0 0 8px rgba(131,110,249,0.6)',
+                          }}
                           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                         />
                       )}
 
-                      <motion.div
-                        initial={{ scale: 1 }}
-                        whileHover={{ scale: 1.2 }}
-                        transition={{ duration: 0.2 }}
-                        className={`flex-shrink-0 transition-colors ${childActive ? 'text-purple-400' : ''}`}
-                      >
-                        <child.icon className="w-3 h-3" />
-                      </motion.div>
+                      <child.icon
+                        className={`w-3.5 h-3.5 shrink-0 transition-colors ${childActive ? 'text-[#b4a7ff]' : 'text-zinc-600 group-hover:text-zinc-400'}`}
+                        strokeWidth={1.75}
+                      />
                       <span className="flex-1">{child.label}</span>
-
-                      {childActive && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: 'spring', stiffness: 300 }}
-                          className="w-1.5 h-1.5 rounded-full bg-purple-400"
-                        />
-                      )}
                     </Link>
                   </motion.div>
                 );
@@ -444,45 +474,43 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
   }
 
   return (
-    <motion.div whileHover={{ x: 2 }} whileTap={{ scale: 0.98 }} initial={false} className="group">
+    <div className="group">
       <Link
         href={section.href}
         onClick={onNavigate}
         aria-current={active ? 'page' : undefined}
-        className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-light transition-all duration-200 relative ${
-          active
-            ? 'text-white bg-white/10 border border-white/10'
-            : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5'
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-normal transition-colors relative ${
+          active ? 'text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.035]'
         }`}
+        style={
+          active
+            ? {
+                background:
+                  'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+              }
+            : undefined
+        }
       >
         {active && (
           <motion.div
             layoutId="activeIndicator"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-purple-500 to-purple-600 rounded-r"
+            className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r"
+            style={{
+              background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
+              boxShadow: '0 0 12px rgba(131,110,249,0.6)',
+            }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           />
         )}
 
-        <motion.div
-          initial={{ scale: 1 }}
-          whileHover={{ scale: 1.15 }}
-          transition={{ duration: 0.2 }}
-          className={`flex-shrink-0 ml-1 transition-colors ${active ? 'text-purple-400' : ''}`}
-        >
-          <Icon className="w-4 h-4" />
-        </motion.div>
+        <Icon
+          className={`w-4 h-4 shrink-0 transition-colors ${active ? 'text-[#b4a7ff]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
+          strokeWidth={1.75}
+        />
 
         <span className="flex-1">{section.label}</span>
-
-        {active && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-            className="w-1.5 h-1.5 rounded-full bg-purple-400"
-          />
-        )}
       </Link>
-    </motion.div>
+    </div>
   );
 }
