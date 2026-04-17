@@ -18,8 +18,6 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  TrendingUp,
-  Clock,
   Code2,
   Terminal,
   ArrowUpRight,
@@ -1253,8 +1251,8 @@ function RepoCliPanel() {
           </div>
           <h3 className="text-lg text-white font-light mb-2">Pull any repo, any runtime</h3>
           <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
-            Every listing is packaged, signed, and served via a resumable tarball endpoint.
-            Unlock paid repos with a single on-chain payment — access persists forever.
+            Every listing is packaged, signed, and served via a resumable tarball endpoint. Unlock
+            paid repos with a single on-chain payment — access persists forever.
           </p>
           <div className="flex flex-col gap-1.5 text-[11px] text-zinc-400 font-light">
             <span className="inline-flex items-center gap-1.5">
@@ -1574,14 +1572,22 @@ function ReposMarketPageContent() {
   return (
     <div className="page-container py-8 relative">
       {/* Ambient background */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[520px] overflow-hidden"
+      >
         <div className="absolute inset-0 opacity-[0.22]">
           <HexagonPattern />
         </div>
         <svg className="absolute inset-0 w-full h-full opacity-[0.07]">
           <defs>
             <pattern id="repos-grid" width="80" height="80" patternUnits="userSpaceOnUse">
-              <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1" />
+              <path
+                d="M 80 0 L 0 0 0 80"
+                fill="none"
+                stroke="rgba(255,255,255,0.6)"
+                strokeWidth="1"
+              />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#repos-grid)" />
@@ -1604,7 +1610,8 @@ function ReposMarketPageContent() {
 
       {/* Header */}
       <div className="page-header relative">
-        <div className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
+        <div
+          className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
           style={{
             border: '1px solid rgba(255,255,255,0.08)',
             background: 'rgba(0,0,0,0.35)',
@@ -1617,7 +1624,10 @@ function ReposMarketPageContent() {
           <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 pointer-events-none" />
 
           <div className="flex items-center gap-2 text-xs text-zinc-500 mb-4">
-            <Link href="/market" className="hover:text-blue-300 transition-colors uppercase tracking-[0.2em]">
+            <Link
+              href="/market"
+              className="hover:text-blue-300 transition-colors uppercase tracking-[0.2em]"
+            >
               Market
             </Link>
             <span className="text-zinc-700">/</span>
@@ -1635,8 +1645,8 @@ function ReposMarketPageContent() {
                 <GradientText gradient="blue">Repositories</GradientText>
               </h1>
               <p className="text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
-                Discover, vote on, and download community code repositories. Publish your own
-                and monetize access with built-in escrow.
+                Discover, vote on, and download community code repositories. Publish your own and
+                monetize access with built-in escrow.
               </p>
             </div>
             {isAuthenticated && (

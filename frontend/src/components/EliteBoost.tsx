@@ -290,7 +290,8 @@ export function EliteBoost() {
           marginTop: '16px',
         }}
       >
-        Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock unlimited earning potential.
+        Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock
+        unlimited earning potential.
       </p>
 
       {/* Platform Features - Masonry Grid */}
@@ -588,7 +589,6 @@ export function EliteBoost() {
           </a>
         </motion.div>
       </div>
-
 
       {/* CTA */}
       <div

@@ -538,6 +538,7 @@ model AgentApiKey {
   createdAt   DateTime      @default(now())
 
   keyHash     String        @unique    // bcrypt hash of the actual key
+  keyLastFour String?                 // last 4 chars of the key for UI identification
   label       String?                 // optional label
   lastUsedAt  DateTime?
 
@@ -703,6 +704,7 @@ model UserApiKey {
   createdAt   DateTime      @default(now())
 
   keyHash     String        @unique    // bcrypt hash of the actual key
+  keyLastFour String?                 // last 4 chars of the key for UI identification
   label       String?                 // optional label (e.g., "Production", "CI/CD")
   lastUsedAt  DateTime?
 

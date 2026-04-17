@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Body,
   Param,
@@ -120,6 +121,15 @@ export class MarketController {
   @HttpCode(HttpStatus.CREATED)
   createApiKey(@CurrentUser('id') userId: string, @Body() body: { label?: string | null }) {
     return this.apiKeysService.createApiKey(userId, body.label || null);
+  }
+
+  @Patch('api-keys/:id')
+  renameApiKey(
+    @Param('id') keyId: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { label?: string | null },
+  ) {
+    return this.apiKeysService.renameApiKey(userId, keyId, body.label ?? null);
   }
 
   @Post('api-keys/:id/request-delete-verification')

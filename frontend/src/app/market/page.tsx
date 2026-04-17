@@ -9,23 +9,17 @@ import {
   Bot,
   GitBranch,
   Zap,
-  ArrowUpRight,
   Search,
-  Filter,
   MoreVertical,
-  Copy,
-  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useState, useEffect, useRef } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { HexagonPattern } from '@/components/ui/HexagonPattern';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface MarketListing {
   id: string;
@@ -96,7 +90,10 @@ const TYPE_COLORS: Record<string, string> = {
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
 
-const TYPE_ACCENTS: Record<string, { color: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }> = {
+const TYPE_ACCENTS: Record<
+  string,
+  { color: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
+> = {
   REPO: { color: '#3b82f6', icon: GitBranch },
   BOT: { color: '#836EF9', icon: Bot },
   AI_AGENT: { color: '#a855f7', icon: Bot },
@@ -123,9 +120,13 @@ function NegotiationModal({
   onClose: () => void;
   userId: string;
 }) {
+  const [negotiation, setNegotiation] = useState<Negotiation | null>(null);
   const [messages, setMessages] = useState<NegotiationMessage[]>([]);
   const [input, setInput] = useState('');
+  const [proposedPrice, setProposedPrice] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(true);
+  const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -136,12 +137,55 @@ function NegotiationModal({
     scrollToBottom();
   }, [messages]);
 
+  // Start or resume a negotiation on open
+  useEffect(() => {
+    const init = async () => {
+      setInitializing(true);
+      setError('');
+      try {
+        const neg = await api.post<Negotiation>(`/market/${listing.id}/negotiate`, {});
+        setNegotiation(neg);
+        setMessages(neg.messages || []);
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Failed to open negotiation');
+      } finally {
+        setInitializing(false);
+      }
+    };
+    init();
+  }, [listing.id]);
+
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || !negotiation || loading) return;
     setLoading(true);
-    setMessages((prev) => [...prev, { id: 'temp', createdAt: new Date().toISOString(), fromRole: 'buyer', content: input }]);
+    setError('');
+    const content = input.trim();
+    const proposed = proposedPrice ? Number(proposedPrice) : undefined;
     setInput('');
-    setLoading(false);
+    setProposedPrice('');
+    try {
+      const updated = await api.post<Negotiation>(
+        `/market/negotiations/${negotiation.id}/message`,
+        { content, proposedPrice: proposed },
+      );
+      setNegotiation(updated);
+      setMessages(updated.messages || []);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to send message');
+      setInput(content);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAccept = async () => {
+    if (!negotiation) return;
+    try {
+      await api.post(`/market/negotiations/${negotiation.id}/accept`, {});
+      onClose();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to accept');
+    }
   };
 
   return (
@@ -164,39 +208,79 @@ function NegotiationModal({
             <h2 className="text-lg font-light text-white">{listing.title}</h2>
             <p className="text-xs text-zinc-500 mt-1">
               Price: {listing.price} {listing.currency}
+              {negotiation?.agreedPrice && (
+                <span className="ml-2 text-emerald-400">
+                  · Agreed: {negotiation.agreedPrice} {listing.currency}
+                </span>
+              )}
             </p>
           </div>
-          <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {negotiation?.status === 'AGREED' && (
+              <button
+                onClick={handleAccept}
+                className="px-3 py-1.5 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-light transition-all"
+              >
+                Proceed to payment
+              </button>
+            )}
+            <button onClick={onClose} className="text-zinc-400 hover:text-white transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.length === 0 && (
-            <p className="text-center text-zinc-500 py-12">Start a negotiation...</p>
+          {initializing && (
+            <p className="text-center text-zinc-500 py-12 text-sm">Opening negotiation...</p>
           )}
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.fromRole.includes('buyer') ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-xs px-4 py-2 rounded-lg ${
-                  msg.fromRole.includes('buyer')
-                    ? 'bg-purple-600/20 border border-purple-500/30 text-purple-200'
-                    : 'bg-zinc-800/50 border border-zinc-700/30 text-zinc-300'
-                }`}
-              >
-                <p className="text-sm">{msg.content}</p>
-                <p className="text-[11px] opacity-60 mt-1">{timeAgo(msg.createdAt)}</p>
+          {!initializing && messages.length === 0 && (
+            <p className="text-center text-zinc-500 py-12 text-sm">
+              Start the negotiation. Propose a price or ask the seller&apos;s agent a question.
+            </p>
+          )}
+          {messages.map((msg) => {
+            const isBuyer = msg.fromRole.includes('buyer');
+            return (
+              <div key={msg.id} className={`flex ${isBuyer ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-sm px-4 py-2 rounded-lg ${
+                    isBuyer
+                      ? 'bg-purple-600/20 border border-purple-500/30 text-purple-200'
+                      : 'bg-zinc-800/50 border border-zinc-700/30 text-zinc-300'
+                  }`}
+                >
+                  <p className="text-[10px] uppercase tracking-wider opacity-60 mb-1">
+                    {msg.fromRole.replace('_', ' ')}
+                  </p>
+                  <p className="text-sm">{msg.content}</p>
+                  {msg.proposedPrice != null && (
+                    <p className="text-xs mt-1 opacity-80">
+                      Proposed: {msg.proposedPrice} {listing.currency}
+                    </p>
+                  )}
+                  <p className="text-[11px] opacity-60 mt-1">{timeAgo(msg.createdAt)}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t border-white/10 p-6">
-          <div className="flex gap-2">
+        {error && <div className="px-6 pb-2 text-xs text-red-400">{error}</div>}
+
+        <div className="border-t border-white/10 p-4">
+          <div className="flex gap-2 mb-2">
+            <input
+              type="number"
+              placeholder="Price"
+              value={proposedPrice}
+              onChange={(e) => setProposedPrice(e.target.value)}
+              className="w-28 bg-zinc-900/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50"
+            />
             <input
               type="text"
-              placeholder="Message seller..."
+              placeholder="Message seller or their agent..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -205,16 +289,20 @@ function NegotiationModal({
                   handleSend();
                 }
               }}
-              className="flex-1 bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50"
+              disabled={initializing || loading}
+              className="flex-1 bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500/50 disabled:opacity-50"
             />
             <button
               onClick={handleSend}
-              disabled={loading}
+              disabled={loading || initializing || !input.trim()}
               className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 transition-all text-white text-sm font-light"
             >
-              Send
+              {loading ? 'Sending...' : 'Send'}
             </button>
           </div>
+          <p className="text-[10px] text-zinc-600">
+            Messages go to the seller&apos;s negotiation agent — responses are signed and recorded.
+          </p>
         </div>
       </motion.div>
     </motion.div>
@@ -222,23 +310,40 @@ function NegotiationModal({
 }
 
 export default function MarketPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: 'var(--bg)' }} />}>
+      <MarketPageContent />
+    </Suspense>
+  );
+}
+
+function MarketPageContent() {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
   const [activeTab, setActiveTab] = useState<'all' | 'featured' | 'activity'>('all');
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
   const [activeNeg, setActiveNeg] = useState<MarketListing | null>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trending'>('recent');
+  const [search, setSearch] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState<'recent' | 'price-low' | 'price-high' | 'trending'>(
+    'recent',
+  );
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       try {
+        const qs = new URLSearchParams({ page: '1' });
+        if (search) qs.set('search', search);
         const [listingsData, feedData] = await Promise.all([
-          api.get<MarketListing[]>('/market/listings?limit=20'),
-          api.get<FeedPost[]>('/market/feed?limit=5'),
+          api.get<{ data: MarketListing[]; total: number; page: number; pages: number }>(
+            `/market?${qs.toString()}`,
+          ),
+          api.get<FeedPost[]>('/market/feed?take=5'),
         ]);
-        setListings(listingsData || []);
+        setListings(listingsData?.data || []);
         setFeedPosts(feedData || []);
       } catch {
         // ignore
@@ -247,7 +352,7 @@ export default function MarketPage() {
       }
     };
     load();
-  }, []);
+  }, [search]);
 
   if (isLoading || loading) {
     return (
@@ -262,7 +367,7 @@ export default function MarketPage() {
   }
 
   const filteredListings = listings.filter((l) =>
-    search ? l.title.toLowerCase().includes(search.toLowerCase()) : true
+    search ? l.title.toLowerCase().includes(search.toLowerCase()) : true,
   );
 
   const sortedListings = [...filteredListings].sort((a, b) => {
@@ -282,7 +387,10 @@ export default function MarketPage() {
   return (
     <div style={{ background: 'var(--bg)' }} className="relative min-h-screen overflow-hidden">
       {/* Hexagon pattern backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-[0.2]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[780px] opacity-[0.2]"
+      >
         <HexagonPattern />
       </div>
 
@@ -323,7 +431,6 @@ export default function MarketPage() {
             'linear-gradient(90deg, transparent, rgba(131,110,249,0.6), rgba(6,182,212,0.4), transparent)',
         }}
       />
-
 
       {activeNeg && user && (
         <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
@@ -546,7 +653,10 @@ function StatCard({
   return (
     <div className="p-4 rounded-lg border border-white/8 bg-white/3 hover:bg-white/5 transition-colors">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-purple-300" style={{ background: 'rgba(131,110,249,0.1)' }}>
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-purple-300"
+          style={{ background: 'rgba(131,110,249,0.1)' }}
+        >
           {icon}
         </div>
         <span className="text-xs text-zinc-400 uppercase tracking-wider">{label}</span>

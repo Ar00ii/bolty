@@ -1,8 +1,8 @@
 'use client';
 
-import { motion, useMotionValue, useSpring } from 'framer-motion';
-import dynamic from 'next/dynamic';
+import { motion, useSpring } from 'framer-motion';
 import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import React, { useRef, useCallback } from 'react';
 
 const ShapeGrid = dynamic(() => import('@/components/ui/ShapeGrid'), { ssr: false });
@@ -54,35 +54,159 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
   // Bigger shapes (viewBox 0 0 400 400, shapes scaled up)
   const shapes = [
     // 0: Diamond
-    <rect key="s0" x="105" y="105" width="190" height="190" fill="none" stroke="#9333ea" strokeWidth="1.5" transform="rotate(45 200 200)" opacity="0.85" />,
+    <rect
+      key="s0"
+      x="105"
+      y="105"
+      width="190"
+      height="190"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      transform="rotate(45 200 200)"
+      opacity="0.85"
+    />,
     // 1: Circle
-    <circle key="s1" cx="200" cy="200" r="110" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
+    <circle
+      key="s1"
+      cx="200"
+      cy="200"
+      r="110"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
     // 2: Triangle
-    <polygon key="s2" points="200,75 320,310 80,310" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
+    <polygon
+      key="s2"
+      points="200,75 320,310 80,310"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
     // 3: Hexagon
-    <polygon key="s3" points="200,85 290,140 290,260 200,315 110,260 110,140" fill="none" stroke="#9333ea" strokeWidth="1.5" opacity="0.85" />,
+    <polygon
+      key="s3"
+      points="200,85 290,140 290,260 200,315 110,260 110,140"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
   ];
 
   const dashedShapes = [
     // 0: Dashed square + inner diamond
     <>
-      <rect key="d0a" x="80" y="80" width="240" height="240" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
-      <rect key="d0b" x="140" y="140" width="120" height="120" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" transform="rotate(45 200 200)" opacity="0.5" className="dash-animate-slow" />
+      <rect
+        key="d0a"
+        x="80"
+        y="80"
+        width="240"
+        height="240"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <rect
+        key="d0b"
+        x="140"
+        y="140"
+        width="120"
+        height="120"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        transform="rotate(45 200 200)"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
     </>,
     // 1: Dashed square + inner circle
     <>
-      <rect key="d1a" x="85" y="85" width="230" height="230" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
-      <circle key="d1b" cx="200" cy="200" r="65" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
+      <rect
+        key="d1a"
+        x="85"
+        y="85"
+        width="230"
+        height="230"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <circle
+        key="d1b"
+        cx="200"
+        cy="200"
+        r="65"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
     </>,
     // 2: Dashed circle + inner triangle
     <>
-      <circle key="d2a" cx="200" cy="200" r="130" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" opacity="0.65" className="dash-animate" />
-      <polygon key="d2b" points="200,120 275,275 125,275" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
+      <circle
+        key="d2a"
+        cx="200"
+        cy="200"
+        r="130"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <polygon
+        key="d2b"
+        points="200,120 275,275 125,275"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
     </>,
     // 3: Dashed diamond + inner hexagon
     <>
-      <rect key="d3a" x="115" y="115" width="170" height="170" fill="none" stroke="#7c3aed" strokeWidth="1.5" strokeDasharray="10 7" transform="rotate(45 200 200)" opacity="0.65" className="dash-animate" />
-      <polygon key="d3b" points="200,125 260,165 260,235 200,275 140,235 140,165" fill="none" stroke="#a855f7" strokeWidth="1.2" strokeDasharray="8 6" opacity="0.5" className="dash-animate-slow" />
+      <rect
+        key="d3a"
+        x="115"
+        y="115"
+        width="170"
+        height="170"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        transform="rotate(45 200 200)"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <polygon
+        key="d3b"
+        points="200,125 260,165 260,235 200,275 140,235 140,165"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
     </>,
   ];
 
@@ -118,7 +242,8 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(147,51,234,0.4) 0%, rgba(124,58,237,0.22) 35%, rgba(88,28,135,0.08) 65%, transparent 100%)',
+          background:
+            'radial-gradient(circle, rgba(147,51,234,0.4) 0%, rgba(124,58,237,0.22) 35%, rgba(88,28,135,0.08) 65%, transparent 100%)',
           filter: 'blur(22px)',
         }}
       />
@@ -130,14 +255,27 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(192,132,252,0.18) 50%, transparent 100%)',
+          background:
+            'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(192,132,252,0.18) 50%, transparent 100%)',
           filter: 'blur(14px)',
         }}
       />
 
       {/* Fade edges */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to right, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to bottom, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)' }} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to right, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to bottom, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)',
+        }}
+      />
 
       {/* Layer 0: Base shape */}
       <div className="absolute inset-0 flex items-center justify-center">
@@ -147,25 +285,43 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
       </div>
 
       {/* Layer 1: Dashed with marching animation (parallax 1x) */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ x: dottedX, y: dottedY }}
-      >
+      <motion.div className="absolute inset-0" style={{ x: dottedX, y: dottedY }}>
         <svg viewBox="0 0 400 400" className="w-full h-full">
           {dashedShapes[v]}
         </svg>
       </motion.div>
 
       {/* Layer 2: Corner brackets (parallax 2x) */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ x: greeblesX, y: greeblesY }}
-      >
+      <motion.div className="absolute inset-0" style={{ x: greeblesX, y: greeblesY }}>
         <svg viewBox="0 0 400 400" className="w-full h-full">
-          <path d="M 55 100 L 55 55 L 100 55" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
-          <path d="M 300 55 L 345 55 L 345 100" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
-          <path d="M 55 300 L 55 345 L 100 345" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
-          <path d="M 300 345 L 345 345 L 345 300" fill="none" stroke="#a855f7" strokeWidth="1.2" opacity="0.5" />
+          <path
+            d="M 55 100 L 55 55 L 100 55"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 300 55 L 345 55 L 345 100"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 55 300 L 55 345 L 100 345"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 300 345 L 345 345 L 345 300"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
         </svg>
       </motion.div>
     </div>
@@ -176,25 +332,29 @@ const GeometricFigure = ({ variant }: { variant: number }) => {
 const FEATURES = [
   {
     title: 'Intuitive Marketplace',
-    description: 'Discover, publish, and sell AI agents with zero friction. Full visibility into agent performance.',
+    description:
+      'Discover, publish, and sell AI agents with zero friction. Full visibility into agent performance.',
     icon: ShoppingCart,
     details: ['Browse agents', 'Publish custom', 'Track revenue', 'Monetize'],
   },
   {
     title: 'Full-stack AI Agents',
-    description: 'Deploy autonomous agents with complete control. Real-time execution and monitoring across your infrastructure.',
+    description:
+      'Deploy autonomous agents with complete control. Real-time execution and monitoring across your infrastructure.',
     icon: Bot,
     details: ['Custom logic', 'Real-time sync', 'Auto-scaling', 'Analytics'],
   },
   {
     title: 'Zero Ops Deployment',
-    description: 'Deploy without operational overhead. Automatic scaling, monitoring, and maintenance included.',
+    description:
+      'Deploy without operational overhead. Automatic scaling, monitoring, and maintenance included.',
     icon: Zap,
     details: ['Auto-scaling', 'Zero config', 'Built-in monitoring', 'Self-healing'],
   },
   {
     title: 'Real-time Analytics',
-    description: 'Monitor agent performance with detailed metrics. Track usage, costs, and ROI in real-time dashboards.',
+    description:
+      'Monitor agent performance with detailed metrics. Track usage, costs, and ROI in real-time dashboards.',
     icon: TrendingUp,
     details: ['Live metrics', 'Cost tracking', 'Performance data', 'Insights'],
   },
@@ -239,10 +399,7 @@ export const FeaturesGrid = () => {
       </p>
 
       {/* Grid */}
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        style={{ paddingTop: '60px' }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ paddingTop: '60px' }}>
         {FEATURES.map((feature, idx) => {
           const Icon = feature.icon;
           return (
@@ -258,13 +415,17 @@ export const FeaturesGrid = () => {
               }}
               whileHover={{
                 borderColor: 'rgba(147, 51, 234, 0.7)',
-                boxShadow: '0 0 60px rgba(147, 51, 234, 0.3), 0 0 120px rgba(147, 51, 234, 0.12), inset 0 1px 40px rgba(147, 51, 234, 0.06)',
+                boxShadow:
+                  '0 0 60px rgba(147, 51, 234, 0.3), 0 0 120px rgba(147, 51, 234, 0.12), inset 0 1px 40px rgba(147, 51, 234, 0.06)',
                 scale: 1.04,
                 y: -8,
               }}
             >
               {/* Geometric figure */}
-              <div className="relative overflow-hidden transition-all duration-500 group-hover:brightness-150" style={{ background: '#141414' }}>
+              <div
+                className="relative overflow-hidden transition-all duration-500 group-hover:brightness-150"
+                style={{ background: '#141414' }}
+              >
                 <GeometricFigure variant={idx} />
               </div>
 
@@ -307,7 +468,10 @@ export const FeaturesGrid = () => {
                 {/* Details */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2">
                   {feature.details.map((detail, i) => (
-                    <div key={i} className="flex items-center gap-1.5 text-xs text-white/35 group-hover:text-white/50 transition-colors duration-300">
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 text-xs text-white/35 group-hover:text-white/50 transition-colors duration-300"
+                    >
                       <div className="w-1 h-1 rounded-full bg-purple-600/60 group-hover:bg-purple-400/80 transition-colors duration-300" />
                       {detail}
                     </div>

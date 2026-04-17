@@ -44,9 +44,41 @@ export class ApiKeysService {
         label: true,
         createdAt: true,
         lastUsedAt: true,
+        keyLastFour: true,
       },
     });
-    return keys;
+    return keys.map((k) => ({
+      id: k.id,
+      label: k.label,
+      createdAt: k.createdAt,
+      lastUsedAt: k.lastUsedAt,
+      lastFour: k.keyLastFour,
+    }));
+  }
+
+  /**
+   * Rename an API key label
+   */
+  async renameApiKey(userId: string, keyId: string, label: string | null) {
+    const existing = await this.prisma.userApiKey.findUnique({ where: { id: keyId } });
+    if (!existing || existing.userId !== userId) {
+      throw new BadRequestException('API key not found or does not belong to you');
+    }
+    const trimmed = label?.trim() || null;
+    if (trimmed && trimmed.length > 64) {
+      throw new BadRequestException('Label must be 64 characters or fewer');
+    }
+    const updated = await this.prisma.userApiKey.update({
+      where: { id: keyId },
+      data: { label: trimmed },
+    });
+    return {
+      id: updated.id,
+      label: updated.label,
+      createdAt: updated.createdAt,
+      lastUsedAt: updated.lastUsedAt,
+      lastFour: updated.keyLastFour,
+    };
   }
 
   /**
@@ -60,6 +92,7 @@ export class ApiKeysService {
       data: {
         userId,
         keyHash,
+        keyLastFour: plainKey.slice(-4),
         label: label || null,
       },
     });
@@ -70,6 +103,7 @@ export class ApiKeysService {
       label: apiKey.label,
       createdAt: apiKey.createdAt,
       lastUsedAt: apiKey.lastUsedAt,
+      lastFour: apiKey.keyLastFour,
     };
   }
 

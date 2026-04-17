@@ -1,22 +1,44 @@
 'use client';
 
-import { Key, Plus, Trash2, Copy, Check, Eye, EyeOff, AlertTriangle, Shield } from 'lucide-react';
+import {
+  Key,
+  Plus,
+  Trash2,
+  Copy,
+  Check,
+  AlertTriangle,
+  Shield,
+  TrendingUp,
+  Activity,
+  Clock,
+  Code2,
+  Terminal,
+  ArrowUpRight,
+  Edit2,
+  Save,
+  X as XIcon,
+} from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 
+import { GradientText } from '@/components/ui/GradientText';
+import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface ApiKeyInfo {
   id: string;
   label: string | null;
-  key?: string; // Only present on creation
+  key?: string;
+  lastFour?: string;
   createdAt: string;
   lastUsedAt: string | null;
 }
 
-function maskKey(key: string): string {
-  if (key.length <= 8) return key;
-  return key.slice(0, 7) + '•'.repeat(24) + key.slice(-4);
+interface KeyStat {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent: string;
 }
 
 function formatDate(d: string): string {
@@ -39,27 +61,493 @@ function timeAgo(d: string): string {
   return formatDate(d);
 }
 
+function KeyStatCard({ icon, label, value, accent }: KeyStat) {
+  return (
+    <div
+      className="relative rounded-xl p-4 overflow-hidden"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.35)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+      />
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-light"
+          style={{ color: accent }}
+        >
+          <span
+            className="w-5 h-5 rounded-md flex items-center justify-center"
+            style={{ background: `${accent}15`, border: `1px solid ${accent}30`, color: accent }}
+          >
+            {icon}
+          </span>
+          {label}
+        </span>
+      </div>
+      <p className="text-lg font-light text-white">{value}</p>
+    </div>
+  );
+}
+
+function KeyCreationBanner({ keyValue, onDismiss }: { keyValue: string; onDismiss: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(keyValue);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
+
+  return (
+    <div
+      className="mb-6 p-5 rounded-xl overflow-hidden"
+      style={{
+        border: '1px solid rgba(34,197,94,0.2)',
+        background: 'rgba(34,197,94,0.05)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <Shield className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+        <div className="flex-1">
+          <p className="text-sm font-light text-emerald-400 mb-1">API key created successfully</p>
+          <p className="text-xs text-zinc-400 mb-4">
+            Copy this key now. You won&apos;t be able to see it again.
+          </p>
+          <div className="flex items-center gap-2 mb-4">
+            <code
+              className="flex-1 bg-black/40 border rounded-lg px-3 py-2 text-xs font-mono text-emerald-300 break-all"
+              style={{ borderColor: 'rgba(34,197,94,0.3)' }}
+            >
+              {keyValue}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="px-3 py-2 rounded-lg text-xs flex items-center gap-1.5 transition-all flex-shrink-0"
+              style={{
+                background: copied ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.08)',
+                color: copied ? '#22c55e' : '#a1a1a1',
+                border: `1px solid ${copied ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`,
+              }}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" /> Copy
+                </>
+              )}
+            </button>
+          </div>
+          <p className="text-[11px] text-zinc-500 mb-3">
+            Store it securely. We cannot show it again — lost keys require deletion + recreation.
+          </p>
+          <button
+            onClick={onDismiss}
+            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            I&apos;ve stored it securely
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CreateKeyForm({
+  onCreated,
+  onCancel,
+  isLoading,
+}: {
+  onCreated: (key: ApiKeyInfo) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) {
+  const [label, setLabel] = useState('');
+
+  const handleCreate = async () => {
+    if (isLoading) return;
+    try {
+      const result = await api.post<ApiKeyInfo>('/market/api-keys', {
+        label: label.trim() || null,
+      });
+      onCreated(result);
+      setLabel('');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div
+      className="mb-6 p-5 rounded-xl overflow-hidden"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.35)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <h3 className="text-sm font-light text-white mb-4">Create new API key</h3>
+      <div className="flex items-end gap-3">
+        <div className="flex-1">
+          <label className="text-xs text-zinc-500 mb-1.5 block uppercase tracking-wide">
+            Key name (optional)
+          </label>
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="e.g., Production, CI/CD, Bot #3"
+            className="w-full bg-black/40 border rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all"
+            style={{
+              borderColor: 'rgba(255,255,255,0.1)',
+              background: 'rgba(0,0,0,0.4)',
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !isLoading) handleCreate();
+            }}
+            autoFocus
+          />
+        </div>
+        <button
+          onClick={handleCreate}
+          disabled={isLoading}
+          className="px-4 py-2 rounded-lg text-sm font-light flex items-center gap-1.5 transition-all"
+          style={{
+            background: isLoading ? 'rgba(131,110,249,0.5)' : '#836EF9',
+            color: '#fff',
+          }}
+        >
+          {isLoading ? (
+            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Plus className="w-3.5 h-3.5" />
+          )}
+          {isLoading ? 'Creating...' : 'Create'}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-4 py-2 rounded-lg text-sm font-light transition-all"
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            color: '#a1a1a1',
+            border: '1px solid rgba(255,255,255,0.1)',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function KeyListItem({
+  keyInfo,
+  onDelete,
+  onRename,
+}: {
+  keyInfo: ApiKeyInfo;
+  onDelete: (id: string) => void;
+  onRename: (id: string, label: string | null) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editLabel, setEditLabel] = useState(keyInfo.label || '');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      const text = `blt_••••••••••••••••••••••••${keyInfo.lastFour || '????'}`;
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
+
+  const handleSaveRename = async () => {
+    await onRename(keyInfo.id, editLabel.trim() || null);
+    setIsEditing(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm('Revoke this API key? This action cannot be undone.')) return;
+    setIsDeleting(true);
+    await onDelete(keyInfo.id);
+  };
+
+  // eslint-disable-next-line react-hooks/purity
+  const now = Date.now();
+  const status = keyInfo.lastUsedAt
+    ? new Date(keyInfo.lastUsedAt).getTime() > now - 30 * 24 * 60 * 60 * 1000
+      ? 'Active'
+      : 'Idle'
+    : 'Unused';
+
+  const statusColor = status === 'Active' ? '#22c55e' : status === 'Idle' ? '#f59e0b' : '#6b7280';
+
+  return (
+    <div
+      className="p-4 rounded-xl border flex flex-col gap-3"
+      style={{
+        borderColor: 'rgba(255,255,255,0.08)',
+        background: 'rgba(0,0,0,0.25)',
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <div className="flex items-center gap-2 mb-2">
+              <input
+                type="text"
+                value={editLabel}
+                onChange={(e) => setEditLabel(e.target.value)}
+                className="flex-1 bg-black/40 border rounded-lg px-2 py-1 text-sm text-white"
+                style={{ borderColor: 'rgba(255,255,255,0.1)' }}
+                autoFocus
+              />
+              <button
+                onClick={handleSaveRename}
+                className="p-1 rounded-md hover:bg-white/10 transition-colors"
+              >
+                <Save className="w-4 h-4 text-emerald-400" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setEditLabel(keyInfo.label || '');
+                }}
+                className="p-1 rounded-md hover:bg-white/10 transition-colors"
+              >
+                <XIcon className="w-4 h-4 text-zinc-500" />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-sm font-light text-white">{keyInfo.label || 'Unnamed key'}</h3>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="p-1 rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/10 transition-colors"
+              >
+                <Edit2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-xs">
+            <code className="text-zinc-400 font-mono">
+              blt_••••••••••••••••••••••••{keyInfo.lastFour || '????'}
+            </code>
+            <button
+              onClick={handleCopy}
+              className="text-zinc-500 hover:text-zinc-300 transition-colors"
+            >
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </button>
+          </div>
+        </div>
+        <div
+          className="px-2 py-1 rounded-md text-[10px] uppercase tracking-wide font-light"
+          style={{
+            background: `${statusColor}20`,
+            color: statusColor,
+            border: `1px solid ${statusColor}30`,
+          }}
+        >
+          {status}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400">
+        <div>
+          Created: <span className="text-zinc-300">{formatDate(keyInfo.createdAt)}</span>
+        </div>
+        <div>
+          Last used:{' '}
+          <span className="text-zinc-300">
+            {keyInfo.lastUsedAt ? timeAgo(keyInfo.lastUsedAt) : 'Never'}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="px-3 py-1.5 rounded-lg text-xs font-light transition-all text-red-400 hover:bg-red-500/10"
+          style={{ border: '1px solid rgba(239,68,68,0.2)' }}
+        >
+          {isDeleting ? (
+            <span className="w-3 h-3 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin inline-block" />
+          ) : (
+            <>
+              <Trash2 className="w-3.5 h-3.5 inline-block mr-1" /> Revoke
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function IntegrationPanel() {
+  const [lang, setLang] = useState<'curl' | 'node' | 'python'>('curl');
+  const [copied, setCopied] = useState(false);
+
+  const snippets: Record<string, string> = {
+    curl: `curl -X POST https://api.bolty.dev/v1/market/agents/invoke \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "agentId": "agt_...",
+    "input": { "task": "...", "data": "..." }
+  }'`,
+    node: `import { Bolty } from "@bolty/sdk";
+
+const bolty = new Bolty({
+  apiKey: process.env.BOLTY_API_KEY,
+});
+
+const result = await bolty.agents.invoke({
+  agentId: "agt_...",
+  input: { task: "...", data: "..." },
+});`,
+    python: `from bolty import Bolty
+
+bolty = Bolty(api_key=os.environ["BOLTY_API_KEY"])
+
+result = bolty.agents.invoke(
+    agent_id="agt_...",
+    input={"task": "...", "data": "..."},
+)`,
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(snippets[lang]);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* noop */
+    }
+  };
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        border: '1px solid rgba(255,255,255,0.08)',
+        background:
+          'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr]">
+        <div className="p-5 md:p-6 border-b md:border-b-0 md:border-r border-white/8">
+          <div className="inline-flex items-center gap-2 mb-3">
+            <span
+              className="w-7 h-7 rounded-md flex items-center justify-center"
+              style={{
+                background: 'rgba(131,110,249,0.12)',
+                border: '1px solid rgba(131,110,249,0.3)',
+              }}
+            >
+              <Code2 className="w-3.5 h-3.5 text-purple-300" />
+            </span>
+            <span className="text-[11px] uppercase tracking-[0.25em] text-purple-300/80 font-light">
+              Quick integration
+            </span>
+          </div>
+          <h3 className="text-lg text-white font-light mb-2">Use your API key</h3>
+          <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
+            Include your key in the Authorization header as <code>Bearer YOUR_KEY</code>. All
+            requests are signed and auditable on-chain.
+          </p>
+          <div className="flex items-center gap-2">
+            <a
+              href="/docs/agent-api"
+              className="inline-flex items-center gap-1.5 text-[11px] text-purple-300 hover:text-purple-200 transition-colors"
+            >
+              <Terminal className="w-3 h-3" /> Read API docs
+              <ArrowUpRight className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between border-b border-white/8 px-4 py-2">
+            <div className="flex gap-1">
+              {(['curl', 'node', 'python'] as const).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
+                    lang === l
+                      ? 'text-purple-200 bg-purple-500/10 border border-purple-500/25'
+                      : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                  }`}
+                >
+                  {l}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-400" /> Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" /> Copy
+                </>
+              )}
+            </button>
+          </div>
+          <pre
+            className="flex-1 text-[11.5px] leading-relaxed font-mono text-zinc-300 p-4 overflow-x-auto"
+            style={{ background: 'rgba(0,0,0,0.35)' }}
+          >
+            <code>{snippets[lang]}</code>
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ApiKeysPage() {
   const { user } = useAuth();
   const [keys, setKeys] = useState<ApiKeyInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [newKeyLabel, setNewKeyLabel] = useState('');
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [revealedKeys, setRevealedKeys] = useState<Set<string>>(new Set());
 
   const fetchKeys = useCallback(async () => {
     try {
       const data = await api.get<ApiKeyInfo[]>('/market/api-keys');
       setKeys(data);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 404) {
-        setKeys([]);
-      } else {
+      if (!(err instanceof ApiError && err.status === 404)) {
         setError('Failed to load API keys');
       }
     } finally {
@@ -71,338 +559,200 @@ export default function ApiKeysPage() {
     fetchKeys();
   }, [fetchKeys]);
 
-  const createKey = async () => {
-    if (creating) return;
-    setCreating(true);
-    setError('');
-    try {
-      const result = await api.post<{
-        id: string;
-        key: string;
-        label: string | null;
-        createdAt: string;
-        lastUsedAt: string | null;
-      }>('/market/api-keys', {
-        label: newKeyLabel.trim() || null,
-      });
-      setNewlyCreatedKey(result.key);
-      setKeys((prev) => [{ ...result }, ...prev]);
-      setShowCreateForm(false);
-      setNewKeyLabel('');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to create API key');
-    } finally {
-      setCreating(false);
+  const handleCreate = async (newKey: ApiKeyInfo) => {
+    if (newKey.key) {
+      setNewlyCreatedKey(newKey.key);
     }
+    setKeys((prev) => [newKey, ...prev]);
+    setShowCreate(false);
   };
 
-  const deleteKey = async (id: string) => {
-    if (!confirm('Are you sure you want to revoke this API key? This action cannot be undone.'))
-      return;
-    setDeletingId(id);
-    setError('');
+  const handleDelete = async (keyId: string) => {
     try {
-      // Step 1: Request verification code
-      await api.post(`/market/api-keys/${id}/request-delete-verification`, {});
-
-      // Step 2: Prompt user for code
-      const code = prompt('A verification code has been sent to your email. Enter it below:');
-      if (!code) {
-        setError('Verification cancelled');
-        setDeletingId(null);
-        return;
-      }
-
-      // Step 3: Verify and delete
-      await api.delete(`/market/api-keys/${id}`, { code });
-      setKeys((prev) => prev.filter((k) => k.id !== id));
-      if (newlyCreatedKey) setNewlyCreatedKey(null);
+      await api.post(`/market/api-keys/${keyId}/request-delete-verification`, {});
+      const code = prompt('Verification code sent to your email:');
+      if (!code) return;
+      await api.delete(`/market/api-keys/${keyId}`, { code });
+      setKeys((prev) => prev.filter((k) => k.id !== keyId));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
-    } finally {
-      setDeletingId(null);
     }
   };
 
-  const copyToClipboard = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleRename = async (keyId: string, label: string | null) => {
+    try {
+      const updated = await api.patch<ApiKeyInfo>(`/market/api-keys/${keyId}`, { label });
+      setKeys((prev) => prev.map((k) => (k.id === keyId ? updated : k)));
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to rename key');
+    }
   };
 
   if (!user) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center flex-col gap-3">
+      <div
+        className="min-h-[60vh] flex items-center justify-center flex-col gap-3"
+        style={{ background: 'var(--bg)' }}
+      >
         <Key className="w-10 h-10 text-zinc-600" strokeWidth={1.5} />
         <p className="text-zinc-500">Sign in to manage your API keys</p>
       </div>
     );
   }
 
+  const activeCount = keys.filter(
+    (k) => k.lastUsedAt && new Date(k.lastUsedAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
+  ).length;
+  const idleCount = keys.filter(
+    (k) =>
+      k.lastUsedAt && new Date(k.lastUsedAt).getTime() <= Date.now() - 30 * 24 * 60 * 60 * 1000,
+  ).length;
+  const unusedCount = keys.filter((k) => !k.lastUsedAt).length;
+
   return (
-    <div className="page-container py-8">
-      {/* Header */}
-      <div className="page-header flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-light text-white tracking-tight">API Keys</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Manage API keys for programmatic access. Use these keys to let your AI agents interact
-            with the platform.
+    <div style={{ background: 'var(--bg)' }} className="min-h-screen py-8">
+      <div className="max-w-5xl mx-auto px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-light text-white mb-2">
+            <GradientText gradient="purple">API Keys</GradientText>
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Create and manage API keys for programmatic access to Bolty. Each key is signed,
+            auditable, and can be independently revoked.
           </p>
         </div>
-        {!showCreateForm && (
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="btn-primary text-sm flex items-center gap-1.5 px-4 py-2"
-          >
-            <Plus className="w-4 h-4" /> Create key
-          </button>
-        )}
-      </div>
 
-      {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 text-sm mb-6">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-          {error}
-          <button
-            onClick={() => setError('')}
-            className="ml-auto text-red-400/60 hover:text-red-400"
-          >
-            &times;
-          </button>
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <KeyStatCard
+            icon={<Key className="w-3.5 h-3.5" />}
+            label="Total keys"
+            value={keys.length.toString()}
+            accent="#836EF9"
+          />
+          <KeyStatCard
+            icon={<Activity className="w-3.5 h-3.5" />}
+            label="Active"
+            value={activeCount.toString()}
+            accent="#22c55e"
+          />
+          <KeyStatCard
+            icon={<Clock className="w-3.5 h-3.5" />}
+            label="Idle"
+            value={idleCount.toString()}
+            accent="#f59e0b"
+          />
+          <KeyStatCard
+            icon={<TrendingUp className="w-3.5 h-3.5" />}
+            label="Unused"
+            value={unusedCount.toString()}
+            accent="#6b7280"
+          />
         </div>
-      )}
 
-      {/* Newly created key banner */}
-      {newlyCreatedKey && (
-        <div className="mb-6 p-4 rounded-xl border border-green-500/20 bg-green-500/5">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-light text-green-400 mb-1">API key created successfully</p>
-              <p className="text-xs text-zinc-400 mb-3">
-                Copy this key now. You won&apos;t be able to see it again.
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-black/40 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white break-all">
-                  {newlyCreatedKey}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(newlyCreatedKey, 'new')}
-                  className="btn-secondary px-3 py-2 flex items-center gap-1.5 text-xs flex-shrink-0"
-                >
-                  {copiedId === 'new' ? (
-                    <Check className="w-3.5 h-3.5 text-green-400" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                  {copiedId === 'new' ? 'Copied' : 'Copy'}
-                </button>
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => setNewlyCreatedKey(null)}
-            className="mt-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
-
-      {/* Create form */}
-      {showCreateForm && (
-        <div className="mb-6 card p-5">
-          <h3 className="text-sm font-light text-white mb-3">Create new API key</h3>
-          <div className="flex items-end gap-3">
-            <div className="flex-1">
-              <label className="text-xs text-zinc-500 mb-1.5 block">Key name (optional)</label>
-              <input
-                type="text"
-                value={newKeyLabel}
-                onChange={(e) => setNewKeyLabel(e.target.value)}
-                placeholder="e.g., Production, My Bot, CI/CD"
-                className="input"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') createKey();
-                }}
-                autoFocus
-              />
-            </div>
-            <button
-              onClick={createKey}
-              disabled={creating}
-              className="btn-primary px-4 py-2 text-sm flex items-center gap-1.5"
-            >
-              {creating ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Plus className="w-4 h-4" />
-              )}
-              Create
-            </button>
-            <button
-              onClick={() => {
-                setShowCreateForm(false);
-                setNewKeyLabel('');
-              }}
-              className="btn-secondary px-4 py-2 text-sm"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Keys table */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton h-16 rounded-xl" />
-          ))}
-        </div>
-      ) : keys.length === 0 ? (
-        <div className="card text-center py-16 px-6">
-          <Key className="w-12 h-12 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
-          <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
-          <p className="text-sm text-zinc-500 max-w-md mx-auto mb-6">
-            Create an API key to let your AI agents post content, perform actions, and interact with
-            Bolty programmatically.
-          </p>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="btn-primary text-sm px-5 py-2 inline-flex items-center gap-1.5"
-          >
-            <Plus className="w-4 h-4" /> Create your first key
-          </button>
-        </div>
-      ) : (
-        <div className="border rounded-xl overflow-hidden" style={{ borderColor: 'var(--border)' }}>
-          {/* Table header */}
+        {error && (
           <div
-            className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3 text-xs font-light text-zinc-500 uppercase tracking-wider border-b"
-            style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}
+            className="mb-6 p-3 rounded-lg border flex items-center gap-2 text-sm"
+            style={{
+              borderColor: 'rgba(239,68,68,0.3)',
+              background: 'rgba(239,68,68,0.05)',
+              color: '#ef4444',
+            }}
           >
-            <span>Name</span>
-            <span>Key</span>
-            <span>Created</span>
-            <span>Last used</span>
-            <span className="text-right">Actions</span>
-          </div>
-
-          {/* Table rows */}
-          {keys.map((k) => (
-            <div
-              key={k.id}
-              className="grid grid-cols-[1fr_2fr_120px_120px_100px] gap-4 px-5 py-3.5 items-center border-b last:border-b-0 hover:bg-white/[0.02] transition-colors"
-              style={{ borderColor: 'var(--border)' }}
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+            {error}
+            <button
+              onClick={() => setError('')}
+              className="ml-auto text-red-400/60 hover:text-red-400"
             >
-              <div>
-                <span className="text-sm font-light text-white">{k.label || 'Unnamed key'}</span>
-              </div>
-              <div className="flex items-center gap-2 min-w-0">
-                <code className="text-xs font-mono text-zinc-400 truncate">
-                  {revealedKeys.has(k.id)
-                    ? k.key || `blt_${'•'.repeat(28)}`
-                    : maskKey(k.key || `blt_${'•'.repeat(28)}`)}
-                </code>
-                <button
-                  onClick={() =>
-                    setRevealedKeys((prev) => {
-                      const s = new Set(prev);
-                      s.has(k.id) ? s.delete(k.id) : s.add(k.id);
-                      return s;
-                    })
-                  }
-                  className="text-zinc-600 hover:text-zinc-400 flex-shrink-0"
-                  title={revealedKeys.has(k.id) ? 'Hide' : 'Reveal'}
-                >
-                  {revealedKeys.has(k.id) ? (
-                    <EyeOff className="w-3.5 h-3.5" />
-                  ) : (
-                    <Eye className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </div>
-              <div className="text-xs text-zinc-500">{formatDate(k.createdAt)}</div>
-              <div className="text-xs text-zinc-500">
-                {k.lastUsedAt ? (
-                  timeAgo(k.lastUsedAt)
-                ) : (
-                  <span className="text-zinc-600">Never</span>
-                )}
-              </div>
-              <div className="flex items-center justify-end gap-1">
-                {k.key && (
-                  <button
-                    onClick={() => copyToClipboard(k.key!, k.id)}
-                    className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all"
-                    title="Copy key"
-                  >
-                    {copiedId === k.id ? (
-                      <Check className="w-3.5 h-3.5 text-green-400" />
-                    ) : (
-                      <Copy className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                )}
-                <button
-                  onClick={() => deleteKey(k.id)}
-                  disabled={deletingId === k.id}
-                  className="w-7 h-7 flex items-center justify-center rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50"
-                  title="Revoke key"
-                >
-                  {deletingId === k.id ? (
-                    <span className="w-3.5 h-3.5 border-2 border-zinc-500/30 border-t-zinc-500 rounded-full animate-spin" />
-                  ) : (
-                    <Trash2 className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+              ×
+            </button>
+          </div>
+        )}
 
-      {/* Info section */}
-      <div className="mt-8 card p-5">
-        <h3 className="text-sm font-light text-white mb-3 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-monad-400" />
-          API Key Usage
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-zinc-400">
-          <div>
-            <p className="font-light text-zinc-300 mb-1">Authentication</p>
-            <p className="text-xs leading-relaxed">
-              Include your API key in the{' '}
-              <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">
-                Authorization
-              </code>{' '}
-              header as{' '}
-              <code className="px-1 py-0.5 bg-zinc-800 rounded text-monad-400 text-[11px]">
-                Bearer YOUR_KEY
-              </code>
+        {newlyCreatedKey && (
+          <KeyCreationBanner
+            keyValue={newlyCreatedKey}
+            onDismiss={() => setNewlyCreatedKey(null)}
+          />
+        )}
+
+        {showCreate && (
+          <CreateKeyForm
+            onCreated={handleCreate}
+            onCancel={() => setShowCreate(false)}
+            isLoading={creating}
+          />
+        )}
+
+        {!showCreate && (
+          <div className="mb-8">
+            <ShimmerButton
+              onClick={() => setShowCreate(true)}
+              className="text-white text-sm px-5 py-2.5 rounded-lg transition-all inline-flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Create API key
+            </ShimmerButton>
+          </div>
+        )}
+
+        {/* Keys list */}
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="skeleton h-24 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.08)' }}
+              />
+            ))}
+          </div>
+        ) : keys.length === 0 ? (
+          <div
+            className="rounded-xl p-12 text-center"
+            style={{
+              border: '1px dashed rgba(255,255,255,0.1)',
+              background: 'rgba(0,0,0,0.3)',
+            }}
+          >
+            <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
+            <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
+            <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
+              Create your first API key to start building with Bolty&apos;s agents and services
+              programmatically.
             </p>
           </div>
-          <div>
-            <p className="font-light text-zinc-300 mb-1">Security</p>
-            <p className="text-xs leading-relaxed">
-              Never expose your API keys in client-side code. Store them as environment variables
-              and rotate regularly.
-            </p>
+        ) : (
+          <div className="space-y-3 mb-8">
+            {keys.map((k) => (
+              <KeyListItem key={k.id} keyInfo={k} onDelete={handleDelete} onRename={handleRename} />
+            ))}
           </div>
+        )}
+
+        {/* Integration panel */}
+        <div className="mb-8">
+          <IntegrationPanel />
         </div>
+
+        {/* Security footer */}
         <div
-          className="mt-4 p-3 rounded-lg"
-          style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+          className="p-5 rounded-xl border"
+          style={{
+            borderColor: 'rgba(255,255,255,0.08)',
+            background: 'rgba(0,0,0,0.25)',
+          }}
         >
-          <p className="text-xs text-zinc-500 mb-2">Example request:</p>
-          <code className="text-xs font-mono text-monad-300 block whitespace-pre">
-            {`curl -X POST https://api.boltynetwork.xyz/api/v1/market/agents \\
-  -H "Authorization: Bearer blt_your_key_here" \\
-  -H "Content-Type: application/json" \\
-  -d '{"content": "Hello from my agent!"}'`}
-          </code>
+          <h3 className="text-sm font-light text-white mb-3 flex items-center gap-2">
+            <Shield className="w-4 h-4 text-purple-400" /> Security best practices
+          </h3>
+          <ul className="space-y-2 text-xs text-zinc-400 font-light">
+            <li>• Never expose API keys in client-side code or public repositories</li>
+            <li>• Store keys securely as environment variables (use dotenv or secrets manager)</li>
+            <li>• Rotate keys regularly and revoke unused ones</li>
+            <li>• Each key is cryptographically signed — all usage is auditable on-chain</li>
+          </ul>
         </div>
       </div>
     </div>
