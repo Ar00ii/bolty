@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Bell,
   Check,
@@ -67,7 +68,17 @@ const TYPE_META: Record<
 };
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleString(undefined, {
+  const date = new Date(iso);
+  const diffMs = Date.now() - date.getTime();
+  const sec = Math.round(diffMs / 1000);
+  if (sec < 45) return 'just now';
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}h ago`;
+  const day = Math.round(hr / 24);
+  if (day < 7) return `${day}d ago`;
+  return date.toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -248,14 +259,18 @@ export default function NotificationsPage() {
       </div>
 
       <div className="flex flex-wrap gap-1.5 mb-6">
-        {TYPE_FILTERS.map((t) => {
+        {TYPE_FILTERS.map((t, idx) => {
           const count = t.value === 'ALL' ? items.length : typeCounts[t.value] || 0;
           if (t.value !== 'ALL' && count === 0) return null;
           const active = typeFilter === t.value;
           return (
-            <button
+            <motion.button
               key={t.value}
               onClick={() => setTypeFilter(t.value)}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.03, duration: 0.22 }}
+              whileTap={{ scale: 0.96 }}
               className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
                 active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
@@ -282,7 +297,7 @@ export default function NotificationsPage() {
               >
                 {count}
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -354,7 +369,7 @@ export default function NotificationsPage() {
             }}
           />
           <ul className="relative divide-y divide-white/[0.05]">
-            {visible.map((n) => {
+            {visible.map((n, idx) => {
               const meta = TYPE_META[n.type] ?? TYPE_META.SYSTEM;
               const Icon = meta.icon;
               const inner = (
@@ -408,7 +423,16 @@ export default function NotificationsPage() {
                 </div>
               );
               return (
-                <li key={n.id}>
+                <motion.li
+                  key={n.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.025, 0.3),
+                    duration: 0.24,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                >
                   {n.url ? (
                     <Link href={n.url} onClick={() => handleRead(n)} className="block">
                       {inner}
@@ -418,7 +442,7 @@ export default function NotificationsPage() {
                       {inner}
                     </button>
                   )}
-                </li>
+                </motion.li>
               );
             })}
           </ul>
