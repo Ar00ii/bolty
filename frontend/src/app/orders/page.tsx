@@ -272,10 +272,14 @@ export default function OrdersPage() {
         {baseOrders.length > 0 && (
           <button
             onClick={() => downloadOrdersCsv(baseOrders, tab)}
-            className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[11.5px] text-zinc-400 hover:text-white h-9 px-3 rounded-lg transition-colors"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
             aria-label="Export orders as CSV"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5" strokeWidth={2} />
             Export CSV
           </button>
         )}
@@ -328,24 +332,37 @@ export default function OrdersPage() {
       {/* Search */}
       {baseOrders.length > 0 && (
         <div className="relative mb-4">
-          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500"
+            strokeWidth={1.75}
+          />
           <input
             ref={searchRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title, counterparty, or order id"
-            className="w-full pl-9 pr-16 py-2 text-sm rounded-lg bg-white/[0.04] border border-white/10 focus:border-white/20 focus:outline-none text-white placeholder-zinc-600 font-light"
+            className="w-full pl-9 pr-16 py-2.5 text-[13px] rounded-lg text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
           />
           {search ? (
             <button
               onClick={() => setSearch('')}
               aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/10 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/10 transition-colors"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           ) : (
-            <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-600 border border-zinc-700/60 rounded px-1.5 py-0.5">
+            <kbd
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-zinc-500 rounded-md px-1.5 py-0.5 leading-none"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
               /
             </kbd>
           )}
@@ -353,7 +370,7 @@ export default function OrdersPage() {
       )}
 
       {/* Status filter */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-1.5 mb-6">
         {STATUS_FILTER_ORDER.map((s) => {
           const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
           const active = statusFilter === s;
@@ -361,14 +378,32 @@ export default function OrdersPage() {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                active
-                  ? 'border-monad-500/60 bg-monad-500/10 text-monad-300'
-                  : 'border-white/10 text-zinc-400 hover:text-white hover:border-white/20'
+              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
+              style={
+                active
+                  ? {
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }
+                  : {
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    }
+              }
             >
               {STATUS_FILTER_LABELS[s]}
-              <span className="ml-1.5 text-[10px] text-zinc-600">{count}</span>
+              <span
+                className="text-[10px] font-normal"
+                style={{ color: active ? 'rgba(255,255,255,0.7)' : 'rgba(113,113,122,1)' }}
+              >
+                {count}
+              </span>
             </button>
           );
         })}
@@ -382,19 +417,64 @@ export default function OrdersPage() {
           ))}
         </div>
       ) : orders.length === 0 ? (
-        <div className="card text-center py-16 px-6">
-          <ShoppingBag className="w-10 h-10 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
-          <p className="text-zinc-500 text-sm mb-6">
+        <div
+          className="relative text-center py-16 px-6 rounded-2xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
+            style={{ background: 'rgba(131,110,249,0.18)' }}
+          />
+          <div
+            className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+              border: '1px solid rgba(131,110,249,0.28)',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+            }}
+          >
+            <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+          </div>
+          <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
+            {tab === 'buying' ? 'No purchases yet' : 'No sales yet'}
+          </p>
+          <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
             {tab === 'buying'
-              ? 'No purchases yet. Browse the marketplace!'
-              : 'No sales yet. Create a listing!'}
+              ? 'Browse the marketplace to discover AI agents, repos, and services from the community.'
+              : 'Publish your first listing to start receiving orders from buyers.'}
           </p>
           <a
             href="/market"
-            className="btn-primary text-sm px-5 py-2 inline-flex items-center gap-2"
+            className="group relative inline-flex items-center gap-2 rounded-lg h-10 px-4 text-[12.5px] font-medium text-white transition-colors"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
+            }}
           >
-            <BarChart3 className="w-4 h-4" />
-            {tab === 'buying' ? 'Explore Marketplace' : 'Create Listing'}
+            <BarChart3
+              className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors"
+              strokeWidth={2}
+            />
+            <span className="tracking-[0.005em]">
+              {tab === 'buying' ? 'Explore marketplace' : 'Create listing'}
+            </span>
           </a>
         </div>
       ) : (
