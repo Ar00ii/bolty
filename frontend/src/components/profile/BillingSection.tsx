@@ -81,32 +81,79 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
       </div>
 
       {/* Current Plan Card */}
-      <div className="p-6 border-2 border-purple-500/30 bg-purple-900/10 rounded-lg">
+      <div
+        className="relative p-6 rounded-xl overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(131,110,249,0.32), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 32px -8px rgba(131,110,249,0.35)',
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+          }}
+        />
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-2xl font-light text-white">{currentPlan.name}</h3>
-            <p className="text-sm text-gray-400 mt-1">Your current plan</p>
+            <h3 className="text-2xl font-light text-white tracking-[-0.01em]">
+              {currentPlan.name}
+            </h3>
+            <p className="text-sm text-zinc-400 mt-1">Your current plan</p>
           </div>
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${status.bg}`}>
+          <div
+            className="flex items-center gap-2 px-3 py-1 rounded-full"
+            style={{
+              background:
+                data.status === 'active'
+                  ? 'linear-gradient(180deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.04) 100%)'
+                  : data.status === 'past_due'
+                    ? 'linear-gradient(180deg, rgba(239,68,68,0.18) 0%, rgba(239,68,68,0.04) 100%)'
+                    : 'linear-gradient(180deg, rgba(161,161,170,0.18) 0%, rgba(161,161,170,0.04) 100%)',
+              boxShadow:
+                data.status === 'active'
+                  ? 'inset 0 0 0 1px rgba(34,197,94,0.32)'
+                  : data.status === 'past_due'
+                    ? 'inset 0 0 0 1px rgba(239,68,68,0.32)'
+                    : 'inset 0 0 0 1px rgba(161,161,170,0.3)',
+            }}
+          >
             <status.icon className={`w-4 h-4 ${status.color}`} />
-            <span className={`text-xs font-light ${status.color}`}>{status.label}</span>
+            <span className={`text-[11px] font-medium tracking-[0.005em] ${status.color}`}>
+              {status.label}
+            </span>
           </div>
         </div>
 
         {data.plan !== 'free' && (
-          <div className="space-y-1 mb-4 pb-4 border-b border-gray-700">
-            <p className="text-sm text-gray-400">Price</p>
-            <p className="text-lg font-light text-white">${currentPlan.price}</p>
-            <p className="text-xs text-gray-500">billed monthly</p>
+          <div className="space-y-1 mb-4 pb-4 border-b border-white/[0.06]">
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+              Price
+            </p>
+            <p className="text-2xl font-light text-white tabular-nums tracking-[-0.01em]">
+              ${currentPlan.price}
+            </p>
+            <p className="text-xs text-zinc-500">billed monthly</p>
           </div>
         )}
 
         <div className="space-y-2 mb-4">
-          <p className="text-xs text-gray-400 uppercase tracking-wide">Includes</p>
+          <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+            Includes
+          </p>
           {currentPlan.features.map((feature) => (
             <div key={feature} className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-              <span className="text-sm text-gray-300">{feature}</span>
+              <div
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: '#836EF9',
+                  boxShadow: '0 0 8px rgba(131,110,249,0.6)',
+                }}
+              />
+              <span className="text-sm text-zinc-300">{feature}</span>
             </div>
           ))}
         </div>
@@ -123,7 +170,13 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
               }
             }}
             disabled={loading}
-            className="w-full mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
+            className="w-full mt-4 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+            }}
           >
             {loading
               ? 'Processing...'
@@ -136,21 +189,52 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
 
       {/* Billing Information */}
       <div className="space-y-4">
-        <h3 className="text-sm font-light text-white uppercase tracking-wide">
+        <h3 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
           Billing Information
         </h3>
 
         {/* Email */}
-        <div className="p-4 border border-gray-700 rounded-lg">
-          <p className="text-xs text-gray-500 mb-2">Billing Email</p>
-          <p className="text-sm text-white font-light">{data.email}</p>
+        <div
+          className="relative p-4 rounded-xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+            }}
+          />
+          <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+            Billing Email
+          </p>
+          <p className="text-sm text-white font-light tracking-[0.005em]">{data.email}</p>
         </div>
 
         {/* Next Billing Date */}
         {data.plan !== 'free' && data.nextBillingDate && (
-          <div className="p-4 border border-gray-700 rounded-lg">
-            <p className="text-xs text-gray-500 mb-2">Next Billing Date</p>
-            <p className="text-sm text-white font-light">
+          <div
+            className="relative p-4 rounded-xl overflow-hidden"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+              }}
+            />
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+              Next Billing Date
+            </p>
+            <p className="text-sm text-white font-light tabular-nums tracking-[0.005em]">
               {new Date(data.nextBillingDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
@@ -162,20 +246,46 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
 
         {/* Payment Method */}
         {data.plan !== 'free' && (
-          <div className="p-4 border border-gray-700 rounded-lg">
+          <div
+            className="relative p-4 rounded-xl overflow-hidden"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+              }}
+            />
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-gray-400" />
-                <p className="text-xs text-gray-500">Payment Method</p>
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-[#b4a7ff]" />
+                </div>
+                <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                  Payment Method
+                </p>
               </div>
               <button
                 onClick={() => setShowCardModal(true)}
-                className="text-xs text-purple-400 hover:text-purple-300"
+                className="text-[11px] font-medium tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
               >
                 Update
               </button>
             </div>
-            <p className="text-sm text-white font-light">
+            <p className="text-sm text-white font-light tabular-nums tracking-[0.005em]">
               {data.cardLast4 ? `•••• •••• •••• ${data.cardLast4}` : 'No payment method on file'}
             </p>
           </div>
@@ -184,16 +294,43 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
 
       {/* Invoice History */}
       {data.plan !== 'free' && (
-        <div className="space-y-3 pt-4 border-t border-gray-700">
-          <h3 className="text-sm font-light text-white uppercase tracking-wide">Invoice History</h3>
-          <button className="w-full flex items-center justify-between px-4 py-2 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors">
-            <span className="text-sm text-gray-300">Invoice #INV-2025-04-001</span>
-            <Download className="w-4 h-4 text-gray-400" />
-          </button>
-          <button className="w-full flex items-center justify-between px-4 py-2 border border-gray-700 hover:border-gray-600 rounded-lg transition-colors">
-            <span className="text-sm text-gray-300">Invoice #INV-2025-03-001</span>
-            <Download className="w-4 h-4 text-gray-400" />
-          </button>
+        <div className="space-y-3 pt-4 border-t border-white/[0.06]">
+          <h3 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+            Invoice History
+          </h3>
+          {['INV-2025-04-001', 'INV-2025-03-001'].map((invoiceId) => (
+            <button
+              key={invoiceId}
+              className="group relative w-full flex items-center justify-between px-4 py-3 rounded-xl overflow-hidden transition-all hover:brightness-110"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                }}
+              />
+              <span className="text-[13px] text-zinc-300 font-light tracking-[0.005em] font-mono">
+                Invoice #{invoiceId}
+              </span>
+              <div
+                className="w-7 h-7 rounded-lg flex items-center justify-center transition-all group-hover:scale-105"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                }}
+              >
+                <Download className="w-3.5 h-3.5 text-[#b4a7ff]" />
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>
