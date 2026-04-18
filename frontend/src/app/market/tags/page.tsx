@@ -162,9 +162,10 @@ export default function MarketTagsPage() {
               ].map(({ k, label, Icon }) => {
                 const active = sort === k;
                 return (
-                  <button
+                  <motion.button
                     key={k}
                     onClick={() => setSort(k)}
+                    whileTap={{ scale: 0.95 }}
                     className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
                       active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
                     }`}
@@ -181,7 +182,7 @@ export default function MarketTagsPage() {
                   >
                     <Icon className="w-3 h-3" strokeWidth={2} />
                     {label}
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
