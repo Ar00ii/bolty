@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Plus,
   X,
@@ -262,23 +263,6 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          {/* Category pills */}
-          <div className="flex gap-1.5 flex-wrap">
-            {CATEGORIES.slice(0, 5).map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setCategory(cat.value)}
-                className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 ${
-                  category === cat.value
-                    ? 'text-monad-300 bg-monad-500/12 border-monad-500/30 shadow-[0_0_8px_rgba(131,110,249,0.1)]'
-                    : 'text-zinc-500 bg-transparent border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
           {isAuthenticated && (
             <button
               onClick={() => setShowCreate((v) => !v)}
@@ -291,21 +275,46 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* More categories */}
+      {/* Category chips — single row, horizontally scrollable on mobile */}
       <div className="flex gap-1.5 flex-wrap mb-6">
-        {CATEGORIES.slice(5).map((cat) => (
-          <button
-            key={cat.value}
-            onClick={() => setCategory(cat.value)}
-            className={`text-xs px-3 py-1.5 rounded-lg border transition-all duration-200 ${
-              category === cat.value
-                ? 'text-monad-300 bg-monad-500/12 border-monad-500/30 shadow-[0_0_8px_rgba(131,110,249,0.1)]'
-                : 'text-zinc-500 bg-transparent border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
-            }`}
-          >
-            {cat.label}
-          </button>
-        ))}
+        {CATEGORIES.map((cat, idx) => {
+          const CatIcon = cat.icon;
+          const active = category === cat.value;
+          const catAccent = CATEGORY_COLORS[cat.value] || '#836EF9';
+          return (
+            <motion.button
+              key={cat.value || 'all'}
+              onClick={() => setCategory(cat.value)}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.025, duration: 0.22 }}
+              whileTap={{ scale: 0.96 }}
+              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              style={
+                active
+                  ? {
+                      background: `linear-gradient(180deg, ${catAccent}38 0%, ${catAccent}10 100%)`,
+                      boxShadow: `inset 0 0 0 1px ${catAccent}60, 0 0 14px -4px ${catAccent}80`,
+                    }
+                  : {
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    }
+              }
+            >
+              <CatIcon
+                className="w-3 h-3"
+                strokeWidth={2}
+                style={{ color: active ? catAccent : 'currentColor' }}
+              />
+              {cat.label}
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Create Service Form */}
@@ -489,14 +498,22 @@ export default function ServicesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {services.map((service) => {
+          {services.map((service, i) => {
             const catColor = CATEGORY_COLORS[service.category] || '#71717a';
             const isExpanded = expandedCard === service.id;
 
             return (
-              <div
+              <motion.div
                 key={service.id}
-                className="relative flex flex-col overflow-hidden rounded-xl transition-all hover:brightness-110"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(i * 0.04, 0.4),
+                  duration: 0.3,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+                whileHover={{ y: -2 }}
+                className="relative flex flex-col overflow-hidden rounded-xl transition-all"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -684,7 +701,7 @@ export default function ServicesPage() {
                     </Link>
                   )}
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
