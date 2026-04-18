@@ -290,7 +290,14 @@ export default function DmPage() {
               onClick={() => setShowNewDm(!showNewDm)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-monad-300 hover:bg-monad-500/20 transition-all border border-monad-500/20"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+              style={{
+                color: '#b4a7ff',
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+              }}
               title="New conversation"
             >
               +
@@ -312,13 +319,25 @@ export default function DmPage() {
                   onChange={(e) => setNewRecipient(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && startNewDm()}
                   placeholder="Username or ID..."
-                  className="text-xs py-2 px-3 flex-1 rounded-lg bg-monad-500/10 border border-monad-500/20 text-white placeholder:text-monad-300/40 focus:outline-none focus:border-monad-400/50"
+                  className="text-xs py-2 px-3 flex-1 rounded-lg text-white placeholder:text-zinc-500 outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.03)',
+                  }}
                 />
                 <motion.button
                   onClick={startNewDm}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="text-xs py-2 px-3 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all"
+                  className="text-xs py-2 px-3 rounded-lg text-white font-light transition-all"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -4px rgba(131,110,249,0.5)',
+                  }}
                 >
                   Go
                 </motion.button>
@@ -334,7 +353,12 @@ export default function DmPage() {
               value={contactQuery}
               onChange={(e) => setContactQuery(e.target.value)}
               placeholder="Search conversations…"
-              className="w-full pl-8 pr-8 py-2 text-xs bg-zinc-900/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 outline-none focus:border-monad-400/40 transition-colors font-light"
+              className="w-full pl-8 pr-8 py-2 text-xs rounded-lg text-white placeholder-zinc-500 outline-none transition-all font-light focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             />
             {contactQuery && (
               <button
@@ -348,23 +372,36 @@ export default function DmPage() {
           </div>
 
           {/* Category tabs */}
-          <div className="flex gap-1.5 px-2 flex-wrap">
-            {CATEGORIES.map((cat) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`text-xs px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                  activeCategory === cat.id
-                    ? 'bg-monad-500/30 text-monad-200 border border-monad-400/40'
-                    : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
-                }`}
-              >
-                {cat.icon}
-                {cat.label}
-              </motion.button>
-            ))}
+          <div className="flex gap-1 px-2 flex-wrap">
+            {CATEGORIES.map((cat) => {
+              const active = activeCategory === cat.id;
+              return (
+                <motion.button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="text-[10.5px] uppercase tracking-[0.14em] font-medium px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1"
+                  style={
+                    active
+                      ? {
+                          color: '#b4a7ff',
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        }
+                      : {
+                          color: 'rgba(161,161,170,0.55)',
+                          background: 'transparent',
+                        }
+                  }
+                >
+                  {cat.icon}
+                  {cat.label}
+                </motion.button>
+              );
+            })}
           </div>
 
           {/* Contacts */}
@@ -378,11 +415,27 @@ export default function DmPage() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ delay: idx * 0.02 }}
                   onClick={() => openConversation(c)}
-                  className={`w-full text-left px-3 py-3 rounded-xl transition-all flex items-center gap-3 ${
+                  className="w-full text-left px-3 py-3 rounded-xl transition-all flex items-center gap-3"
+                  style={
                     activePeer?.id === c.user.id
-                      ? 'bg-monad-500/20 border border-monad-400/30'
-                      : 'hover:bg-white/5 border border-transparent'
-                  }`}
+                      ? {
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.4)',
+                        }
+                      : {
+                          background: 'transparent',
+                        }
+                  }
+                  onMouseEnter={(e) => {
+                    if (activePeer?.id !== c.user.id)
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activePeer?.id !== c.user.id)
+                      e.currentTarget.style.background = 'transparent';
+                  }}
                 >
                   <Avatar
                     name={c.user.username}
@@ -399,7 +452,13 @@ export default function DmPage() {
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="text-xs bg-monad-500 text-white rounded-full px-2 py-0.5 font-light flex-shrink-0"
+                          className="text-[10px] font-mono text-white rounded-full px-2 py-0.5 font-medium flex-shrink-0"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.35) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 12px -2px rgba(131,110,249,0.6)',
+                          }}
                         >
                           {c.unread}
                         </motion.span>
@@ -430,29 +489,51 @@ export default function DmPage() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden border border-monad-500/10"
+          className="relative flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(15,15,26,0.6), rgba(26,0,51,0.4))',
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
           }}
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
           {!activePeer ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-16 h-16 rounded-2xl bg-monad-500/15 border border-monad-500/20 flex items-center justify-center mb-6"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                }}
               >
-                <MessageSquare className="w-8 h-8 text-monad-300" strokeWidth={1.5} />
+                <MessageSquare className="w-7 h-7" style={{ color: '#b4a7ff' }} strokeWidth={1.5} />
               </motion.div>
-              <h3 className="text-lg font-light mb-2 text-white">Messages</h3>
+              <h3 className="text-lg font-light mb-2 text-white tracking-[-0.01em]">Messages</h3>
               <p className="text-sm text-zinc-400 mb-6 max-w-xs">
                 Select a conversation to start chatting or create a new one to connect
               </p>
               <motion.button
                 onClick={() => setShowNewDm(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white text-sm font-light transition-all"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 py-2.5 rounded-lg text-white text-sm font-light transition-all"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                }}
               >
                 New conversation
               </motion.button>
@@ -460,7 +541,13 @@ export default function DmPage() {
           ) : (
             <>
               {/* Chat header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-monad-500/10">
+              <div
+                className="relative flex items-center justify-between px-6 py-4"
+                style={{
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(131,110,249,0.04)',
+                }}
+              >
                 <div className="flex items-center gap-3">
                   <Avatar
                     name={activePeer.username}
@@ -488,7 +575,14 @@ export default function DmPage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-1.5 text-xs text-monad-300 bg-monad-500/15 px-3 py-1.5 rounded-lg border border-monad-500/20"
+                    className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.14em] font-medium h-7 px-3 rounded-md"
+                    style={{
+                      color: '#b4a7ff',
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }}
                   >
                     <Eye size={12} />
                     Both viewing
@@ -595,7 +689,13 @@ export default function DmPage() {
               </div>
 
               {/* Input */}
-              <div className="px-6 py-4 border-t border-monad-500/10">
+              <div
+                className="px-6 py-4"
+                style={{
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(131,110,249,0.03)',
+                }}
+              >
                 <AnimatePresence>
                   {error && (
                     <motion.p
@@ -608,7 +708,7 @@ export default function DmPage() {
                     </motion.p>
                   )}
                 </AnimatePresence>
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center">
                   <input
                     type="text"
                     value={input}
@@ -619,14 +719,26 @@ export default function DmPage() {
                       connected ? `Message ${activePeer.username || '...'}...` : 'Connecting...'
                     }
                     maxLength={2000}
-                    className="flex-1 px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white/5 border border-monad-500/20 text-white placeholder:text-zinc-500 focus:border-monad-400/50 focus:bg-white/8"
+                    className="flex-1 px-4 py-3 rounded-xl text-[13px] outline-none transition-all text-white placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12),_inset_0_1px_0_rgba(255,255,255,0.04)]"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    }}
                   />
                   <motion.button
                     onClick={sendMessage}
                     disabled={!connected || !input.trim()}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-11 h-11 flex items-center justify-center rounded-xl transition-all disabled:opacity-40 hover:opacity-100 bg-monad-500 hover:bg-monad-600 text-white"
+                    className="w-11 h-11 flex items-center justify-center rounded-xl transition-all disabled:opacity-40 text-white"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    }}
                   >
                     <Send size={18} />
                   </motion.button>
