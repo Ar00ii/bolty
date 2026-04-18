@@ -4,6 +4,7 @@ import {
   Bell,
   Check,
   DollarSign,
+  LucideIcon,
   MessageSquare,
   Package,
   PartyPopper,
@@ -25,14 +26,44 @@ import {
 
 const TYPE_META: Record<
   NotificationType,
-  { icon: React.ComponentType<{ className?: string }>; accent: string; label: string }
+  {
+    icon: LucideIcon;
+    accent: string;
+    color: string;
+    label: string;
+  }
 > = {
-  MARKET_NEW_SALE: { icon: DollarSign, accent: 'text-emerald-400', label: 'Sale' },
-  MARKET_NEW_REVIEW: { icon: Star, accent: 'text-yellow-400', label: 'Review' },
-  MARKET_ORDER_DELIVERED: { icon: Package, accent: 'text-cyan-400', label: 'Delivery' },
-  MARKET_ORDER_COMPLETED: { icon: PartyPopper, accent: 'text-[#836EF9]', label: 'Completed' },
-  MARKET_NEGOTIATION_MESSAGE: { icon: MessageSquare, accent: 'text-zinc-300', label: 'Message' },
-  SYSTEM: { icon: Bell, accent: 'text-zinc-400', label: 'System' },
+  MARKET_NEW_SALE: {
+    icon: DollarSign,
+    accent: 'text-emerald-400',
+    color: '#22c55e',
+    label: 'Sale',
+  },
+  MARKET_NEW_REVIEW: {
+    icon: Star,
+    accent: 'text-yellow-400',
+    color: '#f59e0b',
+    label: 'Review',
+  },
+  MARKET_ORDER_DELIVERED: {
+    icon: Package,
+    accent: 'text-cyan-400',
+    color: '#06B6D4',
+    label: 'Delivery',
+  },
+  MARKET_ORDER_COMPLETED: {
+    icon: PartyPopper,
+    accent: 'text-[#836EF9]',
+    color: '#836EF9',
+    label: 'Completed',
+  },
+  MARKET_NEGOTIATION_MESSAGE: {
+    icon: MessageSquare,
+    accent: 'text-zinc-300',
+    color: '#a1a1aa',
+    label: 'Message',
+  },
+  SYSTEM: { icon: Bell, accent: 'text-zinc-400', color: '#71717a', label: 'System' },
 };
 
 function formatTime(iso: string) {
@@ -335,14 +366,13 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div
-                    className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${meta.accent}`}
+                    className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                      background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}06 100%)`,
+                      boxShadow: `inset 0 0 0 1px ${meta.color}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${meta.color}40`,
                     }}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" style={{ color: meta.color }} strokeWidth={1.75} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
