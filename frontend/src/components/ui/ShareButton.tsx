@@ -1,6 +1,6 @@
 'use client';
 
-import { Share2 } from 'lucide-react';
+import { Check, Share2 } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface ShareButtonProps {
@@ -12,7 +12,7 @@ interface ShareButtonProps {
 }
 
 const DEFAULT_CLASSNAME =
-  'inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white text-sm transition-colors';
+  'inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-zinc-300 hover:text-white text-[12.5px] transition-all hover:brightness-110 tracking-[0.005em]';
 
 export function ShareButton({
   title,
@@ -47,10 +47,34 @@ export function ShareButton({
     }
   };
 
+  const isDefaultClassName = className === DEFAULT_CLASSNAME;
+  const style = isDefaultClassName
+    ? copied
+      ? {
+          background: 'linear-gradient(180deg, rgba(34,197,94,0.14) 0%, rgba(34,197,94,0.04) 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(34,197,94,0.35), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(34,197,94,0.4)',
+          color: '#86efac',
+        }
+      : {
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }
+    : undefined;
+
   return (
-    <button onClick={handleShare} className={className} aria-label={ariaLabel || label}>
-      <Share2 className="w-4 h-4" />
-      {copied ? 'Copied!' : label}
+    <button
+      onClick={handleShare}
+      className={className}
+      aria-label={ariaLabel || label}
+      style={style}
+    >
+      {copied ? (
+        <Check className="w-3.5 h-3.5" strokeWidth={2} />
+      ) : (
+        <Share2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+      )}
+      {copied ? 'Copied' : label}
     </button>
   );
 }

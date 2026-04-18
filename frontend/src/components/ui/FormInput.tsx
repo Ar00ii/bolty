@@ -16,29 +16,44 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm text-zinc-300 font-light mb-2">
+          <label className="block text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
             {label}
-            {required && <span className="text-red-400 ml-1">*</span>}
+            {required && <span className="ml-1 text-[#fda4af]">*</span>}
           </label>
         )}
         <div className="relative">
           <input
             ref={ref}
-            className={`w-full px-3 py-2 rounded-lg bg-zinc-900/50 border font-light text-sm transition-all ${
-              error
-                ? 'border-red-500/50 focus:border-red-500 focus:ring-1 focus:ring-red-500/50'
-                : 'border-zinc-700 focus:border-monad-500 focus:ring-1 focus:ring-monad-500/30'
-            } text-white placeholder-zinc-600 outline-none ${className}`}
+            className={`w-full px-3 py-2.5 ${error ? 'pr-9' : ''} rounded-lg text-[13px] font-light text-white placeholder-zinc-600 outline-none transition-all focus:brightness-110 tracking-[0.005em] ${className}`}
+            style={{
+              background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+              boxShadow: error
+                ? 'inset 0 0 0 1px rgba(239,68,68,0.5)'
+                : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
             {...props}
           />
           {error && (
-            <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400" />
+            <AlertCircle
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
+              style={{ color: '#fda4af' }}
+              strokeWidth={1.75}
+            />
           )}
         </div>
         {error && (
-          <p className="text-xs text-red-400 font-light mt-1 flex items-center gap-1">{error}</p>
+          <p
+            className="text-[12px] mt-1.5 flex items-center gap-1.5 tracking-[0.005em]"
+            style={{ color: '#fda4af' }}
+          >
+            {error}
+          </p>
         )}
-        {hint && !error && <p className="text-xs text-zinc-500 font-light mt-1">{hint}</p>}
+        {hint && !error && (
+          <p className="text-[11px] text-zinc-500 mt-1.5 tracking-[0.005em] leading-relaxed">
+            {hint}
+          </p>
+        )}
       </div>
     );
   },
