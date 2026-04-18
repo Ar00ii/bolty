@@ -145,92 +145,85 @@ export default function HomePage() {
       <ClickClickDone />
 
       {/* ── DEPLOY APPS WITH ZERO OPS ── */}
-      <section
-        className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
-        style={{ background: '#0d0d0d' }}
-      >
-        {/* Heading */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '64px',
-            fontWeight: 300,
-            lineHeight: 1.05,
-            letterSpacing: '-1.28px',
-          }}
-        >
-          Deploy apps and agents
-          <br />
-          with zero ops.
-        </motion.h2>
+      <section className="relative py-24 px-[7%] max-w-[1810px] mx-auto overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute top-0 right-1/3 w-[500px] h-[500px] rounded-full blur-3xl opacity-15"
+            style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+          />
+        </div>
 
-        <p
-          className="text-white/60"
-          style={{
-            fontSize: '20px',
-            lineHeight: '1.5',
-            maxWidth: '520px',
-            marginTop: '16px',
-          }}
-        >
-          Ship to production in seconds. No servers, no config, no headaches.
-        </p>
+        <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-16 max-w-2xl"
+          >
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-[#b4a7ff] mb-3">
+              Zero ops
+            </p>
+            <h2 className="text-5xl lg:text-6xl font-light text-white tracking-[-0.02em] leading-[1.05]">
+              Deploy apps and agents
+              <br />
+              with zero ops.
+            </h2>
+            <p className="mt-5 text-[15px] text-zinc-400 font-light tracking-[0.005em] leading-relaxed max-w-lg">
+              Ship to production in seconds. No servers, no config, no headaches.
+            </p>
+          </motion.div>
 
-        {/* Feature cards grid */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          style={{ paddingTop: '60px' }}
-        >
-          {FEATURES.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <motion.div
-                key={f.href}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="group flex flex-col gap-5 rounded-lg border p-6 cursor-pointer transition-all duration-500 hover:border-purple-600/50 hover:shadow-[0_0_40px_rgba(147,51,234,0.12)]"
-                style={{
-                  borderColor: '#272727',
-                  background: '#1a1a1a',
-                }}
-              >
-                {/* Icon */}
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] group-hover:scale-110"
-                  style={{ background: '#9333ea' }}
-                >
-                  <Icon className="w-5 h-5 text-white" />
-                </div>
-
-                {/* Title */}
-                <h3
-                  className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {FEATURES.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <motion.a
+                  key={f.href}
+                  href={f.href}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.06 }}
+                  className="group relative flex flex-col gap-4 rounded-2xl p-6 cursor-pointer transition-all hover:brightness-110 overflow-hidden"
                   style={{
-                    fontSize: '22px',
-                    lineHeight: 1.2,
-                    letterSpacing: '-0.5px',
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
                   }}
                 >
-                  {f.title}
-                </h3>
+                  <div
+                    className="absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    }}
+                  />
 
-                {/* Description */}
-                <p
-                  style={{
-                    fontSize: '15px',
-                    lineHeight: 1.5,
-                    color: '#a0a0a0',
-                  }}
-                >
-                  {f.description}
-                </p>
-              </motion.div>
-            );
-          })}
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }}
+                  >
+                    <Icon className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.75} />
+                  </div>
+
+                  <h3 className="text-[18px] font-light text-white tracking-[-0.005em] leading-tight">
+                    {f.title}
+                  </h3>
+
+                  <p className="text-[13px] text-zinc-400 font-light tracking-[0.005em] leading-relaxed">
+                    {f.description}
+                  </p>
+                </motion.a>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -241,40 +234,88 @@ export default function HomePage() {
       <EliteBoost />
 
       {/* ── TESTIMONIALS ── */}
-      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
+      <section className="relative py-24 px-4 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div
+            className="absolute top-1/2 left-1/4 w-[420px] h-[420px] rounded-full blur-3xl opacity-15 -translate-y-1/2"
+            style={{ background: 'radial-gradient(circle, #EC4899 0%, transparent 70%)' }}
+          />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-12"
+            className="mb-14"
           >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Developers</p>
-            <h2 className="text-5xl font-light text-white">What developers say</h2>
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-[#b4a7ff] mb-3">
+              Developers
+            </p>
+            <h2 className="text-5xl lg:text-6xl font-light text-white tracking-[-0.02em]">
+              What developers say
+            </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {TESTIMONIALS.map((t, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="rounded-lg border p-6"
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.5 }}
+                className="relative rounded-2xl p-6 overflow-hidden"
                 style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  background: 'rgba(0, 0, 0, 0)',
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
                 }}
               >
-                <div className="flex gap-1 mb-4">
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+                  }}
+                />
+
+                <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-purple-400 fill-purple-400" />
+                    <Star
+                      key={j}
+                      className="w-3.5 h-3.5 text-[#b4a7ff]"
+                      fill="#b4a7ff"
+                      strokeWidth={1.5}
+                    />
                   ))}
                 </div>
-                <p className="text-gray-300 mb-4">&quot;{t.text}&quot;</p>
-                <div className="pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                  <p className="font-light text-white">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
+
+                <p className="text-[13.5px] text-zinc-300 font-light tracking-[0.005em] leading-relaxed mb-5">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+
+                <div
+                  className="pt-4 flex items-center gap-3"
+                  style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-medium text-white flex-shrink-0"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 12px -4px rgba(131,110,249,0.4)',
+                    }}
+                  >
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-light text-white tracking-[0.005em]">{t.name}</p>
+                    <p className="text-[11px] text-zinc-500 tracking-[0.005em]">{t.role}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
