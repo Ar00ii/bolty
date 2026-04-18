@@ -153,22 +153,38 @@ export default function OrderReceiptPage() {
         <div className="flex items-center justify-between mb-6 no-print">
           <Link
             href={`/orders/${order.id}`}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium text-zinc-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Back to order
           </Link>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-700/60 hover:border-zinc-600 text-xs text-zinc-300 hover:text-white transition-all"
+            className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium text-zinc-300 hover:text-white transition-colors"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
           >
             <Printer className="w-3.5 h-3.5" /> Print / Save PDF
           </button>
         </div>
 
         <div
-          className="receipt-card rounded-2xl border border-zinc-800 p-8 lg:p-10"
-          style={{ background: 'var(--bg-card)' }}
+          className="receipt-card relative rounded-2xl overflow-hidden p-8 lg:p-10"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+          }}
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px no-print"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
           <div className="flex items-start justify-between mb-8 pb-6 border-b border-zinc-800">
             <div>
               <div className="text-xl font-light tracking-tight mb-1" style={{ color: BRAND }}>
@@ -338,8 +354,12 @@ export default function OrderReceiptPage() {
 
           {useEscrow && (
             <div
-              className="flex items-start gap-2.5 p-3 rounded-lg border border-zinc-800"
-              style={{ background: 'rgba(131,110,249,0.06)' }}
+              className="flex items-start gap-2.5 p-3 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+              }}
             >
               <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: BRAND }} />
               <div className="text-[11px] text-zinc-400 leading-relaxed">

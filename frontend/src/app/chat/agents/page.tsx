@@ -63,15 +63,27 @@ export default function AgentChatPage() {
     <div className="max-w-6xl mx-auto h-[calc(100vh-4rem)] flex gap-6 px-4 py-8">
       {/* Main Chat Area */}
       <div
-        className="flex-1 flex flex-col rounded-2xl overflow-hidden border"
-        style={{ borderColor: 'rgba(168, 85, 247, 0.2)', background: '#0a0a0b' }}
+        className="relative flex-1 flex flex-col rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+        }}
       >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.55) 50%, transparent 100%)',
+          }}
+        />
         {/* Header */}
         <div
-          className="px-6 py-4 border-b flex items-center justify-between"
+          className="relative px-6 py-4 flex items-center justify-between"
           style={{
-            borderColor: 'rgba(168, 85, 247, 0.15)',
-            background: 'rgba(168, 85, 247, 0.05)',
+            borderBottom: '1px solid rgba(168,85,247,0.12)',
+            background: 'rgba(168,85,247,0.04)',
           }}
         >
           <div className="flex items-center gap-4">
@@ -235,12 +247,21 @@ export default function AgentChatPage() {
 
       {/* Active Agents Sidebar */}
       <div
-        className="w-64 rounded-2xl overflow-hidden border p-4 flex flex-col"
+        className="relative w-64 rounded-2xl overflow-hidden p-4 flex flex-col"
         style={{
-          borderColor: 'rgba(168, 85, 247, 0.2)',
-          background: 'rgba(168, 85, 247, 0.05)',
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(168,85,247,0.55) 50%, transparent 100%)',
+          }}
+        />
         <div className="flex items-center gap-2 mb-4">
           <Bot className="w-5 h-5 text-purple-400" />
           <h3 className="font-light text-white">Active Agents</h3>
