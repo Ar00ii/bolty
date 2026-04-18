@@ -44,45 +44,22 @@ const POINTS_INFO = [
 ];
 
 function PositionBadge({ idx }: { idx: number }) {
-  if (idx === 0)
+  const tiers: Record<number, string> = { 0: '#f59e0b', 1: '#9ca3af', 2: '#cd7f32' };
+  const color = tiers[idx];
+  if (color) {
     return (
       <span
         className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
         style={{
-          background: 'rgba(245,158,11,0.12)',
-          border: '1px solid rgba(245,158,11,0.25)',
-          color: '#f59e0b',
+          background: `linear-gradient(135deg, ${color}2e 0%, ${color}08 100%)`,
+          boxShadow: `inset 0 0 0 1px ${color}50, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${color}55`,
+          color,
         }}
       >
-        1
+        {idx + 1}
       </span>
     );
-  if (idx === 1)
-    return (
-      <span
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
-        style={{
-          background: 'rgba(156,163,175,0.12)',
-          border: '1px solid rgba(156,163,175,0.25)',
-          color: '#9ca3af',
-        }}
-      >
-        2
-      </span>
-    );
-  if (idx === 2)
-    return (
-      <span
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-light font-mono"
-        style={{
-          background: 'rgba(205,127,50,0.12)',
-          border: '1px solid rgba(205,127,50,0.25)',
-          color: '#cd7f32',
-        }}
-      >
-        3
-      </span>
-    );
+  }
   return (
     <span className="w-7 h-7 flex items-center justify-center text-xs font-mono text-zinc-600">
       {idx + 1}
@@ -135,13 +112,17 @@ export default function LeaderboardPage() {
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center"
             style={{
-              background: 'rgba(131,110,249,0.12)',
-              border: '1px solid rgba(131,110,249,0.2)',
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.24) 0%, rgba(131,110,249,0.06) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 22px -4px rgba(131,110,249,0.5)',
             }}
           >
-            <Trophy className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+            <Trophy className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.75} />
           </div>
-          <p className="text-xs font-mono text-monad-400 uppercase tracking-widest">Hall of Fame</p>
+          <p className="text-[10.5px] font-medium text-[#b4a7ff] uppercase tracking-[0.18em]">
+            Hall of Fame
+          </p>
         </div>
         <h1 className="text-2xl font-light text-white mb-1.5">Reputation Leaderboard</h1>
         <p className="text-sm text-zinc-500 max-w-lg">
@@ -151,10 +132,20 @@ export default function LeaderboardPage() {
 
       {/* Rank System */}
       <div
-        className="border border-white/[0.06] rounded-2xl p-5 mb-6"
-        style={{ background: 'rgba(255,255,255,0.01)' }}
+        className="relative rounded-2xl p-5 mb-6 overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
       >
-        <h2 className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-4">
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <h2 className="text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-4">
           Rank Tiers
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -162,7 +153,10 @@ export default function LeaderboardPage() {
             <div
               key={r.rank}
               className="flex items-center gap-2.5 p-3 rounded-xl"
-              style={{ background: `${r.color}08`, border: `1px solid ${r.color}20` }}
+              style={{
+                background: `linear-gradient(180deg, ${r.color}12 0%, ${r.color}03 100%)`,
+                boxShadow: `inset 0 0 0 1px ${r.color}28, inset 0 1px 0 rgba(255,255,255,0.04)`,
+              }}
             >
               <span
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
@@ -186,10 +180,20 @@ export default function LeaderboardPage() {
 
       {/* How to earn points */}
       <div
-        className="border border-white/[0.06] rounded-2xl p-5 mb-8"
-        style={{ background: 'rgba(255,255,255,0.01)' }}
+        className="relative rounded-2xl p-5 mb-8 overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
       >
-        <h2 className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-4">
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <h2 className="text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-4">
           How to Earn Points
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
@@ -199,11 +203,11 @@ export default function LeaderboardPage() {
               className="flex items-center justify-between px-3 py-2 rounded-lg"
               style={{
                 background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
               }}
             >
-              <span className="text-xs text-zinc-400">{p.label}</span>
-              <span className="text-xs font-mono font-light text-monad-400 ml-4 flex-shrink-0">
+              <span className="text-[12.5px] text-zinc-400 tracking-[0.005em]">{p.label}</span>
+              <span className="text-[11.5px] font-mono font-light text-[#b4a7ff] ml-4 flex-shrink-0">
                 +{p.points} pts
               </span>
             </div>
