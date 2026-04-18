@@ -119,14 +119,22 @@ export default function FavoritesPage() {
 
         {!loading && listings.length > 0 && (
           <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none"
+              strokeWidth={1.75}
+            />
             <input
               ref={searchRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search saved listings…"
-              className="w-full pl-9 pr-16 py-2.5 bg-zinc-900/40 border border-zinc-800 rounded-lg text-sm font-light text-white placeholder-zinc-600 outline-none focus:border-[#836EF9]/40 transition-colors"
+              className="w-full pl-9 pr-16 py-2.5 rounded-lg text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             />
             {query ? (
               <button
@@ -137,7 +145,13 @@ export default function FavoritesPage() {
                 <X className="w-3.5 h-3.5" />
               </button>
             ) : (
-              <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
+              <kbd
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
                 /
               </kbd>
             )}
@@ -145,13 +159,21 @@ export default function FavoritesPage() {
         )}
 
         {missing.length > 0 && !loading && (
-          <div className="mb-6 rounded-lg border border-yellow-500/20 bg-yellow-500/5 px-4 py-3 text-xs text-yellow-300 flex items-center justify-between gap-3">
-            <span>
+          <div
+            className="relative mb-6 rounded-xl overflow-hidden px-4 py-3 text-[12px] text-yellow-200 flex items-center justify-between gap-3"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(161,98,7,0.18) 0%, rgba(113,63,18,0.12) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(234,179,8,0.28), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 16px -6px rgba(234,179,8,0.35)',
+            }}
+          >
+            <span className="font-normal">
               {missing.length} saved listing{missing.length === 1 ? '' : 's'} no longer available.
             </span>
             <button
               onClick={() => missing.forEach(remove)}
-              className="text-yellow-200 hover:text-white underline underline-offset-2"
+              className="text-yellow-100 hover:text-white underline underline-offset-2 font-medium"
             >
               Clean up
             </button>
@@ -170,29 +192,91 @@ export default function FavoritesPage() {
           </div>
         ) : listings.length === 0 ? (
           <div
-            className="rounded-xl border border-white/10 p-12 text-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative rounded-2xl overflow-hidden p-12 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            }}
           >
-            <Heart className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-sm text-zinc-300 font-light">No saved listings yet</p>
-            <p className="text-xs text-zinc-500 mt-1 font-light">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(236,72,153,0.5) 50%, transparent 100%)',
+              }}
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
+              style={{ background: 'rgba(236,72,153,0.2)' }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(236,72,153,0.22) 0%, rgba(236,72,153,0.06) 100%)',
+                border: '1px solid rgba(236,72,153,0.3)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(236,72,153,0.35)',
+              }}
+            >
+              <Heart className="w-5 h-5 text-[#f9a8d4]" strokeWidth={1.5} />
+            </div>
+            <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
+              No saved listings yet
+            </p>
+            <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
               Browse the marketplace and hit the heart icon to start building your list.
             </p>
             <Link
               href="/market"
-              className="inline-block mt-5 px-5 py-2 text-xs rounded-lg border border-white/10 text-zinc-300 hover:text-white hover:border-white/20 transition-all"
+              className="relative inline-flex items-center gap-2 mt-5 rounded-lg h-9 px-4 text-[12px] font-medium text-zinc-300 hover:text-white transition-colors"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
               Browse listings
             </Link>
           </div>
         ) : visible.length === 0 ? (
           <div
-            className="rounded-xl border border-white/10 p-12 text-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative rounded-2xl overflow-hidden p-12 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            }}
           >
-            <Search className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-sm text-zinc-300 font-light">No matches</p>
-            <p className="text-xs text-zinc-500 mt-1 font-light">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                border: '1px solid rgba(131,110,249,0.28)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+              }}
+            >
+              <Search className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+            </div>
+            <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
+              No matches
+            </p>
+            <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
               Try a different keyword or clear the search.
             </p>
           </div>
@@ -207,42 +291,64 @@ export default function FavoritesPage() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03, duration: 0.25 }}
-                  className="relative rounded-xl border border-white/5 hover:border-white/10 transition-all overflow-hidden"
-                  style={{ background: 'var(--bg-card)' }}
+                  className="group relative rounded-xl transition-all overflow-hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px rgba(0,0,0,0.55)',
+                  }}
                 >
-                  <Link href={`/market/agents/${l.id}`} className="block p-5">
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-70"
+                    style={{
+                      background: `linear-gradient(90deg, transparent 0%, ${meta.color} 50%, transparent 100%)`,
+                    }}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
+                    style={{ background: `${meta.color}25` }}
+                  />
+                  <Link href={`/market/agents/${l.id}`} className="relative block p-5">
                     <div className="flex items-start gap-3 mb-3">
                       <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
                         style={{
-                          background: `${meta.color}14`,
-                          border: `1px solid ${meta.color}33`,
+                          background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}08 100%)`,
+                          border: `1px solid ${meta.color}40`,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${meta.color}30`,
                         }}
                       >
                         <Icon className="w-4 h-4" style={{ color: meta.color }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium mb-1">
                           {meta.label}
                         </p>
-                        <p className="text-sm font-light text-white truncate">{l.title}</p>
-                        <p className="text-xs text-zinc-500 mt-0.5 truncate">
+                        <p className="text-[13px] font-normal text-white truncate tracking-[0.005em]">
+                          {l.title}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5 truncate">
                           @{l.seller.username || 'anonymous'}
                         </p>
                       </div>
-                      <div className="text-right shrink-0">
-                        <p className="text-sm font-mono text-purple-300">
+                      <div className="text-right shrink-0 pr-8">
+                        <p className="text-[13px] font-medium text-[#b4a7ff] tracking-[0.005em]">
                           {l.price === 0 ? 'Free' : `${l.price} ${l.currency}`}
                         </p>
                         {l.reviewAverage != null && (
                           <p className="text-[11px] text-zinc-500 mt-1 inline-flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-400" />
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                             {l.reviewAverage.toFixed(1)}
                           </p>
                         )}
                       </div>
                     </div>
-                    <p className="text-xs text-zinc-400 font-light line-clamp-2">{l.description}</p>
+                    <p className="text-[12px] text-zinc-400 font-normal line-clamp-2 leading-relaxed">
+                      {l.description}
+                    </p>
                   </Link>
                   <button
                     onClick={(e) => {
@@ -250,7 +356,11 @@ export default function FavoritesPage() {
                       remove(l.id);
                     }}
                     aria-label="Remove from favorites"
-                    className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-zinc-500 hover:text-pink-300 hover:bg-pink-500/10 transition-colors"
+                    className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-pink-300 hover:text-pink-200 hover:bg-pink-500/10 transition-colors z-10"
+                    style={{
+                      background: 'rgba(236,72,153,0.08)',
+                      border: '1px solid rgba(236,72,153,0.22)',
+                    }}
                   >
                     <Heart className="w-3.5 h-3.5 fill-pink-400 text-pink-400" />
                   </button>
