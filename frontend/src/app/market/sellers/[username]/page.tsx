@@ -159,8 +159,14 @@ export default function SellerProfilePage() {
       />
 
       {/* Breadcrumb */}
-      <div className="border-b border-white/8 sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 text-xs text-zinc-500">
+      <div
+        className="sticky top-0 z-40 backdrop-blur-md"
+        style={{
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(10,10,14,0.8)',
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 text-[11px] text-zinc-500">
           <Link href="/market" className="hover:text-zinc-200 transition-colors">
             Marketplace
           </Link>
@@ -173,95 +179,92 @@ export default function SellerProfilePage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-10">
+      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-8">
         {/* Hero */}
-        <section className="flex flex-col sm:flex-row gap-6 items-start">
-          <div className="w-20 h-20 rounded-full border border-white/10 bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
-            {seller.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={seller.avatarUrl}
-                alt={seller.username}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-2xl text-zinc-400">
-                {seller.username.slice(0, 1).toUpperCase()}
-              </span>
-            )}
-          </div>
-
-          <div className="flex-1 min-w-0">
-            <h1 className="text-3xl lg:text-4xl font-light text-white">
-              <GradientText gradient="purple">@{seller.username}</GradientText>
-            </h1>
-            {seller.bio && (
-              <p className="text-sm text-zinc-300 mt-2 leading-relaxed max-w-2xl">{seller.bio}</p>
-            )}
-            <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-zinc-500">
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                Joined {formatJoined(seller.createdAt)}
-              </span>
-              {seller.githubLogin && (
-                <a
-                  href={`https://github.com/${seller.githubLogin}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-white transition-colors"
-                >
-                  <Github className="w-3 h-3" />
-                  {seller.githubLogin}
-                </a>
-              )}
-              {seller.twitterUrl && (
-                <a
-                  href={seller.twitterUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-white transition-colors"
-                >
-                  <Twitter className="w-3 h-3" />
-                  twitter
-                </a>
-              )}
-              {seller.linkedinUrl && (
-                <a
-                  href={seller.linkedinUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-white transition-colors"
-                >
-                  <Linkedin className="w-3 h-3" />
-                  linkedin
-                </a>
-              )}
-              {seller.websiteUrl && (
-                <a
-                  href={seller.websiteUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 hover:text-white transition-colors"
-                >
-                  <Globe className="w-3 h-3" />
-                  website
-                </a>
+        <section
+          className="relative rounded-2xl overflow-hidden p-6 sm:p-8"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+          }}
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
+          <div className="flex flex-col sm:flex-row gap-6 items-start">
+            <div
+              className="w-20 h-20 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+              }}
+            >
+              {seller.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={seller.avatarUrl}
+                  alt={seller.username}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-2xl font-light" style={{ color: '#b4a7ff' }}>
+                  {seller.username.slice(0, 1).toUpperCase()}
+                </span>
               )}
             </div>
-          </div>
 
-          <div className="flex flex-col items-end gap-2">
-            <ShareButton
-              title={`@${seller.username} on Bolty`}
-              text={`Check out @${seller.username}'s listings on Bolty`}
-              ariaLabel="Share seller profile"
-            />
-            <Link
-              href={`/u/${seller.username}`}
-              className="text-xs text-zinc-400 hover:text-white underline underline-offset-4"
-            >
-              View full profile →
-            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-3xl lg:text-4xl font-light text-white tracking-[-0.01em]">
+                <GradientText gradient="purple">@{seller.username}</GradientText>
+              </h1>
+              {seller.bio && (
+                <p className="text-sm text-zinc-300 mt-2 leading-relaxed max-w-2xl">{seller.bio}</p>
+              )}
+              <div className="mt-4 flex flex-wrap gap-1.5 text-[11px]">
+                <SocialChip icon={Calendar} label={`Joined ${formatJoined(seller.createdAt)}`} />
+                {seller.githubLogin && (
+                  <SocialChip
+                    href={`https://github.com/${seller.githubLogin}`}
+                    icon={Github}
+                    label={seller.githubLogin}
+                  />
+                )}
+                {seller.twitterUrl && (
+                  <SocialChip href={seller.twitterUrl} icon={Twitter} label="twitter" />
+                )}
+                {seller.linkedinUrl && (
+                  <SocialChip href={seller.linkedinUrl} icon={Linkedin} label="linkedin" />
+                )}
+                {seller.websiteUrl && (
+                  <SocialChip href={seller.websiteUrl} icon={Globe} label="website" />
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col items-end gap-2">
+              <ShareButton
+                title={`@${seller.username} on Bolty`}
+                text={`Check out @${seller.username}'s listings on Bolty`}
+                ariaLabel="Share seller profile"
+              />
+              <Link
+                href={`/u/${seller.username}`}
+                className="text-[11px] transition-colors"
+                style={{ color: 'rgba(161,161,170,0.6)' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#b4a7ff')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(161,161,170,0.6)')}
+              >
+                View full profile →
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -280,12 +283,40 @@ export default function SellerProfilePage() {
 
         {/* Listings */}
         <section>
-          <h2 className="text-sm uppercase tracking-widest text-zinc-400 mb-4">
+          <h2 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-4">
             Listings ({listings.length})
           </h2>
           {listings.length === 0 ? (
-            <div className="text-sm text-zinc-500 border border-dashed border-white/10 rounded-lg p-8 text-center">
-              This seller hasn't published any listings yet.
+            <div
+              className="relative rounded-2xl p-10 text-center overflow-hidden"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                }}
+              />
+              <div
+                className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 24px -6px rgba(131,110,249,0.5)',
+                }}
+              >
+                <Package className="w-5 h-5" style={{ color: '#b4a7ff' }} />
+              </div>
+              <p className="text-sm text-zinc-400">
+                This seller hasn't published any listings yet.
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -296,8 +327,28 @@ export default function SellerProfilePage() {
                   <Link
                     key={l.id}
                     href={`/market/agents/${l.id}`}
-                    className="group relative border border-white/8 rounded-lg bg-zinc-950/50 p-4 hover:border-purple-400/30 hover:bg-purple-500/5 transition-colors"
+                    className="group relative rounded-xl p-4 overflow-hidden transition-all"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = `0 0 0 1px ${meta.color}40, inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -12px rgba(0,0,0,0.5)`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow =
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)';
+                    }}
                   >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, ${meta.color}80 50%, transparent 100%)`,
+                      }}
+                    />
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -307,30 +358,46 @@ export default function SellerProfilePage() {
                       aria-pressed={saved}
                       aria-label={saved ? 'Remove from saved' : 'Save for later'}
                       className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
-                        saved
-                          ? 'text-pink-400 bg-pink-500/10 opacity-100'
-                          : 'text-zinc-500 hover:text-pink-300 hover:bg-white/5 opacity-0 group-hover:opacity-100'
+                        saved ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                       }`}
+                      style={
+                        saved
+                          ? {
+                              color: '#f9a8d4',
+                              background: 'rgba(236,72,153,0.1)',
+                              boxShadow: 'inset 0 0 0 1px rgba(236,72,153,0.35)',
+                            }
+                          : {
+                              color: 'rgba(161,161,170,0.5)',
+                              background: 'rgba(255,255,255,0.04)',
+                              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                            }
+                      }
                     >
-                      <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-pink-400' : ''}`} />
+                      <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
                     </button>
                     <div className="flex items-start gap-3 mb-3">
                       <div
-                        className="w-9 h-9 rounded-md flex items-center justify-center"
-                        style={{ background: `${meta.color}18` }}
+                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}06 100%)`,
+                          boxShadow: `inset 0 0 0 1px ${meta.color}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -6px ${meta.color}40`,
+                        }}
                       >
                         <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
                       </div>
                       <div className="min-w-0 flex-1 pr-7">
-                        <div className="text-sm font-medium text-white truncate">{l.title}</div>
+                        <div className="text-[13px] font-light text-white truncate tracking-[0.005em]">
+                          {l.title}
+                        </div>
                         <div className="text-[11px] text-zinc-500 mt-0.5">
                           {meta.label} · {timeAgo(l.createdAt)}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-white font-medium">
-                        {l.price} {l.currency}
+                      <span className="text-sm text-white font-light">
+                        {l.price} <span className="text-zinc-500 text-xs">{l.currency}</span>
                       </span>
                       {l.reviewAverage !== null &&
                         l.reviewAverage !== undefined &&
@@ -352,14 +419,28 @@ export default function SellerProfilePage() {
         {/* Recent reviews */}
         {recentReviews.length > 0 && (
           <section>
-            <h2 className="text-sm uppercase tracking-widest text-zinc-400 mb-4">Recent reviews</h2>
+            <h2 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-4">
+              Recent reviews
+            </h2>
             <div className="space-y-3">
               {recentReviews.map((r) => (
                 <div
                   key={r.id}
-                  className="border border-white/8 rounded-lg bg-zinc-950/50 p-4 flex gap-3"
+                  className="relative rounded-xl p-4 flex gap-3 overflow-hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                  }}
                 >
-                  <div className="w-8 h-8 rounded-full bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
+                  <div
+                    className="w-8 h-8 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                    }}
+                  >
                     {r.author.avatarUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
@@ -375,13 +456,14 @@ export default function SellerProfilePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="text-zinc-200 font-medium">
+                      <span className="text-zinc-200 font-light">
                         @{r.author.username || 'anon'}
                       </span>
                       <span className="text-zinc-600">·</span>
                       <Link
                         href={`/market/agents/${r.listing.id}`}
-                        className="text-purple-300 hover:underline truncate"
+                        className="truncate transition-colors"
+                        style={{ color: '#b4a7ff' }}
                       >
                         {r.listing.title}
                       </Link>
@@ -410,6 +492,40 @@ export default function SellerProfilePage() {
   );
 }
 
+function SocialChip({
+  icon: Icon,
+  label,
+  href,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  href?: string;
+}) {
+  const style: React.CSSProperties = {
+    background: 'rgba(255,255,255,0.03)',
+    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+    color: 'rgba(161,161,170,0.75)',
+  };
+  const content = (
+    <span className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md text-[11px]">
+      <Icon className="w-3 h-3" />
+      {label}
+    </span>
+  );
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" style={style} className="rounded-md">
+        {content}
+      </a>
+    );
+  }
+  return (
+    <span style={style} className="rounded-md">
+      {content}
+    </span>
+  );
+}
+
 function StatCard({
   label,
   value,
@@ -422,16 +538,32 @@ function StatCard({
   accent?: string;
 }) {
   return (
-    <div className="border border-white/8 rounded-lg bg-zinc-950/60 p-4 relative overflow-hidden">
+    <div
+      className="relative rounded-xl p-4 overflow-hidden transition-all"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
       <div
-        className="absolute inset-0 opacity-[0.06] pointer-events-none"
+        className="absolute inset-0 opacity-[0.08] pointer-events-none"
         style={{ background: `radial-gradient(circle at 0% 0%, ${accent}, transparent 60%)` }}
       />
       <div className="flex items-center justify-between mb-2 relative">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-500">{label}</span>
-        <Icon className="w-3.5 h-3.5" style={{ color: accent }} />
+        <span className="text-[10px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
+          {label}
+        </span>
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center"
+          style={{
+            background: `linear-gradient(135deg, ${accent}22 0%, ${accent}06 100%)`,
+            boxShadow: `inset 0 0 0 1px ${accent}38`,
+          }}
+        >
+          <Icon className="w-3 h-3" style={{ color: accent }} />
+        </div>
       </div>
-      <div className="text-2xl font-light text-white relative">{value}</div>
+      <div className="text-2xl font-light text-white relative tracking-[-0.01em]">{value}</div>
     </div>
   );
 }
