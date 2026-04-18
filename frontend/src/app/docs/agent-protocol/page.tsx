@@ -16,17 +16,50 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
   };
   return (
     <div
-      className="relative group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
-      style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}
+      className="relative group rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
+        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
       <div
-        className="flex items-center justify-between px-4 py-2.5 border-b"
-        style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}
+        className="flex items-center justify-between px-4 py-2"
+        style={{
+          borderBottom: '1px solid rgba(131,110,249,0.1)',
+          background: 'rgba(131,110,249,0.04)',
+        }}
       >
-        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{lang}</span>
+        <span
+          className="text-[10px] font-mono uppercase tracking-[0.18em] font-medium"
+          style={{ color: 'rgba(180,167,255,0.55)' }}
+        >
+          {lang}
+        </span>
         <button
           onClick={copy}
-          className="text-xs font-mono px-2.5 py-1 rounded-md transition-all duration-200 text-zinc-500 hover:text-white hover:bg-monad-500/10 border border-transparent hover:border-monad-500/20"
+          className="text-[10.5px] font-mono transition-all px-2 py-0.5 rounded-md"
+          style={
+            copied
+              ? {
+                  color: '#b4a7ff',
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                }
+              : {
+                  color: 'rgba(161,161,170,0.6)',
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }
+          }
         >
           {copied ? '✓ copied' : 'copy'}
         </button>
