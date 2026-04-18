@@ -191,9 +191,22 @@ export default function ServicesPage() {
     <div className="page-container py-8">
       {/* Header */}
       <div className="page-header">
-        <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-2">
-          Hire & Collaborate
-        </p>
+        <div className="inline-flex items-center gap-2 mb-3">
+          <div
+            className="w-6 h-6 rounded-md flex items-center justify-center"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.24) 0%, rgba(131,110,249,0.06) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px rgba(131,110,249,0.5)',
+            }}
+          >
+            <Briefcase className="w-3 h-3 text-[#b4a7ff]" strokeWidth={1.75} />
+          </div>
+          <p className="text-[10.5px] font-medium text-[#b4a7ff] uppercase tracking-[0.18em]">
+            Hire & Collaborate
+          </p>
+        </div>
         <h1 className="text-2xl font-light text-white tracking-tight">Developer Services</h1>
         <p className="text-sm text-zinc-500 mt-1">
           Find skilled developers for your project — or list your own services for others to
@@ -481,11 +494,22 @@ export default function ServicesPage() {
             const isExpanded = expandedCard === service.id;
 
             return (
-              <div key={service.id} className="card-elevated flex flex-col overflow-hidden p-0">
+              <div
+                key={service.id}
+                className="relative flex flex-col overflow-hidden rounded-xl transition-all hover:brightness-110"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03), 0 10px 36px -20px rgba(0,0,0,0.6)',
+                }}
+              >
                 {/* Category accent bar */}
                 <div
-                  className="h-[2px] w-full"
-                  style={{ background: `linear-gradient(90deg, ${catColor}, transparent 80%)` }}
+                  className="h-px w-full"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, ${catColor}90 50%, transparent 100%)`,
+                  }}
                 />
 
                 <div className="p-5 flex-1 flex flex-col">
@@ -496,14 +520,17 @@ export default function ServicesPage() {
                         <img
                           src={service.user.avatarUrl}
                           alt={service.user.username || ''}
-                          className="w-10 h-10 rounded-xl object-cover border border-zinc-800 group-hover:border-monad-500/30 transition-colors"
+                          className="w-10 h-10 rounded-xl object-cover"
+                          style={{
+                            boxShadow: `inset 0 0 0 1px ${catColor}40, 0 0 16px -4px ${catColor}40`,
+                          }}
                         />
                       ) : (
                         <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center font-light text-sm transition-colors group-hover:border-monad-500/30"
+                          className="w-10 h-10 rounded-xl flex items-center justify-center font-light text-sm"
                           style={{
-                            background: `${catColor}12`,
-                            border: `1px solid ${catColor}20`,
+                            background: `linear-gradient(135deg, ${catColor}22 0%, ${catColor}06 100%)`,
+                            boxShadow: `inset 0 0 0 1px ${catColor}40, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${catColor}40`,
                             color: catColor,
                           }}
                         >
@@ -530,8 +557,12 @@ export default function ServicesPage() {
                     </div>
 
                     <span
-                      className="badge-secondary text-[10px] flex-shrink-0"
-                      style={{ color: catColor }}
+                      className="inline-flex items-center h-6 px-2 rounded-md text-[10px] font-medium flex-shrink-0 tracking-[0.005em]"
+                      style={{
+                        color: catColor,
+                        background: `linear-gradient(180deg, ${catColor}1c 0%, ${catColor}06 100%)`,
+                        boxShadow: `inset 0 0 0 1px ${catColor}38`,
+                      }}
                     >
                       {CATEGORY_LABEL[service.category] || service.category}
                     </span>
@@ -575,13 +606,18 @@ export default function ServicesPage() {
                       {service.skills.slice(0, 5).map((s) => (
                         <span
                           key={s}
-                          className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
+                          className="text-[10px] px-1.5 py-0.5 rounded-md text-zinc-300 tracking-[0.005em]"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(30,30,38,0.8) 0%, rgba(18,18,24,0.8) 100%)',
+                            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                          }}
                         >
                           {s}
                         </span>
                       ))}
                       {service.skills.length > 5 && (
-                        <span className="text-[10px] px-1.5 py-0.5 text-zinc-600">
+                        <span className="text-[10px] px-1.5 py-0.5 text-zinc-500">
                           +{service.skills.length - 5}
                         </span>
                       )}
@@ -611,17 +647,38 @@ export default function ServicesPage() {
                   {isAuthenticated && service.user.username !== user?.username ? (
                     <Link
                       href={`/dm?user=${service.user.username}&context=service&serviceId=${service.id}`}
-                      className="btn-primary w-full justify-center gap-2 text-xs py-2.5"
+                      className="w-full inline-flex items-center justify-center gap-2 text-[12.5px] py-2.5 rounded-lg text-white font-light tracking-[0.005em] transition-all hover:brightness-110"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      }}
                     >
                       <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
                       Contact Developer
                     </Link>
                   ) : isAuthenticated && service.user.username === user?.username ? (
-                    <div className="card text-center py-2 text-xs text-zinc-600">Your listing</div>
+                    <div
+                      className="text-center py-2 text-xs text-zinc-500 rounded-lg"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(20,20,26,0.5) 0%, rgba(10,10,14,0.5) 100%)',
+                        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      Your listing
+                    </div>
                   ) : (
                     <Link
                       href="/auth"
-                      className="btn-secondary w-full justify-center gap-2 text-xs py-2.5"
+                      className="w-full inline-flex items-center justify-center gap-2 text-[12.5px] py-2.5 rounded-lg text-zinc-200 font-light tracking-[0.005em] transition-all hover:brightness-110"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                      }}
                     >
                       Sign in to contact
                     </Link>
@@ -659,20 +716,42 @@ export default function ServicesPage() {
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.step} className="step-card">
+              <div
+                key={item.step}
+                className="relative rounded-xl p-5 overflow-hidden"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+                  }}
+                />
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="step-number">{item.step}</div>
+                  <span className="font-mono text-[10.5px] text-zinc-600 tracking-[0.18em]">
+                    {item.step}
+                  </span>
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{
-                      background: 'var(--brand-dim)',
-                      border: '1px solid rgba(131,110,249,0.15)',
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 22px -4px rgba(131,110,249,0.5)',
                     }}
                   >
-                    <Icon className="w-5 h-5 text-monad-400" strokeWidth={1.75} />
+                    <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
                   </div>
                 </div>
-                <h3 className="text-sm font-light text-white mb-2">{item.title}</h3>
+                <h3 className="text-sm font-light text-white mb-2 tracking-[0.005em]">
+                  {item.title}
+                </h3>
                 <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             );
