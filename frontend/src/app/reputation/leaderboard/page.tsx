@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Trophy, GitBranch, Package, Search, X } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -149,9 +150,13 @@ export default function LeaderboardPage() {
           Rank Tiers
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {RANK_INFO.map((r) => (
-            <div
+          {RANK_INFO.map((r, idx) => (
+            <motion.div
               key={r.rank}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.04, duration: 0.28 }}
+              whileHover={{ y: -2 }}
               className="flex items-center gap-2.5 p-3 rounded-xl"
               style={{
                 background: `linear-gradient(180deg, ${r.color}12 0%, ${r.color}03 100%)`,
@@ -173,7 +178,7 @@ export default function LeaderboardPage() {
                   {r.threshold >= 1000 ? `${(r.threshold / 1000).toFixed(0)}k` : r.threshold}+ pts
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -378,9 +383,16 @@ export default function LeaderboardPage() {
                 'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
             }}
           />
-          {visible.map((entry) => (
-            <div
+          {visible.map((entry, idx) => (
+            <motion.div
               key={entry.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: Math.min(idx * 0.025, 0.35),
+                duration: 0.28,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
               className="relative flex items-center gap-4 px-5 py-3.5 border-b border-white/[0.04] hover:bg-white/[0.015] transition-colors last:border-0"
             >
               {/* Position */}
@@ -448,7 +460,7 @@ export default function LeaderboardPage() {
                 </div>
                 <div className="text-[10px] text-zinc-700 font-mono">pts</div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
