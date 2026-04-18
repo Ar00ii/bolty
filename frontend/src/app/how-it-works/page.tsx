@@ -24,36 +24,62 @@ const Code = memo(
   }) => (
     <div
       style={{
+        position: 'relative',
         margin: '1rem 0 1.5rem',
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
-        border: '1px solid #30363d',
+        background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 36px -20px rgba(0,0,0,0.6)',
       }}
     >
       <div
+        aria-hidden="true"
         style={{
-          background: '#010409',
+          position: 'absolute',
+          inset: '0 0 auto 0',
+          height: 1,
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
           padding: '0.6rem 1rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          borderBottom: '1px solid #30363d',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
         }}
       >
-        <span style={{ fontSize: '0.75rem', color: '#8b949e', fontFamily: 'monospace' }}>
+        <span
+          style={{
+            fontSize: '10.5px',
+            color: '#71717a',
+            fontFamily: 'monospace',
+            textTransform: 'uppercase',
+            letterSpacing: '0.18em',
+            fontWeight: 500,
+          }}
+        >
           {lang}
         </span>
         <button
           onClick={() => onCopy(code, id)}
           style={{
-            background: 'none',
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
             border: 'none',
-            color: '#58a6ff',
+            color: copied === id ? '#86efac' : '#d4d4d8',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '11px',
             display: 'flex',
             alignItems: 'center',
             gap: 4,
+            padding: '4px 8px',
+            borderRadius: 6,
+            transition: 'all 0.15s',
           }}
         >
           {copied === id ? (
@@ -71,11 +97,11 @@ const Code = memo(
         style={{
           margin: 0,
           padding: '1rem',
-          background: '#0d1117',
-          color: '#c9d1d9',
+          background: 'transparent',
+          color: '#d4d4d8',
           fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-          fontSize: '0.85rem',
-          lineHeight: 1.6,
+          fontSize: '12.5px',
+          lineHeight: 1.65,
           overflowX: 'auto',
         }}
       >
@@ -93,16 +119,20 @@ const Step = memo(
       <div
         style={{
           flexShrink: 0,
-          width: 32,
-          height: 32,
-          borderRadius: '50%',
-          background: `linear-gradient(135deg, ${BRAND}, #a78bfa)`,
+          width: 34,
+          height: 34,
+          borderRadius: 10,
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(131,110,249,0.42), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '0.85rem',
-          fontWeight: 700,
-          color: '#fff',
+          fontSize: '13px',
+          fontWeight: 300,
+          color: '#b4a7ff',
+          fontFamily: 'monospace',
         }}
       >
         {n}
@@ -148,13 +178,15 @@ H2.displayName = 'H2';
 const Note = memo(({ children }: { children: React.ReactNode }) => (
   <div
     style={{
-      background: 'rgba(131,110,249,0.08)',
-      border: '1px solid rgba(131,110,249,0.25)',
-      borderRadius: 8,
+      position: 'relative',
+      background: 'linear-gradient(180deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.03) 100%)',
+      boxShadow:
+        'inset 0 0 0 1px rgba(131,110,249,0.32), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 20px -8px rgba(131,110,249,0.35)',
+      borderRadius: 12,
       padding: '0.85rem 1rem',
       marginBottom: '1.5rem',
-      fontSize: '0.9rem',
-      color: '#c9d1d9',
+      fontSize: '13.5px',
+      color: '#e4e4e7',
       lineHeight: 1.6,
     }}
   >
@@ -167,13 +199,15 @@ Note.displayName = 'Note';
 const Warn = memo(({ children }: { children: React.ReactNode }) => (
   <div
     style={{
-      background: 'rgba(248,81,73,0.08)',
-      border: '1px solid rgba(248,81,73,0.25)',
-      borderRadius: 8,
+      position: 'relative',
+      background: 'linear-gradient(180deg, rgba(248,113,113,0.14) 0%, rgba(248,113,113,0.03) 100%)',
+      boxShadow:
+        'inset 0 0 0 1px rgba(248,113,113,0.34), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 20px -8px rgba(248,113,113,0.35)',
+      borderRadius: 12,
       padding: '0.85rem 1rem',
       marginBottom: '1.5rem',
-      fontSize: '0.9rem',
-      color: '#c9d1d9',
+      fontSize: '13.5px',
+      color: '#fecaca',
       lineHeight: 1.6,
     }}
   >
