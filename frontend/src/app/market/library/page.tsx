@@ -177,60 +177,90 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-8">
+      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-6">
         {items.length === 0 ? (
           <EmptyState />
         ) : (
           <>
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-              <input
-                ref={searchRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search your library…"
-                className="w-full bg-zinc-950/50 border border-white/8 rounded-lg pl-10 pr-16 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#836EF9]/40 transition-colors"
+            {/* Search + filters */}
+            <div
+              className="relative rounded-xl overflow-hidden p-4 space-y-3"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                }}
               />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                {query ? (
-                  <button
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search"
-                    className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                ) : (
-                  <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
-                    /
-                  </kbd>
-                )}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search your library…"
+                  className="w-full rounded-lg pl-10 pr-16 py-2.5 text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                  }}
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                  {query ? (
+                    <button
+                      onClick={() => setQuery('')}
+                      aria-label="Clear search"
+                      className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  ) : (
+                    <kbd
+                      className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      /
+                    </kbd>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {/* Filter pills */}
-            <div className="flex flex-wrap gap-2">
-              <FilterChip
-                label={`All (${items.length})`}
-                active={filter === 'all'}
-                onClick={() => setFilter('all')}
-              />
-              {(['AI_AGENT', 'BOT', 'SCRIPT', 'REPO'] as const).map((t) => {
-                const c = counts[t] || 0;
-                if (c === 0) return null;
-                const meta = TYPE_META[t];
-                return (
-                  <FilterChip
-                    key={t}
-                    label={`${meta.label} (${c})`}
-                    active={filter === t}
-                    onClick={() => setFilter(t)}
-                    accent={meta.color}
-                  />
-                );
-              })}
+              <div className="relative flex flex-wrap items-center gap-2">
+                <FilterChip
+                  label="All"
+                  count={items.length}
+                  active={filter === 'all'}
+                  onClick={() => setFilter('all')}
+                />
+                {(['AI_AGENT', 'BOT', 'SCRIPT', 'REPO'] as const).map((t) => {
+                  const c = counts[t] || 0;
+                  if (c === 0) return null;
+                  const meta = TYPE_META[t];
+                  return (
+                    <FilterChip
+                      key={t}
+                      label={meta.label}
+                      count={c}
+                      active={filter === t}
+                      onClick={() => setFilter(t)}
+                      accent={meta.color}
+                    />
+                  );
+                })}
+              </div>
             </div>
 
             {/* Items */}
@@ -241,12 +271,34 @@ export default function LibraryPage() {
                 return (
                   <div
                     key={item.orderId}
-                    className="group rounded-lg border border-white/8 bg-zinc-950/50 p-5 hover:border-white/15 transition-colors"
+                    className="group relative rounded-2xl overflow-hidden p-5 transition-all hover:-translate-y-0.5"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+                    }}
                   >
-                    <div className="flex items-start gap-4">
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, ${meta.color}80 50%, transparent 100%)`,
+                      }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -top-24 -right-24 w-56 h-56 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{ background: `${meta.color}22` }}
+                    />
+                    <div className="relative flex items-start gap-4">
                       <div
-                        className="w-10 h-10 rounded-md flex items-center justify-center shrink-0"
-                        style={{ background: `${meta.color}18` }}
+                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}08 100%)`,
+                          border: `1px solid ${meta.color}3a`,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${meta.color}30`,
+                        }}
                       >
                         <meta.Icon className="w-5 h-5" style={{ color: meta.color }} />
                       </div>
@@ -255,16 +307,16 @@ export default function LibraryPage() {
                           <div className="min-w-0">
                             <Link
                               href={`/market/agents/${item.listing.id}`}
-                              className="block text-base font-medium text-white hover:text-purple-200 truncate"
+                              className="block text-[15px] font-normal text-white hover:text-[#b4a7ff] truncate tracking-[0.005em] transition-colors"
                             >
                               {item.listing.title}
                             </Link>
-                            <div className="text-[11px] text-zinc-500 mt-1 flex items-center gap-3">
+                            <div className="text-[11px] text-zinc-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                               <span className="inline-flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
                                 Purchased {timeAgo(item.purchasedAt)}
                               </span>
-                              <span>
+                              <span className="text-zinc-400">
                                 {item.listing.price} {item.listing.currency}
                               </span>
                               <span>· @{item.listing.seller.username || 'anon'}</span>
@@ -284,7 +336,11 @@ export default function LibraryPage() {
                             {item.listing.tags.slice(0, 6).map((t) => (
                               <span
                                 key={t}
-                                className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/8 text-zinc-400"
+                                className="text-[10px] px-2 py-0.5 rounded-full text-zinc-400"
+                                style={{
+                                  background: 'rgba(255,255,255,0.04)',
+                                  border: '1px solid rgba(255,255,255,0.08)',
+                                }}
                               >
                                 #{t}
                               </span>
@@ -296,11 +352,17 @@ export default function LibraryPage() {
                           {item.listing.fileKey && item.listing.fileName && (
                             <a
                               href={`${API_URL}/market/files/${item.listing.fileKey}`}
-                              className="inline-flex items-center gap-2 rounded-md border border-purple-400/30 bg-purple-500/10 px-3 py-1.5 text-xs font-medium text-purple-100 hover:bg-purple-500/20"
+                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-white transition-all hover:brightness-110"
+                              style={{
+                                background:
+                                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
+                                boxShadow:
+                                  'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 18px -4px rgba(131,110,249,0.5)',
+                              }}
                             >
                               <Download className="w-3.5 h-3.5" />
                               Download{' '}
-                              <span className="text-purple-300/80">
+                              <span className="text-[#c9beff]">
                                 {item.listing.fileName}
                                 {item.listing.fileSize
                                   ? ` · ${formatBytes(item.listing.fileSize)}`
@@ -311,7 +373,11 @@ export default function LibraryPage() {
                           {item.listing.agentEndpoint && (
                             <Link
                               href={`/market/agents/${item.listing.id}`}
-                              className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-white/10"
+                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-200 hover:text-white transition-colors"
+                              style={{
+                                background: 'rgba(255,255,255,0.04)',
+                                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                              }}
                             >
                               <Play className="w-3.5 h-3.5" />
                               Open live demo
@@ -322,7 +388,11 @@ export default function LibraryPage() {
                               href={item.listing.agentUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-zinc-200 hover:bg-white/10"
+                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-200 hover:text-white transition-colors"
+                              style={{
+                                background: 'rgba(255,255,255,0.04)',
+                                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                              }}
                             >
                               <ExternalLink className="w-3.5 h-3.5" />
                               Open agent
@@ -330,7 +400,10 @@ export default function LibraryPage() {
                           )}
                           <Link
                             href={`/orders/${item.orderId}`}
-                            className="inline-flex items-center gap-2 rounded-md border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white"
+                            className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-400 hover:text-white transition-colors"
+                            style={{
+                              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                            }}
                           >
                             View order
                           </Link>
@@ -341,8 +414,18 @@ export default function LibraryPage() {
                 );
               })}
               {visible.length === 0 && (
-                <div className="text-sm text-zinc-500 py-8 text-center">
-                  {query ? `No items match "${query}".` : 'No items match this filter.'}
+                <div
+                  className="relative rounded-2xl overflow-hidden p-10 text-center"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <p className="text-[13px] text-zinc-400">
+                    {query ? `No items match "${query}".` : 'No items match this filter.'}
+                  </p>
                 </div>
               )}
             </div>
@@ -355,26 +438,40 @@ export default function LibraryPage() {
 
 function FilterChip({
   label,
+  count,
   active,
   onClick,
   accent,
 }: {
   label: string;
+  count: number;
   active: boolean;
   onClick: () => void;
   accent?: string;
 }) {
+  const c = accent || '#836EF9';
   return (
     <button
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
-        active
-          ? 'bg-purple-500/20 text-purple-100 border-purple-400/40'
-          : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white hover:border-white/20'
+      className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+        active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
       }`}
-      style={active && accent ? { borderColor: `${accent}66`, background: `${accent}1a` } : {}}
+      style={
+        active
+          ? {
+              background: `linear-gradient(180deg, ${c}38 0%, ${c}10 100%)`,
+              boxShadow: `inset 0 0 0 1px ${c}5a, 0 0 14px -4px ${c}70`,
+            }
+          : {
+              background: 'rgba(255,255,255,0.04)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }
+      }
     >
       {label}
+      <span className="text-[10px]" style={{ color: active ? `${c}ee` : 'rgba(161,161,170,0.7)' }}>
+        {count}
+      </span>
     </button>
   );
 }
@@ -382,13 +479,18 @@ function FilterChip({
 function StatusPill({ status }: { status: string }) {
   const tone =
     status === 'COMPLETED'
-      ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+      ? { color: '#6ee7b7', bg: 'rgba(16,185,129,0.12)', ring: 'rgba(16,185,129,0.3)' }
       : status === 'DISPUTED'
-        ? 'bg-rose-500/10 text-rose-300 border-rose-500/20'
-        : 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20';
+        ? { color: '#fda4af', bg: 'rgba(244,63,94,0.12)', ring: 'rgba(244,63,94,0.3)' }
+        : { color: '#d4d4d8', bg: 'rgba(113,113,122,0.14)', ring: 'rgba(113,113,122,0.3)' };
   return (
     <span
-      className={`text-[10px] uppercase tracking-wide px-2 py-0.5 rounded border ${tone} whitespace-nowrap`}
+      className="text-[10px] uppercase tracking-[0.12em] font-medium px-2 py-0.5 rounded-md whitespace-nowrap"
+      style={{
+        color: tone.color,
+        background: tone.bg,
+        boxShadow: `inset 0 0 0 1px ${tone.ring}`,
+      }}
     >
       {status.toLowerCase().replace(/_/g, ' ')}
     </span>
@@ -397,15 +499,52 @@ function StatusPill({ status }: { status: string }) {
 
 function EmptyState() {
   return (
-    <div className="text-center py-24 border border-dashed border-white/10 rounded-lg bg-zinc-950/40">
-      <Library className="w-10 h-10 text-zinc-600 mx-auto mb-4" />
-      <h2 className="text-lg font-light text-white mb-2">Your library is empty</h2>
-      <p className="text-sm text-zinc-400 mb-6 max-w-md mx-auto">
+    <div
+      className="relative rounded-2xl overflow-hidden p-14 text-center"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-30"
+        style={{ background: 'rgba(131,110,249,0.25)' }}
+      />
+      <div
+        className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+          border: '1px solid rgba(131,110,249,0.35)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+        }}
+      >
+        <Library className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+      </div>
+      <h2 className="relative text-[15px] font-normal text-white tracking-[0.005em] mb-1.5">
+        Your library is empty
+      </h2>
+      <p className="relative text-[12px] text-zinc-500 mb-6 max-w-md mx-auto leading-relaxed">
         Buy your first AI agent, repo, or script and it'll show up here — always one click away.
       </p>
       <Link
         href="/market"
-        className="inline-flex items-center gap-2 rounded-md border border-purple-400/30 bg-purple-500/10 px-4 py-2 text-xs font-medium text-purple-200 hover:bg-purple-500/20"
+        className="relative inline-flex items-center gap-2 h-8 px-3.5 rounded-md text-[11.5px] font-medium text-white transition-all hover:brightness-110"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 18px -4px rgba(131,110,249,0.5)',
+        }}
       >
         Browse the marketplace
       </Link>
