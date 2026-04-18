@@ -87,11 +87,18 @@ function OrderCard({
   return (
     <div onClick={onClick} className="card-interactive flex items-center gap-4 p-4 cursor-pointer">
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-full bg-monad-500/15 border border-monad-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <div
+        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.4)',
+        }}
+      >
         {peer?.avatarUrl ? (
           <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
         ) : (
-          <span className="text-base text-monad-400">
+          <span className="text-base font-light" style={{ color: '#b4a7ff' }}>
             {(peer?.username || '?')[0].toUpperCase()}
           </span>
         )}
@@ -289,17 +296,46 @@ export default function OrdersPage() {
       {tab === 'selling' && stats && (
         <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
           {[
-            { label: 'Total', value: stats.total, icon: BarChart3 },
-            { label: 'Pending', value: stats.pending, icon: Clock },
-            { label: 'In Progress', value: stats.inProgress, icon: Package },
-            { label: 'Delivered', value: stats.delivered, icon: Truck },
-            { label: 'Completed', value: stats.completed, icon: CheckCircle2 },
-            { label: 'Disputed', value: stats.disputed, icon: AlertTriangle },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="card p-4 text-center">
-              <Icon className="w-4 h-4 text-monad-400 mx-auto mb-2" strokeWidth={1.5} />
-              <div className="font-mono font-light text-xl text-monad-400">{value}</div>
-              <div className="text-[10px] text-zinc-600 uppercase tracking-wider mt-1">{label}</div>
+            { label: 'Total', value: stats.total, icon: BarChart3, accent: '#836EF9' },
+            { label: 'Pending', value: stats.pending, icon: Clock, accent: '#f59e0b' },
+            { label: 'In Progress', value: stats.inProgress, icon: Package, accent: '#06B6D4' },
+            { label: 'Delivered', value: stats.delivered, icon: Truck, accent: '#22c55e' },
+            { label: 'Completed', value: stats.completed, icon: CheckCircle2, accent: '#836EF9' },
+            { label: 'Disputed', value: stats.disputed, icon: AlertTriangle, accent: '#ef4444' },
+          ].map(({ label, value, icon: Icon, accent }) => (
+            <div
+              key={label}
+              className="relative rounded-xl p-4 text-center overflow-hidden transition-all"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-px"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${accent}80, transparent)`,
+                }}
+              />
+              <div
+                className="w-7 h-7 rounded-md mx-auto mb-2 flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(135deg, ${accent}22 0%, ${accent}06 100%)`,
+                  boxShadow: `inset 0 0 0 1px ${accent}38, inset 0 1px 0 rgba(255,255,255,0.06)`,
+                }}
+              >
+                <Icon className="w-3.5 h-3.5" style={{ color: accent }} strokeWidth={1.75} />
+              </div>
+              <div
+                className="font-mono font-light text-xl tracking-[-0.01em]"
+                style={{ color: accent }}
+              >
+                {value}
+              </div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.18em] font-medium mt-1">
+                {label}
+              </div>
             </div>
           ))}
         </div>
