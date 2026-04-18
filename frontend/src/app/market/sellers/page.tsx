@@ -195,12 +195,16 @@ export default function TopSellersPage() {
                     { k: 'rating', label: 'Rating', Icon: Star },
                     { k: 'listings', label: 'Listings', Icon: Package },
                   ] as const
-                ).map(({ k, label, Icon }) => {
+                ).map(({ k, label, Icon }, idx) => {
                   const active = sort === k;
                   return (
-                    <button
+                    <motion.button
                       key={k}
                       onClick={() => setSort(k)}
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.04, duration: 0.22 }}
+                      whileTap={{ scale: 0.95 }}
                       className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
                         active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
                       }`}
@@ -217,7 +221,7 @@ export default function TopSellersPage() {
                     >
                       <Icon className="w-3 h-3" strokeWidth={2} />
                       {label}
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
@@ -327,13 +331,18 @@ export default function TopSellersPage() {
             {visible.map((s, i) => (
               <motion.div
                 key={s.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03, duration: 0.3 }}
+                transition={{
+                  delay: Math.min(i * 0.035, 0.4),
+                  duration: 0.32,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+                whileHover={{ y: -3 }}
               >
                 <Link
                   href={`/market/sellers/${s.username || ''}`}
-                  className="group relative block p-5 rounded-xl overflow-hidden transition-all hover:-translate-y-0.5"
+                  className="group relative block p-5 rounded-xl overflow-hidden transition-all"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',

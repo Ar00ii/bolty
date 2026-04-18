@@ -288,9 +288,14 @@ export default function FavoritesPage() {
               return (
                 <motion.div
                   key={l.id}
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03, duration: 0.25 }}
+                  transition={{
+                    delay: Math.min(i * 0.035, 0.4),
+                    duration: 0.32,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -2 }}
                   className="group relative rounded-xl transition-all overflow-hidden"
                   style={{
                     background:
@@ -350,11 +355,13 @@ export default function FavoritesPage() {
                       {l.description}
                     </p>
                   </Link>
-                  <button
+                  <motion.button
                     onClick={(e) => {
                       e.preventDefault();
                       remove(l.id);
                     }}
+                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ scale: 1.08 }}
                     aria-label="Remove from favorites"
                     className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-pink-300 hover:text-pink-200 hover:bg-pink-500/10 transition-colors z-10"
                     style={{
@@ -363,7 +370,7 @@ export default function FavoritesPage() {
                     }}
                   >
                     <Heart className="w-3.5 h-3.5 fill-pink-400 text-pink-400" />
-                  </button>
+                  </motion.button>
                 </motion.div>
               );
             })}
