@@ -1,6 +1,13 @@
 'use client';
 
-import { Zap, AlertCircle, CheckCircle } from 'lucide-react';
+import {
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  Flame,
+  Building2,
+  Infinity as InfinityIcon,
+} from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 interface Pack {
@@ -15,11 +22,7 @@ interface RaysShopProps {
   loading?: boolean;
 }
 
-export const RaysShop: React.FC<RaysShopProps> = ({
-  agentId,
-  onPurchaseSuccess,
-  loading = false,
-}) => {
+export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }) => {
   const [packs, setPacks] = useState<Pack[]>([]);
   const [selectedPack, setSelectedPack] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState(false);
@@ -29,7 +32,6 @@ export const RaysShop: React.FC<RaysShopProps> = ({
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-  // Fetch packs
   useEffect(() => {
     const fetchPacks = async () => {
       try {
@@ -41,7 +43,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({
         const data = await response.json();
         setPacks(data.packs || []);
         if (data.packs?.length > 0) {
-          setSelectedPack(data.packs[1].pack); // Default to 2nd pack
+          setSelectedPack(data.packs[1]?.pack || data.packs[0].pack);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load packs');
@@ -90,10 +92,20 @@ export const RaysShop: React.FC<RaysShopProps> = ({
     }
   };
 
+  const surfaceStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+    boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+  };
+
   if (loadingPacks) {
     return (
-      <div className="p-6 rounded-lg bg-gray-800/30 border border-gray-700 text-center">
-        <p className="text-gray-400">Loading packs...</p>
+      <div className="space-y-6">
+        <div className="h-8 bg-white/[0.06] rounded w-48 animate-pulse" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-4 rounded-xl animate-pulse h-28" style={surfaceStyle} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -104,78 +116,218 @@ export const RaysShop: React.FC<RaysShopProps> = ({
     <div className="space-y-6">
       {/* Title */}
       <div>
-        <h3 className="text-lg font-light text-white flex items-center gap-2">
-          <Zap className="w-5 h-5" />
-          Purchase Rays
-        </h3>
-        <p className="text-sm text-gray-400 mt-1">
+        <div className="flex items-center gap-3 mb-2">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+            }}
+          >
+            <Zap className="w-4 h-4 text-[#b4a7ff]" />
+          </div>
+          <h3 className="text-2xl font-light text-white tracking-[-0.01em]">Purchase Rays</h3>
+        </div>
+        <p className="text-sm text-zinc-400 tracking-[0.005em]">
           Boost your agent in trending rankings. Rays accumulate permanently forever.
         </p>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-400 text-sm flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div
+          className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+            color: '#fda4af',
+          }}
+        >
+          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <p>{error}</p>
         </div>
       )}
 
       {/* Success Alert */}
       {success && (
-        <div className="p-4 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-sm flex items-start gap-3">
-          <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+        <div
+          className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+            color: '#86efac',
+          }}
+        >
+          <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <p>{success}</p>
         </div>
       )}
 
       {/* Packs Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        {packs.map((pack) => (
-          <button
-            key={pack.pack}
-            onClick={() => setSelectedPack(pack.pack)}
-            disabled={purchasing}
-            className={`p-4 rounded-lg border-2 transition-all duration-200 text-left ${
-              selectedPack === pack.pack
-                ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                : 'border-gray-700 bg-gray-800/30 hover:border-gray-600'
-            } disabled:opacity-50`}
-          >
-            <div className="font-light text-white">{pack.rays} Rays</div>
-            <div className="text-2xl font-light text-purple-400 mt-2">{pack.boltyPrice}</div>
-            <div className="text-xs text-gray-400 mt-1">BOLTY</div>
-            <div className="text-xs text-gray-500 mt-2">
-              {(pack.boltyPrice / pack.rays).toFixed(2)} per ray
-            </div>
-          </button>
-        ))}
+        {packs.map((pack) => {
+          const isSelected = selectedPack === pack.pack;
+          return (
+            <button
+              key={pack.pack}
+              onClick={() => setSelectedPack(pack.pack)}
+              disabled={purchasing}
+              className="relative p-4 rounded-xl text-left transition-all hover:brightness-110 disabled:opacity-50 overflow-hidden"
+              style={
+                isSelected
+                  ? {
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.5), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    }
+                  : surfaceStyle
+              }
+            >
+              {isSelected && (
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background:
+                      'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+                  }}
+                />
+              )}
+              <div className="flex items-center justify-between mb-3">
+                <p
+                  className={`text-[14px] font-light tracking-[0.005em] ${
+                    isSelected ? 'text-[#b4a7ff]' : 'text-white'
+                  }`}
+                >
+                  {pack.rays.toLocaleString()} Rays
+                </p>
+                {isSelected && (
+                  <div
+                    className="w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.6), 0 0 12px -2px rgba(131,110,249,0.5)',
+                    }}
+                  >
+                    <CheckCircle className="w-3.5 h-3.5 text-[#b4a7ff]" />
+                  </div>
+                )}
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <p className="text-2xl font-light text-white tabular-nums tracking-[-0.01em]">
+                  {pack.boltyPrice.toLocaleString()}
+                </p>
+                <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                  BOLTY
+                </p>
+              </div>
+              <p className="text-[11px] text-zinc-500 mt-2 tabular-nums tracking-[0.005em]">
+                {(pack.boltyPrice / pack.rays).toFixed(2)} per ray
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {/* Selected Pack Details */}
       {selectedPackData && (
-        <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
-          <div className="grid grid-cols-2 gap-4">
+        <div
+          className="relative p-5 rounded-xl overflow-hidden"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.35)',
+          }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+            }}
+          />
+          <div
+            className="grid grid-cols-2 gap-4 pb-4"
+            style={{ borderBottom: '1px solid rgba(131,110,249,0.15)' }}
+          >
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">Rays</p>
-              <p className="text-2xl font-light text-white mt-1">{selectedPackData.rays}</p>
+              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                Rays
+              </p>
+              <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
+                {selectedPackData.rays.toLocaleString()}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 uppercase tracking-widest font-light">Price</p>
-              <p className="text-2xl font-light text-purple-400 mt-1">
-                {selectedPackData.boltyPrice} BOLTY
+              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                Price
+              </p>
+              <p className="text-2xl font-light text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
+                {selectedPackData.boltyPrice.toLocaleString()} BOLTY
               </p>
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-purple-500/20">
-            <p className="text-xs text-gray-400 mb-2">When you purchase these rays:</p>
-            <ul className="text-xs text-gray-300 space-y-1">
-              <li>- 50% BOLTY burned (reduces supply)</li>
-              <li>- 50% BOLTY to Bolty DAO (development)</li>
-              <li>- Rays accumulate permanently</li>
-              <li>- Increases trending visibility</li>
-            </ul>
+          <div className="mt-4">
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
+              When you purchase
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                {
+                  Icon: Flame,
+                  color: '239,68,68',
+                  textColor: '#fda4af',
+                  label: '50% BOLTY burned',
+                },
+                {
+                  Icon: Building2,
+                  color: '6,182,212',
+                  textColor: '#67e8f9',
+                  label: '50% to Bolty DAO',
+                },
+                {
+                  Icon: InfinityIcon,
+                  color: '131,110,249',
+                  textColor: '#b4a7ff',
+                  label: 'Rays accumulate permanently',
+                },
+                {
+                  Icon: Zap,
+                  color: '245,158,11',
+                  textColor: '#fcd34d',
+                  label: 'Boost trending visibility',
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  className="flex items-center gap-3 p-3 rounded-lg"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(8,8,12,0.5) 0%, rgba(4,4,8,0.5) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <div
+                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(${item.color},0.22) 0%, rgba(${item.color},0.06) 100%)`,
+                      boxShadow: `inset 0 0 0 1px rgba(${item.color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 12px -3px rgba(${item.color},0.45)`,
+                    }}
+                  >
+                    <item.Icon className="w-3 h-3" style={{ color: item.textColor }} />
+                  </div>
+                  <p className="text-[12px] text-zinc-300 tracking-[0.005em]">{item.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -184,30 +336,41 @@ export const RaysShop: React.FC<RaysShopProps> = ({
       <button
         onClick={handlePurchase}
         disabled={!selectedPack || purchasing}
-        className={`w-full py-3 rounded-lg font-light transition-all duration-200 flex items-center justify-center gap-2 ${
-          selectedPack && !purchasing
-            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-            : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-        }`}
+        className="w-full py-3 rounded-lg font-light text-[13px] text-white tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+        }}
       >
         {purchasing ? (
           <>
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Processing...
           </>
         ) : (
           <>
-            <Zap className="w-4 h-4" />
-            {selectedPackData ? `Purchase ${selectedPackData.rays} Rays` : 'Select a Pack'}
+            <Zap className="w-3.5 h-3.5" />
+            {selectedPackData
+              ? `Purchase ${selectedPackData.rays.toLocaleString()} Rays`
+              : 'Select a Pack'}
           </>
         )}
       </button>
 
       {/* Info */}
-      <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
-        <p className="text-xs text-gray-400">
-          Note: Purchase requires BOLTY tokens in your wallet. Rays are applied immediately to your
-          agent and boost visibility in the trending section.
+      <div className="relative p-4 rounded-xl overflow-hidden" style={surfaceStyle}>
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+          }}
+        />
+        <p className="text-[12px] text-zinc-400 tracking-[0.005em] leading-relaxed">
+          Purchase requires BOLTY tokens in your wallet. Rays are applied immediately to your agent
+          and boost visibility in the trending section.
         </p>
       </div>
     </div>
