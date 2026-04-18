@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Bot,
   X,
@@ -4637,13 +4638,24 @@ function AgentsPageContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {listings.map((l) => (
-                <AgentCard
+              {listings.map((l, idx) => (
+                <motion.div
                   key={l.id}
-                  listing={l}
-                  isAuthenticated={isAuthenticated}
-                  onNegotiate={() => setNegotiatingListing(l)}
-                />
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.035, 0.4),
+                    duration: 0.32,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -2 }}
+                >
+                  <AgentCard
+                    listing={l}
+                    isAuthenticated={isAuthenticated}
+                    onNegotiate={() => setNegotiatingListing(l)}
+                  />
+                </motion.div>
               ))}
             </div>
           )}

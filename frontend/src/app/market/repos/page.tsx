@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   GitBranch,
   Lock,
@@ -1774,16 +1775,27 @@ function ReposMarketPageContent() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {repos.map((r) => (
-                <RepoCard
+              {repos.map((r, idx) => (
+                <motion.div
                   key={r.id}
-                  repo={r}
-                  isAuthenticated={isAuthenticated}
-                  userId={user?.id}
-                  onVote={vote}
-                  onDownload={download}
-                  onUnlock={unlock}
-                />
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.035, 0.4),
+                    duration: 0.32,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -2 }}
+                >
+                  <RepoCard
+                    repo={r}
+                    isAuthenticated={isAuthenticated}
+                    userId={user?.id}
+                    onVote={vote}
+                    onDownload={download}
+                    onUnlock={unlock}
+                  />
+                </motion.div>
               ))}
             </div>
           )}

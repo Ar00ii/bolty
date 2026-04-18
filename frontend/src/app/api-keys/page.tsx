@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Key,
   Plus,
@@ -739,8 +740,19 @@ export default function ApiKeysPage() {
           </div>
         ) : (
           <div className="space-y-3 mb-8">
-            {keys.map((k) => (
-              <KeyListItem key={k.id} keyInfo={k} onDelete={handleDelete} onRename={handleRename} />
+            {keys.map((k, idx) => (
+              <motion.div
+                key={k.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(idx * 0.04, 0.3),
+                  duration: 0.28,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
+                <KeyListItem keyInfo={k} onDelete={handleDelete} onRename={handleRename} />
+              </motion.div>
             ))}
           </div>
         )}
