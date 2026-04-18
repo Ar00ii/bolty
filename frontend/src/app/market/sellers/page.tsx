@@ -121,59 +121,106 @@ export default function TopSellersPage() {
 
         {!loading && sellers.length > 0 && (
           <div
-            className="mb-6 rounded-xl border border-white/5 p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative mb-6 rounded-xl overflow-hidden p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+            }}
           >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              }}
+            />
             <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none"
+                strokeWidth={1.75}
+              />
               <input
                 ref={searchRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Find a creator…"
-                className="w-full bg-transparent border border-white/8 rounded-lg pl-9 pr-14 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#836EF9]/40 transition-colors"
+                className="w-full rounded-lg pl-9 pr-14 py-2.5 text-[12.5px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
               />
               <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                 {query ? (
                   <button
                     onClick={() => setQuery('')}
                     aria-label="Clear search"
-                    className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                    className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     <X className="w-3 h-3" />
                   </button>
                 ) : (
-                  <kbd className="hidden sm:inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded border border-white/10 bg-white/[0.04] text-[9px] text-zinc-500 font-mono leading-none">
+                  <kbd
+                    className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
                     /
                   </kbd>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] uppercase tracking-[0.15em] text-zinc-500 mr-2">
+            <div className="relative flex items-center gap-2">
+              <span className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
                 Sort
               </span>
-              {(
-                [
-                  { k: 'sales', label: 'Sales', Icon: ShoppingCart },
-                  { k: 'rating', label: 'Rating', Icon: Star },
-                  { k: 'listings', label: 'Listings', Icon: Package },
-                ] as const
-              ).map(({ k, label, Icon }) => (
-                <button
-                  key={k}
-                  onClick={() => setSort(k)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
-                    sort === k
-                      ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
-                      : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
-                  }`}
-                >
-                  <Icon className="w-3 h-3" />
-                  {label}
-                </button>
-              ))}
+              <div
+                className="inline-flex items-center p-0.5 rounded-lg"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
+                {(
+                  [
+                    { k: 'sales', label: 'Sales', Icon: ShoppingCart },
+                    { k: 'rating', label: 'Rating', Icon: Star },
+                    { k: 'listings', label: 'Listings', Icon: Package },
+                  ] as const
+                ).map(({ k, label, Icon }) => {
+                  const active = sort === k;
+                  return (
+                    <button
+                      key={k}
+                      onClick={() => setSort(k)}
+                      className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                        active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
+                      }`}
+                      style={
+                        active
+                          ? {
+                              background:
+                                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                              boxShadow:
+                                'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                            }
+                          : undefined
+                      }
+                    >
+                      <Icon className="w-3 h-3" strokeWidth={2} />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -190,28 +237,88 @@ export default function TopSellersPage() {
           </div>
         ) : sellers.length === 0 ? (
           <div
-            className="rounded-xl border border-white/10 p-12 text-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative rounded-2xl overflow-hidden p-12 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            }}
           >
-            <Users className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-sm text-zinc-300 font-light">No top sellers yet</p>
-            <p className="text-xs text-zinc-500 mt-1 font-light">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              }}
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
+              style={{ background: 'rgba(131,110,249,0.18)' }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                border: '1px solid rgba(131,110,249,0.28)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+              }}
+            >
+              <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+            </div>
+            <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
+              No top sellers yet
+            </p>
+            <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
               Once creators start shipping, you&apos;ll see them climb the leaderboard.
             </p>
             <Link
               href="/market"
-              className="inline-block mt-5 px-5 py-2 text-xs rounded-lg border border-white/10 text-zinc-300 hover:text-white hover:border-white/20 transition-all"
+              className="relative inline-flex items-center gap-2 mt-5 rounded-lg h-9 px-4 text-[12px] font-medium text-zinc-300 hover:text-white transition-colors"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
               Browse listings
             </Link>
           </div>
         ) : visible.length === 0 ? (
           <div
-            className="rounded-xl border border-white/10 p-12 text-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative rounded-2xl overflow-hidden p-12 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            }}
           >
-            <Users className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-sm text-zinc-300 font-light">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                border: '1px solid rgba(131,110,249,0.28)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+              }}
+            >
+              <Users className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+            </div>
+            <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
               {query ? `No creators match "${query}"` : 'No matches'}
             </p>
           </div>
@@ -226,22 +333,41 @@ export default function TopSellersPage() {
               >
                 <Link
                   href={`/market/sellers/${s.username || ''}`}
-                  className="block p-5 rounded-xl border border-white/5 hover:border-white/10 transition-all hover:-translate-y-0.5"
-                  style={{ background: 'var(--bg-card)' }}
+                  className="group relative block p-5 rounded-xl overflow-hidden transition-all hover:-translate-y-0.5"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px rgba(0,0,0,0.55)',
+                  }}
                 >
-                  <div className="flex items-start gap-4">
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-60"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                    }}
+                  />
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
+                    style={{ background: 'rgba(131,110,249,0.25)' }}
+                  />
+                  <div className="relative flex items-start gap-4">
                     <Avatar url={s.avatarUrl} username={s.username} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-sm font-light text-white truncate">
+                        <p className="text-[13px] font-normal text-white truncate tracking-[0.005em]">
                           @{s.username || 'unknown'}
                         </p>
                         {sort === 'sales' && !query.trim() && i < 3 && (
                           <span
-                            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full text-white"
                             style={{
-                              background: 'rgba(131, 110, 249, 0.15)',
-                              color: '#836EF9',
+                              background: 'linear-gradient(180deg, #9a83ff 0%, #7056ec 100%)',
+                              boxShadow:
+                                '0 2px 8px -1px rgba(131,110,249,0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
                             }}
                           >
                             #{i + 1}
@@ -249,24 +375,26 @@ export default function TopSellersPage() {
                         )}
                       </div>
                       {s.bio ? (
-                        <p className="text-xs text-zinc-400 font-light line-clamp-2 mb-3">
+                        <p className="text-[12px] text-zinc-400 font-normal line-clamp-2 mb-3 leading-relaxed">
                           {s.bio}
                         </p>
                       ) : (
-                        <p className="text-xs text-zinc-600 italic font-light mb-3">No bio yet</p>
+                        <p className="text-[11.5px] text-zinc-600 italic font-light mb-3">
+                          No bio yet
+                        </p>
                       )}
-                      <div className="flex flex-wrap gap-3 text-[11px] text-zinc-400">
-                        <span className="inline-flex items-center gap-1">
-                          <ShoppingCart className="w-3 h-3" />
+                      <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-zinc-400">
+                        <span className="inline-flex items-center gap-1.5">
+                          <ShoppingCart className="w-3 h-3 text-zinc-500" strokeWidth={1.75} />
                           {s.sales} sale{s.sales === 1 ? '' : 's'}
                         </span>
-                        <span className="inline-flex items-center gap-1">
-                          <Package className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1.5">
+                          <Package className="w-3 h-3 text-zinc-500" strokeWidth={1.75} />
                           {s.activeListings} listing{s.activeListings === 1 ? '' : 's'}
                         </span>
                         {s.avgRating !== null && (
-                          <span className="inline-flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-400" />
+                          <span className="inline-flex items-center gap-1.5">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                             {s.avgRating.toFixed(2)}
                             <span className="text-zinc-600">({s.reviewCount})</span>
                           </span>
