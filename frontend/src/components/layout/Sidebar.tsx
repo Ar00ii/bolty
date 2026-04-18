@@ -66,6 +66,28 @@ export function Sidebar() {
     }
   }, [pathname, isMobile]);
 
+  // Lock body scroll when mobile drawer open
+  useEffect(() => {
+    if (!isMobile) return;
+    if (isOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isMobile, isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen || !isMobile) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, isMobile]);
+
   const toggleSection = (href: string) => {
     const newExpanded = new Set(expandedSections);
     if (newExpanded.has(href)) {
@@ -214,21 +236,23 @@ export function Sidebar() {
       <AnimatePresence>
         <motion.aside
           key="sidebar"
-          initial={isMobile ? { x: -240 } : false}
-          animate={isOpen || !isMobile ? { x: 0 } : { x: isMobile ? -240 : 0 }}
+          initial={isMobile ? { x: '-100%' } : false}
+          animate={isOpen || !isMobile ? { x: 0 } : { x: '-100%' }}
           transition={{
-            duration: 0.35,
-            ease: [0.4, 0, 0.2, 1],
             type: 'spring',
-            stiffness: 300,
-            damping: 30,
+            stiffness: 340,
+            damping: 34,
           }}
-          className={`fixed lg:relative top-0 left-0 h-screen w-60 overflow-y-auto z-40 flex flex-col ${
+          className={`fixed lg:relative top-0 left-0 overflow-y-auto z-40 flex flex-col w-[86%] max-w-[320px] lg:w-60 lg:max-w-none ${
             isMobile ? 'will-change-transform' : ''
           }`}
           style={{
+            height: '100dvh',
             background: 'linear-gradient(180deg, #0e0e12 0%, #08080b 100%)',
-            boxShadow: 'inset -1px 0 0 rgba(255,255,255,0.05)',
+            boxShadow: isMobile
+              ? '24px 0 60px -10px rgba(0,0,0,0.6), inset -1px 0 0 rgba(131,110,249,0.12)'
+              : 'inset -1px 0 0 rgba(255,255,255,0.05)',
+            borderRight: isMobile ? '1px solid rgba(131,110,249,0.16)' : 'none',
           }}
         >
           {/* Header */}

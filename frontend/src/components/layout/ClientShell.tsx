@@ -22,11 +22,15 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   const isAuth = pathname.startsWith('/auth');
   const showSidebar = !isHome && !isAuth;
 
-  // Show loading bar on route change
+  // Show loading bar on route change + scroll to top
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 500);
+    if (typeof window !== 'undefined') {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+    }
     return () => clearTimeout(timer);
   }, [pathname]);
 
@@ -58,12 +62,12 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
             <AnimatePresence mode="wait">
               <motion.div
                 key={pathname}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
                 transition={{
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1],
+                  duration: 0.32,
+                  ease: [0.22, 0.61, 0.36, 1],
                 }}
               >
                 {children}

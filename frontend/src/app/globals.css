@@ -13,9 +13,18 @@
   letter-spacing: -0.3px;
 }
 
-/* Smooth scrolling */
+/* Smooth scrolling with scroll margin for anchors */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 /* Focus states for keyboard navigation */
@@ -1365,15 +1374,19 @@ select:focus {
 
 /* ── Mobile Responsive Touch Targets ── */
 @media (max-width: 768px) {
-  button,
-  a,
+  /* Touch-friendly controls (without breaking inline links/checkboxes in text) */
+  button[type='submit'],
+  button[type='button']:not(.inline-btn),
+  [role='button']:not(a),
+  input[type='submit'],
+  input[type='button'] {
+    min-height: 40px;
+  }
+
   input[type='checkbox'],
   input[type='radio'] {
-    min-height: 44px;
-    min-width: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    min-width: 18px;
+    min-height: 18px;
   }
 
   /* Better spacing on mobile */
