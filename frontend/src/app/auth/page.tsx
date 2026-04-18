@@ -515,7 +515,12 @@ export default function AuthPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="flex gap-2 mb-8 bg-zinc-900/20 p-1.5 rounded-lg border border-zinc-800/50"
+              className="relative flex gap-1 mb-8 p-1 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
               {(['login', 'register'] as const).map((t) => (
                 <motion.button
@@ -524,12 +529,19 @@ export default function AuthPage() {
                     setTab(t);
                     clearMessages();
                   }}
-                  className={`flex-1 py-2 text-sm font-light rounded-md transition-all ${
-                    tab === t
-                      ? 'bg-monad-500/30 text-monad-300 border border-monad-500/50'
-                      : 'text-zinc-500'
+                  className={`flex-1 py-2 text-[12.5px] font-medium rounded-md transition-colors tracking-[0.005em] ${
+                    tab === t ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
-                  whileHover={{ y: -2 }}
+                  style={
+                    tab === t
+                      ? {
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        }
+                      : undefined
+                  }
                   whileTap={{ scale: 0.98 }}
                 >
                   {t === 'login' ? 'Sign in' : 'Create account'}
@@ -544,8 +556,21 @@ export default function AuthPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-8 backdrop-blur-lg"
+          className="relative rounded-2xl p-8 overflow-hidden backdrop-blur-lg"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+          }}
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
           {/* Error/Success messages */}
           <AnimatePresence mode="wait">
             {error && <ErrorBanner key="error" message={error} />}
@@ -594,8 +619,13 @@ export default function AuthPage() {
                   disabled={loading === '2fa' || twoFactorCode.length !== 6}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
-                           disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full py-2.5 rounded-lg text-white font-medium text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.45), 0 0 22px -4px rgba(131,110,249,0.5)',
+                  }}
                 >
                   {loading === '2fa' ? (
                     <>
@@ -868,7 +898,13 @@ export default function AuthPage() {
                   }}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all"
+                  className="w-full py-2.5 rounded-lg text-white font-medium text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.45), 0 0 22px -4px rgba(131,110,249,0.5)',
+                  }}
                 >
                   Back to sign in
                 </motion.button>
