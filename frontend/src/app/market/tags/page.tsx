@@ -94,9 +94,20 @@ export default function MarketTagsPage() {
         </div>
 
         <div
-          className="rounded-xl border border-white/5 p-4 mb-6 space-y-3"
-          style={{ background: 'var(--bg-card)' }}
+          className="relative rounded-xl overflow-hidden p-4 mb-6 space-y-3"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+          }}
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
           <div className="relative">
             <input
               ref={searchRef}
@@ -104,49 +115,75 @@ export default function MarketTagsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filter tags…"
-              className="w-full bg-transparent border-b border-white/10 pl-1 pr-16 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#836EF9] transition-colors"
+              className="w-full rounded-lg pl-3.5 pr-16 py-2.5 text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             />
-            <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               {search ? (
                 <button
                   onClick={() => setSearch('')}
                   aria-label="Clear filter"
-                  className="w-6 h-6 rounded flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/5 transition-colors"
+                  className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               ) : (
-                <kbd className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded border border-white/10 bg-white/[0.04] text-[10px] text-zinc-400 font-mono leading-none">
+                <kbd
+                  className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
                   /
                 </kbd>
               )}
             </div>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-[0.15em] text-zinc-500">Sort</span>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setSort('popular')}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
-                  sort === 'popular'
-                    ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
-                    : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
-                }`}
-              >
-                <BarChart3 className="w-3 h-3" />
-                Popular
-              </button>
-              <button
-                onClick={() => setSort('alpha')}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-light transition-all ${
-                  sort === 'alpha'
-                    ? 'bg-[#836EF9]/15 text-[#836EF9] border border-[#836EF9]/30'
-                    : 'text-zinc-400 hover:text-white border border-transparent hover:bg-white/5'
-                }`}
-              >
-                <ArrowDownAZ className="w-3 h-3" />
-                A–Z
-              </button>
+          <div className="relative flex items-center justify-between">
+            <span className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium">
+              Sort
+            </span>
+            <div
+              className="inline-flex items-center p-0.5 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
+            >
+              {[
+                { k: 'popular' as const, label: 'Popular', Icon: BarChart3 },
+                { k: 'alpha' as const, label: 'A–Z', Icon: ArrowDownAZ },
+              ].map(({ k, label, Icon }) => {
+                const active = sort === k;
+                return (
+                  <button
+                    key={k}
+                    onClick={() => setSort(k)}
+                    className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                      active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
+                    }`}
+                    style={
+                      active
+                        ? {
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }
+                        : undefined
+                    }
+                  >
+                    <Icon className="w-3 h-3" strokeWidth={2} />
+                    {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -163,14 +200,43 @@ export default function MarketTagsPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div
-            className="rounded-xl border border-white/10 p-12 text-center"
-            style={{ background: 'var(--bg-card)' }}
+            className="relative rounded-2xl overflow-hidden p-12 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            }}
           >
-            <Tag className="w-8 h-8 text-zinc-600 mx-auto mb-3" />
-            <p className="text-sm text-zinc-300 font-light">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(236,72,153,0.45) 50%, transparent 100%)',
+              }}
+            />
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full blur-3xl opacity-30"
+              style={{ background: 'rgba(236,72,153,0.2)' }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(236,72,153,0.2) 0%, rgba(236,72,153,0.06) 100%)',
+                border: '1px solid rgba(236,72,153,0.3)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(236,72,153,0.35)',
+              }}
+            >
+              <Tag className="w-5 h-5 text-[#f9a8d4]" strokeWidth={1.5} />
+            </div>
+            <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
               {search ? `No tags match "${search}"` : 'No tags yet'}
             </p>
-            <p className="text-xs text-zinc-500 mt-1 font-light">
+            <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
               Tags will appear here as creators publish listings.
             </p>
           </div>
@@ -187,19 +253,31 @@ export default function MarketTagsPage() {
                 >
                   <Link
                     href={`/market?tags=${encodeURIComponent(t.tag)}`}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:border-[#836EF9]/50 transition-all"
+                    className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-all hover:-translate-y-0.5"
                     style={{
-                      background: `rgba(131, 110, 249, ${0.05 + weight * 0.12})`,
+                      background: `linear-gradient(180deg, rgba(131,110,249,${
+                        0.08 + weight * 0.14
+                      }) 0%, rgba(131,110,249,${0.02 + weight * 0.05}) 100%)`,
+                      boxShadow: `inset 0 0 0 1px rgba(131,110,249,${
+                        0.16 + weight * 0.16
+                      }), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 ${
+                        8 + weight * 12
+                      }px -4px rgba(131,110,249,${0.12 + weight * 0.18})`,
                     }}
                   >
-                    <Hash className="w-3 h-3 text-[#836EF9]" />
+                    <Hash className="w-3 h-3 text-[#b4a7ff]" strokeWidth={2} />
                     <span
-                      className="font-light text-white"
+                      className="font-normal text-white tracking-[0.005em]"
                       style={{ fontSize: `${12 + weight * 4}px` }}
                     >
                       {t.tag}
                     </span>
-                    <span className="text-[11px] text-zinc-500">{t.count}</span>
+                    <span
+                      className="text-[10.5px] font-medium"
+                      style={{ color: 'rgba(180,167,255,0.6)' }}
+                    >
+                      {t.count}
+                    </span>
                   </Link>
                 </motion.div>
               );
