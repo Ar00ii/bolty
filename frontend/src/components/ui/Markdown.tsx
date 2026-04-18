@@ -108,7 +108,11 @@ function renderInline(text: string): React.ReactNode[] {
       nodes.push(
         <code
           key={key++}
-          className="px-1.5 py-0.5 rounded bg-white/10 text-purple-200 text-[0.85em] font-mono"
+          className="px-1.5 py-0.5 rounded-md text-[#b4a7ff] text-[0.85em] font-mono"
+          style={{
+            background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.2)',
+          }}
         >
           {token.slice(1, -1)}
         </code>,
@@ -128,7 +132,7 @@ function renderInline(text: string): React.ReactNode[] {
             href={link[2]}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
+            className="text-[#b4a7ff] hover:text-white underline underline-offset-2 transition-colors"
           >
             {link[1]}
           </a>,
@@ -149,9 +153,9 @@ export function Markdown({ source, className }: { source: string; className?: st
       {blocks.map((b, i) => {
         if (b.kind === 'heading') {
           const sizes = {
-            1: 'text-xl font-medium text-white mt-6 mb-3',
-            2: 'text-lg font-medium text-white mt-5 mb-2',
-            3: 'text-base font-medium text-zinc-100 mt-4 mb-2',
+            1: 'text-xl font-light text-white mt-6 mb-3 tracking-[-0.01em]',
+            2: 'text-lg font-light text-white mt-5 mb-2 tracking-[-0.005em]',
+            3: 'text-base font-light text-zinc-100 mt-4 mb-2',
           } as const;
           return (
             <div key={i} className={sizes[b.level]}>
@@ -161,7 +165,10 @@ export function Markdown({ source, className }: { source: string; className?: st
         }
         if (b.kind === 'list') {
           return (
-            <ul key={i} className="list-disc list-outside pl-5 my-3 space-y-1 text-zinc-300">
+            <ul
+              key={i}
+              className="list-disc list-outside pl-5 my-3 space-y-1.5 text-[13px] text-zinc-300 tracking-[0.005em] marker:text-[#b4a7ff]"
+            >
               {b.items.map((item, j) => (
                 <li key={j}>{renderInline(item)}</li>
               ))}
@@ -172,15 +179,23 @@ export function Markdown({ source, className }: { source: string; className?: st
           return (
             <pre
               key={i}
-              className="my-3 rounded-md border border-white/10 bg-black/60 p-3 overflow-x-auto text-xs font-mono text-zinc-200"
+              className="relative my-3 rounded-lg p-3 overflow-x-auto text-[12px] font-mono text-zinc-200"
+              style={{
+                background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              }}
             >
-              {b.lang && <div className="text-[10px] text-zinc-500 mb-2">{b.lang}</div>}
+              {b.lang && (
+                <div className="text-[10px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+                  {b.lang}
+                </div>
+              )}
               <code>{b.content}</code>
             </pre>
           );
         }
         return (
-          <p key={i} className="my-3 text-sm leading-relaxed text-zinc-300">
+          <p key={i} className="my-3 text-[13px] leading-relaxed text-zinc-300 tracking-[0.005em]">
             {renderInline(b.text)}
           </p>
         );
