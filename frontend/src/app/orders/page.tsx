@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   ShoppingBag,
   Package,
@@ -52,20 +53,27 @@ interface SellerStats {
 
 const STATUS_CONFIG: Record<
   OrderStatus,
-  { label: string; className: string; icon: React.ElementType }
+  { label: string; icon: React.ElementType; color: string }
 > = {
-  PENDING_DELIVERY: { label: 'Pending', className: 'badge-warning', icon: Clock },
-  IN_PROGRESS: { label: 'In Progress', className: 'badge', icon: Package },
-  DELIVERED: { label: 'Delivered', className: 'badge-success', icon: Truck },
-  COMPLETED: { label: 'Completed', className: 'badge-secondary', icon: CheckCircle2 },
-  DISPUTED: { label: 'Disputed', className: 'badge-error', icon: AlertTriangle },
+  PENDING_DELIVERY: { label: 'Pending', icon: Clock, color: '#f59e0b' },
+  IN_PROGRESS: { label: 'In Progress', icon: Package, color: '#06B6D4' },
+  DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
+  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#836EF9' },
+  DISPUTED: { label: 'Disputed', icon: AlertTriangle, color: '#ef4444' },
 };
 
 function StatusBadge({ status }: { status: OrderStatus }) {
   const cfg = STATUS_CONFIG[status];
   const Icon = cfg.icon;
   return (
-    <span className={`badge ${cfg.className} flex items-center gap-1`}>
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-medium tracking-[0.005em]"
+      style={{
+        color: cfg.color,
+        background: `linear-gradient(180deg, ${cfg.color}22 0%, ${cfg.color}08 100%)`,
+        boxShadow: `inset 0 0 0 1px ${cfg.color}40`,
+      }}
+    >
       <Icon className="w-3 h-3" strokeWidth={2} />
       {cfg.label}
     </span>
@@ -76,63 +84,112 @@ function OrderCard({
   order,
   isSeller,
   onClick,
+  index = 0,
 }: {
   order: Order;
   isSeller: boolean;
   onClick: () => void;
+  index?: number;
 }) {
   const peer = isSeller ? order.buyer : order.seller;
   const ethAmount = order.amountWei ? (parseFloat(order.amountWei) / 1e18).toFixed(4) : '—';
+  const statusColor = STATUS_CONFIG[order.status]?.color ?? '#836EF9';
 
   return (
-    <div onClick={onClick} className="card-interactive flex items-center gap-4 p-4 cursor-pointer">
-      {/* Avatar */}
-      <div
-        className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+    <motion.button
+      type="button"
+      onClick={onClick}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        delay: Math.min(index * 0.035, 0.4),
+        duration: 0.28,
+        ease: [0.22, 0.61, 0.36, 1],
+      }}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.995 }}
+      className="group relative w-full text-left rounded-xl overflow-hidden transition-all"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px rgba(0,0,0,0.55)',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-70"
         style={{
-          background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.4)',
+          background: `linear-gradient(90deg, transparent 0%, ${statusColor} 50%, transparent 100%)`,
         }}
-      >
-        {peer?.avatarUrl ? (
-          <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-base font-light" style={{ color: '#b4a7ff' }}>
-            {(peer?.username || '?')[0].toUpperCase()}
-          </span>
-        )}
-      </div>
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
+        style={{ background: `${statusColor}25` }}
+      />
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <span className="font-light text-sm text-white truncate">{order.listing.title}</span>
-          <StatusBadge status={order.status} />
-          {order.escrowStatus && order.escrowStatus !== 'NONE' && (
-            <span className="badge-success flex items-center gap-1 text-[10px]">
-              <Lock className="w-2.5 h-2.5" /> Escrow
+      <div className="relative flex items-center gap-4 p-4">
+        <div
+          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+            boxShadow:
+              'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.4)',
+          }}
+        >
+          {peer?.avatarUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-base font-light" style={{ color: '#b4a7ff' }}>
+              {(peer?.username || '?')[0].toUpperCase()}
             </span>
           )}
         </div>
-        <div className="text-xs text-zinc-500">
-          {isSeller ? 'Buyer' : 'Seller'}:{' '}
-          <span className="text-zinc-300 font-light">@{peer?.username || 'Unknown'}</span>
-          <span className="mx-1 opacity-40">·</span>
-          {new Date(order.createdAt).toLocaleDateString()}
-        </div>
-      </div>
 
-      {/* Amount */}
-      <div className="text-right flex-shrink-0">
-        <div className="font-mono font-light text-sm text-monad-400">{ethAmount} ETH</div>
-        <div className="text-[10px] text-zinc-600 uppercase tracking-wide mt-0.5">
-          {order.listing.type}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="font-normal text-[13px] text-white truncate tracking-[0.005em]">
+              {order.listing.title}
+            </span>
+            <StatusBadge status={order.status} />
+            {order.escrowStatus && order.escrowStatus !== 'NONE' && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
+                style={{
+                  color: '#22c55e',
+                  background: 'rgba(34,197,94,0.1)',
+                  boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                }}
+              >
+                <Lock className="w-2.5 h-2.5" strokeWidth={2} /> Escrow
+              </span>
+            )}
+          </div>
+          <div className="text-[11px] text-zinc-500">
+            {isSeller ? 'Buyer' : 'Seller'}:{' '}
+            <span className="text-zinc-300 font-normal">@{peer?.username || 'Unknown'}</span>
+            <span className="mx-1 opacity-40">·</span>
+            {new Date(order.createdAt).toLocaleDateString()}
+          </div>
         </div>
-      </div>
 
-      <ArrowRight className="w-4 h-4 text-zinc-600 flex-shrink-0" strokeWidth={1.5} />
-    </div>
+        <div className="text-right flex-shrink-0">
+          <div className="font-mono font-normal text-[13px] text-[#b4a7ff] tracking-[0.005em]">
+            {ethAmount} ETH
+          </div>
+          <div className="text-[10px] text-zinc-600 uppercase tracking-[0.14em] font-medium mt-0.5">
+            {order.listing.type}
+          </div>
+        </div>
+
+        <ArrowRight
+          className="w-4 h-4 text-zinc-600 flex-shrink-0 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5"
+          strokeWidth={1.5}
+        />
+      </div>
+    </motion.button>
   );
 }
 
@@ -302,9 +359,13 @@ export default function OrdersPage() {
             { label: 'Delivered', value: stats.delivered, icon: Truck, accent: '#22c55e' },
             { label: 'Completed', value: stats.completed, icon: CheckCircle2, accent: '#836EF9' },
             { label: 'Disputed', value: stats.disputed, icon: AlertTriangle, accent: '#ef4444' },
-          ].map(({ label, value, icon: Icon, accent }) => (
-            <div
+          ].map(({ label, value, icon: Icon, accent }, idx) => (
+            <motion.div
               key={label}
+              initial={{ opacity: 0, y: 8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: idx * 0.04, duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
+              whileHover={{ y: -2 }}
               className="relative rounded-xl p-4 text-center overflow-hidden transition-all"
               style={{
                 background:
@@ -336,7 +397,7 @@ export default function OrdersPage() {
               <div className="text-[10px] text-zinc-600 uppercase tracking-[0.18em] font-medium mt-1">
                 {label}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
@@ -407,13 +468,17 @@ export default function OrdersPage() {
 
       {/* Status filter */}
       <div className="flex flex-wrap gap-1.5 mb-6">
-        {STATUS_FILTER_ORDER.map((s) => {
+        {STATUS_FILTER_ORDER.map((s, idx) => {
           const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
           const active = statusFilter === s;
           return (
-            <button
+            <motion.button
               key={s}
               onClick={() => setStatusFilter(s)}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.03, duration: 0.22 }}
+              whileTap={{ scale: 0.96 }}
               className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
                 active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
@@ -440,7 +505,7 @@ export default function OrdersPage() {
               >
                 {count}
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -515,12 +580,13 @@ export default function OrdersPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
+          {orders.map((order, i) => (
             <OrderCard
               key={order.id}
               order={order}
               isSeller={tab === 'selling'}
               onClick={() => router.push(`/orders/${order.id}`)}
+              index={i}
             />
           ))}
         </div>
