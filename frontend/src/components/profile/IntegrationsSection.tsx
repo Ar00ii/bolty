@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, X, AlertCircle, Shield } from 'lucide-react';
+import { Plus, X, AlertCircle, Shield, Check } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState } from 'react';
 
@@ -24,17 +24,16 @@ interface IntegrationsSectionProps {
 }
 
 const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
-  // Special icons for integrations without logos
   if (id === 'two-factor') {
-    return <Shield className="w-8 h-8" />;
+    return <Shield className="w-6 h-6" />;
   }
 
   if (id === 'api-keys') {
-    return <span className="text-xl font-light">API</span>;
+    return <span className="text-sm font-medium tracking-wider">API</span>;
   }
 
   if (id === 'ledger') {
-    return <span className="text-xl font-light">LDG</span>;
+    return <span className="text-sm font-medium tracking-wider">LDG</span>;
   }
 
   const logoMap: Record<string, string> = {
@@ -49,7 +48,7 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
   if (!logo) return <span className="text-xl font-light">?</span>;
 
   return (
-    <div className="relative w-8 h-8">
+    <div className="relative w-7 h-7">
       <Image src={logo} alt={id} fill className="object-contain" unoptimized />
     </div>
   );
@@ -63,6 +62,16 @@ const getCategoryLabel = (category: string) => {
     service: 'Services',
   };
   return labels[category as keyof typeof labels] || category;
+};
+
+const getCategoryColor = (category: string) => {
+  const colors: Record<string, string> = {
+    wallet: '245,158,11',
+    social: '6,182,212',
+    security: '239,68,68',
+    service: '131,110,249',
+  };
+  return colors[category] || '131,110,249';
 };
 
 export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
@@ -79,7 +88,6 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     setLoading(id);
     setError(null);
     try {
-      // Special handling for 2FA
       if (id === 'two-factor') {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
         const response = await fetch(`${apiUrl}/auth/2fa/enable/request`, {
@@ -120,7 +128,6 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       if (!response.ok) throw new Error('Invalid authenticator code');
       setTwoFASetup(null);
       setTwoFACode('');
-      // Refresh integrations
       window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to verify code');
@@ -134,7 +141,6 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     setLoading(id);
     setError(null);
     try {
-      // Special handling for 2FA
       if (id === 'two-factor') {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
         const response = await fetch(`${apiUrl}/auth/2fa/disable`, {
@@ -161,55 +167,102 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       {/* Header */}
       <div>
         <h2 className="text-xl font-light text-white">Integrations</h2>
-        <p className="text-sm text-gray-400 mt-1">
+        <p className="text-sm text-gray-400 mt-1 tabular-nums">
           {connectedCount} of {integrations.length} connected
         </p>
       </div>
 
       {error && (
-        <div className="p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 text-sm flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <p>{error}</p>
+        <div
+          className="relative p-4 rounded-lg flex items-start gap-3 overflow-hidden"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+          }}
+        >
+          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#fda4af]" />
+          <p className="text-[13px] text-[#fda4af] tracking-[0.005em]">{error}</p>
         </div>
       )}
 
       {/* 2FA Setup Modal */}
       {twoFASetup && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-900 border border-purple-500/30 rounded-lg p-8 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div
+            className="relative rounded-xl p-8 max-w-md w-full overflow-hidden"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+            }}
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+              }}
+            />
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-light text-white">Set up Google Authenticator</h3>
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                >
+                  <Shield className="w-4 h-4 text-[#b4a7ff]" />
+                </div>
+                <h3 className="text-lg font-light text-white tracking-[-0.005em]">
+                  Set up Google Authenticator
+                </h3>
+              </div>
               <button
                 onClick={() => {
                   setTwoFASetup(null);
                   setTwoFACode('');
                 }}
-                className="text-gray-400 hover:text-white"
+                className="text-zinc-400 hover:text-white transition-colors"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <p className="text-sm text-gray-300 mb-4">
-                  Scan this QR code with Google Authenticator or any TOTP app:
+                <p className="text-[13px] text-zinc-300 mb-4 tracking-[0.005em]">
+                  Scan this QR code with Google Authenticator or any TOTP app
                 </p>
                 <div className="bg-white p-4 rounded-lg flex justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={twoFASetup.qrCode} alt="2FA QR Code" className="w-48 h-48" />
                 </div>
               </div>
 
               <div>
-                <p className="text-sm text-gray-400 mb-2">Or enter this code manually:</p>
-                <code className="block bg-gray-800 p-3 rounded text-center font-mono text-sm text-purple-400 break-words">
+                <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+                  Or enter this code manually
+                </p>
+                <code
+                  className="block p-3 rounded-lg text-center font-mono text-[12px] text-[#b4a7ff] break-words tracking-[0.005em]"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  }}
+                >
                   {twoFASetup.secret}
                 </code>
               </div>
 
               <div>
-                <label className="block text-sm text-gray-300 mb-2">
-                  Enter the 6-digit code from your authenticator app:
+                <label className="block text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+                  Enter the 6-digit code
                 </label>
                 <input
                   type="text"
@@ -218,14 +271,25 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                   value={twoFACode}
                   onChange={(e) => setTwoFACode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="000000"
-                  className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white text-center text-2xl tracking-widest font-mono"
+                  className="w-full px-3 py-3 rounded-lg text-white text-center text-2xl tracking-[0.3em] font-mono focus:outline-none transition-all focus:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                  }}
                 />
               </div>
 
               <button
                 onClick={handleTwoFACodeSubmit}
                 disabled={loading === 'two-factor' || twoFACode.length !== 6}
-                className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-light py-2 rounded-lg transition-colors"
+                className="w-full px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                }}
               >
                 {loading === 'two-factor' ? 'Verifying...' : 'Verify and Enable'}
               </button>
@@ -239,14 +303,27 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
         {categories.map((category) => {
           const categoryIntegrations = integrations.filter((i) => i.category === category);
           if (categoryIntegrations.length === 0) return null;
+          const catColor = getCategoryColor(category);
 
           return (
             <div key={category} className="space-y-4">
               {/* Category Header */}
-              <div className="px-1">
-                <h3 className="text-xs font-light text-gray-400 uppercase tracking-widest">
+              <div className="flex items-center gap-3 px-1">
+                <div
+                  className="h-[1px] flex-shrink-0 w-6"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, rgba(${catColor},0.5) 100%)`,
+                  }}
+                />
+                <h3 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-400">
                   {getCategoryLabel(category)}
                 </h3>
+                <div
+                  className="h-[1px] flex-1"
+                  style={{
+                    background: `linear-gradient(90deg, rgba(${catColor},0.3) 0%, transparent 100%)`,
+                  }}
+                />
               </div>
 
               {/* Integration Cards Grid */}
@@ -254,49 +331,76 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                 {categoryIntegrations.map((integration) => (
                   <div
                     key={integration.id}
-                    className={`
-                      relative p-4 rounded-lg border-2 transition-all duration-200 flex flex-col items-center text-center
-                      ${
-                        integration.connected
-                          ? 'border-purple-500/40 bg-purple-900/10 hover:border-purple-500/60'
-                          : 'border-gray-700 bg-gray-900/40 hover:border-gray-600'
-                      }
-                    `}
+                    className="relative p-4 rounded-xl flex flex-col items-center text-center overflow-hidden transition-all hover:brightness-110"
+                    style={{
+                      background: integration.connected
+                        ? `linear-gradient(180deg, rgba(${catColor},0.12) 0%, rgba(${catColor},0.02) 100%)`
+                        : 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                      boxShadow: integration.connected
+                        ? `inset 0 0 0 1px rgba(${catColor},0.32), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 24px -8px rgba(${catColor},0.35)`
+                        : '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                    }}
                   >
+                    <div
+                      className="absolute inset-x-0 top-0 h-px"
+                      style={{
+                        background: `linear-gradient(90deg, transparent 0%, rgba(${catColor},${integration.connected ? 0.55 : 0.3}) 50%, transparent 100%)`,
+                      }}
+                    />
+
                     {/* Connected Indicator */}
                     {integration.connected && (
-                      <div className="absolute -top-2.5 -right-2.5 w-5 h-5 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center">
-                        <div className="w-2 h-2 rounded-full bg-black" />
+                      <div
+                        className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                        style={{
+                          background:
+                            'linear-gradient(135deg, rgba(34,197,94,0.8) 0%, rgba(34,197,94,0.5) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(34,197,94,0.6), 0 0 10px -2px rgba(34,197,94,0.6)',
+                        }}
+                      >
+                        <Check className="w-3 h-3 text-white" strokeWidth={3} />
                       </div>
                     )}
 
                     {/* Logo */}
                     <div
-                      className={`
-                        p-3 rounded-lg mb-3 transition-colors flex items-center justify-center
-                        ${
-                          integration.connected
-                            ? 'bg-purple-500/20 text-purple-400'
-                            : 'bg-gray-800 text-gray-400'
-                        }
-                      `}
+                      className="w-14 h-14 rounded-xl mb-3 flex items-center justify-center"
+                      style={{
+                        background: integration.connected
+                          ? `linear-gradient(135deg, rgba(${catColor},0.22) 0%, rgba(${catColor},0.06) 100%)`
+                          : 'linear-gradient(135deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
+                        boxShadow: integration.connected
+                          ? `inset 0 0 0 1px rgba(${catColor},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(${catColor},0.45)`
+                          : 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+                        color: integration.connected ? `rgb(${catColor})` : '#a1a1aa',
+                      }}
                     >
                       <IntegrationLogo id={integration.id} />
                     </div>
 
                     {/* Name */}
-                    <h4 className="text-sm font-light text-white mb-1">{integration.name}</h4>
+                    <h4 className="text-[14px] font-light text-white mb-1 tracking-[0.005em]">
+                      {integration.name}
+                    </h4>
 
                     {/* Status */}
                     {integration.connected ? (
-                      <p className="text-xs text-emerald-400 font-light mb-2">Active</p>
+                      <p
+                        className="text-[10.5px] uppercase tracking-[0.18em] font-medium mb-2"
+                        style={{ color: `rgb(${catColor})` }}
+                      >
+                        Active
+                      </p>
                     ) : (
-                      <p className="text-xs text-gray-500 mb-2">Not connected</p>
+                      <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+                        Not connected
+                      </p>
                     )}
 
                     {/* Connected As */}
                     {integration.connectedAs && (
-                      <p className="text-xs text-gray-500 mb-3 truncate w-full">
+                      <p className="text-xs text-zinc-500 mb-3 truncate w-full font-mono tracking-[0.005em]">
                         {integration.connectedAs.length > 20
                           ? integration.connectedAs.slice(0, 17) + '...'
                           : integration.connectedAs}
@@ -311,23 +415,21 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
                           : handleConnect(integration.id)
                       }
                       disabled={loading === integration.id}
-                      className={`
-                        w-full py-2 px-3 rounded-lg text-xs font-light transition-all duration-200
-                        flex items-center justify-center gap-1.5 mt-auto
-                        disabled:opacity-50 disabled:cursor-not-allowed
-                        ${
-                          integration.connected
-                            ? 'border border-purple-500/40 hover:border-purple-500/60 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10'
-                            : 'border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white bg-gray-800/40 hover:bg-gray-800'
-                        }
-                      `}
+                      className="w-full py-2 px-3 rounded-lg text-[12px] font-light tracking-[0.005em] transition-all hover:brightness-110 flex items-center justify-center gap-1.5 mt-auto disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{
+                        background: integration.connected
+                          ? `linear-gradient(180deg, rgba(${catColor},0.22) 0%, rgba(${catColor},0.06) 100%)`
+                          : 'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
+                        boxShadow: integration.connected
+                          ? `inset 0 0 0 1px rgba(${catColor},0.38), inset 0 1px 0 rgba(255,255,255,0.06)`
+                          : 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+                        color: integration.connected ? `rgb(${catColor})` : '#e4e4e7',
+                      }}
                     >
                       {loading === integration.id ? (
                         <>
                           <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
-                          <span className="text-xs">
-                            {integration.connected ? 'Unlinking...' : 'Connecting...'}
-                          </span>
+                          <span>{integration.connected ? 'Unlinking...' : 'Connecting...'}</span>
                         </>
                       ) : integration.connected ? (
                         <>
@@ -350,11 +452,38 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
       </div>
 
       {/* Security Notice */}
-      <div className="p-4 rounded-lg border border-purple-500/30 bg-purple-900/10">
-        <p className="text-xs text-gray-300">
-          <span className="text-purple-400 font-light">Security:</span> Only connect integrations
-          you trust. Review and remove unused connections regularly.
-        </p>
+      <div
+        className="relative p-4 rounded-xl overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0.02) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-start gap-3">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+            }}
+          >
+            <Shield className="w-3.5 h-3.5 text-[#b4a7ff]" />
+          </div>
+          <p className="text-[12px] text-zinc-300 tracking-[0.005em] leading-relaxed">
+            <span className="text-[#b4a7ff] font-medium">Security:</span> Only connect integrations
+            you trust. Review and remove unused connections regularly.
+          </p>
+        </div>
       </div>
     </div>
   );
