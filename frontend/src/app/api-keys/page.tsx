@@ -66,30 +66,33 @@ function KeyStatCard({ icon, label, value, accent }: KeyStat) {
     <div
       className="relative rounded-xl p-4 overflow-hidden"
       style={{
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: 'rgba(0,0,0,0.35)',
-        backdropFilter: 'blur(6px)',
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
+        style={{ background: `linear-gradient(90deg, transparent, ${accent}80, transparent)` }}
       />
       <div className="flex items-center justify-between mb-3">
         <span
-          className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] font-light"
+          className="inline-flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.18em] font-medium"
           style={{ color: accent }}
         >
           <span
-            className="w-5 h-5 rounded-md flex items-center justify-center"
-            style={{ background: `${accent}15`, border: `1px solid ${accent}30`, color: accent }}
+            className="w-6 h-6 rounded-md flex items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${accent}22 0%, ${accent}06 100%)`,
+              boxShadow: `inset 0 0 0 1px ${accent}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px ${accent}45`,
+              color: accent,
+            }}
           >
             {icon}
           </span>
           {label}
         </span>
       </div>
-      <p className="text-lg font-light text-white">{value}</p>
+      <p className="text-xl font-light text-white tracking-[-0.01em]">{value}</p>
     </div>
   );
 }
@@ -191,17 +194,25 @@ function CreateKeyForm({
 
   return (
     <div
-      className="mb-6 p-5 rounded-xl overflow-hidden"
+      className="relative mb-6 p-5 rounded-xl overflow-hidden"
       style={{
-        border: '1px solid rgba(255,255,255,0.08)',
-        background: 'rgba(0,0,0,0.35)',
-        backdropFilter: 'blur(6px)',
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow:
+          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
       }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
       <h3 className="text-sm font-light text-white mb-4">Create new API key</h3>
       <div className="flex items-end gap-3">
         <div className="flex-1">
-          <label className="text-xs text-zinc-500 mb-1.5 block uppercase tracking-wide">
+          <label className="text-[10.5px] text-zinc-500 mb-1.5 block uppercase tracking-[0.18em] font-medium">
             Key name (optional)
           </label>
           <input
@@ -209,10 +220,10 @@ function CreateKeyForm({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g., Production, CI/CD, Bot #3"
-            className="w-full bg-black/40 border rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all"
+            className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
             style={{
-              borderColor: 'rgba(255,255,255,0.1)',
-              background: 'rgba(0,0,0,0.4)',
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
             }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !isLoading) handleCreate();
@@ -223,9 +234,12 @@ function CreateKeyForm({
         <button
           onClick={handleCreate}
           disabled={isLoading}
-          className="px-4 py-2 rounded-lg text-sm font-light flex items-center gap-1.5 transition-all"
+          className="px-4 py-2 rounded-lg text-sm font-light flex items-center gap-1.5 transition-all hover:scale-[1.02] disabled:opacity-60"
           style={{
-            background: isLoading ? 'rgba(131,110,249,0.5)' : '#836EF9',
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+            boxShadow:
+              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
             color: '#fff',
           }}
         >
@@ -240,9 +254,9 @@ function CreateKeyForm({
           onClick={onCancel}
           className="px-4 py-2 rounded-lg text-sm font-light transition-all"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            color: '#a1a1a1',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.04)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            color: 'rgba(161,161,170,0.8)',
           }}
         >
           Cancel
@@ -300,10 +314,10 @@ function KeyListItem({
 
   return (
     <div
-      className="p-4 rounded-xl border flex flex-col gap-3"
+      className="p-4 rounded-xl flex flex-col gap-3 transition-all"
       style={{
-        borderColor: 'rgba(255,255,255,0.08)',
-        background: 'rgba(0,0,0,0.25)',
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <div className="flex items-start justify-between gap-3">
