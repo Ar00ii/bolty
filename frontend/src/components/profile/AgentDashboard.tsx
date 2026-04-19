@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -51,18 +52,28 @@ export const AgentDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Error Alert */}
-      {error && (
-        <div
-          className="p-4 rounded-lg text-[#fda4af] text-[13px] tracking-[0.005em]"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(244,63,94,0.12) 0%, rgba(244,63,94,0.03) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
-          }}
-        >
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-4 rounded-lg text-[#fda4af] text-[13px] tracking-[0.005em]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(244,63,94,0.12) 0%, rgba(244,63,94,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
+              }}
+            >
+              {error}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -144,9 +155,12 @@ export const AgentDashboard: React.FC = () => {
                 >
                   {selectedAgent.webhookUrl}
                 </code>
-                <button
+                <motion.button
                   onClick={handleTestWebhook}
                   disabled={webhookTestId === selectedAgentId}
+                  whileHover={webhookTestId === selectedAgentId ? undefined : { y: -1 }}
+                  whileTap={webhookTestId === selectedAgentId ? undefined : { scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                   className="px-4 py-2 rounded-lg disabled:opacity-50 text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
                   style={{
                     background:
@@ -156,24 +170,34 @@ export const AgentDashboard: React.FC = () => {
                   }}
                 >
                   {webhookTestId === selectedAgentId ? 'Testing...' : 'Test'}
-                </button>
+                </motion.button>
               </div>
 
-              {webhookTestResult && (
-                <div
-                  className={`mt-3 p-3 rounded-lg text-sm ${
-                    webhookTestResult.success
-                      ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                  }`}
-                >
-                  {webhookTestResult.success ? (
-                    <>✓ Connection successful ({webhookTestResult.responseTime}ms)</>
-                  ) : (
-                    <>✕ Connection failed: {webhookTestResult.error}</>
-                  )}
-                </div>
-              )}
+              <AnimatePresence>
+                {webhookTestResult && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -4, height: 0 }}
+                    transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+                    className="overflow-hidden mt-3"
+                  >
+                    <div
+                      className={`p-3 rounded-lg text-sm ${
+                        webhookTestResult.success
+                          ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
+                          : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                      }`}
+                    >
+                      {webhookTestResult.success ? (
+                        <>✓ Connection successful ({webhookTestResult.responseTime}ms)</>
+                      ) : (
+                        <>✕ Connection failed: {webhookTestResult.error}</>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -228,8 +252,11 @@ export const AgentDashboard: React.FC = () => {
             }}
           />
           <p className="text-zinc-400 mb-4 text-[13px] tracking-[0.005em]">No agents created yet</p>
-          <button
+          <motion.button
             onClick={() => setIsCreateModalOpen(true)}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
@@ -240,7 +267,7 @@ export const AgentDashboard: React.FC = () => {
           >
             <Plus className="w-5 h-5" />
             Create Your First Agent
-          </button>
+          </motion.button>
         </div>
       )}
 
