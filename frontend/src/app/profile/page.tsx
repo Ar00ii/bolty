@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -1065,19 +1066,50 @@ export default function ProfilePage() {
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
-              ].map(({ id, label, Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setTab(id)}
-                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full lg:min-w-0`}
-                  title={label}
-                >
-                  <div className="profile-menu-icon">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <span className="profile-menu-label">{label}</span>
-                </button>
-              ))}
+              ].map(({ id, label, Icon }) => {
+                const active = tab === id;
+                return (
+                  <motion.button
+                    key={id}
+                    onClick={() => setTab(id)}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                    className="profile-menu-item min-w-fit lg:w-full lg:min-w-0"
+                    style={active ? { color: '#b4a7ff' } : undefined}
+                    title={label}
+                  >
+                    {active && (
+                      <>
+                        <motion.span
+                          layoutId="profile-menu-pill"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 rounded-md lg:rounded-lg"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }}
+                        />
+                        <motion.span
+                          layoutId="profile-menu-bar"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          aria-hidden="true"
+                          className="hidden lg:block absolute left-0 top-1 bottom-1 w-[2px] rounded-r"
+                          style={{
+                            background:
+                              'linear-gradient(to bottom, transparent 0%, #836ef9 30%, #836ef9 70%, transparent 100%)',
+                          }}
+                        />
+                      </>
+                    )}
+                    <div className="relative z-10 profile-menu-icon">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="relative z-10 profile-menu-label">{label}</span>
+                  </motion.button>
+                );
+              })}
             </nav>
           </div>
 
