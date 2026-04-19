@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
 import React, { useRef } from 'react';
 
@@ -55,25 +56,37 @@ export const FormField: React.FC<FormFieldProps> = ({
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
       />
 
-      {error && (
-        <div
-          id={`${id}-error`}
-          className="flex items-center gap-2 text-[12px] tracking-[0.005em] mt-1"
-          style={{ color: '#fda4af' }}
-        >
-          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
-          <span>{error}</span>
-        </div>
-      )}
+      <AnimatePresence mode="wait" initial={false}>
+        {error && (
+          <motion.div
+            key="error"
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+            id={`${id}-error`}
+            className="flex items-center gap-2 text-[12px] tracking-[0.005em] mt-1 overflow-hidden"
+            style={{ color: '#fda4af' }}
+          >
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
+            <span>{error}</span>
+          </motion.div>
+        )}
 
-      {hint && !error && (
-        <p
-          id={`${id}-hint`}
-          className="text-[11px] text-zinc-500 mt-1 tracking-[0.005em] leading-relaxed"
-        >
-          {hint}
-        </p>
-      )}
+        {hint && !error && (
+          <motion.p
+            key="hint"
+            initial={{ opacity: 0, y: -2 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -2 }}
+            transition={{ duration: 0.18 }}
+            id={`${id}-hint`}
+            className="text-[11px] text-zinc-500 mt-1 tracking-[0.005em] leading-relaxed"
+          >
+            {hint}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

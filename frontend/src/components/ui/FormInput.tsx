@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
 import React from 'react';
 import { forwardRef, InputHTMLAttributes } from 'react';
@@ -33,27 +34,51 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             }}
             {...props}
           />
-          {error && (
-            <AlertCircle
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5"
-              style={{ color: '#fda4af' }}
-              strokeWidth={1.75}
-            />
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <AlertCircle
+                  className="w-3.5 h-3.5"
+                  style={{ color: '#fda4af' }}
+                  strokeWidth={1.75}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        {error && (
-          <p
-            className="text-[12px] mt-1.5 flex items-center gap-1.5 tracking-[0.005em]"
-            style={{ color: '#fda4af' }}
-          >
-            {error}
-          </p>
-        )}
-        {hint && !error && (
-          <p className="text-[11px] text-zinc-500 mt-1.5 tracking-[0.005em] leading-relaxed">
-            {hint}
-          </p>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {error && (
+            <motion.p
+              key="error"
+              initial={{ opacity: 0, y: -4, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -4, height: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+              className="text-[12px] mt-1.5 flex items-center gap-1.5 tracking-[0.005em] overflow-hidden"
+              style={{ color: '#fda4af' }}
+            >
+              {error}
+            </motion.p>
+          )}
+          {hint && !error && (
+            <motion.p
+              key="hint"
+              initial={{ opacity: 0, y: -2 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -2 }}
+              transition={{ duration: 0.18 }}
+              className="text-[11px] text-zinc-500 mt-1.5 tracking-[0.005em] leading-relaxed"
+            >
+              {hint}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
     );
   },
