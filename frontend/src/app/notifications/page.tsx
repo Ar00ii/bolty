@@ -174,8 +174,11 @@ export default function NotificationsPage() {
           </p>
         </div>
         {unread > 0 && (
-          <button
+          <motion.button
             onClick={handleMarkAll}
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
             className="text-[11.5px] text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 h-9 px-3 rounded-lg"
             style={{
               background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
@@ -183,7 +186,7 @@ export default function NotificationsPage() {
             }}
           >
             <Check className="w-3.5 h-3.5" strokeWidth={2} /> Mark all read
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -238,21 +241,24 @@ export default function NotificationsPage() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`text-[11.5px] font-medium h-7 px-3 rounded-md transition-colors tracking-[0.005em] ${
+              className={`relative text-[11.5px] font-medium h-7 px-3 rounded-md transition-colors tracking-[0.005em] ${
                 active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
               }`}
-              style={
-                active
-                  ? {
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                    }
-                  : undefined
-              }
             >
-              {f === 'all' ? 'All' : 'Unread'}
+              {active && (
+                <motion.span
+                  layoutId="notifications-filter-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">{f === 'all' ? 'All' : 'Unread'}</span>
             </button>
           );
         })}
