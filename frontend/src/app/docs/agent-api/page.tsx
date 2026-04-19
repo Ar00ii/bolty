@@ -210,15 +210,28 @@ export default function AgentApiPage() {
                   href={`#${id}`}
                   initial={{ opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.025, duration: 0.24 }}
+                  transition={{
+                    delay: Math.min(idx * 0.025, 0.2),
+                    duration: 0.24,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
                   aria-current={isActive ? 'location' : undefined}
-                  className={`block text-xs font-mono py-1 pl-3 -ml-3 border-l transition-colors ${
-                    isActive
-                      ? 'text-monad-300 border-monad-400'
-                      : 'text-zinc-500 border-transparent hover:text-monad-300 hover:border-monad-400/40'
+                  className={`relative block text-xs font-mono py-1 pl-3 -ml-3 transition-colors ${
+                    isActive ? 'text-monad-300' : 'text-zinc-500 hover:text-monad-300'
                   }`}
                 >
-                  {label}
+                  {isActive && (
+                    <motion.span
+                      layoutId="docs-agent-api-toc-bar"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute left-0 top-1 bottom-1 w-px"
+                      style={{
+                        background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
+                        boxShadow: '0 0 6px rgba(131,110,249,0.5)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10">{label}</span>
                 </motion.a>
               );
             })}

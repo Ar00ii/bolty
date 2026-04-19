@@ -179,15 +179,28 @@ export default function AgentProtocolPage() {
                     href={`#${id}`}
                     initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.025, duration: 0.24 }}
+                    transition={{
+                      delay: Math.min(idx * 0.025, 0.2),
+                      duration: 0.24,
+                      ease: [0.22, 0.61, 0.36, 1],
+                    }}
                     aria-current={isActive ? 'location' : undefined}
-                    className={`block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-all duration-200 ${
-                      isActive
-                        ? 'text-monad-300 bg-monad-500/10'
-                        : 'text-zinc-500 hover:text-monad-400 hover:bg-monad-500/5'
+                    className={`relative block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-colors ${
+                      isActive ? 'text-monad-300' : 'text-zinc-500 hover:text-monad-400'
                     }`}
                   >
-                    {label}
+                    {isActive && (
+                      <motion.span
+                        layoutId="docs-agent-protocol-toc-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="absolute inset-0 rounded-md"
+                        style={{
+                          background: 'rgba(131,110,249,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">{label}</span>
                   </motion.a>
                 );
               })}
