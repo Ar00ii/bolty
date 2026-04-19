@@ -594,7 +594,7 @@ export default function OrdersPage() {
           </p>
           <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
             {tab === 'buying'
-              ? 'Browse the marketplace to discover AI agents, repos, and services from the community.'
+              ? 'Browse the marketplace to discover AI agents and repositories from the community.'
               : 'Publish your first listing to start receiving orders from buyers.'}
           </p>
           <a

@@ -5,7 +5,6 @@ import {
   BarChart3,
   Bell,
   Bot,
-  Briefcase,
   GitBranch,
   Hash,
   Heart,
@@ -159,15 +158,6 @@ const NAV_COMMANDS: NavCommand[] = [
     href: '/notifications',
     icon: Bell,
     keywords: 'notifications inbox alerts',
-  },
-  {
-    kind: 'nav',
-    id: 'nav:services',
-    title: 'Services',
-    hint: 'Hire developers & agents',
-    href: '/services',
-    icon: Briefcase,
-    keywords: 'services gigs hire contract consulting',
   },
   {
     kind: 'nav',

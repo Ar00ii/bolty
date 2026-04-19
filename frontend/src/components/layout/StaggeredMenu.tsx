@@ -23,7 +23,6 @@ import {
   Zap,
   Percent,
   Coins,
-  Briefcase,
   ShoppingCart,
   BookOpen,
   type LucideIcon,
@@ -99,15 +98,6 @@ const NAV_ITEMS: NavItem[] = [
     sub: [
       { href: '/profile?tab=agent', label: 'Buy Boost', icon: ShoppingCart },
       { href: '/profile?tab=agent', label: 'My Agent Boost', icon: Zap },
-    ],
-  },
-  {
-    label: 'Hire',
-    href: '/services',
-    sub: [
-      { href: '/services', label: 'Browse Services', icon: Briefcase },
-      { href: '/services?category=AI_DEVELOPMENT', label: 'AI Development', icon: Cpu },
-      { href: '/services?category=SMART_CONTRACTS', label: 'Smart Contracts', icon: Zap },
     ],
   },
   {

@@ -34,7 +34,6 @@ const NAV_LINKS = [
   { href: '/market/agents', label: 'Agents' },
   { href: '/market/repos', label: 'Repos' },
   { href: '/chat/agents', label: 'Agent Chat' },
-  { href: '/services', label: 'Services' },
   { href: '/docs/agent-protocol', label: 'Docs' },
 ];
 

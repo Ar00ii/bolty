@@ -5,31 +5,35 @@ import {
   Bell,
   BookOpen,
   Bot,
-  Briefcase,
   ChevronRight,
   FileText,
   GitBranch,
   Hash,
   Heart,
+  Home,
+  Key,
   LayoutGrid,
   Library,
   LifeBuoy,
+  LogOut,
   MessageCircle,
   MessageSquare,
   MoreHorizontal,
   Package,
   Search,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   Trophy,
+  User,
   Users,
   Wallet,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useMemo, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -78,7 +82,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'other',
     items: [
-      { href: '/services', label: 'Services', icon: Briefcase },
       { href: '/how-it-works', label: 'How it works', icon: FileText },
       { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen, expandable: true },
     ],
@@ -86,7 +89,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'account',
     items: [
-      { href: '/profile/wallet', label: 'Wallet', icon: Wallet },
+      { href: '/profile?tab=wallet', label: 'Wallet', icon: Wallet },
       { href: '/help', label: 'Support', icon: LifeBuoy },
       { href: '/profile', label: 'Settings', icon: Settings, expandable: true },
     ],
@@ -106,11 +109,9 @@ const TITLE_MAP: { prefix: string; title: string }[] = [
   { prefix: '/chat', title: 'Chat' },
   { prefix: '/dm', title: 'Messages' },
   { prefix: '/notifications', title: 'Notifications' },
-  { prefix: '/services', title: 'Services' },
   { prefix: '/how-it-works', title: 'How it works' },
   { prefix: '/docs', title: 'Docs' },
   { prefix: '/reputation', title: 'Reputation' },
-  { prefix: '/profile/wallet', title: 'Wallet' },
   { prefix: '/profile', title: 'Profile' },
   { prefix: '/repos', title: 'Repositories' },
   { prefix: '/u/', title: 'Profile' },
@@ -118,7 +119,8 @@ const TITLE_MAP: { prefix: string; title: string }[] = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const [sidebarSearch, setSidebarSearch] = useState('');
 
@@ -134,6 +136,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   const groups = useMemo(() => filterGroups(NAV_GROUPS, sidebarSearch), [sidebarSearch]);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout();
+    } finally {
+      router.push('/');
+    }
+  }, [logout, router]);
 
   return (
     <div className="mk-scope mk-shell">
@@ -161,45 +171,54 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         <div className="mk-sidebar__footer">
           <div className="mk-sidebar__user mk-sidebar__user--compact">
-            <div className="mk-sidebar__avatar mk-sidebar__avatar--sm">
+            <Link
+              href="/profile"
+              className="mk-sidebar__avatar mk-sidebar__avatar--sm"
+              aria-label="Open profile settings"
+            >
               {user?.avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={user.avatarUrl} alt={displayName} />
               ) : (
                 <span>{displayName.charAt(0).toUpperCase()}</span>
               )}
-            </div>
-            <span
-              className="mk-sidebar__name mk-sidebar__name--muted"
-              title={displayName}
-            >
+            </Link>
+            <span className="mk-sidebar__name mk-sidebar__name--muted" title={displayName}>
               {user?.username || shortName.toLowerCase()}
             </span>
-            <button type="button" aria-label="More" className="mk-icon-btn">
-              <MoreHorizontal size={14} strokeWidth={1.75} />
-            </button>
-            <button
-              type="button"
+            <SidebarMoreMenu onLogout={handleLogout} />
+            <Link
+              href="/notifications"
               aria-label="Notifications"
               className="mk-icon-btn mk-icon-btn--bell"
             >
               <span className="mk-icon-btn__dot" aria-hidden />
               <Bell size={14} strokeWidth={1.75} />
-            </button>
+            </Link>
           </div>
         </div>
       </aside>
 
       <div className="mk-main">
         <header className="mk-topbar">
-          <div className="mk-topbar__left" />
+          <div className="mk-topbar__left">
+            <Link
+              href="/"
+              className="mk-topbar__home"
+              aria-label="Back to landing page"
+              title="Back to landing"
+            >
+              <Home size={14} strokeWidth={1.75} />
+              <span>Landing</span>
+            </Link>
+          </div>
           <div className="mk-topbar__center">
             <span className="mk-topbar__title">{topbarTitle}</span>
           </div>
           <div className="mk-topbar__right">
-            <button type="button" className="mk-icon-btn" aria-label="More">
-              <MoreHorizontal size={16} strokeWidth={1.75} />
-            </button>
+            <Link href="/profile" aria-label="Settings" title="Settings" className="mk-icon-btn">
+              <Settings size={16} strokeWidth={1.75} />
+            </Link>
           </div>
         </header>
         <main id="main-content" className="mk-main__scroll" tabIndex={-1}>
@@ -210,13 +229,109 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NavList({
-  items,
-  pathname,
-}: {
-  items: NavItem[];
-  pathname: string | null;
-}) {
+function SidebarMoreMenu({ onLogout }: { onLogout: () => void }) {
+  const [open, setOpen] = useState(false);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (popRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('mousedown', onClick);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onClick);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="mk-more">
+      <button
+        ref={btnRef}
+        type="button"
+        aria-label="Settings & more"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={open ? 'mk-icon-btn mk-icon-btn--active' : 'mk-icon-btn'}
+        title="Settings"
+      >
+        <MoreHorizontal size={14} strokeWidth={1.75} />
+      </button>
+      {open && (
+        <div ref={popRef} role="menu" className="mk-more__pop">
+          <div className="mk-more__header">
+            <Settings size={12} strokeWidth={1.75} />
+            <span>Settings</span>
+          </div>
+          <Link
+            href="/profile"
+            role="menuitem"
+            className="mk-more__item"
+            onClick={() => setOpen(false)}
+          >
+            <User size={13} strokeWidth={1.75} />
+            <span>Profile & account</span>
+          </Link>
+          <Link
+            href="/profile?tab=api-keys"
+            role="menuitem"
+            className="mk-more__item"
+            onClick={() => setOpen(false)}
+          >
+            <Key size={13} strokeWidth={1.75} />
+            <span>API keys</span>
+          </Link>
+          <Link
+            href="/profile?tab=security"
+            role="menuitem"
+            className="mk-more__item"
+            onClick={() => setOpen(false)}
+          >
+            <ShieldCheck size={13} strokeWidth={1.75} />
+            <span>Security & 2FA</span>
+          </Link>
+          <Link
+            href="/profile?tab=wallet"
+            role="menuitem"
+            className="mk-more__item"
+            onClick={() => setOpen(false)}
+          >
+            <Wallet size={13} strokeWidth={1.75} />
+            <span>Wallet</span>
+          </Link>
+          <div className="mk-more__sep" />
+          <Link href="/" role="menuitem" className="mk-more__item" onClick={() => setOpen(false)}>
+            <Home size={13} strokeWidth={1.75} />
+            <span>Back to landing</span>
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            className="mk-more__item mk-more__item--danger"
+            onClick={() => {
+              setOpen(false);
+              onLogout();
+            }}
+          >
+            <LogOut size={13} strokeWidth={1.75} />
+            <span>Sign out</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NavList({ items, pathname }: { items: NavItem[]; pathname: string | null }) {
   if (items.length === 0) return null;
   return (
     <ul className="mk-nav">
@@ -251,8 +366,9 @@ function isRouteActive(href: string, pathname: string | null): boolean {
   if (!pathname) return false;
   if (href === '/market' && pathname === '/market') return true;
   if (href === '/market' && pathname.startsWith('/market/')) return false;
-  if (pathname === href) return true;
-  return pathname.startsWith(href + '/');
+  const base = href.split('?')[0];
+  if (pathname === base) return true;
+  return pathname.startsWith(base + '/');
 }
 
 function filterGroups(groups: NavGroup[], query: string): NavGroup[] {

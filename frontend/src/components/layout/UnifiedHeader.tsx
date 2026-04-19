@@ -9,7 +9,6 @@ import {
   ShoppingBag,
   Bot,
   GitBranch,
-  Briefcase,
   BookOpen,
   User,
   KeyRound,
@@ -31,7 +30,6 @@ const NAV_LINKS = [
   { href: '/market', label: 'Marketplace', icon: ShoppingBag },
   { href: '/market/agents', label: 'Agents', icon: Bot },
   { href: '/market/repos', label: 'Repos', icon: GitBranch },
-  { href: '/services', label: 'Services', icon: Briefcase },
   { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen },
 ];
 

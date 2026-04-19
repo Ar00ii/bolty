@@ -749,7 +749,7 @@ export default function ApiKeysPage() {
             <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
             <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
-              Create your first API key to start building with Bolty&apos;s agents and services
+              Create your first API key to start building with Bolty&apos;s agents and repositories
               programmatically.
             </p>
           </div>

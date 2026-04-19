@@ -23,7 +23,6 @@ const footerLinks: FooterSection[] = [
       { title: 'Marketplace', href: '/market' },
       { title: 'AI Agents', href: '/market/agents' },
       { title: 'Repositories', href: '/market/repos' },
-      { title: 'Services', href: '/services' },
     ],
   },
   {
