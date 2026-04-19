@@ -16,6 +16,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DmModule } from './modules/dm/dm.module';
+import { EscrowModule } from './modules/escrow/escrow.module';
 import { MarketModule } from './modules/market/market.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrdersModule } from './modules/orders/orders.module';
@@ -65,6 +66,7 @@ import { UsersModule } from './modules/users/users.module';
     ChartModule,
     UsersModule,
     DmModule,
+    EscrowModule,
     MarketModule,
     NotificationsModule,
     OrdersModule,

@@ -19,6 +19,18 @@ class CompleteDto {
   escrowReleaseTx?: string;
 }
 
+class DisputeDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  txHash?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  reason?: string;
+}
+
 class SendMessageDto {
   @IsString()
   @MaxLength(5000)
@@ -91,8 +103,15 @@ export class OrdersController {
 
   /** POST /orders/:id/dispute */
   @Post(':id/dispute')
-  dispute(@Param('id') id: string, @Request() req: ExpressRequest & { user: { id: string } }) {
-    return this.ordersService.dispute(id, req.user.id);
+  dispute(
+    @Param('id') id: string,
+    @Request() req: ExpressRequest & { user: { id: string } },
+    @Body() body: DisputeDto,
+  ) {
+    return this.ordersService.dispute(id, req.user.id, {
+      txHash: body.txHash,
+      reason: body.reason,
+    });
   }
 
   /** POST /orders/:id/messages */
