@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { ArrowLeft, CheckCircle2, Copy, Printer, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -169,7 +170,10 @@ export default function OrderReceiptPage() {
           </button>
         </div>
 
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
           className="receipt-card relative rounded-2xl overflow-hidden p-8 lg:p-10"
           style={{
             background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
@@ -377,7 +381,7 @@ export default function OrderReceiptPage() {
               platform SLA.
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
