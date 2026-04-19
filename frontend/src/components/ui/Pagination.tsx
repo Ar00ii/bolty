@@ -70,25 +70,29 @@ export function Pagination({
                 }
                 aria-current={isCurrent ? 'page' : undefined}
                 aria-hidden={isEllipsis ? 'true' : undefined}
-                className={`min-w-9 h-9 px-3 rounded-lg text-[13px] font-medium tracking-[0.01em] transition-colors ${
+                className={`relative min-w-9 h-9 px-3 rounded-lg text-[13px] font-medium tracking-[0.01em] transition-colors ${
                   isCurrent
                     ? 'text-white'
                     : isEllipsis
                       ? 'text-zinc-600 cursor-default'
                       : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
                 }`}
-                style={
-                  isCurrent
-                    ? {
-                        background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.08) 100%)',
-                        boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 16px -4px rgba(131,110,249,0.4)',
-                      }
-                    : undefined
-                }
               >
-                {page}
+                {isCurrent && (
+                  <motion.span
+                    layoutId="pagination-current-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.08) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 16px -4px rgba(131,110,249,0.4)',
+                    }}
+                  />
+                )}
+                <span className="relative">{page}</span>
               </motion.button>
             </li>
           );
