@@ -273,7 +273,7 @@ function Toolbar({
       </button>
       <div className="mk-btn-split">
         <Link
-          href="/market/seller"
+          href="/market/agents?tab=mine&new=1"
           className="mk-btn-split__main"
           style={{ color: '#000', textDecoration: 'none', gap: 6 }}
         >

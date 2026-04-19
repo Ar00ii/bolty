@@ -4400,6 +4400,15 @@ function AgentsPageContent() {
     else setActiveTab('market');
   }, [searchParams]);
 
+  // Open deploy form when other pages redirect with ?new=1
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (searchParams.get('new') === '1') {
+      setActiveTab('mine');
+      setShowCreate(true);
+    }
+  }, [searchParams, isAuthenticated]);
+
   // Open negotiation modal when detail page redirects with ?negotiate=id
   useEffect(() => {
     const negotiateId = searchParams.get('negotiate');

@@ -227,7 +227,7 @@ export default function SellerDashboardPage() {
             </p>
           </div>
           <Link
-            href="/market?new=1"
+            href="/market/agents?tab=mine&new=1"
             className="group hidden sm:inline-flex items-center gap-2 rounded-lg h-10 px-3.5 text-[12.5px] font-medium text-white transition-colors"
             style={{
               background:
@@ -820,7 +820,7 @@ function EmptyState() {
         Publish your first AI agent, repo, or script to start tracking sales and engagement here.
       </p>
       <Link
-        href="/market?new=1"
+        href="/market/agents?tab=mine&new=1"
         className="group relative inline-flex items-center gap-2 rounded-lg h-10 px-4 text-[12.5px] font-medium text-white transition-colors"
         style={{
           background:
