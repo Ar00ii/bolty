@@ -184,7 +184,10 @@ function MarketOverview() {
           />
         </div>
         <div className="mk-overview-grid__right">
-          <div className="mk-section-title" style={{ marginBottom: 12 }}>
+          <div
+            className="mk-section-title mk-section-title--accent"
+            style={{ marginBottom: 12, fontSize: 16 }}
+          >
             Listings
           </div>
           {loading ? (

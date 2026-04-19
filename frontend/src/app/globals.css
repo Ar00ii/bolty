@@ -1821,12 +1821,12 @@ aside button[data-active='true']::after {
   line-height: 20px;
 }
 
-/* Kill global Inter + weight 300 inside this scope */
+/* Match landing-page typography: Inter Light + negative tracking */
 .mk-scope,
 .mk-scope * {
-  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif !important;
-  font-weight: 400;
-  letter-spacing: normal !important;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-weight: 300;
+  letter-spacing: -0.3px !important;
 }
 .mk-scope h1,
 .mk-scope h2,
@@ -1841,12 +1841,13 @@ aside button[data-active='true']::after {
 .mk-scope .mk-btn-ghost,
 .mk-scope .mk-badge,
 .mk-scope .mk-nav-item--active {
-  font-weight: 500;
+  font-weight: 400;
 }
 .mk-scope code,
 .mk-scope pre,
 .mk-scope .mk-mono {
   font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  letter-spacing: 0 !important;
 }
 
 /* Neutralize global purple / lift / ripple / underline effects within this scope */
@@ -3334,4 +3335,152 @@ aside button[data-active='true']::after {
 .mk-scope .mk-sidebar,
 .mk-scope .mk-topbar {
   background-color: #000 !important;
+}
+
+/* ============================================================
+   Subtle Bolty-purple accents
+   Kept soft + diffuse so the dashboard stays calm. Never on
+   large blocks — only on titles, brand marks, and focused text.
+   ============================================================ */
+
+:root {
+  --mk-accent: #b4a7ff;
+  --mk-accent-strong: #836ef9;
+  --mk-accent-soft: rgba(180, 167, 255, 0.82);
+}
+
+/* Generic accent helpers */
+.mk-scope .mk-accent {
+  color: var(--mk-accent) !important;
+  text-shadow: 0 0 18px rgba(131, 110, 249, 0.28);
+  letter-spacing: -0.3px !important;
+}
+
+.mk-scope .mk-accent-soft {
+  color: var(--mk-accent-soft) !important;
+  text-shadow: 0 0 14px rgba(131, 110, 249, 0.18);
+}
+
+/* Gradient headline text (white → soft purple) */
+.mk-scope .mk-accent-gradient {
+  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 55%, #b4a7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent !important;
+  letter-spacing: -0.3px !important;
+}
+
+/* Topbar title — subtle purple tint with soft halo */
+.mk-scope .mk-topbar__title {
+  color: var(--mk-accent) !important;
+  text-shadow: 0 0 16px rgba(131, 110, 249, 0.22);
+  letter-spacing: -0.2px !important;
+  font-weight: 400;
+}
+
+/* Section headings inside main content get a soft halo */
+.mk-scope .mk-section-title {
+  color: #ededed;
+  letter-spacing: -0.2px !important;
+}
+
+/* Highlight just the listings / overview heading (acts as the
+   page-hero accent without being loud) */
+.mk-scope .mk-section-title--accent {
+  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 60%, #b4a7ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent !important;
+  font-weight: 400;
+}
+
+/* Sidebar username — very soft purple tint (keeps brand presence) */
+.mk-scope .mk-sidebar__name {
+  color: var(--mk-text) !important;
+}
+.mk-scope .mk-sidebar__user:not(.mk-sidebar__user--compact) .mk-sidebar__name {
+  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent !important;
+}
+
+/* Scope picker label reads as a soft brand line */
+.mk-scope .mk-scope-picker__label {
+  color: var(--mk-accent) !important;
+  text-shadow: 0 0 14px rgba(131, 110, 249, 0.22);
+  letter-spacing: -0.2px !important;
+}
+.mk-scope .mk-scope-picker__dot {
+  background: radial-gradient(circle at 30% 30%, #c4b5fd, #836ef9 70%) !important;
+  box-shadow:
+    0 0 0 1px rgba(131, 110, 249, 0.35),
+    0 0 12px rgba(131, 110, 249, 0.45);
+}
+
+/* Active nav row — soft purple hint on the left edge */
+.mk-scope .mk-nav-row--active {
+  background: linear-gradient(
+    90deg,
+    rgba(131, 110, 249, 0.10) 0%,
+    rgba(131, 110, 249, 0.03) 55%,
+    transparent 100%
+  ) !important;
+  color: var(--mk-text) !important;
+  box-shadow: inset 2px 0 0 rgba(131, 110, 249, 0.55);
+}
+.mk-scope .mk-nav-row--active .mk-nav-row__icon {
+  color: var(--mk-accent);
+  filter: drop-shadow(0 0 6px rgba(131, 110, 249, 0.35));
+}
+
+/* Overview stat dot for brand metric gets a soft purple halo */
+.mk-scope .mk-usage-row__dot {
+  box-shadow: 0 0 8px currentColor;
+}
+
+/* Small "plan" badge beside username — soft purple outline */
+.mk-scope .mk-badge--outline {
+  color: var(--mk-accent) !important;
+  border-color: rgba(131, 110, 249, 0.30) !important;
+  background: rgba(131, 110, 249, 0.06) !important;
+}
+
+/* Alerts card CTA — soft purple with diffuse glow */
+.mk-scope .mk-alerts-card__cta {
+  background: linear-gradient(180deg, #b4a7ff 0%, #836ef9 100%) !important;
+  color: #0a0a0a !important;
+  box-shadow: 0 0 24px rgba(131, 110, 249, 0.35);
+}
+
+/* Diffuse ambient glow anchored to the topbar so the whole
+   dashboard has a subtle brand breath */
+.mk-main {
+  position: relative;
+}
+.mk-main::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 540px;
+  height: 280px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(131, 110, 249, 0.16) 0%,
+    rgba(131, 110, 249, 0.06) 40%,
+    transparent 70%
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+.mk-topbar,
+.mk-main__scroll {
+  position: relative;
+  z-index: 1;
 }
