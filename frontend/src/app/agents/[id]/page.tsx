@@ -353,23 +353,27 @@ export default function AgentDetailPage() {
               key={tab}
               onClick={() => setActiveTab(tab as typeof activeTab)}
               whileTap={{ scale: 0.97 }}
-              className="flex-1 py-2 text-[13px] font-light rounded-lg transition-all capitalize"
-              style={
-                active
-                  ? {
-                      color: '#b4a7ff',
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                    }
-                  : {
-                      color: 'rgba(161,161,170,0.55)',
-                      background: 'transparent',
-                    }
-              }
+              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+              className={`relative flex-1 py-2 text-[13px] font-light rounded-lg transition-colors capitalize ${
+                active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
             >
-              {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
+              {active && (
+                <motion.span
+                  layoutId="agent-detail-tab-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-lg"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">
+                {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
+              </span>
             </motion.button>
           );
         })}
