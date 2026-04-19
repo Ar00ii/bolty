@@ -1287,20 +1287,35 @@ function RepoCliPanel() {
 
         <div className="flex flex-col">
           <div className="flex items-center justify-between border-b border-white/8 px-4 py-2">
-            <div className="flex gap-1">
-              {(['cli', 'git', 'curl'] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
-                    mode === m
-                      ? 'text-blue-200 bg-blue-500/10 border border-blue-500/25'
-                      : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
-                  }`}
-                >
-                  {m}
-                </button>
-              ))}
+            <div className="relative flex gap-1">
+              {(['cli', 'git', 'curl'] as const).map((m) => {
+                const active = mode === m;
+                return (
+                  <motion.button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                    className={`relative text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
+                      active ? 'text-blue-200' : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="market-repos-cli-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded"
+                        style={{
+                          background: 'rgba(6,182,212,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(6,182,212,0.35)',
+                        }}
+                      />
+                    )}
+                    <span className="relative">{m}</span>
+                  </motion.button>
+                );
+              })}
             </div>
             <button
               onClick={handleCopy}
