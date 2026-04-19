@@ -1941,14 +1941,43 @@ aside button[data-active='true']::after {
   background: var(--mk-surface-1) !important;
 }
 
-/* Neutralize purple accent strokes/glows that pages render via inline style */
-.mk-scope [style*='rgba(131, 110, 249'],
-.mk-scope [style*='rgba(131,110,249'] {
-  background: transparent !important;
-  box-shadow: none !important;
-  border-color: transparent !important;
+/* Restore visible brand fill on INTERACTIVE elements that use inline purple
+   gradients for CTAs. */
+.mk-scope button[style*='rgba(131, 110, 249'],
+.mk-scope button[style*='rgba(131,110,249'],
+.mk-scope a[style*='rgba(131, 110, 249'],
+.mk-scope a[style*='rgba(131,110,249'] {
+  background: linear-gradient(
+    180deg,
+    rgba(131, 110, 249, 0.55) 0%,
+    rgba(131, 110, 249, 0.25) 100%
+  ) !important;
+  color: #fff !important;
+  border-color: rgba(131, 110, 249, 0.55) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(131, 110, 249, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 22px -10px rgba(131, 110, 249, 0.45) !important;
+}
+
+/* Decorative divs/spans keep a subtle brand tint so icon containers, avatar
+   rings and status chips stay readable without overwhelming the neutral
+   dashboard palette. */
+.mk-scope div[style*='rgba(131, 110, 249'],
+.mk-scope div[style*='rgba(131,110,249'],
+.mk-scope span[style*='rgba(131, 110, 249'],
+.mk-scope span[style*='rgba(131,110,249'] {
+  background: linear-gradient(
+    135deg,
+    rgba(131, 110, 249, 0.14) 0%,
+    rgba(131, 110, 249, 0.04) 100%
+  ) !important;
+  border-color: rgba(131, 110, 249, 0.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.18) !important;
   color: inherit !important;
 }
+/* Decorative aria-hidden overlays (top-of-card gradient strokes) remain
+   collapsed — see rule further below. */
 
 /* ── mk primitives ───────────────────────────────────────────────── */
 
@@ -2416,12 +2445,22 @@ aside button[data-active='true']::after {
   }
 }
 
-/* Override GradientText inside scope: flatten to white */
+/* Override GradientText inside scope: flatten to white by default */
 .mk-scope .gradient-text,
 .mk-scope .hero-gradient {
   background: none !important;
   -webkit-text-fill-color: var(--mk-text) !important;
   color: var(--mk-text) !important;
+  animation: none !important;
+}
+
+/* Allow purple GradientText to keep a soft brand tint — the user explicitly
+   asked for a subtle diffuse purple on some headings. */
+.mk-scope .gradient-text.gradient-text-purple {
+  background: none !important;
+  -webkit-text-fill-color: #b4a7ff !important;
+  color: #b4a7ff !important;
+  text-shadow: 0 0 18px rgba(131, 110, 249, 0.28);
   animation: none !important;
 }
 
