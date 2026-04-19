@@ -459,28 +459,37 @@ function FilterChip({
 }) {
   const c = accent || '#836EF9';
   return (
-    <button
+    <motion.button
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+      className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
         active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
       }`}
-      style={
-        active
-          ? {
-              background: `linear-gradient(180deg, ${c}38 0%, ${c}10 100%)`,
-              boxShadow: `inset 0 0 0 1px ${c}5a, 0 0 14px -4px ${c}70`,
-            }
-          : {
-              background: 'rgba(255,255,255,0.04)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-            }
-      }
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+      }}
     >
-      {label}
-      <span className="text-[10px]" style={{ color: active ? `${c}ee` : 'rgba(161,161,170,0.7)' }}>
+      {active && (
+        <motion.span
+          layoutId="library-filter-pill"
+          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+          className="absolute inset-0 rounded-md"
+          style={{
+            background: `linear-gradient(180deg, ${c}38 0%, ${c}10 100%)`,
+            boxShadow: `inset 0 0 0 1px ${c}5a, 0 0 14px -4px ${c}70`,
+          }}
+        />
+      )}
+      <span className="relative z-10">{label}</span>
+      <span
+        className="relative z-10 text-[10px]"
+        style={{ color: active ? `${c}ee` : 'rgba(161,161,170,0.7)' }}
+      >
         {count}
       </span>
-    </button>
+    </motion.button>
   );
 }
 

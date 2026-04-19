@@ -414,25 +414,32 @@ export default function SellerDashboardPage() {
                       {(['sales', 'revenue', 'rating', 'recent'] as const).map((k) => {
                         const active = listingSort === k;
                         return (
-                          <button
+                          <motion.button
                             key={k}
                             onClick={() => setListingSort(k)}
-                            className={`text-[11px] px-2.5 h-7 rounded-md transition-colors font-medium tracking-[0.005em] ${
+                            whileTap={{ scale: 0.96 }}
+                            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                            className={`relative text-[11px] px-2.5 h-7 rounded-md transition-colors font-medium tracking-[0.005em] ${
                               active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
                             }`}
-                            style={
-                              active
-                                ? {
-                                    background:
-                                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                                    boxShadow:
-                                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                                  }
-                                : undefined
-                            }
                           >
-                            {k === 'recent' ? 'Newest' : k.charAt(0).toUpperCase() + k.slice(1)}
-                          </button>
+                            {active && (
+                              <motion.span
+                                layoutId="seller-listing-sort-pill"
+                                transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                                className="absolute inset-0 rounded-md"
+                                style={{
+                                  background:
+                                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                                  boxShadow:
+                                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                                }}
+                              />
+                            )}
+                            <span className="relative z-10">
+                              {k === 'recent' ? 'Newest' : k.charAt(0).toUpperCase() + k.slice(1)}
+                            </span>
+                          </motion.button>
                         );
                       })}
                     </div>
