@@ -592,22 +592,39 @@ export default function ReposPage() {
           ))}
         </select>
         <div className="flex gap-1 flex-wrap">
-          {SORTS.map((s) => (
-            <button
-              key={s.value}
-              onClick={() => setSortBy(s.value as typeof sortBy)}
-              className={`px-3 py-1.5 text-xs font-mono rounded-lg border transition-colors ${
-                sortBy === s.value ? 'text-monad-300' : 'text-zinc-600 hover:text-zinc-300'
-              }`}
-              style={
-                sortBy === s.value
-                  ? { background: 'rgba(131,110,249,0.12)', borderColor: 'rgba(131,110,249,0.35)' }
-                  : { background: 'transparent', borderColor: 'rgba(255,255,255,0.08)' }
-              }
-            >
-              {s.label}
-            </button>
-          ))}
+          {SORTS.map((s) => {
+            const active = sortBy === s.value;
+            return (
+              <motion.button
+                key={s.value}
+                onClick={() => setSortBy(s.value as typeof sortBy)}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                className={`relative px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
+                  active ? 'text-monad-300' : 'text-zinc-600 hover:text-zinc-300'
+                }`}
+                style={{
+                  background: 'transparent',
+                  boxShadow: active ? 'none' : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                }}
+              >
+                {active && (
+                  <motion.span
+                    layoutId="repos-sort-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }}
+                  />
+                )}
+                <span className="relative z-10">{s.label}</span>
+              </motion.button>
+            );
+          })}
         </div>
       </div>
 
