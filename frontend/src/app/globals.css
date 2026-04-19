@@ -3523,3 +3523,289 @@ aside button[data-active='true']::after {
   position: relative;
   z-index: 1;
 }
+
+/* ============================================================
+   Deploy / Publish wizard (.mk-wizard)
+   Unified dashboard-dark look for the agent + repo publish flows.
+   Scoped with .mk-scope for specificity so inline styles are
+   deterministically overridden.
+   ============================================================ */
+
+.mk-scope .mk-wizard {
+  background: var(--mk-surface-1) !important;
+  border: 1px solid var(--mk-surface-4) !important;
+  border-radius: 12px !important;
+  padding: 28px 28px 24px 28px !important;
+  box-shadow:
+    var(--mk-shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+  max-width: 720px !important;
+  margin: 24px auto !important;
+  position: relative;
+}
+
+.mk-scope .mk-wizard__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.mk-scope .mk-wizard__title {
+  font-size: 17px !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.3px !important;
+  color: var(--mk-text) !important;
+  line-height: 1.25 !important;
+  margin: 0 0 6px 0 !important;
+}
+
+.mk-scope .mk-wizard__sub {
+  font-size: 12px !important;
+  color: var(--mk-text-muted) !important;
+  letter-spacing: -0.2px;
+}
+
+.mk-scope .mk-wizard__close {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--mk-surface-4) !important;
+  background: transparent !important;
+  color: var(--mk-text-muted) !important;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.mk-scope .mk-wizard__close:hover {
+  color: var(--mk-text) !important;
+  border-color: var(--mk-surface-6) !important;
+  background: var(--mk-surface-2) !important;
+}
+
+/* Steps rail (segmented progress) */
+.mk-scope .mk-wizard__steps {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 22px;
+}
+.mk-scope .mk-wizard__step {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--mk-surface-3) !important;
+  transition: background 0.2s ease;
+}
+.mk-scope .mk-wizard__step--done {
+  background: var(--mk-text) !important;
+}
+
+/* Form elements — unified input look */
+.mk-scope .mk-wizard input,
+.mk-scope .mk-wizard select,
+.mk-scope .mk-wizard textarea {
+  width: 100%;
+  background: var(--mk-surface-0) !important;
+  border: 1px solid var(--mk-surface-4) !important;
+  color: var(--mk-text) !important;
+  border-radius: 8px !important;
+  padding: 9px 12px !important;
+  font-size: 13px !important;
+  font-weight: 300 !important;
+  letter-spacing: -0.2px !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
+  outline: none !important;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  box-shadow: none !important;
+}
+.mk-scope .mk-wizard textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.55 !important;
+}
+.mk-scope .mk-wizard input::placeholder,
+.mk-scope .mk-wizard textarea::placeholder {
+  color: var(--mk-text-muted) !important;
+  opacity: 1;
+}
+.mk-scope .mk-wizard input:focus,
+.mk-scope .mk-wizard select:focus,
+.mk-scope .mk-wizard textarea:focus {
+  border-color: rgba(131, 110, 249, 0.45) !important;
+  background: var(--mk-surface-1) !important;
+  box-shadow: 0 0 0 3px rgba(131, 110, 249, 0.08) !important;
+}
+.mk-scope .mk-wizard input:disabled,
+.mk-scope .mk-wizard select:disabled,
+.mk-scope .mk-wizard textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.mk-scope .mk-wizard label {
+  font-size: 11.5px !important;
+  color: var(--mk-text-muted) !important;
+  letter-spacing: 0.02em !important;
+  font-weight: 400 !important;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* Chip / segmented choice buttons */
+.mk-scope .mk-wizard__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.2px !important;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  background: var(--mk-surface-0) !important;
+  border: 1px solid var(--mk-surface-4) !important;
+  color: var(--mk-text-secondary) !important;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.mk-scope .mk-wizard__chip:hover {
+  border-color: var(--mk-surface-6) !important;
+  background: var(--mk-surface-2) !important;
+  color: var(--mk-text) !important;
+}
+.mk-scope .mk-wizard__chip--active {
+  background: var(--mk-surface-3) !important;
+  border-color: var(--mk-surface-7) !important;
+  color: var(--mk-text) !important;
+  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.22) !important;
+}
+
+/* Large tile-style choice (pricing model / type card) */
+.mk-scope .mk-wizard__tile {
+  text-align: left;
+  background: var(--mk-surface-0) !important;
+  border: 1px solid var(--mk-surface-4) !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  color: var(--mk-text-secondary) !important;
+  transition: all 0.15s ease;
+}
+.mk-scope .mk-wizard__tile:hover {
+  border-color: var(--mk-surface-6) !important;
+  background: var(--mk-surface-2) !important;
+}
+.mk-scope .mk-wizard__tile--active {
+  border-color: rgba(131, 110, 249, 0.45) !important;
+  background: var(--mk-surface-2) !important;
+  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.28) !important;
+}
+
+/* Navigation primary / secondary */
+.mk-scope .mk-wizard__primary {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px !important;
+  background: #ededed !important;
+  color: #0a0a0a !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.2px !important;
+  transition: background 0.15s ease;
+  cursor: pointer;
+}
+.mk-scope .mk-wizard__primary:hover:not(:disabled) {
+  background: #ffffff !important;
+}
+.mk-scope .mk-wizard__primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mk-scope .mk-wizard__secondary {
+  flex: 1;
+  height: 40px;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: var(--mk-text) !important;
+  border: 1px solid var(--mk-surface-5) !important;
+  font-weight: 400 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.2px !important;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+}
+.mk-scope .mk-wizard__secondary:hover {
+  border-color: var(--mk-surface-7) !important;
+  background: var(--mk-surface-2) !important;
+}
+
+/* Info / note cards */
+.mk-scope .mk-wizard__note {
+  background: var(--mk-surface-0) !important;
+  border: 1px solid var(--mk-surface-4) !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  color: var(--mk-text-secondary) !important;
+  box-shadow: inset 2px 0 0 rgba(131, 110, 249, 0.4) !important;
+}
+.mk-scope .mk-wizard__note p {
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  color: var(--mk-text-secondary) !important;
+}
+
+/* Drop-zone (file upload) */
+.mk-scope .mk-wizard__dropzone {
+  border: 1.5px dashed var(--mk-surface-5) !important;
+  background: var(--mk-surface-0) !important;
+  border-radius: 10px !important;
+  padding: 28px 16px !important;
+  text-align: center;
+  color: var(--mk-text-muted) !important;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.mk-scope .mk-wizard__dropzone:hover {
+  border-color: var(--mk-surface-7) !important;
+  background: var(--mk-surface-1) !important;
+}
+.mk-scope .mk-wizard__dropzone--done {
+  border-style: solid !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+  background: rgba(34, 197, 94, 0.04) !important;
+}
+
+/* Section heading inside wizard */
+.mk-scope .mk-wizard__section-title {
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  color: var(--mk-text) !important;
+  letter-spacing: -0.2px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Field hint / counter text */
+.mk-scope .mk-wizard__hint {
+  font-size: 11px !important;
+  color: var(--mk-text-muted) !important;
+  margin-top: 6px !important;
+}
+
+/* Neutralise aggressive inline gradient backgrounds within the wizard so
+   nothing leaks the old purple slab look. */
+.mk-scope .mk-wizard [style*='rgba(131,110,249'],
+.mk-scope .mk-wizard [style*='rgba(131, 110, 249'] {
+  background: var(--mk-surface-0) !important;
+  border-color: var(--mk-surface-4) !important;
+  box-shadow: none !important;
+  color: var(--mk-text-secondary) !important;
+}
+/* Keep active chips/tiles recognisable */
+.mk-scope .mk-wizard .mk-wizard__chip--active,
+.mk-scope .mk-wizard .mk-wizard__tile--active,
+.mk-scope .mk-wizard .mk-wizard__dropzone--done {
+  background: var(--mk-surface-2) !important;
+}

@@ -713,26 +713,32 @@ export default function ReposPage() {
 
       {/* ── Publish modal ─────────────────────────────────────────────────── */}
       {lockModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4">
-          <div
-            className="w-full max-w-sm rounded-2xl p-6 overflow-y-auto max-h-[90vh]"
-            style={{ background: '#1a1a1f', border: '1px solid rgba(131,110,249,0.2)' }}
-          >
-            <h3 className="font-light text-monad-400 mb-1 font-mono">Publish Options</h3>
-            <p className="text-zinc-500 text-xs mb-5">
-              {lockModal.repo.name}
-              {lockModal.repo.private ? ' · private repo' : ''}
-            </p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4 overflow-y-auto py-8">
+          <div className="mk-wizard w-full max-w-md" style={{ margin: 0 }}>
+            <div className="mk-wizard__header">
+              <div>
+                <h3 className="mk-wizard__title">Publish repository</h3>
+                <p className="mk-wizard__sub">
+                  {lockModal.repo.name}
+                  {lockModal.repo.private ? ' · private' : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLockModal(null)}
+                className="mk-wizard__close"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" strokeWidth={1.75} />
+              </button>
+            </div>
 
             {/* Visibility */}
-            <div className="space-y-2.5 mb-5">
+            <label className="mk-wizard__section-title">Visibility</label>
+            <div className="space-y-2 mb-5">
               <button
                 onClick={() => setLockType('public')}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all ${lockType === 'public' ? 'border-monad-500/50' : 'border-white/08 hover:border-white/15'}`}
-                style={{
-                  background:
-                    lockType === 'public' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)',
-                }}
+                className={`mk-wizard__tile w-full flex items-center gap-3 ${lockType === 'public' ? 'mk-wizard__tile--active' : ''}`}
               >
                 <div
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'public' ? 'bg-monad-500/20' : 'bg-white/05'}`}
@@ -754,11 +760,7 @@ export default function ReposPage() {
 
               <button
                 onClick={() => setLockType('locked')}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all ${lockType === 'locked' ? 'border-monad-500/50' : 'border-white/08 hover:border-white/15'}`}
-                style={{
-                  background:
-                    lockType === 'locked' ? 'rgba(131,110,249,0.1)' : 'rgba(255,255,255,0.02)',
-                }}
+                className={`mk-wizard__tile w-full flex items-center gap-3 ${lockType === 'locked' ? 'mk-wizard__tile--active' : ''}`}
               >
                 <div
                   className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'locked' ? 'bg-monad-500/20' : 'bg-white/05'}`}
@@ -1146,19 +1148,20 @@ export default function ReposPage() {
               )}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3 pt-2">
               <button
+                type="button"
                 onClick={() => setLockModal(null)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-mono text-zinc-500 border border-zinc-800 hover:border-zinc-700 hover:text-zinc-300 transition-all"
+                className="mk-wizard__secondary"
               >
-                cancel
+                Cancel
               </button>
               <button
+                type="button"
                 onClick={confirmPublish}
-                className="flex-1 py-2.5 rounded-xl text-xs font-mono text-white transition-all"
-                style={{ background: 'linear-gradient(135deg,#836EF9,#6b4fe0)' }}
+                className="mk-wizard__primary"
               >
-                confirm publish
+                Publish repository
               </button>
             </div>
           </div>

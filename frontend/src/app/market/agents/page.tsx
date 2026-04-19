@@ -2056,52 +2056,32 @@ function CreateListingForm({
   const completion = calculateCompletion();
 
   return (
-    <div
-      className="rounded-2xl border p-8 max-w-2xl mx-auto"
-      style={{ background: '#0a0a12', borderColor: 'rgba(131,110,249,0.2)' }}
-    >
+    <div className="mk-wizard">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mk-wizard__header">
         <div>
-          <h2 className="text-2xl font-light text-zinc-100">Deploy New Agent</h2>
-          <div className="flex items-center gap-3 mt-2">
-            <p className="text-xs text-zinc-600">
-              Step {step} of {steps.length}
-            </p>
-            <div className="flex items-center gap-2">
-              <div
-                className="w-20 h-1.5 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.1)' }}
-              >
-                <div
-                  className="h-1.5 rounded-full transition-all"
-                  style={{
-                    width: `${completion}%`,
-                    background:
-                      'linear-gradient(90deg, rgba(131,110,249,0.6), rgba(99,102,241,0.6))',
-                  }}
-                />
-              </div>
-              <span className="text-xs text-zinc-600">{completion}%</span>
-            </div>
-          </div>
+          <h2 className="mk-wizard__title">Deploy new agent</h2>
+          <p className="mk-wizard__sub">
+            Step {step} of {steps.length} · {completion}% complete
+          </p>
         </div>
-        <button onClick={onCancel} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-          <X className="w-5 h-5" />
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mk-wizard__close"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" strokeWidth={1.75} />
         </button>
       </div>
 
-      {/* Progress Bar */}
-      <div className="flex gap-2 mb-8">
+      {/* Step progress */}
+      <div className="mk-wizard__steps">
         {steps.map((s) => (
-          <div key={s.num} className="flex-1">
-            <div
-              className="h-1.5 rounded-full transition-all"
-              style={{
-                background: s.num <= step ? 'rgba(131,110,249,0.6)' : 'rgba(255,255,255,0.1)',
-              }}
-            />
-          </div>
+          <div
+            key={s.num}
+            className={`mk-wizard__step ${s.num <= step ? 'mk-wizard__step--done' : ''}`}
+          />
         ))}
       </div>
 
@@ -2121,7 +2101,7 @@ function CreateListingForm({
                     key={t}
                     type="button"
                     onClick={() => field('type', t)}
-                    className={`text-xs font-light px-4 py-2 rounded-lg border transition-all ${form.type === t ? 'bg-monad-500/20 border-monad-500/40 text-monad-300' : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'}`}
+                    className={`mk-wizard__chip ${form.type === t ? 'mk-wizard__chip--active' : ''}`}
                   >
                     {TYPE_LABELS[t]}
                   </button>
@@ -2343,11 +2323,7 @@ function CreateListingForm({
                 <label className="text-xs font-light text-zinc-400 mb-3 block">Agent File</label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full rounded-xl border-2 border-dashed py-8 text-center cursor-pointer transition-colors"
-                  style={{
-                    borderColor: uploadedFile ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.1)',
-                    background: uploadedFile ? 'rgba(34,197,94,0.05)' : 'transparent',
-                  }}
+                  className={`mk-wizard__dropzone ${uploadedFile ? 'mk-wizard__dropzone--done' : ''}`}
                 >
                   {uploading ? (
                     <p className="text-xs font-light text-monad-400 animate-pulse">
@@ -2486,14 +2462,12 @@ function CreateListingForm({
                     key={tier.value}
                     type="button"
                     onClick={() => field('pricingModel', tier.value)}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      form.pricingModel === tier.value
-                        ? 'bg-monad-500/20 border-monad-500/40'
-                        : 'bg-transparent border-white/10 hover:border-white/20'
+                    className={`mk-wizard__tile ${
+                      form.pricingModel === tier.value ? 'mk-wizard__tile--active' : ''
                     }`}
                   >
-                    <p className="text-sm font-light text-zinc-100">{tier.label}</p>
-                    <p className="text-xs font-light text-zinc-600">{tier.description}</p>
+                    <p className="text-[13px] font-normal text-zinc-100">{tier.label}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5">{tier.description}</p>
                   </button>
                 ))}
               </div>
@@ -2970,12 +2944,7 @@ function CreateListingForm({
             <button
               type="button"
               onClick={() => setStep((prev) => (prev - 1) as any)}
-              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all border"
-              style={{
-                borderColor: 'rgba(255,255,255,0.1)',
-                color: '#e4e4e7',
-                background: 'transparent',
-              }}
+              className="mk-wizard__secondary"
             >
               Back
             </button>
@@ -2992,27 +2961,13 @@ function CreateListingForm({
                   setError('Please fill in the required fields');
                 }
               }}
-              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all disabled:opacity-40"
-              style={{
-                background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
-                border: '1px solid rgba(131,110,249,0.4)',
-                color: '#e2d9ff',
-              }}
+              className="mk-wizard__primary"
             >
               Next
             </button>
           ) : (
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 py-2.5 rounded-xl font-light text-sm transition-all disabled:opacity-40"
-              style={{
-                background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
-                border: '1px solid rgba(131,110,249,0.4)',
-                color: '#e2d9ff',
-              }}
-            >
-              {submitting ? 'deploying...' : 'deploy agent →'}
+            <button type="submit" disabled={submitting} className="mk-wizard__primary">
+              {submitting ? 'Deploying…' : 'Deploy agent'}
             </button>
           )}
         </div>
