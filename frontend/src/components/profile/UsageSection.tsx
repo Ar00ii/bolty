@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { TrendingUp, AlertCircle, Users } from 'lucide-react';
 import React from 'react';
 
@@ -36,7 +37,10 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
       </div>
 
       {/* Main Usage Metric */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
         className="relative p-6 rounded-xl overflow-hidden space-y-4"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -83,10 +87,12 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
           }}
         >
-          <div
-            className="h-full rounded-full transition-all duration-500"
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(usagePercent, 100)}%` }}
+            transition={{ duration: 0.9, ease: [0.22, 0.61, 0.36, 1], delay: 0.2 }}
+            className="h-full rounded-full"
             style={{
-              width: `${Math.min(usagePercent, 100)}%`,
               background: `linear-gradient(90deg, ${progressColor}cc 0%, ${progressColor} 100%)`,
               boxShadow: `0 0 12px -2px ${progressGlow}`,
             }}
@@ -94,7 +100,10 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         </div>
 
         {(isWarning || isError) && (
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
             className="relative flex items-center gap-2 p-3 rounded-lg overflow-hidden"
             style={{
               background:
@@ -102,13 +111,19 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
               boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
             }}
           >
-            <AlertCircle className="w-4 h-4 text-[#fda4af] flex-shrink-0" />
+            <motion.span
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+              className="flex"
+            >
+              <AlertCircle className="w-4 h-4 text-[#fda4af] flex-shrink-0" />
+            </motion.span>
             <p className="text-[13px] text-[#fda4af] tracking-[0.005em]">
               {isError
                 ? 'You have reached 95% of your usage limit'
                 : 'You are approaching your usage limit'}
             </p>
-          </div>
+          </motion.div>
         )}
 
         <p className="text-xs text-zinc-500">
@@ -120,13 +135,17 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             })}
           </span>
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         {/* Active Agents */}
-        <div
-          className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+          whileHover={{ y: -2 }}
+          className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
           style={{
             background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
             boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
@@ -159,11 +178,15 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             {data.activeAgents}
           </p>
           <p className="text-xs text-zinc-500 mt-2">Currently deployed</p>
-        </div>
+        </motion.div>
 
         {/* Last 24h */}
-        <div
-          className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14, duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+          whileHover={{ y: -2 }}
+          className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
           style={{
             background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
             boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
@@ -196,12 +219,15 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             {data.last24hCalls.toLocaleString()}
           </p>
           <p className="text-xs text-zinc-500 mt-2">API calls</p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Upgrade Section */}
       {usagePercent > 80 && (
-        <div
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
           className="relative p-5 rounded-xl overflow-hidden"
           style={{
             background:
@@ -223,7 +249,10 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
           <p className="text-[13px] text-zinc-400 mb-4 tracking-[0.005em]">
             Upgrade to a higher plan to increase your API call limits
           </p>
-          <button
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
             className="w-full px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
@@ -233,8 +262,8 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
             }}
           >
             View Plans
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
     </div>
   );
