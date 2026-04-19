@@ -407,12 +407,19 @@ export function CommandPalette() {
                       <button
                         onMouseEnter={() => setActiveIndex(idx)}
                         onClick={() => runCommand(cmd)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                          active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
-                        }`}
+                        className="relative w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-white/[0.03]"
                       >
+                        {active && (
+                          <motion.span
+                            layoutId="command-palette-active-row"
+                            transition={{ type: 'spring', stiffness: 420, damping: 36 }}
+                            aria-hidden="true"
+                            className="absolute inset-0"
+                            style={{ background: 'rgba(255,255,255,0.06)' }}
+                          />
+                        )}
                         <div
-                          className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
+                          className="relative shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
                           style={{
                             borderColor: 'rgba(255,255,255,0.08)',
                             background:
@@ -425,12 +432,12 @@ export function CommandPalette() {
                             className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
                           />
                         </div>
-                        <div className="flex-1 min-w-0">
+                        <div className="relative flex-1 min-w-0">
                           <p className="text-sm font-light text-white truncate">{cmd.title}</p>
                           <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
                         </div>
                         {cmd.kind === 'listing' && (
-                          <span className="text-[10px] text-zinc-600 uppercase tracking-wider">
+                          <span className="relative text-[10px] text-zinc-600 uppercase tracking-wider">
                             {cmd.group === 'recent' ? 'Recent' : 'Listing'}
                           </span>
                         )}
