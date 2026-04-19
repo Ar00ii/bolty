@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   LogIn,
   KeyRound,
@@ -84,9 +85,12 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
           <p className="text-sm text-gray-400 mt-1">Your recent account activity</p>
         </div>
         {onExport && (
-          <button
+          <motion.button
             onClick={onExport}
-            className="px-4 py-2 rounded-lg text-[13px] font-light tracking-[0.005em] text-zinc-300 hover:text-white hover:brightness-110 transition-all flex items-center gap-2"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="px-4 py-2 rounded-lg text-[13px] font-light tracking-[0.005em] text-zinc-300 hover:text-white hover:brightness-110 transition-colors flex items-center gap-2"
             style={{
               background: 'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
               boxShadow:
@@ -95,7 +99,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
           >
             <Download className="w-4 h-4" />
             Export
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -137,7 +141,17 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
             const Icon = config.icon;
 
             return (
-              <div key={event.id} className="relative">
+              <motion.div
+                key={event.id}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{
+                  delay: Math.min(index * 0.035, 0.3),
+                  duration: 0.28,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+                className="relative"
+              >
                 {/* Timeline connector */}
                 {index < events.length - 1 && (
                   <div
@@ -198,7 +212,7 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
@@ -207,9 +221,14 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
       {/* Load more hint */}
       {events.length > 0 && (
         <div className="pt-4 border-t border-white/[0.06] text-center">
-          <button className="text-[13px] font-light tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors">
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="text-[13px] font-light tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
+          >
             Load more activity
-          </button>
+          </motion.button>
         </div>
       )}
     </div>
