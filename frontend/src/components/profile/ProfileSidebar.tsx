@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import React from 'react';
 
 import { User } from '@/lib/auth/AuthProvider';
@@ -73,25 +74,46 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
 
       {/* Tab Navigation */}
       <div className="flex flex-col gap-1">
-        {tabs.map((tab) => {
+        {tabs.map((tab, idx) => {
           const isActive = activeTab === tab.id;
           return (
-            <button
+            <motion.button
               key={tab.id}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: Math.min(idx * 0.03, 0.25),
+                duration: 0.24,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => onTabChange(tab.id)}
               className={`profile-menu-item flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition-all w-full ${isActive ? 'active' : ''}`}
             >
+              {isActive && (
+                <motion.span
+                  layoutId="profile-tab-indicator"
+                  className="pointer-events-none absolute inset-0 rounded-lg"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 32 }}
+                />
+              )}
               <span
-                className={`w-5 h-5 flex items-center justify-center transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-500'}`}
+                className={`relative w-5 h-5 flex items-center justify-center transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-500'}`}
               >
                 {tab.icon}
               </span>
               <span
-                className={`text-[13px] font-light flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-300'}`}
+                className={`relative text-[13px] font-light flex-1 text-left tracking-[0.005em] transition-colors ${isActive ? 'text-[#b4a7ff]' : 'text-zinc-300'}`}
               >
                 {tab.label}
               </span>
-            </button>
+            </motion.button>
           );
         })}
       </div>
