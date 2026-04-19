@@ -1765,20 +1765,38 @@ function ReposMarketPageContent() {
                 </option>
               ))}
             </select>
-            <div className="flex gap-1.5 flex-wrap">
-              {SORTS.map((s) => (
-                <button
-                  key={s.value}
-                  onClick={() => setSortBy(s.value as typeof sortBy)}
-                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
-                    sortBy === s.value
-                      ? 'text-monad-300 bg-monad-500/10 border-monad-500/30'
-                      : 'text-zinc-500 hover:text-zinc-300 border-zinc-800 bg-transparent'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+            <div className="relative flex gap-1.5 flex-wrap">
+              {SORTS.map((s) => {
+                const active = sortBy === s.value;
+                return (
+                  <motion.button
+                    key={s.value}
+                    onClick={() => setSortBy(s.value as typeof sortBy)}
+                    whileTap={{ scale: 0.96 }}
+                    whileHover={active ? undefined : { y: -1 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                    className={`relative text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                      active ? 'text-monad-300' : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="market-repos-sort-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        aria-hidden="true"
+                        className="absolute inset-0 rounded-lg"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        }}
+                      />
+                    )}
+                    <span className="relative">{s.label}</span>
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
           {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
