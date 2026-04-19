@@ -403,27 +403,58 @@ export default function OrdersPage() {
       )}
 
       {/* Tabs */}
-      <div className="tab-group mb-4">
-        <button
-          onClick={() => {
-            setTab('buying');
-            setStatusFilter('ALL');
-            setSearch('');
-          }}
-          className={`tab-item ${tab === 'buying' ? 'active' : ''}`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" /> Buying ({buyerOrders.length})
-        </button>
-        <button
-          onClick={() => {
-            setTab('selling');
-            setStatusFilter('ALL');
-            setSearch('');
-          }}
-          className={`tab-item ${tab === 'selling' ? 'active' : ''}`}
-        >
-          <TrendingUp className="w-3.5 h-3.5" /> Selling ({sellerOrders.length})
-        </button>
+      <div
+        className="inline-flex items-center gap-0.5 p-1 rounded-lg mb-4"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
+      >
+        {(
+          [
+            { key: 'buying', label: 'Buying', icon: ShoppingBag, count: buyerOrders.length },
+            { key: 'selling', label: 'Selling', icon: TrendingUp, count: sellerOrders.length },
+          ] as const
+        ).map(({ key, label, icon: Icon, count }) => {
+          const active = tab === key;
+          return (
+            <motion.button
+              key={key}
+              onClick={() => {
+                setTab(key);
+                setStatusFilter('ALL');
+                setSearch('');
+              }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+              className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-light tracking-[0.005em] transition-colors ${
+                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="orders-tab-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <Icon className="relative z-10 w-3.5 h-3.5" strokeWidth={1.75} />
+              <span className="relative z-10">{label}</span>
+              <span
+                className="relative z-10 text-[10.5px] font-normal"
+                style={{ color: active ? 'rgba(255,255,255,0.75)' : 'rgba(113,113,122,1)' }}
+              >
+                {count}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* Search */}
@@ -477,30 +508,37 @@ export default function OrdersPage() {
               onClick={() => setStatusFilter(s)}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.03, duration: 0.22 }}
+              transition={{
+                delay: Math.min(idx * 0.03, 0.2),
+                duration: 0.22,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
               whileTap={{ scale: 0.96 }}
-              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
+              className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
                 active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
-              style={
-                active
-                  ? {
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
-                    }
-                  : {
-                      background:
-                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                      boxShadow:
-                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-                    }
-              }
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
-              {STATUS_FILTER_LABELS[s]}
+              {active && (
+                <motion.span
+                  layoutId="orders-status-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">{STATUS_FILTER_LABELS[s]}</span>
               <span
-                className="text-[10px] font-normal"
+                className="relative z-10 text-[10px] font-normal"
                 style={{ color: active ? 'rgba(255,255,255,0.7)' : 'rgba(113,113,122,1)' }}
               >
                 {count}
