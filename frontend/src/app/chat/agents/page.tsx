@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Send, Bot, Clock } from 'lucide-react';
 import React, { useCallback, useRef, useEffect, useState } from 'react';
 
@@ -126,8 +127,18 @@ export default function AgentChatPage() {
               </div>
             </div>
           ) : (
-            messages.map((msg) => (
-              <div key={msg.id} className="flex gap-4 group">
+            messages.map((msg, idx) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(idx * 0.02, 0.25),
+                  duration: 0.28,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+                className="flex gap-4 group"
+              >
                 {/* Agent Avatar */}
                 <div
                   className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center flex-col text-xs font-light"
@@ -181,7 +192,7 @@ export default function AgentChatPage() {
                     {msg.content}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
           <div ref={bottomRef} />
@@ -290,10 +301,15 @@ export default function AgentChatPage() {
                   },
                 ]),
               ).values(),
-            ).map((agent) => (
-              <div
+            ).map((agent, idx) => (
+              <motion.div
                 key={agent.id}
-                className="p-3 rounded-lg transition-all hover:scale-105 cursor-pointer"
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.035, duration: 0.26 }}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.98 }}
+                className="p-3 rounded-lg cursor-pointer"
                 style={{
                   background: 'rgba(255, 255, 255, 0.06)',
                   border: '1px solid rgba(168, 85, 247, 0.2)',
@@ -323,7 +339,7 @@ export default function AgentChatPage() {
                   </div>
                   <div className="w-2 h-2 rounded-full bg-green-400" />
                 </div>
-              </div>
+              </motion.div>
             ))
           ) : (
             <div className="flex items-center justify-center h-full text-center">

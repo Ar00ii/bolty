@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -317,10 +318,20 @@ export default function ChatPage() {
               </p>
             </div>
           )}
-          {messages.map((msg) => {
+          {messages.map((msg, idx) => {
             const isMe = msg.userId === user?.id;
             return (
-              <div key={msg.id} className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}>
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.24,
+                  ease: [0.22, 0.61, 0.36, 1],
+                  delay: Math.min(idx * 0.012, 0.18),
+                }}
+                className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}
+              >
                 {/* Avatar */}
                 <div
                   className="shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
@@ -407,7 +418,7 @@ export default function ChatPage() {
                     <X className="w-3 h-3" />
                   </button>
                 )}
-              </div>
+              </motion.div>
             );
           })}
           <div ref={bottomRef} />

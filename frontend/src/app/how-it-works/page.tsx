@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { ChevronRight, Copy, Check } from 'lucide-react';
 import React, { useState, memo } from 'react';
 
@@ -724,9 +725,14 @@ export default function HowItWorks() {
               { label: 'Ethereum trades', value: '2.5%', note: 'Platform fee on all ETH payments' },
               { label: '$BOLTY trades', value: '0%', note: 'Zero fee — coming on Base chain' },
               { label: 'Seller receives', value: '97.5%', note: 'After platform fee deduction' },
-            ].map(({ label, value, note }) => (
-              <div
+            ].map(({ label, value, note }, idx) => (
+              <motion.div
                 key={label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ delay: idx * 0.08, duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+                whileHover={{ y: -2 }}
                 style={{
                   background: '#0d1117',
                   border: '1px solid #30363d',
@@ -750,7 +756,7 @@ export default function HowItWorks() {
                 <div style={{ fontSize: '0.8rem', color: '#8b949e', marginTop: '0.3rem' }}>
                   {note}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
