@@ -275,30 +275,37 @@ export default function NotificationsPage() {
               onClick={() => setTypeFilter(t.value)}
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.03, duration: 0.22 }}
+              transition={{
+                delay: Math.min(idx * 0.03, 0.2),
+                duration: 0.22,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
               whileTap={{ scale: 0.96 }}
-              className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
+              className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
                 active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
               }`}
-              style={
-                active
-                  ? {
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
-                    }
-                  : {
-                      background:
-                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                      boxShadow:
-                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-                    }
-              }
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
-              {t.label}
+              {active && (
+                <motion.span
+                  layoutId="notifications-type-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">{t.label}</span>
               <span
-                className="text-[10px] font-normal"
+                className="relative z-10 text-[10px] font-normal"
                 style={{ color: active ? 'rgba(255,255,255,0.7)' : 'rgba(113,113,122,1)' }}
               >
                 {count}

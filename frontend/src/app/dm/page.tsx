@@ -381,24 +381,26 @@ export default function DmPage() {
                   onClick={() => setActiveCategory(cat.id)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="text-[10.5px] uppercase tracking-[0.14em] font-medium px-2.5 py-1.5 rounded-md transition-all flex items-center gap-1"
-                  style={
-                    active
-                      ? {
-                          color: '#b4a7ff',
-                          background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                        }
-                      : {
-                          color: 'rgba(161,161,170,0.55)',
-                          background: 'transparent',
-                        }
-                  }
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className={`relative text-[10.5px] uppercase tracking-[0.14em] font-medium px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1 ${
+                    active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
                 >
-                  {cat.icon}
-                  {cat.label}
+                  {active && (
+                    <motion.span
+                      layoutId="dm-category-pill"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute inset-0 rounded-md"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10 inline-flex">{cat.icon}</span>
+                  <span className="relative z-10">{cat.label}</span>
                 </motion.button>
               );
             })}
