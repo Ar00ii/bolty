@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { AgentDashboard } from '@/components/profile/AgentDashboard';
+import { APIKeysSection } from '@/components/profile/APIKeysSection';
 import { BillingSection } from '@/components/profile/BillingSection';
 import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
@@ -25,7 +26,8 @@ type Tab =
   | 'usage'
   | 'notifications'
   | 'integrations'
-  | 'activity';
+  | 'activity'
+  | 'security';
 
 interface Friend {
   id: string;
@@ -545,6 +547,7 @@ export default function ProfilePage() {
         'notifications',
         'integrations',
         'activity',
+        'security',
       ].includes(tabParam)
     ) {
       setTab(tabParam);
@@ -1059,12 +1062,13 @@ export default function ProfilePage() {
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
                 { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
+                { id: 'billing' as Tab, label: 'Billing', Icon: IconArrow },
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
-                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
+                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
+                { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
                 { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => {
                 const active = tab === id;
@@ -1349,6 +1353,115 @@ export default function ProfilePage() {
                   </div>
                 </form>
               </div>
+            )}
+
+            {/* ════════════════════════════════════════════
+          WALLET
+      ════════════════════════════════════════════ */}
+            {tab === 'wallet' && (
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Wallet"
+                  subtitle="Connect your MetaMask wallet to enable on-chain transactions."
+                />
+                <Alert type="success" msg={walletMsg} />
+                <Alert type="error" msg={walletErr} />
+
+                {walletAddress ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                        <IconWallet className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
+                          Connected
+                        </div>
+                        <div className="font-mono text-sm text-[var(--text)] truncate">
+                          {walletAddress}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] mt-0.5">MetaMask</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDisconnectWallet}
+                      disabled={walletLoading}
+                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {walletLoading ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        'Disconnect Wallet'
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]">
+                      <div className="flex items-start gap-4">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background:
+                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 18px -4px rgba(131,110,249,0.45)',
+                          }}
+                        >
+                          <IconWallet className="w-6 h-6 text-[#b4a7ff]" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-light text-[var(--text)] mb-1">MetaMask</div>
+                          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                            Connect your MetaMask wallet to make payments, receive earnings, and
+                            participate in on-chain transactions on Bolty.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleConnectWallet}
+                      disabled={walletLoading}
+                      className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      }}
+                    >
+                      {walletLoading ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <IconWallet className="w-4 h-4" />
+                          Connect MetaMask
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════
+          API KEYS
+      ════════════════════════════════════════════ */}
+            {tab === 'api-keys' && (
+              <APIKeysSection
+                apiKeys={apiKeys}
+                onDelete={handleDeleteAPIKey}
+                onGenerate={handleGenerateAPIKey}
+                onCopy={handleCopyAPIKey}
+              />
             )}
 
             {/* ════════════════════════════════════════════
@@ -1642,7 +1755,15 @@ export default function ProfilePage() {
                       name: 'Twitter/X',
                       description: 'Share your achievements and activity',
                       connected: !!twitterUrl,
-                      connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
+                      connectedAs: twitterUrl
+                        ? (() => {
+                            try {
+                              return new URL(twitterUrl).pathname.replace(/^\//, '');
+                            } catch {
+                              return twitterUrl;
+                            }
+                          })()
+                        : undefined,
                     },
                     {
                       id: 'discord',
@@ -1729,11 +1850,16 @@ export default function ProfilePage() {
                   return merged;
                 })()}
                 onConnect={async (id: string) => {
+                  if (id === 'metamask') {
+                    await handleConnectWallet();
+                    return;
+                  }
+                  if (id === 'github-social') {
+                    handleLinkGitHub();
+                    return;
+                  }
                   try {
-                    await api.post('/users/integrations', {
-                      provider: id,
-                      name: id,
-                    });
+                    await api.post('/users/integrations', { provider: id, name: id });
                     const ints = await api.get<any>('/users/integrations');
                     setIntegrations(Array.isArray(ints) ? ints : []);
                   } catch (err) {
@@ -1741,6 +1867,14 @@ export default function ProfilePage() {
                   }
                 }}
                 onDisconnect={async (id: string) => {
+                  if (id === 'metamask') {
+                    await handleDisconnectWallet();
+                    return;
+                  }
+                  if (id === 'github-social') {
+                    await handleUnlinkGitHub();
+                    return;
+                  }
                   try {
                     await api.delete(`/users/integrations/${id}`);
                     const ints = await api.get<any>('/users/integrations');
@@ -1750,6 +1884,314 @@ export default function ProfilePage() {
                   }
                 }}
               />
+            )}
+
+            {/* ════════════════════════════════════════════
+          SECURITY
+      ════════════════════════════════════════════ */}
+            {tab === 'security' && (
+              <div className="space-y-4">
+                {/* ── Email address ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Email Address"
+                    subtitle="Update the email address associated with your account."
+                  />
+                  <Alert type="success" msg={secMsg} />
+                  <Alert type="error" msg={secErr} />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                    <div>
+                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
+                        Current email
+                      </div>
+                      <div className="text-sm font-light text-[var(--text)]">
+                        {userEmail || '—'}
+                      </div>
+                    </div>
+                    {emailStep === 'idle' && (
+                      <button
+                        type="button"
+                        onClick={() => setEmailStep('form')}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
+                      >
+                        Change
+                      </button>
+                    )}
+                  </div>
+
+                  {emailStep === 'form' && (
+                    <form onSubmit={handleRequestEmailChange} className="space-y-4">
+                      <Field label="New Email Address">
+                        <Input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          required
+                          placeholder="new@example.com"
+                        />
+                      </Field>
+                      <Field label="Current Password">
+                        <Input
+                          type="password"
+                          value={emailPassword}
+                          onChange={(e) => setEmailPassword(e.target.value)}
+                          required
+                          placeholder="••••••••"
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={emailLoading}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {emailLoading ? 'Sending...' : 'Send verification code'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEmailStep('idle');
+                            setNewEmail('');
+                            setEmailPassword('');
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {emailStep === 'otp' && (
+                    <form onSubmit={handleConfirmEmailChange} className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        A 6-digit code was sent to <span className="text-purple-400">{newEmail}</span>.
+                      </p>
+                      <Field label="Verification Code">
+                        <Input
+                          type="text"
+                          value={emailOtp}
+                          onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          maxLength={6}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={emailLoading || emailOtp.length !== 6}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {emailLoading ? 'Confirming...' : 'Confirm email change'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEmailStep('idle')}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+
+                {/* ── Two-Factor Authentication ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Two-Factor Authentication"
+                    subtitle="Add an extra layer of security to your account."
+                  />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${twoFAEnabled ? 'bg-emerald-400' : 'bg-zinc-500'}`}
+                      />
+                      <div>
+                        <div className="text-sm font-light text-[var(--text)]">
+                          {twoFAEnabled ? '2FA is enabled' : '2FA is disabled'}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          {twoFAEnabled
+                            ? 'Your account is protected with two-factor authentication.'
+                            : 'Enable 2FA to secure your account with a verification code.'}
+                        </div>
+                      </div>
+                    </div>
+                    {enable2FAStep === 'idle' && (
+                      <button
+                        type="button"
+                        onClick={handle2FAToggle}
+                        disabled={toggling2FA || (twoFAEnabled && !disable2FAPassword)}
+                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
+                          twoFAEnabled
+                            ? 'border-red-500/25 text-red-400 hover:border-red-500/40 hover:bg-red-500/5'
+                            : 'border-emerald-500/25 text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/5'
+                        }`}
+                      >
+                        {toggling2FA ? '...' : twoFAEnabled ? 'Disable' : 'Enable'}
+                      </button>
+                    )}
+                  </div>
+
+                  {twoFAEnabled && enable2FAStep === 'idle' && (
+                    <Field label="Password required to disable 2FA">
+                      <Input
+                        type="password"
+                        value={disable2FAPassword}
+                        onChange={(e) => setDisable2FAPassword(e.target.value)}
+                        placeholder="Enter your password"
+                      />
+                    </Field>
+                  )}
+
+                  {enable2FAStep === 'code' && (
+                    <div className="space-y-4 mt-2">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        Enter the 6-digit code sent to your email to enable 2FA.
+                      </p>
+                      <Field label="Verification Code">
+                        <Input
+                          type="text"
+                          value={enable2FACode}
+                          onChange={(e) =>
+                            setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
+                          placeholder="000000"
+                          maxLength={6}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleEnable2FAConfirm}
+                          disabled={toggling2FA || enable2FACode.length !== 6}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {toggling2FA ? 'Verifying...' : 'Verify & Enable'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEnable2FAStep('idle');
+                            setEnable2FACode('');
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Delete Account ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Delete Account"
+                    subtitle="Permanently delete your account and all associated data."
+                  />
+
+                  {deleteStep === 'idle' && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
+                        This action is irreversible. All your data, agents, listings, and transaction
+                        history will be permanently removed.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteStep('confirm')}
+                        className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200"
+                      >
+                        Delete my account
+                      </button>
+                    </div>
+                  )}
+
+                  {deleteStep === 'confirm' && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        Are you sure? We will send a confirmation code to your email.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleRequestDeleteAccount}
+                          disabled={requestingDelete}
+                          className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-light disabled:opacity-50 transition-all"
+                        >
+                          {requestingDelete ? 'Sending code...' : 'Yes, send confirmation code'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteStep('idle')}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {deleteStep === 'otp' && (
+                    <form onSubmit={handleDeleteAccount} className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        Enter the confirmation code sent to your email to permanently delete your
+                        account.
+                      </p>
+                      <Alert type="error" msg={secErr} />
+                      <Field label="Confirmation Code">
+                        <Input
+                          type="text"
+                          value={deleteOtp}
+                          onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          placeholder="000000"
+                          maxLength={6}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={deleting || deleteOtp.length !== 6}
+                          className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-light disabled:opacity-50 transition-all"
+                        >
+                          {deleting ? 'Deleting...' : 'Permanently delete account'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeleteStep('idle');
+                            setDeleteOtp('');
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* ACTIVITY LOG */}
