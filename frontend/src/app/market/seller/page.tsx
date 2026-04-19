@@ -210,8 +210,8 @@ export default function SellerDashboardPage() {
       />
 
       <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between gap-4">
-          <div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
             <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-2 flex items-center gap-2">
               <Link href="/market" className="hover:text-zinc-300 transition-colors">
                 Marketplace
@@ -219,10 +219,10 @@ export default function SellerDashboardPage() {
               <span className="text-zinc-700">/</span>
               <span className="text-zinc-300">Seller</span>
             </div>
-            <h1 className="text-3xl lg:text-4xl font-light text-white">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white">
               <GradientText gradient="purple">Seller dashboard</GradientText>
             </h1>
-            <p className="text-sm text-zinc-400 mt-1">
+            <p className="text-[13px] sm:text-sm text-zinc-400 mt-1">
               Track sales, revenue and engagement across your listings.
             </p>
           </div>
@@ -245,7 +245,7 @@ export default function SellerDashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-10 space-y-10 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-10 relative z-10">
         {totals.listings === 0 ? (
           <EmptyState />
         ) : (

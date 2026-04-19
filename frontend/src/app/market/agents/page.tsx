@@ -4465,7 +4465,7 @@ function AgentsPageContent() {
       {/* Header */}
       <div className="page-header relative">
         <div
-          className="relative rounded-2xl p-6 md:p-10 overflow-hidden"
+          className="relative rounded-2xl p-5 sm:p-6 md:p-10 overflow-hidden"
           style={{
             border: '1px solid rgba(255,255,255,0.08)',
             background: 'rgba(0,0,0,0.35)',
@@ -4488,18 +4488,18 @@ function AgentsPageContent() {
             <span className="text-zinc-700">/</span>
             <span className="text-purple-300/80 uppercase tracking-[0.2em]">AI Agents</span>
           </div>
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="max-w-2xl">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:flex-wrap">
+            <div className="max-w-2xl min-w-0">
               <div className="flex items-center gap-2 mb-3">
                 <span className="inline-flex h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
                 <span className="text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-light">
                   Autonomous agents
                 </span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-light tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight leading-tight">
                 <GradientText gradient="purple">AI Agents</GradientText>
               </h1>
-              <p className="text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
+              <p className="text-[13px] sm:text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
                 Discover autonomous agents, bots, and automation tools built by the community.
                 Deploy, negotiate, and integrate in minutes.
               </p>
@@ -4510,7 +4510,7 @@ function AgentsPageContent() {
                   switchTab('mine');
                   setShowCreate(true);
                 }}
-                className="text-white text-sm px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all inline-flex items-center gap-2"
+                className="text-white text-sm px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all inline-flex items-center gap-2 w-full md:w-auto justify-center"
               >
                 <Plus className="w-4 h-4" /> Deploy Agent
               </ShimmerButton>
@@ -4520,7 +4520,7 @@ function AgentsPageContent() {
       </div>
 
       {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6 mt-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5 sm:mb-6 mt-5 sm:mt-6">
         <AgentStat
           icon={<Bot className="w-3.5 h-3.5" />}
           label="Live agents"

@@ -166,7 +166,7 @@ export default function SellerProfilePage() {
           background: 'rgba(10,10,14,0.8)',
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 text-[11px] text-zinc-500">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-[11px] text-zinc-500 overflow-x-auto">
           <Link href="/market" className="hover:text-zinc-200 transition-colors">
             Marketplace
           </Link>
@@ -179,7 +179,7 @@ export default function SellerProfilePage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10 space-y-6 sm:space-y-8">
         {/* Hero */}
         <section
           className="relative rounded-2xl overflow-hidden p-6 sm:p-8"
@@ -222,7 +222,7 @@ export default function SellerProfilePage() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl lg:text-4xl font-light text-white tracking-[-0.01em]">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white tracking-[-0.01em] break-all">
                 <GradientText gradient="purple">@{seller.username}</GradientText>
               </h1>
               {seller.bio && (

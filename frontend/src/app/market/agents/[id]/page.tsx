@@ -281,7 +281,7 @@ export default function AgentDetailPage() {
     <div className="min-h-screen" style={{ background: '#000' }}>
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-black/70">
-        <div className="max-w-6xl mx-auto px-6 py-3 flex items-center gap-2 text-xs text-zinc-500">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-xs text-zinc-500 overflow-x-auto">
           <Link href="/market" className="hover:text-zinc-200 transition-colors">
             Marketplace
           </Link>
@@ -294,10 +294,10 @@ export default function AgentDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
-        <header className="mb-10">
-          <div className="flex items-start gap-5 flex-wrap">
+        <header className="mb-8 sm:mb-10">
+          <div className="flex items-start gap-4 sm:gap-5 flex-wrap">
             <div
               className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
               style={{
@@ -321,7 +321,7 @@ export default function AgentDetailPage() {
                   </>
                 )}
               </div>
-              <h1 className="text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight break-words">
                 {listing.title}
               </h1>
               <div className="flex items-center gap-3 mt-3 text-sm text-zinc-400">

@@ -69,21 +69,21 @@ export default function MarketTagsPage() {
         />
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-6 py-12">
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <Link
           href="/market"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-8 transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white mb-6 sm:mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to market
         </Link>
 
-        <div className="relative border-t-2 border-l-2 border-white/20 rounded-tl-2xl p-8 mb-8">
+        <div className="relative border-t-2 border-l-2 border-white/20 rounded-tl-2xl p-5 sm:p-8 mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-3">
             <Hash className="w-5 h-5 text-[#EC4899]" />
             <span className="text-xs uppercase tracking-[0.2em] text-zinc-500">Explore</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-light text-white mb-3">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-light text-white mb-3">
             Browse by <GradientText>tag</GradientText>
           </h1>
           <p className="text-zinc-400 font-light max-w-xl">

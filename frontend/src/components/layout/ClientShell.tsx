@@ -1,8 +1,7 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
@@ -10,28 +9,20 @@ import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
-import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useGoToShortcuts } from '@/lib/hooks/useGoToShortcuts';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(false);
   useGoToShortcuts();
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
   const showSidebar = !isHome && !isAuth;
 
-  // Show loading bar on route change + scroll to top
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    if (typeof window !== 'undefined') {
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
-    }
-    return () => clearTimeout(timer);
+    if (typeof window === 'undefined') return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
   }, [pathname]);
 
   return (
@@ -42,37 +33,22 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       >
         Skip to main content
       </a>
-      <ProgressBar isLoading={isLoading} />
       <CommandPalette />
       <ShortcutsModal />
       <FloatingTopBar />
       {!isAuth && <BackToTop />}
-      {/* Show header only on landing and auth pages */}
       {!showSidebar && <UnifiedHeader />}
 
       <div className={`flex ${!showSidebar && !isHome ? 'pt-16' : ''}`}>
         {showSidebar && <Sidebar />}
 
-        <div className="flex-1 w-full">
+        <div className="flex-1 w-full min-w-0">
           <main
             id="main-content"
             tabIndex={-1}
             className="flex-1 relative min-h-screen focus:outline-none"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, y: -6, filter: 'blur(2px)' }}
-                transition={{
-                  duration: 0.32,
-                  ease: [0.22, 0.61, 0.36, 1],
-                }}
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
+            {children}
           </main>
         </div>
       </div>

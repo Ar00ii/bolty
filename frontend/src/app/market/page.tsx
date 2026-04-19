@@ -209,17 +209,17 @@ function MarketPageContent() {
     <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
       {/* Header Section */}
       <div className="border-b border-white/8 sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5 sm:mb-6">
             <div>
-              <h1 className="text-3xl lg:text-4xl font-light text-white mb-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white mb-1.5 sm:mb-2">
                 <GradientText gradient="purple">Marketplace</GradientText>
               </h1>
-              <p className="text-sm text-zinc-400">
+              <p className="text-[13px] sm:text-sm text-zinc-400">
                 Access {listings.length} AI agents, repositories, and services from the community.
               </p>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 -mx-1 px-1 overflow-x-auto lg:overflow-visible">
               <NavChip href="/market/agents" icon={Bot} label="Agents" />
               <NavChip href="/market/repos" icon={GitBranch} label="Repos" />
               <NavChip href="/market/sellers" icon={Users} label="Sellers" />
@@ -237,7 +237,7 @@ function MarketPageContent() {
           </div>
 
           {/* Stat Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <StatCard
               label="Total Listings"
               value={listings.length.toString()}
@@ -261,7 +261,7 @@ function MarketPageContent() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Search & Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div
@@ -360,15 +360,15 @@ function MarketPageContent() {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-1 sm:flex-initial min-w-0">
               <input
                 type="number"
                 inputMode="decimal"
                 min={0}
-                placeholder="Min price"
+                placeholder="Min"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="w-28 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
+                className="flex-1 sm:flex-initial sm:w-28 min-w-0 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
                   boxShadow: '0 0 0 1px rgba(255,255,255,0.08)',
@@ -379,10 +379,10 @@ function MarketPageContent() {
                 type="number"
                 inputMode="decimal"
                 min={0}
-                placeholder="Max price"
+                placeholder="Max"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-28 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
+                className="flex-1 sm:flex-initial sm:w-28 min-w-0 px-2.5 py-1.5 rounded-md text-white placeholder-zinc-500 text-[12px] focus:outline-none focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-shadow"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
                   boxShadow: '0 0 0 1px rgba(255,255,255,0.08)',

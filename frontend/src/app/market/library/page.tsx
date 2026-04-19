@@ -152,7 +152,7 @@ export default function LibraryPage() {
       />
 
       <div className="border-b border-white/8 sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-6xl mx-auto px-6 py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
           <div className="text-[11px] uppercase tracking-widest text-zinc-500 mb-2 flex items-center gap-2">
             <Link href="/market" className="hover:text-zinc-300">
               Marketplace
@@ -160,16 +160,16 @@ export default function LibraryPage() {
             <span>/</span>
             <span className="text-zinc-300">Library</span>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-light text-white">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white">
                 <GradientText gradient="purple">Your library</GradientText>
               </h1>
-              <p className="text-sm text-zinc-400 mt-1">
+              <p className="text-[13px] sm:text-sm text-zinc-400 mt-1">
                 Everything you've purchased, all in one place.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 text-xs text-zinc-400">
+            <div className="inline-flex items-center gap-2 text-xs text-zinc-400 shrink-0">
               <Library className="w-4 h-4" />
               {items.length} item{items.length === 1 ? '' : 's'}
             </div>
@@ -177,7 +177,7 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10 relative z-10 space-y-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10 space-y-6">
         {items.length === 0 ? (
           <EmptyState />
         ) : (
