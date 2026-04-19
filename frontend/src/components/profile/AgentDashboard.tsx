@@ -183,17 +183,36 @@ export const AgentDashboard: React.FC = () => {
                     className="overflow-hidden mt-3"
                   >
                     <div
-                      className={`p-3 rounded-lg text-sm ${
+                      className="relative p-3 rounded-lg overflow-hidden flex items-center gap-2 text-[13px] tracking-[0.005em]"
+                      style={
                         webhookTestResult.success
-                          ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                          : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                      }`}
+                          ? {
+                              background:
+                                'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                              color: '#86efac',
+                            }
+                          : {
+                              background:
+                                'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+                              color: '#fda4af',
+                            }
+                      }
                     >
-                      {webhookTestResult.success ? (
-                        <>✓ Connection successful ({webhookTestResult.responseTime}ms)</>
-                      ) : (
-                        <>✕ Connection failed: {webhookTestResult.error}</>
-                      )}
+                      <motion.span
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+                        className="inline-flex font-medium tabular-nums"
+                      >
+                        {webhookTestResult.success ? '✓' : '✕'}
+                      </motion.span>
+                      <span>
+                        {webhookTestResult.success
+                          ? `Connection successful (${webhookTestResult.responseTime}ms)`
+                          : `Connection failed: ${webhookTestResult.error}`}
+                      </span>
                     </div>
                   </motion.div>
                 )}
