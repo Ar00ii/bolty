@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle, Info, AlertTriangle, X } from 'lucide-react';
 import React from 'react';
 
@@ -34,7 +35,10 @@ export const Alert: React.FC<AlertProps> = ({
   const Icon = config.icon;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 6, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
       className="relative p-4 rounded-xl flex items-start gap-3 overflow-hidden"
       role="alert"
       style={{
@@ -74,16 +78,19 @@ export const Alert: React.FC<AlertProps> = ({
         </p>
       </div>
       {closeable && onClose && (
-        <button
+        <motion.button
           onClick={onClose}
+          whileTap={{ scale: 0.88 }}
+          whileHover={{ rotate: 90 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 20 }}
           className="p-1 rounded-md transition-colors flex-shrink-0 hover:bg-white/10"
           style={{ color: config.textColor }}
           aria-label="Close alert"
         >
           <X className="w-3.5 h-3.5" />
-        </button>
+        </motion.button>
       )}
-    </div>
+    </motion.div>
   );
 };
 

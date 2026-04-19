@@ -42,10 +42,11 @@ function Toast({ toast, onClose }: { toast: ToastType; onClose: () => void }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, x: 100 }}
-      animate={{ opacity: 1, y: 0, x: 0 }}
-      exit={{ opacity: 0, y: -20, x: 100 }}
-      transition={{ duration: 0.3 }}
+      layout
+      initial={{ opacity: 0, y: 16, x: 40, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, x: 60, scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
       className="relative flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-xl pointer-events-auto min-w-[280px] max-w-md overflow-hidden"
       style={{
         background: `linear-gradient(180deg, rgba(${meta.color},0.14) 0%, rgba(${meta.color},0.04) 100%), linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)`,
@@ -74,12 +75,16 @@ function Toast({ toast, onClose }: { toast: ToastType; onClose: () => void }) {
       >
         {toast.message}
       </span>
-      <button
+      <motion.button
         onClick={onClose}
+        whileTap={{ scale: 0.88 }}
+        whileHover={{ rotate: 90 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
         className="p-1 rounded-md transition-colors hover:bg-white/10 text-zinc-400 hover:text-white"
+        aria-label="Dismiss notification"
       >
         <X className="w-3.5 h-3.5" />
-      </button>
+      </motion.button>
     </motion.div>
   );
 }

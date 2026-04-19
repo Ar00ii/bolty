@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
 
@@ -22,7 +23,10 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
   };
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.36, ease: [0.22, 0.61, 0.36, 1] }}
       className="relative flex flex-col items-center justify-center py-16 px-4 rounded-2xl overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -44,7 +48,10 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
         style={{ background: 'rgba(131,110,249,0.18)' }}
       />
       {Icon && (
-        <div
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.08, type: 'spring', stiffness: 260, damping: 20 }}
           className="relative w-12 h-12 rounded-xl mb-4 flex items-center justify-center"
           style={{
             background:
@@ -54,7 +61,7 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
           }}
         >
           <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
-        </div>
+        </motion.div>
       )}
       <h3 className="relative text-lg font-light text-white tracking-[-0.005em] mb-1.5">{title}</h3>
       <p className="relative text-[13px] text-zinc-400 text-center max-w-sm mb-6 tracking-[0.005em] leading-relaxed">
@@ -62,22 +69,28 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
       </p>
       {action &&
         (action.href ? (
-          <a
+          <motion.a
             href={action.href}
-            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white transition-all hover:brightness-110 tracking-[0.005em]"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
             style={primaryStyle}
           >
             {action.label}
-          </a>
+          </motion.a>
         ) : (
-          <button
+          <motion.button
             onClick={action.onClick}
-            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white transition-all hover:brightness-110 tracking-[0.005em]"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="relative inline-flex items-center gap-2 h-10 px-4 rounded-lg font-light text-[13px] text-white hover:brightness-110 tracking-[0.005em]"
             style={primaryStyle}
           >
             {action.label}
-          </button>
+          </motion.button>
         ))}
-    </div>
+    </motion.div>
   );
 }
