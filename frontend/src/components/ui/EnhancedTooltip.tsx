@@ -39,6 +39,13 @@ export function EnhancedTooltip({
   const offset = offsetMap[side];
   const arrowPos = arrowMap[side];
 
+  const tooltipStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+    boxShadow:
+      '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px -10px rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(8px)',
+  };
+
   return (
     <div
       className="relative inline-block"
@@ -50,12 +57,13 @@ export function EnhancedTooltip({
       <AnimatePresence>
         {isVisible && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, ...offset }}
+            initial={{ opacity: 0, scale: 0.9, ...offset }}
             animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, ...offset }}
-            transition={{ delay, duration: 0.2 }}
-            className={`absolute z-50 px-3 py-2 text-xs bg-zinc-900 border border-zinc-700 rounded-lg whitespace-nowrap pointer-events-none ${className}`}
+            exit={{ opacity: 0, scale: 0.9, ...offset }}
+            transition={{ delay, duration: 0.18, ease: [0.22, 0.61, 0.36, 1] }}
+            className={`absolute z-50 px-3 py-2 text-[12px] rounded-lg whitespace-nowrap pointer-events-none tracking-[0.005em] ${className}`}
             style={{
+              ...tooltipStyle,
               left: side === 'right' ? '100%' : side === 'left' ? 'auto' : '50%',
               right: side === 'left' ? '100%' : 'auto',
               top: side === 'bottom' ? '100%' : side === 'top' ? 'auto' : '50%',
@@ -66,12 +74,15 @@ export function EnhancedTooltip({
                   : 'translateX(-50%)',
             }}
           >
-            <div className="text-zinc-300">{content}</div>
+            <div className="text-zinc-200 font-light">{content}</div>
 
             {/* Arrow */}
             <div
-              className={`absolute w-2 h-2 bg-zinc-900 border border-zinc-700 transform rotate-45 ${arrowPos}`}
+              className={`absolute w-2 h-2 transform rotate-45 ${arrowPos}`}
               style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+                boxShadow: '0 0 0 1px rgba(131,110,249,0.25)',
                 left: side === 'left' || side === 'right' ? 'auto' : '50%',
                 right: side === 'left' ? '-6px' : 'auto',
                 marginLeft: side === 'left' || side === 'right' ? 0 : '-4px',
