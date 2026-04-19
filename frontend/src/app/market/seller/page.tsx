@@ -322,17 +322,23 @@ export default function SellerDashboardPage() {
                 </div>
               </div>
               <div className="relative flex items-end gap-1 h-32">
-                {salesByDay.map((d) => {
+                {salesByDay.map((d, idx) => {
                   const h = (d.sales / maxDay) * 100;
                   return (
                     <div
                       key={d.date}
                       className="flex-1 flex flex-col items-center justify-end group relative"
                     >
-                      <div
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${Math.max(2, h)}%` }}
+                        transition={{
+                          delay: Math.min(idx * 0.02, 0.4),
+                          duration: 0.55,
+                          ease: [0.22, 0.61, 0.36, 1],
+                        }}
                         className="w-full rounded-[3px] transition-all group-hover:brightness-125"
                         style={{
-                          height: `${Math.max(2, h)}%`,
                           background:
                             d.sales > 0
                               ? 'linear-gradient(180deg, #a89dff 0%, #7056ec 100%)'
@@ -344,7 +350,7 @@ export default function SellerDashboardPage() {
                         }}
                       />
                       <div
-                        className="absolute bottom-full mb-1.5 hidden group-hover:block text-[10px] text-white whitespace-nowrap rounded-md px-2 py-1"
+                        className="absolute bottom-full mb-1.5 hidden group-hover:block text-[10px] text-white whitespace-nowrap rounded-md px-2 py-1 pointer-events-none"
                         style={{
                           background: 'linear-gradient(180deg, #1a1a20 0%, #0c0c10 100%)',
                           boxShadow:
@@ -501,54 +507,66 @@ export default function SellerDashboardPage() {
                       No listings match “{listingQuery}”.
                     </div>
                   )}
-                  {sortedListings.map((l) => (
-                    <Link
+                  {sortedListings.map((l, idx) => (
+                    <motion.div
                       key={l.id}
-                      href={`/market/agents/${l.id}`}
-                      className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02]"
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: Math.min(idx * 0.025, 0.3),
+                        duration: 0.26,
+                        ease: [0.22, 0.61, 0.36, 1],
+                      }}
                     >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-white truncate">{l.title}</span>
-                          <span
-                            className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded ${
-                              l.status === 'ACTIVE'
-                                ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                                : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
-                            }`}
-                          >
-                            {l.status.toLowerCase()}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-[11px] text-zinc-500 flex items-center gap-3">
-                          <span>
-                            {l.price} {l.currency}
-                          </span>
-                          {l.reviewAverage !== null && l.reviewCount > 0 && (
-                            <span className="inline-flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                              {l.reviewAverage.toFixed(1)} ({l.reviewCount})
+                      <Link
+                        href={`/market/agents/${l.id}`}
+                        className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-white truncate">
+                              {l.title}
                             </span>
-                          )}
-                          <span>· {l.type.toLowerCase()}</span>
+                            <span
+                              className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                                l.status === 'ACTIVE'
+                                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                                  : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
+                              }`}
+                            >
+                              {l.status.toLowerCase()}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-[11px] text-zinc-500 flex items-center gap-3">
+                            <span>
+                              {l.price} {l.currency}
+                            </span>
+                            {l.reviewAverage !== null && l.reviewCount > 0 && (
+                              <span className="inline-flex items-center gap-1">
+                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                {l.reviewAverage.toFixed(1)} ({l.reviewCount})
+                              </span>
+                            )}
+                            <span>· {l.type.toLowerCase()}</span>
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-white">{l.sales}</div>
-                        <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-                          sales
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-white">{l.sales}</div>
+                          <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+                            sales
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-right min-w-[80px]">
-                        <div className="text-sm font-medium text-purple-300">
-                          {l.revenue.toFixed(2)}
+                        <div className="text-right min-w-[80px]">
+                          <div className="text-sm font-medium text-purple-300">
+                            {l.revenue.toFixed(2)}
+                          </div>
+                          <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+                            {l.currency}
+                          </div>
                         </div>
-                        <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-                          {l.currency}
-                        </div>
-                      </div>
-                      <ArrowUpRight className="w-4 h-4 text-zinc-600" />
-                    </Link>
+                        <ArrowUpRight className="w-4 h-4 text-zinc-600" />
+                      </Link>
+                    </motion.div>
                   ))}
                 </div>
               </section>
