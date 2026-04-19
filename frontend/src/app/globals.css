@@ -3809,3 +3809,160 @@ aside button[data-active='true']::after {
 .mk-scope .mk-wizard .mk-wizard__dropzone--done {
   background: var(--mk-surface-2) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Agents page (.mk-agents-*)
+   Minimal dashboard layout: breadcrumb + title + right-aligned CTA,
+   plain underlined tabs, and a sticky two-column split (form | listings).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mk-scope .mk-agents-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 28px 40px;
+  color: var(--mk-text) !important;
+  background: transparent !important;
+}
+
+.mk-scope .mk-agents-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--mk-surface-4);
+}
+
+.mk-scope .mk-agents-head > div:first-child {
+  min-width: 0;
+}
+
+.mk-scope .mk-agents-head__cta {
+  flex: 0 0 auto;
+  height: 32px !important;
+  padding: 0 14px !important;
+  font-size: 12px !important;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mk-scope .mk-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--mk-text-muted);
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+.mk-scope .mk-breadcrumb__link {
+  color: var(--mk-text-muted) !important;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.mk-scope .mk-breadcrumb__link:hover {
+  color: var(--mk-text) !important;
+}
+
+.mk-scope .mk-breadcrumb__sep {
+  color: var(--mk-surface-6);
+}
+
+.mk-scope .mk-agents-title {
+  font-size: 22px;
+  line-height: 1.2;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--mk-text);
+  margin: 0;
+}
+
+.mk-scope .mk-agents-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--mk-surface-4);
+  margin-bottom: 20px;
+}
+
+.mk-scope .mk-agents-tab {
+  position: relative;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--mk-text-muted) !important;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  height: 34px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.mk-scope .mk-agents-tab:hover {
+  color: var(--mk-text-secondary) !important;
+}
+
+.mk-scope .mk-agents-tab--active {
+  color: var(--mk-text) !important;
+}
+
+.mk-scope .mk-agents-tab--active::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 1.5px;
+  background: var(--mk-text);
+  border-radius: 1px;
+}
+
+.mk-scope .mk-agents-split {
+  display: grid;
+  grid-template-columns: minmax(340px, 420px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .mk-scope .mk-agents-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mk-scope .mk-agents-split__form {
+  position: sticky;
+  top: 16px;
+  min-width: 0;
+}
+
+.mk-scope .mk-agents-split__form .mk-wizard {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 20px 20px 18px 20px !important;
+}
+
+.mk-scope .mk-agents-split__list {
+  min-width: 0;
+}
+
+.mk-scope .mk-empty {
+  border: 1px solid var(--mk-surface-4);
+  background: var(--mk-surface-1);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+}
+
+.mk-scope .mk-empty__text {
+  color: var(--mk-text-muted) !important;
+  font-size: 12.5px;
+  margin: 0;
+}

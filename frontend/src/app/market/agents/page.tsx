@@ -4425,140 +4425,52 @@ function AgentsPageContent() {
   };
 
   return (
-    <div className="page-container py-8 relative" style={{ background: '#000' }}>
-      {/* Header */}
-      <div className="page-header relative">
-        <div
-          className="relative rounded-2xl p-5 sm:p-6 md:p-10 overflow-hidden"
-          style={{
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(0,0,0,0.35)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          {/* Corner brackets */}
-          <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-white/20 pointer-events-none" />
-          <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-white/20 pointer-events-none" />
-          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-white/20 pointer-events-none" />
-          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 pointer-events-none" />
-
-          <div className="flex items-center gap-2 text-xs text-zinc-500 mb-4">
-            <Link
-              href="/market"
-              className="hover:text-purple-300 transition-colors uppercase tracking-[0.2em]"
-            >
+    <div className="mk-agents-page">
+      {/* Minimal header: breadcrumb + Deploy CTA */}
+      <div className="mk-agents-head">
+        <div>
+          <div className="mk-breadcrumb">
+            <Link href="/market" className="mk-breadcrumb__link">
               Market
             </Link>
-            <span className="text-zinc-700">/</span>
-            <span className="text-purple-300/80 uppercase tracking-[0.2em]">AI Agents</span>
+            <span className="mk-breadcrumb__sep">/</span>
+            <span>Agents</span>
           </div>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:flex-wrap">
-            <div className="max-w-2xl min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />
-                <span className="text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-light">
-                  Autonomous agents
-                </span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight leading-tight">
-                <GradientText gradient="purple">AI Agents</GradientText>
-              </h1>
-              <p className="text-[13px] sm:text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
-                Discover autonomous agents, bots, and automation tools built by the community.
-                Deploy, negotiate, and integrate in minutes.
-              </p>
-            </div>
-            {isAuthenticated && (
-              <ShimmerButton
-                onClick={() => {
-                  switchTab('mine');
-                  setShowCreate(true);
-                }}
-                className="text-white text-sm px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg transition-all inline-flex items-center gap-2 w-full md:w-auto justify-center"
-              >
-                <Plus className="w-4 h-4" /> Deploy Agent
-              </ShimmerButton>
-            )}
-          </div>
+          <h1 className="mk-agents-title">Agents</h1>
         </div>
+        {isAuthenticated && (
+          <button
+            type="button"
+            onClick={() => {
+              switchTab('mine');
+              setShowCreate(true);
+            }}
+            className="mk-wizard__primary mk-agents-head__cta"
+          >
+            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+            Deploy agent
+          </button>
+        )}
       </div>
-
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5 sm:mb-6 mt-5 sm:mt-6">
-        <AgentStat
-          icon={<Bot className="w-3.5 h-3.5" />}
-          label="Live agents"
-          value={listings.length.toString()}
-          accent="#836EF9"
-          delta="+12% this week"
-        />
-        <AgentStat
-          icon={<Activity className="w-3.5 h-3.5" />}
-          label="Active now"
-          value={Math.max(1, Math.floor(listings.length * 0.42)).toString()}
-          accent="#06B6D4"
-          delta="real-time"
-        />
-        <AgentStat
-          icon={<TrendingUp className="w-3.5 h-3.5" />}
-          label="24h volume"
-          value={`${(listings.length * 3.2).toFixed(1)} BOLTY`}
-          accent="#EC4899"
-          delta="+8.4%"
-        />
-        <AgentStat
-          icon={<Clock className="w-3.5 h-3.5" />}
-          label="Avg response"
-          value="1.2s"
-          accent="#22c55e"
-          delta="p95: 3.1s"
-        />
-      </div>
-
-      {/* Developer quick-start */}
-      <DeveloperQuickstart />
 
       {/* Tabs */}
-      <div
-        className="inline-flex items-center gap-0.5 p-1 rounded-lg mb-6"
-        style={{
-          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-        }}
-      >
+      <div className="mk-agents-tabs">
         {(
           [
-            ['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />],
-            ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />],
+            ['market', 'Marketplace'],
+            ['mine', 'My agents'],
           ] as const
-        ).map(([id, label, icon]) => {
+        ).map(([id, label]) => {
           const active = activeTab === id;
           return (
-            <motion.button
+            <button
               key={id}
+              type="button"
               onClick={() => switchTab(id)}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-              className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-light tracking-[0.005em] transition-colors ${
-                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
+              className={`mk-agents-tab ${active ? 'mk-agents-tab--active' : ''}`}
             >
-              {active && (
-                <motion.span
-                  layoutId="market-agents-tab-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-md"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
-              )}
-              <span className="relative z-10 inline-flex">{icon}</span>
-              <span className="relative z-10">{label}</span>
-            </motion.button>
+              {label}
+            </button>
           );
         })}
       </div>
@@ -4689,32 +4601,17 @@ function AgentsPageContent() {
       {activeTab === 'mine' && (
         <>
           {!isAuthenticated ? (
-            <div className="card text-center py-16">
-              <p className="text-zinc-500 text-sm mb-4">Sign in to manage your agents</p>
-              <Link href="/auth" className="btn-primary text-sm px-4 py-2 inline-flex">
+            <div className="mk-empty">
+              <p className="mk-empty__text">Sign in to manage your agents</p>
+              <Link href="/auth" className="mk-wizard__primary inline-flex mt-3 max-w-fit">
                 Sign in
               </Link>
             </div>
           ) : (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-zinc-500">
-                  {myListings.length} agent{myListings.length !== 1 ? 's' : ''} published
-                </p>
-                <button
-                  onClick={() => setShowCreate((p) => !p)}
-                  className={
-                    showCreate
-                      ? 'btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5'
-                      : 'btn-primary text-xs px-3 py-1.5 flex items-center gap-1.5'
-                  }
-                >
-                  <Plus className="w-3 h-3" /> {showCreate ? 'Cancel' : 'Deploy new'}
-                </button>
-              </div>
-
+            <div className={showCreate ? 'mk-agents-split' : ''}>
+              {/* Left column: deploy form */}
               {showCreate && (
-                <div className="mb-6">
+                <aside className="mk-agents-split__form">
                   <CreateListingForm
                     onCreated={(l) => {
                       setMyListings((p) => [l, ...p]);
@@ -4722,38 +4619,61 @@ function AgentsPageContent() {
                     }}
                     onCancel={() => setShowCreate(false)}
                   />
-                </div>
+                </aside>
               )}
 
-              {myLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="skeleton h-20 rounded-xl" />
-                  ))}
-                </div>
-              ) : myListings.length === 0 ? (
-                <div className="card text-center py-16">
-                  <Bot className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
-                  <p className="text-zinc-600 text-sm mb-3">No agents deployed yet</p>
+              {/* Right column: listings */}
+              <section className="mk-agents-split__list">
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-[12.5px] text-zinc-500">
+                    {myListings.length} agent{myListings.length !== 1 ? 's' : ''} published
+                  </p>
                   <button
-                    onClick={() => setShowCreate(true)}
-                    className="btn-primary text-xs px-4 py-2 inline-flex items-center gap-1.5"
+                    type="button"
+                    onClick={() => setShowCreate((p) => !p)}
+                    className={showCreate ? 'mk-wizard__secondary' : 'mk-wizard__primary'}
+                    style={{ flex: '0 0 auto', height: 32, padding: '0 12px', fontSize: 12 }}
                   >
-                    <Plus className="w-3 h-3" /> Deploy your first agent
+                    <Plus className="w-3 h-3 inline mr-1" />
+                    {showCreate ? 'Close form' : 'Deploy new'}
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {myListings.map((l) => (
-                    <MyAgentCard
-                      key={l.id}
-                      listing={l}
-                      onDelete={(id) => setMyListings((p) => p.filter((x) => x.id !== id))}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
+
+                {myLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="skeleton h-20 rounded-xl" />
+                    ))}
+                  </div>
+                ) : myListings.length === 0 ? (
+                  <div className="mk-empty">
+                    <Bot className="w-8 h-8 text-zinc-700 mx-auto mb-3" strokeWidth={1.25} />
+                    <p className="mk-empty__text">No agents deployed yet</p>
+                    {!showCreate && (
+                      <button
+                        type="button"
+                        onClick={() => setShowCreate(true)}
+                        className="mk-wizard__primary inline-flex mt-3 max-w-fit"
+                        style={{ height: 32, padding: '0 12px', fontSize: 12 }}
+                      >
+                        <Plus className="w-3 h-3 inline mr-1" />
+                        Deploy your first agent
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myListings.map((l) => (
+                      <MyAgentCard
+                        key={l.id}
+                        listing={l}
+                        onDelete={(id) => setMyListings((p) => p.filter((x) => x.id !== id))}
+                      />
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
           )}
         </>
       )}
