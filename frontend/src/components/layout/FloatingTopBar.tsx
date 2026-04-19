@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, User, LogOut, Settings, ChevronDown, Search } from 'lucide-react';
+import { User, LogOut, Settings, ChevronDown, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -62,47 +62,38 @@ export function FloatingTopBar() {
   if (!shouldShow) return null;
 
   const chipStyle: React.CSSProperties = {
-    background: 'linear-gradient(180deg, rgba(24,24,30,0.85) 0%, rgba(12,12,16,0.85) 100%)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
+    background: 'linear-gradient(180deg, rgba(18,18,24,0.92) 0%, rgba(10,10,14,0.92) 100%)',
+    backdropFilter: 'blur(16px) saturate(140%)',
+    WebkitBackdropFilter: 'blur(16px) saturate(140%)',
     boxShadow:
-      '0 8px 24px -8px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+      '0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.2)',
   };
 
   const chipClass =
-    'inline-flex items-center justify-center rounded-xl text-zinc-300 hover:text-white transition-colors';
+    'inline-flex items-center justify-center rounded-xl text-zinc-400 hover:text-white transition-all duration-200 hover:bg-white/[0.04]';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, y: -16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="fixed top-4 right-4 left-auto lg:left-72 lg:right-auto z-40 flex items-center gap-2"
+      transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+      className="fixed top-3 right-3 z-40 flex items-center gap-1.5"
+      style={{ filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.45))' }}
     >
-      {/* Home Button — desktop only; mobile uses sidebar */}
-      <Link
-        href="/"
-        className={`${chipClass} hidden lg:inline-flex w-10 h-10`}
-        style={chipStyle}
-        title="Back to home"
-      >
-        <Home className="w-4 h-4" strokeWidth={1.75} />
-      </Link>
-
-      {/* Command Palette Trigger */}
+      {/* Command Palette Trigger — desktop */}
       <button
         onClick={openPalette}
         title={`Open command palette (${modKey}K)`}
-        className={`${chipClass} hidden md:inline-flex h-10 pl-3 pr-2 gap-2`}
+        className={`${chipClass} hidden md:inline-flex h-9 pl-3 pr-2.5 gap-2`}
         style={chipStyle}
       >
         <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
-        <span className="text-[12px] font-normal text-zinc-400">Search</span>
+        <span className="text-[12px] font-light text-zinc-500">Search</span>
         <kbd
-          className="text-[10px] font-medium text-zinc-500 rounded-md px-1.5 py-0.5 leading-none"
+          className="text-[10px] font-medium text-zinc-600 rounded-md px-1.5 py-0.5 leading-none"
           style={{
             background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.07)',
           }}
         >
           {modKey}K
@@ -110,7 +101,7 @@ export function FloatingTopBar() {
       </button>
 
       {/* Notifications */}
-      <div className="rounded-xl flex items-center justify-center w-10 h-10" style={chipStyle}>
+      <div className="rounded-xl flex items-center justify-center w-9 h-9" style={chipStyle}>
         <NotificationsBell isAuthenticated={isAuthenticated} />
       </div>
 
@@ -118,8 +109,8 @@ export function FloatingTopBar() {
       <div ref={profileRef} className="relative">
         <button
           onClick={() => setProfileOpen(!profileOpen)}
-          className={`${chipClass} h-10 pl-1.5 pr-2.5 gap-2`}
-          style={chipStyle}
+          className={`${chipClass} h-9 pl-1.5 pr-2.5 gap-2`}
+          style={profileOpen ? { ...chipStyle, boxShadow: '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.06)' } : chipStyle}
           aria-haspopup="menu"
           aria-expanded={profileOpen}
         >
@@ -127,12 +118,12 @@ export function FloatingTopBar() {
             <img
               src={user.avatarUrl}
               alt="profile"
-              className="w-7 h-7 rounded-lg object-cover"
-              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
+              style={{ border: '1px solid rgba(255,255,255,0.10)' }}
             />
           ) : (
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white"
+              className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-semibold text-white flex-shrink-0"
               style={{
                 background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)',
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)',
@@ -142,14 +133,12 @@ export function FloatingTopBar() {
             </div>
           )}
 
-          <div className="hidden sm:flex flex-col items-start leading-none">
-            <span className="text-[12px] font-normal text-white">
-              {user?.displayName || user?.username || 'User'}
-            </span>
-          </div>
+          <span className="text-[12px] font-light text-zinc-300 max-w-[96px] truncate">
+            {user?.displayName || user?.username || 'User'}
+          </span>
 
-          <motion.div animate={{ rotate: profileOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDown className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+          <motion.div animate={{ rotate: profileOpen ? 180 : 0 }} transition={{ duration: 0.18 }}>
+            <ChevronDown className="w-3 h-3 text-zinc-600" strokeWidth={2} />
           </motion.div>
         </button>
 
@@ -158,15 +147,17 @@ export function FloatingTopBar() {
           {profileOpen && (
             <motion.div
               role="menu"
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-full right-0 lg:left-0 lg:right-auto mt-2 w-64 rounded-2xl overflow-hidden z-50"
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+              className="absolute top-full right-0 mt-2 w-56 rounded-2xl overflow-hidden z-50"
               style={{
-                background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
+                background: 'linear-gradient(180deg, rgba(16,16,22,0.98) 0%, rgba(9,9,13,0.98) 100%)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
                 boxShadow:
-                  '0 24px 60px -12px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+                  '0 20px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
               <div
@@ -174,54 +165,72 @@ export function FloatingTopBar() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
                 }}
               />
               {/* User Info */}
-              <div className="px-4 py-3.5 border-b border-white/[0.06]">
-                <p className="text-[13px] font-medium text-white truncate">
-                  {user?.displayName || user?.username}
-                </p>
-                {user?.email && (
-                  <p className="text-[11px] text-zinc-500 mt-0.5 truncate">{user.email}</p>
+              <div className="px-3.5 py-3 border-b border-white/[0.06] flex items-center gap-2.5">
+                {user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt=""
+                    className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0"
+                    style={{ background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)' }}
+                  >
+                    {(user?.displayName || user?.username || 'U')[0]?.toUpperCase()}
+                  </div>
                 )}
+                <div className="min-w-0">
+                  <p className="text-[13px] font-light text-white truncate">
+                    {user?.displayName || user?.username}
+                  </p>
+                  {user?.email && (
+                    <p className="text-[11px] text-zinc-500 truncate">{user.email}</p>
+                  )}
+                </div>
               </div>
 
               {/* Menu Items */}
-              <div className="py-1.5">
+              <div className="py-1">
                 <Link
                   href="/profile"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 text-[13px] text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
-                  <User className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+                  <User className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
                   My Profile
                 </Link>
-
                 <Link
-                  href="/profile?tab=notifications"
+                  href="/profile?tab=security"
                   onClick={() => setProfileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-2 text-[13px] text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
+                  className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
-                  <Settings className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+                  <Settings className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
                   Settings
                 </Link>
               </div>
 
               {/* Divider */}
-              <div className="h-px bg-white/[0.06]" />
+              <div className="mx-3 h-px bg-white/[0.06]" />
 
               {/* Logout */}
-              <button
-                onClick={() => {
-                  setProfileOpen(false);
-                  logout();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-400 hover:text-red-300 hover:bg-red-500/[0.08] transition-colors"
-              >
-                <LogOut className="w-3.5 h-3.5" strokeWidth={1.75} />
-                Sign Out
-              </button>
+              <div className="py-1">
+                <button
+                  onClick={() => {
+                    setProfileOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-400 hover:text-red-300 hover:bg-red-500/[0.06] transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={1.75} />
+                  Sign out
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

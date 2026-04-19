@@ -39,7 +39,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       {!isAuth && <BackToTop />}
       {!showSidebar && <UnifiedHeader />}
 
-      <div className={`flex ${!showSidebar && !isHome ? 'pt-16' : ''}`}>
+      <div className={`flex ${!isHome ? 'pt-16' : ''}`}>
         {showSidebar && <Sidebar />}
 
         <div className="flex-1 w-full min-w-0">
