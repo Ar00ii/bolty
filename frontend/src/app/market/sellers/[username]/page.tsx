@@ -320,96 +320,107 @@ export default function SellerProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {listings.map((l) => {
+              {listings.map((l, idx) => {
                 const meta = TYPE_META[l.type] || TYPE_META.OTHER;
                 const saved = has(l.id);
                 return (
-                  <Link
+                  <motion.div
                     key={l.id}
-                    href={`/market/agents/${l.id}`}
-                    className="group relative rounded-xl p-4 overflow-hidden transition-all"
-                    style={{
-                      background:
-                        'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                      boxShadow:
-                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(idx * 0.035, 0.35),
+                      duration: 0.32,
+                      ease: [0.22, 0.61, 0.36, 1],
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = `0 0 0 1px ${meta.color}40, inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -12px rgba(0,0,0,0.5)`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow =
-                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)';
-                    }}
+                    whileHover={{ y: -3 }}
                   >
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                    <Link
+                      href={`/market/agents/${l.id}`}
+                      className="group relative rounded-xl p-4 overflow-hidden transition-all block"
                       style={{
-                        background: `linear-gradient(90deg, transparent 0%, ${meta.color}80 50%, transparent 100%)`,
+                        background:
+                          'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                        boxShadow:
+                          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
                       }}
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggle(l.id);
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.boxShadow = `0 0 0 1px ${meta.color}40, inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -12px rgba(0,0,0,0.5)`;
                       }}
-                      aria-pressed={saved}
-                      aria-label={saved ? 'Remove from saved' : 'Save for later'}
-                      className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
-                        saved ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-                      }`}
-                      style={
-                        saved
-                          ? {
-                              color: '#f9a8d4',
-                              background: 'rgba(236,72,153,0.1)',
-                              boxShadow: 'inset 0 0 0 1px rgba(236,72,153,0.35)',
-                            }
-                          : {
-                              color: 'rgba(161,161,170,0.5)',
-                              background: 'rgba(255,255,255,0.04)',
-                              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-                            }
-                      }
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.boxShadow =
+                          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)';
+                      }}
                     >
-                      <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
-                    </button>
-                    <div className="flex items-start gap-3 mb-3">
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
                         style={{
-                          background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}06 100%)`,
-                          boxShadow: `inset 0 0 0 1px ${meta.color}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -6px ${meta.color}40`,
+                          background: `linear-gradient(90deg, transparent 0%, ${meta.color}80 50%, transparent 100%)`,
                         }}
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggle(l.id);
+                        }}
+                        aria-pressed={saved}
+                        aria-label={saved ? 'Remove from saved' : 'Save for later'}
+                        className={`absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+                          saved ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        }`}
+                        style={
+                          saved
+                            ? {
+                                color: '#f9a8d4',
+                                background: 'rgba(236,72,153,0.1)',
+                                boxShadow: 'inset 0 0 0 1px rgba(236,72,153,0.35)',
+                              }
+                            : {
+                                color: 'rgba(161,161,170,0.5)',
+                                background: 'rgba(255,255,255,0.04)',
+                                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                              }
+                        }
                       >
-                        <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
-                      </div>
-                      <div className="min-w-0 flex-1 pr-7">
-                        <div className="text-[13px] font-light text-white truncate tracking-[0.005em]">
-                          {l.title}
+                        <Heart className={`w-3.5 h-3.5 ${saved ? 'fill-current' : ''}`} />
+                      </button>
+                      <div className="flex items-start gap-3 mb-3">
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                          style={{
+                            background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}06 100%)`,
+                            boxShadow: `inset 0 0 0 1px ${meta.color}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -6px ${meta.color}40`,
+                          }}
+                        >
+                          <meta.Icon className="w-4 h-4" style={{ color: meta.color }} />
                         </div>
-                        <div className="text-[11px] text-zinc-500 mt-0.5">
-                          {meta.label} · {timeAgo(l.createdAt)}
+                        <div className="min-w-0 flex-1 pr-7">
+                          <div className="text-[13px] font-light text-white truncate tracking-[0.005em]">
+                            {l.title}
+                          </div>
+                          <div className="text-[11px] text-zinc-500 mt-0.5">
+                            {meta.label} · {timeAgo(l.createdAt)}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-white font-light">
-                        {l.price} <span className="text-zinc-500 text-xs">{l.currency}</span>
-                      </span>
-                      {l.reviewAverage !== null &&
-                        l.reviewAverage !== undefined &&
-                        (l.reviewCount ?? 0) > 0 && (
-                          <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                            {l.reviewAverage.toFixed(1)}
-                            <span className="text-zinc-600">({l.reviewCount})</span>
-                          </span>
-                        )}
-                    </div>
-                  </Link>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-white font-light">
+                          {l.price} <span className="text-zinc-500 text-xs">{l.currency}</span>
+                        </span>
+                        {l.reviewAverage !== null &&
+                          l.reviewAverage !== undefined &&
+                          (l.reviewCount ?? 0) > 0 && (
+                            <span className="inline-flex items-center gap-1 text-[11px] text-zinc-400">
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                              {l.reviewAverage.toFixed(1)}
+                              <span className="text-zinc-600">({l.reviewCount})</span>
+                            </span>
+                          )}
+                      </div>
+                    </Link>
+                  </motion.div>
                 );
               })}
             </div>
