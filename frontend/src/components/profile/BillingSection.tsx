@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { CreditCard, Download, AlertCircle, CheckCircle } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -81,7 +82,10 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
       </div>
 
       {/* Current Plan Card */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
         className="relative p-6 rounded-xl overflow-hidden"
         style={{
           background:
@@ -144,8 +148,18 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
           <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
             Includes
           </p>
-          {currentPlan.features.map((feature) => (
-            <div key={feature} className="flex items-center gap-2">
+          {currentPlan.features.map((feature, idx) => (
+            <motion.div
+              key={feature}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.1 + idx * 0.04,
+                duration: 0.24,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              className="flex items-center gap-2"
+            >
               <div
                 className="w-1.5 h-1.5 rounded-full"
                 style={{
@@ -154,12 +168,12 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
                 }}
               />
               <span className="text-sm text-zinc-300">{feature}</span>
-            </div>
+            </motion.div>
           ))}
         </div>
 
         {data.plan !== 'enterprise' && (
-          <button
+          <motion.button
             onClick={async () => {
               if (!onUpgrade) return;
               setLoading(true);
@@ -170,6 +184,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
               }
             }}
             disabled={loading}
+            whileHover={loading ? undefined : { y: -1 }}
+            whileTap={loading ? undefined : { scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
             className="w-full mt-4 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
             style={{
               background:
@@ -183,9 +200,9 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
               : data.plan === 'free'
                 ? 'Upgrade to Pro'
                 : 'Upgrade to Enterprise'}
-          </button>
+          </motion.button>
         )}
-      </div>
+      </motion.div>
 
       {/* Billing Information */}
       <div className="space-y-4">
@@ -278,12 +295,14 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
                   Payment Method
                 </p>
               </div>
-              <button
+              <motion.button
                 onClick={() => setShowCardModal(true)}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 className="text-[11px] font-medium tracking-[0.005em] text-[#b4a7ff] hover:text-white transition-colors"
               >
                 Update
-              </button>
+              </motion.button>
             </div>
             <p className="text-sm text-white font-light tabular-nums tracking-[0.005em]">
               {data.cardLast4 ? `•••• •••• •••• ${data.cardLast4}` : 'No payment method on file'}
@@ -298,10 +317,19 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
           <h3 className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
             Invoice History
           </h3>
-          {['INV-2025-04-001', 'INV-2025-03-001'].map((invoiceId) => (
-            <button
+          {['INV-2025-04-001', 'INV-2025-03-001'].map((invoiceId, idx) => (
+            <motion.button
               key={invoiceId}
-              className="group relative w-full flex items-center justify-between px-4 py-3 rounded-xl overflow-hidden transition-all hover:brightness-110"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.1 + idx * 0.04,
+                duration: 0.24,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative w-full flex items-center justify-between px-4 py-3 rounded-xl overflow-hidden transition-colors hover:brightness-110"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -329,7 +357,7 @@ export const BillingSection: React.FC<BillingSectionProps> = ({
               >
                 <Download className="w-3.5 h-3.5 text-[#b4a7ff]" />
               </div>
-            </button>
+            </motion.button>
           ))}
         </div>
       )}
