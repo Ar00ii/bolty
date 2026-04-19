@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
@@ -36,14 +37,17 @@ export function Pagination({
 
   return (
     <nav aria-label="Pagination" className="flex items-center justify-center gap-1.5 mt-8">
-      <button
+      <motion.button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
+        whileTap={currentPage === 1 || isLoading ? undefined : { scale: 0.92 }}
+        whileHover={currentPage === 1 || isLoading ? undefined : { x: -1 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
         aria-label="Previous page"
         className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
-      </button>
+      </motion.button>
 
       <ol className="flex gap-1 list-none m-0 p-0">
         {pages.map((page, idx) => {
@@ -51,9 +55,12 @@ export function Pagination({
           const isEllipsis = page === '...';
           return (
             <li key={idx}>
-              <button
+              <motion.button
                 onClick={() => typeof page === 'number' && onPageChange(page)}
                 disabled={isEllipsis || isLoading}
+                whileTap={isEllipsis || isLoading || isCurrent ? undefined : { scale: 0.92 }}
+                whileHover={isEllipsis || isLoading || isCurrent ? undefined : { y: -1 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 aria-label={
                   isEllipsis
                     ? undefined
@@ -82,20 +89,23 @@ export function Pagination({
                 }
               >
                 {page}
-              </button>
+              </motion.button>
             </li>
           );
         })}
       </ol>
 
-      <button
+      <motion.button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
+        whileTap={currentPage === totalPages || isLoading ? undefined : { scale: 0.92 }}
+        whileHover={currentPage === totalPages || isLoading ? undefined : { x: 1 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
         aria-label="Next page"
         className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
-      </button>
+      </motion.button>
     </nav>
   );
 }
