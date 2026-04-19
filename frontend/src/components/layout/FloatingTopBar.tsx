@@ -77,10 +77,15 @@ export function FloatingTopBar() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed top-4 left-4 lg:left-72 z-40 flex items-center gap-2"
+      className="fixed top-4 right-4 left-auto lg:left-72 lg:right-auto z-40 flex items-center gap-2"
     >
-      {/* Home Button */}
-      <Link href="/" className={`${chipClass} w-10 h-10`} style={chipStyle} title="Back to home">
+      {/* Home Button — desktop only; mobile uses sidebar */}
+      <Link
+        href="/"
+        className={`${chipClass} hidden lg:inline-flex w-10 h-10`}
+        style={chipStyle}
+        title="Back to home"
+      >
         <Home className="w-4 h-4" strokeWidth={1.75} />
       </Link>
 
@@ -157,7 +162,7 @@ export function FloatingTopBar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-full left-0 mt-2 w-64 rounded-2xl overflow-hidden z-50"
+              className="absolute top-full right-0 lg:left-0 lg:right-auto mt-2 w-64 rounded-2xl overflow-hidden z-50"
               style={{
                 background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
                 boxShadow:

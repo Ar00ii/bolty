@@ -28,18 +28,15 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
 
   return (
     <div
-      className="relative overflow-hidden border-b"
+      className="relative overflow-hidden border-b grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,1fr)] gap-8 lg:gap-0 px-6 sm:px-10 lg:px-0 min-h-[calc(100vh-64px)] lg:min-h-[calc(100vh-90px)]"
       style={{
         background: 'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
         borderColor: 'rgba(39,39,39)',
-        minHeight: 'calc(100vh - 90px)',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(16, 1fr)',
       }}
     >
       {/* Grid lines overlay */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none hidden lg:block"
         style={{
           backgroundImage:
             'linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)',
@@ -52,62 +49,30 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10"
-        style={{
-          gridColumn: '2 / 9',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          padding: '80px 0',
-          gap: '40px',
-        }}
+        className="relative z-10 flex flex-col justify-center gap-8 sm:gap-10 py-14 sm:py-20 lg:py-20 lg:pl-[6.25%] lg:pr-[4%]"
       >
         {/* Hero Text Group */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <h1
-            className="text-white font-light"
-            style={{
-              fontSize: '80px',
-              lineHeight: '80px',
-              letterSpacing: '-2.4px',
-            }}
-          >
+        <div className="flex flex-col gap-5 sm:gap-6">
+          <h1 className="text-white font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]">
             Your fastest path to
             <br />
             production for
-            <div
-              style={{
-                display: 'block',
-                position: 'relative',
-                minHeight: '80px',
-                marginTop: '8px',
-              }}
-            >
-              <motion.div
+            <span className="block relative mt-1 sm:mt-2 min-h-[1.1em]">
+              <motion.span
                 key={wordIndex}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.5 }}
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
+                className="absolute left-0 top-0 inline-flex items-center gap-1.5"
               >
                 <span
+                  className="font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
                   style={{
                     background: 'linear-gradient(to right, #9b52fb, #b8ffd7)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    fontSize: '80px',
-                    lineHeight: '80px',
-                    fontWeight: 300,
-                    letterSpacing: '-2.4px',
                   }}
                 >
                   {words[wordIndex]}
@@ -115,57 +80,35 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 <motion.span
                   animate={{ opacity: [1, 1, 0, 0] }}
                   transition={{ duration: 1.1, repeat: Infinity }}
+                  className="inline-flex items-center text-[clamp(36px,9vw,80px)] leading-[1.02]"
                   style={{
-                    display: 'inline-flex',
                     height: '1em',
                     width: '0.6ch',
-                    alignItems: 'center',
                     background: 'linear-gradient(to top, #373145, rgba(55,49,69,0.5))',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
-                    fontSize: '80px',
                   }}
                 >
                   ▌
                 </motion.span>
-              </motion.div>
-            </div>
+              </motion.span>
+            </span>
           </h1>
 
-          <p
-            className="text-white/70"
-            style={{
-              fontSize: '20px',
-              lineHeight: '1.5',
-              maxWidth: '480px',
-            }}
-          >
+          <p className="text-white/70 text-base sm:text-lg lg:text-xl leading-relaxed max-w-[480px]">
             Intuitive infrastructure to scale any app or agent from your first user to your
             billionth.
           </p>
         </div>
 
         {/* Buttons */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap gap-3">
           <Link
             href={isAuthenticated ? '/market' : '/auth?tab=register'}
-            className="hover:opacity-85 transition-opacity"
-            style={{
-              fontSize: '20px',
-              fontWeight: 400,
-              padding: '20px 24px',
-              textDecoration: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: '#fff',
-              color: '#0d0d0d',
-              whiteSpace: 'nowrap',
-              cursor: 'pointer',
-            }}
+            className="hover:opacity-85 transition-opacity inline-flex items-center gap-2.5 bg-white text-[#0d0d0d] px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl whitespace-nowrap"
           >
-            Dashboard <span style={{ fontSize: '18px' }}>›</span>
+            Dashboard <span className="text-[0.9em]">›</span>
           </Link>
         </div>
       </motion.div>
@@ -175,42 +118,20 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="relative"
-        style={{
-          gridColumn: '9 / 18',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}
+        className="relative hidden lg:flex items-center justify-end"
       >
         {/* Placeholder for Lottie animation */}
         <div
+          className="absolute top-0 right-0 w-full"
           style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            width: '100%',
             aspectRatio: '630 / 591',
             background: 'radial-gradient(circle at 50% 50%, #9b52fb 0%, transparent 70%)',
             filter: 'blur(60px)',
             opacity: 0.3,
           }}
         />
-        <div
-          style={{
-            position: 'relative',
-            zIndex: 10,
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(255,255,255,0.2)',
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ fontSize: '14px', fontWeight: 300 }}>Interactive preview</p>
+        <div className="relative z-10 w-full h-full flex items-center justify-center text-white/20 text-center">
+          <p className="text-sm font-light">Interactive preview</p>
         </div>
       </motion.div>
     </div>

@@ -186,33 +186,41 @@ export function Sidebar() {
     <>
       {/* Mobile Menu Toggle Button */}
       <motion.button
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.95 }}
+        whileTap={{ scale: 0.94 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 lg:hidden z-50 p-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/10 bg-zinc-900/80 backdrop-blur-sm border border-white/5 transition-colors"
+        className="fixed top-4 left-4 lg:hidden z-[60] w-10 h-10 rounded-xl flex items-center justify-center text-zinc-300 hover:text-white transition-colors"
+        style={{
+          background: 'linear-gradient(180deg, rgba(24,24,30,0.85) 0%, rgba(12,12,16,0.85) 100%)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          boxShadow:
+            '0 8px 24px -8px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.div
+            <motion.span
               key="close"
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.18 }}
+              className="inline-flex"
             >
-              <X className="w-5 h-5" />
-            </motion.div>
+              <X className="w-4 h-4" strokeWidth={1.75} />
+            </motion.span>
           ) : (
-            <motion.div
+            <motion.span
               key="menu"
               initial={{ rotate: 90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.18 }}
+              className="inline-flex"
             >
-              <Menu className="w-5 h-5" />
-            </motion.div>
+              <Menu className="w-4 h-4" strokeWidth={1.75} />
+            </motion.span>
           )}
         </AnimatePresence>
       </motion.button>
@@ -227,7 +235,7 @@ export function Sidebar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setIsOpen(false)}
-            className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-black/70 z-40 lg:hidden backdrop-blur-md"
           />
         )}
       </AnimatePresence>
@@ -243,7 +251,7 @@ export function Sidebar() {
             stiffness: 340,
             damping: 34,
           }}
-          className={`fixed lg:relative top-0 left-0 overflow-y-auto z-40 flex flex-col w-[86%] max-w-[320px] lg:w-60 lg:max-w-none ${
+          className={`fixed lg:relative top-0 left-0 overflow-y-auto z-50 flex flex-col w-[82%] max-w-[300px] lg:w-60 lg:max-w-none lg:z-40 ${
             isMobile ? 'will-change-transform' : ''
           }`}
           style={{
