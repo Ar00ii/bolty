@@ -435,8 +435,17 @@ export default function ProfilePage() {
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [toggling2FA, setToggling2FA] = useState(false);
   const [disable2FAPassword, setDisable2FAPassword] = useState('');
-  const [enable2FAStep, setEnable2FAStep] = useState<'idle' | 'code'>('idle');
+  const [enable2FAStep, setEnable2FAStep] = useState<'idle' | 'scan'>('idle');
   const [enable2FACode, setEnable2FACode] = useState('');
+  const [twoFAQrCode, setTwoFAQrCode] = useState<string | null>(null);
+  const [twoFASecret, setTwoFASecret] = useState<string | null>(null);
+  const [twoFASecretCopied, setTwoFASecretCopied] = useState(false);
+
+  // Password change
+  const [pwStep, setPwStep] = useState<'idle' | 'sent'>('idle');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwErr, setPwErr] = useState('');
   const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'otp'>('idle');
   const [newEmail, setNewEmail] = useState('');
   const [emailPassword, setEmailPassword] = useState('');
@@ -944,9 +953,14 @@ export default function ProfilePage() {
         setDisable2FAPassword('');
         setSecMsg('Two-factor authentication disabled.');
       } else {
-        await api.post('/auth/2fa/enable/request', {});
-        setEnable2FAStep('code');
-        setSecMsg('Verification code sent to your email.');
+        const res = await api.post<{ qrCode?: string; secret?: string }>(
+          '/auth/2fa/enable/request',
+          {},
+        );
+        setTwoFAQrCode(res.qrCode || null);
+        setTwoFASecret(res.secret || null);
+        setEnable2FAStep('scan');
+        setSecMsg('Scan the QR code with your authenticator app to continue.');
       }
     } catch (err) {
       setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA setting.');
@@ -963,11 +977,42 @@ export default function ProfilePage() {
       setTwoFAEnabled(true);
       setEnable2FAStep('idle');
       setEnable2FACode('');
-      setSecMsg('2FA enabled. A code will be emailed to you on your next login.');
+      setTwoFAQrCode(null);
+      setTwoFASecret(null);
+      setTwoFASecretCopied(false);
+      setSecMsg('2FA enabled. You will be asked for a code from your authenticator at next login.');
     } catch (err) {
       setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally {
       setToggling2FA(false);
+    }
+  };
+
+  const handleCopy2FASecret = async () => {
+    if (!twoFASecret) return;
+    try {
+      await navigator.clipboard.writeText(twoFASecret);
+      setTwoFASecretCopied(true);
+      setTimeout(() => setTwoFASecretCopied(false), 2000);
+    } catch {
+      /* silent */
+    }
+  };
+
+  const handleRequestPasswordReset = async () => {
+    const email = (user as { email?: string } | null)?.email;
+    if (!email) return;
+    setPwErr('');
+    setPwMsg('');
+    setPwLoading(true);
+    try {
+      await api.post('/auth/password/forgot', { email });
+      setPwStep('sent');
+      setPwMsg('Password reset link sent to your email.');
+    } catch (err) {
+      setPwErr(err instanceof ApiError ? err.message : 'Failed to send reset link.');
+    } finally {
+      setPwLoading(false);
     }
   };
 
@@ -1972,13 +2017,16 @@ export default function ProfilePage() {
                   {emailStep === 'otp' && (
                     <form onSubmit={handleConfirmEmailChange} className="space-y-4">
                       <p className="text-sm text-[var(--text-secondary)] font-light">
-                        A 6-digit code was sent to <span className="text-purple-400">{newEmail}</span>.
+                        A 6-digit code was sent to{' '}
+                        <span className="text-purple-400">{newEmail}</span>.
                       </p>
                       <Field label="Verification Code">
                         <Input
                           type="text"
                           value={emailOtp}
-                          onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          onChange={(e) =>
+                            setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
                           placeholder="000000"
                           maxLength={6}
                         />
@@ -2059,22 +2107,84 @@ export default function ProfilePage() {
                     </Field>
                   )}
 
-                  {enable2FAStep === 'code' && (
-                    <div className="space-y-4 mt-2">
-                      <p className="text-sm text-[var(--text-secondary)] font-light">
-                        Enter the 6-digit code sent to your email to enable 2FA.
-                      </p>
-                      <Field label="Verification Code">
-                        <Input
-                          type="text"
-                          value={enable2FACode}
-                          onChange={(e) =>
-                            setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
-                          }
-                          placeholder="000000"
-                          maxLength={6}
-                        />
-                      </Field>
+                  {enable2FAStep === 'scan' && (
+                    <div className="space-y-5 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                        {twoFAQrCode ? (
+                          <div className="flex justify-center md:justify-start">
+                            <div
+                              className="p-3 rounded-xl bg-white"
+                              style={{
+                                boxShadow:
+                                  '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={twoFAQrCode}
+                                alt="2FA QR code"
+                                width={180}
+                                height={180}
+                                className="block w-[180px] h-[180px]"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-[180px] h-[180px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-purple-400 animate-spin" />
+                          </div>
+                        )}
+                        <div className="space-y-3 min-w-0">
+                          <div>
+                            <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
+                              Step 1 · Scan
+                            </div>
+                            <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                              Open an authenticator app (Google Authenticator, 1Password, Authy…)
+                              and scan this QR code.
+                            </p>
+                          </div>
+                          {twoFASecret && (
+                            <div>
+                              <div className="text-xs uppercase tracking-widest text-[var(--text-muted)] mb-1">
+                                Can&apos;t scan? Manual key
+                              </div>
+                              <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2">
+                                <code className="flex-1 font-mono text-[11px] text-[var(--text)] break-all">
+                                  {twoFASecret}
+                                </code>
+                                <button
+                                  type="button"
+                                  onClick={handleCopy2FASecret}
+                                  className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                                >
+                                  {twoFASecretCopied ? 'Copied' : 'Copy'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="text-xs uppercase tracking-widest text-purple-300/80">
+                          Step 2 · Verify
+                        </div>
+                        <Field label="6-digit code from your authenticator">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            value={enable2FACode}
+                            onChange={(e) =>
+                              setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                            }
+                            placeholder="000000"
+                            maxLength={6}
+                          />
+                        </Field>
+                      </div>
+
                       <div className="flex gap-2">
                         <button
                           type="button"
@@ -2088,13 +2198,15 @@ export default function ProfilePage() {
                               'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                           }}
                         >
-                          {toggling2FA ? 'Verifying...' : 'Verify & Enable'}
+                          {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
                         </button>
                         <button
                           type="button"
                           onClick={() => {
                             setEnable2FAStep('idle');
                             setEnable2FACode('');
+                            setTwoFAQrCode(null);
+                            setTwoFASecret(null);
                           }}
                           className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                         >
@@ -2103,6 +2215,41 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* ── Password ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Password"
+                    subtitle="Change your password via a secure email reset link."
+                  />
+                  <Alert type="success" msg={pwMsg} />
+                  <Alert type="error" msg={pwErr} />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="min-w-0">
+                      <div className="text-sm font-light text-[var(--text)] mb-0.5">
+                        {pwStep === 'sent' ? 'Reset link sent' : 'Password reset'}
+                      </div>
+                      <div className="text-xs text-[var(--text-muted)]">
+                        {pwStep === 'sent'
+                          ? `Check ${userEmail || 'your inbox'} for instructions.`
+                          : 'We will email you a one-time link to set a new password.'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRequestPasswordReset}
+                      disabled={pwLoading || !userEmail}
+                      className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                    >
+                      {pwLoading
+                        ? 'Sending...'
+                        : pwStep === 'sent'
+                          ? 'Resend link'
+                          : 'Send reset link'}
+                    </button>
+                  </div>
                 </div>
 
                 {/* ── Delete Account ── */}
@@ -2115,8 +2262,8 @@ export default function ProfilePage() {
                   {deleteStep === 'idle' && (
                     <div className="space-y-4">
                       <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
-                        This action is irreversible. All your data, agents, listings, and transaction
-                        history will be permanently removed.
+                        This action is irreversible. All your data, agents, listings, and
+                        transaction history will be permanently removed.
                       </div>
                       <button
                         type="button"
@@ -2164,7 +2311,9 @@ export default function ProfilePage() {
                         <Input
                           type="text"
                           value={deleteOtp}
-                          onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                          onChange={(e) =>
+                            setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
                           placeholder="000000"
                           maxLength={6}
                         />

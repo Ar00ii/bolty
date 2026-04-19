@@ -2,9 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home,
   Globe,
-  Briefcase,
   MessageSquare,
   BookOpen,
   Menu,
@@ -141,11 +139,6 @@ export function Sidebar() {
       icon: Zap,
       href: '/profile?tab=agent',
       separator: true,
-    },
-    {
-      label: 'Services',
-      icon: Briefcase,
-      href: '/services',
     },
     {
       label: 'Docs',
