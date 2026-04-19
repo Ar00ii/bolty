@@ -1772,3 +1772,847 @@ aside button[data-active='true']::after {
   );
   pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MARKET DASHBOARD DARK THEME (scope: .mk-scope)
+   Minimalist flat cards with inset-glow borders, Geist font,
+   blue-link accents and neutral gray surfaces. No purple brand gradients.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mk-scope {
+  /* tokens */
+  --mk-bg: #000;
+  --mk-surface-1: #0a0a0a;
+  --mk-surface-2: #111;
+  --mk-surface-3: #1a1a1a;
+  --mk-surface-4: #1f1f1f;
+  --mk-surface-5: #292929;
+  --mk-surface-6: #2e2e2e;
+  --mk-surface-7: #454545;
+  --mk-text: #ededed;
+  --mk-text-secondary: #a1a1a1;
+  --mk-text-muted: #888;
+  --mk-text-placeholder: #7d7d7d;
+  --mk-link: #52a8ff;
+  --mk-success: #50e3c2;
+  --mk-amber: #f2a20d;
+  --mk-amber-bg: #331b00;
+  --mk-error: #ff6166;
+  --mk-error-bg: #3c1618;
+  --mk-shadow-card:
+    rgba(255, 255, 255, 0.145) 0 0 0 1px, rgba(0, 0, 0, 0.16) 0 1px 2px 0,
+    #000 0 0 0 1px;
+  --mk-shadow-card-hover:
+    rgba(255, 255, 255, 0.22) 0 0 0 1px, rgba(0, 0, 0, 0.2) 0 2px 4px 0,
+    #000 0 0 0 1px;
+  --mk-shadow-input: rgba(255, 255, 255, 0.14) 0 0 0 1px;
+  --mk-shadow-input-focus: rgba(255, 255, 255, 0.22) 0 0 0 1px;
+  --mk-shadow-badge-inset: rgba(255, 255, 255, 0.14) 0 0 0 1px inset;
+  --mk-shadow-focus: 0 0 0 2px #000, 0 0 0 4px #52a8ff;
+  --mk-radius: 6px;
+  --mk-radius-full: 9999px;
+
+  background: var(--mk-bg);
+  color: var(--mk-text);
+  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  letter-spacing: normal;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Kill global Inter + weight 300 inside this scope */
+.mk-scope,
+.mk-scope * {
+  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-weight: 400;
+  letter-spacing: normal !important;
+}
+.mk-scope h1,
+.mk-scope h2,
+.mk-scope h3,
+.mk-scope h4,
+.mk-scope h5,
+.mk-scope h6,
+.mk-scope strong,
+.mk-scope .mk-title,
+.mk-scope .mk-btn-primary,
+.mk-scope .mk-btn-secondary,
+.mk-scope .mk-btn-ghost,
+.mk-scope .mk-badge,
+.mk-scope .mk-nav-item--active {
+  font-weight: 500;
+}
+.mk-scope code,
+.mk-scope pre,
+.mk-scope .mk-mono {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+/* Neutralize global purple / lift / ripple / underline effects within this scope */
+.mk-scope section::after {
+  display: none !important;
+}
+.mk-scope button:not(:disabled):hover,
+.mk-scope .btn:hover,
+.mk-scope [role='button']:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+.mk-scope button:not(:disabled):active,
+.mk-scope .btn:active,
+.mk-scope [role='button']:active {
+  transform: scale(0.98) !important;
+}
+.mk-scope button::after,
+.mk-scope button::before,
+.mk-scope .btn::after,
+.mk-scope .btn::before,
+.mk-scope [role='button']::after,
+.mk-scope [role='button']::before {
+  display: none !important;
+  content: none !important;
+}
+.mk-scope a:not([role='button'])::after,
+.mk-scope .link::after {
+  display: none !important;
+  content: none !important;
+}
+.mk-scope button:hover svg,
+.mk-scope a:hover svg {
+  transform: none !important;
+}
+.mk-scope .badge:hover,
+.mk-scope .pill:hover,
+.mk-scope .tag:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+.mk-scope input[type='text']:hover,
+.mk-scope input[type='email']:hover,
+.mk-scope input[type='password']:hover,
+.mk-scope input[type='search']:hover,
+.mk-scope input[type='number']:hover,
+.mk-scope textarea:hover,
+.mk-scope select:hover {
+  border-color: transparent !important;
+  box-shadow: var(--mk-shadow-input) !important;
+}
+.mk-scope input[type='text']:focus,
+.mk-scope input[type='email']:focus,
+.mk-scope input[type='password']:focus,
+.mk-scope input[type='search']:focus,
+.mk-scope input[type='number']:focus,
+.mk-scope textarea:focus,
+.mk-scope select:focus {
+  border-color: transparent !important;
+  box-shadow: var(--mk-shadow-input-focus) !important;
+  animation: none !important;
+}
+.mk-scope table tbody tr:hover {
+  background-color: var(--mk-surface-1) !important;
+}
+.mk-scope .card,
+.mk-scope .card-interactive,
+.mk-scope .card-elevated {
+  transition: box-shadow 0.15s ease !important;
+}
+.mk-scope .card:hover,
+.mk-scope .card-interactive:hover,
+.mk-scope .card-elevated:hover,
+.mk-scope [role='article']:hover,
+.mk-scope .marketplace-card:hover,
+.mk-scope .agent-card:hover,
+.mk-scope .repo-card:hover {
+  transform: none !important;
+  box-shadow: var(--mk-shadow-card-hover) !important;
+}
+
+/* Scrollbar inside scope */
+.mk-scope ::-webkit-scrollbar-thumb {
+  background: var(--mk-surface-7);
+}
+
+/* Flatten any inline gradient card backgrounds legacy pages use */
+.mk-scope [style*='linear-gradient(180deg, rgba(20, 20, 26'],
+.mk-scope [style*='linear-gradient(180deg,rgba(20,20,26'],
+.mk-scope [style*='linear-gradient(180deg, rgba(20,20,26'] {
+  background: var(--mk-surface-1) !important;
+}
+
+/* Neutralize purple accent strokes/glows that pages render via inline style */
+.mk-scope [style*='rgba(131, 110, 249'],
+.mk-scope [style*='rgba(131,110,249'] {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+  color: inherit !important;
+}
+
+/* ── mk primitives ───────────────────────────────────────────────── */
+
+.mk-scope .mk-page {
+  background: var(--mk-bg);
+  min-height: 100vh;
+  color: var(--mk-text);
+}
+
+.mk-scope .mk-topbar {
+  height: 56px;
+  background: var(--mk-bg);
+  border-bottom: 1px solid var(--mk-surface-3);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+}
+
+.mk-scope .mk-card {
+  background: var(--mk-surface-1);
+  border-radius: var(--mk-radius);
+  padding: 16px;
+  box-shadow: var(--mk-shadow-card);
+  color: var(--mk-text);
+  transition: box-shadow 0.15s ease;
+  position: relative;
+}
+.mk-scope .mk-card--hover:hover,
+.mk-scope a.mk-card:hover,
+.mk-scope button.mk-card:hover {
+  box-shadow: var(--mk-shadow-card-hover);
+}
+
+.mk-scope .mk-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mk-text);
+  line-height: 20px;
+}
+.mk-scope .mk-card-sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--mk-text-secondary);
+  line-height: 20px;
+}
+.mk-scope .mk-card-meta {
+  font-size: 13px;
+  color: var(--mk-text-secondary);
+}
+
+.mk-scope .mk-btn-primary {
+  background: #ededed;
+  color: #0a0a0a;
+  border: none;
+  border-radius: var(--mk-radius);
+  padding: 0 12px;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.mk-scope .mk-btn-primary:hover {
+  background: #d4d4d4;
+}
+.mk-scope .mk-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: var(--mk-shadow-focus);
+}
+.mk-scope .mk-btn-primary:active {
+  transform: scale(0.98);
+}
+.mk-scope .mk-btn-primary--sm,
+.mk-scope .mk-btn-secondary,
+.mk-scope .mk-btn-ghost {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--mk-radius);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mk-scope .mk-btn-primary--sm {
+  background: #ededed;
+  color: #0a0a0a;
+  border: none;
+}
+.mk-scope .mk-btn-primary--sm:hover {
+  background: #d4d4d4;
+}
+
+.mk-scope .mk-btn-secondary {
+  background: var(--mk-surface-1);
+  color: var(--mk-text);
+  border: 1px solid var(--mk-surface-6);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+.mk-scope .mk-btn-secondary:hover {
+  background: var(--mk-surface-3);
+  border-color: var(--mk-surface-7);
+}
+.mk-scope .mk-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: var(--mk-shadow-focus);
+}
+
+.mk-scope .mk-btn-ghost {
+  background: transparent;
+  color: var(--mk-text);
+  border: none;
+  padding: 0 8px;
+  transition: background 0.15s;
+}
+.mk-scope .mk-btn-ghost:hover {
+  background: var(--mk-surface-4);
+}
+.mk-scope .mk-btn-ghost--danger {
+  color: var(--mk-error);
+}
+.mk-scope .mk-btn-ghost--danger:hover {
+  background: var(--mk-error-bg);
+}
+
+.mk-scope .mk-input,
+.mk-scope .mk-search {
+  background: var(--mk-surface-1);
+  color: #fff;
+  border: none;
+  outline: none;
+  border-radius: var(--mk-radius);
+  padding: 0 12px;
+  height: 40px;
+  font-family: 'Geist', Arial, sans-serif;
+  font-size: 14px;
+  box-shadow: var(--mk-shadow-input);
+  transition: box-shadow 0.15s;
+  width: 100%;
+}
+.mk-scope .mk-input::placeholder,
+.mk-scope .mk-search::placeholder {
+  color: var(--mk-text-placeholder);
+}
+.mk-scope .mk-input:focus,
+.mk-scope .mk-search:focus {
+  box-shadow: var(--mk-shadow-input-focus);
+}
+
+.mk-scope .mk-input--sm {
+  height: 32px;
+  font-size: 13px;
+}
+
+.mk-scope .mk-select {
+  background: var(--mk-surface-1);
+  color: var(--mk-text);
+  border: none;
+  outline: none;
+  border-radius: var(--mk-radius);
+  padding: 0 32px 0 12px;
+  height: 40px;
+  font-size: 14px;
+  box-shadow: var(--mk-shadow-input);
+  appearance: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.mk-scope .mk-select:focus {
+  box-shadow: var(--mk-shadow-input-focus);
+}
+
+.mk-scope .mk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  border-radius: var(--mk-radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 0 6px 0 4px;
+  white-space: nowrap;
+  color: var(--mk-text);
+  background: var(--mk-surface-4);
+}
+.mk-scope .mk-badge--neutral {
+  background: #000;
+  color: var(--mk-text-secondary);
+  box-shadow: var(--mk-shadow-badge-inset);
+}
+.mk-scope .mk-badge--amber {
+  background: var(--mk-amber-bg);
+  color: var(--mk-amber);
+}
+.mk-scope .mk-badge--error {
+  background: var(--mk-error-bg);
+  color: var(--mk-error);
+}
+.mk-scope .mk-badge--success {
+  background: transparent;
+  color: var(--mk-text);
+  padding-left: 0;
+}
+.mk-scope .mk-badge--success::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mk-success);
+  margin-right: 6px;
+}
+.mk-scope .mk-badge--plan {
+  background: var(--mk-surface-4);
+  color: var(--mk-text);
+  padding: 0 8px;
+}
+
+.mk-scope .mk-link {
+  color: var(--mk-link);
+  text-decoration: none;
+  transition: color 0.125s ease-out;
+}
+.mk-scope .mk-link:hover {
+  text-decoration: underline;
+}
+
+.mk-scope .mk-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--mk-surface-5);
+  color: var(--mk-text-secondary);
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.mk-scope .mk-divider {
+  height: 1px;
+  background: var(--mk-surface-3);
+  border: 0;
+}
+
+.mk-scope .mk-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--mk-radius);
+  background: var(--mk-surface-1);
+  box-shadow: var(--mk-shadow-card);
+}
+.mk-scope .mk-tab {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mk-text-secondary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.mk-scope .mk-tab:hover {
+  color: var(--mk-text);
+  background: var(--mk-surface-3);
+}
+.mk-scope .mk-tab--active {
+  background: var(--mk-surface-4);
+  color: var(--mk-text);
+}
+
+.mk-scope .mk-stat {
+  background: var(--mk-surface-1);
+  border-radius: var(--mk-radius);
+  padding: 16px;
+  box-shadow: var(--mk-shadow-card);
+}
+.mk-scope .mk-stat__label {
+  font-size: 12px;
+  color: var(--mk-text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 8px;
+}
+.mk-scope .mk-stat__value {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--mk-text);
+  line-height: 1.1;
+}
+.mk-scope .mk-stat__trend {
+  font-size: 12px;
+  color: var(--mk-text-secondary);
+  margin-top: 4px;
+}
+
+.mk-scope .mk-empty {
+  border-radius: var(--mk-radius);
+  background: var(--mk-surface-1);
+  box-shadow: var(--mk-shadow-card);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--mk-text-secondary);
+}
+.mk-scope .mk-empty__title {
+  color: var(--mk-text);
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 12px;
+  margin-bottom: 4px;
+}
+.mk-scope .mk-empty__desc {
+  color: var(--mk-text-secondary);
+  font-size: 13px;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.mk-scope .mk-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--mk-surface-1);
+  border-radius: var(--mk-radius);
+  box-shadow: var(--mk-shadow-card);
+  overflow: hidden;
+}
+.mk-scope .mk-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mk-text-muted);
+  background: var(--mk-surface-2);
+  border-bottom: 1px solid var(--mk-surface-3);
+}
+.mk-scope .mk-table td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--mk-text);
+  border-bottom: 1px solid var(--mk-surface-3);
+  vertical-align: middle;
+}
+.mk-scope .mk-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.mk-scope .mk-table tbody tr:hover {
+  background: var(--mk-surface-2) !important;
+}
+
+.mk-scope .mk-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--mk-radius);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--mk-text);
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.mk-scope .mk-nav-item:hover {
+  background: var(--mk-surface-2);
+}
+.mk-scope .mk-nav-item--active {
+  background: var(--mk-surface-4);
+}
+
+.mk-scope .mk-type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  background: #000;
+  color: var(--mk-text-secondary);
+  box-shadow: var(--mk-shadow-badge-inset);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.mk-scope .mk-type-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mk-radius);
+  background: var(--mk-surface-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mk-text);
+  flex-shrink: 0;
+}
+
+.mk-scope .mk-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--mk-surface-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mk-text);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.mk-scope .mk-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mk-scope .mk-avatar--lg {
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+}
+.mk-scope .mk-avatar--xl {
+  width: 64px;
+  height: 64px;
+  font-size: 20px;
+}
+
+/* Loading spinner */
+.mk-scope .mk-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--mk-surface-4);
+  border-top-color: var(--mk-text);
+  border-radius: 50%;
+  animation: mk-spin 0.8s linear infinite;
+}
+@keyframes mk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Override GradientText inside scope: flatten to white */
+.mk-scope .gradient-text,
+.mk-scope .hero-gradient {
+  background: none !important;
+  -webkit-text-fill-color: var(--mk-text) !important;
+  color: var(--mk-text) !important;
+  animation: none !important;
+}
+
+/* ── Aggressive override of purple/tailwind styles within scope ───── */
+
+/* Purple-ish tailwind utility classes → neutral accents */
+.mk-scope .text-purple-200,
+.mk-scope .text-purple-300,
+.mk-scope .text-purple-400,
+.mk-scope .text-purple-500,
+.mk-scope .text-purple-600,
+.mk-scope .text-violet-300,
+.mk-scope .text-violet-400,
+.mk-scope .text-fuchsia-400,
+.mk-scope .text-\[\#b4a7ff\],
+.mk-scope .text-\[\#9b88ff\],
+.mk-scope .text-\[\#836EF9\] {
+  color: var(--mk-text-secondary) !important;
+}
+
+.mk-scope .text-pink-200,
+.mk-scope .text-pink-300,
+.mk-scope .text-pink-400 {
+  color: var(--mk-text-secondary) !important;
+}
+
+/* Solid purple/pink backgrounds & borders → neutral surfaces */
+.mk-scope .bg-purple-500,
+.mk-scope .bg-purple-600,
+.mk-scope .bg-purple-700,
+.mk-scope .bg-violet-600,
+.mk-scope .bg-fuchsia-500,
+.mk-scope .bg-fuchsia-600 {
+  background-color: var(--mk-surface-4) !important;
+  color: var(--mk-text) !important;
+}
+
+.mk-scope .border-purple-500\/50,
+.mk-scope .border-purple-600\/50,
+.mk-scope .border-purple-500\/30,
+.mk-scope .border-purple-600\/30,
+.mk-scope .border-purple-400\/50,
+.mk-scope .border-purple-400\/30,
+.mk-scope [class*='border-purple'],
+.mk-scope [class*='border-violet'],
+.mk-scope [class*='border-fuchsia'],
+.mk-scope [class*='border-pink'] {
+  border-color: var(--mk-surface-3) !important;
+}
+
+/* Tailwind purple/pink gradient utilities */
+.mk-scope [class*='from-purple'],
+.mk-scope [class*='to-purple'],
+.mk-scope [class*='via-purple'],
+.mk-scope [class*='from-violet'],
+.mk-scope [class*='to-violet'],
+.mk-scope [class*='via-violet'],
+.mk-scope [class*='from-fuchsia'],
+.mk-scope [class*='to-fuchsia'],
+.mk-scope [class*='from-pink'],
+.mk-scope [class*='to-pink'],
+.mk-scope [class*='bg-gradient-to'] {
+  background-image: none !important;
+  background-color: transparent !important;
+}
+
+/* Sticky backdrop fake-glass bars used by market pages → solid black */
+.mk-scope .bg-zinc-950\/90,
+.mk-scope .bg-zinc-950\/80,
+.mk-scope .bg-zinc-900\/90,
+.mk-scope .bg-zinc-900\/80,
+.mk-scope .bg-zinc-900\/70,
+.mk-scope .bg-zinc-900\/60,
+.mk-scope .bg-zinc-900\/50,
+.mk-scope .bg-zinc-900\/40,
+.mk-scope .bg-zinc-900 {
+  background-color: #000 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.mk-scope .bg-zinc-800,
+.mk-scope .bg-zinc-800\/30,
+.mk-scope .bg-zinc-800\/50,
+.mk-scope .bg-zinc-800\/80,
+.mk-scope .bg-black\/40,
+.mk-scope .bg-black\/50,
+.mk-scope .bg-black\/60,
+.mk-scope .bg-black\/30 {
+  background-color: var(--mk-surface-1) !important;
+}
+
+.mk-scope .bg-white\/\[0\.02\],
+.mk-scope .bg-white\/\[0\.04\],
+.mk-scope .bg-white\/5,
+.mk-scope .bg-white\/10 {
+  background-color: var(--mk-surface-2) !important;
+}
+
+.mk-scope .border-white\/\[0\.05\],
+.mk-scope .border-white\/\[0\.06\],
+.mk-scope .border-white\/\[0\.08\],
+.mk-scope .border-white\/\[0\.1\],
+.mk-scope .border-white\/5,
+.mk-scope .border-white\/10,
+.mk-scope .border-white\/20 {
+  border-color: var(--mk-surface-3) !important;
+}
+
+.mk-scope .border-zinc-800,
+.mk-scope .border-zinc-800\/80,
+.mk-scope .border-zinc-700,
+.mk-scope .border-zinc-700\/50,
+.mk-scope .border-zinc-700\/30,
+.mk-scope .border-zinc-600,
+.mk-scope .border-zinc-600\/30 {
+  border-color: var(--mk-surface-3) !important;
+}
+
+/* Monad accents used in the app (purple-ish too) */
+.mk-scope .text-monad-400,
+.mk-scope .text-monad-500,
+.mk-scope .text-monad-600,
+.mk-scope .bg-monad-400\/10,
+.mk-scope .bg-monad-500\/5,
+.mk-scope .border-monad-400\/20,
+.mk-scope .border-monad-400\/30,
+.mk-scope .border-monad-400\/60 {
+  color: var(--mk-text-secondary) !important;
+  background-color: transparent !important;
+  border-color: var(--mk-surface-3) !important;
+}
+
+/* Force links to blue accent */
+.mk-scope a,
+.mk-scope .link {
+  color: inherit;
+}
+.mk-scope a.mk-link,
+.mk-scope .mk-text-link {
+  color: var(--mk-link) !important;
+}
+
+/* Rounded pill → flat radius */
+.mk-scope .rounded-full.mk-flat,
+.mk-scope .rounded-2xl.mk-flat,
+.mk-scope .rounded-xl.mk-flat {
+  border-radius: var(--mk-radius) !important;
+}
+
+/* Backdrop blur within scope: off (we use solid blacks) */
+.mk-scope .backdrop-blur-sm,
+.mk-scope .backdrop-blur-md,
+.mk-scope .backdrop-blur-lg,
+.mk-scope .backdrop-blur-xl {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Fill amber stars → keep amber but softer */
+.mk-scope .text-amber-400,
+.mk-scope .fill-amber-400 {
+  color: var(--mk-amber) !important;
+  fill: var(--mk-amber) !important;
+}
+
+/* Heart saved accent → blue link instead of pink */
+.mk-scope .text-pink-400,
+.mk-scope .fill-pink-400,
+.mk-scope .text-pink-300,
+.mk-scope .fill-pink-300 {
+  color: var(--mk-link) !important;
+  fill: var(--mk-link) !important;
+}
+
+/* Bigger rounded (rounded-xl) cards used in market keep radius but use flat bg */
+.mk-scope .rounded-xl,
+.mk-scope .rounded-2xl {
+  border-radius: var(--mk-radius);
+}
+
+/* Ensure sticky headers inside scope use solid black */
+.mk-scope .sticky {
+  background-color: #000;
+}
+
+/* Text "gradient" strokes overlaying top of cards (inline styled purple line) */
+.mk-scope span[aria-hidden='true'][style*='linear-gradient'] {
+  display: none !important;
+}
+
+/* Keep the scrollbars thin and gray */
+.mk-scope * {
+  scrollbar-color: var(--mk-surface-6) transparent;
+}
