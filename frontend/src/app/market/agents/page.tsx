@@ -4540,22 +4540,48 @@ function AgentsPageContent() {
       <DeveloperQuickstart />
 
       {/* Tabs */}
-      <div className="tab-group mb-6">
+      <div
+        className="inline-flex items-center gap-0.5 p-1 rounded-lg mb-6"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
+      >
         {(
           [
             ['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />],
             ['mine', 'My Agents', <Cpu key="c" className="w-3.5 h-3.5" />],
           ] as const
-        ).map(([id, label, icon]) => (
-          <button
-            key={id}
-            onClick={() => switchTab(id)}
-            className={`tab-item ${activeTab === id ? 'active' : ''}`}
-          >
-            {icon}
-            {label}
-          </button>
-        ))}
+        ).map(([id, label, icon]) => {
+          const active = activeTab === id;
+          return (
+            <motion.button
+              key={id}
+              onClick={() => switchTab(id)}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+              className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-light tracking-[0.005em] transition-colors ${
+                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="market-agents-tab-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10 inline-flex">{icon}</span>
+              <span className="relative z-10">{label}</span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* ── Marketplace tab ── */}
