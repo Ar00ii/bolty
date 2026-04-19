@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   BarChart3,
   Bell,
@@ -308,142 +309,152 @@ export function CommandPalette() {
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-[14vh] px-4"
-      onClick={() => setOpen(false)}
-    >
-      <div
-        className="absolute inset-0 backdrop-blur-md"
-        style={{ background: 'rgba(3, 3, 8, 0.72)' }}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Command palette"
-        className="relative w-full max-w-xl rounded-2xl overflow-hidden"
-        style={{
-          background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
-          boxShadow:
-            '0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-px"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
-          }}
-        />
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
-          <Search className="w-4 h-4 text-zinc-500 shrink-0" strokeWidth={1.75} />
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={onKeyDown}
-            placeholder="Search listings, jump to pages…"
-            className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-600 focus:outline-none tracking-[0.005em]"
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18 }}
+          className="fixed inset-0 z-[100] flex items-start justify-center pt-[14vh] px-4"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="absolute inset-0 backdrop-blur-md"
+            style={{ background: 'rgba(3, 3, 8, 0.72)' }}
           />
-          <kbd className="text-[10px] font-medium text-zinc-500 border border-white/10 bg-white/[0.03] rounded px-1.5 py-0.5 leading-none">
-            Esc
-          </kbd>
-        </div>
-
-        <div className="max-h-[380px] overflow-y-auto py-2">
-          {commands.length === 0 ? (
-            <div className="px-4 py-10 text-center">
-              <Sparkles className="w-5 h-5 text-zinc-700 mx-auto mb-2" />
-              <p className="text-xs text-zinc-500">No matches — try a different term</p>
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command palette"
+            initial={{ opacity: 0, scale: 0.96, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+            className="relative w-full max-w-xl rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(180deg, #131317 0%, #0c0c10 100%)',
+              boxShadow:
+                '0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.05)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+              }}
+            />
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
+              <Search className="w-4 h-4 text-zinc-500 shrink-0" strokeWidth={1.75} />
+              <input
+                ref={inputRef}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Search listings, jump to pages…"
+                className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-600 focus:outline-none tracking-[0.005em]"
+              />
+              <kbd className="text-[10px] font-medium text-zinc-500 border border-white/10 bg-white/[0.03] rounded px-1.5 py-0.5 leading-none">
+                Esc
+              </kbd>
             </div>
-          ) : (
-            commands.map((cmd, idx) => {
-              const active = idx === activeIndex;
-              const Icon = cmd.icon;
-              const prev = commands[idx - 1];
-              const groupOf = (c: Command) =>
-                c.kind === 'nav' ? 'nav' : c.group === 'recent' ? 'recent' : 'search';
-              const currentGroup = groupOf(cmd);
-              const showHeader = !prev || groupOf(prev) !== currentGroup;
-              const headerLabel =
-                currentGroup === 'recent'
-                  ? 'Recently viewed'
-                  : currentGroup === 'nav'
-                    ? 'Jump to'
-                    : 'Listings';
-              return (
-                <React.Fragment key={cmd.id}>
-                  {showHeader && (
-                    <div className="flex items-center justify-between px-4 pt-2 pb-1">
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                        {headerLabel}
-                      </span>
-                      {currentGroup === 'recent' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearRecent();
-                          }}
-                          className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 hover:text-zinc-300 transition-colors"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  <button
-                    onMouseEnter={() => setActiveIndex(idx)}
-                    onClick={() => runCommand(cmd)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                      active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
-                    }`}
-                  >
-                    <div
-                      className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
-                      style={{
-                        borderColor: 'rgba(255,255,255,0.08)',
-                        background:
-                          cmd.kind === 'listing'
-                            ? 'rgba(131,110,249,0.08)'
-                            : 'rgba(255,255,255,0.03)',
-                      }}
-                    >
-                      <Icon
-                        className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-light text-white truncate">{cmd.title}</p>
-                      <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
-                    </div>
-                    {cmd.kind === 'listing' && (
-                      <span className="text-[10px] text-zinc-600 uppercase tracking-wider">
-                        {cmd.group === 'recent' ? 'Recent' : 'Listing'}
-                      </span>
-                    )}
-                  </button>
-                </React.Fragment>
-              );
-            })
-          )}
-        </div>
 
-        <div className="flex items-center justify-between px-4 py-2 border-t border-white/10 text-[10px] text-zinc-500">
-          <span className="flex items-center gap-2">
-            <kbd className="border border-zinc-700/60 rounded px-1.5 py-0.5">↑↓</kbd>
-            navigate
-            <kbd className="border border-zinc-700/60 rounded px-1.5 py-0.5 ml-2">↵</kbd>
-            select
-          </span>
-          <span>
-            {commands.length} result{commands.length === 1 ? '' : 's'}
-          </span>
-        </div>
-      </div>
-    </div>
+            <div className="max-h-[380px] overflow-y-auto py-2">
+              {commands.length === 0 ? (
+                <div className="px-4 py-10 text-center">
+                  <Sparkles className="w-5 h-5 text-zinc-700 mx-auto mb-2" />
+                  <p className="text-xs text-zinc-500">No matches — try a different term</p>
+                </div>
+              ) : (
+                commands.map((cmd, idx) => {
+                  const active = idx === activeIndex;
+                  const Icon = cmd.icon;
+                  const prev = commands[idx - 1];
+                  const groupOf = (c: Command) =>
+                    c.kind === 'nav' ? 'nav' : c.group === 'recent' ? 'recent' : 'search';
+                  const currentGroup = groupOf(cmd);
+                  const showHeader = !prev || groupOf(prev) !== currentGroup;
+                  const headerLabel =
+                    currentGroup === 'recent'
+                      ? 'Recently viewed'
+                      : currentGroup === 'nav'
+                        ? 'Jump to'
+                        : 'Listings';
+                  return (
+                    <React.Fragment key={cmd.id}>
+                      {showHeader && (
+                        <div className="flex items-center justify-between px-4 pt-2 pb-1">
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
+                            {headerLabel}
+                          </span>
+                          {currentGroup === 'recent' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                clearRecent();
+                              }}
+                              className="text-[10px] uppercase tracking-[0.18em] text-zinc-600 hover:text-zinc-300 transition-colors"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      <button
+                        onMouseEnter={() => setActiveIndex(idx)}
+                        onClick={() => runCommand(cmd)}
+                        className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
+                          active ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <div
+                          className="shrink-0 w-7 h-7 rounded-md flex items-center justify-center border"
+                          style={{
+                            borderColor: 'rgba(255,255,255,0.08)',
+                            background:
+                              cmd.kind === 'listing'
+                                ? 'rgba(131,110,249,0.08)'
+                                : 'rgba(255,255,255,0.03)',
+                          }}
+                        >
+                          <Icon
+                            className={`w-3.5 h-3.5 ${cmd.kind === 'listing' ? 'text-[#836EF9]' : 'text-zinc-300'}`}
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-light text-white truncate">{cmd.title}</p>
+                          <p className="text-[11px] text-zinc-500 truncate">{cmd.hint}</p>
+                        </div>
+                        {cmd.kind === 'listing' && (
+                          <span className="text-[10px] text-zinc-600 uppercase tracking-wider">
+                            {cmd.group === 'recent' ? 'Recent' : 'Listing'}
+                          </span>
+                        )}
+                      </button>
+                    </React.Fragment>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex items-center justify-between px-4 py-2 border-t border-white/10 text-[10px] text-zinc-500">
+              <span className="flex items-center gap-2">
+                <kbd className="border border-zinc-700/60 rounded px-1.5 py-0.5">↑↓</kbd>
+                navigate
+                <kbd className="border border-zinc-700/60 rounded px-1.5 py-0.5 ml-2">↵</kbd>
+                select
+              </span>
+              <span>
+                {commands.length} result{commands.length === 1 ? '' : 's'}
+              </span>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
