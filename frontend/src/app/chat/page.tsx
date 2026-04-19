@@ -471,27 +471,30 @@ export default function ChatPage() {
                 {EMOJI_CATEGORIES.map((cat, idx) => {
                   const active = activeEmojiCategory === idx;
                   return (
-                    <button
+                    <motion.button
                       key={cat.label}
                       onClick={() => setActiveEmojiCategory(idx)}
-                      className="flex-1 py-1.5 text-[10.5px] uppercase tracking-[0.16em] font-medium rounded-md transition-all"
-                      style={
-                        active
-                          ? {
-                              color: '#b4a7ff',
-                              background:
-                                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                              boxShadow:
-                                'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                            }
-                          : {
-                              color: 'rgba(161,161,170,0.55)',
-                              background: 'transparent',
-                            }
-                      }
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                      className={`relative flex-1 py-1.5 text-[10.5px] uppercase tracking-[0.16em] font-medium rounded-md transition-colors ${
+                        active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
                     >
-                      {cat.label}
-                    </button>
+                      {active && (
+                        <motion.span
+                          layoutId="chat-emoji-category-pill"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 rounded-md"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }}
+                        />
+                      )}
+                      <span className="relative z-10">{cat.label}</span>
+                    </motion.button>
                   );
                 })}
               </div>
