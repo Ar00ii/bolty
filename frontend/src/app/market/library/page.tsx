@@ -265,13 +265,21 @@ export default function LibraryPage() {
 
             {/* Items */}
             <div className="grid gap-4">
-              {visible.map((item) => {
+              {visible.map((item, idx) => {
                 if (!item.listing) return null;
                 const meta = TYPE_META[item.listing.type] || TYPE_META.OTHER;
                 return (
-                  <div
+                  <motion.div
                     key={item.orderId}
-                    className="group relative rounded-2xl overflow-hidden p-5 transition-all hover:-translate-y-0.5"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(idx * 0.035, 0.35),
+                      duration: 0.32,
+                      ease: [0.22, 0.61, 0.36, 1],
+                    }}
+                    whileHover={{ y: -3 }}
+                    className="group relative rounded-2xl overflow-hidden p-5"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -410,7 +418,7 @@ export default function LibraryPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
               {visible.length === 0 && (
