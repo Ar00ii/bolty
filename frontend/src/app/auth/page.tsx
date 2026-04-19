@@ -529,22 +529,28 @@ export default function AuthPage() {
                     setTab(t);
                     clearMessages();
                   }}
-                  className={`flex-1 py-2 text-[12.5px] font-medium rounded-md transition-colors tracking-[0.005em] ${
+                  className={`relative flex-1 py-2 text-[12.5px] font-medium rounded-md transition-colors tracking-[0.005em] ${
                     tab === t ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
                   }`}
-                  style={
-                    tab === t
-                      ? {
-                          background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                        }
-                      : undefined
-                  }
                   whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 >
-                  {t === 'login' ? 'Sign in' : 'Create account'}
+                  {tab === t && (
+                    <motion.span
+                      layoutId="auth-tab-pill"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute inset-0 rounded-md"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {t === 'login' ? 'Sign in' : 'Create account'}
+                  </span>
                 </motion.button>
               ))}
             </motion.div>

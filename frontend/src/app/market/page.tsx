@@ -533,25 +533,32 @@ function MarketPageContent() {
           {(['all', 'featured', 'activity'] as const).map((tab) => {
             const active = activeTab === tab;
             return (
-              <button
+              <motion.button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 className={`relative px-4 h-8 text-[12.5px] font-medium rounded-lg transition-colors ${
                   active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
                 }`}
-                style={
-                  active
-                    ? {
-                        background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                        boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.45)',
-                      }
-                    : undefined
-                }
               >
-                {tab === 'all' ? 'All Listings' : tab === 'featured' ? 'Featured' : 'Activity'}
-              </button>
+                {active && (
+                  <motion.span
+                    layoutId="market-home-tab-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }}
+                  />
+                )}
+                <span className="relative z-10">
+                  {tab === 'all' ? 'All Listings' : tab === 'featured' ? 'Featured' : 'Activity'}
+                </span>
+              </motion.button>
             );
           })}
         </div>
