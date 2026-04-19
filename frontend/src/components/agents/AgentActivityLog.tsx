@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Activity, CheckCircle2, XCircle, Clock, AlertTriangle, Circle } from 'lucide-react';
 import React from 'react';
 
@@ -93,13 +94,21 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
 
   return (
     <div className="space-y-3">
-      {activities.map((activity) => {
+      {activities.map((activity, idx) => {
         const meta = getMeta(activity.status);
         const Icon = meta.icon;
         return (
-          <div
+          <motion.div
             key={activity.id}
-            className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: Math.min(idx * 0.035, 0.25),
+              duration: 0.26,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            whileHover={{ y: -2 }}
+            className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
             style={{
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -160,7 +169,7 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
                   )}
               </div>
             </div>
-          </div>
+          </motion.div>
         );
       })}
     </div>
