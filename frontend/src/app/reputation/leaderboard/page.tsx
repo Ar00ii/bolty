@@ -275,28 +275,34 @@ export default function LeaderboardPage() {
             </div>
           </div>
           <div className="relative flex flex-wrap gap-1.5">
-            <button
+            <motion.button
               onClick={() => setRankFilter('ALL')}
-              className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em]"
-              style={
-                rankFilter === 'ALL'
-                  ? {
-                      color: '#fff',
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                    }
-                  : {
-                      color: '#a1a1aa',
-                      background: 'rgba(255,255,255,0.04)',
-                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                    }
-              }
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+              className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                rankFilter === 'ALL' ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              }}
             >
-              All
-              <span className="text-[10px] opacity-70">{leaderboard.length}</span>
-            </button>
+              {rankFilter === 'ALL' && (
+                <motion.span
+                  layoutId="leaderboard-rank-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-md"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">All</span>
+              <span className="relative z-10 text-[10px] opacity-70">{leaderboard.length}</span>
+            </motion.button>
             {RANK_INFO.slice()
               .reverse()
               .map((r) => {
@@ -304,27 +310,33 @@ export default function LeaderboardPage() {
                 if (count === 0) return null;
                 const active = rankFilter === r.rank;
                 return (
-                  <button
+                  <motion.button
                     key={r.rank}
                     onClick={() => setRankFilter(r.rank)}
-                    className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em]"
-                    style={
-                      active
-                        ? {
-                            color: '#fff',
-                            background: `linear-gradient(180deg, ${r.color}38 0%, ${r.color}0f 100%)`,
-                            boxShadow: `inset 0 0 0 1px ${r.color}5a, 0 0 14px -4px ${r.color}70`,
-                          }
-                        : {
-                            color: '#a1a1aa',
-                            background: 'rgba(255,255,255,0.04)',
-                            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                          }
-                    }
+                    whileTap={{ scale: 0.96 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                    className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                      active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                    }`}
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                    }}
                   >
-                    {r.label}
-                    <span className="text-[10px] opacity-70">{count}</span>
-                  </button>
+                    {active && (
+                      <motion.span
+                        layoutId="leaderboard-rank-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="absolute inset-0 rounded-md"
+                        style={{
+                          background: `linear-gradient(180deg, ${r.color}38 0%, ${r.color}0f 100%)`,
+                          boxShadow: `inset 0 0 0 1px ${r.color}5a, 0 0 14px -4px ${r.color}70`,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">{r.label}</span>
+                    <span className="relative z-10 text-[10px] opacity-70">{count}</span>
+                  </motion.button>
                 );
               })}
           </div>
