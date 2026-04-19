@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Zap,
   AlertCircle,
@@ -136,47 +137,76 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
       </div>
 
       {/* Error Alert */}
-      {error && (
-        <div
-          className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
-            color: '#fda4af',
-          }}
-        >
-          <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <p>{error}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+                color: '#fda4af',
+              }}
+            >
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p>{error}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Success Alert */}
-      {success && (
-        <div
-          className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
-            color: '#86efac',
-          }}
-        >
-          <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-          <p>{success}</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {success && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-4 rounded-xl flex items-start gap-3 text-[13px] tracking-[0.005em]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                color: '#86efac',
+              }}
+            >
+              <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p>{success}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Packs Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        {packs.map((pack) => {
+        {packs.map((pack, idx) => {
           const isSelected = selectedPack === pack.pack;
           return (
-            <button
+            <motion.button
               key={pack.pack}
               onClick={() => setSelectedPack(pack.pack)}
               disabled={purchasing}
-              className="relative p-4 rounded-xl text-left transition-all hover:brightness-110 disabled:opacity-50 overflow-hidden"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: Math.min(idx * 0.04, 0.2),
+                duration: 0.26,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              whileHover={purchasing ? undefined : { y: -2 }}
+              whileTap={purchasing ? undefined : { scale: 0.98 }}
+              className="relative p-4 rounded-xl text-left transition-colors hover:brightness-110 disabled:opacity-50 overflow-hidden"
               style={
                 isSelected
                   ? {
@@ -205,19 +235,25 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
                 >
                   {pack.rays.toLocaleString()} Rays
                 </p>
-                {isSelected && (
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.6), 0 0 12px -2px rgba(131,110,249,0.5)',
-                    }}
-                  >
-                    <CheckCircle className="w-3.5 h-3.5 text-[#b4a7ff]" />
-                  </div>
-                )}
+                <AnimatePresence>
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0.4, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.4, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+                      className="w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{
+                        background:
+                          'linear-gradient(135deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.6), 0 0 12px -2px rgba(131,110,249,0.5)',
+                      }}
+                    >
+                      <CheckCircle className="w-3.5 h-3.5 text-[#b4a7ff]" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               <div className="flex items-baseline gap-1.5">
                 <p className="text-2xl font-light text-white tabular-nums tracking-[-0.01em]">
@@ -230,113 +266,123 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
               <p className="text-[11px] text-zinc-500 mt-2 tabular-nums tracking-[0.005em]">
                 {(pack.boltyPrice / pack.rays).toFixed(2)} per ray
               </p>
-            </button>
+            </motion.button>
           );
         })}
       </div>
 
       {/* Selected Pack Details */}
-      {selectedPackData && (
-        <div
-          className="relative p-5 rounded-xl overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.35)',
-          }}
-        >
-          <div
-            className="absolute inset-x-0 top-0 h-px"
+      <AnimatePresence mode="wait">
+        {selectedPackData && (
+          <motion.div
+            key={selectedPackData.pack}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="relative p-5 rounded-xl overflow-hidden"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.35)',
             }}
-          />
-          <div
-            className="grid grid-cols-2 gap-4 pb-4"
-            style={{ borderBottom: '1px solid rgba(131,110,249,0.15)' }}
           >
-            <div>
-              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
-                Rays
-              </p>
-              <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
-                {selectedPackData.rays.toLocaleString()}
-              </p>
+            <div
+              className="absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+              }}
+            />
+            <div
+              className="grid grid-cols-2 gap-4 pb-4"
+              style={{ borderBottom: '1px solid rgba(131,110,249,0.15)' }}
+            >
+              <div>
+                <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                  Rays
+                </p>
+                <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
+                  {selectedPackData.rays.toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                  Price
+                </p>
+                <p className="text-2xl font-light text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
+                  {selectedPackData.boltyPrice.toLocaleString()} BOLTY
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
-                Price
-              </p>
-              <p className="text-2xl font-light text-[#b4a7ff] mt-1 tabular-nums tracking-[-0.01em]">
-                {selectedPackData.boltyPrice.toLocaleString()} BOLTY
-              </p>
-            </div>
-          </div>
 
-          <div className="mt-4">
-            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
-              When you purchase
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                {
-                  Icon: Flame,
-                  color: '239,68,68',
-                  textColor: '#fda4af',
-                  label: '50% BOLTY burned',
-                },
-                {
-                  Icon: Building2,
-                  color: '6,182,212',
-                  textColor: '#67e8f9',
-                  label: '50% to Bolty DAO',
-                },
-                {
-                  Icon: InfinityIcon,
-                  color: '131,110,249',
-                  textColor: '#b4a7ff',
-                  label: 'Rays accumulate permanently',
-                },
-                {
-                  Icon: Zap,
-                  color: '245,158,11',
-                  textColor: '#fcd34d',
-                  label: 'Boost trending visibility',
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="flex items-center gap-3 p-3 rounded-lg"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(8,8,12,0.5) 0%, rgba(4,4,8,0.5) 100%)',
-                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
-                  }}
-                >
+            <div className="mt-4">
+              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
+                When you purchase
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    Icon: Flame,
+                    color: '239,68,68',
+                    textColor: '#fda4af',
+                    label: '50% BOLTY burned',
+                  },
+                  {
+                    Icon: Building2,
+                    color: '6,182,212',
+                    textColor: '#67e8f9',
+                    label: '50% to Bolty DAO',
+                  },
+                  {
+                    Icon: InfinityIcon,
+                    color: '131,110,249',
+                    textColor: '#b4a7ff',
+                    label: 'Rays accumulate permanently',
+                  },
+                  {
+                    Icon: Zap,
+                    color: '245,158,11',
+                    textColor: '#fcd34d',
+                    label: 'Boost trending visibility',
+                  },
+                ].map((item) => (
                   <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                    key={item.label}
+                    className="flex items-center gap-3 p-3 rounded-lg"
                     style={{
-                      background: `linear-gradient(135deg, rgba(${item.color},0.22) 0%, rgba(${item.color},0.06) 100%)`,
-                      boxShadow: `inset 0 0 0 1px rgba(${item.color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 12px -3px rgba(${item.color},0.45)`,
+                      background:
+                        'linear-gradient(180deg, rgba(8,8,12,0.5) 0%, rgba(4,4,8,0.5) 100%)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
                     }}
                   >
-                    <item.Icon className="w-3 h-3" style={{ color: item.textColor }} />
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: `linear-gradient(135deg, rgba(${item.color},0.22) 0%, rgba(${item.color},0.06) 100%)`,
+                        boxShadow: `inset 0 0 0 1px rgba(${item.color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 12px -3px rgba(${item.color},0.45)`,
+                      }}
+                    >
+                      <item.Icon className="w-3 h-3" style={{ color: item.textColor }} />
+                    </div>
+                    <p className="text-[12px] text-zinc-300 tracking-[0.005em]">{item.label}</p>
                   </div>
-                  <p className="text-[12px] text-zinc-300 tracking-[0.005em]">{item.label}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Purchase Button */}
-      <button
+      <motion.button
         onClick={handlePurchase}
         disabled={!selectedPack || purchasing}
-        className="w-full py-3 rounded-lg font-light text-[13px] text-white tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        whileHover={!selectedPack || purchasing ? undefined : { y: -1 }}
+        whileTap={!selectedPack || purchasing ? undefined : { scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+        className="w-full py-3 rounded-lg font-light text-[13px] text-white tracking-[0.005em] transition-colors hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         style={{
           background:
             'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
@@ -357,7 +403,7 @@ export const RaysShop: React.FC<RaysShopProps> = ({ agentId, onPurchaseSuccess }
               : 'Select a Pack'}
           </>
         )}
-      </button>
+      </motion.button>
 
       {/* Info */}
       <div className="relative p-4 rounded-xl overflow-hidden" style={surfaceStyle}>

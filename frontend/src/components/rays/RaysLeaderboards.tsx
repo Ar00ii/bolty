@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { TrendingUp, Trophy, Users, Crown, Medal, Award } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
@@ -152,60 +153,80 @@ export const RaysLeaderboards: React.FC = () => {
 
       {/* Tab Buttons */}
       <div className="relative flex gap-1 p-1 rounded-xl" style={surfaceStyle}>
-        <button
+        <motion.button
           onClick={() => setActiveTab('rays')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all text-[13px] font-light tracking-[0.005em] ${
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-light tracking-[0.005em] ${
             activeTab === 'rays' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
-          style={
-            activeTab === 'rays'
-              ? {
-                  background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
-                }
-              : undefined
-          }
         >
-          <Trophy className="w-3.5 h-3.5" />
-          Top Agents
-        </button>
-        <button
+          {activeTab === 'rays' && (
+            <motion.span
+              layoutId="rays-leaderboard-tab-indicator"
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              className="absolute inset-0 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+              }}
+            />
+          )}
+          <Trophy className="w-3.5 h-3.5 relative" />
+          <span className="relative">Top Agents</span>
+        </motion.button>
+        <motion.button
           onClick={() => setActiveTab('creators')}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all text-[13px] font-light tracking-[0.005em] ${
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+          className={`relative flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-colors text-[13px] font-light tracking-[0.005em] ${
             activeTab === 'creators' ? 'text-[#b4a7ff]' : 'text-zinc-400 hover:text-zinc-200'
           }`}
-          style={
-            activeTab === 'creators'
-              ? {
-                  background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
-                }
-              : undefined
-          }
         >
-          <Users className="w-3.5 h-3.5" />
-          Top Creators
-        </button>
+          {activeTab === 'creators' && (
+            <motion.span
+              layoutId="rays-leaderboard-tab-indicator"
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
+              className="absolute inset-0 rounded-lg"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+              }}
+            />
+          )}
+          <Users className="w-3.5 h-3.5 relative" />
+          <span className="relative">Top Creators</span>
+        </motion.button>
       </div>
 
       {/* Error */}
-      {error && (
-        <div
-          className="p-4 rounded-xl text-[13px] tracking-[0.005em]"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
-            color: '#fda4af',
-          }}
-        >
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-4 rounded-xl text-[13px] tracking-[0.005em]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+                color: '#fda4af',
+              }}
+            >
+              {error}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Rays Leaderboard */}
       {activeTab === 'rays' &&
@@ -215,13 +236,21 @@ export const RaysLeaderboards: React.FC = () => {
           renderEmpty('No agents in leaderboard yet', Trophy)
         ) : (
           <div className="space-y-3">
-            {raysLeaderboard.map((entry) => {
+            {raysLeaderboard.map((entry, idx) => {
               const positionMeta = getPositionMeta(entry.position);
               const rankMeta = RANK_META[entry.rank] || RANK_META.HIERRO;
               return (
-                <div
+                <motion.div
                   key={entry.agentId}
-                  className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.035, 0.3),
+                    duration: 0.26,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -2 }}
+                  className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
                   style={surfaceStyle}
                 >
                   <div
@@ -272,7 +301,7 @@ export const RaysLeaderboards: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -286,12 +315,20 @@ export const RaysLeaderboards: React.FC = () => {
           renderEmpty('No creators in leaderboard yet', Users)
         ) : (
           <div className="space-y-3">
-            {creatorsLeaderboard.map((entry) => {
+            {creatorsLeaderboard.map((entry, idx) => {
               const positionMeta = getPositionMeta(entry.position);
               return (
-                <div
+                <motion.div
                   key={entry.creatorId}
-                  className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.035, 0.3),
+                    duration: 0.26,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -2 }}
+                  className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
                   style={surfaceStyle}
                 >
                   <div
@@ -339,7 +376,7 @@ export const RaysLeaderboards: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

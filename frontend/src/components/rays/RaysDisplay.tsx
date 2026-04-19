@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { TrendingUp, Trophy, Gauge, Sparkles } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
@@ -89,7 +90,10 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
   return (
     <div className="space-y-4">
       {/* Main Card */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.32, ease: [0.22, 0.61, 0.36, 1] }}
         className="relative p-6 rounded-xl overflow-hidden"
         style={{
           background: `linear-gradient(180deg, rgba(${rankMeta.color},0.14) 0%, rgba(${rankMeta.color},0.04) 100%)`,
@@ -171,10 +175,16 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             Last rank up: {new Date(data.lastRankUpAt).toLocaleDateString()}
           </p>
         )}
-      </div>
+      </motion.div>
 
       {/* Benefits */}
-      <div className="relative p-5 rounded-xl overflow-hidden" style={surfaceStyle}>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative p-5 rounded-xl overflow-hidden"
+        style={surfaceStyle}
+      >
         <div
           className="absolute inset-x-0 top-0 h-px"
           style={{
@@ -202,17 +212,24 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             'Increased visibility and exposure',
             'More transaction opportunities',
             'Rays accumulated permanently',
-          ].map((benefit) => (
-            <li
+          ].map((benefit, idx) => (
+            <motion.li
               key={benefit}
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.12 + idx * 0.05,
+                duration: 0.24,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
               className="text-[13px] text-zinc-400 flex items-start gap-2 tracking-[0.005em]"
             >
               <Sparkles className="w-3 h-3 text-[#b4a7ff] mt-1 flex-shrink-0" />
               {benefit}
-            </li>
+            </motion.li>
           ))}
         </ul>
-      </div>
+      </motion.div>
 
       {/* Progress to Next Rank */}
       <RankProgress currentRank={data.currentRank} totalRays={data.totalRaysAccumulated} />
@@ -252,7 +269,10 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
 
   if (nextIndex >= rankOrder.length) {
     return (
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.16, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
         className="relative p-5 rounded-xl text-center overflow-hidden"
         style={{
           background:
@@ -274,7 +294,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
             You are at the highest rank
           </p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -285,7 +305,10 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
   const nextMeta = RANK_META[nextRank] || RANK_META.HIERRO;
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.16, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
       className="relative p-5 rounded-xl overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -322,10 +345,12 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
         }}
       >
-        <div
-          className="h-full rounded-full transition-all duration-500"
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 0.61, 0.36, 1] }}
+          className="h-full rounded-full"
           style={{
-            width: `${progress}%`,
             background: `linear-gradient(90deg, rgba(${nextMeta.color},0.85) 0%, rgba(${nextMeta.color},1) 100%)`,
             boxShadow: `0 0 12px rgba(${nextMeta.color},0.6)`,
           }}
@@ -339,7 +364,7 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
           {progress.toFixed(1)}%
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
