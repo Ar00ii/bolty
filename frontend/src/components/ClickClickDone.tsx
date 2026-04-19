@@ -219,7 +219,7 @@ export function ClickClickDone() {
                       RANK_TIERS
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {['Newcomer', 'Bronze', 'Silver', 'Gold'].map((tier) => (
+                      {['Hierro', 'Bronce', 'Plata', 'Oro'].map((tier) => (
                         <div
                           key={tier}
                           style={{

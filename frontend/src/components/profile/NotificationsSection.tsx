@@ -13,7 +13,7 @@ interface NotificationSettings {
 
 interface NotificationsSectionProps {
   settings: NotificationSettings;
-  billingEmail: string;
+  email: string;
   onUpdate: (settings: NotificationSettings) => Promise<void>;
 }
 
@@ -28,7 +28,7 @@ interface NotificationOption {
 
 export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
   settings,
-  billingEmail,
+  email,
   onUpdate,
 }) => {
   const [localSettings, setLocalSettings] = useState(settings);
@@ -65,7 +65,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
       key: 'weeklyReport',
       icon: Mail,
       title: 'Weekly Usage Report',
-      description: `Summary of your API usage sent to ${billingEmail}`,
+      description: `Summary of your API usage sent to ${email}`,
       color: '6,182,212',
       textColor: '#67e8f9',
     },
@@ -230,7 +230,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
         <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
           Email Address
         </p>
-        <p className="text-sm text-white font-light tracking-[0.005em] break-all">{billingEmail}</p>
+        <p className="text-sm text-white font-light tracking-[0.005em] break-all">{email}</p>
         <p className="text-xs text-zinc-500 mt-2">
           All notifications will be sent to this email address
         </p>

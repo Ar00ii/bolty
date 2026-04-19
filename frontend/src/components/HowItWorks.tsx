@@ -234,10 +234,10 @@ export const HowItWorks = memo(() => {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: 'Newcomer', color: '#71717a' },
-                    { label: 'Bronze', color: '#cd7f32' },
-                    { label: 'Silver', color: '#9ca3af' },
-                    { label: 'Gold', color: '#f59e0b' },
+                    { label: 'Hierro', color: '#78716c' },
+                    { label: 'Bronce', color: '#cd7f32' },
+                    { label: 'Plata', color: '#9ca3af' },
+                    { label: 'Oro', color: '#f59e0b' },
                   ].map((tier) => (
                     <div
                       key={tier.label}
