@@ -6,7 +6,6 @@ import {
   BookOpen,
   Bot,
   Briefcase,
-  ChevronDown,
   ChevronRight,
   FileText,
   GitBranch,
@@ -128,13 +127,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     if (displayName.length <= 14) return displayName;
     return displayName.slice(0, 13) + '…';
   }, [displayName]);
-  const plan = useMemo(() => {
-    const role = (user?.role || 'USER').toUpperCase();
-    if (role === 'ADMIN') return 'Pro';
-    if (role === 'SELLER') return 'Seller';
-    return 'Hobby';
-  }, [user?.role]);
-
   const topbarTitle = useMemo(() => {
     if (!pathname || pathname === '/') return 'Overview';
     const found = TITLE_MAP.find((m) => pathname.startsWith(m.prefix));
@@ -146,24 +138,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mk-scope mk-shell">
       <aside className="mk-sidebar" aria-label="Primary navigation">
-        <div className="mk-sidebar__user">
-          <div className="mk-sidebar__avatar">
-            {user?.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.avatarUrl} alt={displayName} />
-            ) : (
-              <span>{displayName.charAt(0).toUpperCase()}</span>
-            )}
-          </div>
-          <span className="mk-sidebar__name" title={displayName}>
-            {shortName}
-          </span>
-          <span className="mk-badge mk-badge--outline">{plan}</span>
-          <button type="button" aria-label="Switch account" className="mk-icon-btn">
-            <ChevronDown size={14} strokeWidth={1.75} />
-          </button>
-        </div>
-
         <div className="mk-sidebar__search">
           <Search size={14} strokeWidth={1.75} className="mk-sidebar__search-icon" />
           <input
@@ -218,13 +192,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="mk-main">
         <header className="mk-topbar">
-          <div className="mk-topbar__left">
-            <button type="button" className="mk-scope-picker" aria-label="Scope">
-              <span className="mk-scope-picker__dot" aria-hidden />
-              <span className="mk-scope-picker__label">Bolty Network</span>
-              <ChevronDown size={12} strokeWidth={1.75} />
-            </button>
-          </div>
+          <div className="mk-topbar__left" />
           <div className="mk-topbar__center">
             <span className="mk-topbar__title">{topbarTitle}</span>
           </div>
