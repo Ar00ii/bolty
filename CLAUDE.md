@@ -1,5 +1,7 @@
 # Project conventions for Claude Code
 
+> **First thing every session**: read `HANDOFF.md` at the repo root. It tracks who's working on what, recent commits, and the pending backlog so parallel agents don't step on each other.
+
 ## Git workflow
 
 - Develop on the session branch provided by the harness (`claude/session-...`).
