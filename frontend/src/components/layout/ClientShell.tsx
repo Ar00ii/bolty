@@ -17,7 +17,8 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
-  const showSidebar = !isHome && !isAuth;
+  const isMarket = pathname.startsWith('/market');
+  const showSidebar = !isHome && !isAuth && !isMarket;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -35,11 +36,11 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       </a>
       <CommandPalette />
       <ShortcutsModal />
-      <FloatingTopBar />
-      {!isAuth && <BackToTop />}
-      {!showSidebar && <UnifiedHeader />}
+      {!isMarket && <FloatingTopBar />}
+      {!isAuth && !isMarket && <BackToTop />}
+      {!showSidebar && !isMarket && <UnifiedHeader />}
 
-      <div className={`flex ${!isHome ? 'pt-16' : ''}`}>
+      <div className={`flex ${!isHome && !isMarket ? 'pt-16' : ''}`}>
         {showSidebar && <Sidebar />}
 
         <div className="flex-1 w-full min-w-0">
