@@ -6,12 +6,9 @@ import {
   ChevronDown,
   ChevronRight,
   GitBranch,
-  LayoutGrid,
-  List,
   Package,
   Plus,
   Search,
-  SlidersHorizontal,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
@@ -98,7 +95,6 @@ function MarketOverview() {
   const initialSearch = searchParams.get('search') || '';
   const { items: recentItems } = useRecentlyViewed();
 
-  const [view, setView] = useState<'grid' | 'list'>('list');
   const [search, setSearch] = useState(initialSearch);
   const [listings, setListings] = useState<MarketListing[]>([]);
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
@@ -168,7 +164,7 @@ function MarketOverview() {
 
   return (
     <div>
-      <Toolbar view={view} setView={setView} search={search} setSearch={setSearch} />
+      <Toolbar search={search} setSearch={setSearch} />
 
       <div className="mk-overview-grid">
         <div className="mk-overview-grid__left">
@@ -204,22 +200,10 @@ function MarketOverview() {
                 Try a different search term or clear filters to see all listings.
               </p>
             </div>
-          ) : view === 'list' ? (
+          ) : (
             <div>
               {filteredListings.map((l) => (
                 <ProjectCard key={l.id} listing={l} feed={feedPosts} />
-              ))}
-            </div>
-          ) : (
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                gap: 12,
-              }}
-            >
-              {filteredListings.map((l) => (
-                <ProjectCard key={l.id} listing={l} feed={feedPosts} compact />
               ))}
             </div>
           )}
@@ -230,13 +214,9 @@ function MarketOverview() {
 }
 
 function Toolbar({
-  view,
-  setView,
   search,
   setSearch,
 }: {
-  view: 'grid' | 'list';
-  setView: (v: 'grid' | 'list') => void;
   search: string;
   setSearch: (s: string) => void;
 }) {
@@ -252,25 +232,6 @@ function Toolbar({
           aria-label="Search listings"
         />
       </div>
-      <button type="button" className="mk-icon-box" aria-label="Filter">
-        <SlidersHorizontal size={15} strokeWidth={1.75} />
-      </button>
-      <button
-        type="button"
-        className={view === 'grid' ? 'mk-icon-box mk-icon-box--active' : 'mk-icon-box'}
-        aria-label="Grid view"
-        onClick={() => setView('grid')}
-      >
-        <LayoutGrid size={15} strokeWidth={1.75} />
-      </button>
-      <button
-        type="button"
-        className={view === 'list' ? 'mk-icon-box mk-icon-box--active' : 'mk-icon-box'}
-        aria-label="List view"
-        onClick={() => setView('list')}
-      >
-        <List size={15} strokeWidth={1.75} />
-      </button>
       <div className="mk-btn-split">
         <Link
           href="/market/agents?tab=mine&new=1"
