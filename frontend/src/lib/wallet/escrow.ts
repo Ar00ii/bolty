@@ -11,11 +11,14 @@ const ESCROW_ABI = [
   'function deposit(string orderId, address seller) payable',
   'function release(string orderId)',
   'function dispute(string orderId)',
+  'function resolve(string orderId, bool refundBuyer)',
+  'function admin() view returns (address)',
   'function getOrder(string orderId) view returns (address buyer, address seller, uint256 amount, uint256 createdAt, uint8 status)',
   'function isReleasable(string orderId) view returns (bool)',
   'event Deposited(string indexed orderId, address buyer, address seller, uint256 amount)',
   'event Released(string indexed orderId, address seller, uint256 sellerAmount, uint256 platformFee)',
   'event Disputed(string indexed orderId, address disputedBy)',
+  'event Resolved(string indexed orderId, bool refundedBuyer, uint256 amount)',
 ];
 
 // Escrow statuses matching the Solidity enum
@@ -104,6 +107,29 @@ export async function escrowDispute(orderId: string): Promise<string> {
   const contract = new ethers.Contract(escrowAddress, ESCROW_ABI, signer);
 
   const tx = await contract.dispute(orderId);
+  const receipt = await tx.wait();
+  return receipt.hash;
+}
+
+/**
+ * Admin resolves a disputed escrow order.
+ * refundBuyer = true  → full refund to buyer.
+ * refundBuyer = false → pay seller (minus platform fee).
+ * @returns The transaction hash of the resolution.
+ */
+export async function escrowResolve(orderId: string, refundBuyer: boolean): Promise<string> {
+  const eth = getMetaMaskProvider();
+  if (!eth) throw new Error('MetaMask not found');
+
+  const escrowAddress = getEscrowAddress();
+  if (!escrowAddress) throw new Error('Escrow contract not configured');
+
+  const { ethers } = await import('ethers');
+  const provider = new ethers.BrowserProvider(eth);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(escrowAddress, ESCROW_ABI, signer);
+
+  const tx = await contract.resolve(orderId, refundBuyer);
   const receipt = await tx.wait();
   return receipt.hash;
 }
