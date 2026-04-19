@@ -203,24 +203,31 @@ export default function TopSellersPage() {
                       onClick={() => setSort(k)}
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.04, duration: 0.22 }}
+                      transition={{
+                        delay: Math.min(idx * 0.04, 0.2),
+                        duration: 0.22,
+                        ease: [0.22, 0.61, 0.36, 1],
+                      }}
                       whileTap={{ scale: 0.95 }}
-                      className={`inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                      className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
                         active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
                       }`}
-                      style={
-                        active
-                          ? {
-                              background:
-                                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                              boxShadow:
-                                'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                            }
-                          : undefined
-                      }
                     >
-                      <Icon className="w-3 h-3" strokeWidth={2} />
-                      {label}
+                      {active && (
+                        <motion.span
+                          layoutId="sellers-sort-pill"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 rounded-md"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }}
+                        />
+                      )}
+                      <Icon className="relative z-10 w-3 h-3" strokeWidth={2} />
+                      <span className="relative z-10">{label}</span>
                     </motion.button>
                   );
                 })}
