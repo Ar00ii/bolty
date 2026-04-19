@@ -6,65 +6,103 @@ export interface ReputationInfo {
   points: number;
   label: string;
   color: string;
-  tier: number; // 0–6 for bar fill
+  tier: number; // 0–7 for bar fill
   description?: string;
+  threshold: number;
 }
 
-export function getReputationRank(points: number): ReputationInfo {
-  if (points >= 10000)
-    return {
-      points,
-      label: 'Legend',
-      color: '#836ef9',
-      tier: 6,
-      description: 'Hall of fame — the pinnacle of the Bolty ecosystem',
-    };
-  if (points >= 4000)
-    return {
-      points,
-      label: 'Diamond',
-      color: '#38bdf8',
-      tier: 5,
-      description: 'Top-tier contributor trusted by thousands',
-    };
-  if (points >= 1500)
-    return {
-      points,
-      label: 'Platinum',
-      color: '#a855f7',
-      tier: 4,
-      description: 'Elite developer with exceptional track record',
-    };
-  if (points >= 600)
-    return {
-      points,
-      label: 'Gold',
-      color: '#f59e0b',
-      tier: 3,
-      description: 'Highly respected community member',
-    };
-  if (points >= 200)
-    return {
-      points,
-      label: 'Silver',
-      color: '#9ca3af',
-      tier: 2,
-      description: 'Established developer with proven contributions',
-    };
-  if (points >= 50)
-    return {
-      points,
-      label: 'Bronze',
-      color: '#cd7f32',
-      tier: 1,
-      description: 'Actively contributing to the community',
-    };
-  return {
-    points,
-    label: 'Newcomer',
-    color: '#71717a',
-    tier: 0,
+export interface RankDefinition {
+  rank:
+    | 'HIERRO'
+    | 'BRONCE'
+    | 'PLATA'
+    | 'ORO'
+    | 'PLATINO'
+    | 'DIAMANTE'
+    | 'MAESTRIA'
+    | 'CAMPEON';
+  label: string;
+  color: string;
+  threshold: number;
+  description: string;
+}
+
+// New 8-tier rank system, in ascending order (matches backend rays.service.ts).
+export const RANK_TIERS: RankDefinition[] = [
+  {
+    rank: 'HIERRO',
+    label: 'Hierro',
+    color: '#78716c',
+    threshold: 0,
     description: 'Just getting started on the platform',
+  },
+  {
+    rank: 'BRONCE',
+    label: 'Bronce',
+    color: '#cd7f32',
+    threshold: 25,
+    description: 'Actively contributing to the community',
+  },
+  {
+    rank: 'PLATA',
+    label: 'Plata',
+    color: '#9ca3af',
+    threshold: 50,
+    description: 'Established developer with proven contributions',
+  },
+  {
+    rank: 'ORO',
+    label: 'Oro',
+    color: '#f59e0b',
+    threshold: 120,
+    description: 'Highly respected community member',
+  },
+  {
+    rank: 'PLATINO',
+    label: 'Platino',
+    color: '#a855f7',
+    threshold: 250,
+    description: 'Elite developer with exceptional track record',
+  },
+  {
+    rank: 'DIAMANTE',
+    label: 'Diamante',
+    color: '#38bdf8',
+    threshold: 500,
+    description: 'Top-tier contributor trusted by thousands',
+  },
+  {
+    rank: 'MAESTRIA',
+    label: 'Maestría',
+    color: '#ec4899',
+    threshold: 1000,
+    description: 'Master of the craft — exceptional standing',
+  },
+  {
+    rank: 'CAMPEON',
+    label: 'Campeón',
+    color: '#836ef9',
+    threshold: 2000,
+    description: 'Champion — reserved for the top 5 of the ecosystem',
+  },
+];
+
+export function getReputationRank(rays: number): ReputationInfo {
+  let current = RANK_TIERS[0];
+  let tier = 0;
+  for (let i = 0; i < RANK_TIERS.length; i++) {
+    if (rays >= RANK_TIERS[i].threshold) {
+      current = RANK_TIERS[i];
+      tier = i;
+    }
+  }
+  return {
+    points: rays,
+    label: current.label,
+    color: current.color,
+    tier,
+    description: current.description,
+    threshold: current.threshold,
   };
 }
 
@@ -99,9 +137,8 @@ export function ReputationBadge({
         border: `1px solid ${rank.color}35`,
         color: rank.color,
       }}
-      title={`${rank.label} · ${points.toLocaleString()} reputation points`}
+      title={`${rank.label} · ${points.toLocaleString()} rays`}
     >
-      {/* Tier indicator: filled dots */}
       <span
         className={`${s.dot} rounded-full flex-shrink-0`}
         style={{ background: rank.color, opacity: 0.85 }}

@@ -6,7 +6,11 @@ import Link from 'next/link';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 
 import { DottedSurface } from '@/components/ui/dotted-surface';
-import { ReputationBadge } from '@/components/ui/reputation-badge';
+import {
+  getReputationRank,
+  RANK_TIERS,
+  ReputationBadge,
+} from '@/components/ui/reputation-badge';
 import { api } from '@/lib/api/client';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
@@ -18,30 +22,17 @@ interface LeaderboardEntry {
   reputationPoints: number;
   occupation: string | null;
   position: number;
-  rank: string;
-  rankMeta: { label: string; color: string; badge: string; description: string };
   _count: { repositories: number; marketListings: number };
 }
 
-const RANK_INFO = [
-  { rank: 'NEWCOMER', label: 'Newcomer', color: '#71717a', threshold: 0 },
-  { rank: 'BRONZE', label: 'Bronze', color: '#cd7f32', threshold: 50 },
-  { rank: 'SILVER', label: 'Silver', color: '#9ca3af', threshold: 200 },
-  { rank: 'GOLD', label: 'Gold', color: '#f59e0b', threshold: 600 },
-  { rank: 'PLATINUM', label: 'Platinum', color: '#a855f7', threshold: 1500 },
-  { rank: 'DIAMOND', label: 'Diamond', color: '#38bdf8', threshold: 4000 },
-  { rank: 'LEGEND', label: 'Legend', color: '#836ef9', threshold: 10000 },
-];
-
-const POINTS_INFO = [
-  { reason: 'REPO_PUBLISHED', label: 'Publish a repository', points: 15 },
-  { reason: 'REPO_UPVOTE_RECEIVED', label: 'Receive an upvote on a repo', points: 5 },
-  { reason: 'REPO_SOLD', label: 'Sell a locked repository', points: 75 },
-  { reason: 'LISTING_SOLD', label: 'Sell a market listing', points: 100 },
-  { reason: 'FIRST_SALE', label: 'First ever sale bonus', points: 150 },
-  { reason: 'SERVICE_COMPLETED', label: 'Complete a service contract', points: 50 },
-  { reason: 'PROFILE_COMPLETED', label: 'Complete your profile', points: 10 },
-  { reason: 'COLLABORATOR_ADDED', label: 'Add a collaborator to a repo', points: 10 },
+const RAYS_INFO = [
+  { reason: 'REPO_PUBLISHED', label: 'Publish a repository', rays: 15 },
+  { reason: 'REPO_UPVOTE_RECEIVED', label: 'Receive an upvote on a repo', rays: 5 },
+  { reason: 'REPO_SOLD', label: 'Sell a locked repository', rays: 75 },
+  { reason: 'LISTING_SOLD', label: 'Sell a market listing', rays: 100 },
+  { reason: 'FIRST_SALE', label: 'First ever sale bonus', rays: 150 },
+  { reason: 'PROFILE_COMPLETED', label: 'Complete your profile', rays: 10 },
+  { reason: 'COLLABORATOR_ADDED', label: 'Add a collaborator to a repo', rays: 10 },
 ];
 
 function PositionBadge({ idx }: { idx: number }) {
@@ -84,24 +75,43 @@ export default function LeaderboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Annotate with the new-tier rank. CAMPEON is reserved for the top 5 in the leaderboard.
+  const annotated = useMemo(() => {
+    return leaderboard.map((e, idx) => {
+      const rays = e.reputationPoints;
+      const base = getReputationRank(rays);
+      const position = e.position || idx + 1;
+      const qualifiesForCampeon = rays >= 2000 && position <= 5;
+      const tier = base.tier === 7 && !qualifiesForCampeon ? 6 : base.tier;
+      const rank = RANK_TIERS[tier];
+      return {
+        ...e,
+        position,
+        rankKey: rank.rank,
+        rankLabel: rank.label,
+        rankColor: rank.color,
+      };
+    });
+  }, [leaderboard]);
+
   const rankCounts = useMemo(() => {
-    return leaderboard.reduce<Record<string, number>>((acc, e) => {
-      acc[e.rank] = (acc[e.rank] || 0) + 1;
+    return annotated.reduce<Record<string, number>>((acc, e) => {
+      acc[e.rankKey] = (acc[e.rankKey] || 0) + 1;
       return acc;
     }, {});
-  }, [leaderboard]);
+  }, [annotated]);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return leaderboard.filter((e) => {
-      if (rankFilter !== 'ALL' && e.rank !== rankFilter) return false;
+    return annotated.filter((e) => {
+      if (rankFilter !== 'ALL' && e.rankKey !== rankFilter) return false;
       if (!q) return true;
       const hay = [e.username ?? '', e.displayName ?? '', e.occupation ?? '']
         .join(' ')
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [leaderboard, query, rankFilter]);
+  }, [annotated, query, rankFilter]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -125,9 +135,9 @@ export default function LeaderboardPage() {
             Hall of Fame
           </p>
         </div>
-        <h1 className="text-2xl font-light text-white mb-1.5">Reputation Leaderboard</h1>
+        <h1 className="text-2xl font-light text-white mb-1.5">Rays Leaderboard</h1>
         <p className="text-sm text-zinc-500 max-w-lg">
-          The most trusted and respected developers in the Bolty ecosystem.
+          The most trusted and respected developers in the Bolty ecosystem, ranked by rays earned.
         </p>
       </div>
 
@@ -150,7 +160,7 @@ export default function LeaderboardPage() {
           Rank Tiers
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {RANK_INFO.map((r, idx) => (
+          {RANK_TIERS.map((r, idx) => (
             <motion.div
               key={r.rank}
               initial={{ opacity: 0, y: 6 }}
@@ -175,7 +185,11 @@ export default function LeaderboardPage() {
                   className="font-mono"
                   style={{ color: 'rgba(161,161,170,0.4)', fontSize: '0.6rem' }}
                 >
-                  {r.threshold >= 1000 ? `${(r.threshold / 1000).toFixed(0)}k` : r.threshold}+ pts
+                  {r.rank === 'CAMPEON'
+                    ? 'Top 5 · 2k+ rays'
+                    : r.threshold >= 1000
+                      ? `${(r.threshold / 1000).toFixed(0)}k+ rays`
+                      : `${r.threshold}+ rays`}
                 </p>
               </div>
             </motion.div>
@@ -183,7 +197,7 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      {/* How to earn points */}
+      {/* How to earn rays */}
       <div
         className="relative rounded-2xl p-5 mb-8 overflow-hidden"
         style={{
@@ -199,10 +213,10 @@ export default function LeaderboardPage() {
           }}
         />
         <h2 className="text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-4">
-          How to Earn Points
+          How to Earn Rays
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5">
-          {POINTS_INFO.map((p) => (
+          {RAYS_INFO.map((p) => (
             <div
               key={p.reason}
               className="flex items-center justify-between px-3 py-2 rounded-lg"
@@ -213,7 +227,7 @@ export default function LeaderboardPage() {
             >
               <span className="text-[12.5px] text-zinc-400 tracking-[0.005em]">{p.label}</span>
               <span className="text-[11.5px] font-mono font-light text-[#b4a7ff] ml-4 flex-shrink-0">
-                +{p.points} pts
+                +{p.rays} rays
               </span>
             </div>
           ))}
@@ -221,7 +235,7 @@ export default function LeaderboardPage() {
       </div>
 
       {/* Search + rank filter */}
-      {!loading && leaderboard.length > 0 && (
+      {!loading && annotated.length > 0 && (
         <div
           className="relative rounded-xl overflow-hidden p-4 mb-4 space-y-3"
           style={{
@@ -301,9 +315,9 @@ export default function LeaderboardPage() {
                 />
               )}
               <span className="relative z-10">All</span>
-              <span className="relative z-10 text-[10px] opacity-70">{leaderboard.length}</span>
+              <span className="relative z-10 text-[10px] opacity-70">{annotated.length}</span>
             </motion.button>
-            {RANK_INFO.slice()
+            {RANK_TIERS.slice()
               .reverse()
               .map((r) => {
                 const count = rankCounts[r.rank] || 0;
@@ -348,7 +362,7 @@ export default function LeaderboardPage() {
         <div className="text-center py-20">
           <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto" />
         </div>
-      ) : leaderboard.length === 0 ? (
+      ) : annotated.length === 0 ? (
         <div
           className="relative rounded-2xl overflow-hidden p-14 text-center"
           style={{
@@ -365,7 +379,7 @@ export default function LeaderboardPage() {
             }}
           />
           <p className="text-zinc-500 text-[13px]">
-            No rankings yet. Be the first to earn reputation.
+            No rankings yet. Be the first to earn rays.
           </p>
         </div>
       ) : visible.length === 0 ? (
@@ -424,9 +438,9 @@ export default function LeaderboardPage() {
                   <div
                     className="w-8 h-8 rounded-xl flex items-center justify-center font-light text-xs"
                     style={{
-                      background: `${entry.rankMeta.color}15`,
-                      border: `1px solid ${entry.rankMeta.color}25`,
-                      color: entry.rankMeta.color,
+                      background: `${entry.rankColor}15`,
+                      border: `1px solid ${entry.rankColor}25`,
+                      color: entry.rankColor,
                     }}
                   >
                     {(entry.displayName || entry.username || 'U')[0].toUpperCase()}
@@ -462,15 +476,15 @@ export default function LeaderboardPage() {
                 </span>
               </div>
 
-              {/* Points */}
+              {/* Rays */}
               <div className="flex-shrink-0 text-right">
                 <div
                   className="text-sm font-light font-mono"
-                  style={{ color: entry.rankMeta.color }}
+                  style={{ color: entry.rankColor }}
                 >
                   {entry.reputationPoints.toLocaleString()}
                 </div>
-                <div className="text-[10px] text-zinc-700 font-mono">pts</div>
+                <div className="text-[10px] text-zinc-700 font-mono">rays</div>
               </div>
             </motion.div>
           ))}

@@ -7,7 +7,6 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { AgentDashboard } from '@/components/profile/AgentDashboard';
 import { APIKeysSection } from '@/components/profile/APIKeysSection';
-import { BillingSection } from '@/components/profile/BillingSection';
 import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
 import { UsageSection } from '@/components/profile/UsageSection';
@@ -22,7 +21,6 @@ type Tab =
   | 'friends'
   | 'agent'
   | 'api-keys'
-  | 'billing'
   | 'usage'
   | 'notifications'
   | 'integrations'
@@ -459,10 +457,6 @@ export default function ProfilePage() {
   // API Keys
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
 
-  // Billing
-  const [billingPlan, setBillingPlan] = useState('free');
-  const [billingEmail, setBillingEmail] = useState('');
-
   // Notifications
   const [notifErrors, setNotifErrors] = useState(true);
   const [notifReports, setNotifReports] = useState(true);
@@ -496,10 +490,6 @@ export default function ProfilePage() {
     setWebsiteUrl((user as { websiteUrl?: string }).websiteUrl || '');
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
-
-    // Billing email
-    setBillingEmail((user as { email?: string }).email || '');
-    setBillingPlan('pro');
 
     // Load real API keys from backend
     api
@@ -551,7 +541,6 @@ export default function ProfilePage() {
         'friends',
         'agent',
         'api-keys',
-        'billing',
         'usage',
         'notifications',
         'integrations',
@@ -1107,7 +1096,6 @@ export default function ProfilePage() {
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
                 { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-                { id: 'billing' as Tab, label: 'Billing', Icon: IconArrow },
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
                 { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
@@ -1718,22 +1706,6 @@ export default function ProfilePage() {
           AI AGENT — Professional SaaS Dashboard
       ════════════════════════════════════════════ */}
             {tab === 'agent' && <AgentDashboard />}
-            {/* BILLING */}
-            {tab === 'billing' && (
-              <BillingSection
-                data={{
-                  plan: billingPlan as 'free' | 'pro' | 'enterprise',
-                  email: billingEmail,
-                  nextBillingDate:
-                    billingPlan === 'pro'
-                      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                      : undefined,
-                  amount: billingPlan === 'pro' ? 99 : undefined,
-                  status: 'active',
-                  cardLast4: billingPlan === 'pro' ? '4242' : undefined,
-                }}
-              />
-            )}
 
             {/* USAGE */}
             {tab === 'usage' && (
@@ -1757,7 +1729,7 @@ export default function ProfilePage() {
                   monthlyReport: false,
                   deploymentAlerts: true,
                 }}
-                billingEmail={billingEmail}
+                email={userEmail || ''}
                 onUpdate={async (settings) => {
                   setNotifErrors(settings.emailOnErrors);
                   setNotifReports(settings.weeklyReport);

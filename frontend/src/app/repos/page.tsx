@@ -69,15 +69,16 @@ interface Repository {
   collaborators?: Collaborator[];
 }
 
-// Reputation rank helper
-function getReputationRank(points: number): { label: string; color: string; badge: string } {
-  if (points >= 10000) return { label: 'Legend', color: '#836ef9', badge: 'LGD' };
-  if (points >= 4000) return { label: 'Diamond', color: '#38bdf8', badge: 'DIA' };
-  if (points >= 1500) return { label: 'Platinum', color: '#a855f7', badge: 'PLT' };
-  if (points >= 600) return { label: 'Gold', color: '#f59e0b', badge: 'GLD' };
-  if (points >= 200) return { label: 'Silver', color: '#9ca3af', badge: 'SLV' };
-  if (points >= 50) return { label: 'Bronze', color: '#cd7f32', badge: 'BRZ' };
-  return { label: 'Newcomer', color: '#71717a', badge: 'NEW' };
+// Reputation rank helper (rays-based, matches /components/ui/reputation-badge.tsx)
+function getReputationRank(rays: number): { label: string; color: string; badge: string } {
+  if (rays >= 2000) return { label: 'Campeón', color: '#836ef9', badge: 'CMP' };
+  if (rays >= 1000) return { label: 'Maestría', color: '#ec4899', badge: 'MST' };
+  if (rays >= 500) return { label: 'Diamante', color: '#38bdf8', badge: 'DIA' };
+  if (rays >= 250) return { label: 'Platino', color: '#a855f7', badge: 'PLT' };
+  if (rays >= 120) return { label: 'Oro', color: '#f59e0b', badge: 'ORO' };
+  if (rays >= 50) return { label: 'Plata', color: '#9ca3af', badge: 'PLA' };
+  if (rays >= 25) return { label: 'Bronce', color: '#cd7f32', badge: 'BRZ' };
+  return { label: 'Hierro', color: '#78716c', badge: 'HRO' };
 }
 
 interface GitHubRepo {
