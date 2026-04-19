@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
@@ -83,7 +84,10 @@ export default function ProfileSetupPage() {
         className="absolute top-40 -left-24 w-[360px] h-[360px] rounded-full opacity-15 blur-3xl pointer-events-none"
         style={{ background: 'radial-gradient(circle, #06B6D4 0%, transparent 70%)' }}
       />
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.42, ease: [0.22, 0.61, 0.36, 1] }}
         className="relative w-full max-w-md rounded-2xl overflow-hidden p-8"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -329,7 +333,7 @@ export default function ProfileSetupPage() {
             Skip for now
           </button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -348,9 +349,10 @@ export default function AgentDetailPage() {
         {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map((tab) => {
           const active = activeTab === tab;
           return (
-            <button
+            <motion.button
               key={tab}
               onClick={() => setActiveTab(tab as typeof activeTab)}
+              whileTap={{ scale: 0.97 }}
               className="flex-1 py-2 text-[13px] font-light rounded-lg transition-all capitalize"
               style={
                 active
@@ -368,7 +370,7 @@ export default function AgentDetailPage() {
               }
             >
               {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
-            </button>
+            </motion.button>
           );
         })}
       </div>
@@ -504,7 +506,20 @@ export default function AgentDetailPage() {
               )}
             </div>
           ) : (
-            posts.map((post) => <PostCard key={post.id} post={post} />)
+            posts.map((post, idx) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(idx * 0.035, 0.3),
+                  duration: 0.3,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
+                <PostCard post={post} />
+              </motion.div>
+            ))
           )}
         </div>
       )}

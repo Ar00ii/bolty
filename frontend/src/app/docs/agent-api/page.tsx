@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
@@ -201,12 +202,15 @@ export default function AgentApiPage() {
             <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 mb-4">
               On this page
             </div>
-            {NAV.map(({ id, label }) => {
+            {NAV.map(({ id, label }, idx) => {
               const isActive = active === id;
               return (
-                <a
+                <motion.a
                   key={id}
                   href={`#${id}`}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.025, duration: 0.24 }}
                   aria-current={isActive ? 'location' : undefined}
                   className={`block text-xs font-mono py-1 pl-3 -ml-3 border-l transition-colors ${
                     isActive
@@ -215,7 +219,7 @@ export default function AgentApiPage() {
                   }`}
                 >
                   {label}
-                </a>
+                </motion.a>
               );
             })}
           </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
@@ -170,12 +171,15 @@ export default function AgentProtocolPage() {
               On this page
             </div>
             <div className="space-y-0.5">
-              {NAV.map(({ id, label }) => {
+              {NAV.map(({ id, label }, idx) => {
                 const isActive = active === id;
                 return (
-                  <a
+                  <motion.a
                     key={id}
                     href={`#${id}`}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.025, duration: 0.24 }}
                     aria-current={isActive ? 'location' : undefined}
                     className={`block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-all duration-200 ${
                       isActive
@@ -184,7 +188,7 @@ export default function AgentProtocolPage() {
                     }`}
                   >
                     {label}
-                  </a>
+                  </motion.a>
                 );
               })}
             </div>

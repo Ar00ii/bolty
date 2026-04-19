@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -392,10 +393,18 @@ export default function PublicProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profile.repositories.map((repo) => (
-                <div
+              {profile.repositories.map((repo, idx) => (
+                <motion.div
                   key={repo.id}
-                  className="group relative rounded-xl overflow-hidden p-4 transition-all hover:-translate-y-0.5"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.04, 0.4),
+                    duration: 0.32,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  whileHover={{ y: -3 }}
+                  className="group relative rounded-xl overflow-hidden p-4 transition-all"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -470,7 +479,7 @@ export default function PublicProfilePage() {
                     <span>⑂ {repo.forks}</span>
                     <span>↓ {repo.downloadCount}</span>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           )}
