@@ -34,6 +34,7 @@ interface NavSection {
   label: string;
   icon: any;
   href: string;
+  separator?: boolean;
   children?: {
     label: string;
     href: string;
@@ -100,19 +101,24 @@ export function Sidebar() {
 
   const navSections: NavSection[] = [
     {
-      label: 'Home',
-      icon: Home,
-      href: '/',
-    },
-    {
       label: 'Profile',
       icon: User,
       href: '/profile',
     },
     {
-      label: 'Dashboard',
-      icon: Home,
+      label: 'Marketplace',
+      icon: ShoppingCart,
       href: '/market',
+      separator: true,
+      children: [
+        { label: 'AI Agents', href: '/market/agents', icon: Bot },
+        { label: 'Repositories', href: '/market/repos', icon: GitBranch },
+        { label: 'Top Sellers', href: '/market/sellers', icon: Users },
+        { label: 'Browse by tag', href: '/market/tags', icon: Hash },
+        { label: 'Saved', href: '/market/favorites', icon: Heart },
+        { label: 'Library', href: '/market/library', icon: Library },
+        { label: 'Seller Dashboard', href: '/market/seller', icon: BarChart3 },
+      ],
     },
     {
       label: 'Community',
@@ -129,45 +135,23 @@ export function Sidebar() {
       label: 'Messages',
       icon: MessageSquare,
       href: '/dm',
-      children: [
-        { label: 'All Messages', href: '/dm', icon: MessageSquare },
-        { label: 'Friends', href: '/dm?cat=friends', icon: Globe },
-        { label: 'Sellers', href: '/dm?cat=sellers', icon: ShoppingCart },
-      ],
-    },
-    {
-      label: 'Marketplace',
-      icon: ShoppingCart,
-      href: '/market',
-      children: [
-        { label: 'AI Agents', href: '/market/agents', icon: Bot },
-        { label: 'Repositories', href: '/market/repos', icon: GitBranch },
-        { label: 'Top sellers', href: '/market/sellers', icon: Users },
-        { label: 'Browse by tag', href: '/market/tags', icon: Hash },
-        { label: 'Saved', href: '/market/favorites', icon: Heart },
-        { label: 'Library', href: '/market/library', icon: Library },
-        { label: 'Seller dashboard', href: '/market/seller', icon: BarChart3 },
-      ],
     },
     {
       label: 'Boost',
       icon: Zap,
       href: '/profile?tab=agent',
-      children: [
-        { label: 'Buy Boost', href: '/profile?tab=agent', icon: ShoppingCart },
-        { label: 'My Agent Boost', href: '/profile?tab=agent', icon: Zap },
-      ],
+      separator: true,
     },
     {
       label: 'Services',
       icon: Briefcase,
       href: '/services',
-      children: [{ label: 'Browse', href: '/services', icon: Briefcase }],
     },
     {
       label: 'Docs',
       icon: BookOpen,
       href: '/docs/agent-protocol',
+      separator: true,
       children: [
         { label: 'Agent Protocol', href: '/docs/agent-protocol', icon: BookOpen },
         { label: 'API Reference', href: '/docs/agent-api', icon: Code2 },
@@ -176,8 +160,9 @@ export function Sidebar() {
   ];
 
   const isActive = (href: string) => {
-    if (href === '/market') return pathname.startsWith('/market') || pathname === '/';
-    return pathname === href || pathname.startsWith(href);
+    const basePath = href.split('?')[0];
+    if (basePath === '/') return pathname === '/';
+    return pathname === basePath || pathname.startsWith(basePath + '/');
   };
 
   if (!mounted) return null;
@@ -265,47 +250,65 @@ export function Sidebar() {
         >
           {/* Header */}
           <motion.div
-            className="px-5 pt-6 pb-4 border-b border-white/[0.05]"
+            className="px-4 pt-5 pb-4 relative"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.3 }}
+            transition={{ delay: 0.05, duration: 0.3 }}
           >
             <div className="flex items-center gap-2.5">
               <span
-                className="inline-flex w-7 h-7 items-center justify-center rounded-lg"
+                className="inline-flex w-8 h-8 items-center justify-center rounded-xl flex-shrink-0"
                 style={{
                   background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(236,72,153,0.18) 100%)',
-                  border: '1px solid rgba(131,110,249,0.28)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                    'linear-gradient(135deg, rgba(131,110,249,0.3) 0%, rgba(236,72,153,0.2) 100%)',
+                  border: '1px solid rgba(131,110,249,0.32)',
+                  boxShadow:
+                    'inset 0 1px 0 rgba(255,255,255,0.10), 0 0 16px -4px rgba(131,110,249,0.5)',
                 }}
               >
-                <Zap className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={2} />
+                <Zap className="w-4 h-4 text-[#c4b5fd]" strokeWidth={2} />
               </span>
               <div className="flex flex-col leading-none">
-                <span className="text-[13px] font-semibold text-white tracking-[0.005em]">
+                <span className="text-[14px] font-semibold text-white tracking-[-0.01em]">
                   Bolty
                 </span>
-                <span className="text-[10px] text-zinc-500 mt-1 tracking-[0.18em] uppercase">
+                <span className="text-[9.5px] text-[#836ef9]/60 mt-0.5 tracking-[0.22em] uppercase font-medium">
                   Network
                 </span>
               </div>
             </div>
+            {/* Bottom border with gradient */}
+            <div
+              className="absolute bottom-0 left-4 right-4 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.25) 40%, rgba(255,255,255,0.05) 100%)',
+              }}
+            />
           </motion.div>
 
           {/* Nav sections */}
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 px-3 py-3 space-y-0.5">
             {navSections.map((section, idx) => (
               <motion.div
-                key={section.href}
-                initial={{ opacity: 0, x: -20 }}
+                key={`${section.href}-${idx}`}
+                initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
-                  delay: isMobile ? idx * 0.05 : 0,
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1],
+                  delay: isMobile ? Math.min(idx * 0.04, 0.2) : 0,
+                  duration: 0.25,
+                  ease: [0.22, 0.61, 0.36, 1],
                 }}
               >
+                {section.separator && (
+                  <div
+                    className="my-2 mx-1 h-px"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, rgba(131,110,249,0.15) 0%, rgba(255,255,255,0.04) 60%, transparent 100%)',
+                    }}
+                  />
+                )}
                 <SidebarItem
                   section={section}
                   isActive={isActive}
@@ -317,54 +320,55 @@ export function Sidebar() {
             ))}
           </nav>
 
-          {/* Footer divider */}
+          {/* Footer */}
           <motion.div
-            className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.3 }}
-          />
-
-          {/* Footer info */}
-          <motion.div
-            className="px-3 py-3 space-y-0.5 text-[12px] text-zinc-500"
-            initial={{ opacity: 0, y: 10 }}
+            className="px-3 pb-4 pt-2"
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
           >
-            <button
-              onClick={() => {
-                if (typeof window === 'undefined') return;
-                window.dispatchEvent(
-                  new KeyboardEvent('keydown', {
-                    key: 'k',
-                    ctrlKey: true,
-                    metaKey: true,
-                    bubbles: true,
-                  }),
-                );
+            <div
+              className="h-px mb-3"
+              style={{
+                background:
+                  'linear-gradient(90deg, rgba(131,110,249,0.15) 0%, rgba(255,255,255,0.04) 60%, transparent 100%)',
               }}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
-            >
-              <span>Quick search</span>
-              <span className="inline-flex items-center gap-1">
-                <SidebarKbd>⌘</SidebarKbd>
-                <SidebarKbd>K</SidebarKbd>
-              </span>
-            </button>
-            <button
-              onClick={() => {
-                if (typeof window === 'undefined') return;
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }));
-              }}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded-md hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
-            >
-              <span>Shortcuts</span>
-              <SidebarKbd>?</SidebarKbd>
-            </button>
-            <p className="text-zinc-600 px-2 pt-2 text-[10.5px] tracking-[0.12em] uppercase">
-              © Bolty Network
-            </p>
+            />
+            <div className="space-y-0.5 text-[12px] text-zinc-500">
+              <button
+                onClick={() => {
+                  if (typeof window === 'undefined') return;
+                  window.dispatchEvent(
+                    new KeyboardEvent('keydown', {
+                      key: 'k',
+                      ctrlKey: true,
+                      metaKey: true,
+                      bubbles: true,
+                    }),
+                  );
+                }}
+                className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
+              >
+                <span>Quick search</span>
+                <span className="inline-flex items-center gap-1">
+                  <SidebarKbd>⌘</SidebarKbd>
+                  <SidebarKbd>K</SidebarKbd>
+                </span>
+              </button>
+              <button
+                onClick={() => {
+                  if (typeof window === 'undefined') return;
+                  window.dispatchEvent(new KeyboardEvent('keydown', { key: '?', bubbles: true }));
+                }}
+                className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-white/[0.03] hover:text-zinc-300 transition-colors"
+              >
+                <span>Shortcuts</span>
+                <SidebarKbd>?</SidebarKbd>
+              </button>
+              <p className="text-zinc-700 px-2 pt-2 text-[10px] tracking-[0.15em] uppercase">
+                © 2026 Bolty Network
+              </p>
+            </div>
           </motion.div>
         </motion.aside>
       </AnimatePresence>
@@ -405,17 +409,18 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
     return (
       <div className="group">
         <motion.button
-          whileTap={{ scale: 0.99 }}
+          whileTap={{ scale: 0.985 }}
           onClick={onToggle}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-normal transition-colors relative ${
-            active ? 'text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.035]'
+          className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-light transition-all duration-150 relative ${
+            active ? 'text-white' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.03]'
           }`}
           style={
             active
               ? {
                   background:
-                    'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                    'linear-gradient(90deg, rgba(131,110,249,0.16) 0%, rgba(131,110,249,0.04) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.04)',
                 }
               : undefined
           }
@@ -423,27 +428,27 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
           {active && (
             <motion.div
               layoutId="activeIndicator"
-              className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r"
+              className="absolute -left-0.5 top-1.5 bottom-1.5 w-[3px] rounded-r"
               style={{
-                background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
-                boxShadow: '0 0 12px rgba(131,110,249,0.6)',
+                background: 'linear-gradient(180deg, #c4b5fd 0%, #836EF9 100%)',
+                boxShadow: '0 0 10px rgba(131,110,249,0.7)',
               }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              transition={{ type: 'spring', stiffness: 350, damping: 32 }}
             />
           )}
 
           <Icon
-            className={`w-4 h-4 shrink-0 transition-colors ${active ? 'text-[#b4a7ff]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
+            className={`w-[15px] h-[15px] shrink-0 transition-colors ${active ? 'text-[#c4b5fd]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
             strokeWidth={1.75}
           />
 
-          <span className="flex-1 text-left">{section.label}</span>
+          <span className="flex-1 text-left tracking-[0.005em]">{section.label}</span>
 
           <motion.div
             animate={{ rotate: isExpanded ? 90 : 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
-            <ChevronRight className="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 transition-colors" />
+            <ChevronRight className="w-3 h-3 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
           </motion.div>
         </motion.button>
 
@@ -451,53 +456,57 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
         <AnimatePresence>
           {isExpanded && (
             <motion.div
-              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-              animate={{ opacity: 1, height: 'auto', marginTop: 8 }}
-              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-              transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-              className="space-y-0.5 ml-[22px] pl-3 py-1 border-l border-white/[0.06]"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+              className="overflow-hidden"
             >
-              {section.children!.map((child, idx) => {
-                const childActive = isActive(child.href);
-                return (
-                  <motion.div
-                    key={child.href}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={{ delay: idx * 0.03, duration: 0.18 }}
-                  >
-                    <Link
-                      href={child.href}
-                      onClick={onNavigate}
-                      aria-current={childActive ? 'page' : undefined}
-                      className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-[12px] font-normal transition-colors relative ${
-                        childActive
-                          ? 'text-white bg-white/[0.045]'
-                          : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.03]'
-                      }`}
+              <div
+                className="ml-5 pl-3 py-1 mt-0.5 space-y-0.5"
+                style={{ borderLeft: '1px solid rgba(131,110,249,0.12)' }}
+              >
+                {section.children!.map((child, idx) => {
+                  const childActive = isActive(child.href);
+                  return (
+                    <motion.div
+                      key={child.href}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -6 }}
+                      transition={{ delay: idx * 0.025, duration: 0.15 }}
                     >
-                      {childActive && (
-                        <motion.div
-                          layoutId={`subActive-${child.href}`}
-                          className="absolute -left-[13px] top-1/2 -translate-y-1/2 w-[2px] h-3.5 rounded-r"
-                          style={{
-                            background: '#836EF9',
-                            boxShadow: '0 0 8px rgba(131,110,249,0.6)',
-                          }}
-                          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      <Link
+                        href={child.href}
+                        onClick={onNavigate}
+                        aria-current={childActive ? 'page' : undefined}
+                        className={`flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] font-light transition-all duration-150 relative ${
+                          childActive
+                            ? 'text-white bg-white/[0.04]'
+                            : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.025]'
+                        }`}
+                      >
+                        {childActive && (
+                          <motion.div
+                            layoutId={`subActive-${section.href}`}
+                            className="absolute -left-[13px] top-1/2 -translate-y-1/2 w-[2px] h-3 rounded-r"
+                            style={{
+                              background: '#836EF9',
+                              boxShadow: '0 0 6px rgba(131,110,249,0.55)',
+                            }}
+                            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+                          />
+                        )}
+                        <child.icon
+                          className={`w-3.5 h-3.5 shrink-0 transition-colors ${childActive ? 'text-[#b4a7ff]' : 'text-zinc-600 group-hover:text-zinc-400'}`}
+                          strokeWidth={1.75}
                         />
-                      )}
-
-                      <child.icon
-                        className={`w-3.5 h-3.5 shrink-0 transition-colors ${childActive ? 'text-[#b4a7ff]' : 'text-zinc-600 group-hover:text-zinc-400'}`}
-                        strokeWidth={1.75}
-                      />
-                      <span className="flex-1">{child.label}</span>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                        <span className="flex-1 tracking-[0.005em]">{child.label}</span>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -511,15 +520,16 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
         href={section.href}
         onClick={onNavigate}
         aria-current={active ? 'page' : undefined}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-normal transition-colors relative ${
-          active ? 'text-white' : 'text-zinc-400 hover:text-white hover:bg-white/[0.035]'
+        className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-light transition-all duration-150 relative ${
+          active ? 'text-white' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.03]'
         }`}
         style={
           active
             ? {
                 background:
-                  'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                  'linear-gradient(90deg, rgba(131,110,249,0.16) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.04)',
               }
             : undefined
         }
@@ -527,21 +537,21 @@ function SidebarItem({ section, isActive, isExpanded, onToggle, onNavigate }: Si
         {active && (
           <motion.div
             layoutId="activeIndicator"
-            className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r"
+            className="absolute -left-0.5 top-1.5 bottom-1.5 w-[3px] rounded-r"
             style={{
-              background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
-              boxShadow: '0 0 12px rgba(131,110,249,0.6)',
+              background: 'linear-gradient(180deg, #c4b5fd 0%, #836EF9 100%)',
+              boxShadow: '0 0 10px rgba(131,110,249,0.7)',
             }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
           />
         )}
 
         <Icon
-          className={`w-4 h-4 shrink-0 transition-colors ${active ? 'text-[#b4a7ff]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
+          className={`w-[15px] h-[15px] shrink-0 transition-colors ${active ? 'text-[#c4b5fd]' : 'text-zinc-500 group-hover:text-zinc-300'}`}
           strokeWidth={1.75}
         />
 
-        <span className="flex-1">{section.label}</span>
+        <span className="flex-1 tracking-[0.005em]">{section.label}</span>
       </Link>
     </div>
   );
