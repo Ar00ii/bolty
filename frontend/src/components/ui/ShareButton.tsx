@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Share2 } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -63,18 +64,42 @@ export function ShareButton({
     : undefined;
 
   return (
-    <button
+    <motion.button
       onClick={handleShare}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
       className={className}
       aria-label={ariaLabel || label}
       style={style}
     >
-      {copied ? (
-        <Check className="w-3.5 h-3.5" strokeWidth={2} />
-      ) : (
-        <Share2 className="w-3.5 h-3.5" strokeWidth={1.75} />
-      )}
-      {copied ? 'Copied' : label}
-    </button>
+      <AnimatePresence mode="wait" initial={false}>
+        {copied ? (
+          <motion.span
+            key="check"
+            initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.5, rotate: 20 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="inline-flex items-center gap-1.5"
+          >
+            <Check className="w-3.5 h-3.5" strokeWidth={2} />
+            <span>Copied</span>
+          </motion.span>
+        ) : (
+          <motion.span
+            key="share"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="inline-flex items-center gap-1.5"
+          >
+            <Share2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+            <span>{label}</span>
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
   );
 }
