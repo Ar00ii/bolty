@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import React from 'react';
 
 interface LoadingSpinnerProps {
@@ -43,12 +44,29 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-        <div className="flex flex-col items-center gap-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50"
+      >
+        <motion.div
+          initial={{ y: 6, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.05, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+          className="flex flex-col items-center gap-4"
+        >
           {spinner}
-          <p className="text-[13px] text-zinc-400 tracking-[0.005em]">Loading</p>
-        </div>
-      </div>
+          <motion.p
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-[13px] text-zinc-400 tracking-[0.005em]"
+          >
+            Loading
+          </motion.p>
+        </motion.div>
+      </motion.div>
     );
   }
 
