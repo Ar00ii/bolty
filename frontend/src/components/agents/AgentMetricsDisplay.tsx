@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import {
   Activity,
   CheckCircle2,
@@ -130,12 +131,20 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map((item) => {
+      {items.map((item, idx) => {
         const Icon = item.icon;
         return (
-          <div
+          <motion.div
             key={item.label}
-            className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: Math.min(idx * 0.04, 0.25),
+              duration: 0.28,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            whileHover={{ y: -2 }}
+            className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
             style={{
               background:
                 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
@@ -168,7 +177,7 @@ export const AgentMetricsDisplay: React.FC<AgentMetricsDisplayProps> = ({ metric
             >
               {item.value}
             </p>
-          </div>
+          </motion.div>
         );
       })}
     </div>
