@@ -11,7 +11,7 @@ import { WinstonLogger } from './common/logger/winston.logger';
 
 // API Key generation fix - rebuild trigger
 
-const REQUIRED_ENV_VARS = ['JWT_SECRET', 'DATABASE_URL', 'FRONTEND_URL'];
+const REQUIRED_ENV_VARS = ['JWT_SECRET', 'DATABASE_URL', 'FRONTEND_URL', 'REDIS_URL'];
 
 async function bootstrap(): Promise<void> {
   const missing = REQUIRED_ENV_VARS.filter((v) => !process.env[v]);

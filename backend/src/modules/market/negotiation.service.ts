@@ -25,11 +25,17 @@ interface AgentResponse {
 
 interface NegotiationType {
   id: string;
+  buyerId: string;
+  mode: string;
+  turnCount: number;
+  humanSwitchRequestedBy: string | null;
+  humanSwitchAcceptedBy: string[];
   listing: {
     id: string;
     title: string;
     price: number;
     currency: string;
+    sellerId: string;
     minPrice?: number | null;
     agentEndpoint?: string | null;
     fileKey?: string | null;
@@ -278,9 +284,9 @@ export class NegotiationService {
     if (!neg) throw new NotFoundException();
     if (neg.status !== 'ACTIVE') throw new BadRequestException('Negotiation is not active');
     if (neg.buyerId !== userId && neg.listing.sellerId !== userId) throw new ForbiddenException();
-    if ((neg as unknown as Record<string, unknown>).mode === 'HUMAN')
+    if (neg.mode === 'HUMAN')
       throw new BadRequestException('Already in human mode');
-    if ((neg as unknown as Record<string, unknown>).humanSwitchRequestedBy) {
+    if (neg.humanSwitchRequestedBy) {
       throw new BadRequestException(
         'Switch already requested — waiting for the other party to accept',
       );
@@ -288,7 +294,7 @@ export class NegotiationService {
 
     await this.prisma.agentNegotiation.update({
       where: { id },
-      data: { humanSwitchRequestedBy: userId } as unknown as Record<string, unknown>,
+      data: { humanSwitchRequestedBy: userId },
     });
 
     this.gateway.emitHumanSwitchRequest(id, userId);
@@ -308,12 +314,10 @@ export class NegotiationService {
     if (!neg) throw new NotFoundException();
     if (neg.status !== 'ACTIVE') throw new BadRequestException('Negotiation is not active');
     if (neg.buyerId !== userId && neg.listing.sellerId !== userId) throw new ForbiddenException();
-    if ((neg as unknown as Record<string, unknown>).mode === 'HUMAN')
+    if (neg.mode === 'HUMAN')
       throw new BadRequestException('Already in human mode');
 
-    const requestedBy = (neg as unknown as Record<string, unknown>).humanSwitchRequestedBy as
-      | string
-      | undefined;
+    const requestedBy = neg.humanSwitchRequestedBy;
     if (!requestedBy) throw new BadRequestException('No human switch request pending');
     if (requestedBy === userId)
       throw new BadRequestException('You cannot accept your own switch request');
@@ -324,7 +328,7 @@ export class NegotiationService {
         mode: 'HUMAN',
         humanSwitchRequestedBy: null,
         humanSwitchAcceptedBy: [requestedBy, userId],
-      } as unknown as Record<string, unknown>,
+      },
     });
 
     // System message announcing the handshake
@@ -384,10 +388,10 @@ export class NegotiationService {
       if (
         !neg ||
         neg.status !== 'ACTIVE' ||
-        (neg as unknown as Record<string, unknown>).mode !== 'AI_AI'
+        neg.mode !== 'AI_AI'
       )
         return;
-      if (((neg as unknown as Record<string, unknown>).turnCount as number) >= MAX_TURNS) {
+      if (neg.turnCount >= MAX_TURNS) {
         await this.expireNegotiation(negId);
         return;
       }
@@ -420,7 +424,7 @@ export class NegotiationService {
         where: { id: negId },
         data: {
           turnCount: { increment: 1 },
-        } as unknown as Record<string, unknown>,
+        },
       });
 
       if (buyerReply.action === 'accept') {
@@ -453,10 +457,10 @@ export class NegotiationService {
       if (
         !neg ||
         neg.status !== 'ACTIVE' ||
-        (neg as unknown as Record<string, unknown>).mode !== 'AI_AI'
+        neg.mode !== 'AI_AI'
       )
         return;
-      if (((neg as unknown as Record<string, unknown>).turnCount as number) >= MAX_TURNS) {
+      if (neg.turnCount >= MAX_TURNS) {
         await this.expireNegotiation(negId);
         return;
       }
@@ -611,11 +615,7 @@ export class NegotiationService {
       );
       if (result) return result;
     }
-    return this.claudeSellerNegotiate(
-      neg as unknown as Record<string, unknown>,
-      message,
-      proposedPrice,
-    );
+    return this.claudeSellerNegotiate(neg, message, proposedPrice);
   }
 
   // ── Buyer agent ───────────────────────────────────────────────────────────
@@ -636,11 +636,7 @@ export class NegotiationService {
       const result = await this.callWebhook(buyerEndpoint, ctx);
       if (result) return result;
     }
-    return this.claudeBuyerNegotiate(
-      neg as unknown as Record<string, unknown>,
-      sellerMessage,
-      sellerProposedPrice,
-    );
+    return this.claudeBuyerNegotiate(neg, sellerMessage, sellerProposedPrice);
   }
 
   // ── Webhook ───────────────────────────────────────────────────────────────
@@ -651,7 +647,7 @@ export class NegotiationService {
         timeout: 8000,
         headers: {
           'Content-Type': 'application/json',
-          'X-Bolty-Event': (payload as unknown as Record<string, unknown>).event as string,
+          'X-Bolty-Event': (payload as { event?: string }).event ?? '',
         },
         maxBodyLength: 4096,
         maxContentLength: 4096,
@@ -704,7 +700,7 @@ Respond ONLY with JSON: {"reply": "your greeting"}`;
         messages: [{ role: 'user', content: prompt }],
       });
       const parsed = this.parseJson(
-        ((res.content[0] as unknown as Record<string, unknown>).text as string) ?? '',
+        res.content[0].type === 'text' ? res.content[0].text : '',
       );
       if (parsed) return { reply: String(parsed.reply), action: 'counter' };
     } catch (err) {
@@ -717,23 +713,21 @@ Respond ONLY with JSON: {"reply": "your greeting"}`;
   }
 
   private async claudeSellerNegotiate(
-    neg: Record<string, unknown>,
+    neg: NegotiationType,
     buyerMessage: string,
     proposedPrice?: number,
   ): Promise<AgentResponse | null> {
     try {
-      const history = (neg.messages as Array<Record<string, unknown>>)
+      const history = (neg.messages ?? [])
         .map(
-          (m: Record<string, unknown>) =>
-            `[${m.fromRole}]${m.proposedPrice !== null && m.proposedPrice !== undefined ? ` (offer: ${m.proposedPrice} ${(neg.listing as Record<string, unknown>).currency})` : ''}: ${m.content}`,
+          (m) =>
+            `[${m.fromRole}]${m.proposedPrice != null ? ` (offer: ${m.proposedPrice} ${neg.listing.currency})` : ''}: ${m.content}`,
         )
         .join('\n');
-      const minPrice = (neg.listing as Record<string, unknown>).minPrice;
+      const minPrice = neg.listing.minPrice;
       const floorRule =
-        minPrice !== null && minPrice !== undefined
-          ? `- NEVER accept below ${minPrice} ${(neg.listing as Record<string, unknown>).currency}.`
-          : '';
-      const prompt = `You are an AI sales agent for "${(neg.listing as Record<string, unknown>).title}" (asking: ${(neg.listing as Record<string, unknown>).price} ${(neg.listing as Record<string, unknown>).currency}${minPrice !== null && minPrice !== undefined ? `, minimum: ${minPrice} ${(neg.listing as Record<string, unknown>).currency}` : ''}).
+        minPrice != null ? `- NEVER accept below ${minPrice} ${neg.listing.currency}.` : '';
+      const prompt = `You are an AI sales agent for "${neg.listing.title}" (asking: ${neg.listing.price} ${neg.listing.currency}${minPrice != null ? `, minimum: ${minPrice} ${neg.listing.currency}` : ''}).
 Negotiating against the BUYER'S AI agent. Rules:
 - Accept if offer >= 80% of asking (never below minimum).
 - Counter at midpoint if offer is 40-80%.
@@ -744,7 +738,7 @@ ${floorRule}
 History:
 ${history}
 
-Buyer agent: "${buyerMessage}"${proposedPrice !== null && proposedPrice !== undefined ? `\nOffer: ${proposedPrice} ${(neg.listing as Record<string, unknown>).currency}` : ''}
+Buyer agent: "${buyerMessage}"${proposedPrice != null ? `\nOffer: ${proposedPrice} ${neg.listing.currency}` : ''}
 
 Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "action": "accept|reject|counter"}`;
       const res = await this.anthropic.messages.create({
@@ -753,7 +747,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         messages: [{ role: 'user', content: prompt }],
       });
       const parsed = this.parseJson(
-        ((res.content[0] as unknown as Record<string, unknown>).text as string) ?? '',
+        res.content[0].type === 'text' ? res.content[0].text : '',
       );
       if (parsed) {
         let action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(
@@ -797,70 +791,64 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
     }
 
     // Fallback
-    const asking = (neg.listing as Record<string, unknown>).price as number;
-    const minP = (neg.listing as Record<string, unknown>).minPrice;
-    if (proposedPrice !== null && proposedPrice !== undefined) {
+    const asking = neg.listing.price;
+    const minP = neg.listing.minPrice;
+    if (proposedPrice != null) {
       const ratio = proposedPrice / asking;
-      if (
-        ratio >= 0.8 &&
-        (minP === null || minP === undefined || proposedPrice >= (minP as number))
-      )
+      if (ratio >= 0.8 && (minP == null || proposedPrice >= minP))
         return {
-          reply: `Deal! I accept ${proposedPrice} ${(neg.listing as Record<string, unknown>).currency}.`,
+          reply: `Deal! I accept ${proposedPrice} ${neg.listing.currency}.`,
           proposedPrice,
           action: 'accept',
         };
-      if (
-        ratio >= 0.4 &&
-        (minP === null || minP === undefined || proposedPrice >= (minP as number))
-      ) {
+      if (ratio >= 0.4 && (minP == null || proposedPrice >= minP)) {
         const counter = Math.round(((proposedPrice + asking) / 2) * 1e6) / 1e6;
         return {
-          reply: `Meet me at ${counter} ${(neg.listing as Record<string, unknown>).currency}?`,
+          reply: `Meet me at ${counter} ${neg.listing.currency}?`,
           proposedPrice: counter,
           action: 'counter',
         };
       }
-      const floor = (minP as number) ?? Math.round(asking * 0.7 * 1e6) / 1e6;
+      const floor = minP ?? Math.round(asking * 0.7 * 1e6) / 1e6;
       return {
-        reply: `Can't go that low. Minimum is ${floor} ${(neg.listing as Record<string, unknown>).currency}.`,
+        reply: `Can't go that low. Minimum is ${floor} ${neg.listing.currency}.`,
         proposedPrice: floor,
         action: 'counter',
       };
     }
     return {
-      reply: `Asking price is ${asking} ${(neg.listing as Record<string, unknown>).currency}. What's your offer?`,
+      reply: `Asking price is ${asking} ${neg.listing.currency}. What's your offer?`,
       action: 'counter',
     };
   }
 
   private async claudeBuyerNegotiate(
-    neg: Record<string, unknown>,
+    neg: NegotiationType,
     sellerMessage: string,
     sellerProposedPrice?: number,
   ): Promise<AgentResponse | null> {
     try {
-      const history = (neg.messages as Array<Record<string, unknown>>)
+      const history = (neg.messages ?? [])
         .map(
-          (m: Record<string, unknown>) =>
-            `[${m.fromRole}]${m.proposedPrice !== null && m.proposedPrice !== undefined ? ` (price: ${m.proposedPrice} ${(neg.listing as Record<string, unknown>).currency})` : ''}: ${m.content}`,
+          (m) =>
+            `[${m.fromRole}]${m.proposedPrice != null ? ` (price: ${m.proposedPrice} ${neg.listing.currency})` : ''}: ${m.content}`,
         )
         .join('\n');
-      const askingPrice = (neg.listing as Record<string, unknown>).price;
-      const targetPrice = Math.round((askingPrice as number) * 0.75 * 1e6) / 1e6;
-      const prompt = `You are an AI buyer agent trying to purchase "${(neg.listing as Record<string, unknown>).title}" (listed at ${askingPrice} ${(neg.listing as Record<string, unknown>).currency}).
+      const askingPrice = neg.listing.price;
+      const targetPrice = Math.round(askingPrice * 0.75 * 1e6) / 1e6;
+      const prompt = `You are an AI buyer agent trying to purchase "${neg.listing.title}" (listed at ${askingPrice} ${neg.listing.currency}).
 Goal: get the best price. Strategy:
 - Open at ~70% of asking price.
 - Accept if seller offers <= 80% of asking.
 - Counter 5% lower than seller's last counter.
 - After 3 failed counters, accept if seller price < 90% of asking.
 - Be polite but firm. 2-3 sentences max.
-- Target: ${targetPrice} ${(neg.listing as Record<string, unknown>).currency}.
+- Target: ${targetPrice} ${neg.listing.currency}.
 
 History:
 ${history}
 
-Seller agent: "${sellerMessage}"${sellerProposedPrice !== null && sellerProposedPrice !== undefined ? `\nSeller proposes: ${sellerProposedPrice} ${(neg.listing as Record<string, unknown>).currency}` : ''}
+Seller agent: "${sellerMessage}"${sellerProposedPrice != null ? `\nSeller proposes: ${sellerProposedPrice} ${neg.listing.currency}` : ''}
 
 Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "action": "accept|reject|counter"}`;
       const res = await this.anthropic.messages.create({
@@ -869,7 +857,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         messages: [{ role: 'user', content: prompt }],
       });
       const parsed = this.parseJson(
-        ((res.content[0] as unknown as Record<string, unknown>).text as string) ?? '',
+        res.content[0].type === 'text' ? res.content[0].text : '',
       );
       if (parsed) {
         const action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(
@@ -888,24 +876,24 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
     }
 
     // Fallback
-    const asking = (neg.listing as Record<string, unknown>).price as number;
-    if (sellerProposedPrice !== null && sellerProposedPrice !== undefined) {
+    const asking = neg.listing.price;
+    if (sellerProposedPrice != null) {
       if (sellerProposedPrice <= asking * 0.8)
         return {
-          reply: `Works for me. I accept ${sellerProposedPrice} ${(neg.listing as Record<string, unknown>).currency}.`,
+          reply: `Works for me. I accept ${sellerProposedPrice} ${neg.listing.currency}.`,
           proposedPrice: sellerProposedPrice,
           action: 'accept',
         };
       const myCounter = Math.round(sellerProposedPrice * 0.93 * 1e6) / 1e6;
       return {
-        reply: `How about ${myCounter} ${(neg.listing as Record<string, unknown>).currency}?`,
+        reply: `How about ${myCounter} ${neg.listing.currency}?`,
         proposedPrice: myCounter,
         action: 'counter',
       };
     }
     const opening = Math.round(asking * 0.7 * 1e6) / 1e6;
     return {
-      reply: `I'm interested. My opening offer is ${opening} ${(neg.listing as Record<string, unknown>).currency}.`,
+      reply: `I'm interested. My opening offer is ${opening} ${neg.listing.currency}.`,
       proposedPrice: opening,
       action: 'counter',
     };
@@ -913,24 +901,21 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
 
   // ── Apply agent action ────────────────────────────────────────────────────
 
-  private async applyAction(negId: string, response: AgentResponse, neg: Record<string, unknown>) {
+  private async applyAction(negId: string, response: AgentResponse, neg: NegotiationType) {
     if (response.action === 'accept') {
-      const agreedPrice = response.proposedPrice ?? (neg.listing as Record<string, unknown>).price;
+      const agreedPrice = response.proposedPrice ?? neg.listing.price;
       await this.prisma.agentNegotiation.update({
         where: { id: negId },
-        data: { status: 'AGREED', agreedPrice: agreedPrice as number },
+        data: { status: 'AGREED', agreedPrice },
       });
-      this.gateway.emitStatusChange(negId, {
-        status: 'AGREED',
-        agreedPrice: agreedPrice as number,
-      });
+      this.gateway.emitStatusChange(negId, { status: 'AGREED', agreedPrice });
       try {
         const seller = await this.prisma.user.findUnique({
-          where: { id: (neg.listing as Record<string, unknown>).sellerId as string },
+          where: { id: neg.listing.sellerId },
           select: { email: true, username: true },
         });
         const buyer = await this.prisma.user.findUnique({
-          where: { id: neg.buyerId as string },
+          where: { id: neg.buyerId },
           select: { username: true },
         });
         if (seller?.email) {
@@ -938,9 +923,9 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
             .sendAgentDealEmail(
               seller.email,
               seller.username || 'seller',
-              (neg.listing as Record<string, unknown>).title as string,
-              agreedPrice as number,
-              (neg.listing as Record<string, unknown>).currency as string,
+              neg.listing.title,
+              agreedPrice,
+              neg.listing.currency,
               buyer?.username || 'buyer',
               negId,
             )
