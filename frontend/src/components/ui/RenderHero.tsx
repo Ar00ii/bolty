@@ -50,19 +50,19 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             The on-chain
             <br />
             marketplace for
-            <span className="block relative mt-1 sm:mt-2 min-h-[1.1em]">
+            <span className="block relative mt-1 sm:mt-2 min-h-[1.3em] pb-[0.15em] overflow-visible">
               <motion.span
                 key={wordIndex}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.5 }}
-                className="absolute left-0 top-0 inline-flex items-center gap-1.5"
+                className="absolute left-0 top-0 inline-flex items-baseline gap-1.5"
               >
                 <span
-                  className="font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
+                  className="font-light text-[clamp(36px,9vw,80px)] leading-[1.15] tracking-[-0.03em] pb-[0.08em]"
                   style={{
-                    background: 'linear-gradient(to right, #836EF9, #06B6D4)',
+                    background: 'linear-gradient(to right, #c4b5fd, #836EF9)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -73,11 +73,11 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 <motion.span
                   animate={{ opacity: [1, 1, 0, 0] }}
                   transition={{ duration: 1.1, repeat: Infinity }}
-                  className="inline-flex items-center text-[clamp(36px,9vw,80px)] leading-[1.02]"
+                  className="inline-flex items-center text-[clamp(36px,9vw,80px)] leading-[1.15]"
                   style={{
                     height: '1em',
                     width: '0.6ch',
-                    background: 'linear-gradient(to top, #2a1f4a, rgba(42,31,74,0.5))',
+                    background: 'linear-gradient(to top, #a78bfa, rgba(167,139,250,0.5))',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -139,9 +139,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="absolute bottom-0 right-0 w-2/3"
           style={{
             aspectRatio: '1 / 1',
-            background: 'radial-gradient(circle at 50% 50%, #06B6D4 0%, transparent 70%)',
+            background: 'radial-gradient(circle at 50% 50%, #a78bfa 0%, transparent 70%)',
             filter: 'blur(80px)',
-            opacity: 0.18,
+            opacity: 0.22,
           }}
         />
         <div className="relative z-10 w-full h-full flex items-center justify-center text-white/20 text-center">
