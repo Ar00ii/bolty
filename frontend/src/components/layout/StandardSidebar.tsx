@@ -24,7 +24,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -96,10 +96,17 @@ const NAV: NavSection[] = [
   },
 ];
 
-function isItemActive(pathname: string, href: string): boolean {
-  const cleanHref = href.split('?')[0];
+function isItemActive(pathname: string, searchParams: URLSearchParams, href: string): boolean {
+  const [cleanHref, query] = href.split('?');
   if (cleanHref === '/market') return pathname === '/market';
-  if (cleanHref === '/profile') return pathname === '/profile' || pathname.startsWith('/profile/');
+  if (cleanHref === '/profile') {
+    if (!(pathname === '/profile' || pathname.startsWith('/profile/'))) return false;
+    if (query) {
+      const expected = new URLSearchParams(query);
+      return expected.get('tab') === searchParams.get('tab');
+    }
+    return !searchParams.get('tab') || searchParams.get('tab') === 'profile';
+  }
   return pathname === cleanHref || pathname.startsWith(cleanHref + '/');
 }
 
@@ -110,6 +117,7 @@ function shortenAddress(addr: string): string {
 
 export function StandardSidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user, logout } = useAuth();
 
   const walletAddress = user?.walletAddress ?? '0x4f2a0000000000000000000000000000000000E91c';
@@ -201,7 +209,7 @@ export function StandardSidebar() {
             </div>
             {sect.items.map((item) => {
               const Icon = item.icon;
-              const active = isItemActive(pathname, item.href);
+              const active = isItemActive(pathname, searchParams, item.href);
               return <SidebarItem key={item.label} item={item} Icon={Icon} active={active} />;
             })}
           </div>
