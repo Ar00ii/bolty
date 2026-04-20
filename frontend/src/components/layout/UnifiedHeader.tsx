@@ -86,7 +86,7 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="max-w-[1400px] mx-auto pl-0 pr-4 md:pr-8 h-16 flex items-center justify-between">
+        <div className="w-full pl-0 pr-4 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -106,11 +106,11 @@ export function UnifiedHeader() {
               }}
             />
             <span
-              className="text-white text-lg md:text-xl hidden sm:inline"
+              className="text-white text-xl md:text-2xl hidden sm:inline"
               style={{
-                fontFamily: "'Orbitron', system-ui, sans-serif",
+                fontFamily: "'Clash Display', system-ui, sans-serif",
                 fontWeight: 600,
-                letterSpacing: '0.04em',
+                letterSpacing: '-0.01em',
                 textShadow: '0 0 12px rgba(131,110,249,0.35)',
               }}
             >
