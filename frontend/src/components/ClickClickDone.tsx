@@ -219,18 +219,27 @@ export function ClickClickDone() {
                       RANK_TIERS
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {['Hierro', 'Bronce', 'Plata', 'Oro'].map((tier) => (
+                      {[
+                        { label: 'Iron', icon: '🔩' },
+                        { label: 'Bronze', icon: '🥉' },
+                        { label: 'Silver', icon: '🥈' },
+                        { label: 'Gold', icon: '🥇' },
+                      ].map((tier) => (
                         <div
-                          key={tier}
+                          key={tier.label}
                           style={{
                             background: '#9333ea',
                             color: '#fff',
                             padding: '6px 10px',
                             borderRadius: '4px',
                             fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
                           }}
                         >
-                          {tier}
+                          <span aria-hidden="true">{tier.icon}</span>
+                          {tier.label}
                         </div>
                       ))}
                     </div>

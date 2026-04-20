@@ -5,6 +5,7 @@ import React from 'react';
 export interface ReputationInfo {
   points: number;
   label: string;
+  icon: string;
   color: string;
   tier: number; // 0–7 for bar fill
   description?: string;
@@ -12,75 +13,78 @@ export interface ReputationInfo {
 }
 
 export interface RankDefinition {
-  rank:
-    | 'HIERRO'
-    | 'BRONCE'
-    | 'PLATA'
-    | 'ORO'
-    | 'PLATINO'
-    | 'DIAMANTE'
-    | 'MAESTRIA'
-    | 'CAMPEON';
+  rank: 'HIERRO' | 'BRONCE' | 'PLATA' | 'ORO' | 'PLATINO' | 'DIAMANTE' | 'MAESTRIA' | 'CAMPEON';
   label: string;
+  icon: string;
   color: string;
   threshold: number;
   description: string;
 }
 
 // New 8-tier rank system, in ascending order (matches backend rays.service.ts).
+// Note: `rank` enum keys stay in Spanish because they mirror the backend Prisma
+// schema and DB migrations — only the user-facing `label` is localized.
 export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'HIERRO',
-    label: 'Hierro',
+    label: 'Iron',
+    icon: '🔩',
     color: '#78716c',
     threshold: 0,
     description: 'Just getting started on the platform',
   },
   {
     rank: 'BRONCE',
-    label: 'Bronce',
+    label: 'Bronze',
+    icon: '🥉',
     color: '#cd7f32',
     threshold: 25,
     description: 'Actively contributing to the community',
   },
   {
     rank: 'PLATA',
-    label: 'Plata',
+    label: 'Silver',
+    icon: '🥈',
     color: '#9ca3af',
     threshold: 50,
     description: 'Established developer with proven contributions',
   },
   {
     rank: 'ORO',
-    label: 'Oro',
+    label: 'Gold',
+    icon: '🥇',
     color: '#f59e0b',
     threshold: 120,
     description: 'Highly respected community member',
   },
   {
     rank: 'PLATINO',
-    label: 'Platino',
+    label: 'Platinum',
+    icon: '⭐',
     color: '#a855f7',
     threshold: 250,
     description: 'Elite developer with exceptional track record',
   },
   {
     rank: 'DIAMANTE',
-    label: 'Diamante',
+    label: 'Diamond',
+    icon: '💎',
     color: '#38bdf8',
     threshold: 500,
     description: 'Top-tier contributor trusted by thousands',
   },
   {
     rank: 'MAESTRIA',
-    label: 'Maestría',
+    label: 'Master',
+    icon: '👑',
     color: '#ec4899',
     threshold: 1000,
     description: 'Master of the craft — exceptional standing',
   },
   {
     rank: 'CAMPEON',
-    label: 'Campeón',
+    label: 'Champion',
+    icon: '🏆',
     color: '#836ef9',
     threshold: 2000,
     description: 'Champion — reserved for the top 5 of the ecosystem',
@@ -99,6 +103,7 @@ export function getReputationRank(rays: number): ReputationInfo {
   return {
     points: rays,
     label: current.label,
+    icon: current.icon,
     color: current.color,
     tier,
     description: current.description,
@@ -139,10 +144,9 @@ export function ReputationBadge({
       }}
       title={`${rank.label} · ${points.toLocaleString()} rays`}
     >
-      <span
-        className={`${s.dot} rounded-full flex-shrink-0`}
-        style={{ background: rank.color, opacity: 0.85 }}
-      />
+      <span className={`${s.label} leading-none flex-shrink-0`} aria-hidden="true">
+        {rank.icon}
+      </span>
       {showLabel && <span className={s.label}>{rank.label}</span>}
       {showPoints && (
         <span className={s.label}>

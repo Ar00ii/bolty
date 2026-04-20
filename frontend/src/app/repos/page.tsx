@@ -71,14 +71,14 @@ interface Repository {
 
 // Reputation rank helper (rays-based, matches /components/ui/reputation-badge.tsx)
 function getReputationRank(rays: number): { label: string; color: string; badge: string } {
-  if (rays >= 2000) return { label: 'Campeón', color: '#836ef9', badge: 'CMP' };
-  if (rays >= 1000) return { label: 'Maestría', color: '#ec4899', badge: 'MST' };
-  if (rays >= 500) return { label: 'Diamante', color: '#38bdf8', badge: 'DIA' };
-  if (rays >= 250) return { label: 'Platino', color: '#a855f7', badge: 'PLT' };
-  if (rays >= 120) return { label: 'Oro', color: '#f59e0b', badge: 'ORO' };
-  if (rays >= 50) return { label: 'Plata', color: '#9ca3af', badge: 'PLA' };
-  if (rays >= 25) return { label: 'Bronce', color: '#cd7f32', badge: 'BRZ' };
-  return { label: 'Hierro', color: '#78716c', badge: 'HRO' };
+  if (rays >= 2000) return { label: 'Champion', color: '#836ef9', badge: 'CMP' };
+  if (rays >= 1000) return { label: 'Master', color: '#ec4899', badge: 'MST' };
+  if (rays >= 500) return { label: 'Diamond', color: '#38bdf8', badge: 'DIA' };
+  if (rays >= 250) return { label: 'Platinum', color: '#a855f7', badge: 'PLT' };
+  if (rays >= 120) return { label: 'Gold', color: '#f59e0b', badge: 'GLD' };
+  if (rays >= 50) return { label: 'Silver', color: '#9ca3af', badge: 'SLV' };
+  if (rays >= 25) return { label: 'Bronze', color: '#cd7f32', badge: 'BRZ' };
+  return { label: 'Iron', color: '#78716c', badge: 'IRN' };
 }
 
 interface GitHubRepo {
@@ -1157,11 +1157,7 @@ export default function ReposPage() {
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                onClick={confirmPublish}
-                className="mk-wizard__primary"
-              >
+              <button type="button" onClick={confirmPublish} className="mk-wizard__primary">
                 Publish repository
               </button>
             </div>

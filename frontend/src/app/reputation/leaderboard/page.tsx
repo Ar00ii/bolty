@@ -132,8 +132,7 @@ export default function LeaderboardPage() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
               aria-expanded={showHelp}
             >
@@ -198,13 +197,9 @@ export default function LeaderboardPage() {
               </span>
               {RANK_TIERS.map((r) => (
                 <div key={r.rank} className="flex items-center gap-1.5 flex-shrink-0">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{
-                      background: r.color,
-                      boxShadow: `0 0 6px ${r.color}`,
-                    }}
-                  />
+                  <span className="text-[13px] leading-none" aria-hidden="true">
+                    {r.icon}
+                  </span>
                   <span className="text-[11px] font-light" style={{ color: r.color }}>
                     {r.label}
                   </span>
@@ -363,8 +358,7 @@ export default function LeaderboardPage() {
               className="rounded-xl overflow-hidden"
               style={{
                 background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
               <div className="grid grid-cols-[40px_minmax(0,1fr)_110px_70px_70px_90px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">

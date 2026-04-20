@@ -234,23 +234,19 @@ export const HowItWorks = memo(() => {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: 'Hierro', color: '#78716c' },
-                    { label: 'Bronce', color: '#cd7f32' },
-                    { label: 'Plata', color: '#9ca3af' },
-                    { label: 'Oro', color: '#f59e0b' },
+                    { label: 'Iron', icon: '🔩', color: '#78716c' },
+                    { label: 'Bronze', icon: '🥉', color: '#cd7f32' },
+                    { label: 'Silver', icon: '🥈', color: '#9ca3af' },
+                    { label: 'Gold', icon: '🥇', color: '#f59e0b' },
                   ].map((tier) => (
                     <div
                       key={tier.label}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg"
                       style={RANK_CHIP_STYLE(tier.color)}
                     >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                        style={{
-                          background: tier.color,
-                          boxShadow: `0 0 8px ${tier.color}aa`,
-                        }}
-                      />
+                      <span className="text-[13px] leading-none flex-shrink-0" aria-hidden="true">
+                        {tier.icon}
+                      </span>
                       <span
                         className="text-[12px] font-light tracking-[0.005em]"
                         style={{ color: tier.color }}
