@@ -145,9 +145,6 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             opacity: 0.22,
           }}
         />
-        <div className="relative z-10 w-full h-full flex items-center justify-center text-white/20 text-center">
-          <p className="text-sm font-light">Interactive preview</p>
-        </div>
       </motion.div>
     </div>
   );
