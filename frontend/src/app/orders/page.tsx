@@ -1,23 +1,28 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
-  ShoppingBag,
-  Package,
-  Clock,
-  CheckCircle2,
   AlertTriangle,
-  Truck,
-  ArrowRight,
+  ArrowUpRight,
   BarChart3,
+  Bot,
+  CheckCircle2,
+  Clock,
   Download,
-  TrendingUp,
+  GitBranch,
   Lock,
+  Package,
   Search,
+  ShoppingBag,
+  Sparkles,
+  TrendingUp,
+  Truck,
   X,
+  Zap,
+  type LucideIcon,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -26,8 +31,8 @@ import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
-
 type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
+type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 
 interface Order {
   id: string;
@@ -37,7 +42,7 @@ interface Order {
   escrowContract: string | null;
   amountWei: string;
   txHash: string;
-  listing: { id: string; title: string; type: string; price: number; currency: string };
+  listing: { id: string; title: string; type: ListingType; price: number; currency: string };
   buyer: { id: string; username: string | null; avatarUrl: string | null };
   seller: { id: string; username: string | null; avatarUrl: string | null };
 }
@@ -53,144 +58,77 @@ interface SellerStats {
 
 const STATUS_CONFIG: Record<
   OrderStatus,
-  { label: string; icon: React.ElementType; color: string }
+  { label: string; icon: LucideIcon; color: string }
 > = {
   PENDING_DELIVERY: { label: 'Pending', icon: Clock, color: '#f59e0b' },
-  IN_PROGRESS: { label: 'In Progress', icon: Package, color: '#06B6D4' },
+  IN_PROGRESS: { label: 'In progress', icon: Package, color: '#06B6D4' },
   DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
   COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#836EF9' },
   DISPUTED: { label: 'Disputed', icon: AlertTriangle, color: '#ef4444' },
 };
 
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const cfg = STATUS_CONFIG[status];
-  const Icon = cfg.icon;
-  return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-medium tracking-[0.005em]"
-      style={{
-        color: cfg.color,
-        background: `linear-gradient(180deg, ${cfg.color}22 0%, ${cfg.color}08 100%)`,
-        boxShadow: `inset 0 0 0 1px ${cfg.color}40`,
-      }}
-    >
-      <Icon className="w-3 h-3" strokeWidth={2} />
-      {cfg.label}
-    </span>
-  );
+const TYPE_ICON: Record<ListingType, LucideIcon> = {
+  REPO: GitBranch,
+  BOT: Bot,
+  AI_AGENT: Bot,
+  SCRIPT: Zap,
+  OTHER: Package,
+};
+
+const TYPE_ACCENT: Record<ListingType, string> = {
+  REPO: '#06B6D4',
+  BOT: '#836EF9',
+  AI_AGENT: '#836EF9',
+  SCRIPT: '#EC4899',
+  OTHER: '#94a3b8',
+};
+
+type StatusFilter = 'ALL' | OrderStatus;
+
+const STATUS_FILTER_ORDER: StatusFilter[] = [
+  'ALL',
+  'PENDING_DELIVERY',
+  'IN_PROGRESS',
+  'DELIVERED',
+  'COMPLETED',
+  'DISPUTED',
+];
+
+const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+  ALL: 'All',
+  PENDING_DELIVERY: 'Pending',
+  IN_PROGRESS: 'In progress',
+  DELIVERED: 'Delivered',
+  COMPLETED: 'Completed',
+  DISPUTED: 'Disputed',
+};
+
+function timeAgo(d: string | Date) {
+  const diff = Date.now() - new Date(d).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
 
-function OrderCard({
-  order,
-  isSeller,
-  onClick,
-  index = 0,
-}: {
-  order: Order;
-  isSeller: boolean;
-  onClick: () => void;
-  index?: number;
-}) {
-  const peer = isSeller ? order.buyer : order.seller;
-  const ethAmount = order.amountWei ? (parseFloat(order.amountWei) / 1e18).toFixed(4) : '—';
-  const statusColor = STATUS_CONFIG[order.status]?.color ?? '#836EF9';
+function formatEth(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n === 0) return '0';
+  if (n < 0.0001) return '<0.0001';
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(3);
+  return n.toFixed(2);
+}
 
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay: Math.min(index * 0.035, 0.4),
-        duration: 0.28,
-        ease: [0.22, 0.61, 0.36, 1],
-      }}
-      whileHover={{ y: -1 }}
-      whileTap={{ scale: 0.995 }}
-      className="group relative w-full text-left rounded-xl overflow-hidden transition-all"
-      style={{
-        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-        boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px rgba(0,0,0,0.55)',
-      }}
-    >
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-70"
-        style={{
-          background: `linear-gradient(90deg, transparent 0%, ${statusColor} 50%, transparent 100%)`,
-        }}
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-12 -right-12 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity blur-2xl"
-        style={{ background: `${statusColor}25` }}
-      />
-
-      <div className="relative flex items-center gap-4 p-4">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
-            boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 14px -4px rgba(131,110,249,0.4)',
-          }}
-        >
-          {peer?.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-base font-light" style={{ color: '#b4a7ff' }}>
-              {(peer?.username || '?')[0].toUpperCase()}
-            </span>
-          )}
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-normal text-[13px] text-white truncate tracking-[0.005em]">
-              {order.listing.title}
-            </span>
-            <StatusBadge status={order.status} />
-            {order.escrowStatus && order.escrowStatus !== 'NONE' && (
-              <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium"
-                style={{
-                  color: '#22c55e',
-                  background: 'rgba(34,197,94,0.1)',
-                  boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
-                }}
-              >
-                <Lock className="w-2.5 h-2.5" strokeWidth={2} /> Escrow
-              </span>
-            )}
-          </div>
-          <div className="text-[11px] text-zinc-500">
-            {isSeller ? 'Buyer' : 'Seller'}:{' '}
-            <span className="text-zinc-300 font-normal">@{peer?.username || 'Unknown'}</span>
-            <span className="mx-1 opacity-40">·</span>
-            {new Date(order.createdAt).toLocaleDateString()}
-          </div>
-        </div>
-
-        <div className="text-right flex-shrink-0">
-          <div className="font-mono font-normal text-[13px] text-[#b4a7ff] tracking-[0.005em]">
-            {ethAmount} ETH
-          </div>
-          <div className="text-[10px] text-zinc-600 uppercase tracking-[0.14em] font-medium mt-0.5">
-            {order.listing.type}
-          </div>
-        </div>
-
-        <ArrowRight
-          className="w-4 h-4 text-zinc-600 flex-shrink-0 transition-all group-hover:text-zinc-300 group-hover:translate-x-0.5"
-          strokeWidth={1.5}
-        />
-      </div>
-    </motion.button>
-  );
+function formatNumber(n: number): string {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
 }
 
 function csvEscape(v: unknown) {
@@ -241,25 +179,7 @@ function downloadOrdersCsv(orders: Order[], kind: 'buying' | 'selling') {
   URL.revokeObjectURL(url);
 }
 
-type StatusFilter = 'ALL' | OrderStatus;
-
-const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
-  ALL: 'All',
-  PENDING_DELIVERY: 'Pending',
-  IN_PROGRESS: 'In progress',
-  DELIVERED: 'Delivered',
-  COMPLETED: 'Completed',
-  DISPUTED: 'Disputed',
-};
-
-const STATUS_FILTER_ORDER: StatusFilter[] = [
-  'ALL',
-  'PENDING_DELIVERY',
-  'IN_PROGRESS',
-  'DELIVERED',
-  'COMPLETED',
-  'DISPUTED',
-];
+// ── Page ────────────────────────────────────────────────────────────────
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -299,7 +219,7 @@ export default function OrdersPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center flex-col gap-3">
         <ShoppingBag className="w-10 h-10 text-zinc-600" strokeWidth={1} />
-        <p className="text-zinc-500">Sign in to view your orders</p>
+        <p className="text-zinc-500 font-light">Sign in to view your orders</p>
       </div>
     );
   }
@@ -323,312 +243,577 @@ export default function OrdersPage() {
     return acc;
   }, {});
 
+  // Buyer-side quick metrics
+  const buyingMetrics = useMemo(() => {
+    const spent = buyerOrders.reduce((sum, o) => {
+      const eth = o.amountWei ? parseFloat(o.amountWei) / 1e18 : 0;
+      return sum + (Number.isFinite(eth) ? eth : 0);
+    }, 0);
+    const open = buyerOrders.filter(
+      (o) => o.status === 'PENDING_DELIVERY' || o.status === 'IN_PROGRESS',
+    ).length;
+    const delivered = buyerOrders.filter((o) => o.status === 'DELIVERED').length;
+    const completed = buyerOrders.filter((o) => o.status === 'COMPLETED').length;
+    const disputed = buyerOrders.filter((o) => o.status === 'DISPUTED').length;
+    return { spent, open, delivered, completed, disputed, total: buyerOrders.length };
+  }, [buyerOrders]);
+
+  // Seller-side quick metrics
+  const sellingMetrics = useMemo(() => {
+    const earned = sellerOrders
+      .filter((o) => o.escrowStatus === 'RELEASED' || o.status === 'COMPLETED')
+      .reduce((sum, o) => {
+        const eth = o.amountWei ? parseFloat(o.amountWei) / 1e18 : 0;
+        return sum + (Number.isFinite(eth) ? eth : 0);
+      }, 0);
+    return { earned };
+  }, [sellerOrders]);
+
   return (
-    <div className="page-container py-8">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="page-header flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-light text-white tracking-tight">Orders</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            Track all your purchases and sales in one place.
-          </p>
-        </div>
-        {baseOrders.length > 0 && (
-          <button
-            onClick={() => downloadOrdersCsv(baseOrders, tab)}
-            className="inline-flex items-center gap-1.5 text-[11.5px] text-zinc-400 hover:text-white h-9 px-3 rounded-lg transition-colors"
-            style={{
-              background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
-            }}
-            aria-label="Export orders as CSV"
-          >
-            <Download className="w-3.5 h-3.5" strokeWidth={2} />
-            Export CSV
-          </button>
-        )}
-      </div>
-
-      {/* Seller Stats */}
-      {tab === 'selling' && stats && (
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-          {[
-            { label: 'Total', value: stats.total, icon: BarChart3, accent: '#836EF9' },
-            { label: 'Pending', value: stats.pending, icon: Clock, accent: '#f59e0b' },
-            { label: 'In Progress', value: stats.inProgress, icon: Package, accent: '#06B6D4' },
-            { label: 'Delivered', value: stats.delivered, icon: Truck, accent: '#22c55e' },
-            { label: 'Completed', value: stats.completed, icon: CheckCircle2, accent: '#836EF9' },
-            { label: 'Disputed', value: stats.disputed, icon: AlertTriangle, accent: '#ef4444' },
-          ].map(({ label, value, icon: Icon, accent }, idx) => (
-            <motion.div
-              key={label}
-              initial={{ opacity: 0, y: 8, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: idx * 0.04, duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
-              whileHover={{ y: -2 }}
-              className="relative rounded-xl p-4 text-center overflow-hidden transition-all"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-              }}
-            >
-              <div
-                className="absolute inset-x-0 top-0 h-px"
+      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Bolty Orders</span>
+                <LiveDot />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Orders
+              </h1>
+              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+                Track every purchase, sale and escrow release in one feed.
+              </p>
+            </div>
+            {baseOrders.length > 0 && (
+              <button
+                onClick={() => downloadOrdersCsv(baseOrders, tab)}
+                className="inline-flex items-center gap-1.5 text-[12px] text-zinc-300 hover:text-white h-9 px-3 rounded-lg transition-colors"
                 style={{
-                  background: `linear-gradient(90deg, transparent, ${accent}80, transparent)`,
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
                 }}
+                aria-label="Export orders as CSV"
+              >
+                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+                Export CSV
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          {tab === 'buying' ? (
+            <>
+              <StatTile
+                label="Total spent"
+                value={`${formatEth(buyingMetrics.spent)} ETH`}
+                sub={`across ${buyingMetrics.total} orders`}
+                accent="#836EF9"
               />
-              <div
-                className="w-7 h-7 rounded-md mx-auto mb-2 flex items-center justify-center"
-                style={{
-                  background: `linear-gradient(135deg, ${accent}22 0%, ${accent}06 100%)`,
-                  boxShadow: `inset 0 0 0 1px ${accent}38, inset 0 1px 0 rgba(255,255,255,0.06)`,
-                }}
-              >
-                <Icon className="w-3.5 h-3.5" style={{ color: accent }} strokeWidth={1.75} />
-              </div>
-              <div
-                className="font-mono font-light text-xl tracking-[-0.01em]"
-                style={{ color: accent }}
-              >
-                {value}
-              </div>
-              <div className="text-[10px] text-zinc-600 uppercase tracking-[0.18em] font-medium mt-1">
-                {label}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div
-        className="inline-flex items-center gap-0.5 p-1 rounded-lg mb-4"
-        style={{
-          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-        }}
-      >
-        {(
-          [
-            { key: 'buying', label: 'Buying', icon: ShoppingBag, count: buyerOrders.length },
-            { key: 'selling', label: 'Selling', icon: TrendingUp, count: sellerOrders.length },
-          ] as const
-        ).map(({ key, label, icon: Icon, count }) => {
-          const active = tab === key;
-          return (
-            <motion.button
-              key={key}
-              onClick={() => {
-                setTab(key);
-                setStatusFilter('ALL');
-                setSearch('');
-              }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-              className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-light tracking-[0.005em] transition-colors ${
-                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              {active && (
-                <motion.span
-                  layoutId="orders-tab-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-md"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
-              )}
-              <Icon className="relative z-10 w-3.5 h-3.5" strokeWidth={1.75} />
-              <span className="relative z-10">{label}</span>
-              <span
-                className="relative z-10 text-[10.5px] font-normal"
-                style={{ color: active ? 'rgba(255,255,255,0.75)' : 'rgba(113,113,122,1)' }}
-              >
-                {count}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
-
-      {/* Search */}
-      {baseOrders.length > 0 && (
-        <div className="relative mb-4">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500"
-            strokeWidth={1.75}
-          />
-          <input
-            ref={searchRef}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title, counterparty, or order id"
-            className="w-full pl-9 pr-16 py-2.5 text-[13px] rounded-lg text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
-            style={{
-              background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-            }}
-          />
-          {search ? (
-            <button
-              onClick={() => setSearch('')}
-              aria-label="Clear search"
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-white/10 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+              <StatTile
+                label="Open"
+                value={formatNumber(buyingMetrics.open)}
+                sub="in progress or pending"
+                accent="#06B6D4"
+              />
+              <StatTile
+                label="Delivered"
+                value={formatNumber(buyingMetrics.delivered)}
+                sub="awaiting release"
+                accent="#22c55e"
+              />
+              <StatTile
+                label="Completed"
+                value={formatNumber(buyingMetrics.completed)}
+                sub={`${buyingMetrics.disputed} disputed`}
+                accent="#EC4899"
+              />
+            </>
           ) : (
-            <kbd
-              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-medium text-zinc-500 rounded-md px-1.5 py-0.5 leading-none"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              /
-            </kbd>
+            <>
+              <StatTile
+                label="Revenue"
+                value={`${formatEth(sellingMetrics.earned)} ETH`}
+                sub="released + completed"
+                accent="#22c55e"
+              />
+              <StatTile
+                label="Open orders"
+                value={formatNumber((stats?.pending || 0) + (stats?.inProgress || 0))}
+                sub={`${stats?.pending || 0} pending · ${stats?.inProgress || 0} in progress`}
+                accent="#f59e0b"
+              />
+              <StatTile
+                label="Delivered"
+                value={formatNumber(stats?.delivered || 0)}
+                sub="awaiting release"
+                accent="#06B6D4"
+              />
+              <StatTile
+                label="Completed"
+                value={formatNumber(stats?.completed || 0)}
+                sub={`${stats?.disputed || 0} disputed`}
+                accent="#836EF9"
+              />
+            </>
           )}
         </div>
-      )}
+      </section>
 
-      {/* Status filter */}
-      <div className="flex flex-wrap gap-1.5 mb-6">
-        {STATUS_FILTER_ORDER.map((s, idx) => {
-          const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
-          const active = statusFilter === s;
-          return (
-            <motion.button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: Math.min(idx * 0.03, 0.2),
-                duration: 0.22,
-                ease: [0.22, 0.61, 0.36, 1],
-              }}
-              whileTap={{ scale: 0.96 }}
-              className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
-                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
+      {/* Tabs */}
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+          <div
+            className="flex items-center gap-0.5 rounded-lg p-0.5"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            {(
+              [
+                { key: 'buying' as const, label: 'Buying', count: buyerOrders.length, icon: ShoppingBag },
+                { key: 'selling' as const, label: 'Selling', count: sellerOrders.length, icon: TrendingUp },
+              ]
+            ).map(({ key, label, count, icon: Icon }) => {
+              const active = tab === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setTab(key);
+                    setStatusFilter('ALL');
+                    setSearch('');
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-light transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+                  }}
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  {label}
+                  <span
+                    className="text-[10.5px] font-mono tabular-nums"
+                    style={{ color: active ? 'rgba(255,255,255,0.65)' : '#71717a' }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search */}
+          {baseOrders.length > 0 && (
+            <div
+              className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
               style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                background: 'rgba(0,0,0,0.4)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
               }}
             >
-              {active && (
-                <motion.span
-                  layoutId="orders-status-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
+              <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+              <input
+                ref={searchRef}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by title, counterparty, id…"
+                className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+              />
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                  /
+                </kbd>
               )}
-              <span className="relative z-10">{STATUS_FILTER_LABELS[s]}</span>
-              <span
-                className="relative z-10 text-[10px] font-normal"
-                style={{ color: active ? 'rgba(255,255,255,0.7)' : 'rgba(113,113,122,1)' }}
-              >
-                {count}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
+            </div>
+          )}
 
-      {/* Orders list */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton h-[76px] rounded-xl" />
-          ))}
+          {/* Status chips */}
+          <div className="flex items-center gap-1 ml-auto flex-wrap">
+            {STATUS_FILTER_ORDER.map((s) => {
+              const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
+              const active = statusFilter === s;
+              const color = s === 'ALL' ? '#836EF9' : STATUS_CONFIG[s as OrderStatus]?.color;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatusFilter(s)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? `${color}22` : 'rgba(255,255,255,0.02)',
+                    boxShadow: active
+                      ? `inset 0 0 0 1px ${color}5a`
+                      : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  }}
+                >
+                  {STATUS_FILTER_LABELS[s]}
+                  <span
+                    className="text-[10px] font-mono tabular-nums"
+                    style={{ color: active ? `${color}ee` : '#71717a' }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      ) : orders.length === 0 ? (
-        <div
-          className="relative text-center py-16 px-6 rounded-2xl overflow-hidden"
+      </section>
+
+      {/* Table */}
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <OrdersTable
+            orders={orders}
+            tab={tab}
+            loading={loading}
+            onRowClick={(id) => router.push(`/orders/${id}`)}
+          />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ── Components ──────────────────────────────────────────────────────────
+
+function LiveDot() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
+      <span
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: '#22c55e' }}
+      />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+    </span>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent: string;
+}) {
+  return (
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
+      </div>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+function OrdersTable({
+  orders,
+  tab,
+  loading,
+  onRowClick,
+}: {
+  orders: Order[];
+  tab: 'buying' | 'selling';
+  loading: boolean;
+  onRowClick: (id: string) => void;
+}) {
+  if (loading && orders.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        Loading orders…
+      </div>
+    );
+  }
+
+  if (!loading && orders.length === 0) {
+    return (
+      <div
+        className="relative rounded-xl px-6 py-16 text-center overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-30"
+          style={{ background: 'rgba(131,110,249,0.25)' }}
+        />
+        <div
+          className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            border: '1px solid rgba(131,110,249,0.35)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
           }}
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
-            }}
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
-            style={{ background: 'rgba(131,110,249,0.18)' }}
-          />
-          <div
-            className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-              border: '1px solid rgba(131,110,249,0.28)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
-            }}
-          >
-            <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
-          </div>
-          <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
-            {tab === 'buying' ? 'No purchases yet' : 'No sales yet'}
-          </p>
-          <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
-            {tab === 'buying'
-              ? 'Browse the marketplace to discover AI agents and repositories from the community.'
-              : 'Publish your first listing to start receiving orders from buyers.'}
-          </p>
-          <a
-            href="/market"
-            className="group relative inline-flex items-center gap-2 rounded-lg h-10 px-4 text-[12.5px] font-medium text-white transition-colors"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-              boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
-            }}
-          >
-            <BarChart3
-              className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors"
-              strokeWidth={2}
-            />
-            <span className="tracking-[0.005em]">
-              {tab === 'buying' ? 'Explore marketplace' : 'Create listing'}
-            </span>
-          </a>
+          <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
         </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order, i) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              isSeller={tab === 'selling'}
-              onClick={() => router.push(`/orders/${order.id}`)}
-              index={i}
-            />
-          ))}
-        </div>
-      )}
+        <p className="relative text-[14px] text-white font-normal">
+          {tab === 'buying' ? 'No purchases match your filters' : 'No sales match your filters'}
+        </p>
+        <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-5 max-w-sm mx-auto font-light">
+          {tab === 'buying'
+            ? 'Explore the marketplace to start acquiring agents, bots and repos.'
+            : 'Publish listings to start receiving orders from buyers.'}
+        </p>
+        <Link
+          href={tab === 'buying' ? '/market' : '/market/seller/publish'}
+          className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+          }}
+        >
+          {tab === 'buying' ? (
+            <>
+              <BarChart3 className="w-3.5 h-3.5" strokeWidth={1.75} /> Explore marketplace
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} /> Publish listing
+            </>
+          )}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+        <span className="text-center">#</span>
+        <span>Order</span>
+        <span>Status</span>
+        <span>Escrow</span>
+        <span className="text-right">Amount</span>
+        <span className="hidden md:block">{tab === 'buying' ? 'Seller' : 'Buyer'}</span>
+        <span className="text-right">Age</span>
+        <span />
+      </div>
+      <ul>
+        {orders.map((o, i) => (
+          <OrderRow
+            key={o.id}
+            order={o}
+            index={i}
+            isSeller={tab === 'selling'}
+            onClick={() => onRowClick(o.id)}
+          />
+        ))}
+      </ul>
     </div>
+  );
+}
+
+function OrderRow({
+  order,
+  index,
+  isSeller,
+  onClick,
+}: {
+  order: Order;
+  index: number;
+  isSeller: boolean;
+  onClick: () => void;
+}) {
+  const cfg = STATUS_CONFIG[order.status];
+  const StatusIcon = cfg.icon;
+  const TypeIcon = TYPE_ICON[order.listing.type] ?? Package;
+  const typeAccent = TYPE_ACCENT[order.listing.type];
+  const peer = isSeller ? order.buyer : order.seller;
+  const ethAmount = order.amountWei ? parseFloat(order.amountWei) / 1e18 : null;
+
+  const escrowActive = order.escrowStatus && order.escrowStatus !== 'NONE';
+  const escrowColor =
+    order.escrowStatus === 'RELEASED'
+      ? '#22c55e'
+      : order.escrowStatus === 'DISPUTED'
+        ? '#ef4444'
+        : order.escrowStatus === 'REFUNDED'
+          ? '#94a3b8'
+          : '#06B6D4';
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] w-full text-left transition-all hover:bg-white/[0.02]"
+      >
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: cfg.color, opacity: 0.6 }}
+        />
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${typeAccent}18`,
+              boxShadow: `inset 0 0 0 1px ${typeAccent}40`,
+            }}
+          >
+            <TypeIcon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: typeAccent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-normal text-white truncate">
+              {order.listing.title}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 font-light truncate">
+              <span className="font-mono text-zinc-600">
+                #{order.id.slice(0, 8)}
+              </span>
+              {order.txHash && (
+                <>
+                  <span className="text-zinc-700 mx-1">·</span>
+                  <span className="font-mono text-zinc-600">
+                    {order.txHash.slice(0, 10)}…
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div className="min-w-0">
+          <span
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium"
+            style={{
+              color: cfg.color,
+              background: `${cfg.color}14`,
+              boxShadow: `inset 0 0 0 1px ${cfg.color}44`,
+            }}
+          >
+            <StatusIcon className="w-2.5 h-2.5" strokeWidth={2} />
+            {cfg.label}
+          </span>
+        </div>
+
+        {/* Escrow */}
+        <div className="min-w-0">
+          {escrowActive ? (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium"
+              style={{
+                color: escrowColor,
+                background: `${escrowColor}14`,
+                boxShadow: `inset 0 0 0 1px ${escrowColor}44`,
+              }}
+            >
+              <Lock className="w-2.5 h-2.5" strokeWidth={2} />
+              {order.escrowStatus.toLowerCase()}
+            </span>
+          ) : (
+            <span className="text-[10.5px] text-zinc-700 font-light">—</span>
+          )}
+        </div>
+
+        {/* Amount */}
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+          {ethAmount !== null ? formatEth(ethAmount) : '—'}
+          <span className="text-zinc-600 ml-1 text-[10px]">ETH</span>
+        </div>
+
+        {/* Counterparty */}
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
+          <div
+            className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          >
+            {peer?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
+                {(peer?.username || '?')[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          <span className="truncate">@{peer?.username || 'anon'}</span>
+        </div>
+
+        {/* Age */}
+        <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums">
+          {timeAgo(order.createdAt)}
+        </div>
+
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          strokeWidth={1.75}
+        />
+      </button>
+    </li>
   );
 }
