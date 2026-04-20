@@ -86,7 +86,7 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="w-full pl-0 pr-4 md:pr-8 h-16 flex items-center justify-between">
+        <div className="w-full pl-5 md:pl-8 pr-4 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -106,12 +106,15 @@ export function UnifiedHeader() {
               }}
             />
             <span
-              className="text-white text-xl md:text-2xl hidden sm:inline"
+              className="text-xl md:text-2xl hidden sm:inline"
               style={{
-                fontFamily: "'Clash Display', system-ui, sans-serif",
-                fontWeight: 600,
-                letterSpacing: '-0.01em',
-                textShadow: '0 0 12px rgba(131,110,249,0.35)',
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontWeight: 300,
+                letterSpacing: '0.03em',
+                background: 'linear-gradient(90deg, #e2d9ff 0%, #c4b5fd 50%, #a78bfa 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
               }}
             >
               BoltyNetwork
