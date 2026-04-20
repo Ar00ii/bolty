@@ -12,6 +12,16 @@ interface ToastType {
   message: string;
 }
 
+const TOAST_META: Record<
+  ToastType['type'],
+  { icon: typeof CheckCircle2; color: string; textColor: string }
+> = {
+  success: { icon: CheckCircle2, color: '34,197,94', textColor: '#86efac' },
+  error: { icon: AlertCircle, color: '239,68,68', textColor: '#fda4af' },
+  warning: { icon: AlertTriangle, color: '245,158,11', textColor: '#fcd34d' },
+  info: { icon: Info, color: '59,130,246', textColor: '#93c5fd' },
+};
+
 export function ToastContainer() {
   const { toasts, removeToast } = useToast();
 
@@ -27,40 +37,54 @@ export function ToastContainer() {
 }
 
 function Toast({ toast, onClose }: { toast: ToastType; onClose: () => void }) {
-  const icons = {
-    success: <CheckCircle2 className="w-5 h-5 text-green-400" strokeWidth={2} />,
-    error: <AlertCircle className="w-5 h-5 text-red-400" strokeWidth={2} />,
-    warning: <AlertTriangle className="w-5 h-5 text-yellow-400" strokeWidth={2} />,
-    info: <Info className="w-5 h-5 text-blue-400" strokeWidth={2} />,
-  };
-
-  const bgColors = {
-    success: 'bg-green-500/10 border-green-500/30',
-    error: 'bg-red-500/10 border-red-500/30',
-    warning: 'bg-yellow-500/10 border-yellow-500/30',
-    info: 'bg-blue-500/10 border-blue-500/30',
-  };
-
-  const textColors = {
-    success: 'text-green-200',
-    error: 'text-red-200',
-    warning: 'text-yellow-200',
-    info: 'text-blue-200',
-  };
+  const meta = TOAST_META[toast.type];
+  const Icon = meta.icon;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, x: 100 }}
-      animate={{ opacity: 1, y: 0, x: 0 }}
-      exit={{ opacity: 0, y: -20, x: 100 }}
-      transition={{ duration: 0.3 }}
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border pointer-events-auto ${bgColors[toast.type]}`}
+      layout
+      initial={{ opacity: 0, y: 16, x: 40, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -8, x: 60, scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+      className="relative flex items-center gap-3 pl-3 pr-2.5 py-2.5 rounded-xl pointer-events-auto min-w-[280px] max-w-md overflow-hidden"
+      style={{
+        background: `linear-gradient(180deg, rgba(${meta.color},0.14) 0%, rgba(${meta.color},0.04) 100%), linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)`,
+        boxShadow: `0 0 0 1px rgba(${meta.color},0.35), inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 36px -12px rgba(0,0,0,0.6)`,
+        backdropFilter: 'blur(8px)',
+      }}
     >
-      {icons[toast.type]}
-      <span className={`text-sm font-light ${textColors[toast.type]}`}>{toast.message}</span>
-      <button onClick={onClose} className="ml-auto opacity-60 hover:opacity-100 transition-opacity">
-        <X className="w-4 h-4" />
-      </button>
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, rgba(${meta.color},0.6) 50%, transparent 100%)`,
+        }}
+      />
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+        style={{
+          background: `linear-gradient(135deg, rgba(${meta.color},0.22) 0%, rgba(${meta.color},0.06) 100%)`,
+          boxShadow: `inset 0 0 0 1px rgba(${meta.color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(${meta.color},0.45)`,
+        }}
+      >
+        <Icon className="w-3.5 h-3.5" style={{ color: meta.textColor }} strokeWidth={1.75} />
+      </div>
+      <span
+        className="text-[13px] font-light tracking-[0.005em] flex-1"
+        style={{ color: meta.textColor }}
+      >
+        {toast.message}
+      </span>
+      <motion.button
+        onClick={onClose}
+        whileTap={{ scale: 0.88 }}
+        whileHover={{ rotate: 90 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+        className="p-1 rounded-md transition-colors hover:bg-white/10 text-zinc-400 hover:text-white"
+        aria-label="Dismiss notification"
+      >
+        <X className="w-3.5 h-3.5" />
+      </motion.button>
     </motion.div>
   );
 }

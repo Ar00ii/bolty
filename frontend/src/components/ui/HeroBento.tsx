@@ -36,7 +36,7 @@ function NegotiationChat() {
           <div
             className={`px-3 py-1.5 rounded-xl text-[10px] font-mono max-w-[75%] leading-snug ${
               m.role === 'buyer'
-                ? 'bg-monad-500/15 border border-monad-500/25 text-monad-300'
+                ? 'bg-bolty-500/15 border border-bolty-500/25 text-bolty-300'
                 : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
             }`}
           >
@@ -45,7 +45,7 @@ function NegotiationChat() {
             </span>
             {m.text}
             {m.price && (
-              <span className="ml-2 text-[9px] font-light text-monad-400 opacity-80">
+              <span className="ml-2 text-[9px] font-light text-bolty-400 opacity-80">
                 {m.price}
               </span>
             )}
@@ -90,7 +90,7 @@ function ListingsMarquee() {
               <div className="text-[10px] font-light text-zinc-300">{l.name}</div>
               <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag}</div>
             </div>
-            <div className="text-[10px] font-mono font-light text-monad-400">{l.price}</div>
+            <div className="text-[10px] font-mono font-light text-bolty-400">{l.price}</div>
           </div>
         ))}
       </div>
@@ -129,7 +129,7 @@ function ApiAnimation() {
           }}
         >
           <span
-            className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-monad-400'}`}
+            className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-bolty-400'}`}
           >
             {log.method}
           </span>
@@ -147,7 +147,7 @@ function ApiAnimation() {
         style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)' }}
       >
         <div className="text-[9px] font-mono text-zinc-500">
-          <span className="text-monad-400">X-Agent-Key</span>: sk_bolty_xxx...
+          <span className="text-bolty-400">X-Agent-Key</span>: sk_bolty_xxx...
         </div>
       </div>
     </div>
@@ -183,7 +183,7 @@ function PaymentVisual() {
                 i < step
                   ? 'bg-green-400'
                   : i === step
-                    ? 'bg-monad-400 animate-pulse'
+                    ? 'bg-bolty-400 animate-pulse'
                     : 'bg-zinc-700'
               }`}
             />

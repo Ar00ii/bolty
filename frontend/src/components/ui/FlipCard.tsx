@@ -46,10 +46,10 @@ export default function FlipCard({
           }}
         >
           {/* Corner decorators */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-monad-400/30" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-monad-400/30" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-monad-400/30" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-monad-400/30" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-bolty-400/30" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-bolty-400/30" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-bolty-400/30" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-bolty-400/30" />
           {/* Glow */}
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -68,7 +68,7 @@ export default function FlipCard({
           <div className="text-center">
             <div className="text-lg font-light text-white mb-1">{title}</div>
             {subtitle && (
-              <div className="text-xs font-mono text-monad-400 uppercase tracking-widest">
+              <div className="text-xs font-mono text-bolty-400 uppercase tracking-widest">
                 {subtitle}
               </div>
             )}
@@ -91,12 +91,12 @@ export default function FlipCard({
           }}
         >
           {/* Corner decorators */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-monad-400/50" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-monad-400/50" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-monad-400/50" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-monad-400/50" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-bolty-400/50" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-bolty-400/50" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-bolty-400/50" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-bolty-400/50" />
           <div>
-            <div className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">
+            <div className="text-xs font-mono text-bolty-400 uppercase tracking-widest mb-3">
               {subtitle}
             </div>
             <h3 className="text-xl font-light text-white mb-4 leading-tight">{title}</h3>
@@ -104,8 +104,8 @@ export default function FlipCard({
             <p className="text-sm text-zinc-300 leading-relaxed">{description}</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-monad-400 animate-pulse" />
-            <span className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">
+            <div className="w-1.5 h-1.5 rounded-full bg-bolty-400 animate-pulse" />
+            <span className="text-[10px] font-mono text-bolty-400 uppercase tracking-widest">
               Active
             </span>
           </div>

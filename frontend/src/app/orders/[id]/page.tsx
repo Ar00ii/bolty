@@ -10,12 +10,14 @@ import {
   Truck,
   Copy,
   Check,
+  FileText,
 } from 'lucide-react';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-import { API_URL, WS_URL } from '@/lib/api/client';
+import { api, API_URL, WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 const API = API_URL;
@@ -126,12 +128,12 @@ export default function OrderDetailPage() {
   // ── Fetch initial data ──────────────────────────────────────────────────
   const fetchData = useCallback(async () => {
     try {
-      const [orderRes, msgRes] = await Promise.all([
-        fetch(`${API}/orders/${id}`, { credentials: 'include' }),
-        fetch(`${API}/orders/${id}/messages`, { credentials: 'include' }),
+      const [orderData, msgData] = await Promise.all([
+        api.get<Order>(`/orders/${id}`).catch(() => null),
+        api.get<OrderMessage[]>(`/orders/${id}/messages`).catch(() => null),
       ]);
-      if (orderRes.ok) setOrder(await orderRes.json());
-      if (msgRes.ok) setMessages(await msgRes.json());
+      if (orderData) setOrder(orderData);
+      if (msgData) setMessages(msgData);
     } finally {
       setLoading(false);
     }
@@ -197,17 +199,9 @@ export default function OrderDetailPage() {
   const doAction = async (endpoint: string, body?: object) => {
     setActionLoading(true);
     try {
-      const res = await fetch(`${API}/orders/${id}/${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: body ? JSON.stringify(body) : undefined,
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setOrder(updated);
-        setShowDeliverForm(false);
-      }
+      const updated = await api.post<Order>(`/orders/${id}/${endpoint}`, body);
+      setOrder(updated);
+      setShowDeliverForm(false);
     } finally {
       setActionLoading(false);
     }
@@ -362,6 +356,25 @@ export default function OrderDetailPage() {
         >
           {STATUS_LABEL[order.status]}
         </span>
+        <Link
+          href={`/orders/${order.id}/receipt`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            fontSize: '0.72rem',
+            fontWeight: 500,
+            color: 'var(--text-muted)',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 8,
+            padding: '0.4rem 0.7rem',
+            textDecoration: 'none',
+            transition: 'all 0.15s',
+          }}
+        >
+          <FileText style={{ width: 13, height: 13 }} strokeWidth={2} /> Receipt
+        </Link>
       </div>
 
       <div

@@ -1,70 +1,114 @@
 'use client';
 
+import { Crown, Gem, Hammer, Medal, Star, Trophy, type LucideIcon } from 'lucide-react';
 import React from 'react';
 
 export interface ReputationInfo {
   points: number;
   label: string;
+  icon: LucideIcon;
   color: string;
-  tier: number; // 0–6 for bar fill
+  tier: number; // 0–7 for bar fill
   description?: string;
+  threshold: number;
 }
 
-export function getReputationRank(points: number): ReputationInfo {
-  if (points >= 10000)
-    return {
-      points,
-      label: 'Legend',
-      color: '#836ef9',
-      tier: 6,
-      description: 'Hall of fame — the pinnacle of the Bolty ecosystem',
-    };
-  if (points >= 4000)
-    return {
-      points,
-      label: 'Diamond',
-      color: '#38bdf8',
-      tier: 5,
-      description: 'Top-tier contributor trusted by thousands',
-    };
-  if (points >= 1500)
-    return {
-      points,
-      label: 'Platinum',
-      color: '#a855f7',
-      tier: 4,
-      description: 'Elite developer with exceptional track record',
-    };
-  if (points >= 600)
-    return {
-      points,
-      label: 'Gold',
-      color: '#f59e0b',
-      tier: 3,
-      description: 'Highly respected community member',
-    };
-  if (points >= 200)
-    return {
-      points,
-      label: 'Silver',
-      color: '#9ca3af',
-      tier: 2,
-      description: 'Established developer with proven contributions',
-    };
-  if (points >= 50)
-    return {
-      points,
-      label: 'Bronze',
-      color: '#cd7f32',
-      tier: 1,
-      description: 'Actively contributing to the community',
-    };
-  return {
-    points,
-    label: 'Newcomer',
-    color: '#71717a',
-    tier: 0,
+export interface RankDefinition {
+  rank: 'HIERRO' | 'BRONCE' | 'PLATA' | 'ORO' | 'PLATINO' | 'DIAMANTE' | 'MAESTRIA' | 'CAMPEON';
+  label: string;
+  icon: LucideIcon;
+  color: string;
+  threshold: number;
+  description: string;
+}
+
+// New 8-tier rank system, in ascending order (matches backend rays.service.ts).
+// Note: `rank` enum keys stay in Spanish because they mirror the backend Prisma
+// schema and DB migrations — only the user-facing `label` is localized.
+export const RANK_TIERS: RankDefinition[] = [
+  {
+    rank: 'HIERRO',
+    label: 'Iron',
+    icon: Hammer,
+    color: '#78716c',
+    threshold: 0,
     description: 'Just getting started on the platform',
+  },
+  {
+    rank: 'BRONCE',
+    label: 'Bronze',
+    icon: Medal,
+    color: '#cd7f32',
+    threshold: 25,
+    description: 'Actively contributing to the community',
+  },
+  {
+    rank: 'PLATA',
+    label: 'Silver',
+    icon: Medal,
+    color: '#9ca3af',
+    threshold: 50,
+    description: 'Established developer with proven contributions',
+  },
+  {
+    rank: 'ORO',
+    label: 'Gold',
+    icon: Medal,
+    color: '#f59e0b',
+    threshold: 120,
+    description: 'Highly respected community member',
+  },
+  {
+    rank: 'PLATINO',
+    label: 'Platinum',
+    icon: Star,
+    color: '#a855f7',
+    threshold: 250,
+    description: 'Elite developer with exceptional track record',
+  },
+  {
+    rank: 'DIAMANTE',
+    label: 'Diamond',
+    icon: Gem,
+    color: '#38bdf8',
+    threshold: 500,
+    description: 'Top-tier contributor trusted by thousands',
+  },
+  {
+    rank: 'MAESTRIA',
+    label: 'Master',
+    icon: Crown,
+    color: '#ec4899',
+    threshold: 1000,
+    description: 'Master of the craft — exceptional standing',
+  },
+  {
+    rank: 'CAMPEON',
+    label: 'Champion',
+    icon: Trophy,
+    color: '#836ef9',
+    threshold: 2000,
+    description: 'Champion — reserved for the top 5 of the ecosystem',
+  },
+];
+
+export function getReputationRank(rays: number): ReputationInfo {
+  let current = RANK_TIERS[0];
+  let tier = 0;
+  for (let i = 0; i < RANK_TIERS.length; i++) {
+    if (rays >= RANK_TIERS[i].threshold) {
+      current = RANK_TIERS[i];
+      tier = i;
+    }
+  }
+  return {
+    points: rays,
+    label: current.label,
+    icon: current.icon,
+    color: current.color,
+    tier,
+    description: current.description,
+    threshold: current.threshold,
   };
 }
 
@@ -82,11 +126,12 @@ export function ReputationBadge({
   showLabel = false,
 }: ReputationBadgeProps) {
   const rank = getReputationRank(points);
+  const Icon = rank.icon;
 
   const sizes = {
-    sm: { container: 'gap-1 px-1.5 py-0.5', label: 'text-[10px]', dot: 'w-1.5 h-1.5' },
-    md: { container: 'gap-1 px-2 py-1', label: 'text-[10px]', dot: 'w-2 h-2' },
-    lg: { container: 'gap-1.5 px-2.5 py-1', label: 'text-xs', dot: 'w-2 h-2' },
+    sm: { container: 'gap-1 px-1.5 py-0.5', label: 'text-[10px]', icon: 'w-3 h-3' },
+    md: { container: 'gap-1 px-2 py-1', label: 'text-[10px]', icon: 'w-3.5 h-3.5' },
+    lg: { container: 'gap-1.5 px-2.5 py-1', label: 'text-xs', icon: 'w-4 h-4' },
   };
 
   const s = sizes[size];
@@ -99,12 +144,13 @@ export function ReputationBadge({
         border: `1px solid ${rank.color}35`,
         color: rank.color,
       }}
-      title={`${rank.label} · ${points.toLocaleString()} reputation points`}
+      title={`${rank.label} · ${points.toLocaleString()} rays`}
     >
-      {/* Tier indicator: filled dots */}
-      <span
-        className={`${s.dot} rounded-full flex-shrink-0`}
-        style={{ background: rank.color, opacity: 0.85 }}
+      <Icon
+        className={`${s.icon} flex-shrink-0`}
+        strokeWidth={1.75}
+        style={{ color: rank.color }}
+        aria-hidden="true"
       />
       {showLabel && <span className={s.label}>{rank.label}</span>}
       {showPoints && (

@@ -1,201 +1,487 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ShoppingCart, Bot, Zap, TrendingUp, ArrowRight, Check } from 'lucide-react';
-import React from 'react';
+import { motion, useSpring } from 'framer-motion';
+import { ShoppingCart, Bot, Zap, TrendingUp } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import React, { useRef, useCallback } from 'react';
 
-// Visual components
-const MarketplaceVisual = () => (
-  <div className="space-y-3 text-xs">
-    <div className="flex justify-between text-gray-500">
-      <span>Agent Name</span>
-      <span>Status</span>
-    </div>
-    {['GPT-4 Analyzer', 'Voice Bot', 'Data Scraper'].map((name, i) => (
-      <div key={i} className="flex items-center justify-between py-2 border-b border-gray-700">
-        <span className="text-gray-300">{name}</span>
-        <Check className="w-4 h-4 text-green-500" />
-      </div>
-    ))}
-  </div>
-);
+const ShapeGrid = dynamic(() => import('@/components/ui/ShapeGrid'), { ssr: false });
 
-const AgentsVisual = () => (
-  <div className="space-y-2 text-xs">
-    <div className="bg-gray-900 rounded p-3 font-mono text-green-400">
-      <div>{'{'}</div>
-      <div className="ml-2">&quot;agent&quot;: &quot;autonomous&quot;,</div>
-      <div className="ml-2">&quot;status&quot;: &quot;active&quot;</div>
-      <div>{'}'}</div>
-    </div>
-  </div>
-);
-
-const ZeroOpsVisual = () => (
-  <div className="space-y-2">
-    <div className="flex items-end gap-1 h-16">
-      {[40, 60, 45, 75, 55, 80].map((h, i) => (
-        <div
-          key={i}
-          className="flex-1 bg-gradient-to-t from-purple-500 to-purple-400 rounded-t opacity-60"
-          style={{ height: `${h}%` }}
-        />
-      ))}
-    </div>
-    <div className="text-xs text-gray-500 text-center">Auto-scaling</div>
-  </div>
-);
-
-const AnalyticsVisual = () => (
-  <div className="space-y-3 text-xs">
-    <div className="grid grid-cols-2 gap-2">
-      {[
-        { label: 'Requests', value: '12.5K' },
-        { label: 'Avg Time', value: '142ms' },
-        { label: 'Success', value: '99.8%' },
-        { label: 'Cost', value: '$234' },
-      ].map((item, i) => (
-        <div key={i} className="bg-gray-900 rounded p-2">
-          <div className="text-gray-500">{item.label}</div>
-          <div className="text-emerald-400 font-light">{item.value}</div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-interface Feature {
-  title: string;
-  description: string;
-  details: string[];
-  icon: React.ReactNode;
-  color: string;
-  accentColor: string;
-  visual: React.ReactNode;
+/* ─── CSS for animated dashed lines (marching ants) ─── */
+const dashAnimationCSS = `
+@keyframes dashMove {
+  to { stroke-dashoffset: -40; }
 }
+.dash-animate {
+  animation: dashMove 4s linear infinite;
+}
+.dash-animate-slow {
+  animation: dashMove 6s linear infinite;
+}
+`;
 
-const FEATURES_GRID: Feature[] = [
+/* ─────────── Geometric Figure with Parallax ─────────── */
+const GeometricFigure = ({ variant }: { variant: number }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const springConfig = { damping: 20, stiffness: 120 };
+  const dottedX = useSpring(0, springConfig);
+  const dottedY = useSpring(0, springConfig);
+  const greeblesX = useSpring(0, springConfig);
+  const greeblesY = useSpring(0, springConfig);
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const nx = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+      const ny = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+      dottedX.set(nx * 6);
+      dottedY.set(ny * 6);
+      greeblesX.set(nx * 12);
+      greeblesY.set(ny * 12);
+    },
+    [dottedX, dottedY, greeblesX, greeblesY],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    dottedX.set(0);
+    dottedY.set(0);
+    greeblesX.set(0);
+    greeblesY.set(0);
+  }, [dottedX, dottedY, greeblesX, greeblesY]);
+
+  // Bigger shapes (viewBox 0 0 400 400, shapes scaled up)
+  const shapes = [
+    // 0: Diamond
+    <rect
+      key="s0"
+      x="105"
+      y="105"
+      width="190"
+      height="190"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      transform="rotate(45 200 200)"
+      opacity="0.85"
+    />,
+    // 1: Circle
+    <circle
+      key="s1"
+      cx="200"
+      cy="200"
+      r="110"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
+    // 2: Triangle
+    <polygon
+      key="s2"
+      points="200,75 320,310 80,310"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
+    // 3: Hexagon
+    <polygon
+      key="s3"
+      points="200,85 290,140 290,260 200,315 110,260 110,140"
+      fill="none"
+      stroke="#9333ea"
+      strokeWidth="1.5"
+      opacity="0.85"
+    />,
+  ];
+
+  const dashedShapes = [
+    // 0: Dashed square + inner diamond
+    <>
+      <rect
+        key="d0a"
+        x="80"
+        y="80"
+        width="240"
+        height="240"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <rect
+        key="d0b"
+        x="140"
+        y="140"
+        width="120"
+        height="120"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        transform="rotate(45 200 200)"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
+    </>,
+    // 1: Dashed square + inner circle
+    <>
+      <rect
+        key="d1a"
+        x="85"
+        y="85"
+        width="230"
+        height="230"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <circle
+        key="d1b"
+        cx="200"
+        cy="200"
+        r="65"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
+    </>,
+    // 2: Dashed circle + inner triangle
+    <>
+      <circle
+        key="d2a"
+        cx="200"
+        cy="200"
+        r="130"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <polygon
+        key="d2b"
+        points="200,120 275,275 125,275"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
+    </>,
+    // 3: Dashed diamond + inner hexagon
+    <>
+      <rect
+        key="d3a"
+        x="115"
+        y="115"
+        width="170"
+        height="170"
+        fill="none"
+        stroke="#7c3aed"
+        strokeWidth="1.5"
+        strokeDasharray="10 7"
+        transform="rotate(45 200 200)"
+        opacity="0.65"
+        className="dash-animate"
+      />
+      <polygon
+        key="d3b"
+        points="200,125 260,165 260,235 200,275 140,235 140,165"
+        fill="none"
+        stroke="#a855f7"
+        strokeWidth="1.2"
+        strokeDasharray="8 6"
+        opacity="0.5"
+        className="dash-animate-slow"
+      />
+    </>,
+  ];
+
+  const v = variant % 4;
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative w-full flex items-center justify-center"
+      style={{ height: '300px' }}
+    >
+      {/* Hex grid background */}
+      <div className="absolute inset-0 opacity-40">
+        <ShapeGrid
+          shape="hexagon"
+          direction="diagonal"
+          speed={0.3}
+          squareSize={22}
+          borderColor="rgba(147, 51, 234, 0.15)"
+          hoverFillColor="rgba(147, 51, 234, 0.12)"
+          hoverTrailAmount={4}
+        />
+      </div>
+
+      {/* Purple glow center */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: '60%',
+          height: '60%',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background:
+            'radial-gradient(circle, rgba(147,51,234,0.4) 0%, rgba(124,58,237,0.22) 35%, rgba(88,28,135,0.08) 65%, transparent 100%)',
+          filter: 'blur(22px)',
+        }}
+      />
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: '35%',
+          height: '35%',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background:
+            'radial-gradient(circle, rgba(168,85,247,0.45) 0%, rgba(192,132,252,0.18) 50%, transparent 100%)',
+          filter: 'blur(14px)',
+        }}
+      />
+
+      {/* Fade edges */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to right, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(to bottom, #1a1a1a 0%, transparent 12%, transparent 88%, #1a1a1a 100%)',
+        }}
+      />
+
+      {/* Layer 0: Base shape */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg viewBox="0 0 400 400" className="w-full h-full">
+          {shapes[v]}
+        </svg>
+      </div>
+
+      {/* Layer 1: Dashed with marching animation (parallax 1x) */}
+      <motion.div className="absolute inset-0" style={{ x: dottedX, y: dottedY }}>
+        <svg viewBox="0 0 400 400" className="w-full h-full">
+          {dashedShapes[v]}
+        </svg>
+      </motion.div>
+
+      {/* Layer 2: Corner brackets (parallax 2x) */}
+      <motion.div className="absolute inset-0" style={{ x: greeblesX, y: greeblesY }}>
+        <svg viewBox="0 0 400 400" className="w-full h-full">
+          <path
+            d="M 55 100 L 55 55 L 100 55"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 300 55 L 345 55 L 345 100"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 55 300 L 55 345 L 100 345"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+          <path
+            d="M 300 345 L 345 345 L 345 300"
+            fill="none"
+            stroke="#a855f7"
+            strokeWidth="1.2"
+            opacity="0.5"
+          />
+        </svg>
+      </motion.div>
+    </div>
+  );
+};
+
+/* ─────────── Features Data ─────────── */
+const FEATURES = [
   {
     title: 'Intuitive Marketplace',
     description:
       'Discover, publish, and sell AI agents with zero friction. Full visibility into agent performance.',
+    icon: ShoppingCart,
     details: ['Browse agents', 'Publish custom', 'Track revenue', 'Monetize'],
-    icon: <ShoppingCart className="w-12 h-12" />,
-    color: 'rgb(34, 211, 238)',
-    accentColor: 'rgba(34, 211, 238, 0.1)',
-    visual: <MarketplaceVisual />,
   },
   {
     title: 'Full-stack AI Agents',
     description:
       'Deploy autonomous agents with complete control. Real-time execution and monitoring across your infrastructure.',
+    icon: Bot,
     details: ['Custom logic', 'Real-time sync', 'Auto-scaling', 'Analytics'],
-    icon: <Bot className="w-12 h-12" />,
-    color: 'rgb(59, 130, 246)',
-    accentColor: 'rgba(59, 130, 246, 0.1)',
-    visual: <AgentsVisual />,
   },
   {
     title: 'Zero Ops Deployment',
     description:
       'Deploy without operational overhead. Automatic scaling, monitoring, and maintenance included.',
+    icon: Zap,
     details: ['Auto-scaling', 'Zero config', 'Built-in monitoring', 'Self-healing'],
-    icon: <Zap className="w-12 h-12" />,
-    color: 'rgb(168, 85, 247)',
-    accentColor: 'rgba(168, 85, 247, 0.1)',
-    visual: <ZeroOpsVisual />,
   },
   {
     title: 'Real-time Analytics',
     description:
       'Monitor agent performance with detailed metrics. Track usage, costs, and ROI in real-time dashboards.',
+    icon: TrendingUp,
     details: ['Live metrics', 'Cost tracking', 'Performance data', 'Insights'],
-    icon: <TrendingUp className="w-12 h-12" />,
-    color: 'rgb(16, 185, 129)',
-    accentColor: 'rgba(16, 185, 129, 0.1)',
-    visual: <AnalyticsVisual />,
   },
 ];
 
+/* ─────────── Main Component ─────────── */
 export const FeaturesGrid = () => {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {FEATURES_GRID.map((feature, idx) => (
-        <motion.div
-          key={idx}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: idx * 0.1 }}
-          className="relative group"
-          style={{
-            border: `1px solid ${feature.color}22`,
-            background: 'rgba(0, 0, 0, 0.4)',
-          }}
-        >
-          {/* Corner Brackets */}
-          <div
-            className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 pointer-events-none"
-            style={{ borderColor: feature.color }}
-          />
-          <div
-            className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 pointer-events-none"
-            style={{ borderColor: feature.color }}
-          />
-          <div
-            className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 pointer-events-none"
-            style={{ borderColor: feature.color }}
-          />
-          <div
-            className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 pointer-events-none"
-            style={{ borderColor: feature.color }}
-          />
+    <section
+      className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
+      style={{ background: '#0d0d0d' }}
+    >
+      {/* Inject dash animation keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: dashAnimationCSS }} />
 
-          {/* Content */}
-          <div className="p-8">
-            {/* Icon */}
-            <div className="mb-6" style={{ color: feature.color }}>
-              {feature.icon}
-            </div>
+      {/* Heading */}
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-white"
+        style={{
+          fontSize: '64px',
+          fontWeight: 300,
+          lineHeight: 1.05,
+          letterSpacing: '-1.28px',
+        }}
+      >
+        Powerful features built for builders
+      </motion.h2>
 
-            {/* Title */}
-            <h3 className="text-xl font-light mb-3 text-white">{feature.title}</h3>
+      <p
+        className="text-white/60"
+        style={{
+          fontSize: '20px',
+          lineHeight: '1.5',
+          maxWidth: '520px',
+          marginTop: '16px',
+        }}
+      >
+        Everything you need to deploy, manage, and monetize AI agents at scale.
+      </p>
 
-            {/* Description */}
-            <p className="text-sm text-gray-400 mb-8 leading-relaxed">{feature.description}</p>
-
-            {/* Visual */}
-            <div
-              className="mb-8 p-4 rounded bg-gray-950/50"
-              style={{ borderLeft: `2px solid ${feature.color}` }}
+      {/* Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ paddingTop: '60px' }}>
+        {FEATURES.map((feature, idx) => {
+          const Icon = feature.icon;
+          return (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: idx * 0.1 }}
+              className="group flex flex-col rounded-lg border overflow-hidden cursor-pointer"
+              style={{
+                borderColor: '#272727',
+                background: '#1a1a1a',
+              }}
+              whileHover={{
+                borderColor: 'rgba(147, 51, 234, 0.7)',
+                boxShadow:
+                  '0 0 60px rgba(147, 51, 234, 0.3), 0 0 120px rgba(147, 51, 234, 0.12), inset 0 1px 40px rgba(147, 51, 234, 0.06)',
+                scale: 1.04,
+                y: -8,
+              }}
             >
-              {feature.visual}
-            </div>
+              {/* Geometric figure */}
+              <div
+                className="relative overflow-hidden transition-all duration-500 group-hover:brightness-150"
+                style={{ background: '#141414' }}
+              >
+                <GeometricFigure variant={idx} />
+              </div>
 
-            {/* Details List */}
-            <div className="space-y-2 mb-8">
-              {feature.details.map((detail, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
+              {/* Divider line */}
+              <div className="h-px bg-[#272727] group-hover:bg-purple-600/40 transition-colors duration-500" />
+
+              {/* Content */}
+              <div className="flex flex-col gap-4 p-6">
+                {/* Icon + Title */}
+                <div className="flex items-center gap-3">
                   <div
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ backgroundColor: feature.color }}
-                  />
-                  {detail}
+                    className="flex items-center justify-center w-8 h-8 rounded-full transition-all duration-500 group-hover:shadow-[0_0_28px_rgba(147,51,234,0.6)] group-hover:scale-125"
+                    style={{ background: '#9333ea' }}
+                  >
+                    <Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <h3
+                    className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
+                    style={{
+                      fontSize: '22px',
+                      lineHeight: 1.2,
+                      letterSpacing: '-0.5px',
+                    }}
+                  >
+                    {feature.title}
+                  </h3>
                 </div>
-              ))}
-            </div>
 
-            {/* Learn More Link */}
-            <a
-              href="#"
-              className="inline-flex items-center gap-2 text-xs font-light tracking-wide group/link"
-              style={{ color: feature.color }}
-            >
-              Learn more
-              <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
-            </a>
-          </div>
-        </motion.div>
-      ))}
-    </div>
+                {/* Description */}
+                <p
+                  style={{
+                    fontSize: '15px',
+                    lineHeight: 1.5,
+                    color: '#a0a0a0',
+                  }}
+                >
+                  {feature.description}
+                </p>
+
+                {/* Details */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-2">
+                  {feature.details.map((detail, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-1.5 text-xs text-white/35 group-hover:text-white/50 transition-colors duration-300"
+                    >
+                      <div className="w-1 h-1 rounded-full bg-purple-600/60 group-hover:bg-purple-400/80 transition-colors duration-300" />
+                      {detail}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
   );
 };

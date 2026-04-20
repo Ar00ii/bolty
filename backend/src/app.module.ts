@@ -16,7 +16,9 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DmModule } from './modules/dm/dm.module';
+import { EscrowModule } from './modules/escrow/escrow.module';
 import { MarketModule } from './modules/market/market.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { RaysModule } from './modules/rays/rays.module';
 import { ReposModule } from './modules/repos/repos.module';
@@ -64,21 +66,26 @@ import { UsersModule } from './modules/users/users.module';
     ChartModule,
     UsersModule,
     DmModule,
+    EscrowModule,
     MarketModule,
+    NotificationsModule,
     OrdersModule,
     ReputationModule,
     ServicesModule,
   ],
   providers: [
+    // Global CSRF protection guard (double-submit cookie pattern).
+    // Registered BEFORE JwtAuthGuard so that unauthenticated GETs still
+    // emit a fresh CSRF cookie — otherwise the first login POST has no
+    // cookie to read and the guard rejects it with 403.
+    {
+      provide: APP_GUARD,
+      useClass: CsrfGuard,
+    },
     // Global JWT authentication guard (default: all routes require auth, use @Public() to exempt)
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
-    },
-    // Global CSRF protection guard (double-submit cookie pattern)
-    {
-      provide: APP_GUARD,
-      useClass: CsrfGuard,
     },
     // Global rate limiting guard
     {

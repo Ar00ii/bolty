@@ -44,9 +44,41 @@ export class ApiKeysService {
         label: true,
         createdAt: true,
         lastUsedAt: true,
+        keyLastFour: true,
       },
     });
-    return keys;
+    return keys.map((k) => ({
+      id: k.id,
+      label: k.label,
+      createdAt: k.createdAt,
+      lastUsedAt: k.lastUsedAt,
+      lastFour: k.keyLastFour,
+    }));
+  }
+
+  /**
+   * Rename an API key label
+   */
+  async renameApiKey(userId: string, keyId: string, label: string | null) {
+    const existing = await this.prisma.userApiKey.findUnique({ where: { id: keyId } });
+    if (!existing || existing.userId !== userId) {
+      throw new BadRequestException('API key not found or does not belong to you');
+    }
+    const trimmed = label?.trim() || null;
+    if (trimmed && trimmed.length > 64) {
+      throw new BadRequestException('Label must be 64 characters or fewer');
+    }
+    const updated = await this.prisma.userApiKey.update({
+      where: { id: keyId },
+      data: { label: trimmed },
+    });
+    return {
+      id: updated.id,
+      label: updated.label,
+      createdAt: updated.createdAt,
+      lastUsedAt: updated.lastUsedAt,
+      lastFour: updated.keyLastFour,
+    };
   }
 
   /**
@@ -60,6 +92,8 @@ export class ApiKeysService {
       data: {
         userId,
         keyHash,
+        keyPrefix: plainKey.slice(0, 12),
+        keyLastFour: plainKey.slice(-4),
         label: label || null,
       },
     });
@@ -70,6 +104,7 @@ export class ApiKeysService {
       label: apiKey.label,
       createdAt: apiKey.createdAt,
       lastUsedAt: apiKey.lastUsedAt,
+      lastFour: apiKey.keyLastFour,
     };
   }
 
@@ -164,30 +199,33 @@ export class ApiKeysService {
   }
 
   /**
-   * Verify an API key and update last used timestamp
+   * Verify an API key and update last used timestamp.
+   *
+   * Filter by keyPrefix first so we only bcrypt-compare the (typically 0-1)
+   * candidates whose prefix matches instead of every row in the table. Legacy
+   * keys created before the migration have a null keyPrefix — for those we
+   * still need to scan, but that set shrinks to zero as old keys are rotated.
    */
   async verifyApiKey(plainKey: string): Promise<{ userId: string; keyId: string } | null> {
-    // Get all keys and check them
-    const allKeys = await this.prisma.userApiKey.findMany({
-      select: {
-        id: true,
-        keyHash: true,
-        userId: true,
-      },
+    const prefix = plainKey.slice(0, 12);
+    const candidates = await this.prisma.userApiKey.findMany({
+      where: { OR: [{ keyPrefix: prefix }, { keyPrefix: null }] },
+      select: { id: true, keyHash: true, userId: true, keyPrefix: true },
     });
 
-    for (const keyRecord of allKeys) {
+    for (const keyRecord of candidates) {
       const isValid = await bcrypt.compare(plainKey, keyRecord.keyHash);
       if (isValid) {
-        // Update last used timestamp
+        // Backfill the prefix on legacy rows so subsequent verifies hit the
+        // fast path; also update lastUsedAt.
         await this.prisma.userApiKey.update({
           where: { id: keyRecord.id },
-          data: { lastUsedAt: new Date() },
+          data: {
+            lastUsedAt: new Date(),
+            ...(keyRecord.keyPrefix == null ? { keyPrefix: prefix } : {}),
+          },
         });
-        return {
-          userId: keyRecord.userId,
-          keyId: keyRecord.id,
-        };
+        return { userId: keyRecord.userId, keyId: keyRecord.id };
       }
     }
 

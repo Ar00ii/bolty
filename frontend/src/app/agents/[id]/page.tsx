@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useState, useEffect, useCallback } from 'react';
@@ -48,14 +49,14 @@ const POST_TYPE_CONFIG = {
   PRICE_UPDATE: { label: 'Price', color: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5' },
   ANNOUNCEMENT: {
     label: 'Announcement',
-    color: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+    color: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
   },
   DEAL: { label: 'Deal', color: 'text-green-400 border-green-400/30 bg-green-400/5' },
 };
 
 const TYPE_COLORS: Record<string, string> = {
   AI_AGENT: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
-  BOT: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+  BOT: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
   SCRIPT: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5',
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
@@ -83,22 +84,33 @@ function PostCard({ post }: { post: AgentPost }) {
   const cfg = POST_TYPE_CONFIG[post.postType] || POST_TYPE_CONFIG.GENERAL;
   return (
     <div
-      className="rounded-xl p-4"
-      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)' }}
+      className="relative rounded-xl p-4 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.3) 50%, transparent 100%)',
+        }}
+      />
       <div className="flex items-center justify-between mb-2 gap-2">
-        <span className={`text-xs font-mono px-2 py-0.5 rounded border ${cfg.color}`}>
+        <span
+          className={`text-[10.5px] font-mono uppercase tracking-[0.14em] font-medium px-2 py-0.5 rounded-md border ${cfg.color}`}
+        >
           {cfg.label}
         </span>
-        <span className="text-xs font-mono" style={{ color: 'var(--text-muted)' }}>
+        <span className="text-[10.5px] font-mono" style={{ color: 'rgba(161,161,170,0.5)' }}>
           {timeAgo(post.createdAt)}
         </span>
       </div>
-      <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text)' }}>
-        {post.content}
-      </p>
+      <p className="text-sm leading-relaxed whitespace-pre-wrap text-zinc-200">{post.content}</p>
       {post.postType === 'PRICE_UPDATE' && post.price != null && (
-        <div className="mt-2 pt-2 border-t border-yellow-400/20">
+        <div className="mt-3 pt-2.5" style={{ borderTop: '1px solid rgba(250,204,21,0.18)' }}>
           <span className="text-yellow-400 font-mono font-light text-sm">
             {post.price} {post.currency || ''}
           </span>
@@ -215,7 +227,7 @@ export default function AgentDetailPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
       </div>
     );
 
@@ -224,7 +236,7 @@ export default function AgentDetailPage() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-3">
         <div className="text-4xl font-mono text-zinc-700">404</div>
         <div className="text-zinc-400 text-sm">Agent not found</div>
-        <Link href="/market" className="text-monad-400 text-sm hover:underline">
+        <Link href="/market" className="text-bolty-400 text-sm hover:underline">
           ← Back to Agents
         </Link>
       </div>
@@ -234,13 +246,33 @@ export default function AgentDetailPage() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       {/* ── Agent header ── */}
       <div
-        className="rounded-2xl p-6 mb-6"
-        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        className="relative rounded-2xl p-6 mb-6 overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+        }}
       >
-        <div className="flex items-start justify-between flex-wrap gap-4">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-start justify-between flex-wrap gap-4 relative">
           <div className="flex items-start gap-4">
             {/* Agent avatar */}
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-3xl flex-shrink-0">
+            <div
+              className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(16,185,129,0.35), 0 0 24px -6px rgba(16,185,129,0.5)',
+              }}
+            >
               🤖
             </div>
             <div>
@@ -275,7 +307,7 @@ export default function AgentDetailPage() {
               {agent.price === 0 ? (
                 <span className="text-green-400">Free</span>
               ) : (
-                <span className="text-monad-400">
+                <span className="text-bolty-400">
                   {agent.price} {agent.currency}
                 </span>
               )}
@@ -309,21 +341,42 @@ export default function AgentDetailPage() {
       {/* ── Tabs ── */}
       <div
         className="flex gap-1 mb-6 rounded-xl p-1"
-        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
       >
-        {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab as typeof activeTab)}
-            className={`flex-1 py-2 text-sm font-light rounded-lg transition-all capitalize ${
-              activeTab === tab
-                ? 'bg-monad-500/15 text-monad-400 border border-monad-400/20'
-                : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
-          </button>
-        ))}
+        {(['feed', 'about', ...(isOwner ? ['keys'] : [])] as const).map((tab) => {
+          const active = activeTab === tab;
+          return (
+            <motion.button
+              key={tab}
+              onClick={() => setActiveTab(tab as typeof activeTab)}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+              className={`relative flex-1 py-2 text-[13px] font-light rounded-lg transition-colors capitalize ${
+                active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="agent-detail-tab-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-lg"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  }}
+                />
+              )}
+              <span className="relative z-10">
+                {tab === 'feed' ? `Feed (${posts.length})` : tab === 'keys' ? 'API Keys' : 'About'}
+              </span>
+            </motion.button>
+          );
+        })}
       </div>
 
       {/* ── Feed tab ── */}
@@ -333,11 +386,12 @@ export default function AgentDetailPage() {
             <>
               <button
                 onClick={() => setShowPost(!showPost)}
-                className="w-full py-3 rounded-xl text-sm font-light transition-all"
+                className="w-full py-3 rounded-xl text-[13px] font-light transition-all"
                 style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text-muted)',
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                  color: '#b4a7ff',
                 }}
               >
                 + Post an update as this agent
@@ -345,9 +399,22 @@ export default function AgentDetailPage() {
 
               {showPost && (
                 <div
-                  className="rounded-xl p-4 space-y-3"
-                  style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
+                  className="relative rounded-xl p-4 space-y-3 overflow-hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                  }}
                 >
+                  <span
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                    style={{
+                      background:
+                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    }}
+                  />
                   <div className="flex gap-2 flex-wrap">
                     {(Object.keys(POST_TYPE_CONFIG) as AgentPost['postType'][]).map((t) => (
                       <button
@@ -369,11 +436,12 @@ export default function AgentDetailPage() {
                     rows={3}
                     maxLength={2000}
                     placeholder="What does your agent want to say?"
-                    className="w-full px-4 py-2.5 rounded-xl text-sm resize-none outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl text-[13px] resize-none outline-none text-zinc-100 placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
                     style={{
-                      background: 'var(--bg-elevated)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--text)',
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
                     }}
                   />
                   {postType === 'PRICE_UPDATE' && (
@@ -442,7 +510,20 @@ export default function AgentDetailPage() {
               )}
             </div>
           ) : (
-            posts.map((post) => <PostCard key={post.id} post={post} />)
+            posts.map((post, idx) => (
+              <motion.div
+                key={post.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(idx * 0.035, 0.3),
+                  duration: 0.3,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+              >
+                <PostCard post={post} />
+              </motion.div>
+            ))
           )}
         </div>
       )}
@@ -475,7 +556,7 @@ export default function AgentDetailPage() {
                 href={agent.agentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-monad-400 hover:underline break-all"
+                className="text-sm text-bolty-400 hover:underline break-all"
               >
                 {agent.agentUrl}
               </a>
@@ -540,11 +621,11 @@ export default function AgentDetailPage() {
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               Your agent or script can post updates automatically using an API key. Call{' '}
-              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
                 POST {API_URL}/market/{agent.id}/posts
               </code>{' '}
               with header{' '}
-              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
                 X-Agent-Key: bak_...
               </code>
             </p>

@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import React from 'react';
 
 interface LoadingSpinnerProps {
@@ -15,9 +16,9 @@ const sizeClasses = {
 };
 
 const colorClasses = {
-  purple: 'text-purple-500',
+  purple: 'text-[#b4a7ff]',
   white: 'text-white',
-  gray: 'text-gray-500',
+  gray: 'text-zinc-400',
 };
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
@@ -26,28 +27,46 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   fullPage = false,
 }) => {
   const spinner = (
-    <svg
-      className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]}`}
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    <div className={`relative ${sizeClasses[size]}`}>
+      <div
+        className={`absolute inset-0 rounded-full border-2 border-white/5 ${colorClasses[color]}`}
       />
-    </svg>
+      <div
+        className={`absolute inset-0 rounded-full border-2 border-transparent animate-spin ${colorClasses[color]}`}
+        style={{
+          borderTopColor: 'currentColor',
+          borderRightColor: 'currentColor',
+          filter: color === 'purple' ? 'drop-shadow(0 0 6px rgba(131,110,249,0.55))' : undefined,
+        }}
+      />
+    </div>
   );
 
   if (fullPage) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-        <div className="flex flex-col items-center gap-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-50"
+      >
+        <motion.div
+          initial={{ y: 6, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.05, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+          className="flex flex-col items-center gap-4"
+        >
           {spinner}
-          <p className="text-gray-300 text-sm">Loading...</p>
-        </div>
-      </div>
+          <motion.p
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-[13px] text-zinc-400 tracking-[0.005em]"
+          >
+            Loading
+          </motion.p>
+        </motion.div>
+      </motion.div>
     );
   }
 

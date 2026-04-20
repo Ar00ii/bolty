@@ -6,6 +6,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Body,
   Param,
@@ -21,6 +22,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
 
@@ -122,6 +124,16 @@ export class MarketController {
     return this.apiKeysService.createApiKey(userId, body.label || null);
   }
 
+  @Patch('api-keys/:id')
+  renameApiKey(
+    @Param('id') keyId: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { label?: string | null },
+  ) {
+    return this.apiKeysService.renameApiKey(userId, keyId, body.label ?? null);
+  }
+
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post('api-keys/:id/request-delete-verification')
   requestDeleteVerification(
     @Param('id') keyId: string,
@@ -131,6 +143,9 @@ export class MarketController {
     return this.apiKeysService.requestDeleteVerification(userId, keyId, userEmail);
   }
 
+  // Brute-forcing a 6-digit code is only 10^6 guesses — throttle aggressively
+  // so an attacker with a hijacked session can't exhaust the keyspace.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Delete('api-keys/:id')
   @HttpCode(HttpStatus.OK)
   async deleteApiKey(
@@ -149,8 +164,57 @@ export class MarketController {
     @Query('type') type?: string,
     @Query('search') search?: string,
     @Query('page') page?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('tags') tags?: string,
+    @Query('hasDemo') hasDemo?: string,
   ) {
-    return this.marketService.getListings({ type, search, page: page ? Number(page) : 1 });
+    const allowed = ['recent', 'trending', 'price-low', 'price-high'] as const;
+    const normalizedSort = allowed.includes(sortBy as (typeof allowed)[number])
+      ? (sortBy as (typeof allowed)[number])
+      : 'recent';
+    const parsedMin = minPrice && !Number.isNaN(Number(minPrice)) ? Number(minPrice) : undefined;
+    const parsedMax = maxPrice && !Number.isNaN(Number(maxPrice)) ? Number(maxPrice) : undefined;
+    const parsedTags = tags
+      ? tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+          .slice(0, 10)
+      : undefined;
+    return this.marketService.getListings({
+      type,
+      search,
+      page: page ? Number(page) : 1,
+      sortBy: normalizedSort,
+      minPrice: parsedMin,
+      maxPrice: parsedMax,
+      tags: parsedTags,
+      hasDemo: hasDemo === '1' || hasDemo === 'true',
+    });
+  }
+
+  @Public()
+  @Get('facets')
+  getFacets() {
+    return this.marketService.getListingFacets();
+  }
+
+  @Public()
+  @Get('pulse')
+  getPulse(@Query('limit') limit?: string) {
+    const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 15;
+    const bounded = Math.min(50, Math.max(1, parsed));
+    return this.marketService.getMarketPulse(bounded);
+  }
+
+  @Public()
+  @Get('top-sellers')
+  getTopSellers(@Query('limit') limit?: string) {
+    const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 12;
+    const bounded = Math.min(48, Math.max(1, parsed));
+    return this.marketService.getTopSellers(bounded);
   }
 
   // Must be defined before :id to avoid route clash
@@ -199,10 +263,64 @@ export class MarketController {
     return this.negotiationService.getNegotiation(id, userId);
   }
 
+  @Get('seller/analytics')
+  getSellerAnalytics(@CurrentUser('id') userId: string) {
+    return this.marketService.getSellerAnalytics(userId);
+  }
+
+  @Get('library')
+  getMyLibrary(@CurrentUser('id') userId: string) {
+    return this.marketService.getMyLibrary(userId);
+  }
+
+  @Public()
+  @Get('sellers/:username')
+  getSellerProfile(@Param('username') username: string) {
+    return this.marketService.getSellerProfile(username);
+  }
+
   @Public()
   @Get(':id')
   getListing(@Param('id') id: string) {
     return this.marketService.getListing(id);
+  }
+
+  @Public()
+  @Get(':id/related')
+  getRelated(@Param('id') id: string) {
+    return this.marketService.getRelatedListings(id);
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post(':id/invoke')
+  @HttpCode(HttpStatus.OK)
+  invokeAgent(@Param('id') id: string, @Body() body: { prompt: string }) {
+    return this.marketService.invokeAgent(id, body?.prompt || '');
+  }
+
+  // ── Reviews ────────────────────────────────────────────────────────────────
+
+  @Public()
+  @Get(':id/reviews')
+  getReviews(@Param('id') id: string) {
+    return this.marketService.getReviews(id);
+  }
+
+  @Post(':id/reviews')
+  @HttpCode(HttpStatus.CREATED)
+  createReview(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { rating: number; content?: string | null },
+  ) {
+    return this.marketService.createReview(id, userId, body?.rating, body?.content);
+  }
+
+  @Delete('reviews/:reviewId')
+  @HttpCode(HttpStatus.OK)
+  deleteReview(@Param('reviewId') reviewId: string, @CurrentUser('id') userId: string) {
+    return this.marketService.deleteReview(reviewId, userId);
   }
 
   // ── Create / delete listings ───────────────────────────────────────────────

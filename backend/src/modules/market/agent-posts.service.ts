@@ -104,12 +104,17 @@ export class AgentPostsService {
     const rawKey = `bak_${crypto.randomBytes(32).toString('hex')}`;
     const keyHash = await bcrypt.hash(rawKey, 10);
 
-    await this.prisma.agentApiKey.create({
-      data: { listingId, keyHash, label: label ?? null },
+    const created = await this.prisma.agentApiKey.create({
+      data: {
+        listingId,
+        keyHash,
+        keyLastFour: rawKey.slice(-4),
+        label: label ?? null,
+      },
     });
 
     // Return the raw key ONCE — it cannot be recovered later
-    return { key: rawKey, label: label ?? null };
+    return { id: created.id, key: rawKey, label: created.label, lastFour: created.keyLastFour };
   }
 
   async listApiKeys(listingId: string, ownerId: string) {
@@ -120,10 +125,18 @@ export class AgentPostsService {
     if (!listing) throw new NotFoundException('Agent not found');
     if (listing.sellerId !== ownerId) throw new ForbiddenException('Not your agent');
 
-    return this.prisma.agentApiKey.findMany({
+    const keys = await this.prisma.agentApiKey.findMany({
       where: { listingId },
-      select: { id: true, label: true, createdAt: true, lastUsedAt: true },
+      select: { id: true, label: true, createdAt: true, lastUsedAt: true, keyLastFour: true },
+      orderBy: { createdAt: 'desc' },
     });
+    return keys.map((k) => ({
+      id: k.id,
+      label: k.label,
+      createdAt: k.createdAt,
+      lastUsedAt: k.lastUsedAt,
+      lastFour: k.keyLastFour,
+    }));
   }
 
   async revokeApiKey(keyId: string, ownerId: string) {

@@ -1,7 +1,10 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import { useActiveSection } from '@/lib/hooks/useActiveSection';
 
 // ── Code block with copy ────────────────────────────────────────────────────
 
@@ -14,17 +17,50 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
   };
   return (
     <div
-      className="relative group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_24px_rgba(0,0,0,0.3)]"
-      style={{ border: '1px solid var(--border)', background: 'var(--bg)' }}
+      className="relative group rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
+        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
       <div
-        className="flex items-center justify-between px-4 py-2.5 border-b"
-        style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}
+        className="flex items-center justify-between px-4 py-2"
+        style={{
+          borderBottom: '1px solid rgba(131,110,249,0.1)',
+          background: 'rgba(131,110,249,0.04)',
+        }}
       >
-        <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{lang}</span>
+        <span
+          className="text-[10px] font-mono uppercase tracking-[0.18em] font-medium"
+          style={{ color: 'rgba(180,167,255,0.55)' }}
+        >
+          {lang}
+        </span>
         <button
           onClick={copy}
-          className="text-xs font-mono px-2.5 py-1 rounded-md transition-all duration-200 text-zinc-500 hover:text-white hover:bg-monad-500/10 border border-transparent hover:border-monad-500/20"
+          className="text-[10.5px] font-mono transition-all px-2 py-0.5 rounded-md"
+          style={
+            copied
+              ? {
+                  color: '#b4a7ff',
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                }
+              : {
+                  color: 'rgba(161,161,170,0.6)',
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }
+          }
         >
           {copied ? '✓ copied' : 'copy'}
         </button>
@@ -47,11 +83,32 @@ function Section({
   title: string;
   children: React.ReactNode;
 }) {
+  const [copied, setCopied] = useState(false);
+  const copyLink = () => {
+    if (typeof window === 'undefined') return;
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        window.history.replaceState(null, '', `#${id}`);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  };
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <div className="section-divider pt-6">
-        <h2 className="text-lg font-light text-white tracking-tight flex items-center gap-2">
-          <span className="text-monad-400 text-sm">#</span> {title}
+        <h2 className="group text-lg font-light text-white tracking-tight flex items-center gap-2">
+          <button
+            onClick={copyLink}
+            aria-label={`Copy link to ${title}`}
+            className="text-bolty-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
+            title={copied ? 'Link copied' : 'Copy link to section'}
+          >
+            {copied ? '✓' : '#'}
+          </button>
+          {title}
         </h2>
       </div>
       {children}
@@ -65,7 +122,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function Mono({ children }: { children: React.ReactNode }) {
   return (
-    <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">
+    <code className="font-mono text-bolty-300 bg-bolty-500/10 rounded px-1.5 py-0.5 text-xs">
       {children}
     </code>
   );
@@ -84,6 +141,8 @@ const NAV = [
 ];
 
 export default function AgentProtocolPage() {
+  const ids = useMemo(() => NAV.map((n) => n.id), []);
+  const active = useActiveSection(ids);
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Header */}
@@ -112,15 +171,39 @@ export default function AgentProtocolPage() {
               On this page
             </div>
             <div className="space-y-0.5">
-              {NAV.map(({ id, label }) => (
-                <a
-                  key={id}
-                  href={`#${id}`}
-                  className="block text-[13px] text-zinc-500 hover:text-monad-400 py-1.5 px-2 -mx-2 rounded-md hover:bg-monad-500/5 transition-all duration-200"
-                >
-                  {label}
-                </a>
-              ))}
+              {NAV.map(({ id, label }, idx) => {
+                const isActive = active === id;
+                return (
+                  <motion.a
+                    key={id}
+                    href={`#${id}`}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      delay: Math.min(idx * 0.025, 0.2),
+                      duration: 0.24,
+                      ease: [0.22, 0.61, 0.36, 1],
+                    }}
+                    aria-current={isActive ? 'location' : undefined}
+                    className={`relative block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-colors ${
+                      isActive ? 'text-bolty-300' : 'text-zinc-500 hover:text-bolty-400'
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="docs-agent-protocol-toc-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="absolute inset-0 rounded-md"
+                        style={{
+                          background: 'rgba(131,110,249,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10">{label}</span>
+                  </motion.a>
+                );
+              })}
             </div>
           </div>
         </aside>
@@ -228,7 +311,7 @@ export default function AgentProtocolPage() {
                   className="card p-4 space-y-1.5"
                   style={{ borderColor: 'rgba(131,110,249,0.12)' }}
                 >
-                  <div className="text-xs font-mono font-light text-monad-300">{label}</div>
+                  <div className="text-xs font-mono font-light text-bolty-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -280,7 +363,7 @@ export default function AgentProtocolPage() {
                 ['messages', 'Full conversation history ordered oldest → newest'],
               ].map(([field, desc]) => (
                 <div key={field} className="flex gap-3 text-xs">
-                  <span className="font-mono text-monad-300 w-36 flex-shrink-0">{field}</span>
+                  <span className="font-mono text-bolty-300 w-36 flex-shrink-0">{field}</span>
                   <span className="text-zinc-500">{desc}</span>
                 </div>
               ))}
@@ -390,7 +473,7 @@ export default function AgentProtocolPage() {
                 },
               ].map(({ event, when, notes }) => (
                 <div key={event} className="card flex gap-4 px-4 py-3">
-                  <code className="font-mono text-monad-300 text-xs w-48 flex-shrink-0 pt-0.5">
+                  <code className="font-mono text-bolty-300 text-xs w-48 flex-shrink-0 pt-0.5">
                     {event}
                   </code>
                   <div>
@@ -418,7 +501,7 @@ export default function AgentProtocolPage() {
                 'Rate limit: one call per turn, max 15 turns per negotiation',
               ].map((rule) => (
                 <div key={rule} className="flex items-start gap-2 text-xs text-zinc-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0 mt-1.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-bolty-500 flex-shrink-0 mt-1.5" />
                   {rule}
                 </div>
               ))}
@@ -588,7 +671,7 @@ app.listen(3000);`}
               background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)',
             }}
           >
-            <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-light text-bolty-400 uppercase tracking-wider mb-3">
               Ready to connect?
             </p>
             <h3 className="text-xl font-light text-white mb-3">

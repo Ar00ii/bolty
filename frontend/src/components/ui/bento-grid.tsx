@@ -39,7 +39,7 @@ export function BentoCard({
       className={cn(
         'group relative overflow-hidden rounded-2xl p-5 flex flex-col justify-between',
         'border border-white/[0.07] bg-[rgba(12,12,20,0.9)]',
-        'hover:border-monad-500/25 transition-colors duration-300',
+        'hover:border-bolty-500/25 transition-colors duration-300',
         className,
       )}
     >
@@ -55,14 +55,14 @@ export function BentoCard({
             border: '1px solid rgba(131,110,249,0.18)',
           }}
         >
-          <Icon className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+          <Icon className="w-3.5 h-3.5 text-bolty-400" strokeWidth={1.5} />
         </div>
         <div className="text-[13px] font-light text-zinc-200 mb-0.5 leading-tight">{name}</div>
         <div className="text-[11px] text-zinc-500 leading-relaxed">{description}</div>
         {href && cta && (
           <a
             href={href}
-            className="inline-flex items-center gap-1 mt-2 text-[11px] font-light text-monad-400 hover:text-monad-300 transition-colors opacity-0 group-hover:opacity-100"
+            className="inline-flex items-center gap-1 mt-2 text-[11px] font-light text-bolty-400 hover:text-bolty-300 transition-colors opacity-0 group-hover:opacity-100"
           >
             {cta}
             <ArrowRight className="w-3 h-3" />

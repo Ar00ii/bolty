@@ -1,6 +1,7 @@
 'use client';
 
-import { Activity } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Activity, CheckCircle2, XCircle, Clock, AlertTriangle, Circle } from 'lucide-react';
 import React from 'react';
 
 import type { AgentActivityLogEntry } from '@/hooks/useAgentManagement';
@@ -10,35 +11,22 @@ interface AgentActivityLogProps {
   loading?: boolean;
 }
 
-export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, loading }) => {
-  const getStatusColor = (status: AgentActivityLogEntry['status']) => {
-    switch (status) {
-      case 'SUCCESS':
-        return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-      case 'FAILED':
-        return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'PENDING':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-      case 'TIMEOUT':
-        return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-    }
-  };
+const statusMeta = {
+  SUCCESS: { color: '34,197,94', textColor: '#86efac', icon: CheckCircle2 },
+  FAILED: { color: '239,68,68', textColor: '#fda4af', icon: XCircle },
+  PENDING: { color: '245,158,11', textColor: '#fcd34d', icon: Clock },
+  TIMEOUT: { color: '249,115,22', textColor: '#fdba74', icon: AlertTriangle },
+} as const;
 
-  const getStatusIcon = (status: AgentActivityLogEntry['status']) => {
-    switch (status) {
-      case 'SUCCESS':
-        return '✓';
-      case 'FAILED':
-        return '✕';
-      case 'PENDING':
-        return '⧖';
-      case 'TIMEOUT':
-        return '⏱';
-      default:
-        return '◯';
-    }
+export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, loading }) => {
+  const getMeta = (status: AgentActivityLogEntry['status']) => {
+    return (
+      statusMeta[status as keyof typeof statusMeta] || {
+        color: '161,161,170',
+        textColor: '#d4d4d8',
+        icon: Circle,
+      }
+    );
   };
 
   const formatTime = (date: string) => {
@@ -58,9 +46,14 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="p-4 rounded-lg bg-gray-800/50 border border-gray-700 animate-pulse"
+            className="p-4 rounded-xl animate-pulse"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+            }}
           >
-            <div className="h-4 bg-gray-700 rounded w-3/4" />
+            <div className="h-4 bg-white/[0.06] rounded w-3/4" />
           </div>
         ))}
       </div>
@@ -69,59 +62,116 @@ export const AgentActivityLog: React.FC<AgentActivityLogProps> = ({ activities, 
 
   if (activities.length === 0) {
     return (
-      <div className="p-6 rounded-lg bg-gray-800/20 border border-gray-700 text-center">
-        <Activity className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-        <p className="text-sm text-gray-400">No activity yet</p>
+      <div
+        className="relative p-12 rounded-xl text-center overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+          }}
+        />
+        <div
+          className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            boxShadow:
+              'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+          }}
+        >
+          <Activity className="w-5 h-5 text-[#b4a7ff]" />
+        </div>
+        <p className="text-[13px] text-zinc-400 tracking-[0.005em]">No activity yet</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-3">
-      {activities.map((activity) => (
-        <div
-          key={activity.id}
-          className="p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-gray-600 transition-colors"
-        >
-          <div className="flex items-start gap-3">
-            {/* Status Badge */}
+      {activities.map((activity, idx) => {
+        const meta = getMeta(activity.status);
+        const Icon = meta.icon;
+        return (
+          <motion.div
+            key={activity.id}
+            initial={{ opacity: 0, x: -6 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{
+              delay: Math.min(idx * 0.035, 0.25),
+              duration: 0.26,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            whileHover={{ y: -2 }}
+            className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
             <div
-              className={`px-2 py-1 rounded border text-xs font-light flex-shrink-0 mt-0.5 ${getStatusColor(activity.status)}`}
-            >
-              {getStatusIcon(activity.status)}
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-sm font-light text-white">{activity.action}</p>
-                <span className="text-xs text-gray-500 flex-shrink-0">
-                  {formatTime(activity.createdAt)}
-                </span>
+              className="absolute inset-x-0 top-0 h-px"
+              style={{
+                background: `linear-gradient(90deg, transparent 0%, rgba(${meta.color},0.4) 50%, transparent 100%)`,
+              }}
+            />
+            <div className="flex items-start gap-3">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, rgba(${meta.color},0.22) 0%, rgba(${meta.color},0.06) 100%)`,
+                  boxShadow: `inset 0 0 0 1px rgba(${meta.color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(${meta.color},0.45)`,
+                }}
+              >
+                <Icon className="w-3.5 h-3.5" style={{ color: meta.textColor }} />
               </div>
 
-              {/* Response Time */}
-              {activity.responseTime && (
-                <p className="text-xs text-gray-400 mt-1">
-                  Response time: {activity.responseTime}ms
-                </p>
-              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[14px] font-light text-white tracking-[0.005em]">
+                    {activity.action}
+                  </p>
+                  <span className="text-[11px] text-zinc-500 flex-shrink-0 tabular-nums">
+                    {formatTime(activity.createdAt)}
+                  </span>
+                </div>
 
-              {/* Metadata */}
-              {activity.metadata &&
-                typeof activity.metadata === 'object' &&
-                Object.keys(activity.metadata).length > 0 && (
-                  <details className="mt-2 cursor-pointer">
-                    <summary className="text-xs text-gray-500 hover:text-gray-400">Details</summary>
-                    <pre className="mt-2 p-2 bg-gray-900 rounded text-xs text-gray-300 overflow-auto max-h-40">
-                      {JSON.stringify(activity.metadata, null, 2)}
-                    </pre>
-                  </details>
+                {activity.responseTime && (
+                  <p className="text-[11px] text-zinc-500 mt-1 tabular-nums tracking-[0.005em]">
+                    Response time: {activity.responseTime}ms
+                  </p>
                 )}
+
+                {activity.metadata &&
+                  typeof activity.metadata === 'object' &&
+                  Object.keys(activity.metadata).length > 0 && (
+                    <details className="mt-2 cursor-pointer">
+                      <summary className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors">
+                        Details
+                      </summary>
+                      <pre
+                        className="mt-2 p-2 rounded-lg text-[11px] text-zinc-300 overflow-auto max-h-40 font-mono"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+                          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                        }}
+                      >
+                        {JSON.stringify(activity.metadata, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+              </div>
             </div>
-          </div>
-        </div>
-      ))}
+          </motion.div>
+        );
+      })}
     </div>
   );
 };

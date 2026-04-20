@@ -110,7 +110,7 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
                     <div className="absolute inset-0 p-8 flex flex-col justify-between">
                       <div>
                         <div className="flex items-start justify-between mb-3">
-                          <p className="text-[10px] font-mono text-monad-400 uppercase tracking-widest">
+                          <p className="text-[10px] font-mono text-bolty-400 uppercase tracking-widest">
                             {String(currentIndex + 1).padStart(2, '0')} /{' '}
                             {String(items.length).padStart(2, '0')}
                           </p>
@@ -145,7 +145,7 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
       <div className="flex items-center gap-5">
         <button
           onClick={moveBack}
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-zinc-800 bg-white/5 text-zinc-400 hover:border-monad-400/50 hover:text-monad-400 transition-all duration-200"
+          className="flex items-center justify-center w-9 h-9 rounded-full border border-zinc-800 bg-white/5 text-zinc-400 hover:border-bolty-400/50 hover:text-bolty-400 transition-all duration-200"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -155,7 +155,7 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
             <div
               key={i}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === currentIndex ? 'bg-monad-400 w-6' : 'bg-zinc-700 w-1.5'
+                i === currentIndex ? 'bg-bolty-400 w-6' : 'bg-zinc-700 w-1.5'
               }`}
             />
           ))}
@@ -163,7 +163,7 @@ export function FaqCardStack({ items }: FaqCardStackProps) {
 
         <button
           onClick={moveForward}
-          className="flex items-center justify-center w-9 h-9 rounded-full border border-zinc-800 bg-white/5 text-zinc-400 hover:border-monad-400/50 hover:text-monad-400 transition-all duration-200"
+          className="flex items-center justify-center w-9 h-9 rounded-full border border-zinc-800 bg-white/5 text-zinc-400 hover:border-bolty-400/50 hover:text-bolty-400 transition-all duration-200"
         >
           <ChevronRight className="w-4 h-4" />
         </button>

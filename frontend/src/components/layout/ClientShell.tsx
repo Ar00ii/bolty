@@ -1,59 +1,72 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 
+import { BackToTop } from '@/components/layout/BackToTop';
+import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { PowerNavbar } from '@/components/layout/PowerNavbar';
+import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
+import { StandardSidebar } from '@/components/layout/StandardSidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
-import { Footer } from '@/components/ui/footer-section';
-import { ProgressBar } from '@/components/ui/ProgressBar';
+import { useGoToShortcuts } from '@/lib/hooks/useGoToShortcuts';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(false);
+  useGoToShortcuts();
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
-  const showSidebar = !isHome && !isAuth;
+  const isLegal = pathname === '/terms' || pathname === '/privacy';
+  const useAppShell = !isHome && !isAuth && !isLegal;
 
-  // Show loading bar on route change
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timer);
+    if (typeof window === 'undefined') return;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
   }, [pathname]);
+
+  if (useAppShell) {
+    return (
+      <div className="mk-scope min-h-screen" style={{ background: '#09090b' }}>
+        <CommandPalette />
+        <ShortcutsModal />
+        <BackToTop />
+        <div className="flex">
+          <Suspense fallback={<div className="hidden lg:block w-[264px] shrink-0" />}>
+            <StandardSidebar />
+          </Suspense>
+          <div className="flex-1 w-full min-w-0 flex flex-col">
+            <Suspense fallback={<div style={{ height: 56 }} />}>
+              <PowerNavbar />
+            </Suspense>
+            <main id="main-content" tabIndex={-1} className="flex-1 relative focus:outline-none">
+              {children}
+            </main>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <ProgressBar isLoading={isLoading} />
-      <FloatingTopBar />
-      {/* Show header only on landing and auth pages */}
-      {!showSidebar && <UnifiedHeader />}
+      <CommandPalette />
+      <ShortcutsModal />
+      {!isAuth && <FloatingTopBar />}
+      {!isAuth && <BackToTop />}
+      {!isAuth && <UnifiedHeader />}
 
-      <div className={`flex ${!showSidebar && !isHome ? 'pt-16' : ''}`}>
-        {showSidebar && <Sidebar />}
-
-        <div className="flex-1 w-full">
-          <main className="flex-1 relative min-h-screen">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={pathname}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{
-                  duration: 0.3,
-                  ease: [0.4, 0, 0.2, 1],
-                }}
-              >
-                {children}
-              </motion.div>
-            </AnimatePresence>
+      <div className={`flex ${!isHome && !isAuth && !isLegal ? 'pt-16' : ''}`}>
+        <div className="flex-1 w-full min-w-0">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="flex-1 relative min-h-screen focus:outline-none"
+          >
+            {children}
           </main>
-          {!isHome && !isAuth && <Footer />}
         </div>
       </div>
     </div>

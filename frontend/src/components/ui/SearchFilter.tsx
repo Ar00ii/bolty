@@ -8,7 +8,7 @@ import { useState, useCallback, useMemo } from 'react';
 export interface FilterOption {
   id: string;
   label: string;
-  value: any;
+  value: unknown;
 }
 
 interface SearchFilterProps {
@@ -73,53 +73,81 @@ export function SearchFilter({
     onFilterChange?.([]);
   };
 
+  const inputStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+    boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+  };
+
   return (
     <div className="space-y-4">
       {/* Search Input */}
       <div className="relative">
         <div className="relative flex items-center">
-          <Search className="absolute left-3 w-4 h-4 text-zinc-500" />
+          <Search
+            className="absolute left-3 w-3.5 h-3.5 text-zinc-500 pointer-events-none"
+            strokeWidth={1.75}
+          />
           <input
             type="text"
             value={query}
             onChange={(e) => handleSearch(e.target.value)}
             onFocus={() => query && setShowSuggestions(true)}
             placeholder={placeholder}
-            className="w-full pl-9 pr-9 py-2 rounded-lg bg-zinc-900/50 border border-zinc-700 focus:border-monad-500 focus:ring-1 focus:ring-monad-500/30 text-white font-light text-sm outline-none transition-all"
+            className="w-full pl-9 pr-9 py-2.5 rounded-lg text-white placeholder-zinc-600 font-light text-[13px] tracking-[0.005em] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+            style={inputStyle}
           />
-          {query && (
-            <button
-              onClick={() => {
-                setQuery('');
-                onSearch('');
-                setShowSuggestions(false);
-              }}
-              className="absolute right-3 text-zinc-500 hover:text-zinc-300 transition-colors"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+          <AnimatePresence>
+            {query && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ rotate: 90 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                onClick={() => {
+                  setQuery('');
+                  onSearch('');
+                  setShowSuggestions(false);
+                }}
+                className="absolute right-2.5 w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Search Suggestions */}
         <AnimatePresence>
           {showSuggestions && filteredSuggestions.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.15 }}
-              className="absolute top-full left-0 right-0 mt-1 bg-zinc-900 border border-zinc-700 rounded-lg overflow-hidden z-50 shadow-lg"
+              className="absolute top-full left-0 right-0 mt-1.5 rounded-xl overflow-hidden z-50"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+                boxShadow:
+                  '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(8px)',
+              }}
             >
-              {filteredSuggestions.map((suggestion) => (
-                <button
+              {filteredSuggestions.map((suggestion, idx) => (
+                <motion.button
                   key={suggestion}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.18, delay: idx * 0.03 }}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  className="w-full text-left px-4 py-2 text-sm text-zinc-300 font-light hover:bg-zinc-800 transition-colors border-b border-zinc-800 last:border-0"
+                  className="w-full text-left px-3.5 py-2.5 text-[13px] text-zinc-300 font-light hover:text-white hover:bg-white/[0.03] transition-colors border-b border-white/[0.04] last:border-0 flex items-center gap-2.5 tracking-[0.005em]"
                 >
-                  <Search className="w-3 h-3 inline mr-2 text-zinc-500" />
+                  <Search className="w-3 h-3 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
                   {suggestion}
-                </button>
+                </motion.button>
               ))}
             </motion.div>
           )}
@@ -128,32 +156,53 @@ export function SearchFilter({
 
       {/* Filters */}
       {filters.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-light">Filters</p>
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+              Filters
+            </p>
             {selectedFilters.length > 0 && (
               <button
                 onClick={handleClearFilters}
-                className="text-xs text-monad-400 hover:text-monad-300 transition-colors"
+                className="text-[11px] text-[#b4a7ff] hover:text-white transition-colors tracking-[0.005em]"
               >
                 Clear all
               </button>
             )}
           </div>
-          <div className="flex flex-wrap gap-2">
-            {filters.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => handleFilterToggle(filter.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-light transition-all ${
-                  selectedFilters.includes(filter.id)
-                    ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
-                    : 'bg-zinc-900/50 border border-zinc-700 text-zinc-400 hover:text-zinc-300 hover:border-zinc-600'
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-1.5">
+            {filters.map((filter) => {
+              const active = selectedFilters.includes(filter.id);
+              return (
+                <motion.button
+                  key={filter.id}
+                  onClick={() => handleFilterToggle(filter.id)}
+                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -1 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className={`inline-flex items-center h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
+                    active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  style={
+                    active
+                      ? {
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        }
+                      : {
+                          background:
+                            'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                          boxShadow:
+                            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                        }
+                  }
+                >
+                  {filter.label}
+                </motion.button>
+              );
+            })}
           </div>
         </div>
       )}

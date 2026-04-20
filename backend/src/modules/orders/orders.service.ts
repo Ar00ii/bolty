@@ -7,6 +7,8 @@ import {
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
+import { EscrowService } from '../escrow/escrow.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const MAX_MSG_LENGTH = 2000;
 
@@ -18,7 +20,11 @@ const ORDER_INCLUDE = {
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly escrow: EscrowService,
+  ) {}
 
   /** All orders where the user is the buyer */
   async getBuyerOrders(userId: string) {
@@ -73,7 +79,7 @@ export class OrdersService {
     if (!['PENDING_DELIVERY', 'IN_PROGRESS'].includes(order.status)) {
       throw new BadRequestException('Invalid status transition');
     }
-    return this.prisma.marketPurchase.update({
+    const updated = await this.prisma.marketPurchase.update({
       where: { id: orderId },
       data: {
         status: 'DELIVERED',
@@ -81,12 +87,31 @@ export class OrdersService {
       },
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await this.notifications.create({
+        userId: updated.buyerId,
+        type: 'MARKET_ORDER_DELIVERED',
+        title: `"${updated.listing.title}" has been delivered`,
+        body:
+          updated.escrowStatus === 'FUNDED'
+            ? 'Review the delivery and release escrow to complete the order.'
+            : 'Review the delivery and mark the order complete when ready.',
+        url: `/orders/${updated.id}`,
+        meta: { orderId: updated.id, listingId: updated.listingId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return updated;
   }
 
   /**
    * Buyer marks order as completed.
-   * If escrow is active, the frontend must call the escrow contract's release()
-   * function BEFORE calling this endpoint and pass the release tx hash.
+   * If escrow is active, the release tx is verified on chain against the
+   * escrow contract before the order is closed. The frontend must call
+   * escrow.release() first and pass the resulting tx hash.
    */
   async markCompleted(orderId: string, userId: string, escrowReleaseTx?: string) {
     const order = await this.getOrder(orderId, userId);
@@ -95,59 +120,106 @@ export class OrdersService {
       throw new BadRequestException('Order must be DELIVERED before completing');
     }
 
-    // If this order uses escrow, require release tx proof
-    const data: any = { status: 'COMPLETED', completedAt: new Date() };
     if (order.escrowStatus === 'FUNDED') {
       if (!escrowReleaseTx) {
         throw new BadRequestException(
           'Escrow release transaction hash required. Release funds from escrow first.',
         );
       }
-      data.escrowReleaseTx = escrowReleaseTx;
-      data.escrowStatus = 'RELEASED';
-      data.escrowResolvedAt = new Date();
+      // Delegate to EscrowService: it verifies the tx on chain, confirms the
+      // contract status landed at RELEASED, updates the order, and notifies.
+      return this.escrow.confirmRelease(orderId, userId, escrowReleaseTx);
     }
 
-    return this.prisma.marketPurchase.update({
+    const completed = await this.prisma.marketPurchase.update({
       where: { id: orderId },
-      data,
+      data: { status: 'COMPLETED', completedAt: new Date() },
       include: ORDER_INCLUDE,
     });
+
+    try {
+      await this.notifications.create({
+        userId: completed.sellerId,
+        type: 'MARKET_ORDER_COMPLETED',
+        title: `Order completed: "${completed.listing.title}"`,
+        body: 'The buyer confirmed delivery. Thanks for shipping!',
+        url: `/orders/${completed.id}`,
+        meta: { orderId: completed.id, listingId: completed.listingId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return completed;
   }
 
   /**
-   * Either party can open a dispute.
-   * If escrow is active, the frontend should also call dispute() on the contract.
+   * Either party opens a dispute.
+   * If escrow is active, the caller must have already called dispute() on the
+   * escrow contract and must pass the tx hash so we can verify it on chain.
    */
-  async dispute(orderId: string, userId: string) {
+  async dispute(orderId: string, userId: string, options?: { txHash?: string; reason?: string }) {
     const order = await this.getOrder(orderId, userId);
     if (order.status === 'COMPLETED' || order.status === 'DISPUTED') {
       throw new BadRequestException('Cannot dispute this order');
     }
 
-    const data: Record<string, unknown> = { status: 'DISPUTED' };
     if (order.escrowStatus === 'FUNDED') {
-      data.escrowStatus = 'DISPUTED';
-      data.escrowDisputedAt = new Date();
+      if (!options?.txHash) {
+        throw new BadRequestException(
+          'Escrow dispute transaction hash required. Call escrow.dispute() first.',
+        );
+      }
+      return this.escrow.confirmDispute(orderId, userId, options.txHash, {
+        reason: options.reason,
+      });
     }
 
-    return this.prisma.marketPurchase.update({
+    const updated = await this.prisma.marketPurchase.update({
       where: { id: orderId },
-      data,
+      data: { status: 'DISPUTED' },
       include: ORDER_INCLUDE,
     });
+
+    if (options?.reason?.trim()) {
+      await this.prisma.orderMessage.create({
+        data: {
+          orderId,
+          senderId: userId,
+          content: `[DISPUTE OPENED] ${sanitizeText(options.reason.trim().slice(0, 1800))}`,
+        },
+      });
+    }
+
+    const recipientId = userId === updated.buyerId ? updated.sellerId : updated.buyerId;
+    try {
+      await this.notifications.create({
+        userId: recipientId,
+        type: 'SYSTEM',
+        title: `Dispute opened on "${updated.listing.title}"`,
+        body: 'The other party opened a dispute. Review the order chat and resolve, or contact support.',
+        url: `/orders/${updated.id}`,
+        meta: { orderId: updated.id, listingId: updated.listingId, openedBy: userId },
+      });
+    } catch {
+      /* notification failures must not block order flow */
+    }
+
+    return updated;
   }
 
-  /** Get order chat messages */
+  /** Get order chat messages (latest 200 — orders rarely have more) */
   async getMessages(orderId: string, userId: string) {
     await this.getOrder(orderId, userId); // auth check
-    return this.prisma.orderMessage.findMany({
+    const recent = await this.prisma.orderMessage.findMany({
       where: { orderId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
       include: {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
+    return recent.reverse();
   }
 
   /** Send a message in the order chat */
@@ -158,9 +230,9 @@ export class OrdersService {
       throw new BadRequestException(`Message must be 1-${MAX_MSG_LENGTH} characters`);
     }
 
-    await this.getOrder(orderId, senderId); // auth check
+    const order = await this.getOrder(orderId, senderId); // auth check
 
-    return this.prisma.orderMessage.create({
+    const message = await this.prisma.orderMessage.create({
       data: {
         orderId,
         senderId,
@@ -170,6 +242,38 @@ export class OrdersService {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
+
+    const recipientId = senderId === order.buyerId ? order.sellerId : order.buyerId;
+    // Throttle: only notify if recipient doesn't already have an unread
+    // message notification from this order in the last 10 minutes.
+    try {
+      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+      const existing = await this.prisma.notification.findFirst({
+        where: {
+          userId: recipientId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          readAt: null,
+          createdAt: { gte: tenMinutesAgo },
+          meta: { path: ['orderId'], equals: orderId },
+        },
+        select: { id: true },
+      });
+      if (!existing) {
+        const senderName = message.sender.username || 'Someone';
+        await this.notifications.create({
+          userId: recipientId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          title: `New message from @${senderName} on "${order.listing.title}"`,
+          body: trimmed.slice(0, 200),
+          url: `/orders/${orderId}`,
+          meta: { orderId, senderId },
+        });
+      }
+    } catch {
+      /* notification failures must not block chat flow */
+    }
+
+    return message;
   }
 
   /** System message when order is created */

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { AgentStatus, ActivityStatus } from '@prisma/client';
-import * as axios from 'axios';
+import axios from 'axios';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
@@ -167,7 +167,7 @@ export class AgentsService {
     const startTime = Date.now();
 
     try {
-      const response = await axios.default.post(agent.webhookUrl, payload, {
+      const response = await axios.post(agent.webhookUrl, payload, {
         timeout: this.WEBHOOK_TIMEOUT,
         validateStatus: () => true, // Accept all status codes
       });

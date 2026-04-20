@@ -1,0 +1,881 @@
+'use client';
+
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  ArrowUpRight,
+  Check,
+  ChevronRight,
+  Copy,
+  Download,
+  ExternalLink,
+  FileText,
+  GitBranch,
+  Globe,
+  Lock,
+  Package,
+  Shield,
+  Star,
+  Tag,
+  Users,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import { ShareButton } from '@/components/ui/ShareButton';
+import { api, ApiError, API_URL } from '@/lib/api/client';
+import { useAuth } from '@/lib/auth/AuthProvider';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+interface RepositoryDetail {
+  id: string;
+  name: string;
+  fullName: string;
+  description: string | null;
+  language: string | null;
+  stars: number;
+  forks: number;
+  githubUrl: string;
+  topics: string[];
+  downloadCount: number;
+  upvotes: number;
+  downvotes: number;
+  score: number;
+  isPrivate: boolean;
+  isLocked: boolean;
+  lockedPriceUsd: number | null;
+  logoUrl: string | null;
+  websiteUrl: string | null;
+  twitterUrl: string | null;
+  createdAt: string;
+  user: {
+    id?: string;
+    username: string | null;
+    displayName?: string | null;
+    avatarUrl: string | null;
+    walletAddress?: string | null;
+  };
+}
+
+interface Collaborator {
+  id: string;
+  name: string;
+  type: 'USER' | 'AI_AGENT' | 'PROGRAM';
+  role: string | null;
+  url: string | null;
+  user: {
+    id: string;
+    username: string | null;
+    avatarUrl: string | null;
+    reputationPoints: number;
+  } | null;
+}
+
+interface ConsentState {
+  sellerWallet: string;
+  buyerAddress: string;
+  sellerWei: bigint;
+  platformWei: bigint;
+  totalWei: bigint;
+  totalUsd: number;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+const LANG_COLORS: Record<string, string> = {
+  TypeScript: '#3178c6',
+  JavaScript: '#f1e05a',
+  Python: '#3572A5',
+  Go: '#00add8',
+  Rust: '#dea584',
+  Java: '#b07219',
+  Kotlin: '#A97BFF',
+  Swift: '#F05138',
+  Ruby: '#701516',
+  PHP: '#4F5D95',
+  'C++': '#f34b7d',
+  'C#': '#178600',
+  C: '#555555',
+  Solidity: '#AA6746',
+  Dart: '#00B4AB',
+  Shell: '#89e051',
+  Bash: '#89e051',
+};
+
+function timeAgo(d: string) {
+  const diff = Date.now() - new Date(d).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function shortenAddress(addr: string) {
+  if (addr.length < 10) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
+function resolveLogoUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  if (url.startsWith('/api')) return `${API_URL.replace('/api/v1', '')}${url}`;
+  return url;
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────────
+
+export default function RepoDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+
+  const [repo, setRepo] = useState<RepositoryDetail | null>(null);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState<ConsentState | null>(null);
+  const [copiedCmd, setCopiedCmd] = useState(false);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [data, collabs] = await Promise.all([
+        api.get<RepositoryDetail>(`/repos/${id}`),
+        api.get<Collaborator[]>(`/repos/${id}/collaborators`).catch(() => [] as Collaborator[]),
+      ]);
+      setRepo(data);
+      setCollaborators(collabs || []);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 404) setNotFound(true);
+      else setError(err instanceof ApiError ? err.message : 'Failed to load repository');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const vote = async (value: 'UP' | 'DOWN') => {
+    if (!isAuthenticated || !repo) {
+      router.push('/auth');
+      return;
+    }
+    try {
+      await api.post(`/repos/${repo.id}/vote`, { value });
+      await load();
+    } catch {
+      setError('Vote failed');
+    }
+  };
+
+  const download = async () => {
+    if (!repo) return;
+    try {
+      const { downloadUrl } = await api.post<{ downloadUrl: string }>(
+        `/repos/${repo.id}/download`,
+        {},
+      );
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch {
+      window.open(repo.githubUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const startUnlock = async () => {
+    if (!repo || !repo.lockedPriceUsd) return;
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+    const sellerWallet = repo.user.walletAddress;
+    if (!sellerWallet) {
+      setError('Seller has no wallet linked');
+      return;
+    }
+    const ethereum = getMetaMaskProvider();
+    if (!ethereum) {
+      setError('MetaMask not found');
+      return;
+    }
+    let ethPrice = 2000;
+    try {
+      const p = await api.get<{ price?: number }>('/chart/eth-price');
+      if (p.price) ethPrice = p.price;
+    } catch {
+      /* use fallback */
+    }
+    const totalUsd = repo.lockedPriceUsd;
+    const totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
+    const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
+    const platformWei = totalWei - sellerWei;
+    try {
+      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+      setConsent({
+        sellerWallet,
+        buyerAddress: accounts[0],
+        sellerWei,
+        platformWei,
+        totalWei,
+        totalUsd,
+      });
+    } catch {
+      setError('Could not connect to MetaMask');
+    }
+  };
+
+  const executePurchase = async (signature: string, message: string) => {
+    if (!consent || !repo) return;
+    const { sellerWallet, buyerAddress, sellerWei, platformWei } = consent;
+    setConsent(null);
+    const ethereum = getMetaMaskProvider();
+    if (!ethereum) {
+      setError('MetaMask not found');
+      return;
+    }
+    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+    try {
+      const txHash = (await ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
+      })) as string;
+      let platformFeeTxHash: string | undefined;
+      if (platformWallet) {
+        platformFeeTxHash = (await ethereum.request({
+          method: 'eth_sendTransaction',
+          params: [
+            { from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) },
+          ],
+        })) as string;
+      }
+      const result = await api.post<{ success: boolean; downloadUrl?: string }>(
+        `/repos/${repo.id}/purchase`,
+        { txHash, platformFeeTxHash, consentSignature: signature, consentMessage: message },
+      );
+      if (result.success && result.downloadUrl) {
+        window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+      }
+      await load();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(
+        msg.includes('rejected')
+          ? 'Payment cancelled'
+          : err instanceof ApiError
+            ? err.message
+            : 'Payment failed: ' + msg.slice(0, 80),
+      );
+    }
+  };
+
+  const copyInstall = () => {
+    if (!repo) return;
+    navigator.clipboard.writeText(`npm install ${repo.name.toLowerCase()}`);
+    setCopiedCmd(true);
+    setTimeout(() => setCopiedCmd(false), 2000);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin" />
+      </div>
+    );
+  }
+
+  if (notFound || !repo) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        style={{ background: '#000' }}
+      >
+        <p className="text-6xl font-mono text-zinc-800">404</p>
+        <p className="text-zinc-400">Repository not found</p>
+        <Link
+          href="/market/repos"
+          className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to repositories
+        </Link>
+      </div>
+    );
+  }
+
+  const langColor = repo.language ? LANG_COLORS[repo.language] || '#8b949e' : null;
+  const logo = resolveLogoUrl(repo.logoUrl);
+
+  return (
+    <div className="min-h-screen" style={{ background: '#000' }}>
+      {/* Breadcrumb */}
+      <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-black/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-xs text-zinc-500 overflow-x-auto">
+          <Link href="/market" className="hover:text-zinc-200 transition-colors">
+            Marketplace
+          </Link>
+          <ChevronRight className="w-3 h-3 text-zinc-700" />
+          <Link href="/market/repos" className="hover:text-zinc-200 transition-colors">
+            Repositories
+          </Link>
+          <ChevronRight className="w-3 h-3 text-zinc-700" />
+          <span className="text-zinc-300 truncate max-w-md">{repo.name}</span>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {/* Hero */}
+        <header className="mb-8 sm:mb-10">
+          <div className="flex items-start gap-4 sm:gap-5 flex-wrap">
+            {logo ? (
+              <img
+                src={logo}
+                alt={repo.name}
+                className="w-14 h-14 rounded-xl object-cover border border-white/10 shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(59,130,246,0.22) 0%, rgba(59,130,246,0.04) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(59,130,246,0.36), 0 0 28px -6px rgba(59,130,246,0.4)',
+                }}
+              >
+                <GitBranch className="w-6 h-6 text-blue-400" strokeWidth={1.75} />
+              </div>
+            )}
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                <span className="text-blue-300">Repository</span>
+                {repo.isLocked ? (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="inline-flex items-center gap-1.5 text-[#c4b5fd]">
+                      <Lock className="w-3 h-3" /> Paid
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="inline-flex items-center gap-1.5 text-emerald-300">
+                      <Globe className="w-3 h-3" /> Public
+                    </span>
+                  </>
+                )}
+              </div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight break-words">
+                {repo.name}
+              </h1>
+              <p className="text-xs font-mono text-zinc-600 mt-1 truncate">{repo.fullName}</p>
+              <div className="flex items-center gap-3 mt-3 text-sm text-zinc-400 flex-wrap">
+                <Link
+                  href={`/u/${repo.user.username || repo.user.id}`}
+                  className="inline-flex items-center gap-2 hover:text-white transition-colors"
+                >
+                  {repo.user.avatarUrl ? (
+                    <img
+                      src={repo.user.avatarUrl}
+                      alt=""
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="w-5 h-5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-400">
+                      {(repo.user.username || 'A').charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                  <span>@{repo.user.username || 'anonymous'}</span>
+                </Link>
+                {langColor && (
+                  <>
+                    <span className="text-zinc-700">·</span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="w-3 h-3 rounded-full" style={{ background: langColor }} />
+                      {repo.language}
+                    </span>
+                  </>
+                )}
+                <span className="text-zinc-700">·</span>
+                <span>Published {timeAgo(repo.createdAt)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <ShareButton title={repo.name} />
+              <a
+                href={repo.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-zinc-300 hover:text-white text-[12.5px] transition-all hover:brightness-110"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
+                <ExternalLink className="w-3.5 h-3.5" /> GitHub
+              </a>
+            </div>
+          </div>
+
+          {/* Topics */}
+          {repo.topics.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-5 sm:ml-[76px]">
+              {repo.topics.map((t) => (
+                <span
+                  key={t}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs text-zinc-400 bg-white/[0.03] border border-white/[0.06]"
+                >
+                  <Tag className="w-2.5 h-2.5 text-zinc-600" />
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {error && (
+            <p className="mt-4 text-xs text-red-400 font-mono" role="alert">
+              {error}
+            </p>
+          )}
+        </header>
+
+        {/* Body */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
+          <main className="space-y-8 min-w-0">
+            <Section title="About" icon={FileText}>
+              {repo.description ? (
+                <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                  {repo.description}
+                </p>
+              ) : (
+                <p className="text-sm text-zinc-500 italic">
+                  No description provided by the publisher.
+                </p>
+              )}
+            </Section>
+
+            <Section title={`Collaborators (${collaborators.length})`} icon={Users}>
+              {collaborators.length === 0 ? (
+                <p className="text-sm text-zinc-500 italic">
+                  No collaborators listed. Only the publisher has worked on this repo.
+                </p>
+              ) : (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {collaborators.map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center gap-3 rounded-xl p-3"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                        boxShadow:
+                          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                      }}
+                    >
+                      {c.user?.avatarUrl ? (
+                        <img
+                          src={c.user.avatarUrl}
+                          alt=""
+                          className="w-9 h-9 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div
+                          className="w-9 h-9 rounded-full flex items-center justify-center text-sm text-zinc-200"
+                          style={{
+                            background:
+                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.32)',
+                          }}
+                        >
+                          {c.name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-white truncate">{c.name}</p>
+                        <p className="text-[11px] text-zinc-500 truncate">
+                          {c.role || c.type.replace('_', ' ').toLowerCase()}
+                        </p>
+                      </div>
+                      {c.url && (
+                        <a
+                          href={c.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-zinc-500 hover:text-purple-300 transition-colors"
+                          aria-label="Open collaborator link"
+                        >
+                          <ArrowUpRight className="w-4 h-4" />
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+          </main>
+
+          <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+            <ActionsCard
+              repo={repo}
+              onDownload={download}
+              onUnlock={startUnlock}
+              onVote={vote}
+              onCopy={copyInstall}
+              copied={copiedCmd}
+              isAuthenticated={isAuthenticated}
+            />
+            <SellerCard user={repo.user} />
+            <StatsCard repo={repo} />
+            {(repo.websiteUrl || repo.twitterUrl) && <LinksCard repo={repo} />}
+          </aside>
+        </div>
+      </div>
+
+      {consent && (
+        <PaymentConsentModal
+          listingTitle={repo.name}
+          sellerAddress={consent.sellerWallet}
+          sellerAmountETH={(Number(consent.sellerWei) / 1e18).toFixed(6)}
+          platformFeeETH={(Number(consent.platformWei) / 1e18).toFixed(6)}
+          totalETH={(Number(consent.totalWei) / 1e18).toFixed(6)}
+          totalUsd={consent.totalUsd.toFixed(2)}
+          buyerAddress={consent.buyerAddress}
+          onConsent={executePurchase}
+          onCancel={() => setConsent(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Sections ───────────────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-4 pb-2.5 border-b border-white/[0.06]">
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28)',
+          }}
+        >
+          <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
+        </div>
+        <h2 className="text-[11px] uppercase tracking-[0.18em] font-medium text-zinc-300">
+          {title}
+        </h2>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ActionsCard({
+  repo,
+  onDownload,
+  onUnlock,
+  onVote,
+  onCopy,
+  copied,
+  isAuthenticated,
+}: {
+  repo: RepositoryDetail;
+  onDownload: () => void;
+  onUnlock: () => void;
+  onVote: (v: 'UP' | 'DOWN') => void;
+  onCopy: () => void;
+  copied: boolean;
+  isAuthenticated: boolean;
+}) {
+  const locked = repo.isLocked && repo.lockedPriceUsd;
+  return (
+    <div
+      className="relative rounded-xl p-5 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
+      <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+        {locked ? 'Price' : 'Access'}
+      </p>
+      {locked ? (
+        <div className="flex items-baseline gap-2">
+          <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
+            ${repo.lockedPriceUsd}
+          </p>
+          <p className="text-sm text-zinc-500">USD</p>
+        </div>
+      ) : (
+        <p className="text-3xl font-light text-emerald-400 tracking-[-0.01em]">Free</p>
+      )}
+
+      {locked ? (
+        <button
+          onClick={onUnlock}
+          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+            boxShadow:
+              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+          }}
+        >
+          <Lock className="w-4 h-4" />
+          Unlock with MetaMask
+        </button>
+      ) : (
+        <button
+          onClick={onDownload}
+          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+            boxShadow:
+              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+          }}
+        >
+          <Download className="w-4 h-4" />
+          Download
+        </button>
+      )}
+
+      <button
+        onClick={onCopy}
+        className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11.5px] font-mono transition-all"
+        style={{
+          background: 'rgba(131,110,249,0.07)',
+          border: '1px solid rgba(131,110,249,0.15)',
+          color: copied ? '#a78bfa' : '#8b8b95',
+        }}
+      >
+        {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+        {copied ? 'copied!' : `npm install ${repo.name.toLowerCase()}`}
+      </button>
+
+      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-white/[0.06]">
+        <button
+          onClick={() => onVote('UP')}
+          disabled={!isAuthenticated}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-bolty-400 hover:bg-bolty-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          title={isAuthenticated ? 'Upvote' : 'Sign in to vote'}
+        >
+          <ArrowUp className="w-3.5 h-3.5" />
+          {repo.upvotes}
+        </button>
+        <button
+          onClick={() => onVote('DOWN')}
+          disabled={!isAuthenticated}
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-red-400 hover:bg-red-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          title={isAuthenticated ? 'Downvote' : 'Sign in to vote'}
+        >
+          <ArrowDown className="w-3.5 h-3.5" />
+          {repo.downvotes}
+        </button>
+      </div>
+
+      {locked && (
+        <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
+          <Shield className="inline w-3 h-3 mr-1 -mt-0.5" />
+          Payment split 97.5% seller / 2.5% platform.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
+  const [copied, setCopied] = useState(false);
+  const copyWallet = async () => {
+    if (!user.walletAddress) return;
+    await navigator.clipboard.writeText(user.walletAddress);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <div
+      className="relative rounded-xl p-5 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
+        Publisher
+      </p>
+      <div className="flex items-center gap-3">
+        {user.avatarUrl ? (
+          <img
+            src={user.avatarUrl}
+            alt=""
+            className="w-10 h-10 rounded-full object-cover"
+            style={{
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+            }}
+          />
+        ) : (
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center text-sm text-zinc-200"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+            }}
+          >
+            {(user.username || 'A').charAt(0).toUpperCase()}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-white truncate">@{user.username || 'anonymous'}</p>
+          <div className="flex items-center gap-3 mt-0.5">
+            <Link
+              href={`/u/${user.username || user.id}`}
+              className="text-xs text-purple-300 hover:text-purple-200 inline-flex items-center gap-1"
+            >
+              Profile <ArrowUpRight className="w-3 h-3" />
+            </Link>
+            {user.username && (
+              <Link
+                href={`/market/sellers/${user.username}`}
+                className="text-xs text-zinc-500 hover:text-zinc-300 inline-flex items-center gap-1"
+              >
+                Storefront <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+      {user.walletAddress && (
+        <button
+          onClick={copyWallet}
+          className="w-full mt-3 inline-flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-all group hover:brightness-110"
+          style={{
+            background: 'linear-gradient(180deg, rgba(8,8,12,0.6) 0%, rgba(4,4,8,0.6) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+          }}
+          title={user.walletAddress}
+        >
+          <span className="text-[11px] font-mono text-zinc-500 group-hover:text-zinc-300">
+            {shortenAddress(user.walletAddress)}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Copy className="w-3 h-3 text-zinc-600 group-hover:text-zinc-300" />
+            {copied && <span className="text-[10px] text-emerald-400">copied</span>}
+          </span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function StatsCard({ repo }: { repo: RepositoryDetail }) {
+  const stats = [
+    { label: 'Stars', value: repo.stars.toLocaleString(), icon: Star },
+    { label: 'Forks', value: repo.forks.toLocaleString(), icon: GitBranch },
+    { label: 'Downloads', value: repo.downloadCount.toLocaleString(), icon: Download },
+    { label: 'Score', value: repo.score.toLocaleString(), icon: Package },
+  ];
+  return (
+    <div
+      className="relative rounded-xl p-5 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
+        Stats
+      </p>
+      <dl className="grid grid-cols-2 gap-3">
+        {stats.map((s) => (
+          <div key={s.label}>
+            <dt className="text-[11px] text-zinc-500 flex items-center gap-1.5">
+              <s.icon className="w-3 h-3 text-zinc-600" />
+              {s.label}
+            </dt>
+            <dd className="text-lg font-light text-white tabular-nums mt-0.5">{s.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+function LinksCard({ repo }: { repo: RepositoryDetail }) {
+  return (
+    <div
+      className="relative rounded-xl p-5 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-3">
+        Links
+      </p>
+      <ul className="space-y-2">
+        {repo.websiteUrl && (
+          <li>
+            <a
+              href={repo.websiteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+            >
+              <Globe className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="truncate">{repo.websiteUrl.replace(/^https?:\/\//, '')}</span>
+              <ArrowUpRight className="w-3 h-3 ml-auto text-zinc-600" />
+            </a>
+          </li>
+        )}
+        {repo.twitterUrl && (
+          <li>
+            <a
+              href={repo.twitterUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="truncate">{repo.twitterUrl.replace(/^https?:\/\//, '')}</span>
+              <ArrowUpRight className="w-3 h-3 ml-auto text-zinc-600" />
+            </a>
+          </li>
+        )}
+      </ul>
+    </div>
+  );
+}

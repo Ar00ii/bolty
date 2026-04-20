@@ -18,6 +18,7 @@ import { Request, Response } from 'express';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { SkipCsrf } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 import { AuthService } from './auth.service';
@@ -58,6 +59,7 @@ export class AuthController {
   // ── Email / Password Auth ─────────────────────────────────────────────────
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
@@ -83,6 +85,7 @@ export class AuthController {
   }
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('login/email')
@@ -109,6 +112,7 @@ export class AuthController {
   }
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('2fa/verify')
@@ -130,6 +134,7 @@ export class AuthController {
   // ── Password Reset ────────────────────────────────────────────────────────
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('password/forgot')
@@ -140,6 +145,7 @@ export class AuthController {
   }
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('password/reset')
@@ -150,8 +156,6 @@ export class AuthController {
 
   // ── 2FA Management ────────────────────────────────────────────────────────
 
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
@@ -341,6 +345,7 @@ export class AuthController {
   // ── MetaMask ──────────────────────────────────────────────────────────────
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('nonce/ethereum')
   async getEthereumNonce(@Body() dto: GetNonceDto) {
@@ -348,6 +353,7 @@ export class AuthController {
   }
 
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('verify/ethereum')
@@ -374,8 +380,7 @@ export class AuthController {
   // ── Token Refresh ─────────────────────────────────────────────────────────
 
   @Public()
-  @HttpCode(HttpStatus.OK)
-  @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 30, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
@@ -403,6 +408,7 @@ export class AuthController {
   // ── Logout ────────────────────────────────────────────────────────────────
 
   @UseGuards(JwtAuthGuard)
+  @SkipCsrf()
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@CurrentUser('id') userId: string, @Res() res: Response) {
