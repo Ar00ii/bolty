@@ -132,7 +132,7 @@ export function StandardSidebar() {
       {/* Workspace switcher */}
       <button
         type="button"
-        className="grid items-center text-left h-14 px-[14px] gap-[10px] transition-colors hover:bg-white/[0.02]"
+        className="grid items-center text-left h-12 px-[14px] gap-[10px] transition-colors hover:bg-white/[0.02]"
         style={{
           gridTemplateColumns: '38px 1fr 16px',
           borderBottom: '1px solid #1f1f23',
@@ -142,24 +142,19 @@ export function StandardSidebar() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
-        <div className="min-w-0">
-          <div className="text-[13px] truncate" style={{ color: '#e4e4e7', fontWeight: 400 }}>
+        <div className="min-w-0 flex items-center">
+          <div
+            className="text-[14px] truncate"
+            style={{
+              color: '#e4e4e7',
+              fontWeight: 300,
+              fontFamily: 'Inter, system-ui, sans-serif',
+              letterSpacing: '-0.3px',
+            }}
+          >
             {user?.displayName || user?.username
               ? `${user.displayName || user.username}'s Workspace`
               : 'Bolty Workspace'}
-          </div>
-          <div
-            className="flex items-center gap-[6px] font-mono text-[10.5px] mt-[1px]"
-            style={{ color: '#71717a' }}
-          >
-            <span
-              className="w-[6px] h-[6px] rounded-full"
-              style={{
-                background: '#22c55e',
-                boxShadow: '0 0 8px rgba(34,197,94,0.6)',
-              }}
-            />
-            Bolty Mainnet
           </div>
         </div>
         <ChevronsUpDown
