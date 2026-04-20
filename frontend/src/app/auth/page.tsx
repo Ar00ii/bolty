@@ -459,8 +459,11 @@ function AuthPage() {
   };
 
   const handleBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back();
+    if (typeof window === 'undefined') return;
+    const referrer = document.referrer;
+    const sameOrigin = referrer && new URL(referrer).origin === window.location.origin;
+    if (sameOrigin) {
+      window.history.back();
     } else {
       router.push('/');
     }
