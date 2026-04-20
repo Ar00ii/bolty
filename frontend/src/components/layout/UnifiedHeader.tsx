@@ -86,15 +86,20 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="max-w-[1400px] mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto pl-2 pr-4 md:pl-3 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 hover:opacity-85 transition-opacity relative"
+            className="flex items-center gap-3 hover:opacity-85 transition-opacity relative"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/LogoNew.png" alt="Bolty" className="h-9 w-9 object-contain" />
-            <span className="text-white font-light text-sm md:text-base hidden sm:inline tracking-[0.005em]">
+            <img
+              src="/LogoNew.png"
+              alt="Bolty"
+              className="h-12 w-12 object-contain"
+              style={{ mixBlendMode: 'screen' }}
+            />
+            <span className="text-white font-light text-lg md:text-xl hidden sm:inline tracking-[0.005em]">
               BoltyNetwork
             </span>
           </Link>
