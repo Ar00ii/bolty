@@ -575,7 +575,9 @@ export class AuthService {
         githubId: githubProfile.id,
         githubLogin: githubProfile.login,
         avatarUrl: githubProfile.avatar_url,
-        githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : undefined,
+        githubToken: githubProfile.accessToken
+          ? encryptToken(githubProfile.accessToken)
+          : undefined,
       },
     });
     this.logger.log(`GitHub linked for user ${userId}: @${githubProfile.login}`);

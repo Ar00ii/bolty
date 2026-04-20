@@ -239,7 +239,7 @@ export class AgentsService {
   /**
    * Log an activity for an agent
    */
-  async logActivity(agentId: string, action: string, status: ActivityStatus, metadata?: any) {
+  async logActivity(agentId: string, action: string, status: ActivityStatus, metadata?: Record<string, unknown>) {
     try {
       await this.prisma.agentActivityLog.create({
         data: {

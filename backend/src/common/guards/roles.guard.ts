@@ -2,8 +2,8 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 import { Reflector } from '@nestjs/core';
 import { UserRole } from '@prisma/client';
 
-import { PrismaService } from '../prisma/prisma.service';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface AuthenticatedRequest {
   user?: { id?: string; role?: UserRole };
