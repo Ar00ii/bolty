@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -269,6 +269,34 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     if (childActiveHref) setOpen(true);
   }, [childActiveHref]);
 
+  // Hover-to-open with a short close delay so crossing the parent↔children
+  // gap doesn't snap it shut.
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => {
+      // Only close if nothing inside keeps it pinned open
+      if (!childActiveHref) setOpen(false);
+    }, 120);
+  };
+  useEffect(() => () => cancelClose(), []);
+
+  const handleGroupEnter = () => {
+    if (!hasChildren) return;
+    cancelClose();
+    setOpen(true);
+  };
+  const handleGroupLeave = () => {
+    if (!hasChildren) return;
+    scheduleClose();
+  };
+
   const iconColor = active ? '#a594ff' : '#71717a';
 
   const rowStyle: React.CSSProperties = {
@@ -320,95 +348,95 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     </>
   );
 
-  return (
-    <>
-      {hasChildren ? (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          className={rowClassName}
-          style={rowStyle}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {body}
-        </button>
-      ) : (
-        <Link
-          href={item.href}
-          className={rowClassName}
-          style={rowStyle}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {body}
-        </Link>
-      )}
+  if (!hasChildren) {
+    return (
+      <Link
+        href={item.href}
+        className={rowClassName}
+        style={rowStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {body}
+      </Link>
+    );
+  }
 
-      {hasChildren && (
-        <AnimatePresence initial={false}>
-          {open && (
-            <motion.div
-              key="children"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div className="mt-0.5 mb-1 pl-[22px] relative">
-                {/* left rail */}
-                <span
-                  className="absolute top-1 bottom-1 w-px"
-                  style={{ left: '15px', background: '#1f1f23' }}
-                />
-                {item.children!.map((c) => {
-                  const ChildIcon = c.icon;
-                  const isActive =
-                    pathname === c.href.split('?')[0] ||
-                    pathname.startsWith(c.href.split('?')[0] + '/');
-                  return (
-                    <Link
-                      key={c.href}
-                      href={c.href}
-                      className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
-                      style={{
-                        color: isActive ? '#e4e4e7' : '#a1a1aa',
-                        background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
-                        fontSize: '12.5px',
-                        fontWeight: 300,
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.color = '#e4e4e7';
-                          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isActive) {
-                          e.currentTarget.style.color = '#a1a1aa';
-                          e.currentTarget.style.background = 'transparent';
-                        }
-                      }}
-                    >
-                      {ChildIcon && (
-                        <ChildIcon
-                          className="w-[14px] h-[14px] shrink-0"
-                          strokeWidth={1.5}
-                          style={{ color: isActive ? '#a594ff' : '#71717a' }}
-                        />
-                      )}
-                      <span className="truncate">{c.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      )}
-    </>
+  return (
+    <div onMouseEnter={handleGroupEnter} onMouseLeave={handleGroupLeave}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className={rowClassName}
+        style={rowStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {body}
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="children"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="mt-0.5 mb-1 pl-[22px] relative">
+              {/* left rail */}
+              <span
+                className="absolute top-1 bottom-1 w-px"
+                style={{ left: '15px', background: '#1f1f23' }}
+              />
+              {item.children!.map((c) => {
+                const ChildIcon = c.icon;
+                const isActive =
+                  pathname === c.href.split('?')[0] ||
+                  pathname.startsWith(c.href.split('?')[0] + '/');
+                return (
+                  <Link
+                    key={c.href}
+                    href={c.href}
+                    className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
+                    style={{
+                      color: isActive ? '#e4e4e7' : '#a1a1aa',
+                      background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
+                      fontSize: '12.5px',
+                      fontWeight: 300,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#e4e4e7';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#a1a1aa';
+                        e.currentTarget.style.background = 'transparent';
+                      }
+                    }}
+                  >
+                    {ChildIcon && (
+                      <ChildIcon
+                        className="w-[14px] h-[14px] shrink-0"
+                        strokeWidth={1.5}
+                        style={{ color: isActive ? '#a594ff' : '#71717a' }}
+                      />
+                    )}
+                    <span className="truncate">{c.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
