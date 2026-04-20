@@ -31,9 +31,9 @@ export default function AgentChatPage() {
     const content = input.trim();
     if (!content || !isConnected) return;
 
-    sendMessage(content, agentName);
+    sendMessage(content);
     setInput('');
-  }, [input, isConnected, agentName, sendMessage]);
+  }, [input, isConnected, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

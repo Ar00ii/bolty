@@ -713,16 +713,7 @@ export default function ProfilePage() {
       }
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch(`${API_URL}/users/upload-avatar`, {
-        method: 'POST',
-        body: form,
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = Array.isArray(data.message) ? data.message[0] : data.message || 'Upload failed';
-        throw new Error(String(msg));
-      }
+      await api.upload('/users/upload-avatar', form);
       await refresh();
       setAvatarMsg('Avatar updated.');
       setTimeout(() => setAvatarMsg(''), 3000);
@@ -805,11 +796,9 @@ export default function ProfilePage() {
   };
 
   const handleLinkGitHub = () => {
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
-    const callbackUrl =
-      process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL ||
-      'http://localhost:3001/api/v1/auth/github/callback';
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&scope=read%3Auser%20repo`;
+    // Delegate to backend — it knows the client_id + callback URL from env and
+    // preserves the access_token cookie so the callback links to the current user.
+    window.location.href = `${API_URL}/auth/github`;
   };
 
   const handleUnlinkGitHub = async () => {
