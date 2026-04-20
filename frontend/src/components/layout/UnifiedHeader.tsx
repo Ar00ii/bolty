@@ -106,7 +106,7 @@ export function UnifiedHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-3 py-2 rounded-lg text-[13px] font-light tracking-[0.005em] transition-colors"
+                  className="relative px-3 py-2 rounded-lg text-[13px] font-bold tracking-[0.005em] transition-colors"
                   style={{
                     color: active ? '#ffffff' : 'rgb(212,212,216)',
                   }}
@@ -135,14 +135,14 @@ export function UnifiedHeader() {
               <>
                 <Link
                   href="/auth"
-                  className="hidden sm:block text-[13px] font-light text-zinc-300 hover:text-white transition-colors px-2"
+                  className="hidden sm:block text-[13px] font-bold text-zinc-300 hover:text-white transition-colors px-2"
                 >
                   Sign in
                 </Link>
                 <ShimmerButton
                   as={Link}
                   href="/auth?tab=register"
-                  className="text-white text-xs md:text-[13px] font-light px-3.5 md:px-4 py-2 rounded-lg transition-all"
+                  className="text-white text-xs md:text-[13px] font-bold px-3.5 md:px-4 py-2 rounded-lg transition-all"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
