@@ -208,9 +208,7 @@ export default function AiPage() {
               <h1 className="text-2xl sm:text-3xl font-light tracking-tight leading-none">
                 <GradientText>Bolty AI</GradientText>
               </h1>
-              <p className="text-xs text-zinc-500 mt-1 font-mono">
-                gemini-2.0-flash · 10 msgs/min
-              </p>
+              <p className="text-xs text-zinc-500 mt-1 font-mono">gemini-2.0-flash · 10 msgs/min</p>
             </div>
           </div>
         </header>
@@ -236,8 +234,7 @@ export default function AiPage() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
               <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 px-3 pt-3">
@@ -294,8 +291,7 @@ export default function AiPage() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.5) 0%, rgba(10,10,14,0.5) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
               {showEmpty ? (
@@ -374,8 +370,7 @@ export default function AiPage() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
               }}
             >
               <textarea

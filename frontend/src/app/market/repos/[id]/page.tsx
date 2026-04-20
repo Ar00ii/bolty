@@ -401,10 +401,7 @@ export default function RepoDetailPage() {
                   <>
                     <span className="text-zinc-700">·</span>
                     <span className="inline-flex items-center gap-1.5">
-                      <span
-                        className="w-3 h-3 rounded-full"
-                        style={{ background: langColor }}
-                      />
+                      <span className="w-3 h-3 rounded-full" style={{ background: langColor }} />
                       {repo.language}
                     </span>
                   </>
@@ -762,9 +759,7 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
           </div>
         )}
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white truncate">
-            @{user.username || 'anonymous'}
-          </p>
+          <p className="text-sm font-medium text-white truncate">@{user.username || 'anonymous'}</p>
           <div className="flex items-center gap-3 mt-0.5">
             <Link
               href={`/u/${user.username || user.id}`}
