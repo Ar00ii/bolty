@@ -130,8 +130,8 @@ export function StandardSidebar() {
       }}
     >
       {/* Workspace switcher */}
-      <button
-        type="button"
+      <Link
+        href="/"
         className="grid items-center text-left h-12 px-[14px] gap-[10px] transition-colors hover:bg-white/[0.02]"
         style={{
           gridTemplateColumns: '38px 1fr 16px',
@@ -162,7 +162,7 @@ export function StandardSidebar() {
           style={{ color: '#52525b' }}
           strokeWidth={1.75}
         />
-      </button>
+      </Link>
 
       {/* Search trigger */}
       <button
