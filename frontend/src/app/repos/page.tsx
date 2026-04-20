@@ -21,13 +21,20 @@ import {
   Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
+import dynamicImport from 'next/dynamic';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { DottedSurface } from '@/components/ui/dotted-surface';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+
+// three.js is ~150 kB minified. Defer it off the critical path so the first
+// render of /repos doesn't wait on the background decoration.
+const DottedSurface = dynamicImport(
+  () => import('@/components/ui/dotted-surface').then((m) => m.DottedSurface),
+  { ssr: false },
+);
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';

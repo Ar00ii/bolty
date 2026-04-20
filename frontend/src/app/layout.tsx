@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import React from 'react';
 
 import './globals.css';
@@ -7,6 +8,19 @@ import { ToastContainer } from '@/components/ui/Toast';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ToastProvider } from '@/lib/hooks/useToast';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
+
+// Inter is the primary UI font — self-hosted + async-loaded via next/font so
+// the browser can render text immediately instead of waiting on a blocking
+// stylesheet from fonts.googleapis.com. Geist / Geist Mono are loaded
+// asynchronously in <head> below (the `Geist` family isn't exposed by
+// next/font/google in Next 14, so we keep a non-blocking <link>).
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-inter',
+  display: 'swap',
+  preload: true,
+});
 
 const BASE_URL = 'https://boltynetwork.xyz';
 
@@ -101,22 +115,32 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" data-theme="dark" className={inter.variable}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Non-blocking Geist + Geist Mono. The `media="print"` trick lets the
+             browser fetch the stylesheet in the background without blocking
+             the initial paint; the onLoad handler promotes it to `all` once
+             ready. Fontshare's "General Sans" + "Clash Display" links were
+             dropped — the few spots that used General Sans now fall back to
+             Inter, which is visually close and already loaded. */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-          rel="stylesheet"
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
         />
         <link
+          rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
+          media="print"
+          // @ts-expect-error onLoad swap trick for async CSS
+          onLoad="this.media='all'"
         />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&f[]=clash-display@400,500,600,700&display=swap"
-          rel="stylesheet"
-        />
+        <noscript>
+          <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+          />
+        </noscript>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

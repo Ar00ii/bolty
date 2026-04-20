@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
-import { AgentStatus, ActivityStatus } from '@prisma/client';
+import { AgentStatus, ActivityStatus, Prisma } from '@prisma/client';
 import axios from 'axios';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -246,13 +246,14 @@ export class AgentsService {
     metadata?: Record<string, unknown>,
   ) {
     try {
+      const rt = typeof metadata?.responseTime === 'number' ? metadata.responseTime : null;
       await this.prisma.agentActivityLog.create({
         data: {
           agentId,
           action,
           status,
-          metadata: metadata || null,
-          responseTime: metadata?.responseTime || null,
+          metadata: (metadata as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+          responseTime: rt,
         },
       });
     } catch (error) {

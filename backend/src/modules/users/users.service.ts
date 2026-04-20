@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { invalidateUserCache } from '../auth/strategies/jwt.strategy';
 
 interface UpdateProfileData {
   username?: string;
@@ -114,6 +115,7 @@ export class UsersService {
         profileSetup: true,
       },
     });
+    invalidateUserCache(userId);
     return updated;
   }
 

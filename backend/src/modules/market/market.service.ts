@@ -422,35 +422,51 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   }
 
   async getListingFacets() {
-    const listings = await this.prisma.marketListing.findMany({
-      where: { status: 'ACTIVE' },
-      select: { tags: true, price: true, type: true },
-    });
+    // Pull type counts + price range via SQL aggregates so the DB does the
+    // heavy lifting. For tags (string[] column) we still sample rows, but cap
+    // at 500 so catalog growth can't turn this into a full-table scan on
+    // every marketplace page load.
+    const [typeGroups, priceAgg, totalActive, sampledForTags] = await Promise.all([
+      this.prisma.marketListing.groupBy({
+        by: ['type'],
+        where: { status: 'ACTIVE' },
+        _count: { _all: true },
+      }),
+      this.prisma.marketListing.aggregate({
+        where: { status: 'ACTIVE' },
+        _min: { price: true },
+        _max: { price: true },
+      }),
+      this.prisma.marketListing.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.marketListing.findMany({
+        where: { status: 'ACTIVE' },
+        select: { tags: true },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
+      }),
+    ]);
+
     const tagCounts = new Map<string, number>();
-    const typeCounts = new Map<string, number>();
-    let minPrice = Infinity;
-    let maxPrice = -Infinity;
-    for (const l of listings) {
+    for (const l of sampledForTags) {
       for (const t of l.tags || []) {
         tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
       }
-      typeCounts.set(l.type, (typeCounts.get(l.type) || 0) + 1);
-      if (l.price < minPrice) minPrice = l.price;
-      if (l.price > maxPrice) maxPrice = l.price;
     }
     const topTags = Array.from(tagCounts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20)
       .map(([tag, count]) => ({ tag, count }));
-    const types = Array.from(typeCounts.entries()).map(([type, count]) => ({ type, count }));
+
+    const types = typeGroups.map((g) => ({ type: g.type, count: g._count._all }));
+
     return {
       tags: topTags,
       types,
       priceRange: {
-        min: Number.isFinite(minPrice) ? minPrice : 0,
-        max: Number.isFinite(maxPrice) ? maxPrice : 0,
+        min: priceAgg._min.price ?? 0,
+        max: priceAgg._max.price ?? 0,
       },
-      totalActive: listings.length,
+      totalActive,
     };
   }
 
@@ -481,6 +497,12 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   ) {
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
+    // Score listings off purchase + negotiation activity in the last 7 days.
+    // We resolve the top-scoring ids up front, then fetch ONLY those rows with
+    // their relations. Previous impl fetched every listing in the where clause
+    // (unbounded) and sorted in app memory — that turned /market into an N+1
+    // table scan for anyone browsing trending.
+    const CANDIDATE_CAP = 200; // hard cap on how many listings we score
     const [purchaseStats, negotiationStats, total] = await Promise.all([
       this.prisma.marketPurchase.groupBy({
         by: ['listingId'],
@@ -503,16 +525,26 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       scores.set(n.listingId, (scores.get(n.listingId) || 0) + n._count._all * 1);
     }
 
-    const listings = await this.prisma.marketListing.findMany({
+    // Include listings that scored (7d activity) plus the most recent ones
+    // as a fallback, so first-page trending isn't empty on a quiet week.
+    const scoredIds = Array.from(scores.keys());
+    const recentFill = await this.prisma.marketListing.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      take: CANDIDATE_CAP,
+      select: { id: true, createdAt: true },
+    });
+    const candidateIds = new Set<string>([...scoredIds, ...recentFill.map((l) => l.id)]);
+
+    const candidates = await this.prisma.marketListing.findMany({
+      where: { ...where, id: { in: Array.from(candidateIds) } },
       include: {
         seller: { select: { id: true, username: true, avatarUrl: true } },
         repository: { select: { id: true, name: true, githubUrl: true, language: true } },
       },
     });
 
-    const ranked = listings
+    const ranked = candidates
       .map((l) => ({ listing: l, score: scores.get(l.id) || 0 }))
       .sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;

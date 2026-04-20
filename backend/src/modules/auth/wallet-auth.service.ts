@@ -5,6 +5,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 
 import { AuthService } from './auth.service';
 import { AuthTokens } from './auth.service';
+import { invalidateUserCache } from './strategies/jwt.strategy';
 
 @Injectable()
 export class WalletAuthService {
@@ -118,11 +119,13 @@ export class WalletAuthService {
       }
       await tx.user.update({ where: { id: userId }, data: { walletAddress: normalized } });
     });
+    invalidateUserCache(userId);
     this.logger.log(`Wallet linked: ${normalized.slice(0, 8)}... → user ${userId}`);
   }
 
   async unlinkWallet(userId: string): Promise<void> {
     await this.prisma.user.update({ where: { id: userId }, data: { walletAddress: null } });
+    invalidateUserCache(userId);
   }
 
   // ── Helper Methods ────────────────────────────────────────────────────────
