@@ -3,11 +3,12 @@
 import { usePathname } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-import { AppShell } from '@/components/layout/AppShell';
 import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
+import { PowerNavbar } from '@/components/layout/PowerNavbar';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
+import { StandardSidebar } from '@/components/layout/StandardSidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
 import { useGoToShortcuts } from '@/lib/hooks/useGoToShortcuts';
 
@@ -28,7 +29,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   if (useAppShell) {
     return (
-      <div className="min-h-screen" style={{ background: '#000' }}>
+      <div className="min-h-screen" style={{ background: '#09090b' }}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:rounded-md focus:border focus:border-purple-400/40 focus:bg-zinc-950 focus:px-4 focus:py-2 focus:text-xs focus:text-purple-200 focus:shadow-xl"
@@ -37,7 +38,16 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         </a>
         <CommandPalette />
         <ShortcutsModal />
-        <AppShell>{children}</AppShell>
+        <BackToTop />
+        <div className="flex">
+          <StandardSidebar />
+          <div className="flex-1 w-full min-w-0 flex flex-col">
+            <PowerNavbar />
+            <main id="main-content" tabIndex={-1} className="flex-1 relative focus:outline-none">
+              {children}
+            </main>
+          </div>
+        </div>
       </div>
     );
   }
