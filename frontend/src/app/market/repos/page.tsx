@@ -31,7 +31,6 @@ import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react
 
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
-import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
@@ -1589,60 +1588,19 @@ function ReposMarketPageContent() {
 
   return (
     <div className="page-container py-8 relative" style={{ background: '#000' }}>
-      {/* Header */}
-      <div className="page-header relative">
-        <div
-          className="relative rounded-2xl p-5 sm:p-6 md:p-10 overflow-hidden"
-          style={{
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(0,0,0,0.35)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-white/20 pointer-events-none" />
-          <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-white/20 pointer-events-none" />
-          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-white/20 pointer-events-none" />
-          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-white/20 pointer-events-none" />
-
-          <div className="flex items-center gap-2 text-xs text-zinc-500 mb-4">
-            <Link
-              href="/market"
-              className="hover:text-blue-300 transition-colors uppercase tracking-[0.2em]"
-            >
-              Market
-            </Link>
-            <span className="text-zinc-700">/</span>
-            <span className="text-blue-300/80 uppercase tracking-[0.2em]">Repositories</span>
-          </div>
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:flex-wrap">
-            <div className="max-w-2xl min-w-0">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-                <span className="text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-light">
-                  Open source marketplace
-                </span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-tight leading-tight">
-                <GradientText gradient="blue">Repositories</GradientText>
-              </h1>
-              <p className="text-[13px] sm:text-sm md:text-base text-zinc-400 font-light mt-3 max-w-xl">
-                Discover, vote on, and download community code repositories. Publish your own and
-                monetize access with built-in escrow.
-              </p>
-            </div>
-            {isAuthenticated && (
-              <ShimmerButton
-                onClick={() => {
-                  switchTab('mine');
-                  loadGhRepos();
-                }}
-                className="text-white text-sm px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all inline-flex items-center gap-2 w-full md:w-auto justify-center"
-              >
-                <Plus className="w-4 h-4" /> Publish Repo
-              </ShimmerButton>
-            )}
-          </div>
-        </div>
+      {/* Top action row */}
+      <div className="flex items-center justify-end mb-5 sm:mb-6">
+        {isAuthenticated && (
+          <ShimmerButton
+            onClick={() => {
+              switchTab('mine');
+              loadGhRepos();
+            }}
+            className="text-white text-sm px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all inline-flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Publish Repo
+          </ShimmerButton>
+        )}
       </div>
 
       {/* Stats strip */}
@@ -1858,6 +1816,12 @@ function ReposMarketPageContent() {
               ))}
             </div>
           )}
+
+          {/* About this section */}
+          <p className="mt-12 sm:mt-16 mb-2 text-center text-xs sm:text-[13px] text-zinc-500 font-light max-w-2xl mx-auto leading-relaxed">
+            Discover, vote on, and download community code repositories. Publish your own and
+            monetize access with built-in escrow.
+          </p>
         </>
       )}
 
