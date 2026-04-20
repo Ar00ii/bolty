@@ -248,7 +248,7 @@ export function Sidebar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.3 }}
           >
-          <div className="flex items-center gap-3 pl-2">
+          <div className="flex items-center gap-3 pl-4">
               <span
                 className="inline-flex w-8 h-8 items-center justify-center rounded-xl flex-shrink-0"
                 style={{
