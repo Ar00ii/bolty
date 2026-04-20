@@ -20,7 +20,6 @@ import {
   Settings,
   ShoppingBag,
   Trophy,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -87,7 +86,6 @@ const NAV: NavSection[] = [
   {
     section: 'Account',
     items: [
-      { label: 'Wallet', icon: Wallet, href: '/profile?tab=wallet' },
       { label: 'Settings', icon: Settings, href: '/profile' },
       { label: 'How it works', icon: FileText, href: '/how-it-works' },
       { label: 'Docs', icon: BookOpen, href: '/docs/agent-protocol' },
