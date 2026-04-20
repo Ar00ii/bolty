@@ -52,46 +52,40 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'primary',
+    id: 'discover',
+    label: 'Discover',
     items: [
       { href: '/market', label: 'Marketplace', icon: LayoutGrid, expandable: true },
-      { href: '/market/agents', label: 'Agents', icon: Bot },
-      { href: '/market/repos', label: 'Repos', icon: GitBranch },
-      { href: '/market/sellers', label: 'Sellers', icon: Users },
-      { href: '/market/tags', label: 'Tags', icon: Hash },
+      { href: '/reputation/leaderboard', label: 'Leaderboard', icon: Trophy },
     ],
   },
   {
     id: 'workspace',
+    label: 'My work',
     items: [
       { href: '/market/library', label: 'Library', icon: Library },
       { href: '/market/favorites', label: 'Saved', icon: Heart },
-      { href: '/market/seller', label: 'Seller', icon: BarChart3, expandable: true },
-      { href: '/orders', label: 'Orders', icon: ShoppingBag },
+      { href: '/orders', label: 'Orders', icon: ShoppingBag, expandable: true },
     ],
   },
   {
     id: 'community',
+    label: 'Community',
     items: [
       { href: '/chat', label: 'Chat', icon: MessageSquare },
       { href: '/dm', label: 'Messages', icon: MessageCircle },
-      { href: '/reputation/leaderboard', label: 'Leaderboard', icon: Trophy },
       { href: '/notifications', label: 'Notifications', icon: Bell },
     ],
   },
   {
-    id: 'other',
-    items: [
-      { href: '/how-it-works', label: 'How it works', icon: FileText },
-      { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen, expandable: true },
-    ],
-  },
-  {
     id: 'account',
+    label: 'Account',
     items: [
       { href: '/profile?tab=wallet', label: 'Wallet', icon: Wallet },
-      { href: '/help', label: 'Support', icon: LifeBuoy },
       { href: '/profile', label: 'Settings', icon: Settings, expandable: true },
+      { href: '/how-it-works', label: 'How it works', icon: FileText },
+      { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen },
+      { href: '/help', label: 'Help', icon: LifeBuoy },
     ],
   },
 ];
@@ -164,6 +158,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {groups.map((group, idx) => (
             <React.Fragment key={group.id}>
               {idx > 0 && group.items.length > 0 && <div className="mk-sidebar__divider" />}
+              {group.label && group.items.length > 0 && (
+                <div className="mk-sidebar__group-label">{group.label}</div>
+              )}
               <NavList items={group.items} pathname={pathname} />
             </React.Fragment>
           ))}
