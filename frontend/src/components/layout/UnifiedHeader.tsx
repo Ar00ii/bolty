@@ -86,7 +86,7 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="w-full pl-10 md:pl-16 pr-4 md:pr-8 h-16 flex items-center justify-between">
+        <div className="w-full pl-12 md:pl-20 pr-4 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -109,8 +109,8 @@ export function UnifiedHeader() {
               className="text-xl md:text-2xl hidden sm:inline"
               style={{
                 fontFamily: "'Inter', sans-serif",
-                fontWeight: 800,
-                letterSpacing: '-0.02em',
+                fontWeight: 500,
+                letterSpacing: '-0.01em',
                 color: '#ffffff',
               }}
             >
