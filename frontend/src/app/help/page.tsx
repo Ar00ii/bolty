@@ -141,7 +141,7 @@ const FAQS: FaqEntry[] = [
     id: 'seller-fees',
     question: 'What are the seller fees?',
     answer:
-      'Base platform fee is 5% of each sale. BOLTY stakers get discounts down to 2%. Gas fees are paid by the buyer on purchase and by the escrow on release.',
+      'Platform fee is a flat 7% of each sale. Gas fees are paid by the buyer on purchase and by the escrow on release.',
     category: 'selling',
     tags: ['fees', 'payouts'],
   },
