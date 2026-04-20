@@ -22,7 +22,7 @@ export function LegalPage({
   sections: LegalSection[];
 }) {
   return (
-    <div className="min-h-screen" style={{ background: '#000' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#000' }}>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"

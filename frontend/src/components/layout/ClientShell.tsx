@@ -17,7 +17,8 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   const isHome = pathname === '/';
   const isAuth = pathname.startsWith('/auth');
-  const useAppShell = !isHome && !isAuth;
+  const isLegal = pathname === '/terms' || pathname === '/privacy';
+  const useAppShell = !isHome && !isAuth && !isLegal;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
