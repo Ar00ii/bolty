@@ -108,9 +108,9 @@ export function UnifiedHeader() {
             <span
               className="text-xl md:text-2xl hidden sm:inline"
               style={{
-                fontFamily: "'General Sans', sans-serif",
-                fontWeight: 600,
-                letterSpacing: '0em',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 400,
+                letterSpacing: '-0.3px',
                 background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
