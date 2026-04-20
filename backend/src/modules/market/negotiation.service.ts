@@ -284,8 +284,7 @@ export class NegotiationService {
     if (!neg) throw new NotFoundException();
     if (neg.status !== 'ACTIVE') throw new BadRequestException('Negotiation is not active');
     if (neg.buyerId !== userId && neg.listing.sellerId !== userId) throw new ForbiddenException();
-    if (neg.mode === 'HUMAN')
-      throw new BadRequestException('Already in human mode');
+    if (neg.mode === 'HUMAN') throw new BadRequestException('Already in human mode');
     if (neg.humanSwitchRequestedBy) {
       throw new BadRequestException(
         'Switch already requested — waiting for the other party to accept',
@@ -314,8 +313,7 @@ export class NegotiationService {
     if (!neg) throw new NotFoundException();
     if (neg.status !== 'ACTIVE') throw new BadRequestException('Negotiation is not active');
     if (neg.buyerId !== userId && neg.listing.sellerId !== userId) throw new ForbiddenException();
-    if (neg.mode === 'HUMAN')
-      throw new BadRequestException('Already in human mode');
+    if (neg.mode === 'HUMAN') throw new BadRequestException('Already in human mode');
 
     const requestedBy = neg.humanSwitchRequestedBy;
     if (!requestedBy) throw new BadRequestException('No human switch request pending');
@@ -385,12 +383,7 @@ export class NegotiationService {
   private async runBuyerTurn(negId: string) {
     try {
       const neg = await this.fetchNegForAi(negId);
-      if (
-        !neg ||
-        neg.status !== 'ACTIVE' ||
-        neg.mode !== 'AI_AI'
-      )
-        return;
+      if (!neg || neg.status !== 'ACTIVE' || neg.mode !== 'AI_AI') return;
       if (neg.turnCount >= MAX_TURNS) {
         await this.expireNegotiation(negId);
         return;
@@ -454,12 +447,7 @@ export class NegotiationService {
   private async runSellerTurn(negId: string) {
     try {
       const neg = await this.fetchNegForAi(negId);
-      if (
-        !neg ||
-        neg.status !== 'ACTIVE' ||
-        neg.mode !== 'AI_AI'
-      )
-        return;
+      if (!neg || neg.status !== 'ACTIVE' || neg.mode !== 'AI_AI') return;
       if (neg.turnCount >= MAX_TURNS) {
         await this.expireNegotiation(negId);
         return;
@@ -699,9 +687,7 @@ Respond ONLY with JSON: {"reply": "your greeting"}`;
         max_tokens: 256,
         messages: [{ role: 'user', content: prompt }],
       });
-      const parsed = this.parseJson(
-        res.content[0].type === 'text' ? res.content[0].text : '',
-      );
+      const parsed = this.parseJson(res.content[0].type === 'text' ? res.content[0].text : '');
       if (parsed) return { reply: String(parsed.reply), action: 'counter' };
     } catch (err) {
       this.logger.error('Claude seller greet failed', err);
@@ -746,9 +732,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         max_tokens: 512,
         messages: [{ role: 'user', content: prompt }],
       });
-      const parsed = this.parseJson(
-        res.content[0].type === 'text' ? res.content[0].text : '',
-      );
+      const parsed = this.parseJson(res.content[0].type === 'text' ? res.content[0].text : '');
       if (parsed) {
         let action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(
           parsed.action as string,
@@ -856,9 +840,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         max_tokens: 512,
         messages: [{ role: 'user', content: prompt }],
       });
-      const parsed = this.parseJson(
-        res.content[0].type === 'text' ? res.content[0].text : '',
-      );
+      const parsed = this.parseJson(res.content[0].type === 'text' ? res.content[0].text : '');
       if (parsed) {
         const action: 'accept' | 'reject' | 'counter' = ['accept', 'reject', 'counter'].includes(
           parsed.action as string,
