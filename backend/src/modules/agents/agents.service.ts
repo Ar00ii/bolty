@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { AgentStatus, ActivityStatus } from '@prisma/client';
-import * as axios from 'axios';
+import axios from 'axios';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
@@ -22,7 +22,7 @@ export interface TestWebhookPayload {
   event: string;
   timestamp: number;
   test: true;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -167,7 +167,7 @@ export class AgentsService {
     const startTime = Date.now();
 
     try {
-      const response = await axios.default.post(agent.webhookUrl, payload, {
+      const response = await axios.post(agent.webhookUrl, payload, {
         timeout: this.WEBHOOK_TIMEOUT,
         validateStatus: () => true, // Accept all status codes
       });
@@ -239,7 +239,7 @@ export class AgentsService {
   /**
    * Log an activity for an agent
    */
-  async logActivity(agentId: string, action: string, status: ActivityStatus, metadata?: any) {
+  async logActivity(agentId: string, action: string, status: ActivityStatus, metadata?: Record<string, unknown>) {
     try {
       await this.prisma.agentActivityLog.create({
         data: {

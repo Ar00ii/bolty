@@ -75,9 +75,7 @@ export class MarketService {
     return result;
   }
 
-  private async compute7dSparklines(
-    listingIds: string[],
-  ): Promise<Map<string, number[]>> {
+  private async compute7dSparklines(listingIds: string[]): Promise<Map<string, number[]>> {
     const result = new Map<string, number[]>();
     if (listingIds.length === 0) return result;
     const now = Date.now();
@@ -754,9 +752,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       agg.count += r._count._all;
       reviewBySeller.set(sellerId, agg);
     }
-    const listingCountBySeller = new Map(
-      listingCounts.map((l) => [l.sellerId, l._count._all]),
-    );
+    const listingCountBySeller = new Map(listingCounts.map((l) => [l.sellerId, l._count._all]));
     const salesBySeller = new Map(salesGroup.map((s) => [s.sellerId, s._count._all]));
     const sellerById = new Map(sellers.map((s) => [s.id, s]));
 

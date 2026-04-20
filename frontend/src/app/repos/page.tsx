@@ -292,7 +292,7 @@ export default function ReposPage() {
       const formData = new FormData();
       formData.append('file', file);
       const result = await api.upload<{ logoUrl: string }>('/repos/upload-logo', formData);
-      setPubLogoUrl((result as any).logoUrl || '');
+      setPubLogoUrl(result.logoUrl || '');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Logo upload failed');
     } finally {
@@ -413,7 +413,7 @@ export default function ReposPage() {
     let sellerWallet: string | null = null;
     try {
       const details = await api.get<{ user: { walletAddress: string } }>(`/repos/${repo.id}`);
-      sellerWallet = (details as any).user?.walletAddress;
+      sellerWallet = details.user?.walletAddress ?? null;
     } catch {
       setError('Could not fetch seller wallet');
       return;
@@ -430,7 +430,7 @@ export default function ReposPage() {
     let ethPrice = 2000;
     try {
       const priceData = await api.get<{ price: number }>('/chart/eth-price');
-      if ((priceData as any).price) ethPrice = (priceData as any).price;
+      if (priceData.price) ethPrice = priceData.price;
     } catch {
       /* fallback */
     }
