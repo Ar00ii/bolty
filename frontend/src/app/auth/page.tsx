@@ -469,19 +469,19 @@ function AuthPage() {
   // -- Render ----
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
+      className="h-screen w-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
-      {/* Back button — top-left, above all visual layers */}
+      {/* Back button — pinned top-left of the viewport, never moves */}
       <button
         type="button"
         onClick={handleBack}
         aria-label="Go back"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
         style={{
-          background: 'rgba(9,9,11,0.55)',
+          background: 'rgba(9,9,11,0.6)',
           border: '1px solid rgba(255,255,255,0.08)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
@@ -547,7 +547,7 @@ function AuthPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-md max-h-[calc(100vh-4rem)] overflow-y-auto px-1"
       >
         {/* Header */}
         <motion.div
