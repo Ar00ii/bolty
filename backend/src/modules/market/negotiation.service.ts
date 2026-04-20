@@ -150,6 +150,7 @@ export class NegotiationService {
         messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       },
       orderBy: { updatedAt: 'desc' },
+      take: 100,
     });
   }
 

@@ -28,42 +28,9 @@ const nextConfig = {
     ];
   },
 
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Ensure @/ path alias resolves to src/ (backup for tsconfig paths)
     config.resolve.alias['@'] = path.resolve(__dirname, 'src');
-
-    if (isServer) {
-      // Replace @splinetool packages with a stub on the server.
-      // @splinetool/runtime executes `new class extends null` at module-level
-      // which throws in Node.js ("Super constructor null is not a constructor").
-      config.resolve.alias['@splinetool/react-spline'] = path.resolve(
-        __dirname,
-        'src/__stubs__/spline-stub.js',
-      );
-      config.resolve.alias['@splinetool/runtime'] = path.resolve(
-        __dirname,
-        'src/__stubs__/spline-stub.js',
-      );
-    } else {
-      // @splinetool/react-spline@4.x only exposes an ESM "import" condition in
-      // its exports field, which webpack cannot resolve without this alias.
-      // Point directly to the dist file to bypass the broken exports field.
-      config.resolve.alias['@splinetool/react-spline'] = path.resolve(
-        __dirname,
-        'node_modules/@splinetool/react-spline/dist/react-spline.js',
-      );
-      // face-api.js → @tensorflow/tfjs-core → node-fetch → encoding + fs
-      // These are Node.js-only modules; alias to false to exclude from browser bundle.
-      config.resolve.alias['encoding'] = false;
-      config.resolve.alias['fs'] = false;
-      config.resolve.alias['path'] = false;
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        crypto: false,
-      };
-    }
     return config;
   },
 

@@ -82,6 +82,7 @@ export class SocialService {
         receiver: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
       orderBy: { updatedAt: 'desc' },
+      take: 200,
     });
 
     return friendships.map((f) => {
@@ -97,6 +98,7 @@ export class SocialService {
         sender: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
     return requests.map((r) => ({ id: r.id, from: r.sender, createdAt: r.createdAt }));
   }
@@ -108,6 +110,7 @@ export class SocialService {
         receiver: { select: { id: true, username: true, displayName: true, avatarUrl: true } },
       },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
     return requests.map((r) => ({ id: r.id, to: r.receiver, createdAt: r.createdAt }));
   }

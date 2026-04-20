@@ -439,19 +439,29 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.repository.count({ where }),
     ]);
 
-    // Calculate vote scores
-    const reposWithVotes = await Promise.all(
-      repos.map(async (repo) => {
-        const votes = await this.prisma.vote.groupBy({
-          by: ['value'],
-          where: { repositoryId: repo.id },
-          _count: true,
-        });
-        const upvotes = votes.find((v) => v.value === 'UP')?._count ?? 0;
-        const downvotes = votes.find((v) => v.value === 'DOWN')?._count ?? 0;
-        return { ...repo, upvotes, downvotes, score: upvotes - downvotes };
-      }),
-    );
+    // Vote tallies in ONE groupBy across the page instead of one query per row.
+    // Was 1 + N queries (~20 round-trips per /repos page); now 2.
+    const repoIds = repos.map((r) => r.id);
+    const voteAgg = repoIds.length
+      ? await this.prisma.vote.groupBy({
+          by: ['repositoryId', 'value'],
+          where: { repositoryId: { in: repoIds } },
+          _count: { _all: true },
+        })
+      : [];
+
+    const tally = new Map<string, { up: number; down: number }>();
+    for (const row of voteAgg) {
+      const t = tally.get(row.repositoryId) ?? { up: 0, down: 0 };
+      if (row.value === 'UP') t.up = row._count._all;
+      else if (row.value === 'DOWN') t.down = row._count._all;
+      tally.set(row.repositoryId, t);
+    }
+
+    const reposWithVotes = repos.map((repo) => {
+      const t = tally.get(repo.id) ?? { up: 0, down: 0 };
+      return { ...repo, upvotes: t.up, downvotes: t.down, score: t.up - t.down };
+    });
 
     if (sortBy === 'votes') {
       reposWithVotes.sort((a, b) => b.score - a.score);

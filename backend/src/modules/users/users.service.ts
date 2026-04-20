@@ -202,10 +202,13 @@ export class UsersService {
   // ─── Activity Log ──────────────────────────────────────────────────────────
 
   async getActivityLog(userId: string, limit = 50) {
+    // Cap the per-call limit so the controller can't blow up the response
+    // by passing limit=10000.
+    const safeLimit = Math.min(Math.max(1, limit), 200);
     return this.prisma.auditLog.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: limit,
+      take: safeLimit,
       select: {
         id: true,
         action: true,
@@ -263,6 +266,7 @@ export class UsersService {
     return this.prisma.userIntegration.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
   }
 
