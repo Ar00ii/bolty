@@ -248,7 +248,7 @@ export function Sidebar() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05, duration: 0.3 }}
           >
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3 pl-2">
               <span
                 className="inline-flex w-8 h-8 items-center justify-center rounded-xl flex-shrink-0"
                 style={{
@@ -262,10 +262,20 @@ export function Sidebar() {
                 <Zap className="w-4 h-4 text-[#c4b5fd]" strokeWidth={2} />
               </span>
               <div className="flex flex-col leading-none">
-                <span className="text-[14px] font-semibold text-white tracking-[-0.01em]">
+                <span
+                  className="text-[15px] font-light tracking-wide"
+                  style={{
+                    background: 'linear-gradient(90deg, #e2d9ff 0%, #c4b5fd 50%, #a78bfa 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+                    letterSpacing: '0.04em',
+                  }}
+                >
                   Bolty
                 </span>
-                <span className="text-[9.5px] text-[#836ef9]/60 mt-0.5 tracking-[0.22em] uppercase font-medium">
+                <span className="text-[9px] text-[#836ef9]/55 mt-0.5 tracking-[0.28em] uppercase font-medium">
                   Network
                 </span>
               </div>
