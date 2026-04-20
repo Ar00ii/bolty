@@ -702,6 +702,13 @@ export default function ProfilePage() {
     setAvatarErr('');
     setAvatarMsg('');
     try {
+      const MAX_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        throw new Error('Image is larger than 10 MB. Please pick a smaller file.');
+      }
+      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+        throw new Error('Only PNG, JPG or WebP images are allowed.');
+      }
       const form = new FormData();
       form.append('file', file);
       const res = await fetch(`${API_URL}/users/upload-avatar`, {

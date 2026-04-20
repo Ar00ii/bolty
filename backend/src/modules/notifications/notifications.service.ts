@@ -3,6 +3,8 @@ import { NotificationType, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
+import { NotificationsGateway } from './notifications.gateway';
+
 export interface CreateNotificationInput {
   userId: string;
   type: NotificationType;
@@ -14,10 +16,13 @@ export interface CreateNotificationInput {
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly gateway: NotificationsGateway,
+  ) {}
 
   async create(input: CreateNotificationInput) {
-    return this.prisma.notification.create({
+    const notification = await this.prisma.notification.create({
       data: {
         userId: input.userId,
         type: input.type,
@@ -27,6 +32,8 @@ export class NotificationsService {
         meta: input.meta ?? Prisma.JsonNull,
       },
     });
+    this.gateway.pushToUser(input.userId, notification);
+    return notification;
   }
 
   async list(userId: string, params: { unreadOnly?: boolean; take?: number } = {}) {
@@ -51,10 +58,12 @@ export class NotificationsService {
   async markRead(id: string, userId: string) {
     const n = await this.prisma.notification.findUnique({ where: { id } });
     if (!n || n.userId !== userId) throw new NotFoundException();
-    return this.prisma.notification.update({
+    const updated = await this.prisma.notification.update({
       where: { id },
       data: { readAt: new Date() },
     });
+    this.gateway.pushReadToUser(userId, id);
+    return updated;
   }
 
   async markAllRead(userId: string) {
@@ -62,6 +71,7 @@ export class NotificationsService {
       where: { userId, readAt: null },
       data: { readAt: new Date() },
     });
+    this.gateway.pushReadAllToUser(userId);
     return { ok: true };
   }
 }
