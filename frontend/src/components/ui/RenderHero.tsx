@@ -49,7 +49,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         <div className="flex flex-col gap-5 sm:gap-6">
           <h1
             className="text-white font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
-            style={{ fontFamily: "'Space Grotesk', system-ui, sans-serif" }}
+            style={{ fontFamily: "'DM Sans', system-ui, sans-serif" }}
           >
             The on-chain
             <br />
