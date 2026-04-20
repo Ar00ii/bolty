@@ -124,7 +124,9 @@ export function UnifiedHeader() {
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
                   )}
-                  <span className="relative z-10">{link.label}</span>
+                  <span className="relative z-10" style={{ fontWeight: 700 }}>
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
