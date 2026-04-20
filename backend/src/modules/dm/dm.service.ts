@@ -23,17 +23,19 @@ export class DmService {
       throw new ForbiddenException('Cannot send message to yourself');
     }
 
-    // Verify receiver exists and is not banned
-    const receiver = await this.prisma.user.findUnique({
-      where: { id: receiverId },
-      select: { id: true, isBanned: true },
-    });
+    // Batch receiver + sender checks so sending a DM is a single round-trip
+    // to Postgres instead of two sequential findUnique calls.
+    const [receiver, sender] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: receiverId },
+        select: { id: true, isBanned: true },
+      }),
+      this.prisma.user.findUnique({
+        where: { id: senderId },
+        select: { isBanned: true },
+      }),
+    ]);
     if (!receiver) throw new ForbiddenException('User not found');
-
-    const sender = await this.prisma.user.findUnique({
-      where: { id: senderId },
-      select: { isBanned: true },
-    });
     if (!sender || sender.isBanned) throw new ForbiddenException('Account restricted');
 
     return this.prisma.directMessage.create({
@@ -58,6 +60,8 @@ export class DmService {
   }
 
   async getConversation(userId: string, peerId: string, take = 50) {
+    // Hard cap so a caller passing an absurd `take` can't blow memory.
+    const safeTake = Math.min(Math.max(1, take), 100);
     const messages = await this.prisma.directMessage.findMany({
       where: {
         OR: [
@@ -66,7 +70,7 @@ export class DmService {
         ],
       },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
-      take,
+      take: safeTake,
       include: {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },

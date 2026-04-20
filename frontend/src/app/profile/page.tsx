@@ -859,21 +859,31 @@ export default function ProfilePage() {
     }
   };
 
-  const handleGenerateAPIKey = async (name: string) => {
+  const handleGenerateAPIKey = async (name: string): Promise<APIKey | null> => {
     try {
-      const raw = await api.post<any>('/market/api-keys', { label: name });
+      const raw = await api.post<{
+        id: string;
+        key: string;
+        label: string | null;
+        createdAt: string;
+        lastUsedAt: string | null;
+        lastFour?: string;
+      }>('/market/api-keys', { label: name });
       const newKey: APIKey = {
         id: raw.id,
         name: raw.label || name,
         key: raw.key || '',
-        preview: raw.lastFour ? `blt_••••••••••••••••••••••••${raw.lastFour}` : (raw.preview || ''),
+        preview: raw.lastFour ? `blt_••••••••••••••••••••••••${raw.lastFour}` : '',
         createdAt: raw.createdAt,
         lastUsed: raw.lastUsedAt || null,
-        scopes: raw.scopes || [],
+        scopes: [],
       };
       setApiKeys([...apiKeys, newKey]);
+      return newKey;
     } catch (err) {
-      console.error('Failed to generate API key:', err);
+      const msg = err instanceof ApiError ? err.message : 'Failed to generate API key';
+      // Bubble up so the modal surfaces the reason (rate limit, auth, etc.)
+      throw new Error(msg);
     }
   };
 

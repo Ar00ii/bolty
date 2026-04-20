@@ -179,9 +179,11 @@ function CreateKeyForm({
   isLoading: boolean;
 }) {
   const [label, setLabel] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleCreate = async () => {
     if (isLoading) return;
+    setError(null);
     try {
       const result = await api.post<ApiKeyInfo>('/market/api-keys', {
         label: label.trim() || null,
@@ -189,7 +191,7 @@ function CreateKeyForm({
       onCreated(result);
       setLabel('');
     } catch (err) {
-      console.error(err);
+      setError(err instanceof ApiError ? err.message : 'Failed to create API key');
     }
   };
 
@@ -263,6 +265,12 @@ function CreateKeyForm({
           Cancel
         </button>
       </div>
+      {error && (
+        <p className="text-xs text-[#fda4af] mt-3 flex items-start gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+          <span>{error}</span>
+        </p>
+      )}
     </div>
   );
 }
