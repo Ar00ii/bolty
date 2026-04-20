@@ -1,17 +1,17 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
+  ArrowUpRight,
   Bell,
   Check,
   DollarSign,
-  LucideIcon,
   MessageSquare,
   Package,
   PartyPopper,
   Search,
   Star,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -27,67 +27,18 @@ import {
 
 const TYPE_META: Record<
   NotificationType,
-  {
-    icon: LucideIcon;
-    accent: string;
-    color: string;
-    label: string;
-  }
+  { icon: LucideIcon; color: string; label: string }
 > = {
-  MARKET_NEW_SALE: {
-    icon: DollarSign,
-    accent: 'text-emerald-400',
-    color: '#22c55e',
-    label: 'Sale',
-  },
-  MARKET_NEW_REVIEW: {
-    icon: Star,
-    accent: 'text-yellow-400',
-    color: '#f59e0b',
-    label: 'Review',
-  },
-  MARKET_ORDER_DELIVERED: {
-    icon: Package,
-    accent: 'text-cyan-400',
-    color: '#06B6D4',
-    label: 'Delivery',
-  },
-  MARKET_ORDER_COMPLETED: {
-    icon: PartyPopper,
-    accent: 'text-[#836EF9]',
-    color: '#836EF9',
-    label: 'Completed',
-  },
-  MARKET_NEGOTIATION_MESSAGE: {
-    icon: MessageSquare,
-    accent: 'text-zinc-300',
-    color: '#a1a1aa',
-    label: 'Message',
-  },
-  SYSTEM: { icon: Bell, accent: 'text-zinc-400', color: '#71717a', label: 'System' },
+  MARKET_NEW_SALE: { icon: DollarSign, color: '#22c55e', label: 'Sale' },
+  MARKET_NEW_REVIEW: { icon: Star, color: '#f59e0b', label: 'Review' },
+  MARKET_ORDER_DELIVERED: { icon: Package, color: '#06B6D4', label: 'Delivery' },
+  MARKET_ORDER_COMPLETED: { icon: PartyPopper, color: '#836EF9', label: 'Completed' },
+  MARKET_NEGOTIATION_MESSAGE: { icon: MessageSquare, color: '#EC4899', label: 'Message' },
+  SYSTEM: { icon: Bell, color: '#94a3b8', label: 'System' },
 };
 
-function formatTime(iso: string) {
-  const date = new Date(iso);
-  const diffMs = Date.now() - date.getTime();
-  const sec = Math.round(diffMs / 1000);
-  if (sec < 45) return 'just now';
-  const min = Math.round(sec / 60);
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.round(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  const day = Math.round(hr / 24);
-  if (day < 7) return `${day}d ago`;
-  return date.toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
 const TYPE_FILTERS: { value: NotificationType | 'ALL'; label: string }[] = [
-  { value: 'ALL', label: 'All types' },
+  { value: 'ALL', label: 'All' },
   { value: 'MARKET_NEW_SALE', label: 'Sales' },
   { value: 'MARKET_NEW_REVIEW', label: 'Reviews' },
   { value: 'MARKET_ORDER_DELIVERED', label: 'Deliveries' },
@@ -95,6 +46,25 @@ const TYPE_FILTERS: { value: NotificationType | 'ALL'; label: string }[] = [
   { value: 'MARKET_NEGOTIATION_MESSAGE', label: 'Messages' },
   { value: 'SYSTEM', label: 'System' },
 ];
+
+function timeAgo(iso: string) {
+  const diff = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
+function formatNumber(n: number) {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
+}
 
 export default function NotificationsPage() {
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -154,313 +124,445 @@ export default function NotificationsPage() {
       return haystack.includes(q);
     });
   }, [items, typeFilter, q]);
-  const typeCounts = items.reduce<Record<string, number>>((acc, n) => {
-    acc[n.type] = (acc[n.type] || 0) + 1;
-    return acc;
-  }, {});
+
+  const typeCounts = useMemo(() => {
+    return items.reduce<Record<string, number>>((acc, n) => {
+      acc[n.type] = (acc[n.type] || 0) + 1;
+      return acc;
+    }, {});
+  }, [items]);
+
+  const todayCount = useMemo(() => {
+    const since = Date.now() - 24 * 60 * 60 * 1000;
+    return items.filter((n) => new Date(n.createdAt).getTime() >= since).length;
+  }, [items]);
+
+  const mostActiveType = useMemo(() => {
+    let best: { type: string; count: number } | null = null;
+    for (const [t, c] of Object.entries(typeCounts)) {
+      if (!best || c > best.count) best = { type: t, count: c };
+    }
+    return best;
+  }, [typeCounts]);
 
   return (
-    <div className="relative max-w-3xl mx-auto px-4 lg:px-6 py-8 lg:py-12">
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full blur-3xl pointer-events-none -z-10"
-        style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.08), transparent 70%)' }}
-      />
-
-      <div className="flex items-end justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-light text-white tracking-tight">Notifications</h1>
-          <p className="text-sm text-zinc-500 mt-1 font-light">
-            {unread > 0 ? `${unread} unread` : 'You are all caught up'}
-          </p>
-        </div>
-        {unread > 0 && (
-          <motion.button
-            onClick={handleMarkAll}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="text-[11.5px] text-zinc-400 hover:text-white transition-colors flex items-center gap-1.5 h-9 px-3 rounded-lg"
-            style={{
-              background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
-            }}
-          >
-            <Check className="w-3.5 h-3.5" strokeWidth={2} /> Mark all read
-          </motion.button>
-        )}
-      </div>
-
-      <div className="relative mb-3">
-        <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none"
-          strokeWidth={1.75}
-        />
-        <input
-          ref={searchRef}
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search notifications…"
-          className="w-full pl-9 pr-16 py-2.5 rounded-lg text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-          }}
-        />
-        {query ? (
-          <button
-            onClick={() => setQuery('')}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-            aria-label="Clear search"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        ) : (
-          <kbd
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            /
-          </kbd>
-        )}
-      </div>
-
-      <div
-        className="inline-flex items-center p-0.5 rounded-lg mb-3"
-        style={{
-          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-        }}
-      >
-        {(['all', 'unread'] as const).map((f) => {
-          const active = filter === f;
-          return (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`relative text-[11.5px] font-medium h-7 px-3 rounded-md transition-colors tracking-[0.005em] ${
-                active ? 'text-white' : 'text-zinc-500 hover:text-zinc-200'
-              }`}
-            >
-              {active && (
-                <motion.span
-                  layoutId="notifications-filter-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-md"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
-              )}
-              <span className="relative z-10">{f === 'all' ? 'All' : 'Unread'}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="flex flex-wrap gap-1.5 mb-6">
-        {TYPE_FILTERS.map((t, idx) => {
-          const count = t.value === 'ALL' ? items.length : typeCounts[t.value] || 0;
-          if (t.value !== 'ALL' && count === 0) return null;
-          const active = typeFilter === t.value;
-          return (
-            <motion.button
-              key={t.value}
-              onClick={() => setTypeFilter(t.value)}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: Math.min(idx * 0.03, 0.2),
-                duration: 0.22,
-                ease: [0.22, 0.61, 0.36, 1],
-              }}
-              whileTap={{ scale: 0.96 }}
-              className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors tracking-[0.005em] ${
-                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-              }}
-            >
-              {active && (
-                <motion.span
-                  layoutId="notifications-type-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
-              )}
-              <span className="relative z-10">{t.label}</span>
-              <span
-                className="relative z-10 text-[10px] font-normal"
-                style={{ color: active ? 'rgba(255,255,255,0.7)' : 'rgba(113,113,122,1)' }}
+    <div className="min-h-screen pb-20">
+      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+        <div className="mx-auto max-w-[1200px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <Bell className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Activity feed</span>
+                {unread > 0 && <LiveDot />}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Notifications
+              </h1>
+              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+                {unread > 0 ? `${unread} unread · ${items.length} total` : 'You are all caught up.'}
+              </p>
+            </div>
+            {unread > 0 && (
+              <button
+                onClick={handleMarkAll}
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12px] text-zinc-300 hover:text-white transition"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
               >
-                {count}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
+                <Check className="w-3.5 h-3.5" strokeWidth={1.75} />
+                Mark all read
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
 
-      {loading && items.length === 0 ? (
-        <div className="text-center py-20 text-sm text-zinc-500">Loading…</div>
-      ) : visible.length === 0 ? (
-        <div
-          className="relative py-16 text-center rounded-2xl overflow-hidden"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
-          }}
-        >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
-            }}
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1200px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          <StatTile
+            label="Unread"
+            value={formatNumber(unread)}
+            sub={unread > 0 ? 'waiting for you' : 'inbox zero'}
+            accent="#836EF9"
           />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-40"
-            style={{ background: 'rgba(131,110,249,0.18)' }}
+          <StatTile
+            label="Today"
+            value={formatNumber(todayCount)}
+            sub="last 24h"
+            accent="#22c55e"
           />
+          <StatTile
+            label="Total"
+            value={formatNumber(items.length)}
+            sub="last 50 loaded"
+            accent="#06B6D4"
+          />
+          <StatTile
+            label="Top type"
+            value={
+              mostActiveType
+                ? TYPE_META[mostActiveType.type as NotificationType]?.label || '—'
+                : '—'
+            }
+            sub={mostActiveType ? `${mostActiveType.count} events` : 'no activity'}
+            accent="#EC4899"
+          />
+        </div>
+      </section>
+
+      {/* Filters */}
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1200px] flex items-center gap-2 flex-wrap">
           <div
-            className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+            className="flex items-center gap-0.5 rounded-lg p-0.5"
             style={{
-              background:
-                'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-              border: '1px solid rgba(131,110,249,0.28)',
-              boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.35)',
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
-            <Bell className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
-          </div>
-          <p className="relative text-[14px] text-white font-normal tracking-[0.005em]">
-            {q
-              ? 'No notifications match your search'
-              : typeFilter === 'ALL'
-                ? 'Nothing here yet'
-                : 'No notifications of that type'}
-          </p>
-          <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto leading-relaxed">
-            {q
-              ? 'Try a different keyword or clear the search to see everything.'
-              : 'Sales, reviews, delivery updates and marketplace messages will show up in this feed.'}
-          </p>
-        </div>
-      ) : (
-        <div
-          className="relative rounded-2xl overflow-hidden"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
-          }}
-        >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
-            }}
-          />
-          <ul className="relative divide-y divide-white/[0.05]">
-            {visible.map((n, idx) => {
-              const meta = TYPE_META[n.type] ?? TYPE_META.SYSTEM;
-              const Icon = meta.icon;
-              const inner = (
-                <div
-                  className={`flex gap-4 p-4 transition-colors ${
-                    n.readAt
-                      ? 'hover:bg-white/[0.02]'
-                      : 'bg-[#836EF9]/[0.045] hover:bg-[#836EF9]/[0.07]'
-                  }`}
-                >
-                  <div
-                    className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{
-                      background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}06 100%)`,
-                      boxShadow: `inset 0 0 0 1px ${meta.color}38, inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${meta.color}40`,
-                    }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: meta.color }} strokeWidth={1.75} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <span className="text-[10px] uppercase tracking-[0.14em] font-medium text-zinc-500">
-                        {meta.label}
-                      </span>
-                      <span className="text-[10px] text-zinc-700">•</span>
-                      <span className="text-[10px] text-zinc-500 tracking-wide">
-                        {formatTime(n.createdAt)}
-                      </span>
-                      {!n.readAt && (
-                        <span
-                          className="ml-auto text-[9.5px] font-semibold uppercase tracking-[0.12em] px-1.5 py-0.5 rounded-md text-white"
-                          style={{
-                            background: 'linear-gradient(180deg, #9a83ff 0%, #7056ec 100%)',
-                            boxShadow:
-                              '0 2px 8px -1px rgba(131,110,249,0.45), inset 0 1px 0 rgba(255,255,255,0.2)',
-                          }}
-                        >
-                          New
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[13px] font-normal text-white tracking-[0.005em]">
-                      {n.title}
-                    </p>
-                    {n.body && (
-                      <p className="text-[12px] text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
-                        {n.body}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
+            {(['all', 'unread'] as const).map((f) => {
+              const active = filter === f;
               return (
-                <motion.li
-                  key={n.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: Math.min(idx * 0.025, 0.3),
-                    duration: 0.24,
-                    ease: [0.22, 0.61, 0.36, 1],
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => setFilter(f)}
+                  className="px-3 py-1.5 text-[12px] font-light rounded-md transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
                   }}
                 >
-                  {n.url ? (
-                    <Link href={n.url} onClick={() => handleRead(n)} className="block">
-                      {inner}
-                    </Link>
-                  ) : (
-                    <button onClick={() => handleRead(n)} className="w-full text-left">
-                      {inner}
-                    </button>
-                  )}
-                </motion.li>
+                  {f === 'all' ? 'All' : 'Unread'}
+                </button>
               );
             })}
-          </ul>
+          </div>
+
+          <div
+            className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search notifications…"
+              className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+            />
+            {query ? (
+              <button
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            ) : (
+              <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                /
+              </kbd>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 ml-auto flex-wrap">
+            {TYPE_FILTERS.map((t) => {
+              const count = t.value === 'ALL' ? items.length : typeCounts[t.value] || 0;
+              if (t.value !== 'ALL' && count === 0) return null;
+              const active = typeFilter === t.value;
+              const color =
+                t.value === 'ALL'
+                  ? '#836EF9'
+                  : TYPE_META[t.value as NotificationType]?.color || '#836EF9';
+              return (
+                <button
+                  key={t.value}
+                  type="button"
+                  onClick={() => setTypeFilter(t.value)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? `${color}22` : 'rgba(255,255,255,0.02)',
+                    boxShadow: active
+                      ? `inset 0 0 0 1px ${color}5a`
+                      : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  }}
+                >
+                  {t.label}
+                  <span
+                    className="text-[10px] font-mono tabular-nums"
+                    style={{ color: active ? `${color}ee` : '#71717a' }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
+      </section>
+
+      {/* Feed */}
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1200px]">
+          {loading && items.length === 0 ? (
+            <div
+              className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+              style={{
+                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+              }}
+            >
+              Loading notifications…
+            </div>
+          ) : visible.length === 0 ? (
+            <EmptyState query={q} typeFilter={typeFilter} />
+          ) : (
+            <div
+              className="rounded-xl overflow-hidden"
+              style={{
+                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                boxShadow:
+                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+              }}
+            >
+              <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+                <span className="text-center">#</span>
+                <span>Notification</span>
+                <span>Type</span>
+                <span className="text-right">Age</span>
+                <span />
+              </div>
+              <ul>
+                {visible.map((n, i) => (
+                  <NotifRow key={n.id} item={n} index={i} onRead={handleRead} />
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function LiveDot() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
+      <span
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: '#836EF9' }}
+      />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#836EF9]" />
+    </span>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent: string;
+}) {
+  return (
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
+      </div>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+function NotifRow({
+  item,
+  index,
+  onRead,
+}: {
+  item: NotificationItem;
+  index: number;
+  onRead: (n: NotificationItem) => void;
+}) {
+  const meta = TYPE_META[item.type] ?? TYPE_META.SYSTEM;
+  const Icon = meta.icon;
+  const isUnread = !item.readAt;
+
+  const inner = (
+    <div className="group relative grid grid-cols-[28px_minmax(0,1fr)_90px_70px_28px] items-center gap-3 px-3 py-2.5 w-full text-left border-b border-white/[0.04] transition-all hover:bg-white/[0.02]">
+      <span
+        aria-hidden
+        className="absolute left-0 top-0 bottom-0 w-[2px]"
+        style={{ background: meta.color, opacity: isUnread ? 0.9 : 0.35 }}
+      />
+      {isUnread && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: `linear-gradient(90deg, ${meta.color}0f, transparent 35%)`,
+          }}
+        />
       )}
+
+      <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums relative">
+        {isUnread ? (
+          <span
+            aria-hidden
+            className="inline-block w-1.5 h-1.5 rounded-full"
+            style={{
+              background: meta.color,
+              boxShadow: `0 0 6px ${meta.color}`,
+            }}
+          />
+        ) : (
+          String(index + 1).padStart(2, '0')
+        )}
+      </span>
+
+      <div className="min-w-0 flex items-center gap-2.5 relative">
+        <div
+          className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+          style={{
+            background: `${meta.color}18`,
+            boxShadow: `inset 0 0 0 1px ${meta.color}40`,
+          }}
+        >
+          <Icon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: meta.color }} />
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[13px] font-normal text-white truncate">{item.title}</span>
+            {isUnread && (
+              <span
+                className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded font-medium"
+                style={{
+                  color: '#836EF9',
+                  background: 'rgba(131,110,249,0.12)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                }}
+              >
+                NEW
+              </span>
+            )}
+          </div>
+          {item.body && (
+            <div className="text-[10.5px] text-zinc-500 font-light truncate">{item.body}</div>
+          )}
+        </div>
+      </div>
+
+      <div className="relative">
+        <span
+          className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+          style={{
+            color: meta.color,
+            background: `${meta.color}14`,
+            boxShadow: `inset 0 0 0 1px ${meta.color}40`,
+          }}
+        >
+          {meta.label}
+        </span>
+      </div>
+
+      <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums relative">
+        {timeAgo(item.createdAt)}
+      </div>
+
+      <ArrowUpRight
+        className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition relative"
+        strokeWidth={1.75}
+      />
+    </div>
+  );
+
+  return (
+    <li>
+      {item.url ? (
+        <Link href={item.url} onClick={() => onRead(item)} className="block">
+          {inner}
+        </Link>
+      ) : (
+        <button type="button" onClick={() => onRead(item)} className="w-full text-left">
+          {inner}
+        </button>
+      )}
+    </li>
+  );
+}
+
+function EmptyState({ query, typeFilter }: { query: string; typeFilter: string }) {
+  return (
+    <div
+      className="relative rounded-xl px-6 py-16 text-center overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
+      <div
+        className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+          border: '1px solid rgba(131,110,249,0.35)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+        }}
+      >
+        <Bell className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+      </div>
+      <p className="relative text-[14px] text-white font-normal">
+        {query
+          ? 'No notifications match your search'
+          : typeFilter === 'ALL'
+            ? 'Nothing here yet'
+            : 'No notifications of that type'}
+      </p>
+      <p className="relative text-[12px] text-zinc-500 mt-1.5 max-w-sm mx-auto font-light">
+        {query
+          ? 'Try a different keyword or clear the search to see everything.'
+          : 'Sales, reviews, deliveries and marketplace messages show up here in real time.'}
+      </p>
     </div>
   );
 }
