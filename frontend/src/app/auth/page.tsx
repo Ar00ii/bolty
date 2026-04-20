@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
 
 import { FlickeringGrid } from '@/components/ui/flickering-grid';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useState, useEffect } from 'react';
 
@@ -845,13 +846,19 @@ function AuthPage() {
                 </motion.button>
                 <p className="text-xs text-center text-zinc-600 mt-4">
                   By creating an account you agree to our{' '}
-                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                  <Link
+                    href="/terms"
+                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                  >
                     Terms
-                  </span>{' '}
+                  </Link>{' '}
                   and{' '}
-                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                  >
                     Privacy
-                  </span>
+                  </Link>
                   .
                 </p>
               </motion.form>
