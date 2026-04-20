@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { io, Socket } from 'socket.io-client';
 
-import { api } from '@/lib/api/client';
+import { api, WS_URL } from '@/lib/api/client';
 
 export type NotificationType =
   | 'MARKET_NEW_SALE'
@@ -23,6 +24,7 @@ export interface NotificationItem {
 
 export function useNotificationsPoll(isAuthenticated: boolean) {
   const [count, setCount] = useState(0);
+  const socketRef = useRef<Socket | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -36,11 +38,38 @@ export function useNotificationsPoll(isAuthenticated: boolean) {
   useEffect(() => {
     if (!isAuthenticated) {
       setCount(0);
+      socketRef.current?.disconnect();
+      socketRef.current = null;
       return;
     }
+
     refresh();
-    const interval = setInterval(refresh, 30_000);
-    return () => clearInterval(interval);
+
+    // Real-time push: open a socket on /notifications and react to pushes
+    const socket = io(`${WS_URL}/notifications`, {
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+    socketRef.current = socket;
+
+    socket.on('notification:new', () => {
+      setCount((c) => c + 1);
+    });
+    socket.on('notification:read', () => {
+      setCount((c) => Math.max(0, c - 1));
+    });
+    socket.on('notification:read-all', () => {
+      setCount(0);
+    });
+
+    // Fallback polling every 60s in case the socket drops silently
+    const interval = setInterval(refresh, 60_000);
+
+    return () => {
+      clearInterval(interval);
+      socket.disconnect();
+      socketRef.current = null;
+    };
   }, [isAuthenticated, refresh]);
 
   return { count, refresh, setCount };

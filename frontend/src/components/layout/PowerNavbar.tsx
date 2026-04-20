@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -45,7 +46,8 @@ function buildCrumbs(pathname: string): Crumb[] {
 export function PowerNavbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { count: unreadCount } = useNotificationsPoll(isAuthenticated);
 
   const crumbs = useMemo(() => buildCrumbs(pathname), [pathname]);
 
@@ -186,26 +188,27 @@ export function PowerNavbar() {
         aria-label="Notifications"
       >
         <Bell className="w-[15px] h-[15px]" strokeWidth={1.6} />
-        {/* Placeholder count — wire to real unread count later */}
-        <span
-          className="absolute inline-flex items-center justify-center"
-          style={{
-            top: '2px',
-            right: '2px',
-            minWidth: '15px',
-            height: '15px',
-            padding: '0 4px',
-            borderRadius: '999px',
-            background: '#836EF9',
-            color: 'white',
-            fontSize: '9.5px',
-            fontWeight: 600,
-            lineHeight: 1,
-            border: '1.5px solid #09090b',
-          }}
-        >
-          3
-        </span>
+        {isAuthenticated && unreadCount > 0 && (
+          <span
+            className="absolute inline-flex items-center justify-center"
+            style={{
+              top: '2px',
+              right: '2px',
+              minWidth: '15px',
+              height: '15px',
+              padding: '0 4px',
+              borderRadius: '999px',
+              background: '#836EF9',
+              color: 'white',
+              fontSize: '9.5px',
+              fontWeight: 600,
+              lineHeight: 1,
+              border: '1.5px solid #09090b',
+            }}
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
 
       {/* Avatar */}
