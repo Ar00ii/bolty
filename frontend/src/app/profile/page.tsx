@@ -1102,7 +1102,6 @@ export default function ProfilePage() {
                 { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
                 { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
-                { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
               ].map(({ id, label, Icon }) => {
                 const active = tab === id;
                 return (
