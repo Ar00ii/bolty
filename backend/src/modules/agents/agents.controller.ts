@@ -28,7 +28,7 @@ export class AgentsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createAgent(@CurrentUser() user: any, @Body() dto: CreateAgentDto) {
+  async createAgent(@CurrentUser() user: { sub: string }, @Body() dto: CreateAgentDto) {
     const agent = await this.agentsService.createAgent(user.sub, dto);
     return {
       success: true,
@@ -41,7 +41,7 @@ export class AgentsController {
    * GET /agents
    */
   @Get()
-  async listAgents(@CurrentUser() user: any) {
+  async listAgents(@CurrentUser() user: { sub: string }) {
     const agents = await this.agentsService.getAgentsByUserId(user.sub);
     return {
       success: true,
@@ -55,7 +55,7 @@ export class AgentsController {
    * GET /agents/:id
    */
   @Get(':id')
-  async getAgent(@Param('id') agentId: string, @CurrentUser() user: any) {
+  async getAgent(@Param('id') agentId: string, @CurrentUser() user: { sub: string }) {
     const agent = await this.agentsService.getAgent(agentId, user.sub);
     return {
       success: true,
@@ -70,7 +70,7 @@ export class AgentsController {
   @Patch(':id')
   async updateAgent(
     @Param('id') agentId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: { sub: string },
     @Body() dto: UpdateAgentDto,
   ) {
     const agent = await this.agentsService.updateAgent(agentId, user.sub, dto);
@@ -86,7 +86,7 @@ export class AgentsController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAgent(@Param('id') agentId: string, @CurrentUser() user: any) {
+  async deleteAgent(@Param('id') agentId: string, @CurrentUser() user: { sub: string }) {
     await this.agentsService.deleteAgent(agentId, user.sub);
   }
 
@@ -95,7 +95,7 @@ export class AgentsController {
    * POST /agents/:id/test
    */
   @Post(':id/test')
-  async testWebhook(@Param('id') agentId: string, @CurrentUser() user: any) {
+  async testWebhook(@Param('id') agentId: string, @CurrentUser() user: { sub: string }) {
     const result = await this.agentsService.testWebhook(agentId, user.sub);
     return result;
   }
@@ -105,7 +105,7 @@ export class AgentsController {
    * GET /agents/:id/metrics
    */
   @Get(':id/metrics')
-  async getMetrics(@Param('id') agentId: string, @CurrentUser() user: any) {
+  async getMetrics(@Param('id') agentId: string, @CurrentUser() user: { sub: string }) {
     const metrics = await this.agentsService.getMetrics(agentId, user.sub);
     return {
       success: true,
@@ -120,7 +120,7 @@ export class AgentsController {
   @Get(':id/activity-log')
   async getActivityLog(
     @Param('id') agentId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: { sub: string },
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ) {

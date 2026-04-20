@@ -22,7 +22,7 @@ export interface TestWebhookPayload {
   event: string;
   timestamp: number;
   test: true;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 @Injectable()
