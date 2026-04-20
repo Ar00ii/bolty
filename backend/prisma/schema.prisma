@@ -243,6 +243,7 @@ model MarketPurchase {
 
   @@unique([listingId, buyerId], name: "market_purchases_listing_buyer_unique")
   @@index([buyerId, listingId])
+  @@index([buyerId, createdAt])
   @@index([sellerId, status])
   @@map("market_purchases")
 }
