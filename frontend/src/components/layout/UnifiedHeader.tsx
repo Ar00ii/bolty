@@ -108,9 +108,9 @@ export function UnifiedHeader() {
             <span
               className="text-xl md:text-2xl hidden sm:inline"
               style={{
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                letterSpacing: '-0.01em',
+                fontFamily: "'General Sans', sans-serif",
+                fontWeight: 600,
+                letterSpacing: '0em',
                 color: '#ffffff',
               }}
             >
