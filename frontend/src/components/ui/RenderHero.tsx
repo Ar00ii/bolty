@@ -10,14 +10,7 @@ interface RenderHeroProps {
 
 export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
   const [wordIndex, setWordIndex] = useState(0);
-  const words = [
-    'any workload',
-    'apps & agents',
-    'workflows',
-    'APIs & web apps',
-    'data pipelines',
-    'HIPAA apps',
-  ];
+  const words = ['AI agents', 'code repos', 'paid APIs', 'trading bots', 'dev tools', 'scripts'];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -30,7 +23,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
     <div
       className="relative overflow-hidden border-b grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,1fr)] gap-8 lg:gap-0 px-6 sm:px-10 lg:px-0 min-h-[calc(100vh-64px)] lg:min-h-[calc(100vh-90px)]"
       style={{
-        background: 'linear-gradient(to left bottom, #1c0037, rgba(0,0,0,0) 20%), #0d0d0d',
+        background: 'linear-gradient(to left bottom, #1a0b3d, rgba(0,0,0,0) 22%), #0a0a0f',
         borderColor: 'rgba(39,39,39)',
       }}
     >
@@ -54,9 +47,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         {/* Hero Text Group */}
         <div className="flex flex-col gap-5 sm:gap-6">
           <h1 className="text-white font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]">
-            Your fastest path to
+            The on-chain
             <br />
-            production for
+            marketplace for
             <span className="block relative mt-1 sm:mt-2 min-h-[1.1em]">
               <motion.span
                 key={wordIndex}
@@ -69,7 +62,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                 <span
                   className="font-light text-[clamp(36px,9vw,80px)] leading-[1.02] tracking-[-0.03em]"
                   style={{
-                    background: 'linear-gradient(to right, #9b52fb, #b8ffd7)',
+                    background: 'linear-gradient(to right, #836EF9, #06B6D4)',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -84,7 +77,7 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
                   style={{
                     height: '1em',
                     width: '0.6ch',
-                    background: 'linear-gradient(to top, #373145, rgba(55,49,69,0.5))',
+                    background: 'linear-gradient(to top, #2a1f4a, rgba(42,31,74,0.5))',
                     backgroundClip: 'text',
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -96,9 +89,9 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             </span>
           </h1>
 
-          <p className="text-white/70 text-base sm:text-lg lg:text-xl leading-relaxed max-w-[480px]">
-            Intuitive infrastructure to scale any app or agent from your first user to your
-            billionth.
+          <p className="text-white/70 text-base sm:text-lg lg:text-xl leading-relaxed max-w-[520px]">
+            Publish your code, deploy AI agents, and negotiate deals — settled in ETH and secured by
+            on-chain escrow. No middlemen, no chargebacks, no gatekeepers.
           </p>
         </div>
 
@@ -106,9 +99,21 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         <div className="flex flex-wrap gap-3">
           <Link
             href={isAuthenticated ? '/market' : '/auth?tab=register'}
-            className="hover:opacity-85 transition-opacity inline-flex items-center gap-2.5 bg-white text-[#0d0d0d] px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl whitespace-nowrap"
+            className="hover:opacity-85 transition-opacity inline-flex items-center gap-2.5 bg-white text-[#0a0a0f] px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl whitespace-nowrap"
           >
-            Dashboard <span className="text-[0.9em]">›</span>
+            {isAuthenticated ? 'Open marketplace' : 'Start selling'}
+            <span className="text-[0.9em]">›</span>
+          </Link>
+          <Link
+            href="/market"
+            className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl text-white whitespace-nowrap transition-all hover:brightness-110"
+            style={{
+              background: 'rgba(131,110,249,0.08)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 22px -6px rgba(131,110,249,0.4)',
+            }}
+          >
+            Browse the market
           </Link>
         </div>
       </motion.div>
@@ -125,9 +130,18 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="absolute top-0 right-0 w-full"
           style={{
             aspectRatio: '630 / 591',
-            background: 'radial-gradient(circle at 50% 50%, #9b52fb 0%, transparent 70%)',
+            background: 'radial-gradient(circle at 50% 50%, #836EF9 0%, transparent 70%)',
             filter: 'blur(60px)',
-            opacity: 0.3,
+            opacity: 0.32,
+          }}
+        />
+        <div
+          className="absolute bottom-0 right-0 w-2/3"
+          style={{
+            aspectRatio: '1 / 1',
+            background: 'radial-gradient(circle at 50% 50%, #06B6D4 0%, transparent 70%)',
+            filter: 'blur(80px)',
+            opacity: 0.18,
           }}
         />
         <div className="relative z-10 w-full h-full flex items-center justify-center text-white/20 text-center">
