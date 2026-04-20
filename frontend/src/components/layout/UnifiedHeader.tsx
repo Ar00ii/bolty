@@ -109,7 +109,7 @@ export function UnifiedHeader() {
               className="text-xl md:text-2xl hidden sm:inline"
               style={{
                 fontFamily: "'Inter', sans-serif",
-                fontWeight: 400,
+                fontWeight: 700,
                 letterSpacing: '-0.3px',
                 background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
                 WebkitBackgroundClip: 'text',
