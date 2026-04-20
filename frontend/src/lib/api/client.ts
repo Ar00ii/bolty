@@ -27,9 +27,14 @@ class ApiClient {
   }
 
   private getCsrfToken(): string | null {
-    // Read CSRF token from cookie (set by server, non-httpOnly)
+    // Read CSRF token from cookie (set by server, non-httpOnly).
+    // Cookie name is lowercase "csrf-token" — the legacy "X-CSRF-Token" name is
+    // kept as a fallback so older browsers still carrying the old host-only
+    // cookie can mirror it back until the server-sent clearCookie lands.
     if (typeof document === 'undefined') return null; // SSR safety
-    const match = document.cookie.match(/(?:^|;\s*)X-CSRF-Token=([^;]*)/);
+    const match =
+      document.cookie.match(/(?:^|;\s*)csrf-token=([^;]*)/) ||
+      document.cookie.match(/(?:^|;\s*)X-CSRF-Token=([^;]*)/);
     return match ? decodeURIComponent(match[1]) : null;
   }
 
