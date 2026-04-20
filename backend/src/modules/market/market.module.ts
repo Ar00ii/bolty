@@ -11,6 +11,7 @@ import { AgentSandboxService } from './agent-sandbox.service';
 import { AgentScanService } from './agent-scan.service';
 import { ApiKeysService } from './api-keys.service';
 import { MarketController } from './market.controller';
+import { MarketGateway } from './market.gateway';
 import { MarketService } from './market.service';
 import { NegotiationService } from './negotiation.service';
 import { NegotiationsGateway } from './negotiations.gateway';
@@ -20,6 +21,7 @@ import { NegotiationsGateway } from './negotiations.gateway';
   controllers: [AgentPostsController, MarketController],
   providers: [
     MarketService,
+    MarketGateway,
     NegotiationService,
     NegotiationsGateway,
     AgentPostsService,

@@ -1,69 +1,101 @@
 'use client';
 
 import {
+  ArrowUpRight,
   Bot,
-  Check,
-  ChevronDown,
-  ChevronRight,
+  Flame,
   GitBranch,
   Package,
   Plus,
   Search,
+  Sparkles,
+  TrendingUp,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { io, type Socket } from 'socket.io-client';
 
-import { api } from '@/lib/api/client';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
+import { api, WS_URL } from '@/lib/api/client';
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+type TypeFilter = 'ALL' | ListingType;
+type SortKey = 'trending' | 'recent' | 'volume' | 'price-low' | 'price-high';
 
 interface MarketListing {
   id: string;
   createdAt: string;
   title: string;
-  description: string;
-  type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+  type: ListingType;
   price: number;
   currency: string;
   tags: string[];
-  status: string;
   seller: { id: string; username: string | null; avatarUrl: string | null };
-  repository: { id: string; name: string; githubUrl: string; language: string | null } | null;
   reviewAverage?: number | null;
   reviewCount?: number;
+  sales24h?: number;
+  volumeEth24h?: number;
+  sparkline7d?: number[];
 }
 
-interface FeedPost {
-  id: string;
-  createdAt: string;
-  content: string;
-  postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL';
-  listing: {
+interface Pulse {
+  stats: {
+    activeListings: number;
+    totalListings: number;
+    totalSales: number;
+    sales24h: number;
+    volumeEth24h: number;
+    traders24h: number;
+  };
+  recentTrades: Array<{
+    id: string;
+    createdAt: string;
+    priceEth: number | null;
+    buyer: { id: string; username: string | null; avatarUrl: string | null };
+    seller: { id: string; username: string | null };
+    listing: { id: string; title: string; type: ListingType; currency: string; price: number };
+  }>;
+  recentListings: Array<{
     id: string;
     title: string;
-    type: string;
+    type: ListingType;
+    price: number;
+    currency: string;
+    tags: string[];
+    createdAt: string;
     seller: { id: string; username: string | null; avatarUrl: string | null };
-  };
+  }>;
 }
 
-interface Facets {
-  tags: { tag: string; count: number }[];
-  types: { type: string; count: number }[];
-  priceRange: { min: number; max: number };
-  totalActive: number;
+interface SaleEvent {
+  listingId: string;
+  listingTitle: string;
+  listingType: ListingType;
+  priceEth: number | null;
+  currency: string;
+  buyer: { id: string; username: string | null; avatarUrl: string | null };
+  seller: { id: string; username: string | null };
+  createdAt: string;
 }
 
-interface UsageMetric {
-  label: string;
-  value: string;
-  quota: string;
-  color: string;
+interface NewListingEvent {
+  listingId: string;
+  title: string;
+  type: ListingType;
+  price: number;
+  currency: string;
+  tags: string[];
+  seller: { id: string; username: string | null; avatarUrl: string | null };
+  createdAt: string;
 }
 
-const TYPE_ICONS: Record<string, LucideIcon> = {
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const TYPE_ICON: Record<ListingType, LucideIcon> = {
   REPO: GitBranch,
   BOT: Bot,
   AI_AGENT: Bot,
@@ -71,372 +103,917 @@ const TYPE_ICONS: Record<string, LucideIcon> = {
   OTHER: Package,
 };
 
-function timeAgo(d: string) {
+const TYPE_LABEL: Record<ListingType, string> = {
+  REPO: 'Repo',
+  BOT: 'Bot',
+  AI_AGENT: 'Agent',
+  SCRIPT: 'Script',
+  OTHER: 'Other',
+};
+
+const TYPE_ACCENT: Record<ListingType, string> = {
+  REPO: '#06B6D4',
+  BOT: '#836EF9',
+  AI_AGENT: '#836EF9',
+  SCRIPT: '#EC4899',
+  OTHER: '#94a3b8',
+};
+
+function timeAgo(d: string | Date) {
   const diff = Date.now() - new Date(d).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
+
+function formatNumber(n: number): string {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
+}
+
+function formatEth(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n === 0) return '0';
+  if (n < 0.0001) return '<0.0001';
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(3);
+  return n.toFixed(2);
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
 
 export default function MarketPage() {
   return (
-    <Suspense fallback={<div className="mk-scope min-h-[60vh]" />}>
-      <MarketOverview />
+    <Suspense fallback={<div className="min-h-[60vh]" />}>
+      <MarketScreener />
     </Suspense>
   );
 }
 
-function MarketOverview() {
-  const { isLoading: authLoading } = useAuth();
+function MarketScreener() {
   const searchParams = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
-  const { items: recentItems } = useRecentlyViewed();
 
   const [search, setSearch] = useState(initialSearch);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
+  const [sort, setSort] = useState<SortKey>('trending');
   const [listings, setListings] = useState<MarketListing[]>([]);
-  const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
-  const [facets, setFacets] = useState<Facets | null>(null);
+  const [pulse, setPulse] = useState<Pulse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api
-      .get<Facets>('/market/facets')
-      .then((f) => setFacets(f))
-      .catch(() => void 0);
-  }, []);
+  // Rows that should flash green (listingId → timestamp)
+  const [flash, setFlash] = useState<Map<string, number>>(new Map());
+  // Rows added live via socket (pre-pended)
+  const [liveListings, setLiveListings] = useState<MarketListing[]>([]);
+  // Live trade feed (rolling)
+  const [liveTrades, setLiveTrades] = useState<Pulse['recentTrades']>([]);
+  // Stats that pulse on change
+  const [statPulse, setStatPulse] = useState<Record<string, number>>({});
 
+  // ── Fetch initial data ──────────────────────────────────────────────────
   useEffect(() => {
+    let cancelled = false;
     const load = async () => {
       setLoading(true);
       try {
-        const qs = new URLSearchParams({ page: '1', sortBy: 'recent' });
+        const qs = new URLSearchParams({ page: '1' });
+        qs.set('sortBy', sort === 'volume' ? 'trending' : sort);
         if (search) qs.set('search', search);
-        const [listingsData, feedData] = await Promise.all([
-          api.get<{ data: MarketListing[]; total: number; page: number; pages: number }>(
-            `/market?${qs.toString()}`,
-          ),
-          api.get<FeedPost[]>('/market/feed?take=6'),
+        if (typeFilter !== 'ALL') qs.set('type', typeFilter);
+
+        const [listRes, pulseRes] = await Promise.all([
+          api.get<{ data: MarketListing[] }>(`/market?${qs.toString()}`),
+          api.get<Pulse>('/market/pulse?limit=20'),
         ]);
-        setListings(listingsData?.data || []);
-        setFeedPosts(feedData || []);
-      } catch {
-        // ignore
+        if (cancelled) return;
+
+        const data = listRes?.data || [];
+        if (sort === 'volume') {
+          data.sort((a, b) => (b.volumeEth24h || 0) - (a.volumeEth24h || 0));
+        }
+        setListings(data);
+        setPulse(pulseRes);
+        setLiveTrades(pulseRes?.recentTrades || []);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     load();
-  }, [search]);
+    return () => {
+      cancelled = true;
+    };
+  }, [search, typeFilter, sort]);
 
-  const usage: UsageMetric[] = useMemo(() => {
-    const totalActive = facets?.totalActive ?? listings.length;
-    const tagCount = facets?.tags.length ?? 0;
-    const typeCount = facets?.types.reduce((sum, t) => sum + t.count, 0) ?? listings.length;
-    return [
-      { label: 'Active Listings', value: formatNumber(totalActive), quota: ' / ∞', color: '#52a8ff' },
-      { label: 'Agents Indexed', value: formatNumber(typeCount), quota: ' / ∞', color: '#50e3c2' },
-      { label: 'Tags Tracked', value: formatNumber(tagCount), quota: ' / ∞', color: '#f2a20d' },
-      { label: 'Recent Updates', value: formatNumber(feedPosts.length), quota: ' / day', color: '#ff6166' },
-    ];
-  }, [facets, listings.length, feedPosts.length]);
+  // ── Websocket ──────────────────────────────────────────────────────────
+  const socketRef = useRef<Socket | null>(null);
+  useEffect(() => {
+    const socket = io(`${WS_URL}/market`, {
+      transports: ['websocket'],
+      withCredentials: true,
+    });
+    socketRef.current = socket;
 
-  const filteredListings = useMemo(() => {
-    if (!search) return listings;
-    const q = search.toLowerCase();
-    return listings.filter(
-      (l) =>
-        l.title.toLowerCase().includes(q) ||
-        (l.description || '').toLowerCase().includes(q) ||
-        (l.seller.username || '').toLowerCase().includes(q),
-    );
-  }, [listings, search]);
+    socket.on('sale', (ev: SaleEvent) => {
+      // Flash the row
+      setFlash((prev) => {
+        const next = new Map(prev);
+        next.set(ev.listingId, Date.now());
+        return next;
+      });
+      // Bump 24h stats on the row locally (feels instant)
+      setListings((prev) =>
+        prev.map((l) =>
+          l.id === ev.listingId
+            ? {
+                ...l,
+                sales24h: (l.sales24h || 0) + 1,
+                volumeEth24h: Number(
+                  ((l.volumeEth24h || 0) + (ev.priceEth || 0)).toFixed(4),
+                ),
+              }
+            : l,
+        ),
+      );
+      // Prepend to live trades
+      setLiveTrades((prev) => {
+        const next = [
+          {
+            id: `live-${ev.listingId}-${Date.now()}`,
+            createdAt: ev.createdAt,
+            priceEth: ev.priceEth,
+            buyer: ev.buyer,
+            seller: ev.seller,
+            listing: {
+              id: ev.listingId,
+              title: ev.listingTitle,
+              type: ev.listingType,
+              currency: ev.currency,
+              price: 0,
+            },
+          },
+          ...prev,
+        ];
+        return next.slice(0, 40);
+      });
+      // Pulse the global stats
+      setStatPulse({ sales24h: Date.now(), volumeEth24h: Date.now() });
+      setPulse((p) =>
+        p
+          ? {
+              ...p,
+              stats: {
+                ...p.stats,
+                sales24h: p.stats.sales24h + 1,
+                volumeEth24h: Number(
+                  (p.stats.volumeEth24h + (ev.priceEth || 0)).toFixed(4),
+                ),
+              },
+            }
+          : p,
+      );
+    });
 
-  if (authLoading && loading) {
-    return (
-      <div className="mk-scope flex items-center justify-center min-h-[50vh]">
-        <span className="mk-spinner" aria-label="Loading" />
-      </div>
-    );
-  }
+    socket.on('new-listing', (ev: NewListingEvent) => {
+      setLiveListings((prev) => {
+        if (prev.some((l) => l.id === ev.listingId)) return prev;
+        const entry: MarketListing = {
+          id: ev.listingId,
+          createdAt: ev.createdAt,
+          title: ev.title,
+          type: ev.type,
+          price: ev.price,
+          currency: ev.currency,
+          tags: ev.tags,
+          seller: ev.seller,
+          reviewAverage: null,
+          reviewCount: 0,
+          sales24h: 0,
+          volumeEth24h: 0,
+          sparkline7d: new Array(7).fill(0),
+        };
+        return [entry, ...prev].slice(0, 10);
+      });
+      setStatPulse((p) => ({ ...p, activeListings: Date.now() }));
+      setPulse((p) =>
+        p
+          ? {
+              ...p,
+              stats: {
+                ...p.stats,
+                activeListings: p.stats.activeListings + 1,
+                totalListings: p.stats.totalListings + 1,
+              },
+              recentListings: [
+                {
+                  id: ev.listingId,
+                  title: ev.title,
+                  type: ev.type,
+                  price: ev.price,
+                  currency: ev.currency,
+                  tags: ev.tags,
+                  createdAt: ev.createdAt,
+                  seller: ev.seller,
+                },
+                ...(p.recentListings || []),
+              ].slice(0, 20),
+            }
+          : p,
+      );
+    });
+
+    return () => {
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  // Clear stale flashes
+  useEffect(() => {
+    if (flash.size === 0) return;
+    const t = setInterval(() => {
+      const now = Date.now();
+      setFlash((prev) => {
+        let changed = false;
+        const next = new Map(prev);
+        next.forEach((v, k) => {
+          if (now - v > 1500) {
+            next.delete(k);
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }, 500);
+    return () => clearInterval(t);
+  }, [flash.size]);
+
+  // Merge live listings into the main table
+  const mergedListings = useMemo(() => {
+    if (liveListings.length === 0) return listings;
+    const seen = new Set(listings.map((l) => l.id));
+    const fresh = liveListings.filter((l) => !seen.has(l.id));
+    return [...fresh, ...listings];
+  }, [listings, liveListings]);
 
   return (
-    <div>
-      <Toolbar search={search} setSearch={setSearch} />
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Bolty Screener</span>
+                <LiveDot />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Marketplace
+              </h1>
+            </div>
+            <Link
+              href="/market/seller/publish"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+              }}
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={1.75} />
+              Publish listing
+            </Link>
+          </div>
+        </div>
+      </header>
 
-      <div className="mk-overview-grid">
-        <div className="mk-overview-grid__left">
-          <UsageCard metrics={usage} />
-          <AlertsCard />
-          <RecentPreviewsCard
-            recent={recentItems}
-            fallback={listings.slice(0, 5).map((l) => ({
-              id: l.id,
-              title: l.title,
-              type: l.type,
-            }))}
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          <StatTile
+            label="24h volume"
+            value={`${formatEth(pulse?.stats.volumeEth24h || 0)} ETH`}
+            sub={`${pulse?.stats.sales24h ?? 0} sales`}
+            pulseKey={statPulse.volumeEth24h}
+            accent="#836EF9"
+          />
+          <StatTile
+            label="24h sales"
+            value={formatNumber(pulse?.stats.sales24h || 0)}
+            sub={`${pulse?.stats.traders24h ?? 0} traders`}
+            pulseKey={statPulse.sales24h}
+            accent="#22c55e"
+          />
+          <StatTile
+            label="Active listings"
+            value={formatNumber(pulse?.stats.activeListings || 0)}
+            sub={`${pulse?.stats.totalListings ?? 0} total`}
+            pulseKey={statPulse.activeListings}
+            accent="#06B6D4"
+          />
+          <StatTile
+            label="All-time sales"
+            value={formatNumber(pulse?.stats.totalSales || 0)}
+            sub="since launch"
+            accent="#EC4899"
           />
         </div>
-        <div className="mk-overview-grid__right">
-          <div
-            className="mk-section-title mk-section-title--accent"
-            style={{ marginBottom: 12, fontSize: 16 }}
-          >
-            Listings
+      </section>
+
+      {/* New launches ticker */}
+      <NewLaunchesTicker items={pulse?.recentListings || []} />
+
+      {/* Filters */}
+      <section className="px-6 md:px-10 mt-5 mb-3">
+        <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 flex-1 min-w-[240px] max-w-md px-3 py-1.5 rounded-lg bg-black/40 border border-white/10">
+            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search agents, repos, bots, tags…"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-600"
+            />
           </div>
-          {loading ? (
-            <div className="mk-card" style={{ padding: 24, textAlign: 'center' }}>
-              <span className="mk-spinner" aria-label="Loading" />
-            </div>
-          ) : filteredListings.length === 0 ? (
-            <div className="mk-empty">
-              <Package
-                style={{ width: 28, height: 28, color: 'var(--mk-text-muted)', margin: '0 auto' }}
-              />
-              <p className="mk-empty__title">No listings match</p>
-              <p className="mk-empty__desc">
-                Try a different search term or clear filters to see all listings.
-              </p>
-            </div>
-          ) : (
-            <div>
-              {filteredListings.map((l) => (
-                <ProjectCard key={l.id} listing={l} feed={feedPosts} />
-              ))}
-            </div>
-          )}
+
+          <TypeTabs value={typeFilter} onChange={setTypeFilter} />
+
+          <div className="flex items-center gap-1 ml-auto">
+            <SortChip
+              active={sort === 'trending'}
+              onClick={() => setSort('trending')}
+              icon={<Flame className="w-3 h-3" strokeWidth={1.75} />}
+              label="Hot"
+            />
+            <SortChip
+              active={sort === 'recent'}
+              onClick={() => setSort('recent')}
+              icon={<Sparkles className="w-3 h-3" strokeWidth={1.75} />}
+              label="New"
+            />
+            <SortChip
+              active={sort === 'volume'}
+              onClick={() => setSort('volume')}
+              icon={<TrendingUp className="w-3 h-3" strokeWidth={1.75} />}
+              label="Volume"
+            />
+            <SortChip
+              active={sort === 'price-low'}
+              onClick={() => setSort('price-low')}
+              label="Low $"
+            />
+            <SortChip
+              active={sort === 'price-high'}
+              onClick={() => setSort('price-high')}
+              label="High $"
+            />
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Table + trades feed */}
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+          <div>
+            <ScreenerTable
+              listings={mergedListings}
+              flash={flash}
+              liveIds={new Set(liveListings.map((l) => l.id))}
+              loading={loading}
+            />
+          </div>
+          <aside className="hidden lg:block">
+            <LiveTradesFeed trades={liveTrades} />
+          </aside>
+        </div>
+      </section>
     </div>
   );
 }
 
-function Toolbar({
-  search,
-  setSearch,
+// ── Sub-components ─────────────────────────────────────────────────────────
+
+function LiveDot() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
+      <span
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: '#22c55e' }}
+      />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+    </span>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  sub,
+  pulseKey,
+  accent,
 }: {
-  search: string;
-  setSearch: (s: string) => void;
+  label: string;
+  value: string;
+  sub: string;
+  pulseKey?: number;
+  accent: string;
 }) {
+  const [pulsing, setPulsing] = useState(false);
+  useEffect(() => {
+    if (!pulseKey) return;
+    setPulsing(true);
+    const t = setTimeout(() => setPulsing(false), 700);
+    return () => clearTimeout(t);
+  }, [pulseKey]);
+
   return (
-    <div className="mk-toolbar">
-      <div className="mk-toolbar__search">
-        <Search size={14} strokeWidth={1.75} className="mk-toolbar__search-icon" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search Listings…"
-          aria-label="Search listings"
-        />
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden transition-all"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: pulsing
+          ? `0 0 0 1px ${accent}66, inset 0 1px 0 rgba(255,255,255,0.04), 0 0 20px -4px ${accent}55`
+          : '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
       </div>
-      <div className="mk-btn-split">
-        <Link
-          href="/market/agents?tab=mine&new=1"
-          className="mk-btn-split__main"
-          style={{ color: '#000', textDecoration: 'none', gap: 6 }}
-        >
-          <Plus size={14} strokeWidth={2} />
-          Add New…
-        </Link>
-        <span className="mk-btn-split__divider" aria-hidden />
-        <button type="button" className="mk-btn-split__chevron" aria-label="More">
-          <ChevronDown size={14} strokeWidth={2} />
-        </button>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
       </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
     </div>
   );
 }
 
-function UsageCard({ metrics }: { metrics: UsageMetric[] }) {
+function NewLaunchesTicker({
+  items,
+}: {
+  items: Array<{ id: string; title: string; type: ListingType; price: number; currency: string; createdAt: string }>;
+}) {
+  if (items.length === 0) return null;
+  const doubled = [...items, ...items];
   return (
-    <div className="mk-card" style={{ padding: 14 }}>
-      <div className="flex items-start justify-between" style={{ marginBottom: 8 }}>
-        <div>
-          <div
-            className="mk-section-title"
-            style={{ margin: 0, fontSize: 12, color: 'var(--mk-text-muted)' }}
-          >
-            Last 30 days
-          </div>
+    <section className="px-6 md:px-10 mb-2">
+      <div
+        className="mx-auto max-w-[1400px] relative overflow-hidden rounded-lg py-2"
+        style={{
+          background: 'linear-gradient(90deg, rgba(34,197,94,0.05), rgba(131,110,249,0.05))',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="flex items-center gap-1.5 px-3 text-[10.5px] uppercase tracking-[0.16em] text-[#22c55e] font-medium whitespace-nowrap absolute left-0 top-0 bottom-0 z-10 pr-3"
+          style={{
+            background: 'linear-gradient(90deg, rgba(10,10,14,0.95) 70%, transparent)',
+          }}
+        >
+          <Sparkles className="w-3 h-3" strokeWidth={2} />
+          New launches
         </div>
-        <button type="button" className="mk-upgrade-chip" aria-label="Upgrade">
-          Upgrade
-        </button>
+        <div
+          className="flex gap-6 whitespace-nowrap pl-36"
+          style={{
+            animation: 'bolty-ticker 60s linear infinite',
+          }}
+        >
+          {doubled.map((item, i) => {
+            const Icon = TYPE_ICON[item.type] ?? Package;
+            return (
+              <Link
+                href={`/market/agents/${item.id}`}
+                key={`${item.id}-${i}`}
+                className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
+              >
+                <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: TYPE_ACCENT[item.type] }} />
+                <span>{item.title}</span>
+                <span className="font-mono text-[#b4a7ff]">{formatEth(item.price)} {item.currency}</span>
+                <span className="text-zinc-600">· {timeAgo(item.createdAt)} ago</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-      {metrics.map((m) => (
-        <div key={m.label} className="mk-usage-row">
-          <span className="mk-usage-row__dot" style={{ background: m.color }} />
-          <span className="mk-usage-row__label">{m.label}</span>
-          <span className="mk-usage-row__value">
-            {m.value}
-            <span style={{ color: 'var(--mk-text-muted)' }}>{m.quota}</span>
-          </span>
-        </div>
+      <style jsx>{`
+        @keyframes bolty-ticker {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function TypeTabs({
+  value,
+  onChange,
+}: {
+  value: TypeFilter;
+  onChange: (v: TypeFilter) => void;
+}) {
+  const tabs: { key: TypeFilter; label: string }[] = [
+    { key: 'ALL', label: 'All' },
+    { key: 'AI_AGENT', label: 'Agents' },
+    { key: 'BOT', label: 'Bots' },
+    { key: 'REPO', label: 'Repos' },
+    { key: 'SCRIPT', label: 'Scripts' },
+  ];
+  return (
+    <div
+      className="flex items-center gap-0.5 rounded-lg p-0.5"
+      style={{
+        background: 'rgba(0,0,0,0.4)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          onClick={() => onChange(t.key)}
+          className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
+          style={{
+            color: value === t.key ? '#ffffff' : '#a1a1aa',
+            background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
+            boxShadow:
+              value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+          }}
+        >
+          {t.label}
+        </button>
       ))}
     </div>
   );
 }
 
-function AlertsCard() {
-  return (
-    <div className="mk-card" style={{ marginTop: 16 }}>
-      <div className="mk-alerts-card">
-        <h3 className="mk-alerts-card__title">Get alerted for new drops</h3>
-        <p className="mk-alerts-card__desc">
-          Automatically watch listings, price changes, and seller activity in real time.
-        </p>
-        <Link href="/market/favorites" className="mk-alerts-card__cta">
-          Go to Saved
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function RecentPreviewsCard({
-  recent,
-  fallback,
+function SortChip({
+  active,
+  onClick,
+  icon,
+  label,
 }: {
-  recent: { id: string; title: string; type: string }[];
-  fallback: { id: string; title: string; type: string }[];
+  active: boolean;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  label: string;
 }) {
-  const source = recent.length > 0 ? recent : fallback;
   return (
-    <div style={{ marginTop: 20 }}>
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+      style={{
+        color: active ? '#ffffff' : '#a1a1aa',
+        background: active ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.02)',
+        boxShadow: active
+          ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
+          : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function ScreenerTable({
+  listings,
+  flash,
+  liveIds,
+  loading,
+}: {
+  listings: MarketListing[];
+  flash: Map<string, number>;
+  liveIds: Set<string>;
+  loading: boolean;
+}) {
+  if (loading && listings.length === 0) {
+    return (
       <div
-        className="mk-section-title"
-        style={{ fontSize: 12, color: 'var(--mk-text-muted)', marginBottom: 8 }}
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
       >
-        Recent Previews
+        Loading market data…
       </div>
-      <div className="mk-card" style={{ padding: 0 }}>
-        {source.length === 0 ? (
-          <div className="mk-empty" style={{ padding: '20px 16px', minHeight: 0 }}>
-            <p className="mk-empty__title" style={{ fontSize: 13 }}>
-              Nothing yet
-            </p>
-            <p className="mk-empty__desc" style={{ fontSize: 12 }}>
-              Recently viewed listings will appear here.
-            </p>
-          </div>
-        ) : (
-          <div style={{ padding: '4px 12px' }}>
-            {source.slice(0, 6).map((r) => {
-              const Icon = TYPE_ICONS[r.type] || TYPE_ICONS.OTHER;
-              return (
-                <Link
-                  key={r.id}
-                  href={`/market/agents/${r.id}`}
-                  className="mk-preview-row"
-                  style={{ textDecoration: 'none' }}
-                >
-                  <span className="mk-preview-row__icon">
-                    <Icon size={12} strokeWidth={1.75} />
-                  </span>
-                  <span className="mk-preview-row__title">{r.title}</span>
-                  <span className="mk-preview-row__tag">{shortId(r.id)}</span>
-                  <span className="mk-preview-row__dot" />
-                </Link>
-              );
-            })}
-          </div>
-        )}
+    );
+  }
+
+  if (!loading && listings.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-20 text-center"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="text-sm font-light text-zinc-300">No listings match your filters.</div>
+        <div className="text-xs font-light text-zinc-500 mt-1">
+          Try changing the type or clearing the search.
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+        <span className="text-center">#</span>
+        <span>Listing</span>
+        <span className="text-right">Price</span>
+        <span className="text-right">24h</span>
+        <span className="text-right">24h vol</span>
+        <span className="text-right">Rating</span>
+        <span className="hidden md:block">Seller</span>
+        <span />
+      </div>
+      <ul>
+        {listings.map((l, i) => (
+          <Row
+            key={l.id}
+            listing={l}
+            index={i}
+            flashedAt={flash.get(l.id)}
+            isLive={liveIds.has(l.id)}
+          />
+        ))}
+      </ul>
     </div>
   );
 }
 
-function ProjectCard({
+function Row({
   listing,
-  feed,
-  compact = false,
+  index,
+  flashedAt,
+  isLive,
 }: {
   listing: MarketListing;
-  feed: FeedPost[];
-  compact?: boolean;
+  index: number;
+  flashedAt?: number;
+  isLive: boolean;
 }) {
-  const Icon = TYPE_ICONS[listing.type] || TYPE_ICONS.OTHER;
-  const matchedPost = feed.find((p) => p.listing.id === listing.id);
-  const domain = buildDomain(listing);
-  const repo = listing.repository?.name
-    ? listing.repository.name
-    : listing.seller.username
-      ? `${listing.seller.username}/${slugify(listing.title)}`
-      : 'bolty/listing';
+  const Icon = TYPE_ICON[listing.type] ?? Package;
+  const accent = TYPE_ACCENT[listing.type];
+  const flashing = !!flashedAt && Date.now() - flashedAt < 1500;
+  const sparkline = listing.sparkline7d || [];
 
   return (
-    <Link href={`/market/agents/${listing.id}`} className="mk-project-card">
-      <div className="mk-project-card__header">
-        <div className="mk-project-card__ident">
+    <li>
+      <Link
+        href={`/market/agents/${listing.id}`}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all"
+        style={{
+          background: flashing
+            ? 'linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.02))'
+            : isLive
+              ? 'linear-gradient(90deg, rgba(131,110,249,0.08), transparent)'
+              : 'transparent',
+        }}
+      >
+        {/* Flash left bar */}
+        {flashing && (
           <span
-            className="mk-sidebar__avatar"
-            style={{ width: 28, height: 28, flexBasis: 28 }}
-          >
-            <Icon size={14} strokeWidth={1.75} />
-          </span>
-          <div style={{ minWidth: 0 }}>
-            <p className="mk-project-card__title">{listing.title}</p>
-            <p className="mk-project-card__domain">{domain}</p>
-          </div>
-        </div>
-        <div className="mk-project-card__actions">
-          <span className="mk-project-card__check" aria-label="Verified">
-            <Check size={12} strokeWidth={2} />
-          </span>
-          <button
-            type="button"
-            className="mk-icon-btn"
-            aria-label="More"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
+            aria-hidden
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: '#22c55e', boxShadow: '0 0 8px #22c55e' }}
+          />
+        )}
+        {isLive && !flashing && (
+          <span
+            aria-hidden
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: accent, opacity: 0.6 }}
+          />
+        )}
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${accent}18`,
+              boxShadow: `inset 0 0 0 1px ${accent}40`,
             }}
           >
-            <ChevronRight size={14} strokeWidth={1.75} />
-          </button>
+            <Icon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: accent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-normal text-white truncate">
+                {listing.title}
+              </span>
+              {isLive && (
+                <span
+                  className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded"
+                  style={{
+                    color: '#22c55e',
+                    background: 'rgba(34,197,94,0.1)',
+                    boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                  }}
+                >
+                  NEW
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 font-light flex items-center gap-1">
+              <span style={{ color: accent }}>{TYPE_LABEL[listing.type]}</span>
+              {(listing.tags || []).slice(0, 2).map((t) => (
+                <span key={t} className="text-zinc-600">
+                  · {t}
+                </span>
+              ))}
+              <span className="text-zinc-600">· {timeAgo(listing.createdAt)} ago</span>
+            </div>
+          </div>
         </div>
-      </div>
-      {!compact && (
-        <>
-          <span className="mk-project-card__repo">
-            <GitBranch size={11} strokeWidth={1.75} />
-            {repo}
-          </span>
-          <p className="mk-project-card__commit">
-            {matchedPost?.content || listing.description || 'No recent activity.'}
-          </p>
-          <p className="mk-project-card__meta">
-            {timeAgo(listing.createdAt)} on <span style={{ color: 'var(--mk-text-secondary)' }}>main</span>
-          </p>
-        </>
-      )}
-    </Link>
+
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+          {formatEth(listing.price)}
+          <span className="text-zinc-600 ml-1 text-[10px]">{listing.currency}</span>
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12px]">
+          <SalesCell sales={listing.sales24h || 0} />
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12px] text-zinc-300 flex items-center justify-end gap-1.5">
+          <Sparkline data={sparkline} accent={listing.sales24h ? '#22c55e' : '#52525b'} />
+          <span className="w-12 text-right">{formatEth(listing.volumeEth24h || 0)}</span>
+        </div>
+
+        <div className="text-right text-[12px] text-zinc-300 font-light">
+          {listing.reviewCount ? (
+            <span>
+              <span className="text-[#f59e0b]">★</span>{' '}
+              {(listing.reviewAverage ?? 0).toFixed(1)}
+              <span className="text-zinc-600 ml-0.5 text-[10px]">({listing.reviewCount})</span>
+            </span>
+          ) : (
+            <span className="text-zinc-600">—</span>
+          )}
+        </div>
+
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
+          <div
+            className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          >
+            {listing.seller.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={listing.seller.avatarUrl}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
+                {(listing.seller.username || '?')[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          <span className="truncate">@{listing.seller.username || 'unknown'}</span>
+        </div>
+
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          strokeWidth={1.75}
+        />
+      </Link>
+    </li>
   );
 }
 
-function formatNumber(n: number): string {
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
-  return n.toString();
+function SalesCell({ sales }: { sales: number }) {
+  if (sales === 0) return <span className="text-zinc-600">0</span>;
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[#22c55e]">
+      <ArrowUpRight className="w-3 h-3" strokeWidth={2} />
+      {sales}
+    </span>
+  );
 }
 
-function buildDomain(l: MarketListing): string {
-  const slug = slugify(l.title) || 'listing';
-  return `${slug}.bolty.app`;
+function Sparkline({ data, accent }: { data: number[]; accent: string }) {
+  if (!data || data.length === 0) return <span className="w-12 h-4 inline-block" />;
+  const max = Math.max(1, ...data);
+  const w = 48;
+  const h = 16;
+  const step = data.length > 1 ? w / (data.length - 1) : 0;
+  const points = data
+    .map((v, i) => {
+      const x = i * step;
+      const y = h - (v / max) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+
+  return (
+    <svg width={w} height={h} className="flex-shrink-0" aria-hidden>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
-function slugify(s: string): string {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 32);
+function LiveTradesFeed({ trades }: { trades: Pulse['recentTrades'] }) {
+  return (
+    <div
+      className="rounded-xl overflow-hidden sticky top-4"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
+        <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
+          Live trades
+          <LiveDot />
+        </div>
+        <span className="text-[10px] text-zinc-600 font-light">{trades.length}</span>
+      </div>
+      {trades.length === 0 ? (
+        <div className="px-3 py-10 text-center text-[12px] text-zinc-500 font-light">
+          Waiting for the first trade…
+        </div>
+      ) : (
+        <ul className="max-h-[560px] overflow-y-auto">
+          {trades.map((t) => (
+            <TradeRow key={t.id} trade={t} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
 
-function shortId(id: string): string {
-  return id.slice(0, 7);
+function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
+  const Icon = TYPE_ICON[trade.listing.type] ?? Package;
+  const accent = TYPE_ACCENT[trade.listing.type];
+  return (
+    <li className="border-b border-white/[0.04] last:border-0">
+      <Link
+        href={`/market/agents/${trade.listing.id}`}
+        className="flex items-center gap-2 px-3 py-2 hover:bg-white/[0.02] transition"
+      >
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+          style={{ background: `${accent}18`, boxShadow: `inset 0 0 0 1px ${accent}40` }}
+        >
+          <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: accent }} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[11.5px] text-white truncate font-light">
+            {trade.listing.title}
+          </div>
+          <div className="text-[10px] text-zinc-500 font-light truncate">
+            <span className="text-[#22c55e]">@{trade.buyer.username || 'anon'}</span>
+            <span className="text-zinc-600"> bought from </span>
+            <span className="text-zinc-400">@{trade.seller.username || 'anon'}</span>
+          </div>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <div className="font-mono text-[11.5px] text-[#b4a7ff] tabular-nums">
+            {formatEth(trade.priceEth)}
+          </div>
+          <div className="text-[10px] text-zinc-600 font-light">{timeAgo(trade.createdAt)}</div>
+        </div>
+      </Link>
+    </li>
+  );
 }
-
