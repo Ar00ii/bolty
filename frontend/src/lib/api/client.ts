@@ -111,8 +111,22 @@ class ApiClient {
   ): Promise<T> {
     let response = await this.doFetch(method, path, body, options);
 
-    // Auto-refresh on 401 (except for auth endpoints to avoid loops)
-    if (response.status === 401 && !path.startsWith('/auth/')) {
+    // Auto-refresh on 401 — skip only the endpoints where retrying with a
+    // refreshed access token makes no sense or risks looping:
+    //   - /auth/refresh itself (loop)
+    //   - /auth/login/* and /auth/register (401 = bad credentials, not expired token)
+    //   - /auth/logout (we're tearing down the session anyway)
+    // /auth/me MUST go through refresh so that reload after 15min works.
+    const skipRefresh =
+      path === '/auth/refresh' ||
+      path === '/auth/logout' ||
+      path.startsWith('/auth/login') ||
+      path.startsWith('/auth/register') ||
+      path.startsWith('/auth/verify/') ||
+      path.startsWith('/auth/nonce/') ||
+      path.startsWith('/auth/2fa/verify') ||
+      path.startsWith('/auth/password/');
+    if (response.status === 401 && !skipRefresh) {
       const refreshed = await this.tryRefreshToken();
       if (refreshed) {
         response = await this.doFetch(method, path, body, options);

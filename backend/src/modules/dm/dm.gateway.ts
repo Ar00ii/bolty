@@ -23,11 +23,17 @@ interface AuthenticatedSocket extends Socket {
 /** Simple sliding-window rate limiter: max messages per window (ms) per user */
 class WsRateLimiter {
   private readonly counts = new Map<string, { count: number; resetAt: number }>();
+  private cleanupTimer: NodeJS.Timeout;
 
   constructor(
     private readonly maxMessages: number,
     private readonly windowMs: number,
-  ) {}
+  ) {
+    // Purge expired entries every 5 minutes — otherwise the map grows
+    // unbounded with one stale entry per connecting user forever.
+    this.cleanupTimer = setInterval(() => this.cleanup(), 5 * 60 * 1000);
+    this.cleanupTimer.unref?.();
+  }
 
   isAllowed(userId: string): boolean {
     const now = Date.now();
@@ -42,6 +48,17 @@ class WsRateLimiter {
 
     entry.count++;
     return true;
+  }
+
+  private cleanup(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.counts) {
+      if (now >= entry.resetAt) this.counts.delete(key);
+    }
+  }
+
+  destroy(): void {
+    clearInterval(this.cleanupTimer);
   }
 }
 

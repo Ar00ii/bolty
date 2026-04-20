@@ -208,16 +208,18 @@ export class OrdersService {
     return updated;
   }
 
-  /** Get order chat messages */
+  /** Get order chat messages (latest 200 — orders rarely have more) */
   async getMessages(orderId: string, userId: string) {
     await this.getOrder(orderId, userId); // auth check
-    return this.prisma.orderMessage.findMany({
+    const recent = await this.prisma.orderMessage.findMany({
       where: { orderId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
       include: {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
+    return recent.reverse();
   }
 
   /** Send a message in the order chat */
