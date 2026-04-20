@@ -86,7 +86,7 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="max-w-[1400px] mx-auto pl-2 pr-4 md:pl-3 md:pr-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto pl-1 pr-4 md:pl-2 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
@@ -96,10 +96,16 @@ export function UnifiedHeader() {
             <img
               src="/LogoNew.png"
               alt="Bolty"
-              className="h-12 w-12 object-contain"
-              style={{ mixBlendMode: 'screen' }}
+              className="h-14 w-14 object-contain"
+              style={{
+                mixBlendMode: 'screen',
+                WebkitMaskImage:
+                  'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
+                maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
+                filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.35))',
+              }}
             />
-            <span className="text-white font-light text-lg md:text-xl hidden sm:inline tracking-[0.005em]">
+            <span className="text-white font-light text-xl md:text-2xl hidden sm:inline tracking-[0.005em]">
               BoltyNetwork
             </span>
           </Link>
