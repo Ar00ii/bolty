@@ -4,6 +4,8 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { WS_URL } from '@/lib/api/client';
+
 import type { NegotiationMessage, Negotiation } from '../types';
 
 export function useNegotiation(
@@ -17,9 +19,10 @@ export function useNegotiation(
     if (!negotiationId) return;
 
     // Initialize WebSocket connection
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '', {
+    const socket = io(WS_URL, {
       path: '/socket.io',
       query: { negotiationId },
+      withCredentials: true,
     });
 
     socket.on('message', (message: NegotiationMessage) => {
