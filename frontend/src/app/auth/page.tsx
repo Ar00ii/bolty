@@ -380,7 +380,7 @@ function AuthPage() {
     }
     setLoading('2fa');
     try {
-      await api.post('/auth/login/2fa', { tempToken, code: twoFactorCode });
+      await api.post('/auth/2fa/verify', { tempToken, code: twoFactorCode });
       await refresh();
       router.push('/');
     } catch (err) {
@@ -449,7 +449,7 @@ function AuthPage() {
     }
     setLoading('forgot');
     try {
-      await api.post('/auth/forgot-password', { identifier: forgotIdentifier.trim() });
+      await api.post('/auth/password/forgot', { identifier: forgotIdentifier.trim() });
       setTab('reset-sent');
     } catch (err) {
       setError(mapError(err));

@@ -85,7 +85,7 @@ export default function PublicProfilePage() {
     setFriendMsg('');
     try {
       if (friendStatus === 'none') {
-        await api.post('/social/friends/request', { username: profile?.username });
+        await api.post('/social/friends/request', { targetId: profile?.id });
         setFriendStatus('pending_sent');
         setFriendMsg('Friend request sent');
       } else if (friendStatus === 'pending_received' && friendRequestId) {

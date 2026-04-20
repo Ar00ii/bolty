@@ -24,7 +24,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { API_URL } from '@/lib/api/client';
+import { api, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
@@ -198,14 +198,14 @@ export default function OrdersPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [buyRes, sellRes, statsRes] = await Promise.all([
-        fetch(`${API}/orders`, { credentials: 'include' }),
-        fetch(`${API}/orders/selling`, { credentials: 'include' }),
-        fetch(`${API}/orders/seller/stats`, { credentials: 'include' }),
+      const [buyOrders, sellOrders, sellerStats] = await Promise.all([
+        api.get<Order[]>('/orders').catch(() => null),
+        api.get<Order[]>('/orders/selling').catch(() => null),
+        api.get<SellerStats>('/orders/seller/stats').catch(() => null),
       ]);
-      if (buyRes.ok) setBuyerOrders(await buyRes.json());
-      if (sellRes.ok) setSellerOrders(await sellRes.json());
-      if (statsRes.ok) setStats(await statsRes.json());
+      if (buyOrders) setBuyerOrders(buyOrders);
+      if (sellOrders) setSellerOrders(sellOrders);
+      if (sellerStats) setStats(sellerStats);
     } finally {
       setLoading(false);
     }
