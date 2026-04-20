@@ -111,9 +111,6 @@ export function PowerNavbar() {
         })}
       </nav>
 
-      {/* Inline ticker — hidden on smaller screens to avoid collisions */}
-      <Ticker />
-
       <div className="flex-1" />
 
       {/* Command search */}
