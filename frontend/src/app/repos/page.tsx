@@ -1252,7 +1252,7 @@ export default function ReposPage() {
                         {repo.collaborators.slice(0, 3).map((c) => (
                           <div
                             key={c.id}
-                            className="w-4 h-4 rounded-full border border-zinc-900 overflow-hidden flex items-center justify-center text-xs"
+                            className="w-5 h-5 rounded-full border border-zinc-900 overflow-hidden flex items-center justify-center text-xs"
                             style={{ background: 'rgba(131,110,249,0.2)' }}
                             title={c.name}
                           >

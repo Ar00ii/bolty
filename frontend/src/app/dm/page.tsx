@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X } from 'lucide-react';
+import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -110,6 +110,7 @@ export default function DmPage() {
   const [contactQuery, setContactQuery] = useState('');
   const [bothViewing, setBothViewing] = useState(false);
   const [isAgentChat, setIsAgentChat] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -199,6 +200,7 @@ export default function DmPage() {
     setContacts((prev) =>
       prev.map((c) => (c.user.id === contact.user.id ? { ...c, unread: 0 } : c)),
     );
+    setSidebarOpen(false);
   }, []);
 
   const sendMessage = useCallback(() => {
@@ -270,12 +272,42 @@ export default function DmPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]">
       <div className="flex gap-4 h-full">
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
         {/* ── Sidebar ── */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-72 hidden lg:flex flex-col gap-4 flex-shrink-0"
+        <div
+          className={[
+            'flex flex-col gap-4 flex-shrink-0',
+            'fixed z-50 overflow-y-auto transition-transform duration-300',
+            sidebarOpen
+              ? 'inset-y-0 left-0 w-80 max-w-[85vw] pt-[72px] pb-6 px-4 translate-x-0'
+              : '-translate-x-full pointer-events-none w-0',
+            'lg:relative lg:translate-x-0 lg:w-72 lg:inset-auto lg:z-auto',
+            'lg:pt-0 lg:pb-0 lg:px-0 lg:overflow-y-visible lg:pointer-events-auto',
+          ].join(' ')}
+          style={sidebarOpen ? {
+            background: 'linear-gradient(180deg, rgba(12,12,16,0.99) 0%, rgba(7,7,11,0.99) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '4px 0 24px -4px rgba(0,0,0,0.6), 1px 0 0 rgba(255,255,255,0.04)',
+          } : {}}
         >
+          {/* Mobile close button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-5 right-3 w-8 h-8 flex items-center justify-center rounded-xl text-zinc-400 hover:text-white transition-colors lg:hidden"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
+            aria-label="Close sidebar"
+          >
+            <X size={15} />
+          </button>
           {/* Header */}
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
@@ -485,7 +517,7 @@ export default function DmPage() {
               </motion.p>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {/* ── Main conversation ── */}
         <motion.div
@@ -525,32 +557,48 @@ export default function DmPage() {
               <p className="text-sm text-zinc-400 mb-6 max-w-xs">
                 Select a conversation to start chatting or create a new one to connect
               </p>
-              <motion.button
-                onClick={() => setShowNewDm(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-2.5 rounded-lg text-white text-sm font-light transition-all"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-                }}
-              >
-                New conversation
-              </motion.button>
+              <div className="flex flex-col items-center gap-3">
+                <motion.button
+                  onClick={() => setShowNewDm(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-2.5 rounded-lg text-white text-sm font-light transition-all"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  }}
+                >
+                  New conversation
+                </motion.button>
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  <Menu size={13} /> Browse conversations
+                </button>
+              </div>
             </div>
           ) : (
             <>
               {/* Chat header */}
               <div
-                className="relative flex items-center justify-between px-6 py-4"
+                className="relative flex items-center justify-between px-4 py-4"
                 style={{
                   borderBottom: '1px solid rgba(255,255,255,0.06)',
                   background: 'rgba(131,110,249,0.04)',
                 }}
               >
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl text-zinc-400 hover:text-white transition-colors lg:hidden flex-shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.06)' }}
+                    aria-label="Open conversations"
+                  >
+                    <Menu size={15} />
+                  </button>
                   <Avatar
                     name={activePeer.username}
                     url={activePeer.avatarUrl}
