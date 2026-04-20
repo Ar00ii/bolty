@@ -106,9 +106,10 @@ export function UnifiedHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-3 py-2 rounded-lg text-[13px] font-light tracking-[0.005em] transition-colors"
+                  className="relative px-3 py-2 rounded-lg text-[13px] tracking-[0.005em] transition-colors"
                   style={{
                     color: active ? '#ffffff' : 'rgb(212,212,216)',
+                    fontWeight: 700,
                   }}
                 >
                   {active && (
@@ -123,7 +124,9 @@ export function UnifiedHeader() {
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
                   )}
-                  <span className="relative z-10">{link.label}</span>
+                  <span className="relative z-10" style={{ fontWeight: 700 }}>
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
@@ -131,22 +134,36 @@ export function UnifiedHeader() {
 
           {/* Right: Auth/Profile */}
           <div className="flex items-center gap-2 md:gap-4">
+            <a
+              href="https://x.com/BoltyNetwork"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Bolty on X"
+              title="Bolty on X"
+              className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </a>
             {!isAuthenticated ? (
               <>
                 <Link
                   href="/auth"
-                  className="hidden sm:block text-[13px] font-light text-zinc-300 hover:text-white transition-colors px-2"
+                  className="hidden sm:block text-[13px] text-zinc-300 hover:text-white transition-colors px-2"
+                  style={{ fontWeight: 700 }}
                 >
                   Sign in
                 </Link>
                 <ShimmerButton
                   as={Link}
                   href="/auth?tab=register"
-                  className="text-white text-xs md:text-[13px] font-light px-3.5 md:px-4 py-2 rounded-lg transition-all"
+                  className="text-white text-xs md:text-[13px] px-3.5 md:px-4 py-2 rounded-lg transition-all"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
                     border: '1px solid rgba(131,110,249,0.35)',
+                    fontWeight: 700,
                   }}
                 >
                   Get started

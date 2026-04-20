@@ -126,12 +126,30 @@ export default function HomePage() {
           <AvatarCircles
             numPeople={12400}
             avatarUrls={[
-              { imageUrl: 'https://avatars.githubusercontent.com/u/16860528', profileUrl: '#' },
-              { imageUrl: 'https://avatars.githubusercontent.com/u/20110627', profileUrl: '#' },
-              { imageUrl: 'https://avatars.githubusercontent.com/u/106103625', profileUrl: '#' },
-              { imageUrl: 'https://avatars.githubusercontent.com/u/59228569', profileUrl: '#' },
-              { imageUrl: 'https://avatars.githubusercontent.com/u/89768406', profileUrl: '#' },
-              { imageUrl: 'https://avatars.githubusercontent.com/u/3084745', profileUrl: '#' },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=coder&backgroundColor=836ef9',
+              },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=hacker&backgroundColor=a78bfa',
+              },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=maker&backgroundColor=c4b5fd',
+              },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=builder&backgroundColor=7c3aed',
+              },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=shipper&backgroundColor=8b5cf6',
+              },
+              {
+                imageUrl:
+                  'https://api.dicebear.com/9.x/thumbs/svg?seed=artist&backgroundColor=a855f7',
+              },
             ]}
           />
           <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
@@ -368,24 +386,17 @@ export default function HomePage() {
               <h3 className="text-white font-light mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Contact
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
                     Privacy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
                     Terms
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

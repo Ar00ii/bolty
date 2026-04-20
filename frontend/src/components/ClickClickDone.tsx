@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Hammer, Medal } from 'lucide-react';
 import React from 'react';
 
 export function ClickClickDone() {
@@ -219,18 +220,27 @@ export function ClickClickDone() {
                       RANK_TIERS
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {['Hierro', 'Bronce', 'Plata', 'Oro'].map((tier) => (
+                      {[
+                        { label: 'Iron', Icon: Hammer },
+                        { label: 'Bronze', Icon: Medal },
+                        { label: 'Silver', Icon: Medal },
+                        { label: 'Gold', Icon: Medal },
+                      ].map((tier) => (
                         <div
-                          key={tier}
+                          key={tier.label}
                           style={{
                             background: '#9333ea',
                             color: '#fff',
                             padding: '6px 10px',
                             borderRadius: '4px',
                             fontSize: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
                           }}
                         >
-                          {tier}
+                          <tier.Icon size={12} strokeWidth={1.75} aria-hidden="true" />
+                          {tier.label}
                         </div>
                       ))}
                     </div>

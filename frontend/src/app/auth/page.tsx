@@ -1,9 +1,21 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  Zap,
+} from 'lucide-react';
+
+import { FlickeringGrid } from '@/components/ui/flickering-grid';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useState, useEffect } from 'react';
 
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -208,7 +220,15 @@ function Field({
             onClick={() => setShowPassword(!showPassword)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="text-zinc-600 hover:text-zinc-400 transition-colors"
+            style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              overflow: 'visible',
+            }}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             <motion.div animate={{ rotate: showPassword ? 0 : 180 }} transition={{ duration: 0.2 }}>
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -261,11 +281,21 @@ function SuccessBanner({ message }: { message: string }) {
 }
 
 // -- Main Component ----
-export default function AuthPage() {
+export default function AuthPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <AuthPage />
+    </Suspense>
+  );
+}
+
+function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>('login');
+  const initialTab = searchParams.get('tab') === 'register' ? 'register' : 'login';
+  const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>(initialTab);
 
   // Login state
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -428,6 +458,14 @@ export default function AuthPage() {
     }
   };
 
+  const handleBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
+
   // -- Render ----
   return (
     <div
@@ -436,6 +474,40 @@ export default function AuthPage() {
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
+      {/* Back button — top-left, above all visual layers */}
+      <button
+        type="button"
+        onClick={handleBack}
+        aria-label="Go back"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
+        style={{
+          background: 'rgba(9,9,11,0.55)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
+      >
+        <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+        Back
+      </button>
+
+      {/* Flickering grid — sits between gradient and orbs, masked to fade at edges */}
+      <FlickeringGrid
+        className="absolute inset-0 z-0 pointer-events-none"
+        squareSize={4}
+        gridGap={6}
+        color="#836EF9"
+        maxOpacity={0.35}
+        flickerChance={0.12}
+      />
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 55% at 50% 50%, transparent 0%, rgba(10,10,14,0.7) 55%, rgba(10,10,14,0.95) 100%)',
+        }}
+      />
+
       {/* Animated background orbs */}
       <motion.div
         className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
@@ -808,13 +880,19 @@ export default function AuthPage() {
                 </motion.button>
                 <p className="text-xs text-center text-zinc-600 mt-4">
                   By creating an account you agree to our{' '}
-                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                  <Link
+                    href="/terms"
+                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                  >
                     Terms
-                  </span>{' '}
+                  </Link>{' '}
                   and{' '}
-                  <span className="text-zinc-500 hover:text-monad-400 cursor-pointer transition-colors">
+                  <Link
+                    href="/privacy"
+                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                  >
                     Privacy
-                  </span>
+                  </Link>
                   .
                 </p>
               </motion.form>

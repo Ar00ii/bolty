@@ -156,11 +156,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
             value={`${formatEth(stats?.volumeEth24h)} ETH`}
             accent="#22c55e"
           />
-          <HeroStat
-            label="24h traders"
-            value={formatNumber(stats?.traders24h)}
-            accent="#EC4899"
-          />
+          <HeroStat label="24h traders" value={formatNumber(stats?.traders24h)} accent="#EC4899" />
         </div>
       </div>
     </header>
@@ -173,8 +169,7 @@ function HeroStat({ label, value, accent }: { label: string; value: string; acce
       className="relative rounded-xl px-4 py-3 overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-        boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       <span
@@ -218,10 +213,8 @@ function Flow() {
         <div
           className="mt-8 rounded-xl p-5 md:p-7 overflow-hidden relative"
           style={{
-            background:
-              'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
           }}
         >
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-1 relative">
@@ -312,7 +305,7 @@ function Features() {
     {
       icon: ShieldCheck,
       title: 'Reputation that travels',
-      body: 'Earn rays on every sale, climb 8 tiers from Hierro to Campeón. Your rank follows you into every new listing you publish.',
+      body: 'Earn rays on every sale, climb 8 tiers from Iron to Champion. Your rank follows you into every new listing you publish.',
       accent: '#EC4899',
       href: '/reputation/leaderboard',
     },
@@ -386,10 +379,8 @@ function FeatureCard({
   );
 
   const wrapperStyle: React.CSSProperties = {
-    background:
-      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-    boxShadow:
-      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+    boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
   };
 
   return (
@@ -437,32 +428,28 @@ const CHANGELOG: ChangelogEntry[] = [
     version: 'v0.9',
     tag: 'SHIP',
     title: 'Live market screener',
-    body:
-      'Marketplace rebuilt as a DexScreener-style live dashboard. Rows flash on sale, trades stream in real time, 24h volume and sparklines per listing.',
+    body: 'Marketplace rebuilt as a DexScreener-style live dashboard. Rows flash on sale, trades stream in real time, 24h volume and sparklines per listing.',
   },
   {
     date: 'Apr 18, 2026',
     version: 'v0.8',
     tag: 'SHIP',
     title: 'On-chain escrow release + dispute',
-    body:
-      'Full BoltyEscrow flow wired end-to-end. Buyers release funds from the order page, either party can dispute, admin resolves via /admin/disputes with on-chain verification.',
+    body: 'Full BoltyEscrow flow wired end-to-end. Buyers release funds from the order page, either party can dispute, admin resolves via /admin/disputes with on-chain verification.',
   },
   {
     date: 'Apr 17, 2026',
     version: 'v0.7',
     tag: 'NEW',
     title: 'Rays reputation with 8 tiers',
-    body:
-      'Leaderboard switched from the old billing tiers to the new 8-tier rays system: Hierro → Bronce → Plata → Oro → Platino → Diamante → Maestría → Campeón.',
+    body: 'Leaderboard switched from the old billing tiers to the new 8-tier rays system: Iron → Bronze → Silver → Gold → Platinum → Diamond → Master → Champion.',
   },
   {
     date: 'Apr 16, 2026',
     version: 'v0.6',
     tag: 'SHIP',
     title: 'Profile settings + TOTP 2FA',
-    body:
-      'Unified settings dashboard with in-app password reset and TOTP 2FA via QR code.',
+    body: 'Unified settings dashboard with in-app password reset and TOTP 2FA via QR code.',
   },
 ];
 
@@ -488,8 +475,7 @@ function Changelog() {
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
               <div className="flex items-start gap-3 flex-wrap">
@@ -548,8 +534,7 @@ function CtaFooter() {
         style={{
           background:
             'linear-gradient(135deg, rgba(131,110,249,0.08), rgba(6,182,212,0.05) 50%, rgba(236,72,153,0.06))',
-          boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+          boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
         <div className="relative flex items-center justify-between gap-6 flex-wrap">
