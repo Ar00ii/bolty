@@ -42,19 +42,29 @@ export function ProgressBar({
 
   return (
     <motion.div
-      className={`fixed top-0 left-0 h-1 bg-gradient-to-r ${color} z-[9999] pointer-events-none`}
-      style={{ width: `${progress}%` }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      className={`fixed top-0 left-0 h-[2px] bg-gradient-to-r ${color} z-[9999] pointer-events-none`}
+      animate={{ width: `${progress}%`, opacity: isLoading || progress > 0 ? 1 : 0 }}
+      transition={{ width: { duration: 0.35, ease: 'easeOut' }, opacity: { duration: 0.3 } }}
+      style={{
+        boxShadow: '0 0 10px rgba(131,110,249,0.55), 0 0 20px rgba(131,110,249,0.25)',
+      }}
     >
-      {/* Glow effect */}
+      {/* Leading glow */}
       <div
-        className="absolute right-0 top-0 h-full w-20 blur-xl opacity-50"
+        className="absolute right-0 top-0 h-full w-24 blur-xl opacity-70"
         style={{
           background: 'linear-gradient(90deg, transparent, currentColor)',
         }}
+      />
+      {/* Shimmer sweep */}
+      <motion.div
+        className="absolute inset-y-0 w-24"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
+          mixBlendMode: 'overlay',
+        }}
+        animate={{ x: ['-100%', '400%'] }}
+        transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
       />
     </motion.div>
   );

@@ -1,617 +1,1019 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, TrendingUp, Package } from 'lucide-react';
-import Link from 'next/link';
-import React, { useState, useEffect, useRef } from 'react';
+export const dynamic = 'force-dynamic';
 
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
-import { api, ApiError } from '@/lib/api/client';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import {
+  ArrowUpRight,
+  Bot,
+  Flame,
+  GitBranch,
+  Package,
+  Plus,
+  Search,
+  Sparkles,
+  TrendingUp,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { io, type Socket } from 'socket.io-client';
+
+import { api, WS_URL } from '@/lib/api/client';
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+type TypeFilter = 'ALL' | ListingType;
+type SortKey = 'trending' | 'recent' | 'volume' | 'price-low' | 'price-high';
 
 interface MarketListing {
   id: string;
   createdAt: string;
   title: string;
-  description: string;
-  type: 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+  type: ListingType;
   price: number;
   currency: string;
-  minPrice?: number | null;
   tags: string[];
-  status: string;
-  agentUrl?: string | null;
-  agentEndpoint?: string | null;
-  fileKey?: string | null;
-  fileName?: string | null;
-  fileSize?: number | null;
-  fileMimeType?: string | null;
   seller: { id: string; username: string | null; avatarUrl: string | null };
-  repository: { id: string; name: string; githubUrl: string; language: string | null } | null;
+  reviewAverage?: number | null;
+  reviewCount?: number;
+  sales24h?: number;
+  volumeEth24h?: number;
+  sparkline7d?: number[];
 }
 
-interface NegotiationMessage {
-  id: string;
-  createdAt: string;
-  fromRole: 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent';
-  content: string;
-  proposedPrice?: number | null;
-}
-
-interface Negotiation {
-  id: string;
-  status: 'ACTIVE' | 'AGREED' | 'REJECTED' | 'EXPIRED';
-  agreedPrice?: number | null;
-  listing: {
+interface Pulse {
+  stats: {
+    activeListings: number;
+    totalListings: number;
+    totalSales: number;
+    sales24h: number;
+    volumeEth24h: number;
+    traders24h: number;
+  };
+  recentTrades: Array<{
+    id: string;
+    createdAt: string;
+    priceEth: number | null;
+    buyer: { id: string; username: string | null; avatarUrl: string | null };
+    seller: { id: string; username: string | null };
+    listing: { id: string; title: string; type: ListingType; currency: string; price: number };
+  }>;
+  recentListings: Array<{
     id: string;
     title: string;
+    type: ListingType;
     price: number;
     currency: string;
-    sellerId: string;
-    agentEndpoint?: string | null;
-    minPrice?: number | null;
-  };
-  buyer: { id: string; username: string | null };
-  messages: NegotiationMessage[];
-}
-
-interface FeedPost {
-  id: string;
-  createdAt: string;
-  content: string;
-  postType: 'GENERAL' | 'PRICE_UPDATE' | 'ANNOUNCEMENT' | 'DEAL';
-  price: number | null;
-  currency: string | null;
-  listing: {
-    id: string;
-    title: string;
-    type: string;
+    tags: string[];
+    createdAt: string;
     seller: { id: string; username: string | null; avatarUrl: string | null };
-  };
+  }>;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  REPO: 'text-blue-400 border-blue-400/20 bg-blue-400/5',
-  BOT: 'text-monad-400 border-monad-400/20 bg-monad-400/5',
-  AI_AGENT: 'text-violet-400 border-violet-400/20 bg-violet-400/5',
-  SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
-  OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
+interface SaleEvent {
+  listingId: string;
+  listingTitle: string;
+  listingType: ListingType;
+  priceEth: number | null;
+  currency: string;
+  buyer: { id: string; username: string | null; avatarUrl: string | null };
+  seller: { id: string; username: string | null };
+  createdAt: string;
+}
+
+interface NewListingEvent {
+  listingId: string;
+  title: string;
+  type: ListingType;
+  price: number;
+  currency: string;
+  tags: string[];
+  seller: { id: string; username: string | null; avatarUrl: string | null };
+  createdAt: string;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+const TYPE_ICON: Record<ListingType, LucideIcon> = {
+  REPO: GitBranch,
+  BOT: Bot,
+  AI_AGENT: Bot,
+  SCRIPT: Zap,
+  OTHER: Package,
 };
 
-const ROLE_COLORS: Record<string, string> = {
-  buyer: 'bg-monad-500/10 border-monad-500/20 text-monad-300',
-  seller: 'bg-zinc-800/50 border-zinc-700/30 text-zinc-300',
-  buyer_agent: 'bg-monad-500/8 border-monad-500/15 text-monad-200',
-  seller_agent: 'bg-monad-500/10 border-monad-500/15 text-monad-300',
+const TYPE_LABEL: Record<ListingType, string> = {
+  REPO: 'Repo',
+  BOT: 'Bot',
+  AI_AGENT: 'Agent',
+  SCRIPT: 'Script',
+  OTHER: 'Other',
 };
 
-function timeAgo(d: string) {
+const TYPE_ACCENT: Record<ListingType, string> = {
+  REPO: '#06B6D4',
+  BOT: '#836EF9',
+  AI_AGENT: '#836EF9',
+  SCRIPT: '#EC4899',
+  OTHER: '#94a3b8',
+};
+
+function timeAgo(d: string | Date) {
   const diff = Date.now() - new Date(d).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
 
-function NegotiationModal({
-  listing,
-  onClose,
-  userId,
-}: {
-  listing: MarketListing;
-  onClose: () => void;
-  userId: string;
-}) {
-  const [neg, setNeg] = useState<Negotiation | null>(null);
+function formatNumber(n: number): string {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
+}
+
+function formatEth(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n === 0) return '0';
+  if (n < 0.0001) return '<0.0001';
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(3);
+  return n.toFixed(2);
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
+
+export default function MarketPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" />}>
+      <MarketScreener />
+    </Suspense>
+  );
+}
+
+function MarketScreener() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
+  const [search, setSearch] = useState(initialSearch);
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
+  const [sort, setSort] = useState<SortKey>('trending');
+  const [listings, setListings] = useState<MarketListing[]>([]);
+  const [pulse, setPulse] = useState<Pulse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [paying, setPaying] = useState(false);
-  const [paid, setPaid] = useState(false);
-  const [message, setMessage] = useState('');
-  const [offerPrice, setOfferPrice] = useState('');
-  const [error, setError] = useState('');
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const [consentData, setConsentData] = useState<{
-    sellerWallet: string;
-    buyerAddress: string;
-    sellerWei: bigint;
-    platformWei: bigint;
-    totalWei: bigint;
-    negotiationId: string;
-    amountWei: string;
-    totalUsd: number;
-  } | null>(null);
 
+  // Rows that should flash green (listingId → timestamp)
+  const [flash, setFlash] = useState<Map<string, number>>(new Map());
+  // Rows added live via socket (pre-pended)
+  const [liveListings, setLiveListings] = useState<MarketListing[]>([]);
+  // Live trade feed (rolling)
+  const [liveTrades, setLiveTrades] = useState<Pulse['recentTrades']>([]);
+  // Stats that pulse on change
+  const [statPulse, setStatPulse] = useState<Record<string, number>>({});
+
+  // ── Fetch initial data ──────────────────────────────────────────────────
   useEffect(() => {
-    api
-      .post<Negotiation>(`/market/${listing.id}/negotiate`, {})
-      .then(setNeg)
-      .catch((err) =>
-        setError(err instanceof ApiError ? err.message : 'Failed to start negotiation'),
-      )
-      .finally(() => setLoading(false));
-  }, [listing.id]);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [neg?.messages.length]);
-
-  const send = async () => {
-    if (!neg || !message.trim()) return;
-    setSending(true);
-    setError('');
-    try {
-      const updated = await api.post<Negotiation>(`/market/negotiations/${neg.id}/message`, {
-        content: message.trim(),
-        proposedPrice: offerPrice ? parseFloat(offerPrice) : undefined,
-      });
-      setNeg(updated);
-      setMessage('');
-      setOfferPrice('');
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to send message');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const accept = async () => {
-    if (!neg) return;
-    setSending(true);
-    try {
-      const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/accept`, {});
-      setNeg(u);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to accept');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const reject = async () => {
-    if (!neg) return;
-    setSending(true);
-    try {
-      const u = await api.post<Negotiation>(`/market/negotiations/${neg.id}/reject`, {});
-      setNeg(u);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to reject');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const payWithEth = async () => {
-    if (!neg?.agreedPrice) return;
-    setPaying(true);
-    setError('');
-    try {
-      const ethereum = getMetaMaskProvider();
-      if (!ethereum) {
-        setError('MetaMask not found');
-        setPaying(false);
-        return;
-      }
-      const sellerData = await api.get<any>(`/market/${listing.id}`);
-      const sellerWallet = sellerData?.seller?.walletAddress;
-      if (!sellerWallet) {
-        setError('Seller has no wallet linked');
-        setPaying(false);
-        return;
-      }
-      let ethPrice = 2000;
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
       try {
-        const p = await api.get<any>('/chart/eth-price');
-        if (p.price) ethPrice = p.price;
-      } catch {
-        // ignore
-      }
-      const totalWei = BigInt(Math.ceil(neg.agreedPrice * 1e18));
-      const totalUsd = neg.agreedPrice * ethPrice;
-      const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
-      const platformWei = totalWei - sellerWei;
-      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
-      setConsentData({
-        sellerWallet,
-        buyerAddress: accounts[0],
-        sellerWei,
-        platformWei,
-        totalWei,
-        negotiationId: neg.id,
-        amountWei: totalWei.toString(),
-        totalUsd,
-      });
-    } catch (err: any) {
-      const msg = err?.message || String(err);
-      setError(
-        msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80),
-      );
-    } finally {
-      setPaying(false);
-    }
-  };
+        const qs = new URLSearchParams({ page: '1' });
+        qs.set('sortBy', sort === 'volume' ? 'trending' : sort);
+        if (search) qs.set('search', search);
+        if (typeFilter !== 'ALL') qs.set('type', typeFilter);
 
-  const executePayment = async (signature: string, consentMessage: string) => {
-    if (!consentData) return;
-    const { sellerWallet, buyerAddress, sellerWei, platformWei, negotiationId, amountWei } =
-      consentData;
-    setConsentData(null);
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) {
-      setError('MetaMask not found');
-      return;
-    }
-    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-    try {
-      const txHash = (await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
-      })) as string;
-      let platformFeeTxHash: string | undefined;
-      if (platformWallet) {
-        platformFeeTxHash = (await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [
-            { from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) },
-          ],
-        })) as string;
-      }
-      await api.post(`/market/${listing.id}/purchase`, {
-        txHash,
-        amountWei,
-        negotiationId,
-        platformFeeTxHash,
-        consentSignature: signature,
-        consentMessage,
-      });
-      setPaid(true);
-    } catch (err: any) {
-      const msg = err?.message || String(err);
-      setError(
-        msg.includes('rejected') ? 'Payment cancelled' : 'Payment failed: ' + msg.slice(0, 80),
-      );
-    }
-  };
+        const [listRes, pulseRes] = await Promise.all([
+          api.get<{ data: MarketListing[] }>(`/market?${qs.toString()}`),
+          api.get<Pulse>('/market/pulse?limit=20'),
+        ]);
+        if (cancelled) return;
 
-  const isSeller = neg?.listing?.sellerId === userId;
+        const data = listRes?.data || [];
+        if (sort === 'volume') {
+          data.sort((a, b) => (b.volumeEth24h || 0) - (a.volumeEth24h || 0));
+        }
+        setListings(data);
+        setPulse(pulseRes);
+        setLiveTrades(pulseRes?.recentTrades || []);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [search, typeFilter, sort]);
+
+  // ── Websocket ──────────────────────────────────────────────────────────
+  const socketRef = useRef<Socket | null>(null);
+  useEffect(() => {
+    const socket = io(`${WS_URL}/market`, {
+      transports: ['websocket'],
+      withCredentials: true,
+    });
+    socketRef.current = socket;
+
+    socket.on('sale', (ev: SaleEvent) => {
+      // Flash the row
+      setFlash((prev) => {
+        const next = new Map(prev);
+        next.set(ev.listingId, Date.now());
+        return next;
+      });
+      // Bump 24h stats on the row locally (feels instant)
+      setListings((prev) =>
+        prev.map((l) =>
+          l.id === ev.listingId
+            ? {
+                ...l,
+                sales24h: (l.sales24h || 0) + 1,
+                volumeEth24h: Number(((l.volumeEth24h || 0) + (ev.priceEth || 0)).toFixed(4)),
+              }
+            : l,
+        ),
+      );
+      // Prepend to live trades
+      setLiveTrades((prev) => {
+        const next = [
+          {
+            id: `live-${ev.listingId}-${Date.now()}`,
+            createdAt: ev.createdAt,
+            priceEth: ev.priceEth,
+            buyer: ev.buyer,
+            seller: ev.seller,
+            listing: {
+              id: ev.listingId,
+              title: ev.listingTitle,
+              type: ev.listingType,
+              currency: ev.currency,
+              price: 0,
+            },
+          },
+          ...prev,
+        ];
+        return next.slice(0, 40);
+      });
+      // Pulse the global stats
+      setStatPulse({ sales24h: Date.now(), volumeEth24h: Date.now() });
+      setPulse((p) =>
+        p
+          ? {
+              ...p,
+              stats: {
+                ...p.stats,
+                sales24h: p.stats.sales24h + 1,
+                volumeEth24h: Number((p.stats.volumeEth24h + (ev.priceEth || 0)).toFixed(4)),
+              },
+            }
+          : p,
+      );
+    });
+
+    socket.on('new-listing', (ev: NewListingEvent) => {
+      setLiveListings((prev) => {
+        if (prev.some((l) => l.id === ev.listingId)) return prev;
+        const entry: MarketListing = {
+          id: ev.listingId,
+          createdAt: ev.createdAt,
+          title: ev.title,
+          type: ev.type,
+          price: ev.price,
+          currency: ev.currency,
+          tags: ev.tags,
+          seller: ev.seller,
+          reviewAverage: null,
+          reviewCount: 0,
+          sales24h: 0,
+          volumeEth24h: 0,
+          sparkline7d: new Array(7).fill(0),
+        };
+        return [entry, ...prev].slice(0, 10);
+      });
+      setStatPulse((p) => ({ ...p, activeListings: Date.now() }));
+      setPulse((p) =>
+        p
+          ? {
+              ...p,
+              stats: {
+                ...p.stats,
+                activeListings: p.stats.activeListings + 1,
+                totalListings: p.stats.totalListings + 1,
+              },
+              recentListings: [
+                {
+                  id: ev.listingId,
+                  title: ev.title,
+                  type: ev.type,
+                  price: ev.price,
+                  currency: ev.currency,
+                  tags: ev.tags,
+                  createdAt: ev.createdAt,
+                  seller: ev.seller,
+                },
+                ...(p.recentListings || []),
+              ].slice(0, 20),
+            }
+          : p,
+      );
+    });
+
+    return () => {
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, []);
+
+  // Clear stale flashes
+  useEffect(() => {
+    if (flash.size === 0) return;
+    const t = setInterval(() => {
+      const now = Date.now();
+      setFlash((prev) => {
+        let changed = false;
+        const next = new Map(prev);
+        next.forEach((v, k) => {
+          if (now - v > 1500) {
+            next.delete(k);
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }, 500);
+    return () => clearInterval(t);
+  }, [flash.size]);
+
+  // Merge live listings into the main table
+  const mergedListings = useMemo(() => {
+    if (liveListings.length === 0) return listings;
+    const seen = new Set(listings.map((l) => l.id));
+    const fresh = liveListings.filter((l) => !seen.has(l.id));
+    return [...fresh, ...listings];
+  }, [listings, liveListings]);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.7)' }}
-    >
-      {consentData && (
-        <PaymentConsentModal
-          listingTitle={listing.title}
-          sellerAddress={consentData.sellerWallet}
-          sellerAmountETH={(Number(consentData.sellerWei) / 1e18).toFixed(6)}
-          platformFeeETH={(Number(consentData.platformWei) / 1e18).toFixed(6)}
-          totalETH={(Number(consentData.totalWei) / 1e18).toFixed(6)}
-          totalUsd={consentData.totalUsd.toFixed(2)}
-          buyerAddress={consentData.buyerAddress}
-          onConsent={executePayment}
-          onCancel={() => setConsentData(null)}
-        />
-      )}
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <header className="px-6 pt-4 pb-4 md:px-10 md:pt-5">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Bolty Screener</span>
+                <LiveDot />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Marketplace
+              </h1>
+            </div>
+            <Link
+              href="/market/seller/publish"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+              }}
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={1.75} />
+              Publish listing
+            </Link>
+          </div>
+        </div>
+      </header>
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-auto rounded-2xl border border-monad-500/20"
-        style={{ background: 'var(--bg-card)' }}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-all z-10"
-        >
-          <X className="w-5 h-5" />
-        </button>
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          <StatTile
+            label="24h volume"
+            value={`${formatEth(pulse?.stats.volumeEth24h || 0)} ETH`}
+            sub={`${pulse?.stats.sales24h ?? 0} sales`}
+            pulseKey={statPulse.volumeEth24h}
+            accent="#836EF9"
+          />
+          <StatTile
+            label="24h sales"
+            value={formatNumber(pulse?.stats.sales24h || 0)}
+            sub={`${pulse?.stats.traders24h ?? 0} traders`}
+            pulseKey={statPulse.sales24h}
+            accent="#22c55e"
+          />
+          <StatTile
+            label="Active listings"
+            value={formatNumber(pulse?.stats.activeListings || 0)}
+            sub={`${pulse?.stats.totalListings ?? 0} total`}
+            pulseKey={statPulse.activeListings}
+            accent="#06B6D4"
+          />
+          <StatTile
+            label="All-time sales"
+            value={formatNumber(pulse?.stats.totalSales || 0)}
+            sub="since launch"
+            accent="#EC4899"
+          />
+        </div>
+      </section>
 
-        <div className="p-6 space-y-4">
-          <div>
-            <h2 className="text-2xl font-light text-white">{listing.title}</h2>
-            <p className="text-sm text-zinc-400">
-              Starting at {listing.price} {listing.currency}
-            </p>
+      {/* New launches ticker */}
+      <NewLaunchesTicker items={pulse?.recentListings || []} />
+
+      {/* Filters */}
+      <section className="px-6 md:px-10 mt-5 mb-3">
+        <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1 flex-1 min-w-[240px] max-w-md px-3 py-1.5 rounded-lg bg-black/40 border border-white/10">
+            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search agents, repos, bots, tags…"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-600"
+            />
           </div>
 
-          {loading ? (
-            <div className="py-8 text-center">
-              <motion.div
-                className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400 mx-auto"
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity }}
-              />
-            </div>
-          ) : !neg ? (
-            <p className="text-red-400">{error || 'Failed to load negotiation'}</p>
-          ) : paid ? (
-            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400">
-              Payment successful!
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="max-h-[300px] overflow-y-auto space-y-3 p-3 rounded-lg bg-white/5 border border-white/10">
-                {neg.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`text-sm ${ROLE_COLORS[msg.fromRole] || ''} p-2.5 rounded-lg border`}
-                  >
-                    <p className="font-light">{msg.content}</p>
-                    {msg.proposedPrice && (
-                      <p className="text-xs mt-1">Price: {msg.proposedPrice}</p>
-                    )}
-                  </div>
-                ))}
-                <div ref={bottomRef} />
-              </div>
+          <TypeTabs value={typeFilter} onChange={setTypeFilter} />
 
-              {error && <p className="text-red-400 text-sm">{error}</p>}
-
-              {neg.status === 'ACTIVE' && (
-                <div className="space-y-3">
-                  <input
-                    type="number"
-                    placeholder="Offer price (optional)"
-                    value={offerPrice}
-                    onChange={(e) => setOfferPrice(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-zinc-600 text-sm"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Your message..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-zinc-600 text-sm"
-                  />
-                  <button
-                    onClick={send}
-                    disabled={sending || !message.trim()}
-                    className="w-full py-2 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light text-sm disabled:opacity-50"
-                  >
-                    {sending ? 'Sending...' : 'Send'}
-                  </button>
-                </div>
-              )}
-
-              {isSeller && neg.status === 'ACTIVE' && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={accept}
-                    disabled={sending}
-                    className="flex-1 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 text-green-400 font-light text-sm"
-                  >
-                    Accept
-                  </button>
-                  <button
-                    onClick={reject}
-                    disabled={sending}
-                    className="flex-1 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 font-light text-sm"
-                  >
-                    Reject
-                  </button>
-                </div>
-              )}
-
-              {!isSeller && neg.status === 'AGREED' && (
-                <button
-                  onClick={payWithEth}
-                  disabled={paying}
-                  className="w-full py-2 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light text-sm disabled:opacity-50"
-                >
-                  {paying ? 'Processing...' : 'Pay with ETH'}
-                </button>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-1 ml-auto">
+            <SortChip
+              active={sort === 'trending'}
+              onClick={() => setSort('trending')}
+              icon={<Flame className="w-3 h-3" strokeWidth={1.75} />}
+              label="Hot"
+            />
+            <SortChip
+              active={sort === 'recent'}
+              onClick={() => setSort('recent')}
+              icon={<Sparkles className="w-3 h-3" strokeWidth={1.75} />}
+              label="New"
+            />
+            <SortChip
+              active={sort === 'volume'}
+              onClick={() => setSort('volume')}
+              icon={<TrendingUp className="w-3 h-3" strokeWidth={1.75} />}
+              label="Volume"
+            />
+            <SortChip
+              active={sort === 'price-low'}
+              onClick={() => setSort('price-low')}
+              label="Low $"
+            />
+            <SortChip
+              active={sort === 'price-high'}
+              onClick={() => setSort('price-high')}
+              label="High $"
+            />
+          </div>
         </div>
-      </motion.div>
+      </section>
+
+      {/* Table + trades feed */}
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
+          <div>
+            <ScreenerTable
+              listings={mergedListings}
+              flash={flash}
+              liveIds={new Set(liveListings.map((l) => l.id))}
+              loading={loading}
+            />
+          </div>
+          <aside className="hidden lg:block">
+            <LiveTradesFeed trades={liveTrades} />
+          </aside>
+        </div>
+      </section>
     </div>
   );
 }
 
-export default function MarketPage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
-  const [activeTab, setActiveTab] = useState<'browse' | 'activity' | 'my-items'>('browse');
-  const [recentListings, setRecentListings] = useState<MarketListing[]>([]);
-  const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);
-  const [activeNeg, setActiveNeg] = useState<MarketListing | null>(null);
-  const [loading, setLoading] = useState(true);
+// ── Sub-components ─────────────────────────────────────────────────────────
 
+function LiveDot() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
+      <span
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: '#22c55e' }}
+      />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+    </span>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  sub,
+  pulseKey,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  pulseKey?: number;
+  accent: string;
+}) {
+  const [pulsing, setPulsing] = useState(false);
   useEffect(() => {
-    const load = async () => {
-      try {
-        const [listings, feed] = await Promise.all([
-          api.get<MarketListing[]>('/market/listings?limit=4'),
-          api.get<FeedPost[]>('/market/feed?limit=3'),
-        ]);
-        setRecentListings(listings || []);
-        setFeedPosts(feed || []);
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+    if (!pulseKey) return;
+    setPulsing(true);
+    const t = setTimeout(() => setPulsing(false), 700);
+    return () => clearTimeout(t);
+  }, [pulseKey]);
 
-  if (isLoading || loading) {
+  return (
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden transition-all"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: pulsing
+          ? `0 0 0 1px ${accent}66, inset 0 1px 0 rgba(255,255,255,0.04), 0 0 20px -4px ${accent}55`
+          : '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
+      </div>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+function NewLaunchesTicker({
+  items,
+}: {
+  items: Array<{
+    id: string;
+    title: string;
+    type: ListingType;
+    price: number;
+    currency: string;
+    createdAt: string;
+  }>;
+}) {
+  if (items.length === 0) return null;
+  const doubled = [...items, ...items];
+  return (
+    <section className="px-6 md:px-10 mb-2">
+      <div
+        className="mx-auto max-w-[1400px] relative overflow-hidden rounded-lg py-2"
+        style={{
+          background: 'linear-gradient(90deg, rgba(34,197,94,0.05), rgba(131,110,249,0.05))',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        <div
+          className="flex items-center gap-1.5 px-3 text-[10.5px] uppercase tracking-[0.16em] text-[#22c55e] font-medium whitespace-nowrap absolute left-0 top-0 bottom-0 z-10 pr-3"
+          style={{
+            background: 'linear-gradient(90deg, rgba(10,10,14,0.95) 70%, transparent)',
+          }}
+        >
+          <Sparkles className="w-3 h-3" strokeWidth={2} />
+          New launches
+        </div>
+        <div
+          className="flex gap-6 whitespace-nowrap pl-36"
+          style={{
+            animation: 'bolty-ticker 60s linear infinite',
+          }}
+        >
+          {doubled.map((item, i) => {
+            const Icon = TYPE_ICON[item.type] ?? Package;
+            return (
+              <Link
+                href={`/market/agents/${item.id}`}
+                key={`${item.id}-${i}`}
+                className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
+              >
+                <Icon
+                  className="w-3 h-3"
+                  strokeWidth={1.75}
+                  style={{ color: TYPE_ACCENT[item.type] }}
+                />
+                <span>{item.title}</span>
+                <span className="font-mono text-[#b4a7ff]">
+                  {formatEth(item.price)} {item.currency}
+                </span>
+                <span className="text-zinc-600">· {timeAgo(item.createdAt)} ago</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes bolty-ticker {
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFilter) => void }) {
+  const tabs: { key: TypeFilter; label: string }[] = [
+    { key: 'ALL', label: 'All' },
+    { key: 'AI_AGENT', label: 'Agents' },
+    { key: 'BOT', label: 'Bots' },
+    { key: 'REPO', label: 'Repos' },
+    { key: 'SCRIPT', label: 'Scripts' },
+  ];
+  return (
+    <div
+      className="flex items-center gap-0.5 rounded-lg p-0.5"
+      style={{
+        background: 'rgba(0,0,0,0.4)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          onClick={() => onChange(t.key)}
+          className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
+          style={{
+            color: value === t.key ? '#ffffff' : '#a1a1aa',
+            background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
+            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+          }}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SortChip({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon?: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+      style={{
+        color: active ? '#ffffff' : '#a1a1aa',
+        background: active ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.02)',
+        boxShadow: active
+          ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
+          : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function ScreenerTable({
+  listings,
+  flash,
+  liveIds,
+  loading,
+}: {
+  listings: MarketListing[];
+  flash: Map<string, number>;
+  liveIds: Set<string>;
+  loading: boolean;
+}) {
+  if (loading && listings.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity }}
-        />
+      <div
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        Loading market data…
       </div>
     );
   }
 
-  const TABS = [
-    { id: 'browse', label: 'Browse', icon: <Star size={16} /> },
-    { id: 'activity', label: 'Activity', icon: <TrendingUp size={16} /> },
-    { id: 'my-items', label: 'My Items', icon: <Package size={16} /> },
-  ] as const;
+  if (!loading && listings.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-20 text-center"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="text-sm font-light text-zinc-300">No listings match your filters.</div>
+        <div className="text-xs font-light text-zinc-500 mt-1">
+          Try changing the type or clearing the search.
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      style={{ background: 'var(--bg)', height: 'calc(100vh - 5rem)' }}
-      className="overflow-hidden flex flex-col"
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
     >
-      {activeNeg && user && (
-        <NegotiationModal listing={activeNeg} onClose={() => setActiveNeg(null)} userId={user.id} />
-      )}
-
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="px-6 md:px-8 pt-6 pb-4 border-b border-monad-500/10 flex-shrink-0"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-light text-white">Marketplace</h1>
-              <p className="text-sm text-zinc-400">AI agents, tools, and repositories</p>
-            </div>
-            <div className="flex gap-2">
-              <Link
-                href="/market/agents"
-                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
-              >
-                Browse Agents
-              </Link>
-              <Link
-                href="/market/repos"
-                className="px-4 py-2 text-sm rounded-lg border border-monad-500/30 hover:bg-monad-500/10 text-white font-light transition-all"
-              >
-                Browse Repos
-              </Link>
-            </div>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex gap-2">
-            {TABS.map((tab) => (
-              <motion.button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`px-4 py-2 rounded-lg text-sm font-light flex items-center gap-2 transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-monad-500/20 text-monad-300 border border-monad-500/30'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </motion.button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 md:px-8 py-6">
-          <AnimatePresence mode="wait">
-            {activeTab === 'browse' && (
-              <motion.div
-                key="browse"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-6"
-              >
-                <div>
-                  <h2 className="text-lg font-light text-white mb-3">Featured</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {recentListings.slice(0, 2).map((listing) => (
-                      <motion.button
-                        key={listing.id}
-                        onClick={() => setActiveNeg(listing)}
-                        whileHover={{ y: -2 }}
-                        className="text-left p-4 rounded-xl border border-monad-500/15 hover:border-monad-500/30 bg-monad-500/5 hover:bg-monad-500/10 transition-all"
-                      >
-                        <p className="font-light text-white mb-1">{listing.title}</p>
-                        <p className="text-xs text-zinc-400">
-                          {listing.price} {listing.currency}
-                        </p>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h2 className="text-lg font-light text-white mb-3">Recent</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {recentListings.slice(2, 4).map((listing) => (
-                      <motion.button
-                        key={listing.id}
-                        onClick={() => setActiveNeg(listing)}
-                        whileHover={{ y: -2 }}
-                        className="text-left p-3 rounded-lg border border-white/10 hover:border-monad-500/20 bg-white/5 hover:bg-monad-500/5 transition-all"
-                      >
-                        <p className="text-sm font-light text-white">{listing.title}</p>
-                        <p className="text-xs text-zinc-500 mt-1">
-                          {listing.price} {listing.currency}
-                        </p>
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {activeTab === 'activity' && (
-              <motion.div
-                key="activity"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="space-y-3"
-              >
-                <h2 className="text-lg font-light text-white mb-4">Recent Activity</h2>
-                {feedPosts.map((post) => (
-                  <motion.div
-                    key={post.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="p-3 rounded-lg border border-white/10 bg-white/5"
-                  >
-                    <p className="text-sm font-light text-white">{post.listing.title}</p>
-                    <p className="text-xs text-zinc-400 mt-1">{post.content}</p>
-                    <p className="text-xs text-zinc-600 mt-2">{timeAgo(post.createdAt)}</p>
-                  </motion.div>
-                ))}
-              </motion.div>
-            )}
-
-            {activeTab === 'my-items' && (
-              <motion.div
-                key="my-items"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-center py-12"
-              >
-                <Package className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                <p className="text-zinc-400 font-light">No items yet</p>
-                <Link
-                  href="/profile?tab=listings"
-                  className="text-sm text-monad-400 hover:text-monad-300 mt-2 inline-block"
-                >
-                  Create your first listing →
-                </Link>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+        <span className="text-center">#</span>
+        <span>Listing</span>
+        <span className="text-right">Price</span>
+        <span className="text-right">24h</span>
+        <span className="text-right">24h vol</span>
+        <span className="text-right">Rating</span>
+        <span className="hidden md:block">Seller</span>
+        <span />
       </div>
+      <ul>
+        {listings.map((l, i) => (
+          <Row
+            key={l.id}
+            listing={l}
+            index={i}
+            flashedAt={flash.get(l.id)}
+            isLive={liveIds.has(l.id)}
+          />
+        ))}
+      </ul>
     </div>
+  );
+}
+
+function Row({
+  listing,
+  index,
+  flashedAt,
+  isLive,
+}: {
+  listing: MarketListing;
+  index: number;
+  flashedAt?: number;
+  isLive: boolean;
+}) {
+  const Icon = TYPE_ICON[listing.type] ?? Package;
+  const accent = TYPE_ACCENT[listing.type];
+  const flashing = !!flashedAt && Date.now() - flashedAt < 1500;
+  const sparkline = listing.sparkline7d || [];
+
+  return (
+    <li>
+      <Link
+        href={`/market/agents/${listing.id}`}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all"
+        style={{
+          background: flashing
+            ? 'linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.02))'
+            : isLive
+              ? 'linear-gradient(90deg, rgba(131,110,249,0.08), transparent)'
+              : 'transparent',
+        }}
+      >
+        {/* Flash left bar */}
+        {flashing && (
+          <span
+            aria-hidden
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: '#22c55e', boxShadow: '0 0 8px #22c55e' }}
+          />
+        )}
+        {isLive && !flashing && (
+          <span
+            aria-hidden
+            className="absolute left-0 top-0 bottom-0 w-[2px]"
+            style={{ background: accent, opacity: 0.6 }}
+          />
+        )}
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${accent}18`,
+              boxShadow: `inset 0 0 0 1px ${accent}40`,
+            }}
+          >
+            <Icon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: accent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] font-normal text-white truncate">{listing.title}</span>
+              {isLive && (
+                <span
+                  className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded"
+                  style={{
+                    color: '#22c55e',
+                    background: 'rgba(34,197,94,0.1)',
+                    boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                  }}
+                >
+                  NEW
+                </span>
+              )}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 font-light flex items-center gap-1">
+              <span style={{ color: accent }}>{TYPE_LABEL[listing.type]}</span>
+              {(listing.tags || []).slice(0, 2).map((t) => (
+                <span key={t} className="text-zinc-600">
+                  · {t}
+                </span>
+              ))}
+              <span className="text-zinc-600">· {timeAgo(listing.createdAt)} ago</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+          {formatEth(listing.price)}
+          <span className="text-zinc-600 ml-1 text-[10px]">{listing.currency}</span>
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12px]">
+          <SalesCell sales={listing.sales24h || 0} />
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12px] text-zinc-300 flex items-center justify-end gap-1.5">
+          <Sparkline data={sparkline} accent={listing.sales24h ? '#22c55e' : '#52525b'} />
+          <span className="w-12 text-right">{formatEth(listing.volumeEth24h || 0)}</span>
+        </div>
+
+        <div className="text-right text-[12px] text-zinc-300 font-light">
+          {listing.reviewCount ? (
+            <span>
+              <span className="text-[#f59e0b]">★</span> {(listing.reviewAverage ?? 0).toFixed(1)}
+              <span className="text-zinc-600 ml-0.5 text-[10px]">({listing.reviewCount})</span>
+            </span>
+          ) : (
+            <span className="text-zinc-600">—</span>
+          )}
+        </div>
+
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
+          <div
+            className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          >
+            {listing.seller.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={listing.seller.avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
+                {(listing.seller.username || '?')[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          <span className="truncate">@{listing.seller.username || 'unknown'}</span>
+        </div>
+
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          strokeWidth={1.75}
+        />
+      </Link>
+    </li>
+  );
+}
+
+function SalesCell({ sales }: { sales: number }) {
+  if (sales === 0) return <span className="text-zinc-600">0</span>;
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[#22c55e]">
+      <ArrowUpRight className="w-3 h-3" strokeWidth={2} />
+      {sales}
+    </span>
+  );
+}
+
+function Sparkline({ data, accent }: { data: number[]; accent: string }) {
+  if (!data || data.length === 0) return <span className="w-12 h-4 inline-block" />;
+  const max = Math.max(1, ...data);
+  const w = 48;
+  const h = 16;
+  const step = data.length > 1 ? w / (data.length - 1) : 0;
+  const points = data
+    .map((v, i) => {
+      const x = i * step;
+      const y = h - (v / max) * h;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(' ');
+
+  return (
+    <svg width={w} height={h} className="flex-shrink-0" aria-hidden>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={accent}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function LiveTradesFeed({ trades }: { trades: Pulse['recentTrades'] }) {
+  return (
+    <div
+      className="rounded-xl overflow-hidden sticky top-4"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
+        <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
+          Live trades
+          <LiveDot />
+        </div>
+        <span className="text-[10px] text-zinc-600 font-light">{trades.length}</span>
+      </div>
+      {trades.length === 0 ? (
+        <div className="px-3 py-10 text-center text-[12px] text-zinc-500 font-light">
+          Waiting for the first trade…
+        </div>
+      ) : (
+        <ul className="max-h-[560px] overflow-y-auto">
+          {trades.map((t) => (
+            <TradeRow key={t.id} trade={t} />
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
+  const Icon = TYPE_ICON[trade.listing.type] ?? Package;
+  const accent = TYPE_ACCENT[trade.listing.type];
+  return (
+    <li className="border-b border-white/[0.04] last:border-0">
+      <Link
+        href={`/market/agents/${trade.listing.id}`}
+        className="flex items-center gap-2 px-3 py-2 hover:bg-white/[0.02] transition"
+      >
+        <div
+          className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+          style={{ background: `${accent}18`, boxShadow: `inset 0 0 0 1px ${accent}40` }}
+        >
+          <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: accent }} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[11.5px] text-white truncate font-light">{trade.listing.title}</div>
+          <div className="text-[10px] text-zinc-500 font-light truncate">
+            <span className="text-[#22c55e]">@{trade.buyer.username || 'anon'}</span>
+            <span className="text-zinc-600"> bought from </span>
+            <span className="text-zinc-400">@{trade.seller.username || 'anon'}</span>
+          </div>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <div className="font-mono text-[11.5px] text-[#b4a7ff] tabular-nums">
+            {formatEth(trade.priceEth)}
+          </div>
+          <div className="text-[10px] text-zinc-600 font-light">{timeAgo(trade.createdAt)}</div>
+        </div>
+      </Link>
+    </li>
   );
 }

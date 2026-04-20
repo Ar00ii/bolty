@@ -27,9 +27,14 @@ class ApiClient {
   }
 
   private getCsrfToken(): string | null {
-    // Read CSRF token from cookie (set by server, non-httpOnly)
+    // Read CSRF token from cookie (set by server, non-httpOnly).
+    // Cookie name is lowercase "csrf-token" — the legacy "X-CSRF-Token" name is
+    // kept as a fallback so older browsers still carrying the old host-only
+    // cookie can mirror it back until the server-sent clearCookie lands.
     if (typeof document === 'undefined') return null; // SSR safety
-    const match = document.cookie.match(/(?:^|;\s*)X-CSRF-Token=([^;]*)/);
+    const match =
+      document.cookie.match(/(?:^|;\s*)csrf-token=([^;]*)/) ||
+      document.cookie.match(/(?:^|;\s*)X-CSRF-Token=([^;]*)/);
     return match ? decodeURIComponent(match[1]) : null;
   }
 
@@ -106,8 +111,22 @@ class ApiClient {
   ): Promise<T> {
     let response = await this.doFetch(method, path, body, options);
 
-    // Auto-refresh on 401 (except for auth endpoints to avoid loops)
-    if (response.status === 401 && !path.startsWith('/auth/')) {
+    // Auto-refresh on 401 — skip only the endpoints where retrying with a
+    // refreshed access token makes no sense or risks looping:
+    //   - /auth/refresh itself (loop)
+    //   - /auth/login/* and /auth/register (401 = bad credentials, not expired token)
+    //   - /auth/logout (we're tearing down the session anyway)
+    // /auth/me MUST go through refresh so that reload after 15min works.
+    const skipRefresh =
+      path === '/auth/refresh' ||
+      path === '/auth/logout' ||
+      path.startsWith('/auth/login') ||
+      path.startsWith('/auth/register') ||
+      path.startsWith('/auth/verify/') ||
+      path.startsWith('/auth/nonce/') ||
+      path.startsWith('/auth/2fa/verify') ||
+      path.startsWith('/auth/password/');
+    if (response.status === 401 && !skipRefresh) {
       const refreshed = await this.tryRefreshToken();
       if (refreshed) {
         response = await this.doFetch(method, path, body, options);
@@ -146,8 +165,13 @@ class ApiClient {
   async upload<T>(path: string, formData: FormData): Promise<T> {
     let response: Response;
     try {
+      const headers: Record<string, string> = {};
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
       response = await fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
+        headers,
         credentials: 'include',
         body: formData,
         // No Content-Type — browser sets multipart/form-data with boundary
@@ -179,9 +203,13 @@ class ApiClient {
   ): Promise<void> {
     let response: Response;
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
       response = await fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify(body),
       });

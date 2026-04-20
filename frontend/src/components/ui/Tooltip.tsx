@@ -22,6 +22,13 @@ export function Tooltip({ content, children, side = 'top', showIcon = true }: To
     right: 'left-full ml-2 top-1/2 -translate-y-1/2',
   };
 
+  const tooltipStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+    boxShadow:
+      '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -8px rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(8px)',
+  };
+
   return (
     <div className="relative inline-block">
       <div
@@ -31,32 +38,25 @@ export function Tooltip({ content, children, side = 'top', showIcon = true }: To
       >
         {children ||
           (showIcon && (
-            <HelpCircle className="w-4 h-4 text-zinc-500 hover:text-zinc-300 transition-colors inline" />
+            <HelpCircle className="w-3.5 h-3.5 text-zinc-500 hover:text-[#b4a7ff] transition-colors inline" />
           ))}
       </div>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{
+              opacity: 0,
+              scale: 0.95,
+              y: side === 'top' ? 4 : side === 'bottom' ? -4 : 0,
+            }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className={`absolute z-50 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg whitespace-nowrap text-xs text-zinc-200 font-light pointer-events-none ${positionClasses[side]}`}
+            className={`absolute z-50 px-2.5 py-1.5 rounded-lg whitespace-nowrap text-[12px] text-zinc-200 font-light pointer-events-none tracking-[0.005em] ${positionClasses[side]}`}
+            style={tooltipStyle}
           >
             {content}
-            <div
-              className="absolute w-2 h-2 bg-zinc-900 border border-zinc-700 rotate-45 pointer-events-none"
-              style={
-                side === 'top'
-                  ? { bottom: '-5px', left: '50%', transform: 'translateX(-50%)' }
-                  : side === 'bottom'
-                    ? { top: '-5px', left: '50%', transform: 'translateX(-50%)' }
-                    : side === 'left'
-                      ? { right: '-5px', top: '50%', transform: 'translateY(-50%)' }
-                      : { left: '-5px', top: '50%', transform: 'translateY(-50%)' }
-              }
-            />
           </motion.div>
         )}
       </AnimatePresence>

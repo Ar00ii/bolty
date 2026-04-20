@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
 
@@ -35,41 +36,80 @@ export function Pagination({
   if (endPage < totalPages) pages.push(totalPages);
 
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
-      <button
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-1.5 mt-8">
+      <motion.button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1 || isLoading}
-        className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        whileTap={currentPage === 1 || isLoading ? undefined : { scale: 0.92 }}
+        whileHover={currentPage === 1 || isLoading ? undefined : { x: -1 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+        aria-label="Previous page"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronLeft className="w-4 h-4" />
-      </button>
+        <ChevronLeft className="w-4 h-4" strokeWidth={1.75} />
+      </motion.button>
 
-      <div className="flex gap-1">
-        {pages.map((page, idx) => (
-          <button
-            key={idx}
-            onClick={() => typeof page === 'number' && onPageChange(page)}
-            disabled={page === '...' || isLoading}
-            className={`px-3 py-1.5 rounded-lg text-sm font-light transition-all ${
-              page === currentPage
-                ? 'bg-monad-500/20 border border-monad-500/30 text-monad-300'
-                : page === '...'
-                  ? 'text-zinc-600 cursor-default'
-                  : 'border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-      </div>
+      <ol className="flex gap-1 list-none m-0 p-0">
+        {pages.map((page, idx) => {
+          const isCurrent = page === currentPage;
+          const isEllipsis = page === '...';
+          return (
+            <li key={idx}>
+              <motion.button
+                onClick={() => typeof page === 'number' && onPageChange(page)}
+                disabled={isEllipsis || isLoading}
+                whileTap={isEllipsis || isLoading || isCurrent ? undefined : { scale: 0.92 }}
+                whileHover={isEllipsis || isLoading || isCurrent ? undefined : { y: -1 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                aria-label={
+                  isEllipsis
+                    ? undefined
+                    : isCurrent
+                      ? `Page ${page}, current`
+                      : `Go to page ${page}`
+                }
+                aria-current={isCurrent ? 'page' : undefined}
+                aria-hidden={isEllipsis ? 'true' : undefined}
+                className={`relative min-w-9 h-9 px-3 rounded-lg text-[13px] font-medium tracking-[0.01em] transition-colors ${
+                  isCurrent
+                    ? 'text-white'
+                    : isEllipsis
+                      ? 'text-zinc-600 cursor-default'
+                      : 'text-zinc-400 hover:text-white hover:bg-white/[0.05]'
+                }`}
+              >
+                {isCurrent && (
+                  <motion.span
+                    layoutId="pagination-current-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    aria-hidden="true"
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.08) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 16px -4px rgba(131,110,249,0.4)',
+                    }}
+                  />
+                )}
+                <span className="relative">{page}</span>
+              </motion.button>
+            </li>
+          );
+        })}
+      </ol>
 
-      <button
+      <motion.button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages || isLoading}
-        className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        whileTap={currentPage === totalPages || isLoading ? undefined : { scale: 0.92 }}
+        whileHover={currentPage === totalPages || isLoading ? undefined : { x: 1 }}
+        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+        aria-label="Next page"
+        className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:bg-white/[0.05] hover:border-white/20 disabled:opacity-40 disabled:hover:bg-white/[0.02] disabled:hover:border-white/10 disabled:hover:text-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronRight className="w-4 h-4" />
-      </button>
-    </div>
+        <ChevronRight className="w-4 h-4" strokeWidth={1.75} />
+      </motion.button>
+    </nav>
   );
 }

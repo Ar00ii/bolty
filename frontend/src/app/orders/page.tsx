@@ -1,28 +1,40 @@
 'use client';
 
-import {
-  ShoppingBag,
-  Package,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-  Truck,
-  ArrowRight,
-  BarChart3,
-  TrendingUp,
-  Lock,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
+export const dynamic = 'force-dynamic';
 
-import { API_URL } from '@/lib/api/client';
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  BarChart3,
+  Bot,
+  CheckCircle2,
+  Clock,
+  Download,
+  GitBranch,
+  Lock,
+  Package,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  TrendingUp,
+  Truck,
+  X,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { api, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
-
 type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
+type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 
 interface Order {
   id: string;
@@ -32,7 +44,7 @@ interface Order {
   escrowContract: string | null;
   amountWei: string;
   txHash: string;
-  listing: { id: string; title: string; type: string; price: number; currency: string };
+  listing: { id: string; title: string; type: ListingType; price: number; currency: string };
   buyer: { id: string; username: string | null; avatarUrl: string | null };
   seller: { id: string; username: string | null; avatarUrl: string | null };
 }
@@ -48,87 +60,137 @@ interface SellerStats {
 
 const STATUS_CONFIG: Record<
   OrderStatus,
-  { label: string; className: string; icon: React.ElementType }
+  { label: string; icon: LucideIcon; color: string }
 > = {
-  PENDING_DELIVERY: { label: 'Pending', className: 'badge-warning', icon: Clock },
-  IN_PROGRESS: { label: 'In Progress', className: 'badge', icon: Package },
-  DELIVERED: { label: 'Delivered', className: 'badge-success', icon: Truck },
-  COMPLETED: { label: 'Completed', className: 'badge-secondary', icon: CheckCircle2 },
-  DISPUTED: { label: 'Disputed', className: 'badge-error', icon: AlertTriangle },
+  PENDING_DELIVERY: { label: 'Pending', icon: Clock, color: '#f59e0b' },
+  IN_PROGRESS: { label: 'In progress', icon: Package, color: '#06B6D4' },
+  DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
+  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#836EF9' },
+  DISPUTED: { label: 'Disputed', icon: AlertTriangle, color: '#ef4444' },
 };
 
-function StatusBadge({ status }: { status: OrderStatus }) {
-  const cfg = STATUS_CONFIG[status];
-  const Icon = cfg.icon;
-  return (
-    <span className={`badge ${cfg.className} flex items-center gap-1`}>
-      <Icon className="w-3 h-3" strokeWidth={2} />
-      {cfg.label}
-    </span>
-  );
+const TYPE_ICON: Record<ListingType, LucideIcon> = {
+  REPO: GitBranch,
+  BOT: Bot,
+  AI_AGENT: Bot,
+  SCRIPT: Zap,
+  OTHER: Package,
+};
+
+const TYPE_ACCENT: Record<ListingType, string> = {
+  REPO: '#06B6D4',
+  BOT: '#836EF9',
+  AI_AGENT: '#836EF9',
+  SCRIPT: '#EC4899',
+  OTHER: '#94a3b8',
+};
+
+type StatusFilter = 'ALL' | OrderStatus;
+
+const STATUS_FILTER_ORDER: StatusFilter[] = [
+  'ALL',
+  'PENDING_DELIVERY',
+  'IN_PROGRESS',
+  'DELIVERED',
+  'COMPLETED',
+  'DISPUTED',
+];
+
+const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
+  ALL: 'All',
+  PENDING_DELIVERY: 'Pending',
+  IN_PROGRESS: 'In progress',
+  DELIVERED: 'Delivered',
+  COMPLETED: 'Completed',
+  DISPUTED: 'Disputed',
+};
+
+function timeAgo(d: string | Date) {
+  const diff = Date.now() - new Date(d).getTime();
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
 }
 
-function OrderCard({
-  order,
-  isSeller,
-  onClick,
-}: {
-  order: Order;
-  isSeller: boolean;
-  onClick: () => void;
-}) {
-  const peer = isSeller ? order.buyer : order.seller;
-  const ethAmount = order.amountWei ? (parseFloat(order.amountWei) / 1e18).toFixed(4) : '—';
-
-  return (
-    <div onClick={onClick} className="card-interactive flex items-center gap-4 p-4 cursor-pointer">
-      {/* Avatar */}
-      <div className="w-10 h-10 rounded-full bg-monad-500/15 border border-monad-500/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-        {peer?.avatarUrl ? (
-          <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-base text-monad-400">
-            {(peer?.username || '?')[0].toUpperCase()}
-          </span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1 flex-wrap">
-          <span className="font-light text-sm text-white truncate">{order.listing.title}</span>
-          <StatusBadge status={order.status} />
-          {order.escrowStatus && order.escrowStatus !== 'NONE' && (
-            <span className="badge-success flex items-center gap-1 text-[10px]">
-              <Lock className="w-2.5 h-2.5" /> Escrow
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-zinc-500">
-          {isSeller ? 'Buyer' : 'Seller'}:{' '}
-          <span className="text-zinc-300 font-light">@{peer?.username || 'Unknown'}</span>
-          <span className="mx-1 opacity-40">·</span>
-          {new Date(order.createdAt).toLocaleDateString()}
-        </div>
-      </div>
-
-      {/* Amount */}
-      <div className="text-right flex-shrink-0">
-        <div className="font-mono font-light text-sm text-monad-400">{ethAmount} ETH</div>
-        <div className="text-[10px] text-zinc-600 uppercase tracking-wide mt-0.5">
-          {order.listing.type}
-        </div>
-      </div>
-
-      <ArrowRight className="w-4 h-4 text-zinc-600 flex-shrink-0" strokeWidth={1.5} />
-    </div>
-  );
+function formatEth(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n === 0) return '0';
+  if (n < 0.0001) return '<0.0001';
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(3);
+  return n.toFixed(2);
 }
+
+function formatNumber(n: number): string {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
+}
+
+function csvEscape(v: unknown) {
+  const s = v === null || v === undefined ? '' : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadOrdersCsv(orders: Order[], kind: 'buying' | 'selling') {
+  const header = [
+    'orderId',
+    'createdAt',
+    'status',
+    'escrowStatus',
+    'listingTitle',
+    'listingType',
+    'priceEth',
+    'amountWei',
+    'counterparty',
+    'txHash',
+  ];
+  const rows = orders.map((o) => {
+    const peer = kind === 'selling' ? o.buyer : o.seller;
+    const eth = o.amountWei ? (parseFloat(o.amountWei) / 1e18).toString() : '';
+    return [
+      o.id,
+      o.createdAt,
+      o.status,
+      o.escrowStatus,
+      o.listing.title,
+      o.listing.type,
+      eth,
+      o.amountWei,
+      peer?.username || '',
+      o.txHash,
+    ]
+      .map(csvEscape)
+      .join(',');
+  });
+  const csv = [header.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bolty-orders-${kind}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Page ────────────────────────────────────────────────────────────────
 
 export default function OrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [tab, setTab] = useState<'buying' | 'selling'>('buying');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
+  const [search, setSearch] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
+  useKeyboardFocus(searchRef);
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
@@ -138,14 +200,14 @@ export default function OrdersPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [buyRes, sellRes, statsRes] = await Promise.all([
-        fetch(`${API}/orders`, { credentials: 'include' }),
-        fetch(`${API}/orders/selling`, { credentials: 'include' }),
-        fetch(`${API}/orders/seller/stats`, { credentials: 'include' }),
+      const [buyOrders, sellOrders, sellerStats] = await Promise.all([
+        api.get<Order[]>('/orders').catch(() => null),
+        api.get<Order[]>('/orders/selling').catch(() => null),
+        api.get<SellerStats>('/orders/seller/stats').catch(() => null),
       ]);
-      if (buyRes.ok) setBuyerOrders(await buyRes.json());
-      if (sellRes.ok) setSellerOrders(await sellRes.json());
-      if (statsRes.ok) setStats(await statsRes.json());
+      if (buyOrders) setBuyerOrders(buyOrders);
+      if (sellOrders) setSellerOrders(sellOrders);
+      if (sellerStats) setStats(sellerStats);
     } finally {
       setLoading(false);
     }
@@ -159,94 +221,601 @@ export default function OrdersPage() {
     return (
       <div className="min-h-[60vh] flex items-center justify-center flex-col gap-3">
         <ShoppingBag className="w-10 h-10 text-zinc-600" strokeWidth={1} />
-        <p className="text-zinc-500">Sign in to view your orders</p>
+        <p className="text-zinc-500 font-light">Sign in to view your orders</p>
       </div>
     );
   }
 
-  const orders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const baseOrders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const q = search.trim().toLowerCase();
+  const searched = q
+    ? baseOrders.filter((o) => {
+        const counterparty = tab === 'buying' ? o.seller.username : o.buyer.username;
+        return (
+          o.listing.title.toLowerCase().includes(q) ||
+          (counterparty || '').toLowerCase().includes(q) ||
+          o.id.toLowerCase().includes(q)
+        );
+      })
+    : baseOrders;
+  const orders =
+    statusFilter === 'ALL' ? searched : searched.filter((o) => o.status === statusFilter);
+  const statusCounts = searched.reduce<Record<string, number>>((acc, o) => {
+    acc[o.status] = (acc[o.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Buyer-side quick metrics
+  const buyingMetrics = useMemo(() => {
+    const spent = buyerOrders.reduce((sum, o) => {
+      const eth = o.amountWei ? parseFloat(o.amountWei) / 1e18 : 0;
+      return sum + (Number.isFinite(eth) ? eth : 0);
+    }, 0);
+    const open = buyerOrders.filter(
+      (o) => o.status === 'PENDING_DELIVERY' || o.status === 'IN_PROGRESS',
+    ).length;
+    const delivered = buyerOrders.filter((o) => o.status === 'DELIVERED').length;
+    const completed = buyerOrders.filter((o) => o.status === 'COMPLETED').length;
+    const disputed = buyerOrders.filter((o) => o.status === 'DISPUTED').length;
+    return { spent, open, delivered, completed, disputed, total: buyerOrders.length };
+  }, [buyerOrders]);
+
+  // Seller-side quick metrics
+  const sellingMetrics = useMemo(() => {
+    const earned = sellerOrders
+      .filter((o) => o.escrowStatus === 'RELEASED' || o.status === 'COMPLETED')
+      .reduce((sum, o) => {
+        const eth = o.amountWei ? parseFloat(o.amountWei) / 1e18 : 0;
+        return sum + (Number.isFinite(eth) ? eth : 0);
+      }, 0);
+    return { earned };
+  }, [sellerOrders]);
 
   return (
-    <div className="page-container py-8">
+    <div className="min-h-screen pb-20">
       {/* Header */}
-      <div className="page-header">
-        <h1 className="text-2xl font-light text-white tracking-tight">Orders</h1>
-        <p className="text-sm text-zinc-500 mt-1">
-          Track all your purchases and sales in one place.
-        </p>
-      </div>
-
-      {/* Seller Stats */}
-      {tab === 'selling' && stats && (
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-          {[
-            { label: 'Total', value: stats.total, icon: BarChart3 },
-            { label: 'Pending', value: stats.pending, icon: Clock },
-            { label: 'In Progress', value: stats.inProgress, icon: Package },
-            { label: 'Delivered', value: stats.delivered, icon: Truck },
-            { label: 'Completed', value: stats.completed, icon: CheckCircle2 },
-            { label: 'Disputed', value: stats.disputed, icon: AlertTriangle },
-          ].map(({ label, value, icon: Icon }) => (
-            <div key={label} className="card p-4 text-center">
-              <Icon className="w-4 h-4 text-monad-400 mx-auto mb-2" strokeWidth={1.5} />
-              <div className="font-mono font-light text-xl text-monad-400">{value}</div>
-              <div className="text-[10px] text-zinc-600 uppercase tracking-wider mt-1">{label}</div>
+      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Bolty Orders</span>
+                <LiveDot />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Orders
+              </h1>
+              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+                Track every purchase, sale and escrow release in one feed.
+              </p>
             </div>
-          ))}
+            {baseOrders.length > 0 && (
+              <button
+                onClick={() => downloadOrdersCsv(baseOrders, tab)}
+                className="inline-flex items-center gap-1.5 text-[12px] text-zinc-300 hover:text-white h-9 px-3 rounded-lg transition-colors"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+                aria-label="Export orders as CSV"
+              >
+                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
+                Export CSV
+              </button>
+            )}
+          </div>
         </div>
-      )}
+      </header>
+
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          {tab === 'buying' ? (
+            <>
+              <StatTile
+                label="Total spent"
+                value={`${formatEth(buyingMetrics.spent)} ETH`}
+                sub={`across ${buyingMetrics.total} orders`}
+                accent="#836EF9"
+              />
+              <StatTile
+                label="Open"
+                value={formatNumber(buyingMetrics.open)}
+                sub="in progress or pending"
+                accent="#06B6D4"
+              />
+              <StatTile
+                label="Delivered"
+                value={formatNumber(buyingMetrics.delivered)}
+                sub="awaiting release"
+                accent="#22c55e"
+              />
+              <StatTile
+                label="Completed"
+                value={formatNumber(buyingMetrics.completed)}
+                sub={`${buyingMetrics.disputed} disputed`}
+                accent="#EC4899"
+              />
+            </>
+          ) : (
+            <>
+              <StatTile
+                label="Revenue"
+                value={`${formatEth(sellingMetrics.earned)} ETH`}
+                sub="released + completed"
+                accent="#22c55e"
+              />
+              <StatTile
+                label="Open orders"
+                value={formatNumber((stats?.pending || 0) + (stats?.inProgress || 0))}
+                sub={`${stats?.pending || 0} pending · ${stats?.inProgress || 0} in progress`}
+                accent="#f59e0b"
+              />
+              <StatTile
+                label="Delivered"
+                value={formatNumber(stats?.delivered || 0)}
+                sub="awaiting release"
+                accent="#06B6D4"
+              />
+              <StatTile
+                label="Completed"
+                value={formatNumber(stats?.completed || 0)}
+                sub={`${stats?.disputed || 0} disputed`}
+                accent="#836EF9"
+              />
+            </>
+          )}
+        </div>
+      </section>
 
       {/* Tabs */}
-      <div className="tab-group mb-6">
-        <button
-          onClick={() => setTab('buying')}
-          className={`tab-item ${tab === 'buying' ? 'active' : ''}`}
-        >
-          <ShoppingBag className="w-3.5 h-3.5" /> Buying ({buyerOrders.length})
-        </button>
-        <button
-          onClick={() => setTab('selling')}
-          className={`tab-item ${tab === 'selling' ? 'active' : ''}`}
-        >
-          <TrendingUp className="w-3.5 h-3.5" /> Selling ({sellerOrders.length})
-        </button>
-      </div>
-
-      {/* Orders list */}
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton h-[76px] rounded-xl" />
-          ))}
-        </div>
-      ) : orders.length === 0 ? (
-        <div className="card text-center py-16 px-6">
-          <ShoppingBag className="w-10 h-10 text-zinc-700 mx-auto mb-4" strokeWidth={1} />
-          <p className="text-zinc-500 text-sm mb-6">
-            {tab === 'buying'
-              ? 'No purchases yet. Browse the marketplace!'
-              : 'No sales yet. Create a listing!'}
-          </p>
-          <a
-            href="/market"
-            className="btn-primary text-sm px-5 py-2 inline-flex items-center gap-2"
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+          <div
+            className="flex items-center gap-0.5 rounded-lg p-0.5"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
           >
-            <BarChart3 className="w-4 h-4" />
-            {tab === 'buying' ? 'Explore Marketplace' : 'Create Listing'}
-          </a>
+            {(
+              [
+                { key: 'buying' as const, label: 'Buying', count: buyerOrders.length, icon: ShoppingBag },
+                { key: 'selling' as const, label: 'Selling', count: sellerOrders.length, icon: TrendingUp },
+              ]
+            ).map(({ key, label, count, icon: Icon }) => {
+              const active = tab === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => {
+                    setTab(key);
+                    setStatusFilter('ALL');
+                    setSearch('');
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-light transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+                  }}
+                >
+                  <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+                  {label}
+                  <span
+                    className="text-[10.5px] font-mono tabular-nums"
+                    style={{ color: active ? 'rgba(255,255,255,0.65)' : '#71717a' }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Search */}
+          {baseOrders.length > 0 && (
+            <div
+              className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
+              style={{
+                background: 'rgba(0,0,0,0.4)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              }}
+            >
+              <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+              <input
+                ref={searchRef}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by title, counterparty, id…"
+                className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+              />
+              {search ? (
+                <button
+                  onClick={() => setSearch('')}
+                  aria-label="Clear search"
+                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              ) : (
+                <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                  /
+                </kbd>
+              )}
+            </div>
+          )}
+
+          {/* Status chips */}
+          <div className="flex items-center gap-1 ml-auto flex-wrap">
+            {STATUS_FILTER_ORDER.map((s) => {
+              const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
+              const active = statusFilter === s;
+              const color = s === 'ALL' ? '#836EF9' : STATUS_CONFIG[s as OrderStatus]?.color;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatusFilter(s)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? `${color}22` : 'rgba(255,255,255,0.02)',
+                    boxShadow: active
+                      ? `inset 0 0 0 1px ${color}5a`
+                      : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  }}
+                >
+                  {STATUS_FILTER_LABELS[s]}
+                  <span
+                    className="text-[10px] font-mono tabular-nums"
+                    style={{ color: active ? `${color}ee` : '#71717a' }}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      ) : (
-        <div className="space-y-3">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              isSeller={tab === 'selling'}
-              onClick={() => router.push(`/orders/${order.id}`)}
-            />
-          ))}
+      </section>
+
+      {/* Table */}
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <OrdersTable
+            orders={orders}
+            tab={tab}
+            loading={loading}
+            onRowClick={(id) => router.push(`/orders/${id}`)}
+          />
         </div>
-      )}
+      </section>
     </div>
+  );
+}
+
+// ── Components ──────────────────────────────────────────────────────────
+
+function LiveDot() {
+  return (
+    <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
+      <span
+        className="absolute inset-0 rounded-full animate-ping"
+        style={{ background: '#22c55e' }}
+      />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+    </span>
+  );
+}
+
+function StatTile({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent: string;
+}) {
+  return (
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
+      </div>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+    </div>
+  );
+}
+
+function OrdersTable({
+  orders,
+  tab,
+  loading,
+  onRowClick,
+}: {
+  orders: Order[];
+  tab: 'buying' | 'selling';
+  loading: boolean;
+  onRowClick: (id: string) => void;
+}) {
+  if (loading && orders.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        Loading orders…
+      </div>
+    );
+  }
+
+  if (!loading && orders.length === 0) {
+    return (
+      <div
+        className="relative rounded-xl px-6 py-16 text-center overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-30"
+          style={{ background: 'rgba(131,110,249,0.25)' }}
+        />
+        <div
+          className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            border: '1px solid rgba(131,110,249,0.35)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+          }}
+        >
+          <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+        </div>
+        <p className="relative text-[14px] text-white font-normal">
+          {tab === 'buying' ? 'No purchases match your filters' : 'No sales match your filters'}
+        </p>
+        <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-5 max-w-sm mx-auto font-light">
+          {tab === 'buying'
+            ? 'Explore the marketplace to start acquiring agents, bots and repos.'
+            : 'Publish listings to start receiving orders from buyers.'}
+        </p>
+        <Link
+          href={tab === 'buying' ? '/market' : '/market/seller/publish'}
+          className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+          }}
+        >
+          {tab === 'buying' ? (
+            <>
+              <BarChart3 className="w-3.5 h-3.5" strokeWidth={1.75} /> Explore marketplace
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} /> Publish listing
+            </>
+          )}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+        <span className="text-center">#</span>
+        <span>Order</span>
+        <span>Status</span>
+        <span>Escrow</span>
+        <span className="text-right">Amount</span>
+        <span className="hidden md:block">{tab === 'buying' ? 'Seller' : 'Buyer'}</span>
+        <span className="text-right">Age</span>
+        <span />
+      </div>
+      <ul>
+        {orders.map((o, i) => (
+          <OrderRow
+            key={o.id}
+            order={o}
+            index={i}
+            isSeller={tab === 'selling'}
+            onClick={() => onRowClick(o.id)}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function OrderRow({
+  order,
+  index,
+  isSeller,
+  onClick,
+}: {
+  order: Order;
+  index: number;
+  isSeller: boolean;
+  onClick: () => void;
+}) {
+  const cfg = STATUS_CONFIG[order.status];
+  const StatusIcon = cfg.icon;
+  const TypeIcon = TYPE_ICON[order.listing.type] ?? Package;
+  const typeAccent = TYPE_ACCENT[order.listing.type];
+  const peer = isSeller ? order.buyer : order.seller;
+  const ethAmount = order.amountWei ? parseFloat(order.amountWei) / 1e18 : null;
+
+  const escrowActive = order.escrowStatus && order.escrowStatus !== 'NONE';
+  const escrowColor =
+    order.escrowStatus === 'RELEASED'
+      ? '#22c55e'
+      : order.escrowStatus === 'DISPUTED'
+        ? '#ef4444'
+        : order.escrowStatus === 'REFUNDED'
+          ? '#94a3b8'
+          : '#06B6D4';
+
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] w-full text-left transition-all hover:bg-white/[0.02]"
+      >
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: cfg.color, opacity: 0.6 }}
+        />
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${typeAccent}18`,
+              boxShadow: `inset 0 0 0 1px ${typeAccent}40`,
+            }}
+          >
+            <TypeIcon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: typeAccent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-normal text-white truncate">
+              {order.listing.title}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 font-light truncate">
+              <span className="font-mono text-zinc-600">
+                #{order.id.slice(0, 8)}
+              </span>
+              {order.txHash && (
+                <>
+                  <span className="text-zinc-700 mx-1">·</span>
+                  <span className="font-mono text-zinc-600">
+                    {order.txHash.slice(0, 10)}…
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div className="min-w-0">
+          <span
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium"
+            style={{
+              color: cfg.color,
+              background: `${cfg.color}14`,
+              boxShadow: `inset 0 0 0 1px ${cfg.color}44`,
+            }}
+          >
+            <StatusIcon className="w-2.5 h-2.5" strokeWidth={2} />
+            {cfg.label}
+          </span>
+        </div>
+
+        {/* Escrow */}
+        <div className="min-w-0">
+          {escrowActive ? (
+            <span
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium"
+              style={{
+                color: escrowColor,
+                background: `${escrowColor}14`,
+                boxShadow: `inset 0 0 0 1px ${escrowColor}44`,
+              }}
+            >
+              <Lock className="w-2.5 h-2.5" strokeWidth={2} />
+              {order.escrowStatus.toLowerCase()}
+            </span>
+          ) : (
+            <span className="text-[10.5px] text-zinc-700 font-light">—</span>
+          )}
+        </div>
+
+        {/* Amount */}
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+          {ethAmount !== null ? formatEth(ethAmount) : '—'}
+          <span className="text-zinc-600 ml-1 text-[10px]">ETH</span>
+        </div>
+
+        {/* Counterparty */}
+        <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
+          <div
+            className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          >
+            {peer?.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={peer.avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
+                {(peer?.username || '?')[0].toUpperCase()}
+              </div>
+            )}
+          </div>
+          <span className="truncate">@{peer?.username || 'anon'}</span>
+        </div>
+
+        {/* Age */}
+        <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums">
+          {timeAgo(order.createdAt)}
+        </div>
+
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          strokeWidth={1.75}
+        />
+      </button>
+    </li>
   );
 }

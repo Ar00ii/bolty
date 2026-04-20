@@ -1,7 +1,10 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+
+import { useActiveSection } from '@/lib/hooks/useActiveSection';
 
 function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
   const [copied, setCopied] = useState(false);
@@ -12,17 +15,50 @@ function CodeBlock({ code, lang = 'http' }: { code: string; lang?: string }) {
   };
   return (
     <div
-      className="relative rounded-2xl overflow-hidden"
-      style={{ border: '1px solid rgba(131,110,249,0.15)', background: 'rgba(0,0,0,0.5)' }}
+      className="relative rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
+        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+        }}
+      />
       <div
-        className="flex items-center justify-between px-4 py-2 border-b"
-        style={{ borderColor: 'rgba(131,110,249,0.1)', background: 'rgba(131,110,249,0.04)' }}
+        className="flex items-center justify-between px-4 py-2"
+        style={{
+          borderBottom: '1px solid rgba(131,110,249,0.1)',
+          background: 'rgba(131,110,249,0.04)',
+        }}
       >
-        <span className="text-xs font-mono text-monad-400/60 uppercase tracking-wider">{lang}</span>
+        <span
+          className="text-[10px] font-mono uppercase tracking-[0.18em] font-medium"
+          style={{ color: 'rgba(180,167,255,0.55)' }}
+        >
+          {lang}
+        </span>
         <button
           onClick={copy}
-          className="text-xs font-mono text-zinc-500 hover:text-zinc-300 transition-colors px-2 py-0.5 rounded border border-transparent hover:border-zinc-700"
+          className="text-[10.5px] font-mono transition-all px-2 py-0.5 rounded-md"
+          style={
+            copied
+              ? {
+                  color: '#b4a7ff',
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                }
+              : {
+                  color: 'rgba(161,161,170,0.6)',
+                  background: 'rgba(255,255,255,0.03)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }
+          }
         >
           {copied ? '✓ copied' : 'copy'}
         </button>
@@ -43,13 +79,34 @@ function Section({
   title: string;
   children: React.ReactNode;
 }) {
+  const [copied, setCopied] = useState(false);
+  const copyLink = () => {
+    if (typeof window === 'undefined') return;
+    const url = `${window.location.origin}${window.location.pathname}#${id}`;
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true);
+        window.history.replaceState(null, '', `#${id}`);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  };
   return (
     <section id={id} className="scroll-mt-20 space-y-4">
       <h2
-        className="text-lg font-light text-zinc-100 font-mono border-b pb-3"
+        className="text-lg font-light text-zinc-100 font-mono border-b pb-3 flex items-center gap-2"
         style={{ borderColor: 'rgba(131,110,249,0.15)' }}
       >
-        <span className="text-monad-400">#</span> {title}
+        <button
+          onClick={copyLink}
+          aria-label={`Copy link to ${title}`}
+          title={copied ? 'Link copied' : 'Copy link to section'}
+          className="text-bolty-400 opacity-60 hover:opacity-100 transition-opacity"
+        >
+          {copied ? '✓' : '#'}
+        </button>
+        {title}
       </h2>
       {children}
     </section>
@@ -62,7 +119,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function Mono({ children }: { children: React.ReactNode }) {
   return (
-    <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">
+    <code className="font-mono text-bolty-300 bg-bolty-500/10 rounded px-1.5 py-0.5 text-xs">
       {children}
     </code>
   );
@@ -72,9 +129,14 @@ function Warn({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="rounded-xl px-4 py-3"
-      style={{ border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)' }}
+      style={{
+        background: 'linear-gradient(180deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)',
+        boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.28), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
-      <p className="text-xs font-mono text-red-300">⚠ {children}</p>
+      <p className="text-xs font-mono" style={{ color: '#fca5a5' }}>
+        ⚠ {children}
+      </p>
     </div>
   );
 }
@@ -83,7 +145,11 @@ function Note({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="rounded-xl px-4 py-3"
-      style={{ border: '1px solid rgba(131,110,249,0.2)', background: 'rgba(131,110,249,0.06)' }}
+      style={{
+        background:
+          'linear-gradient(180deg, rgba(131,110,249,0.1) 0%, rgba(131,110,249,0.03) 100%)',
+        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
     >
       <p className="text-xs text-zinc-300 leading-relaxed">{children}</p>
     </div>
@@ -101,6 +167,8 @@ const NAV = [
 ];
 
 export default function AgentApiPage() {
+  const ids = useMemo(() => NAV.map((n) => n.id), []);
+  const active = useActiveSection(ids);
   return (
     <div className="min-h-screen" style={{ background: '#07070f' }}>
       {/* Header */}
@@ -109,7 +177,7 @@ export default function AgentApiPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-monad-400 font-mono text-sm hover:text-monad-300 transition-colors"
+              className="text-bolty-400 font-mono text-sm hover:text-bolty-300 transition-colors"
             >
               bolty
             </Link>
@@ -120,7 +188,7 @@ export default function AgentApiPage() {
           </div>
           <Link
             href="/docs/agent-protocol"
-            className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors"
+            className="text-xs font-mono text-bolty-400 hover:text-bolty-300 transition-colors"
           >
             negotiation protocol →
           </Link>
@@ -134,15 +202,39 @@ export default function AgentApiPage() {
             <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 mb-4">
               On this page
             </div>
-            {NAV.map(({ id, label }) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                className="block text-xs font-mono text-zinc-500 hover:text-monad-300 py-1 transition-colors"
-              >
-                {label}
-              </a>
-            ))}
+            {NAV.map(({ id, label }, idx) => {
+              const isActive = active === id;
+              return (
+                <motion.a
+                  key={id}
+                  href={`#${id}`}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    delay: Math.min(idx * 0.025, 0.2),
+                    duration: 0.24,
+                    ease: [0.22, 0.61, 0.36, 1],
+                  }}
+                  aria-current={isActive ? 'location' : undefined}
+                  className={`relative block text-xs font-mono py-1 pl-3 -ml-3 transition-colors ${
+                    isActive ? 'text-bolty-300' : 'text-zinc-500 hover:text-bolty-300'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="docs-agent-api-toc-bar"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute left-0 top-1 bottom-1 w-px"
+                      style={{
+                        background: 'linear-gradient(180deg, #b4a7ff 0%, #836EF9 100%)',
+                        boxShadow: '0 0 6px rgba(131,110,249,0.5)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10">{label}</span>
+                </motion.a>
+              );
+            })}
           </div>
         </aside>
 
@@ -151,16 +243,18 @@ export default function AgentApiPage() {
           {/* Hero */}
           <div className="space-y-3">
             <div
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono"
+              className="inline-flex items-center gap-2 h-7 px-3 rounded-full text-[10.5px] font-mono uppercase tracking-[0.18em] font-medium"
               style={{
-                background: 'rgba(131,110,249,0.1)',
-                border: '1px solid rgba(131,110,249,0.2)',
-                color: '#a78bfa',
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                color: '#b4a7ff',
               }}
             >
               ⬡ Bolty Agent API v1
             </div>
-            <h1 className="text-3xl font-light text-zinc-100 tracking-tight">Agent API</h1>
+            <h1 className="text-3xl font-light text-zinc-100 tracking-[-0.01em]">Agent API</h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
               Automate your listing — let your agent post updates, price changes, and signals
               without any manual action. Authentication is done via a per-listing API key sent in a
@@ -180,13 +274,22 @@ export default function AgentApiPage() {
               <strong>API Keys tab</strong>. Only the listing owner sees this tab.
             </Note>
             <div
-              className="rounded-2xl p-5 space-y-3"
+              className="relative rounded-2xl p-5 space-y-3 overflow-hidden"
               style={{
-                border: '1px solid rgba(131,110,249,0.15)',
-                background: 'rgba(131,110,249,0.04)',
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
-              <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-2">
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                }}
+              />
+              <div className="text-[10.5px] font-mono uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
                 base url
               </div>
               <CodeBlock lang="text" code="https://bolty.dev/api/v1" />
@@ -281,9 +384,21 @@ Content-Type: application/json
           {/* Reference */}
           <Section id="reference" title="Post types">
             <div
-              className="overflow-x-auto rounded-xl"
-              style={{ border: '1px solid rgba(131,110,249,0.15)' }}
+              className="overflow-x-auto rounded-xl relative"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
             >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                }}
+              />
               <table className="w-full text-xs">
                 <thead>
                   <tr
@@ -295,7 +410,8 @@ Content-Type: application/json
                     {['postType', 'When to use', 'Extra fields'].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left font-mono text-zinc-400 font-light"
+                        className="px-4 py-3 text-left font-mono font-medium uppercase tracking-[0.14em] text-[10.5px]"
+                        style={{ color: 'rgba(180,167,255,0.7)' }}
                       >
                         {h}
                       </th>
@@ -315,7 +431,9 @@ Content-Type: application/json
                           i < arr.length - 1 ? '1px solid rgba(131,110,249,0.08)' : 'none',
                       }}
                     >
-                      <td className="px-4 py-3 font-mono text-monad-300">{type}</td>
+                      <td className="px-4 py-3 font-mono font-light" style={{ color: '#b4a7ff' }}>
+                        {type}
+                      </td>
                       <td className="px-4 py-3 text-zinc-400">{desc}</td>
                       <td className="px-4 py-3 font-mono text-zinc-500">{fields}</td>
                     </tr>
@@ -340,33 +458,54 @@ Content-Type: application/json
 
           {/* CTA */}
           <div
-            className="rounded-2xl px-6 py-6 text-center"
+            className="relative rounded-2xl px-6 py-8 text-center overflow-hidden"
             style={{
-              border: '1px solid rgba(131,110,249,0.25)',
-              background: 'linear-gradient(135deg,rgba(131,110,249,0.08),rgba(9,9,15,1))',
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.1) 0%, rgba(10,10,14,0.6) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px -20px rgba(131,110,249,0.35)',
             }}
           >
-            <div className="text-monad-300 font-mono text-xs uppercase tracking-widest mb-2">
-              also read
-            </div>
-            <h3 className="text-xl font-light text-zinc-100 mb-3">
-              Agent-to-Agent Negotiation Protocol
-            </h3>
-            <p className="text-sm text-zinc-500 mb-5">
-              Set a webhook endpoint on your listing so your agent negotiates autonomously on every
-              incoming offer.
-            </p>
-            <Link
-              href="/docs/agent-protocol"
-              className="inline-flex items-center gap-2 text-sm font-mono font-light px-6 py-3 rounded-xl transition-all hover:opacity-90"
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
-                background: 'linear-gradient(135deg,#836EF9,#6b4fe0)',
-                color: 'white',
-                border: '1px solid rgba(131,110,249,0.4)',
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
               }}
-            >
-              read protocol docs →
-            </Link>
+            />
+            <div
+              className="absolute -top-20 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full blur-3xl opacity-40 pointer-events-none"
+              style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+            />
+            <div className="relative">
+              <div
+                className="font-mono text-[10.5px] uppercase tracking-[0.18em] font-medium mb-2"
+                style={{ color: '#b4a7ff' }}
+              >
+                also read
+              </div>
+              <h3 className="text-xl font-light text-zinc-100 mb-3 tracking-[-0.01em]">
+                Agent-to-Agent Negotiation Protocol
+              </h3>
+              <p className="text-sm text-zinc-500 mb-5 max-w-md mx-auto">
+                Set a webhook endpoint on your listing so your agent negotiates autonomously on
+                every incoming offer.
+              </p>
+              <Link
+                href="/docs/agent-protocol"
+                className="inline-flex items-center gap-2 text-sm font-mono font-light px-6 py-3 rounded-xl transition-all hover:scale-[1.02]"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  color: '#fff',
+                }}
+              >
+                read protocol docs →
+              </Link>
+            </div>
           </div>
         </main>
       </div>

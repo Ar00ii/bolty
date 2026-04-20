@@ -1,10 +1,10 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Search,
   Sun,
   Moon,
-  Bell,
   ChevronDown,
   LogOut,
   User,
@@ -15,11 +15,13 @@ import {
   X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useTheme } from '@/lib/theme/ThemeContext';
+
+import { NotificationsBell } from './NotificationsBell';
 
 interface NavbarProps {
   menuOpen: boolean;
@@ -32,7 +34,6 @@ const NAV_LINKS = [
   { href: '/market/agents', label: 'Agents' },
   { href: '/market/repos', label: 'Repos' },
   { href: '/chat/agents', label: 'Agent Chat' },
-  { href: '/services', label: 'Services' },
   { href: '/docs/agent-protocol', label: 'Docs' },
 ];
 
@@ -40,6 +41,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -129,9 +131,19 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search agents, repos..."
-                  className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-monad-400/50 transition-colors"
+                  className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-bolty-400/50 transition-colors"
                   onKeyDown={(e) => {
-                    if (e.key === 'Escape') setSearchOpen(false);
+                    if (e.key === 'Escape') {
+                      setSearchOpen(false);
+                      setSearchQuery('');
+                    } else if (e.key === 'Enter') {
+                      const q = searchQuery.trim();
+                      if (q) {
+                        router.push(`/market?search=${encodeURIComponent(q)}`);
+                        setSearchOpen(false);
+                        setSearchQuery('');
+                      }
+                    }
                   }}
                 />
               </div>
@@ -170,9 +182,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
 
         {isAuthenticated ? (
           <>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-all relative">
-              <Bell className="w-4 h-4" />
-            </button>
+            <NotificationsBell isAuthenticated={isAuthenticated} />
 
             <div ref={profileRef} className="relative">
               <button
@@ -186,65 +196,75 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                     className="w-7 h-7 rounded-full border border-zinc-700"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-light">
+                  <div className="w-7 h-7 rounded-full bg-bolty-500/20 border border-bolty-500/30 flex items-center justify-center text-bolty-400 text-xs font-light">
                     {displayLabel[0]?.toUpperCase()}
                   </div>
                 )}
                 <span className="text-sm text-zinc-300 hidden sm:block max-w-[100px] truncate">
                   {displayLabel}
                 </span>
-                <ChevronDown
-                  className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`}
-                />
+                <motion.span
+                  animate={{ rotate: profileOpen ? 180 : 0 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className="inline-flex"
+                >
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-500" />
+                </motion.span>
               </button>
 
-              {profileOpen && (
-                <div
-                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50"
-                  style={{ background: 'var(--bg-card)' }}
-                >
-                  <div className="p-3 border-b border-zinc-700/50">
-                    <p className="text-sm font-light text-white truncate">{displayLabel}</p>
-                    <p className="text-xs text-zinc-500 truncate">
-                      {user?.email || user?.githubLogin || ''}
-                    </p>
-                  </div>
-                  <div className="py-1">
-                    <Link
-                      href="/profile"
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <User className="w-4 h-4" /> Profile
-                    </Link>
-                    <Link
-                      href="/orders"
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <ShoppingBag className="w-4 h-4" /> Orders
-                    </Link>
-                    <Link
-                      href="/api-keys"
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Key className="w-4 h-4" /> API Keys
-                    </Link>
-                    <Link
-                      href="/profile?tab=security"
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
-                    >
-                      <Settings className="w-4 h-4" /> Settings
-                    </Link>
-                  </div>
-                  <div className="py-1 border-t border-zinc-700/50">
-                    <button
-                      onClick={logout}
-                      className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
-                    >
-                      <LogOut className="w-4 h-4" /> Sign out
-                    </button>
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                    className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-zinc-700/80 overflow-hidden shadow-xl z-50 origin-top-right"
+                    style={{ background: 'var(--bg-card)' }}
+                  >
+                    <div className="p-3 border-b border-zinc-700/50">
+                      <p className="text-sm font-light text-white truncate">{displayLabel}</p>
+                      <p className="text-xs text-zinc-500 truncate">
+                        {user?.email || user?.githubLogin || ''}
+                      </p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <User className="w-4 h-4" /> Profile
+                      </Link>
+                      <Link
+                        href="/orders"
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <ShoppingBag className="w-4 h-4" /> Orders
+                      </Link>
+                      <Link
+                        href="/api-keys"
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Key className="w-4 h-4" /> API Keys
+                      </Link>
+                      <Link
+                        href="/profile?tab=notifications"
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                      >
+                        <Settings className="w-4 h-4" /> Settings
+                      </Link>
+                    </div>
+                    <div className="py-1 border-t border-zinc-700/50">
+                      <button
+                        onClick={logout}
+                        className="flex items-center gap-2.5 px-3 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-white/5 transition-all w-full text-left"
+                      >
+                        <LogOut className="w-4 h-4" /> Sign out
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </>
         ) : (

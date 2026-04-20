@@ -20,13 +20,28 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly config: ConfigService) {
     const redisUrl = this.config.get<string>('REDIS_URL', 'redis://localhost:6379');
+    const useTls = redisUrl.startsWith('rediss://');
+
+    // Log connection attempt (mask password)
+    const maskedUrl = redisUrl.replace(/:[^:@]+@/, ':***@');
+    this.logger.log(`Initializing Redis with URL: ${maskedUrl} (TLS: ${useTls})`);
+
     this.client = new Redis(redisUrl, {
       retryStrategy: (times: number) => {
-        const delay = Math.min(times * 50, 2000);
-        return delay;
+        if (times > 20) {
+          if (times % 60 === 0) {
+            this.logger.warn(`Redis still unreachable after ${times} attempts`);
+          }
+          return 30000;
+        }
+        return Math.min(times * 200, 5000);
       },
       maxRetriesPerRequest: 3,
       enableReadyCheck: true,
+      enableOfflineQueue: false,
+      ...(useTls && { tls: {} }),
+      connectTimeout: 10000,
+      lazyConnect: true,
     });
 
     this.client.on('error', (err) => {
@@ -43,19 +58,24 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    // Verify Redis connection at startup
-    try {
-      await this.client.ping();
-      this.logger.log('Redis service initialized and verified');
-    } catch (err) {
-      this.logger.error(`Failed to connect to Redis: ${(err as Error).message}`);
-      throw err;
-    }
+    // Kick off the connection without blocking bootstrap. If Redis is down the
+    // HTTP server must still bind its port so the platform health-check passes.
+    this.client.connect().catch((err) => {
+      this.logger.warn(
+        `Redis connection failed at startup: ${(err as Error).message}. ` +
+          'Application will continue; rate limiting, sessions and nonces will be unavailable until Redis recovers.',
+      );
+    });
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.client.quit();
-    this.logger.log('Redis connection closed');
+    try {
+      await this.client.quit();
+      this.logger.log('Redis connection closed');
+    } catch (err) {
+      this.client.disconnect();
+      this.logger.warn(`Redis quit failed, forced disconnect: ${(err as Error).message}`);
+    }
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {

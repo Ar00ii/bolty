@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MessageSquare, Zap, Users, Clock, Eye } from 'lucide-react';
+import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -66,7 +66,7 @@ function Avatar({
         />
       ) : (
         <div
-          className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-monad-300 font-light text-xs`}
+          className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-bolty-300 font-light text-xs`}
           style={{
             background: 'linear-gradient(135deg, rgba(167,137,250,0.2), rgba(131,110,249,0.15))',
             border: '1px solid rgba(167,137,250,0.3)',
@@ -76,7 +76,7 @@ function Avatar({
         </div>
       )}
       {badge === 'agent' && (
-        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-monad-400 rounded-full border border-black" />
+        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-bolty-400 rounded-full border border-black" />
       )}
       {badge === 'online' && (
         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-black" />
@@ -107,10 +107,17 @@ export default function DmPage() {
   const [error, setError] = useState('');
   const [showNewDm, setShowNewDm] = useState(false);
   const [activeCategory, setActiveCategory] = useState<ContactCategory>('all');
+  const [contactQuery, setContactQuery] = useState('');
   const [bothViewing, setBothViewing] = useState(false);
   const [isAgentChat, setIsAgentChat] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Latest refs so socket handlers see fresh values without re-subscribing on
+  // every activePeer/user change (which would tear down & reopen the socket
+  // and race with in-flight messages).
+  const activePeerRef = useRef<Contact['user'] | null>(null);
+  const userIdRef = useRef<string | undefined>(undefined);
 
   const CATEGORIES: { id: ContactCategory; label: string; icon: React.ReactNode }[] = [
     { id: 'all', label: 'All', icon: <MessageSquare size={14} /> },
@@ -121,13 +128,24 @@ export default function DmPage() {
   ];
 
   const filteredContacts = contacts.filter((c) => {
-    if (activeCategory === 'all') return true;
-    return c.type === activeCategory;
+    if (activeCategory !== 'all' && c.type !== activeCategory) return false;
+    const q = contactQuery.trim().toLowerCase();
+    if (!q) return true;
+    const haystack = `${c.user.username || ''} ${c.lastMessage || ''}`.toLowerCase();
+    return haystack.includes(q);
   });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.push('/auth');
   }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    activePeerRef.current = activePeer;
+  }, [activePeer]);
+
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -148,27 +166,29 @@ export default function DmPage() {
         messages: DMMessage[];
         isAgentNegotiation?: boolean;
       }) => {
-        if (activePeer?.id === peerId || msgs.length > 0) {
+        if (activePeerRef.current?.id === peerId) {
           setMessages(msgs);
           setIsAgentChat(isAgentNegotiation ?? false);
         }
       },
     );
     socket.on('newDM', ({ peerId, message }: { peerId: string; message: DMMessage }) => {
+      const activeId = activePeerRef.current?.id;
+      const myId = userIdRef.current;
+      const belongsToActive = activeId === peerId;
       setMessages((prev) => {
+        if (!belongsToActive) return prev;
         if (prev.find((m) => m.id === message.id)) return prev;
-        if (activePeer?.id === peerId || message.senderId === user?.id) return [...prev, message];
-        return prev;
+        return [...prev, message];
       });
       setContacts((prev) =>
         prev.map((c) => {
           if (c.user.id !== peerId) return c;
-          const isActive = activePeer?.id === peerId;
           return {
             ...c,
             lastMessage: message.content.slice(0, 60),
             lastAt: message.createdAt,
-            unread: isActive ? c.unread : c.unread + (message.senderId !== user?.id ? 1 : 0),
+            unread: belongsToActive ? c.unread : c.unread + (message.senderId !== myId ? 1 : 0),
           };
         }),
       );
@@ -182,19 +202,23 @@ export default function DmPage() {
     return () => {
       socket.disconnect();
     };
-  }, [isAuthenticated, user?.id, activePeer?.id]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const openConversation = useCallback((contact: Contact) => {
+    // Update the ref synchronously so the 'conversation' handler accepts the
+    // payload that arrives before React flushes the state update.
+    activePeerRef.current = contact.user;
     setActivePeer(contact.user);
     setMessages([]);
     socketRef.current?.emit('openConversation', { peerId: contact.user.id });
     setContacts((prev) =>
       prev.map((c) => (c.user.id === contact.user.id ? { ...c, unread: 0 } : c)),
     );
+    setSidebarOpen(false);
   }, []);
 
   const sendMessage = useCallback(() => {
@@ -255,7 +279,7 @@ export default function DmPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400"
+          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-bolty-400"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -266,12 +290,42 @@ export default function DmPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]">
       <div className="flex gap-4 h-full">
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
         {/* ── Sidebar ── */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="w-72 hidden lg:flex flex-col gap-4 flex-shrink-0"
+        <div
+          className={[
+            'flex flex-col gap-4 flex-shrink-0',
+            'fixed z-50 overflow-y-auto transition-transform duration-300',
+            sidebarOpen
+              ? 'inset-y-0 left-0 w-80 max-w-[85vw] pt-[72px] pb-6 px-4 translate-x-0'
+              : '-translate-x-full pointer-events-none w-0',
+            'lg:relative lg:translate-x-0 lg:w-72 lg:inset-auto lg:z-auto',
+            'lg:pt-0 lg:pb-0 lg:px-0 lg:overflow-y-visible lg:pointer-events-auto',
+          ].join(' ')}
+          style={sidebarOpen ? {
+            background: 'linear-gradient(180deg, rgba(12,12,16,0.99) 0%, rgba(7,7,11,0.99) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '4px 0 24px -4px rgba(0,0,0,0.6), 1px 0 0 rgba(255,255,255,0.04)',
+          } : {}}
         >
+          {/* Mobile close button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute top-5 right-3 w-8 h-8 flex items-center justify-center rounded-xl text-zinc-400 hover:text-white transition-colors lg:hidden"
+            style={{ background: 'rgba(255,255,255,0.06)' }}
+            aria-label="Close sidebar"
+          >
+            <X size={15} />
+          </button>
           {/* Header */}
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
@@ -286,7 +340,14 @@ export default function DmPage() {
               onClick={() => setShowNewDm(!showNewDm)}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-monad-300 hover:bg-monad-500/20 transition-all border border-monad-500/20"
+              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+              style={{
+                color: '#b4a7ff',
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+              }}
               title="New conversation"
             >
               +
@@ -308,13 +369,25 @@ export default function DmPage() {
                   onChange={(e) => setNewRecipient(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && startNewDm()}
                   placeholder="Username or ID..."
-                  className="text-xs py-2 px-3 flex-1 rounded-lg bg-monad-500/10 border border-monad-500/20 text-white placeholder:text-monad-300/40 focus:outline-none focus:border-monad-400/50"
+                  className="text-xs py-2 px-3 flex-1 rounded-lg text-white placeholder:text-zinc-500 outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.03)',
+                  }}
                 />
                 <motion.button
                   onClick={startNewDm}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="text-xs py-2 px-3 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all"
+                  className="text-xs py-2 px-3 rounded-lg text-white font-light transition-all"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -4px rgba(131,110,249,0.5)',
+                  }}
                 >
                   Go
                 </motion.button>
@@ -322,24 +395,65 @@ export default function DmPage() {
             )}
           </AnimatePresence>
 
-          {/* Category tabs */}
-          <div className="flex gap-1.5 px-2 flex-wrap">
-            {CATEGORIES.map((cat) => (
-              <motion.button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`text-xs px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1 ${
-                  activeCategory === cat.id
-                    ? 'bg-monad-500/30 text-monad-200 border border-monad-400/40'
-                    : 'text-zinc-400 hover:text-zinc-200 border border-transparent'
-                }`}
+          {/* Contact search */}
+          <div className="relative px-2">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+            <input
+              type="text"
+              value={contactQuery}
+              onChange={(e) => setContactQuery(e.target.value)}
+              placeholder="Search conversations…"
+              className="w-full pl-8 pr-8 py-2 text-xs rounded-lg text-white placeholder-zinc-500 outline-none transition-all font-light focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
+            />
+            {contactQuery && (
+              <button
+                onClick={() => setContactQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-0.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                aria-label="Clear search"
               >
-                {cat.icon}
-                {cat.label}
-              </motion.button>
-            ))}
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex gap-1 px-2 flex-wrap">
+            {CATEGORIES.map((cat) => {
+              const active = activeCategory === cat.id;
+              return (
+                <motion.button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className={`relative text-[10.5px] uppercase tracking-[0.14em] font-medium px-2.5 py-1.5 rounded-md transition-colors flex items-center gap-1 ${
+                    active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="dm-category-pill"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      className="absolute inset-0 rounded-md"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10 inline-flex">{cat.icon}</span>
+                  <span className="relative z-10">{cat.label}</span>
+                </motion.button>
+              );
+            })}
           </div>
 
           {/* Contacts */}
@@ -353,11 +467,27 @@ export default function DmPage() {
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ delay: idx * 0.02 }}
                   onClick={() => openConversation(c)}
-                  className={`w-full text-left px-3 py-3 rounded-xl transition-all flex items-center gap-3 ${
+                  className="w-full text-left px-3 py-3 rounded-xl transition-all flex items-center gap-3"
+                  style={
                     activePeer?.id === c.user.id
-                      ? 'bg-monad-500/20 border border-monad-400/30'
-                      : 'hover:bg-white/5 border border-transparent'
-                  }`}
+                      ? {
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.4)',
+                        }
+                      : {
+                          background: 'transparent',
+                        }
+                  }
+                  onMouseEnter={(e) => {
+                    if (activePeer?.id !== c.user.id)
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activePeer?.id !== c.user.id)
+                      e.currentTarget.style.background = 'transparent';
+                  }}
                 >
                   <Avatar
                     name={c.user.username}
@@ -374,7 +504,13 @@ export default function DmPage() {
                         <motion.span
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="text-xs bg-monad-500 text-white rounded-full px-2 py-0.5 font-light flex-shrink-0"
+                          className="text-[10px] font-mono text-white rounded-full px-2 py-0.5 font-medium flex-shrink-0"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.35) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 12px -2px rgba(131,110,249,0.6)',
+                          }}
                         >
                           {c.unread}
                         </motion.span>
@@ -391,50 +527,96 @@ export default function DmPage() {
                 animate={{ opacity: 1 }}
                 className="text-xs text-center py-8 text-zinc-500"
               >
-                {activeCategory === 'all'
-                  ? 'No conversations yet. Start a new one.'
-                  : `No ${activeCategory} conversations.`}
+                {contactQuery.trim()
+                  ? 'No conversations match your search.'
+                  : activeCategory === 'all'
+                    ? 'No conversations yet. Start a new one.'
+                    : `No ${activeCategory} conversations.`}
               </motion.p>
             )}
           </div>
-        </motion.div>
+        </div>
 
         {/* ── Main conversation ── */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden border border-monad-500/10"
+          className="relative flex-1 flex flex-col min-h-0 rounded-2xl overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(15,15,26,0.6), rgba(26,0,51,0.4))',
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
           }}
         >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
           {!activePeer ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="w-16 h-16 rounded-2xl bg-monad-500/15 border border-monad-500/20 flex items-center justify-center mb-6"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                }}
               >
-                <MessageSquare className="w-8 h-8 text-monad-300" strokeWidth={1.5} />
+                <MessageSquare className="w-7 h-7" style={{ color: '#b4a7ff' }} strokeWidth={1.5} />
               </motion.div>
-              <h3 className="text-lg font-light mb-2 text-white">Messages</h3>
+              <h3 className="text-lg font-light mb-2 text-white tracking-[-0.01em]">Messages</h3>
               <p className="text-sm text-zinc-400 mb-6 max-w-xs">
                 Select a conversation to start chatting or create a new one to connect
               </p>
-              <motion.button
-                onClick={() => setShowNewDm(true)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white text-sm font-light transition-all"
-              >
-                New conversation
-              </motion.button>
+              <div className="flex flex-col items-center gap-3">
+                <motion.button
+                  onClick={() => setShowNewDm(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-6 py-2.5 rounded-lg text-white text-sm font-light transition-all"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  }}
+                >
+                  New conversation
+                </motion.button>
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+                >
+                  <Menu size={13} /> Browse conversations
+                </button>
+              </div>
             </div>
           ) : (
             <>
               {/* Chat header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-monad-500/10">
+              <div
+                className="relative flex items-center justify-between px-4 py-4"
+                style={{
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(131,110,249,0.04)',
+                }}
+              >
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl text-zinc-400 hover:text-white transition-colors lg:hidden flex-shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.06)' }}
+                    aria-label="Open conversations"
+                  >
+                    <Menu size={15} />
+                  </button>
                   <Avatar
                     name={activePeer.username}
                     url={activePeer.avatarUrl}
@@ -445,14 +627,14 @@ export default function DmPage() {
                     {activePeer.username ? (
                       <Link
                         href={`/u/${activePeer.username}`}
-                        className="text-sm font-light hover:text-monad-300 transition-colors text-white"
+                        className="text-sm font-light hover:text-bolty-300 transition-colors text-white"
                       >
                         {activePeer.username}
                       </Link>
                     ) : (
                       <p className="text-sm font-light text-white">{activePeer.id.slice(0, 8)}</p>
                     )}
-                    <p className="text-xs text-monad-400">
+                    <p className="text-xs text-bolty-400">
                       {connected ? 'Online' : 'Connecting...'}
                     </p>
                   </div>
@@ -461,7 +643,14 @@ export default function DmPage() {
                   <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex items-center gap-1.5 text-xs text-monad-300 bg-monad-500/15 px-3 py-1.5 rounded-lg border border-monad-500/20"
+                    className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.14em] font-medium h-7 px-3 rounded-md"
+                    style={{
+                      color: '#b4a7ff',
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }}
                   >
                     <Eye size={12} />
                     Both viewing
@@ -491,7 +680,7 @@ export default function DmPage() {
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}
-                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-monad-500 to-monad-600 flex items-center justify-center text-white text-xs font-light border-2 border-monad-400"
+                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-bolty-500 to-bolty-600 flex items-center justify-center text-white text-xs font-light border-2 border-bolty-400"
                                 >
                                   AI
                                 </motion.div>
@@ -499,7 +688,7 @@ export default function DmPage() {
                             )}
                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               {isAgent && (
-                                <p className="text-xs font-light text-monad-300 mb-1">
+                                <p className="text-xs font-light text-bolty-300 mb-1">
                                   {msg.agentName || 'Agent'} • {formatTime(msg.createdAt)}
                                 </p>
                               )}
@@ -511,9 +700,9 @@ export default function DmPage() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isAgent
-                                    ? 'bg-monad-500/25 text-monad-100 border border-monad-500/30 rounded-2xl rounded-tl-lg'
+                                    ? 'bg-bolty-500/25 text-bolty-100 border border-bolty-500/30 rounded-2xl rounded-tl-lg'
                                     : isMe
-                                      ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
+                                      ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
                                       : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >
@@ -544,7 +733,7 @@ export default function DmPage() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isMe
-                                    ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
+                                    ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
                                     : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >
@@ -568,7 +757,13 @@ export default function DmPage() {
               </div>
 
               {/* Input */}
-              <div className="px-6 py-4 border-t border-monad-500/10">
+              <div
+                className="px-6 py-4"
+                style={{
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                  background: 'rgba(131,110,249,0.03)',
+                }}
+              >
                 <AnimatePresence>
                   {error && (
                     <motion.p
@@ -581,7 +776,7 @@ export default function DmPage() {
                     </motion.p>
                   )}
                 </AnimatePresence>
-                <div className="flex gap-3 items-center">
+                <div className="flex gap-2 items-center">
                   <input
                     type="text"
                     value={input}
@@ -592,14 +787,26 @@ export default function DmPage() {
                       connected ? `Message ${activePeer.username || '...'}...` : 'Connecting...'
                     }
                     maxLength={2000}
-                    className="flex-1 px-4 py-3 rounded-xl text-sm outline-none transition-all bg-white/5 border border-monad-500/20 text-white placeholder:text-zinc-500 focus:border-monad-400/50 focus:bg-white/8"
+                    className="flex-1 px-4 py-3 rounded-xl text-[13px] outline-none transition-all text-white placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12),_inset_0_1px_0_rgba(255,255,255,0.04)]"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                    }}
                   />
                   <motion.button
                     onClick={sendMessage}
                     disabled={!connected || !input.trim()}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-11 h-11 flex items-center justify-center rounded-xl transition-all disabled:opacity-40 hover:opacity-100 bg-monad-500 hover:bg-monad-600 text-white"
+                    className="w-11 h-11 flex items-center justify-center rounded-xl transition-all disabled:opacity-40 text-white"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    }}
                   >
                     <Send size={18} />
                   </motion.button>

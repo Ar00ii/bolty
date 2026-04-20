@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
@@ -65,18 +68,56 @@ export default function ProfileSetupPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16">
-      <div className="w-full max-w-md">
-        <div className="mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-monad-500/10 border border-monad-500/20 mb-4">
+    <div
+      className="relative min-h-screen overflow-hidden flex items-center justify-center px-4 py-16"
+      style={{ background: 'var(--bg-page)' }}
+    >
+      <div
+        className="absolute -top-40 -right-20 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+      />
+      <div
+        className="absolute top-40 -left-24 w-[360px] h-[360px] rounded-full opacity-15 blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #06B6D4 0%, transparent 70%)' }}
+      />
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.42, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative w-full max-w-md rounded-2xl overflow-hidden p-8"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+        }}
+      >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <div className="relative mb-8">
+          <div
+            className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              border: '1px solid rgba(131,110,249,0.35)',
+              boxShadow:
+                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+            }}
+          >
             <svg
-              className="w-7 h-7 text-monad-400"
+              className="w-6 h-6 text-[#b4a7ff]"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -89,26 +130,41 @@ export default function ProfileSetupPage() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-light text-white tracking-tight mb-1">
+          <h1 className="text-2xl font-light text-white tracking-[0.005em] mb-1">
             Set up your profile
           </h1>
-          <p className="text-sm text-zinc-400">Choose your username and add your social links</p>
+          <p className="text-sm text-zinc-400 font-light">
+            Choose your username and add your social links
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div
+            className="relative rounded-lg px-4 py-3 mb-4"
+            style={{
+              background: 'rgba(244,63,94,0.1)',
+              boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
+            }}
+          >
+            <p className="text-[#fda4af] text-[12.5px]">{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="relative space-y-4">
           {/* Username */}
           <div>
-            <label className="block text-xs text-zinc-400 font-mono mb-1.5">
-              Username <span className="text-red-400">*</span>
+            <label className="block text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-1.5">
+              Username <span className="text-[#fda4af]">*</span>
             </label>
-            <div className="flex items-center gap-2 bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-monad-500/50 transition-colors">
-              <span className="text-monad-400 font-mono text-sm">@</span>
+            <div
+              className="flex items-center gap-2 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
+            >
+              <span className="text-[#b4a7ff] font-mono text-sm">@</span>
               <input
                 type="text"
                 value={username}
@@ -116,47 +172,71 @@ export default function ProfileSetupPage() {
                   setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))
                 }
                 placeholder="your_username"
-                className="flex-1 bg-transparent text-white text-sm font-mono outline-none placeholder:text-zinc-600"
+                className="flex-1 bg-transparent text-white text-[13px] font-mono outline-none placeholder:text-zinc-600"
                 maxLength={30}
                 required
               />
             </div>
-            <p className="text-xs text-zinc-600 mt-1 font-mono">Letters, numbers, _ and - only</p>
+            <p className="text-[11px] text-zinc-600 mt-1.5">Letters, numbers, _ and - only</p>
           </div>
 
           {/* Display Name */}
           <div>
-            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Display Name</label>
+            <label className="block text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-1.5">
+              Display Name
+            </label>
             <input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your Name"
-              className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-monad-500/50 transition-colors placeholder:text-zinc-600"
+              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] placeholder:text-zinc-600"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
               maxLength={50}
             />
           </div>
 
           {/* Bio */}
           <div>
-            <label className="block text-xs text-zinc-400 font-mono mb-1.5">Bio</label>
+            <label className="block text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-1.5">
+              Bio
+            </label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell us about yourself..."
+              placeholder="Tell us about yourself…"
               rows={3}
-              className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-monad-500/50 transition-colors placeholder:text-zinc-600 resize-none"
+              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] placeholder:text-zinc-600 resize-none"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+              }}
               maxLength={300}
             />
           </div>
 
           {/* Divider */}
-          <div className="border-t border-zinc-800 pt-2">
-            <p className="text-xs text-zinc-500 font-mono mb-3">Social links (optional)</p>
+          <div className="pt-2">
+            <p className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-3">
+              Social links <span className="normal-case tracking-normal">(optional)</span>
+            </p>
 
             {/* Twitter/X */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-zinc-600 transition-colors">
+            <div className="space-y-2.5">
+              <div
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
                 <svg
                   className="w-4 h-4 text-zinc-500 shrink-0"
                   fill="currentColor"
@@ -169,12 +249,20 @@ export default function ProfileSetupPage() {
                   value={twitterUrl}
                   onChange={(e) => setTwitterUrl(e.target.value)}
                   placeholder="https://x.com/yourhandle"
-                  className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-600"
+                  className="flex-1 bg-transparent text-white text-[13px] outline-none placeholder:text-zinc-600"
                 />
               </div>
 
               {/* LinkedIn */}
-              <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-zinc-600 transition-colors">
+              <div
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
                 <svg
                   className="w-4 h-4 text-zinc-500 shrink-0"
                   fill="currentColor"
@@ -187,12 +275,20 @@ export default function ProfileSetupPage() {
                   value={linkedinUrl}
                   onChange={(e) => setLinkedinUrl(e.target.value)}
                   placeholder="https://linkedin.com/in/yourprofile"
-                  className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-600"
+                  className="flex-1 bg-transparent text-white text-[13px] outline-none placeholder:text-zinc-600"
                 />
               </div>
 
               {/* Website */}
-              <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800 rounded-xl px-4 py-3 focus-within:border-zinc-600 transition-colors">
+              <div
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                }}
+              >
                 <svg
                   className="w-4 h-4 text-zinc-500 shrink-0"
                   fill="none"
@@ -211,7 +307,7 @@ export default function ProfileSetupPage() {
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   placeholder="https://yourwebsite.com"
-                  className="flex-1 bg-transparent text-white text-sm outline-none placeholder:text-zinc-600"
+                  className="flex-1 bg-transparent text-white text-[13px] outline-none placeholder:text-zinc-600"
                 />
               </div>
             </div>
@@ -220,20 +316,26 @@ export default function ProfileSetupPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full py-3 rounded-xl bg-monad-500 hover:bg-monad-400 text-white font-light text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-11 rounded-lg text-white font-medium text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.45), 0 0 22px -4px rgba(131,110,249,0.5)',
+            }}
           >
-            {saving ? 'Saving...' : 'Save & Continue'}
+            {saving ? 'Saving…' : 'Save & Continue'}
           </button>
 
           <button
             type="button"
             onClick={() => router.push('/')}
-            className="w-full py-2.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors font-mono"
+            className="w-full py-2 text-[11px] uppercase tracking-[0.18em] text-zinc-500 hover:text-zinc-300 transition-colors font-medium"
           >
-            skip for now
+            Skip for now
           </button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

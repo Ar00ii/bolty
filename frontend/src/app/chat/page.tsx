@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -249,36 +250,53 @@ export default function ChatPage() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <span className="text-monad-400 font-mono text-sm animate-pulse">Connecting...</span>
+        <span className="text-bolty-400 font-mono text-sm animate-pulse">Connecting...</span>
       </div>
     );
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
       <div
-        className="flex flex-col h-full rounded-2xl overflow-hidden border"
-        style={{ borderColor: 'rgba(255,255,255,0.08)', background: '#0a0a0b' }}
+        className="relative flex flex-col h-full rounded-2xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+        }}
       >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
         {/* Header */}
         <div
-          className="px-5 py-4 border-b flex items-center justify-between"
-          style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(131,110,249,0.04)' }}
+          className="relative px-5 py-4 flex items-center justify-between"
+          style={{
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(131,110,249,0.04)',
+          }}
         >
           <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center"
+              className="w-9 h-9 rounded-xl flex items-center justify-center"
               style={{
-                background: 'rgba(131,110,249,0.12)',
-                border: '1px solid rgba(131,110,249,0.2)',
+                background:
+                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.45)',
               }}
             >
-              <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+              <Bot className="w-4 h-4" strokeWidth={1.5} style={{ color: '#b4a7ff' }} />
             </div>
             <div>
               <h1 className="text-sm font-light text-white">Community Chat</h1>
               <div className="flex items-center gap-1.5">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-monad-400 animate-pulse' : 'bg-red-500'}`}
+                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-bolty-400 animate-pulse' : 'bg-red-500'}`}
                 />
                 <span className="text-xs" style={{ color: 'rgba(161,161,170,0.6)' }}>
                   {connected ? 'connected' : 'disconnected'}
@@ -300,10 +318,20 @@ export default function ChatPage() {
               </p>
             </div>
           )}
-          {messages.map((msg) => {
+          {messages.map((msg, idx) => {
             const isMe = msg.userId === user?.id;
             return (
-              <div key={msg.id} className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}>
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.24,
+                  ease: [0.22, 0.61, 0.36, 1],
+                  delay: Math.min(idx * 0.012, 0.18),
+                }}
+                className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}
+              >
                 {/* Avatar */}
                 <div
                   className="shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
@@ -322,7 +350,7 @@ export default function ChatPage() {
                   {msg.avatarUrl ? (
                     <img src={msg.avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : isMe ? (
-                    <UserIcon className="w-4 h-4 text-monad-400" strokeWidth={2} />
+                    <UserIcon className="w-4 h-4 text-bolty-400" strokeWidth={2} />
                   ) : (
                     <span className="text-xs font-light text-zinc-400">
                       {(msg.username || 'U')[0].toUpperCase()}
@@ -337,7 +365,7 @@ export default function ChatPage() {
                       (msg.username ? (
                         <Link
                           href={`/u/${msg.username}`}
-                          className="text-xs font-light text-monad-400 hover:text-monad-300 transition-colors"
+                          className="text-xs font-light text-bolty-400 hover:text-bolty-300 transition-colors"
                         >
                           {msg.username}
                         </Link>
@@ -358,16 +386,20 @@ export default function ChatPage() {
                     style={
                       isMe
                         ? {
-                            background: 'rgba(131,110,249,0.2)',
-                            color: '#e4e4e7',
-                            borderRadius: '12px 12px 4px 12px',
-                            border: '1px solid rgba(131,110,249,0.25)',
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.24) 0%, rgba(131,110,249,0.1) 100%)',
+                            color: '#f0edff',
+                            borderRadius: '14px 14px 4px 14px',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 6px 18px -12px rgba(131,110,249,0.5)',
                           }
                         : {
-                            background: 'rgba(255,255,255,0.06)',
+                            background:
+                              'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
                             color: '#d4d4d8',
-                            borderRadius: '12px 12px 12px 4px',
-                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '14px 14px 14px 4px',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
                           }
                     }
                   >
@@ -386,7 +418,7 @@ export default function ChatPage() {
                     <X className="w-3 h-3" />
                   </button>
                 )}
-              </div>
+              </motion.div>
             );
           })}
           <div ref={bottomRef} />
@@ -394,8 +426,11 @@ export default function ChatPage() {
 
         {/* Input */}
         <div
-          className="border-t px-4 py-3 relative"
-          style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+          className="px-4 py-3 relative"
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(131,110,249,0.03)',
+          }}
         >
           {notice && (
             <div
@@ -410,31 +445,58 @@ export default function ChatPage() {
           {showEmoji && (
             <div
               ref={emojiPickerRef}
-              className="absolute bottom-full mb-2 left-4 z-50 rounded-2xl overflow-hidden shadow-2xl"
+              className="absolute bottom-full mb-2 left-4 z-50 rounded-2xl overflow-hidden"
               style={{
-                background: '#16161a',
-                border: '1px solid rgba(131,110,249,0.25)',
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+                boxShadow:
+                  '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.04), 0 24px 48px -16px rgba(0,0,0,0.7)',
                 width: 320,
+                backdropFilter: 'blur(16px)',
               }}
             >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+                style={{
+                  background:
+                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                }}
+              />
               {/* Category tabs */}
-              <div className="flex border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
-                {EMOJI_CATEGORIES.map((cat, idx) => (
-                  <button
-                    key={cat.label}
-                    onClick={() => setActiveEmojiCategory(idx)}
-                    className="flex-1 py-2 text-xs font-mono transition-colors"
-                    style={{
-                      color: activeEmojiCategory === idx ? '#836ef9' : 'rgba(161,161,170,0.5)',
-                      background:
-                        activeEmojiCategory === idx ? 'rgba(131,110,249,0.1)' : 'transparent',
-                      borderBottom:
-                        activeEmojiCategory === idx ? '2px solid #836ef9' : '2px solid transparent',
-                    }}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+              <div
+                className="flex gap-1 p-1.5"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+              >
+                {EMOJI_CATEGORIES.map((cat, idx) => {
+                  const active = activeEmojiCategory === idx;
+                  return (
+                    <motion.button
+                      key={cat.label}
+                      onClick={() => setActiveEmojiCategory(idx)}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                      className={`relative flex-1 py-1.5 text-[10.5px] uppercase tracking-[0.16em] font-medium rounded-md transition-colors ${
+                        active ? 'text-[#b4a7ff]' : 'text-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {active && (
+                        <motion.span
+                          layoutId="chat-emoji-category-pill"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 rounded-md"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }}
+                        />
+                      )}
+                      <span className="relative z-10">{cat.label}</span>
+                    </motion.button>
+                  );
+                })}
               </div>
               {/* Emoji grid */}
               <div className="p-3 grid grid-cols-10 gap-1">
@@ -442,7 +504,16 @@ export default function ChatPage() {
                   <button
                     key={emoji}
                     onClick={() => insertEmoji(emoji)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg text-base hover:bg-monad-500/20 transition-colors"
+                    className="w-7 h-7 flex items-center justify-center rounded-md text-base transition-all hover:scale-110"
+                    style={{ background: 'transparent' }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(131,110,249,0.15)';
+                      e.currentTarget.style.boxShadow = 'inset 0 0 0 1px rgba(131,110,249,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
                     title={emoji}
                   >
                     {emoji}
@@ -456,12 +527,22 @@ export default function ChatPage() {
             {/* Emoji toggle button */}
             <button
               onClick={() => setShowEmoji((v) => !v)}
-              className="p-2.5 rounded-xl border transition-all self-end"
-              style={{
-                borderColor: showEmoji ? 'rgba(131,110,249,0.5)' : 'rgba(255,255,255,0.1)',
-                color: showEmoji ? '#836ef9' : 'rgba(161,161,170,0.5)',
-                background: showEmoji ? 'rgba(131,110,249,0.1)' : 'transparent',
-              }}
+              className="p-2.5 rounded-xl transition-all self-end"
+              style={
+                showEmoji
+                  ? {
+                      color: '#b4a7ff',
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                    }
+                  : {
+                      color: 'rgba(161,161,170,0.6)',
+                      background: 'rgba(255,255,255,0.04)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                    }
+              }
               title="Emoji picker"
             >
               <Smile className="w-4 h-4" />
@@ -479,10 +560,12 @@ export default function ChatPage() {
                 }
                 maxLength={500}
                 rows={1}
-                className="w-full px-4 py-2.5 rounded-xl resize-none outline-none transition-all text-sm"
+                className="w-full px-4 py-2.5 rounded-xl resize-none outline-none transition-all text-[13px] focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12),_inset_0_1px_0_rgba(255,255,255,0.04)]"
                 style={{
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
                   color: '#e4e4e7',
                   minHeight: '42px',
                   maxHeight: '128px',
@@ -490,8 +573,8 @@ export default function ChatPage() {
               />
               {input.length > 0 && (
                 <span
-                  className="absolute bottom-1.5 right-3 text-xs"
-                  style={{ color: 'rgba(161,161,170,0.3)' }}
+                  className="absolute bottom-1.5 right-3 text-[10px] font-mono tracking-wider"
+                  style={{ color: 'rgba(161,161,170,0.35)' }}
                 >
                   {input.length}/500
                 </span>
@@ -502,23 +585,39 @@ export default function ChatPage() {
               onClick={sendMessage}
               disabled={!connected || !input.trim()}
               className="p-2.5 rounded-xl transition-all hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 self-end"
-              style={{ background: 'linear-gradient(135deg, #836EF9, #6b4fe0)', color: '#fff' }}
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                color: '#fff',
+              }}
+              title="Send (Enter)"
             >
               <Send className="w-4 h-4" />
             </button>
           </div>
 
           {input.length === 0 && !showEmoji && (
-            <div className="mt-2.5 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {['Hello everyone', 'Need help with my agent', 'Looking for collaborators'].map(
                 (q) => (
                   <button
                     key={q}
                     onClick={() => setInput(q)}
-                    className="px-3 py-1 text-xs rounded-full border transition-colors hover:border-monad-500/40 hover:text-monad-400"
+                    className="px-3 py-1 text-[11px] rounded-full transition-all hover:scale-[1.02]"
                     style={{
-                      borderColor: 'rgba(255,255,255,0.08)',
-                      color: 'rgba(161,161,170,0.4)',
+                      background: 'rgba(255,255,255,0.03)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                      color: 'rgba(161,161,170,0.55)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = 'inset 0 0 0 1px rgba(131,110,249,0.35)';
+                      e.currentTarget.style.color = '#b4a7ff';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,0.06)';
+                      e.currentTarget.style.color = 'rgba(161,161,170,0.55)';
                     }}
                   >
                     {q}

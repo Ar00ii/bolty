@@ -1,6 +1,7 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TrendingUp, Trophy, Gauge, Sparkles } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface AgentRaysData {
@@ -17,15 +18,15 @@ interface RaysDisplayProps {
   refreshTrigger?: number;
 }
 
-const RANK_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  HIERRO: { bg: 'bg-gray-800', text: 'text-gray-400', border: 'border-gray-700' },
-  BRONCE: { bg: 'bg-amber-900/30', text: 'text-amber-400', border: 'border-amber-600' },
-  PLATA: { bg: 'bg-slate-600/30', text: 'text-slate-300', border: 'border-slate-500' },
-  ORO: { bg: 'bg-yellow-600/30', text: 'text-yellow-400', border: 'border-yellow-500' },
-  PLATINO: { bg: 'bg-purple-600/30', text: 'text-purple-400', border: 'border-purple-500' },
-  DIAMANTE: { bg: 'bg-cyan-600/30', text: 'text-cyan-400', border: 'border-cyan-500' },
-  MAESTRIA: { bg: 'bg-blue-600/30', text: 'text-blue-400', border: 'border-blue-500' },
-  CAMPEON: { bg: 'bg-red-600/30', text: 'text-red-400', border: 'border-red-500' },
+const RANK_META: Record<string, { color: string; textColor: string }> = {
+  HIERRO: { color: '161,161,170', textColor: '#d4d4d8' },
+  BRONCE: { color: '180,83,9', textColor: '#fcd34d' },
+  PLATA: { color: '148,163,184', textColor: '#e2e8f0' },
+  ORO: { color: '234,179,8', textColor: '#fde047' },
+  PLATINO: { color: '131,110,249', textColor: '#b4a7ff' },
+  DIAMANTE: { color: '6,182,212', textColor: '#67e8f9' },
+  MAESTRIA: { color: '59,130,246', textColor: '#93c5fd' },
+  CAMPEON: { color: '239,68,68', textColor: '#fda4af' },
 };
 
 export const RaysDisplay: React.FC<RaysDisplayProps> = ({
@@ -61,76 +62,174 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
     fetchRaysData();
   }, [agentId, API_URL, refreshTrigger, onDataLoaded]);
 
+  const surfaceStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+    boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+  };
+
   if (loading) {
     return (
-      <div className="p-6 rounded-lg bg-gray-800/30 border border-gray-700 animate-pulse">
-        <div className="h-20 bg-gray-700 rounded" />
+      <div className="p-6 rounded-xl animate-pulse" style={surfaceStyle}>
+        <div className="h-20 bg-white/[0.06] rounded" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="p-6 rounded-lg bg-gray-800/30 border border-gray-700 text-center">
-        <p className="text-gray-400 text-sm">{error || 'Unable to load rays data'}</p>
+      <div className="p-6 rounded-xl text-center" style={surfaceStyle}>
+        <p className="text-[13px] text-zinc-400 tracking-[0.005em]">
+          {error || 'Unable to load rays data'}
+        </p>
       </div>
     );
   }
 
-  const rankColor = RANK_COLORS[data.currentRank] || RANK_COLORS.HIERRO;
+  const rankMeta = RANK_META[data.currentRank] || RANK_META.HIERRO;
 
   return (
     <div className="space-y-4">
       {/* Main Card */}
-      <div className={`p-6 rounded-lg border-2 ${rankColor.bg} ${rankColor.border}`}>
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
-              Current Rank
-            </p>
-            <h3 className={`text-3xl font-light mt-1 ${rankColor.text}`}>{data.currentRank}</h3>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.32, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative p-6 rounded-xl overflow-hidden"
+        style={{
+          background: `linear-gradient(180deg, rgba(${rankMeta.color},0.14) 0%, rgba(${rankMeta.color},0.04) 100%)`,
+          boxShadow: `0 0 0 1px rgba(${rankMeta.color},0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 40px -12px rgba(${rankMeta.color},0.35)`,
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background: `linear-gradient(90deg, transparent 0%, rgba(${rankMeta.color},0.6) 50%, transparent 100%)`,
+          }}
+        />
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-start gap-3">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{
+                background: `linear-gradient(135deg, rgba(${rankMeta.color},0.28) 0%, rgba(${rankMeta.color},0.08) 100%)`,
+                boxShadow: `inset 0 0 0 1px rgba(${rankMeta.color},0.45), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -4px rgba(${rankMeta.color},0.55)`,
+              }}
+            >
+              <Trophy className="w-4 h-4" style={{ color: rankMeta.textColor }} />
+            </div>
+            <div>
+              <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+                Current Rank
+              </p>
+              <h3
+                className="text-3xl font-light mt-1 tracking-[-0.01em]"
+                style={{
+                  color: rankMeta.textColor,
+                  textShadow: `0 0 24px rgba(${rankMeta.color},0.4)`,
+                }}
+              >
+                {data.currentRank}
+              </h3>
+            </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
               Trending Position
             </p>
-            <p className={`text-3xl font-light mt-1 ${rankColor.text}`}>#{data.position}</p>
+            <p
+              className="text-3xl font-light mt-1 tabular-nums tracking-[-0.01em]"
+              style={{ color: rankMeta.textColor }}
+            >
+              #{data.position}
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-700">
+        <div
+          className="grid grid-cols-2 gap-4 pt-5"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+        >
           <div>
-            <p className="text-xs text-gray-400">Total Rays Accumulated</p>
-            <p className="text-2xl font-light text-white mt-1">{data.totalRaysAccumulated}</p>
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+              Total Rays
+            </p>
+            <p className="text-2xl font-light text-white mt-1 tabular-nums tracking-[-0.01em]">
+              {data.totalRaysAccumulated.toLocaleString()}
+            </p>
           </div>
           <div>
-            <p className="text-xs text-gray-400">Visibility Multiplier</p>
-            <p className={`text-2xl font-light mt-1 ${rankColor.text}`}>
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+              Visibility Multiplier
+            </p>
+            <p
+              className="text-2xl font-light mt-1 tabular-nums tracking-[-0.01em]"
+              style={{ color: rankMeta.textColor }}
+            >
               {getBoostMultiplier(data.currentRank)}x
             </p>
           </div>
         </div>
 
         {data.lastRankUpAt && (
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-[11px] text-zinc-500 mt-4 tracking-[0.005em]">
             Last rank up: {new Date(data.lastRankUpAt).toLocaleDateString()}
           </p>
         )}
-      </div>
+      </motion.div>
 
       {/* Benefits */}
-      <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
-        <div className="flex items-start gap-2 mb-3">
-          <TrendingUp className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-light text-white">Ranking Benefits</p>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative p-5 rounded-xl overflow-hidden"
+        style={surfaceStyle}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-start gap-3 mb-4">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+            }}
+          >
+            <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" />
+          </div>
+          <p className="text-[14px] font-light text-white tracking-[0.005em]">Ranking Benefits</p>
         </div>
-        <ul className="text-xs text-gray-400 space-y-1 ml-6">
-          <li>Higher position in trending leaderboard</li>
-          <li>Increased visibility and exposure</li>
-          <li>More transaction opportunities</li>
-          <li>Rays accumulated permanently</li>
+        <ul className="space-y-2 pl-11">
+          {[
+            'Higher position in trending leaderboard',
+            'Increased visibility and exposure',
+            'More transaction opportunities',
+            'Rays accumulated permanently',
+          ].map((benefit, idx) => (
+            <motion.li
+              key={benefit}
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{
+                delay: 0.12 + idx * 0.05,
+                duration: 0.24,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
+              className="text-[13px] text-zinc-400 flex items-start gap-2 tracking-[0.005em]"
+            >
+              <Sparkles className="w-3 h-3 text-[#b4a7ff] mt-1 flex-shrink-0" />
+              {benefit}
+            </motion.li>
+          ))}
         </ul>
-      </div>
+      </motion.div>
 
       {/* Progress to Next Rank */}
       <RankProgress currentRank={data.currentRank} totalRays={data.totalRaysAccumulated} />
@@ -170,34 +269,102 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
 
   if (nextIndex >= rankOrder.length) {
     return (
-      <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30 text-center">
-        <p className="text-sm font-light text-purple-400">You are at the highest rank!</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.16, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative p-5 rounded-xl text-center overflow-hidden"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.4)',
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+          }}
+        />
+        <div className="flex items-center justify-center gap-2">
+          <Trophy className="w-4 h-4 text-[#b4a7ff]" />
+          <p className="text-[14px] font-light text-[#b4a7ff] tracking-[0.005em]">
+            You are at the highest rank
+          </p>
+        </div>
+      </motion.div>
     );
   }
 
   const nextRank = rankOrder[nextIndex];
   const nextThreshold = rankThresholds[nextRank];
   const raysNeeded = nextThreshold - totalRays;
+  const progress = Math.min(100, (totalRays / nextThreshold) * 100);
+  const nextMeta = RANK_META[nextRank] || RANK_META.HIERRO;
 
   return (
-    <div className="p-4 rounded-lg bg-gray-800/30 border border-gray-700">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-gray-400 font-light">Next Rank: {nextRank}</p>
-        <p className="text-xs text-gray-400">
-          {totalRays} / {nextThreshold} rays
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.16, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
+      className="relative p-5 rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <div
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, rgba(${nextMeta.color},0.4) 50%, transparent 100%)`,
+        }}
+      />
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Gauge className="w-3.5 h-3.5 text-zinc-500" />
+          <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+            Next Rank
+          </p>
+          <span
+            className="text-[12px] font-light tracking-[0.005em]"
+            style={{ color: nextMeta.textColor }}
+          >
+            {nextRank}
+          </span>
+        </div>
+        <p className="text-[11px] text-zinc-400 tabular-nums tracking-[0.005em]">
+          {totalRays.toLocaleString()} / {nextThreshold.toLocaleString()}
         </p>
       </div>
-      <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-purple-600 transition-all duration-300"
-          style={{ width: `${(totalRays / nextThreshold) * 100}%` }}
+      <div
+        className="w-full h-2 rounded-full overflow-hidden"
+        style={{
+          background: 'rgba(8,8,12,0.6)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+        }}
+      >
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ delay: 0.3, duration: 0.9, ease: [0.22, 0.61, 0.36, 1] }}
+          className="h-full rounded-full"
+          style={{
+            background: `linear-gradient(90deg, rgba(${nextMeta.color},0.85) 0%, rgba(${nextMeta.color},1) 100%)`,
+            boxShadow: `0 0 12px rgba(${nextMeta.color},0.6)`,
+          }}
         />
       </div>
-      <p className="text-xs text-gray-500 mt-2">
-        {raysNeeded > 0 ? `${raysNeeded} rays needed` : 'Ready to rank up!'}
-      </p>
-    </div>
+      <div className="flex items-center justify-between mt-3">
+        <p className="text-[11px] text-zinc-500 tracking-[0.005em]">
+          {raysNeeded > 0 ? `${raysNeeded.toLocaleString()} rays needed` : 'Ready to rank up'}
+        </p>
+        <span className="text-[11px] font-light tabular-nums" style={{ color: nextMeta.textColor }}>
+          {progress.toFixed(1)}%
+        </span>
+      </div>
+    </motion.div>
   );
 };
 

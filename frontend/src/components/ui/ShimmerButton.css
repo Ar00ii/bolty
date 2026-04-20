@@ -3,7 +3,6 @@
   overflow: hidden;
   border: none;
   cursor: pointer;
-  font-weight: 300;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
@@ -14,6 +13,7 @@
   position: relative;
   z-index: 1;
   mix-blend-mode: normal;
+  font-weight: inherit;
 }
 
 .shimmer-button-shimmer {

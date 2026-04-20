@@ -23,7 +23,6 @@ import {
   Zap,
   Percent,
   Coins,
-  Briefcase,
   ShoppingCart,
   BookOpen,
   type LucideIcon,
@@ -102,15 +101,6 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   {
-    label: 'Hire',
-    href: '/services',
-    sub: [
-      { href: '/services', label: 'Browse Services', icon: Briefcase },
-      { href: '/services?category=AI_DEVELOPMENT', label: 'AI Development', icon: Cpu },
-      { href: '/services?category=SMART_CONTRACTS', label: 'Smart Contracts', icon: Zap },
-    ],
-  },
-  {
     label: 'Docs',
     href: '/docs/agent-protocol',
     sub: [
@@ -129,7 +119,7 @@ const PROFILE_ITEM: NavItem = {
     { href: '/profile?tab=wallet', label: 'Wallet', icon: Wallet },
     { href: '/api-keys', label: 'API Keys', icon: Key },
     { href: '/profile?tab=agent', label: 'AI Agent', icon: Cpu },
-    { href: '/profile?tab=security', label: 'Security', icon: Settings },
+    { href: '/profile?tab=notifications', label: 'Settings', icon: Settings },
   ],
 };
 

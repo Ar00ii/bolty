@@ -13,6 +13,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     config: ConfigService,
     private readonly prisma: PrismaService,
   ) {
+    const secret = config.get<string>('JWT_SECRET');
+    if (!secret || secret.length < 32) {
+      throw new Error(
+        'CRITICAL: JWT_SECRET must be set and at least 32 characters. Refusing to start with an insecure fallback.',
+      );
+    }
     super({
       // Extract JWT from HttpOnly cookie (preferred) or Authorization header
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -20,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: config.get<string>('JWT_SECRET') || 'changeme',
+      secretOrKey: secret,
       passReqToCallback: false,
     });
   }

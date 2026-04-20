@@ -1,11 +1,14 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { AgentDashboard } from '@/components/profile/AgentDashboard';
-import { BillingSection } from '@/components/profile/BillingSection';
+import { APIKeysSection } from '@/components/profile/APIKeysSection';
 import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
 import { NotificationsSection } from '@/components/profile/NotificationsSection';
 import { UsageSection } from '@/components/profile/UsageSection';
@@ -20,11 +23,11 @@ type Tab =
   | 'friends'
   | 'agent'
   | 'api-keys'
-  | 'billing'
   | 'usage'
   | 'notifications'
   | 'integrations'
-  | 'activity';
+  | 'activity'
+  | 'security';
 
 interface Friend {
   id: string;
@@ -298,7 +301,7 @@ function Avatar({
   }
   return (
     <div
-      className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-light flex-shrink-0`}
+      className={`${cls} rounded-full bg-bolty-500/15 border border-bolty-500/25 flex items-center justify-center text-bolty-400 font-light flex-shrink-0`}
     >
       {(name || 'U')[0]?.toUpperCase()}
     </div>
@@ -432,8 +435,17 @@ export default function ProfilePage() {
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
   const [toggling2FA, setToggling2FA] = useState(false);
   const [disable2FAPassword, setDisable2FAPassword] = useState('');
-  const [enable2FAStep, setEnable2FAStep] = useState<'idle' | 'code'>('idle');
+  const [enable2FAStep, setEnable2FAStep] = useState<'idle' | 'scan'>('idle');
   const [enable2FACode, setEnable2FACode] = useState('');
+  const [twoFAQrCode, setTwoFAQrCode] = useState<string | null>(null);
+  const [twoFASecret, setTwoFASecret] = useState<string | null>(null);
+  const [twoFASecretCopied, setTwoFASecretCopied] = useState(false);
+
+  // Password change
+  const [pwStep, setPwStep] = useState<'idle' | 'sent'>('idle');
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg] = useState('');
+  const [pwErr, setPwErr] = useState('');
   const [emailStep, setEmailStep] = useState<'idle' | 'form' | 'otp'>('idle');
   const [newEmail, setNewEmail] = useState('');
   const [emailPassword, setEmailPassword] = useState('');
@@ -446,10 +458,6 @@ export default function ProfilePage() {
 
   // API Keys
   const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
-
-  // Billing
-  const [billingPlan, setBillingPlan] = useState('free');
-  const [billingEmail, setBillingEmail] = useState('');
 
   // Notifications
   const [notifErrors, setNotifErrors] = useState(true);
@@ -484,10 +492,6 @@ export default function ProfilePage() {
     setWebsiteUrl((user as { websiteUrl?: string }).websiteUrl || '');
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
-
-    // Billing email
-    setBillingEmail((user as { email?: string }).email || '');
-    setBillingPlan('pro');
 
     // Load real API keys from backend
     api
@@ -539,11 +543,11 @@ export default function ProfilePage() {
         'friends',
         'agent',
         'api-keys',
-        'billing',
         'usage',
         'notifications',
         'integrations',
         'activity',
+        'security',
       ].includes(tabParam)
     ) {
       setTab(tabParam);
@@ -700,18 +704,16 @@ export default function ProfilePage() {
     setAvatarErr('');
     setAvatarMsg('');
     try {
+      const MAX_SIZE = 10 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        throw new Error('Image is larger than 10 MB. Please pick a smaller file.');
+      }
+      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+        throw new Error('Only PNG, JPG or WebP images are allowed.');
+      }
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch(`${API_URL}/users/upload-avatar`, {
-        method: 'POST',
-        body: form,
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const msg = Array.isArray(data.message) ? data.message[0] : data.message || 'Upload failed';
-        throw new Error(String(msg));
-      }
+      await api.upload('/users/upload-avatar', form);
       await refresh();
       setAvatarMsg('Avatar updated.');
       setTimeout(() => setAvatarMsg(''), 3000);
@@ -794,11 +796,9 @@ export default function ProfilePage() {
   };
 
   const handleLinkGitHub = () => {
-    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || '';
-    const callbackUrl =
-      process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL ||
-      'http://localhost:3001/api/v1/auth/github/callback';
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(callbackUrl)}&scope=read%3Auser%20repo`;
+    // Delegate to backend — it knows the client_id + callback URL from env and
+    // preserves the access_token cookie so the callback links to the current user.
+    window.location.href = `${API_URL}/auth/github`;
   };
 
   const handleUnlinkGitHub = async () => {
@@ -940,9 +940,14 @@ export default function ProfilePage() {
         setDisable2FAPassword('');
         setSecMsg('Two-factor authentication disabled.');
       } else {
-        await api.post('/auth/2fa/enable/request', {});
-        setEnable2FAStep('code');
-        setSecMsg('Verification code sent to your email.');
+        const res = await api.post<{ qrCode?: string; secret?: string }>(
+          '/auth/2fa/enable/request',
+          {},
+        );
+        setTwoFAQrCode(res.qrCode || null);
+        setTwoFASecret(res.secret || null);
+        setEnable2FAStep('scan');
+        setSecMsg('Scan the QR code with your authenticator app to continue.');
       }
     } catch (err) {
       setSecErr(err instanceof ApiError ? err.message : 'Failed to update 2FA setting.');
@@ -959,11 +964,42 @@ export default function ProfilePage() {
       setTwoFAEnabled(true);
       setEnable2FAStep('idle');
       setEnable2FACode('');
-      setSecMsg('2FA enabled. A code will be emailed to you on your next login.');
+      setTwoFAQrCode(null);
+      setTwoFASecret(null);
+      setTwoFASecretCopied(false);
+      setSecMsg('2FA enabled. You will be asked for a code from your authenticator at next login.');
     } catch (err) {
       setSecErr(err instanceof ApiError ? err.message : 'Invalid or expired code.');
     } finally {
       setToggling2FA(false);
+    }
+  };
+
+  const handleCopy2FASecret = async () => {
+    if (!twoFASecret) return;
+    try {
+      await navigator.clipboard.writeText(twoFASecret);
+      setTwoFASecretCopied(true);
+      setTimeout(() => setTwoFASecretCopied(false), 2000);
+    } catch {
+      /* silent */
+    }
+  };
+
+  const handleRequestPasswordReset = async () => {
+    const email = (user as { email?: string } | null)?.email;
+    if (!email) return;
+    setPwErr('');
+    setPwMsg('');
+    setPwLoading(true);
+    try {
+      await api.post('/auth/password/forgot', { email });
+      setPwStep('sent');
+      setPwMsg('Password reset link sent to your email.');
+    } catch (err) {
+      setPwErr(err instanceof ApiError ? err.message : 'Failed to send reset link.');
+    } finally {
+      setPwLoading(false);
     }
   };
 
@@ -1035,7 +1071,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
       </div>
     );
   }
@@ -1058,26 +1094,56 @@ export default function ProfilePage() {
                 { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
                 { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
                 { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-                { id: 'billing' as Tab, label: 'Billing', Icon: IconWallet },
                 { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
-                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconShield },
+                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
                 { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
+                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
                 { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'activity' as Tab, label: 'Activity', Icon: IconCpu },
-                { id: 'agent' as Tab, label: 'AI Agent', Icon: IconCpu },
-              ].map(({ id, label, Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setTab(id)}
-                  className={`profile-menu-item ${tab === id ? 'active' : ''} min-w-fit lg:w-full lg:min-w-0`}
-                  title={label}
-                >
-                  <div className="profile-menu-icon">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <span className="profile-menu-label">{label}</span>
-                </button>
-              ))}
+                { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
+              ].map(({ id, label, Icon }) => {
+                const active = tab === id;
+                return (
+                  <motion.button
+                    key={id}
+                    onClick={() => setTab(id)}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                    className="profile-menu-item min-w-fit lg:w-full lg:min-w-0"
+                    style={active ? { color: '#b4a7ff' } : undefined}
+                    title={label}
+                  >
+                    {active && (
+                      <>
+                        <motion.span
+                          layoutId="profile-menu-pill"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          className="absolute inset-0 rounded-md lg:rounded-lg"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          }}
+                        />
+                        <motion.span
+                          layoutId="profile-menu-bar"
+                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          aria-hidden="true"
+                          className="hidden lg:block absolute left-0 top-1 bottom-1 w-[2px] rounded-r"
+                          style={{
+                            background:
+                              'linear-gradient(to bottom, transparent 0%, #836ef9 30%, #836ef9 70%, transparent 100%)',
+                          }}
+                        />
+                      </>
+                    )}
+                    <div className="relative z-10 profile-menu-icon">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="relative z-10 profile-menu-label">{label}</span>
+                  </motion.button>
+                );
+              })}
             </nav>
           </div>
 
@@ -1148,7 +1214,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
                       disabled={avatarUploading}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-monad-500/30 text-[var(--text-muted)] hover:text-monad-400 transition-all disabled:opacity-50"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/30 text-[var(--text-muted)] hover:text-bolty-400 transition-all disabled:opacity-50"
                     >
                       {avatarUploading ? 'Uploading...' : 'Change photo'}
                     </button>
@@ -1165,8 +1231,8 @@ export default function ProfilePage() {
                 <form onSubmit={handleSaveGeneral} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Username">
-                      <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                        <span className="px-3 text-monad-400 font-mono text-sm select-none">@</span>
+                      <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                        <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
                         <input
                           type="text"
                           value={username}
@@ -1205,12 +1271,12 @@ export default function ProfilePage() {
                   </Field>
 
                   {userTag && (
-                    <div className="flex items-center justify-between bg-monad-500/5 border border-monad-500/15 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3">
                       <div>
                         <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
                           User ID
                         </div>
-                        <div className="font-mono text-monad-400 font-light">#{userTag}</div>
+                        <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
                       </div>
                       <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
                         Others can find you
@@ -1320,6 +1386,115 @@ export default function ProfilePage() {
             )}
 
             {/* ════════════════════════════════════════════
+          WALLET
+      ════════════════════════════════════════════ */}
+            {tab === 'wallet' && (
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Wallet"
+                  subtitle="Connect your MetaMask wallet to enable on-chain transactions."
+                />
+                <Alert type="success" msg={walletMsg} />
+                <Alert type="error" msg={walletErr} />
+
+                {walletAddress ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                        <IconWallet className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
+                          Connected
+                        </div>
+                        <div className="font-mono text-sm text-[var(--text)] truncate">
+                          {walletAddress}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)] mt-0.5">MetaMask</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDisconnectWallet}
+                      disabled={walletLoading}
+                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {walletLoading ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
+                          Disconnecting...
+                        </>
+                      ) : (
+                        'Disconnect Wallet'
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]">
+                      <div className="flex items-start gap-4">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                          style={{
+                            background:
+                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 18px -4px rgba(131,110,249,0.45)',
+                          }}
+                        >
+                          <IconWallet className="w-6 h-6 text-[#b4a7ff]" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-light text-[var(--text)] mb-1">MetaMask</div>
+                          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                            Connect your MetaMask wallet to make payments, receive earnings, and
+                            participate in on-chain transactions on Bolty.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleConnectWallet}
+                      disabled={walletLoading}
+                      className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        boxShadow:
+                          'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      }}
+                    >
+                      {walletLoading ? (
+                        <>
+                          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <IconWallet className="w-4 h-4" />
+                          Connect MetaMask
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ════════════════════════════════════════════
+          API KEYS
+      ════════════════════════════════════════════ */}
+            {tab === 'api-keys' && (
+              <APIKeysSection
+                apiKeys={apiKeys}
+                onDelete={handleDeleteAPIKey}
+                onGenerate={handleGenerateAPIKey}
+                onCopy={handleCopyAPIKey}
+              />
+            )}
+
+            {/* ════════════════════════════════════════════
           FRIENDS
       ════════════════════════════════════════════ */}
             {tab === 'friends' && (
@@ -1330,7 +1505,7 @@ export default function ProfilePage() {
                     title="Professional Network"
                     subtitle="Build meaningful connections with developers and expand your professional community."
                   />
-                  <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                  <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                     <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
                     <input
                       type="text"
@@ -1340,7 +1515,7 @@ export default function ProfilePage() {
                       className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                     />
                     {searching ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin flex-shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin flex-shrink-0" />
                     ) : (
                       searchQuery && (
                         <button
@@ -1370,13 +1545,13 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                               {u.username && <span>@{u.username}</span>}
-                              {u.userTag && <span className="text-monad-400/70">#{u.userTag}</span>}
+                              {u.userTag && <span className="text-bolty-400/70">#{u.userTag}</span>}
                             </div>
                           </div>
                           <button
                             onClick={() => handleSendFriendRequest(u.id)}
                             disabled={sendingTo === u.id}
-                            className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
+                            className="text-xs text-bolty-400 border border-bolty-500/30 hover:border-bolty-400/60 hover:bg-bolty-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
                           >
                             {sendingTo === u.id ? '...' : '+ Add'}
                           </button>
@@ -1396,7 +1571,7 @@ export default function ProfilePage() {
                 <div className="profile-content-card">
                   {friendsLoading ? (
                     <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
                       Loading...
                     </div>
                   ) : (
@@ -1425,14 +1600,14 @@ export default function ProfilePage() {
                                 <div className="flex-1 min-w-0">
                                   <Link
                                     href={`/u/${req.from.username}`}
-                                    className="text-sm font-light text-[var(--text)] hover:text-monad-300 transition-colors"
+                                    className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
                                   >
                                     {req.from.displayName || req.from.username}
                                   </Link>
                                   <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                                     {req.from.username && <span>@{req.from.username}</span>}
                                     {req.from.userTag && (
-                                      <span className="text-monad-400/60">#{req.from.userTag}</span>
+                                      <span className="text-bolty-400/60">#{req.from.userTag}</span>
                                     )}
                                   </div>
                                 </div>
@@ -1475,7 +1650,7 @@ export default function ProfilePage() {
                             {friends.map((f) => (
                               <div
                                 key={f.id}
-                                className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/40 hover:shadow-lg transition-all duration-200"
+                                className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-bolty-500/40 hover:shadow-lg transition-all duration-200"
                               >
                                 <Avatar
                                   src={f.friend.avatarUrl}
@@ -1485,21 +1660,21 @@ export default function ProfilePage() {
                                 <div className="flex-1 min-w-0">
                                   <Link
                                     href={`/u/${f.friend.username}`}
-                                    className="text-xs font-light text-[var(--text)] hover:text-monad-300 transition-colors truncate block"
+                                    className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
                                   >
                                     {f.friend.displayName || f.friend.username}
                                   </Link>
                                   <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
                                     {f.friend.username && <span>@{f.friend.username}</span>}
                                     {f.friend.userTag && (
-                                      <span className="text-monad-400/50">#{f.friend.userTag}</span>
+                                      <span className="text-bolty-400/50">#{f.friend.userTag}</span>
                                     )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <Link
                                     href={`/dm?peer=${f.friend.id}`}
-                                    className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-2 py-1 rounded-lg transition-all duration-200"
+                                    className="text-xs text-bolty-400 border border-bolty-500/25 hover:border-bolty-400/50 hover:bg-bolty-500/8 px-2 py-1 rounded-lg transition-all duration-200"
                                     title="Direct message"
                                   >
                                     DM
@@ -1528,22 +1703,6 @@ export default function ProfilePage() {
           AI AGENT — Professional SaaS Dashboard
       ════════════════════════════════════════════ */}
             {tab === 'agent' && <AgentDashboard />}
-            {/* BILLING */}
-            {tab === 'billing' && (
-              <BillingSection
-                data={{
-                  plan: billingPlan as 'free' | 'pro' | 'enterprise',
-                  email: billingEmail,
-                  nextBillingDate:
-                    billingPlan === 'pro'
-                      ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-                      : undefined,
-                  amount: billingPlan === 'pro' ? 99 : undefined,
-                  status: 'active',
-                  cardLast4: billingPlan === 'pro' ? '4242' : undefined,
-                }}
-              />
-            )}
 
             {/* USAGE */}
             {tab === 'usage' && (
@@ -1567,7 +1726,7 @@ export default function ProfilePage() {
                   monthlyReport: false,
                   deploymentAlerts: true,
                 }}
-                billingEmail={billingEmail}
+                email={userEmail || ''}
                 onUpdate={async (settings) => {
                   setNotifErrors(settings.emailOnErrors);
                   setNotifReports(settings.weeklyReport);
@@ -1610,7 +1769,15 @@ export default function ProfilePage() {
                       name: 'Twitter/X',
                       description: 'Share your achievements and activity',
                       connected: !!twitterUrl,
-                      connectedAs: twitterUrl ? new URL(twitterUrl).pathname.slice(1) : undefined,
+                      connectedAs: twitterUrl
+                        ? (() => {
+                            try {
+                              return new URL(twitterUrl).pathname.replace(/^\//, '');
+                            } catch {
+                              return twitterUrl;
+                            }
+                          })()
+                        : undefined,
                     },
                     {
                       id: 'discord',
@@ -1697,11 +1864,16 @@ export default function ProfilePage() {
                   return merged;
                 })()}
                 onConnect={async (id: string) => {
+                  if (id === 'metamask') {
+                    await handleConnectWallet();
+                    return;
+                  }
+                  if (id === 'github-social') {
+                    handleLinkGitHub();
+                    return;
+                  }
                   try {
-                    await api.post('/users/integrations', {
-                      provider: id,
-                      name: id,
-                    });
+                    await api.post('/users/integrations', { provider: id, name: id });
                     const ints = await api.get<any>('/users/integrations');
                     setIntegrations(Array.isArray(ints) ? ints : []);
                   } catch (err) {
@@ -1709,6 +1881,14 @@ export default function ProfilePage() {
                   }
                 }}
                 onDisconnect={async (id: string) => {
+                  if (id === 'metamask') {
+                    await handleDisconnectWallet();
+                    return;
+                  }
+                  if (id === 'github-social') {
+                    await handleUnlinkGitHub();
+                    return;
+                  }
                   try {
                     await api.delete(`/users/integrations/${id}`);
                     const ints = await api.get<any>('/users/integrations');
@@ -1718,6 +1898,418 @@ export default function ProfilePage() {
                   }
                 }}
               />
+            )}
+
+            {/* ════════════════════════════════════════════
+          SECURITY
+      ════════════════════════════════════════════ */}
+            {tab === 'security' && (
+              <div className="space-y-4">
+                {/* ── Email address ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Email Address"
+                    subtitle="Update the email address associated with your account."
+                  />
+                  <Alert type="success" msg={secMsg} />
+                  <Alert type="error" msg={secErr} />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                    <div>
+                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
+                        Current email
+                      </div>
+                      <div className="text-sm font-light text-[var(--text)]">
+                        {userEmail || '—'}
+                      </div>
+                    </div>
+                    {emailStep === 'idle' && (
+                      <button
+                        type="button"
+                        onClick={() => setEmailStep('form')}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
+                      >
+                        Change
+                      </button>
+                    )}
+                  </div>
+
+                  {emailStep === 'form' && (
+                    <form onSubmit={handleRequestEmailChange} className="space-y-4">
+                      <Field label="New Email Address">
+                        <Input
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          required
+                          placeholder="new@example.com"
+                        />
+                      </Field>
+                      <Field label="Current Password">
+                        <Input
+                          type="password"
+                          value={emailPassword}
+                          onChange={(e) => setEmailPassword(e.target.value)}
+                          required
+                          placeholder="••••••••"
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={emailLoading}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {emailLoading ? 'Sending...' : 'Send verification code'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEmailStep('idle');
+                            setNewEmail('');
+                            setEmailPassword('');
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {emailStep === 'otp' && (
+                    <form onSubmit={handleConfirmEmailChange} className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        A 6-digit code was sent to{' '}
+                        <span className="text-purple-400">{newEmail}</span>.
+                      </p>
+                      <Field label="Verification Code">
+                        <Input
+                          type="text"
+                          value={emailOtp}
+                          onChange={(e) =>
+                            setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
+                          placeholder="000000"
+                          maxLength={6}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={emailLoading || emailOtp.length !== 6}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {emailLoading ? 'Confirming...' : 'Confirm email change'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEmailStep('idle')}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+
+                {/* ── Two-Factor Authentication ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Two-Factor Authentication"
+                    subtitle="Add an extra layer of security to your account."
+                  />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${twoFAEnabled ? 'bg-emerald-400' : 'bg-zinc-500'}`}
+                      />
+                      <div>
+                        <div className="text-sm font-light text-[var(--text)]">
+                          {twoFAEnabled ? '2FA is enabled' : '2FA is disabled'}
+                        </div>
+                        <div className="text-xs text-[var(--text-muted)]">
+                          {twoFAEnabled
+                            ? 'Your account is protected with two-factor authentication.'
+                            : 'Enable 2FA to secure your account with a verification code.'}
+                        </div>
+                      </div>
+                    </div>
+                    {enable2FAStep === 'idle' && (
+                      <button
+                        type="button"
+                        onClick={handle2FAToggle}
+                        disabled={toggling2FA || (twoFAEnabled && !disable2FAPassword)}
+                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
+                          twoFAEnabled
+                            ? 'border-red-500/25 text-red-400 hover:border-red-500/40 hover:bg-red-500/5'
+                            : 'border-emerald-500/25 text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/5'
+                        }`}
+                      >
+                        {toggling2FA ? '...' : twoFAEnabled ? 'Disable' : 'Enable'}
+                      </button>
+                    )}
+                  </div>
+
+                  {twoFAEnabled && enable2FAStep === 'idle' && (
+                    <Field label="Password required to disable 2FA">
+                      <Input
+                        type="password"
+                        value={disable2FAPassword}
+                        onChange={(e) => setDisable2FAPassword(e.target.value)}
+                        placeholder="Enter your password"
+                      />
+                    </Field>
+                  )}
+
+                  {enable2FAStep === 'scan' && (
+                    <div className="space-y-5 mt-2">
+                      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                        {twoFAQrCode ? (
+                          <div className="flex justify-center md:justify-start">
+                            <div
+                              className="p-3 rounded-xl bg-white"
+                              style={{
+                                boxShadow:
+                                  '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
+                              }}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={twoFAQrCode}
+                                alt="2FA QR code"
+                                width={180}
+                                height={180}
+                                className="block w-[180px] h-[180px]"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-[180px] h-[180px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-purple-400 animate-spin" />
+                          </div>
+                        )}
+                        <div className="space-y-3 min-w-0">
+                          <div>
+                            <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
+                              Step 1 · Scan
+                            </div>
+                            <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                              Open an authenticator app (Google Authenticator, 1Password, Authy…)
+                              and scan this QR code.
+                            </p>
+                          </div>
+                          {twoFASecret && (
+                            <div>
+                              <div className="text-xs uppercase tracking-widest text-[var(--text-muted)] mb-1">
+                                Can&apos;t scan? Manual key
+                              </div>
+                              <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2">
+                                <code className="flex-1 font-mono text-[11px] text-[var(--text)] break-all">
+                                  {twoFASecret}
+                                </code>
+                                <button
+                                  type="button"
+                                  onClick={handleCopy2FASecret}
+                                  className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                                >
+                                  {twoFASecretCopied ? 'Copied' : 'Copy'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="text-xs uppercase tracking-widest text-purple-300/80">
+                          Step 2 · Verify
+                        </div>
+                        <Field label="6-digit code from your authenticator">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="one-time-code"
+                            value={enable2FACode}
+                            onChange={(e) =>
+                              setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                            }
+                            placeholder="000000"
+                            maxLength={6}
+                          />
+                        </Field>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleEnable2FAConfirm}
+                          disabled={toggling2FA || enable2FACode.length !== 6}
+                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                          style={{
+                            background:
+                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            boxShadow:
+                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEnable2FAStep('idle');
+                            setEnable2FACode('');
+                            setTwoFAQrCode(null);
+                            setTwoFASecret(null);
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Password ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Password"
+                    subtitle="Change your password via a secure email reset link."
+                  />
+                  <Alert type="success" msg={pwMsg} />
+                  <Alert type="error" msg={pwErr} />
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+                    <div className="min-w-0">
+                      <div className="text-sm font-light text-[var(--text)] mb-0.5">
+                        {pwStep === 'sent' ? 'Reset link sent' : 'Password reset'}
+                      </div>
+                      <div className="text-xs text-[var(--text-muted)]">
+                        {pwStep === 'sent'
+                          ? `Check ${userEmail || 'your inbox'} for instructions.`
+                          : 'We will email you a one-time link to set a new password.'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRequestPasswordReset}
+                      disabled={pwLoading || !userEmail}
+                      className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                    >
+                      {pwLoading
+                        ? 'Sending...'
+                        : pwStep === 'sent'
+                          ? 'Resend link'
+                          : 'Send reset link'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* ── Delete Account ── */}
+                <div className="profile-content-card">
+                  <SectionHeader
+                    title="Delete Account"
+                    subtitle="Permanently delete your account and all associated data."
+                  />
+
+                  {deleteStep === 'idle' && (
+                    <div className="space-y-4">
+                      <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
+                        This action is irreversible. All your data, agents, listings, and
+                        transaction history will be permanently removed.
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteStep('confirm')}
+                        className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200"
+                      >
+                        Delete my account
+                      </button>
+                    </div>
+                  )}
+
+                  {deleteStep === 'confirm' && (
+                    <div className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        Are you sure? We will send a confirmation code to your email.
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleRequestDeleteAccount}
+                          disabled={requestingDelete}
+                          className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-light disabled:opacity-50 transition-all"
+                        >
+                          {requestingDelete ? 'Sending code...' : 'Yes, send confirmation code'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setDeleteStep('idle')}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {deleteStep === 'otp' && (
+                    <form onSubmit={handleDeleteAccount} className="space-y-4">
+                      <p className="text-sm text-[var(--text-secondary)] font-light">
+                        Enter the confirmation code sent to your email to permanently delete your
+                        account.
+                      </p>
+                      <Alert type="error" msg={secErr} />
+                      <Field label="Confirmation Code">
+                        <Input
+                          type="text"
+                          value={deleteOtp}
+                          onChange={(e) =>
+                            setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                          }
+                          placeholder="000000"
+                          maxLength={6}
+                        />
+                      </Field>
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          disabled={deleting || deleteOtp.length !== 6}
+                          className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-light disabled:opacity-50 transition-all"
+                        >
+                          {deleting ? 'Deleting...' : 'Permanently delete account'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDeleteStep('idle');
+                            setDeleteOtp('');
+                          }}
+                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* ACTIVITY LOG */}
@@ -1768,8 +2360,8 @@ export default function ProfilePage() {
                         typeColor = 'text-emerald-400';
                         typeBg = 'bg-emerald-500/10';
                       } else if (action.toLowerCase().includes('api')) {
-                        typeColor = 'text-monad-400';
-                        typeBg = 'bg-monad-500/10';
+                        typeColor = 'text-bolty-400';
+                        typeBg = 'bg-bolty-500/10';
                       } else if (
                         action.toLowerCase().includes('error') ||
                         action.toLowerCase().includes('failed')
@@ -1787,7 +2379,7 @@ export default function ProfilePage() {
                       return (
                         <div
                           key={idx}
-                          className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-monad-500/20 hover:bg-monad-500/2 transition-all duration-200 group"
+                          className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-bolty-500/20 hover:bg-bolty-500/2 transition-all duration-200 group"
                         >
                           <div
                             className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`}

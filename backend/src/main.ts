@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
@@ -76,6 +77,16 @@ async function bootstrap(): Promise<void> {
   // ── Cookie Parser ────────────────────────────────────────────────────────
   app.use(cookieParser(configService.get<string>('SESSION_SECRET')));
 
+  // ── Prevent CDN/proxy caching of authenticated responses ─────────────────
+  // Without this, CloudFlare or any shared proxy can cache /auth/me, /users/profile,
+  // /notifications and similar endpoints, causing every visitor to see the same user.
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Vary', 'Cookie, Authorization');
+    next();
+  });
+
   // ── Global Validation Pipe ───────────────────────────────────────────────
   app.useGlobalPipes(
     new ValidationPipe({
@@ -91,7 +102,7 @@ async function bootstrap(): Promise<void> {
   // ── API Prefix ───────────────────────────────────────────────────────────
   app.setGlobalPrefix('api/v1');
 
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
   logger.log(`Bolty Backend running on port ${port}`, 'Bootstrap');
   logger.log(`Environment: ${configService.get('NODE_ENV')}`, 'Bootstrap');
 }

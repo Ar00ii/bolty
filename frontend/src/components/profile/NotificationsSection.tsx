@@ -1,6 +1,7 @@
 'use client';
 
-import { Mail, AlertCircle, CheckCircle, Bell } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Mail, AlertCircle, CheckCircle, Bell, type LucideIcon } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface NotificationSettings {
@@ -12,13 +13,22 @@ interface NotificationSettings {
 
 interface NotificationsSectionProps {
   settings: NotificationSettings;
-  billingEmail: string;
+  email: string;
   onUpdate: (settings: NotificationSettings) => Promise<void>;
+}
+
+interface NotificationOption {
+  key: keyof NotificationSettings;
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  color: string;
+  textColor: string;
 }
 
 export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
   settings,
-  billingEmail,
+  email,
   onUpdate,
 }) => {
   const [localSettings, setLocalSettings] = useState(settings);
@@ -42,30 +52,38 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
     }
   };
 
-  const notificationOptions = [
+  const notificationOptions: NotificationOption[] = [
     {
-      key: 'emailOnErrors' as const,
+      key: 'emailOnErrors',
       icon: AlertCircle,
       title: 'Email on API Errors',
       description: 'Get alerts for failed requests or rate limit warnings',
+      color: '239,68,68',
+      textColor: '#fda4af',
     },
     {
-      key: 'weeklyReport' as const,
+      key: 'weeklyReport',
       icon: Mail,
       title: 'Weekly Usage Report',
-      description: `Summary of your API usage sent to ${billingEmail}`,
+      description: `Summary of your API usage sent to ${email}`,
+      color: '6,182,212',
+      textColor: '#67e8f9',
     },
     {
-      key: 'monthlyReport' as const,
+      key: 'monthlyReport',
       icon: Bell,
       title: 'Monthly Newsletter',
       description: 'Product updates, tips, and new features',
+      color: '245,158,11',
+      textColor: '#fcd34d',
     },
     {
-      key: 'deploymentAlerts' as const,
+      key: 'deploymentAlerts',
       icon: CheckCircle,
       title: 'Deployment Alerts',
       description: 'Notifications when your agents are deployed or updated',
+      color: '34,197,94',
+      textColor: '#86efac',
     },
   ];
 
@@ -80,75 +98,191 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
       </div>
 
       {/* Success Message */}
-      {saved && (
-        <div className="p-3 bg-green-900/20 border border-green-800 rounded-lg flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-          <p className="text-sm text-green-300">Notification preferences saved successfully</p>
-        </div>
-      )}
+      <AnimatePresence>
+        {saved && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="relative p-3 rounded-lg flex items-center gap-2 overflow-hidden"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+              }}
+            >
+              <CheckCircle className="w-4 h-4 text-[#86efac] flex-shrink-0" />
+              <p className="text-[13px] text-[#86efac] tracking-[0.005em]">
+                Notification preferences saved successfully
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Notification Options */}
       <div className="space-y-3">
-        {notificationOptions.map(({ key, icon: Icon, title, description }) => (
-          <div
-            key={key}
-            className="p-4 border border-gray-700 rounded-lg hover:border-gray-600 transition-colors"
-          >
-            <div className="flex items-start gap-4">
-              <div className="mt-1">
-                <Icon className="w-5 h-5 text-purple-400 flex-shrink-0" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <h3 className="text-sm font-light text-white">{title}</h3>
-                    <p className="text-xs text-gray-400 mt-1">{description}</p>
+        {notificationOptions.map(
+          ({ key, icon: Icon, title, description, color, textColor }, idx) => {
+            const isEnabled = localSettings[key];
+            return (
+              <motion.div
+                key={key}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: Math.min(idx * 0.04, 0.2),
+                  duration: 0.26,
+                  ease: [0.22, 0.61, 0.36, 1],
+                }}
+                className="relative p-4 rounded-xl overflow-hidden transition-all hover:brightness-110"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
+              >
+                <div
+                  className="absolute inset-x-0 top-0 h-px"
+                  style={{
+                    background: `linear-gradient(90deg, transparent 0%, rgba(${color},0.4) 50%, transparent 100%)`,
+                  }}
+                />
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(${color},0.22) 0%, rgba(${color},0.06) 100%)`,
+                      boxShadow: `inset 0 0 0 1px rgba(${color},0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(${color},0.45)`,
+                    }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: textColor }} />
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={localSettings[key]}
-                      onChange={() => handleToggle(key)}
-                      disabled={loading}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-gray-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600" />
-                  </label>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-[14px] font-light text-white tracking-[0.005em]">
+                          {title}
+                        </h3>
+                        <p className="text-[12px] text-zinc-400 mt-1 tracking-[0.005em]">
+                          {description}
+                        </p>
+                      </div>
+                      <motion.button
+                        type="button"
+                        onClick={() => handleToggle(key)}
+                        disabled={loading}
+                        role="switch"
+                        aria-checked={isEnabled}
+                        whileTap={loading ? undefined : { scale: 0.92 }}
+                        transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                        className="relative w-10 h-5.5 rounded-full flex-shrink-0 transition-all disabled:opacity-50"
+                        style={{
+                          background: isEnabled
+                            ? 'linear-gradient(180deg, rgba(131,110,249,0.8) 0%, rgba(131,110,249,0.55) 100%)'
+                            : 'linear-gradient(180deg, rgba(40,40,48,0.9) 0%, rgba(24,24,30,0.9) 100%)',
+                          boxShadow: isEnabled
+                            ? 'inset 0 0 0 1px rgba(131,110,249,0.6), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -2px rgba(131,110,249,0.5)'
+                            : 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
+                          width: '40px',
+                          height: '22px',
+                        }}
+                      >
+                        <motion.span
+                          layout
+                          className="absolute top-[3px] w-4 h-4 rounded-full bg-white"
+                          animate={{ left: isEnabled ? '21px' : '3px' }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                          style={{
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                          }}
+                        />
+                      </motion.button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
+              </motion.div>
+            );
+          },
+        )}
       </div>
 
       {/* Email Preferences */}
-      <div className="p-4 border border-gray-700 rounded-lg bg-gray-900/50">
-        <p className="text-sm font-light text-white mb-2">Email Address</p>
-        <p className="text-sm text-gray-300 break-all">{billingEmail}</p>
-        <p className="text-xs text-gray-500 mt-2">
+      <div
+        className="relative p-4 rounded-xl overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <div
+          className="absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+          }}
+        />
+        <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
+          Email Address
+        </p>
+        <p className="text-sm text-white font-light tracking-[0.005em] break-all">{email}</p>
+        <p className="text-xs text-zinc-500 mt-2">
           All notifications will be sent to this email address
         </p>
       </div>
 
       {/* Save Button */}
-      {hasChanges && (
-        <div className="flex gap-3">
-          <button
-            onClick={handleSave}
-            disabled={loading}
-            className="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
+      <AnimatePresence>
+        {hasChanges && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: 6, height: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
           >
-            {loading ? 'Saving...' : 'Save Preferences'}
-          </button>
-          <button
-            onClick={() => setLocalSettings(settings)}
-            disabled={loading}
-            className="flex-1 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-light transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-        </div>
-      )}
+            <div className="flex gap-3">
+              <motion.button
+                onClick={handleSave}
+                disabled={loading}
+                whileHover={loading ? undefined : { y: -1 }}
+                whileTap={loading ? undefined : { scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                className="flex-1 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                }}
+              >
+                {loading ? 'Saving...' : 'Save Preferences'}
+              </motion.button>
+              <motion.button
+                onClick={() => setLocalSettings(settings)}
+                disabled={loading}
+                whileHover={loading ? undefined : { y: -1 }}
+                whileTap={loading ? undefined : { scale: 0.97 }}
+                transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                className="flex-1 px-4 py-2.5 text-zinc-300 rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 hover:text-white disabled:opacity-50"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(40,40,48,0.7) 0%, rgba(20,20,26,0.7) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
+              >
+                Cancel
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

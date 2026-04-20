@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronDown, ChevronUp, Inbox } from 'lucide-react';
 import React from 'react';
 import { useState } from 'react';
 
@@ -59,11 +60,22 @@ export function DataTable<T extends Record<string, any>>({
     });
   }
 
+  const surfaceStyle = {
+    background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+    boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+  };
+
   if (loading) {
     return (
       <div className="space-y-2">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="skeleton h-12 rounded-lg" />
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.04, duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="skeleton h-12 rounded-lg"
+          />
         ))}
       </div>
     );
@@ -71,63 +83,132 @@ export function DataTable<T extends Record<string, any>>({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 border border-zinc-800 rounded-lg bg-zinc-900/30">
-        <p className="text-zinc-400 font-light text-sm">{emptyMessage}</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
+        className="relative text-center py-14 rounded-xl overflow-hidden"
+        style={surfaceStyle}
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+          }}
+        />
+        <motion.div
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 360, damping: 22, delay: 0.08 }}
+          className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
+          style={{
+            background: 'rgba(131,110,249,0.08)',
+            border: '1px solid rgba(131,110,249,0.18)',
+          }}
+        >
+          <Inbox className="w-4 h-4 text-[#a89dff]" strokeWidth={1.75} />
+        </motion.div>
+        <p className="text-[13px] text-zinc-300 font-light tracking-[0.005em]">{emptyMessage}</p>
+      </motion.div>
     );
   }
 
   return (
-    <div className="overflow-x-auto border border-zinc-800 rounded-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.26, ease: [0.22, 0.61, 0.36, 1] }}
+      className="relative overflow-x-auto rounded-xl"
+      style={surfaceStyle}
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+        }}
+      />
       <table className="w-full">
         <thead>
-          <tr className="border-b border-zinc-800 bg-zinc-900/50">
-            {columns.map((col) => (
-              <th
-                key={String(col.key)}
-                className={`px-4 py-3 text-left text-xs font-light text-zinc-300 uppercase tracking-wider ${col.className || ''}`}
-              >
-                {col.sortable ? (
-                  <button
-                    onClick={() => handleSort(col.key)}
-                    className="flex items-center gap-1 hover:text-zinc-100 transition-colors"
-                  >
-                    {col.label}
-                    {sortKey === col.key &&
-                      (sortDir === 'asc' ? (
-                        <ChevronUp className="w-3 h-3" />
-                      ) : (
-                        <ChevronDown className="w-3 h-3" />
-                      ))}
-                  </button>
-                ) : (
-                  col.label
-                )}
-              </th>
-            ))}
+          <tr
+            className="border-b border-white/[0.06]"
+            style={{ background: 'rgba(255,255,255,0.015)' }}
+          >
+            {columns.map((col) => {
+              const isSorted = sortKey === col.key;
+              return (
+                <th
+                  key={String(col.key)}
+                  className={`px-4 py-3 text-left text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 ${col.className || ''}`}
+                >
+                  {col.sortable ? (
+                    <motion.button
+                      onClick={() => handleSort(col.key)}
+                      whileTap={{ scale: 0.96 }}
+                      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                      className={`flex items-center gap-1.5 transition-colors ${
+                        isSorted ? 'text-[#b4a7ff]' : 'hover:text-zinc-300'
+                      }`}
+                    >
+                      {col.label}
+                      <AnimatePresence mode="wait" initial={false}>
+                        {isSorted && (
+                          <motion.span
+                            key={sortDir}
+                            initial={{ opacity: 0, y: -2 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 2 }}
+                            transition={{ duration: 0.14 }}
+                            className="inline-flex"
+                          >
+                            {sortDir === 'asc' ? (
+                              <ChevronUp className="w-3 h-3" strokeWidth={2} />
+                            ) : (
+                              <ChevronDown className="w-3 h-3" strokeWidth={2} />
+                            )}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
+                  ) : (
+                    col.label
+                  )}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row) => (
-            <tr
+          {sortedData.map((row, idx) => (
+            <motion.tr
               key={String(row[rowKey])}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: Math.min(idx * 0.025, 0.2),
+                duration: 0.22,
+                ease: [0.22, 0.61, 0.36, 1],
+              }}
               onClick={() => onRowClick?.(row)}
-              className={`border-b border-zinc-800 hover:bg-zinc-800/50 transition-colors ${
+              className={`border-b border-white/[0.04] last:border-0 hover:bg-white/[0.025] transition-colors ${
                 onRowClick ? 'cursor-pointer' : ''
               }`}
             >
               {columns.map((col) => (
                 <td
                   key={String(col.key)}
-                  className={`px-4 py-3 text-sm text-zinc-300 font-light ${col.className || ''}`}
+                  className={`px-4 py-3 text-[13px] text-zinc-300 font-light tracking-[0.005em] ${col.className || ''}`}
                 >
                   {col.render ? col.render(row[col.key], row) : row[col.key]}
                 </td>
               ))}
-            </tr>
+            </motion.tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </motion.div>
   );
 }

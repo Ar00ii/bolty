@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -51,11 +52,28 @@ export const AgentDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Error Alert */}
-      {error && (
-        <div className="p-4 rounded-lg bg-red-900/20 border border-red-500/30 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -6, height: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div
+              className="p-4 rounded-lg text-[#fda4af] text-[13px] tracking-[0.005em]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(244,63,94,0.12) 0%, rgba(244,63,94,0.03) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
+              }}
+            >
+              {error}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -68,7 +86,7 @@ export const AgentDashboard: React.FC = () => {
       </div>
 
       {/* Agent Selector */}
-      <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
+      <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
         <label className="block text-sm font-light text-gray-300 mb-3">Select Agent</label>
         <AgentSelector
           agents={agents}
@@ -84,7 +102,7 @@ export const AgentDashboard: React.FC = () => {
       {selectedAgent && (
         <div className="space-y-6">
           {/* Agent Info Card */}
-          <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
+          <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-widest font-light mb-2">
@@ -114,7 +132,7 @@ export const AgentDashboard: React.FC = () => {
             </div>
 
             {selectedAgent.description && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="mt-4 pt-4 border-t border-white/[0.06]">
                 <p className="text-xs text-gray-400 uppercase tracking-widest font-light mb-2">
                   Description
                 </p>
@@ -122,38 +140,83 @@ export const AgentDashboard: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="mt-4 pt-4 border-t border-white/[0.06]">
               <p className="text-xs text-gray-400 uppercase tracking-widest font-light mb-2">
                 Webhook URL
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-purple-400 truncate">
+                <code
+                  className="flex-1 rounded-lg px-3 py-2 text-sm text-[#b4a7ff] truncate font-mono"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  }}
+                >
                   {selectedAgent.webhookUrl}
                 </code>
-                <button
+                <motion.button
                   onClick={handleTestWebhook}
                   disabled={webhookTestId === selectedAgentId}
-                  className="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-light transition-colors text-sm"
+                  whileHover={webhookTestId === selectedAgentId ? undefined : { y: -1 }}
+                  whileTap={webhookTestId === selectedAgentId ? undefined : { scale: 0.96 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className="px-4 py-2 rounded-lg disabled:opacity-50 text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  }}
                 >
                   {webhookTestId === selectedAgentId ? 'Testing...' : 'Test'}
-                </button>
+                </motion.button>
               </div>
 
-              {webhookTestResult && (
-                <div
-                  className={`mt-3 p-3 rounded-lg text-sm ${
-                    webhookTestResult.success
-                      ? 'bg-emerald-500/20 border border-emerald-500/30 text-emerald-400'
-                      : 'bg-red-500/20 border border-red-500/30 text-red-400'
-                  }`}
-                >
-                  {webhookTestResult.success ? (
-                    <>✓ Connection successful ({webhookTestResult.responseTime}ms)</>
-                  ) : (
-                    <>✕ Connection failed: {webhookTestResult.error}</>
-                  )}
-                </div>
-              )}
+              <AnimatePresence>
+                {webhookTestResult && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    exit={{ opacity: 0, y: -4, height: 0 }}
+                    transition={{ duration: 0.22, ease: [0.22, 0.61, 0.36, 1] }}
+                    className="overflow-hidden mt-3"
+                  >
+                    <div
+                      className="relative p-3 rounded-lg overflow-hidden flex items-center gap-2 text-[13px] tracking-[0.005em]"
+                      style={
+                        webhookTestResult.success
+                          ? {
+                              background:
+                                'linear-gradient(180deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+                              color: '#86efac',
+                            }
+                          : {
+                              background:
+                                'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+                              color: '#fda4af',
+                            }
+                      }
+                    >
+                      <motion.span
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+                        className="inline-flex font-medium tabular-nums"
+                      >
+                        {webhookTestResult.success ? '✓' : '✕'}
+                      </motion.span>
+                      <span>
+                        {webhookTestResult.success
+                          ? `Connection successful (${webhookTestResult.responseTime}ms)`
+                          : `Connection failed: ${webhookTestResult.error}`}
+                      </span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -164,7 +227,7 @@ export const AgentDashboard: React.FC = () => {
           </div>
 
           {/* Rays Section */}
-          <div className="space-y-6 pt-6 border-t border-gray-700">
+          <div className="space-y-6 pt-6 border-t border-white/[0.06]">
             {/* Rays Display */}
             {selectedAgentId && (
               <div>
@@ -174,7 +237,7 @@ export const AgentDashboard: React.FC = () => {
 
             {/* Purchase Rays */}
             {selectedAgentId && (
-              <div className="bg-gray-800/30 border border-gray-700 rounded-lg p-6">
+              <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
                 <RaysShop
                   agentId={selectedAgentId}
                   onPurchaseSuccess={() => setRaysRefreshTrigger((prev) => prev + 1)}
@@ -193,20 +256,42 @@ export const AgentDashboard: React.FC = () => {
 
       {/* Empty State */}
       {!loading && agents.length === 0 && (
-        <div className="p-12 rounded-lg bg-gray-800/30 border border-gray-700 text-center">
-          <p className="text-gray-400 mb-4">No agents created yet</p>
-          <button
+        <div
+          className="relative p-12 rounded-xl text-center overflow-hidden"
+          style={{
+            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+          }}
+        >
+          <div
+            className="absolute inset-x-0 top-0 h-px"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            }}
+          />
+          <p className="text-zinc-400 mb-4 text-[13px] tracking-[0.005em]">No agents created yet</p>
+          <motion.button
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-light transition-colors"
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+            }}
           >
             <Plus className="w-5 h-5" />
             Create Your First Agent
-          </button>
+          </motion.button>
         </div>
       )}
 
       {/* Rays Leaderboards */}
-      <div className="pt-6 border-t border-gray-700">
+      <div className="pt-6 border-t border-white/[0.06]">
         <RaysLeaderboards />
       </div>
 

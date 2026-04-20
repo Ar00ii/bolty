@@ -90,7 +90,11 @@ function ActionSearchBar({
   return (
     <div className="w-full">
       <div className="relative flex flex-col items-start">
-        {label && <label className="text-xs font-mono text-zinc-500 mb-1.5 block">{label}</label>}
+        {label && (
+          <label className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2 block">
+            {label}
+          </label>
+        )}
         <div className="relative w-full">
           <Input
             type="text"
@@ -106,27 +110,27 @@ function ActionSearchBar({
             }}
             onBlur={() => setTimeout(() => setIsFocused(false), 180)}
           />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4">
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none">
             <AnimatePresence mode="popLayout">
               {query.length > 0 ? (
                 <motion.div
                   key="send"
-                  initial={{ y: -10, opacity: 0 }}
+                  initial={{ y: -8, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 10, opacity: 0 }}
+                  exit={{ y: 8, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <Send className="w-4 h-4 text-zinc-500" />
+                  <Send className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
                 </motion.div>
               ) : (
                 <motion.div
                   key="search"
-                  initial={{ y: -10, opacity: 0 }}
+                  initial={{ y: -8, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: 10, opacity: 0 }}
+                  exit={{ y: 8, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  <Search className="w-4 h-4 text-zinc-500" />
+                  <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -137,47 +141,60 @@ function ActionSearchBar({
           <AnimatePresence>
             {isFocused && result && !selectedAction && (
               <motion.div
-                className="w-full border border-zinc-800 rounded-xl overflow-hidden mt-1.5"
+                className="w-full rounded-xl overflow-hidden mt-1.5"
                 style={{
-                  background: 'rgba(18,18,21,0.98)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(8px)',
                 }}
                 variants={container}
                 initial="hidden"
                 animate="show"
                 exit="exit"
               >
-                <motion.ul className="max-h-56 overflow-y-auto">
+                <motion.ul className="max-h-64 overflow-y-auto">
                   {result.actions.length === 0 && (
-                    <li className="px-4 py-3 text-xs text-zinc-600 font-mono text-center">
+                    <li className="px-4 py-3.5 text-[12px] text-zinc-500 text-center tracking-[0.005em]">
                       No results
                     </li>
                   )}
                   {result.actions.map((action) => (
                     <motion.li
                       key={action.id}
-                      className="px-3 py-2.5 flex items-center justify-between cursor-pointer hover:bg-monad-500/8 transition-colors"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                      className="px-3.5 py-2.5 flex items-center justify-between cursor-pointer transition-colors hover:bg-white/[0.03] border-b border-white/[0.04] last:border-0"
                       variants={item}
                       onClick={() => handleSelect(action)}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <span className="text-monad-400 flex-shrink-0">{action.icon}</span>
-                        <span className="text-sm font-light text-zinc-200 truncate">
+                        <span className="text-[#b4a7ff] flex-shrink-0 flex items-center">
+                          {action.icon}
+                        </span>
+                        <span className="text-[13px] font-light text-zinc-200 truncate tracking-[0.005em]">
                           {action.label}
                         </span>
                         {action.description && (
-                          <span className="text-xs text-zinc-600 truncate hidden sm:block">
+                          <span className="text-[11px] text-zinc-500 truncate hidden sm:block tracking-[0.005em]">
                             {action.description}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                         {action.short && (
-                          <span className="text-xs text-zinc-600 font-mono">{action.short}</span>
+                          <span className="text-[10.5px] text-zinc-600 font-mono">
+                            {action.short}
+                          </span>
                         )}
                         {action.end && (
-                          <span className="text-xs px-1.5 py-0.5 rounded border border-monad-500/20 text-monad-400/70 font-mono">
+                          <span
+                            className="text-[10px] px-1.5 py-0.5 rounded text-[#b4a7ff] font-mono tracking-[0.02em]"
+                            style={{
+                              background:
+                                'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                            }}
+                          >
                             {action.end}
                           </span>
                         )}
@@ -187,7 +204,7 @@ function ActionSearchBar({
                 </motion.ul>
                 {result.actions.length > 0 && (
                   <div
-                    className="px-4 py-2 flex items-center justify-between text-xs text-zinc-700 font-mono"
+                    className="px-4 py-2 flex items-center justify-between text-[10.5px] text-zinc-600 font-mono uppercase tracking-[0.18em]"
                     style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
                   >
                     <span>
