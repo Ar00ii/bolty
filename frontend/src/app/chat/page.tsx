@@ -250,7 +250,7 @@ export default function ChatPage() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <span className="text-monad-400 font-mono text-sm animate-pulse">Connecting...</span>
+        <span className="text-bolty-400 font-mono text-sm animate-pulse">Connecting...</span>
       </div>
     );
 
@@ -296,7 +296,7 @@ export default function ChatPage() {
               <h1 className="text-sm font-light text-white">Community Chat</h1>
               <div className="flex items-center gap-1.5">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-monad-400 animate-pulse' : 'bg-red-500'}`}
+                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-bolty-400 animate-pulse' : 'bg-red-500'}`}
                 />
                 <span className="text-xs" style={{ color: 'rgba(161,161,170,0.6)' }}>
                   {connected ? 'connected' : 'disconnected'}
@@ -350,7 +350,7 @@ export default function ChatPage() {
                   {msg.avatarUrl ? (
                     <img src={msg.avatarUrl} alt="" className="w-full h-full object-cover" />
                   ) : isMe ? (
-                    <UserIcon className="w-4 h-4 text-monad-400" strokeWidth={2} />
+                    <UserIcon className="w-4 h-4 text-bolty-400" strokeWidth={2} />
                   ) : (
                     <span className="text-xs font-light text-zinc-400">
                       {(msg.username || 'U')[0].toUpperCase()}
@@ -365,7 +365,7 @@ export default function ChatPage() {
                       (msg.username ? (
                         <Link
                           href={`/u/${msg.username}`}
-                          className="text-xs font-light text-monad-400 hover:text-monad-300 transition-colors"
+                          className="text-xs font-light text-bolty-400 hover:text-bolty-300 transition-colors"
                         >
                           {msg.username}
                         </Link>

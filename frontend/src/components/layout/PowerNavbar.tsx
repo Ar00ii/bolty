@@ -208,7 +208,7 @@ export function PowerNavbar() {
           className="w-[6px] h-[6px] rounded-full"
           style={{ background: '#22c55e', boxShadow: '0 0 8px rgba(34,197,94,0.5)' }}
         />
-        <span>Monad</span>
+        <span>Bolty</span>
         <span style={{ color: '#52525b' }}>·</span>
         <span style={{ color: '#71717a' }}>#8,492,118</span>
       </div>

@@ -688,7 +688,7 @@ function ActionsCard({
         <button
           onClick={() => onVote('UP')}
           disabled={!isAuthenticated}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-monad-400 hover:bg-monad-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-bolty-400 hover:bg-bolty-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           title={isAuthenticated ? 'Upvote' : 'Sign in to vote'}
         >
           <ArrowUp className="w-3.5 h-3.5" />

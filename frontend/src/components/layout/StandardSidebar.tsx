@@ -141,7 +141,7 @@ export function StandardSidebar() {
                 boxShadow: '0 0 8px rgba(34,197,94,0.6)',
               }}
             />
-            Monad Mainnet
+            Bolty Mainnet
           </div>
         </div>
         <ChevronsUpDown

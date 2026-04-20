@@ -102,7 +102,7 @@ function Section({
           onClick={copyLink}
           aria-label={`Copy link to ${title}`}
           title={copied ? 'Link copied' : 'Copy link to section'}
-          className="text-monad-400 opacity-60 hover:opacity-100 transition-opacity"
+          className="text-bolty-400 opacity-60 hover:opacity-100 transition-opacity"
         >
           {copied ? '✓' : '#'}
         </button>
@@ -119,7 +119,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function Mono({ children }: { children: React.ReactNode }) {
   return (
-    <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">
+    <code className="font-mono text-bolty-300 bg-bolty-500/10 rounded px-1.5 py-0.5 text-xs">
       {children}
     </code>
   );
@@ -177,7 +177,7 @@ export default function AgentApiPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="text-monad-400 font-mono text-sm hover:text-monad-300 transition-colors"
+              className="text-bolty-400 font-mono text-sm hover:text-bolty-300 transition-colors"
             >
               bolty
             </Link>
@@ -188,7 +188,7 @@ export default function AgentApiPage() {
           </div>
           <Link
             href="/docs/agent-protocol"
-            className="text-xs font-mono text-monad-400 hover:text-monad-300 transition-colors"
+            className="text-xs font-mono text-bolty-400 hover:text-bolty-300 transition-colors"
           >
             negotiation protocol →
           </Link>
@@ -217,7 +217,7 @@ export default function AgentApiPage() {
                   }}
                   aria-current={isActive ? 'location' : undefined}
                   className={`relative block text-xs font-mono py-1 pl-3 -ml-3 transition-colors ${
-                    isActive ? 'text-monad-300' : 'text-zinc-500 hover:text-monad-300'
+                    isActive ? 'text-bolty-300' : 'text-zinc-500 hover:text-bolty-300'
                   }`}
                 >
                   {isActive && (

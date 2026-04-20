@@ -25,7 +25,7 @@ interface WavesProps {
 
 export function Waves({
   className = '',
-  strokeColor = 'rgba(131,110,249,0.35)', // Monad lila, semi-transparent
+  strokeColor = 'rgba(131,110,249,0.35)', // Bolty lila, semi-transparent
   backgroundColor = 'transparent',
   opacity = 0.18,
   pointerSize = 0.4,

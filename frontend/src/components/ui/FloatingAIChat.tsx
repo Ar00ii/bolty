@@ -54,7 +54,7 @@ export function FloatingAIChat() {
                     border: '1px solid rgba(131,110,249,0.3)',
                   }}
                 >
-                  <Bot className="w-3.5 h-3.5 text-monad-400" strokeWidth={1.5} />
+                  <Bot className="w-3.5 h-3.5 text-bolty-400" strokeWidth={1.5} />
                 </div>
                 <div>
                   <span className="text-sm font-light text-white">AI Assistant</span>

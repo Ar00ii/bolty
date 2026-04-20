@@ -158,9 +158,9 @@ export function PaymentConsentModal({
             style={{ borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <div className="flex items-center gap-2.5">
-              <Shield className="w-4 h-4 text-monad-400" />
+              <Shield className="w-4 h-4 text-bolty-400" />
               <span className="font-light text-white text-sm">Payment Consent</span>
-              <span className="text-[10px] font-mono text-monad-400/60 border border-monad-400/20 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-mono text-bolty-400/60 border border-bolty-400/20 px-1.5 py-0.5 rounded">
                 BETA
               </span>
             </div>
@@ -239,7 +239,7 @@ export function PaymentConsentModal({
                   Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
                 </span>
                 <div className="text-right">
-                  <span className="text-monad-300 font-mono font-light">{totalETH} ETH</span>
+                  <span className="text-bolty-300 font-mono font-light">{totalETH} ETH</span>
                   <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
                 </div>
               </div>

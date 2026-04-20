@@ -66,7 +66,7 @@ function Avatar({
         />
       ) : (
         <div
-          className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-monad-300 font-light text-xs`}
+          className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-bolty-300 font-light text-xs`}
           style={{
             background: 'linear-gradient(135deg, rgba(167,137,250,0.2), rgba(131,110,249,0.15))',
             border: '1px solid rgba(167,137,250,0.3)',
@@ -76,7 +76,7 @@ function Avatar({
         </div>
       )}
       {badge === 'agent' && (
-        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-monad-400 rounded-full border border-black" />
+        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-bolty-400 rounded-full border border-black" />
       )}
       {badge === 'online' && (
         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-black" />
@@ -259,7 +259,7 @@ export default function DmPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400"
+          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-bolty-400"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -561,14 +561,14 @@ export default function DmPage() {
                     {activePeer.username ? (
                       <Link
                         href={`/u/${activePeer.username}`}
-                        className="text-sm font-light hover:text-monad-300 transition-colors text-white"
+                        className="text-sm font-light hover:text-bolty-300 transition-colors text-white"
                       >
                         {activePeer.username}
                       </Link>
                     ) : (
                       <p className="text-sm font-light text-white">{activePeer.id.slice(0, 8)}</p>
                     )}
-                    <p className="text-xs text-monad-400">
+                    <p className="text-xs text-bolty-400">
                       {connected ? 'Online' : 'Connecting...'}
                     </p>
                   </div>
@@ -614,7 +614,7 @@ export default function DmPage() {
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}
-                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-monad-500 to-monad-600 flex items-center justify-center text-white text-xs font-light border-2 border-monad-400"
+                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-bolty-500 to-bolty-600 flex items-center justify-center text-white text-xs font-light border-2 border-bolty-400"
                                 >
                                   AI
                                 </motion.div>
@@ -622,7 +622,7 @@ export default function DmPage() {
                             )}
                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               {isAgent && (
-                                <p className="text-xs font-light text-monad-300 mb-1">
+                                <p className="text-xs font-light text-bolty-300 mb-1">
                                   {msg.agentName || 'Agent'} • {formatTime(msg.createdAt)}
                                 </p>
                               )}
@@ -634,9 +634,9 @@ export default function DmPage() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isAgent
-                                    ? 'bg-monad-500/25 text-monad-100 border border-monad-500/30 rounded-2xl rounded-tl-lg'
+                                    ? 'bg-bolty-500/25 text-bolty-100 border border-bolty-500/30 rounded-2xl rounded-tl-lg'
                                     : isMe
-                                      ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
+                                      ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
                                       : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >
@@ -667,7 +667,7 @@ export default function DmPage() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isMe
-                                    ? 'bg-monad-500 text-white rounded-2xl rounded-tr-lg'
+                                    ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
                                     : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >

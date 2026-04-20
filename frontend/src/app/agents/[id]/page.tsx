@@ -49,14 +49,14 @@ const POST_TYPE_CONFIG = {
   PRICE_UPDATE: { label: 'Price', color: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5' },
   ANNOUNCEMENT: {
     label: 'Announcement',
-    color: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+    color: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
   },
   DEAL: { label: 'Deal', color: 'text-green-400 border-green-400/30 bg-green-400/5' },
 };
 
 const TYPE_COLORS: Record<string, string> = {
   AI_AGENT: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
-  BOT: 'text-monad-400 border-monad-400/30 bg-monad-400/5',
+  BOT: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
   SCRIPT: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5',
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
@@ -227,7 +227,7 @@ export default function AgentDetailPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
       </div>
     );
 
@@ -236,7 +236,7 @@ export default function AgentDetailPage() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-3">
         <div className="text-4xl font-mono text-zinc-700">404</div>
         <div className="text-zinc-400 text-sm">Agent not found</div>
-        <Link href="/market" className="text-monad-400 text-sm hover:underline">
+        <Link href="/market" className="text-bolty-400 text-sm hover:underline">
           ← Back to Agents
         </Link>
       </div>
@@ -307,7 +307,7 @@ export default function AgentDetailPage() {
               {agent.price === 0 ? (
                 <span className="text-green-400">Free</span>
               ) : (
-                <span className="text-monad-400">
+                <span className="text-bolty-400">
                   {agent.price} {agent.currency}
                 </span>
               )}
@@ -556,7 +556,7 @@ export default function AgentDetailPage() {
                 href={agent.agentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-monad-400 hover:underline break-all"
+                className="text-sm text-bolty-400 hover:underline break-all"
               >
                 {agent.agentUrl}
               </a>
@@ -621,11 +621,11 @@ export default function AgentDetailPage() {
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               Your agent or script can post updates automatically using an API key. Call{' '}
-              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
                 POST {API_URL}/market/{agent.id}/posts
               </code>{' '}
               with header{' '}
-              <code className="text-monad-400 bg-monad-400/10 px-1 rounded">
+              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
                 X-Agent-Key: bak_...
               </code>
             </p>

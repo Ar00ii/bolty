@@ -499,7 +499,7 @@ export default function ReposPage() {
   const ghRepoActions: Action[] = ghRepos.map((repo) => ({
     id: String(repo.id),
     label: repo.name,
-    icon: <GitBranch className="w-4 h-4 text-monad-400" strokeWidth={1.5} />,
+    icon: <GitBranch className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />,
     description: repo.language || '',
     short: repo.private ? 'private' : 'public',
     end: publishing === repo.id ? '...' : 'publish',
@@ -515,7 +515,7 @@ export default function ReposPage() {
       <DottedSurface />
 
       <div className="mb-10">
-        <p className="text-xs font-mono text-monad-400 uppercase tracking-widest mb-3">
+        <p className="text-xs font-mono text-bolty-400 uppercase tracking-widest mb-3">
           Repository Showcase
         </p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -602,7 +602,7 @@ export default function ReposPage() {
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                 className={`relative px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
-                  active ? 'text-monad-300' : 'text-zinc-600 hover:text-zinc-300'
+                  active ? 'text-bolty-300' : 'text-zinc-600 hover:text-zinc-300'
                 }`}
                 style={{
                   background: 'transparent',
@@ -647,11 +647,11 @@ export default function ReposPage() {
           {/* Wallet not linked warning */}
           {!user?.walletAddress && (
             <div
-              className="mb-4 flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-monad-500/25"
+              className="mb-4 flex items-start gap-3 p-3.5 rounded-xl border border-dashed border-bolty-500/25"
               style={{ background: 'rgba(131,110,249,0.04)' }}
             >
               <Wallet
-                className="w-4 h-4 text-monad-400/60 flex-shrink-0 mt-0.5"
+                className="w-4 h-4 text-bolty-400/60 flex-shrink-0 mt-0.5"
                 strokeWidth={1.5}
               />
               <div className="flex-1 min-w-0">
@@ -661,7 +661,7 @@ export default function ReposPage() {
                 </p>
                 <Link
                   href="/profile?tab=wallet"
-                  className="inline-flex items-center gap-1 text-xs font-mono text-monad-400 hover:text-monad-300 border border-monad-500/30 hover:bg-monad-500/10 rounded-lg px-2.5 py-1 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-mono text-bolty-400 hover:text-bolty-300 border border-bolty-500/30 hover:bg-bolty-500/10 rounded-lg px-2.5 py-1 transition-colors"
                 >
                   <Wallet className="w-3 h-3" strokeWidth={1.5} />
                   Link wallet →
@@ -672,7 +672,7 @@ export default function ReposPage() {
 
           {ghNeedsConnect && (
             <div
-              className="mb-4 p-4 border border-monad-500/20 rounded-xl text-center"
+              className="mb-4 p-4 border border-bolty-500/20 rounded-xl text-center"
               style={{ background: 'rgba(131,110,249,0.05)' }}
             >
               <p className="text-sm text-zinc-400 mb-3">
@@ -680,7 +680,7 @@ export default function ReposPage() {
               </p>
               <a
                 href={GITHUB_OAUTH_URL}
-                className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors"
+                className="inline-block px-4 py-2 rounded-xl border border-bolty-500/30 text-bolty-400 text-xs font-mono hover:bg-bolty-500/10 transition-colors"
               >
                 Connect GitHub
               </a>
@@ -695,7 +695,7 @@ export default function ReposPage() {
               <p className="text-xs text-zinc-600 mb-3">Reconnect to access private repos.</p>
               <a
                 href={`https://github.com/login/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || ''}&redirect_uri=${encodeURIComponent(process.env.NEXT_PUBLIC_GITHUB_CALLBACK_URL || 'http://localhost:3001/api/v1/auth/github/callback')}&scope=read%3Auser%20repo`}
-                className="inline-block px-4 py-2 rounded-xl border border-monad-500/30 text-monad-400 text-xs font-mono hover:bg-monad-500/10 transition-colors"
+                className="inline-block px-4 py-2 rounded-xl border border-bolty-500/30 text-bolty-400 text-xs font-mono hover:bg-bolty-500/10 transition-colors"
               >
                 Reconnect GitHub
               </a>
@@ -742,16 +742,16 @@ export default function ReposPage() {
                 className={`mk-wizard__tile w-full flex items-center gap-3 ${lockType === 'public' ? 'mk-wizard__tile--active' : ''}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'public' ? 'bg-monad-500/20' : 'bg-white/05'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'public' ? 'bg-bolty-500/20' : 'bg-white/05'}`}
                 >
                   <Globe
-                    className={`w-4 h-4 ${lockType === 'public' ? 'text-monad-400' : 'text-zinc-500'}`}
+                    className={`w-4 h-4 ${lockType === 'public' ? 'text-bolty-400' : 'text-zinc-500'}`}
                     strokeWidth={1.5}
                   />
                 </div>
                 <div className="text-left">
                   <div
-                    className={`text-sm font-light ${lockType === 'public' ? 'text-monad-300' : 'text-zinc-400'}`}
+                    className={`text-sm font-light ${lockType === 'public' ? 'text-bolty-300' : 'text-zinc-400'}`}
                   >
                     Public — Free
                   </div>
@@ -764,16 +764,16 @@ export default function ReposPage() {
                 className={`mk-wizard__tile w-full flex items-center gap-3 ${lockType === 'locked' ? 'mk-wizard__tile--active' : ''}`}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'locked' ? 'bg-monad-500/20' : 'bg-white/05'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${lockType === 'locked' ? 'bg-bolty-500/20' : 'bg-white/05'}`}
                 >
                   <Lock
-                    className={`w-4 h-4 ${lockType === 'locked' ? 'text-monad-400' : 'text-zinc-500'}`}
+                    className={`w-4 h-4 ${lockType === 'locked' ? 'text-bolty-400' : 'text-zinc-500'}`}
                     strokeWidth={1.5}
                   />
                 </div>
                 <div className="text-left">
                   <div
-                    className={`text-sm font-light ${lockType === 'locked' ? 'text-monad-300' : 'text-zinc-400'}`}
+                    className={`text-sm font-light ${lockType === 'locked' ? 'text-bolty-300' : 'text-zinc-400'}`}
                   >
                     Locked — Paid Access
                   </div>
@@ -785,7 +785,7 @@ export default function ReposPage() {
             {lockType === 'locked' && (
               <div className="mb-5">
                 <label className="text-xs text-zinc-500 font-mono block mb-1.5">Price (USD)</label>
-                <div className="flex items-center gap-2 rounded-xl px-3 py-2.5 border border-zinc-800 bg-zinc-900/70 focus-within:border-monad-500/50 transition-colors">
+                <div className="flex items-center gap-2 rounded-xl px-3 py-2.5 border border-zinc-800 bg-zinc-900/70 focus-within:border-bolty-500/50 transition-colors">
                   <span className="text-zinc-600 font-mono text-sm">$</span>
                   <input
                     type="number"
@@ -870,7 +870,7 @@ export default function ReposPage() {
                       }}
                     >
                       {logoUploading ? (
-                        <div className="w-4 h-4 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+                        <div className="w-4 h-4 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
                       ) : (
                         <Upload className="w-4 h-4 text-zinc-600" strokeWidth={1.5} />
                       )}
@@ -892,7 +892,7 @@ export default function ReposPage() {
                     placeholder="https://your-project.com"
                     value={pubWebsiteUrl}
                     onChange={(e) => setPubWebsiteUrl(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-bolty-500/50 transition-colors"
                   />
                 </div>
 
@@ -904,7 +904,7 @@ export default function ReposPage() {
                     placeholder="https://x.com/yourproject"
                     value={pubTwitterUrl}
                     onChange={(e) => setPubTwitterUrl(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                    className="w-full rounded-xl px-3 py-2 text-sm bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-bolty-500/50 transition-colors"
                   />
                 </div>
               </div>
@@ -916,7 +916,7 @@ export default function ReposPage() {
                 <p className="text-xs font-mono text-zinc-500">Collaborators (optional)</p>
                 <button
                   onClick={() => setShowCollabForm((v) => !v)}
-                  className="flex items-center gap-1 text-xs text-monad-400 hover:text-monad-300 transition-colors"
+                  className="flex items-center gap-1 text-xs text-bolty-400 hover:text-bolty-300 transition-colors"
                 >
                   <Plus className="w-3 h-3" />
                   Add
@@ -1010,7 +1010,7 @@ export default function ReposPage() {
 
                   {collabType === 'USER' ? (
                     <div className="relative">
-                      <div className="flex items-center gap-2 rounded-xl px-3 py-2 border border-zinc-800 bg-zinc-900/70 focus-within:border-monad-500/50 transition-colors">
+                      <div className="flex items-center gap-2 rounded-xl px-3 py-2 border border-zinc-800 bg-zinc-900/70 focus-within:border-bolty-500/50 transition-colors">
                         <Search
                           className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0"
                           strokeWidth={1.5}
@@ -1057,7 +1057,7 @@ export default function ReposPage() {
                                   setCollabSearchResults([]);
                                   setShowCollabForm(false);
                                 }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-monad-500/10 transition-colors text-left"
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-bolty-500/10 transition-colors text-left"
                               >
                                 {u.avatarUrl ? (
                                   <img
@@ -1102,14 +1102,14 @@ export default function ReposPage() {
                         }
                         value={collabName}
                         onChange={(e) => setCollabName(e.target.value)}
-                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-bolty-500/50 transition-colors"
                       />
                       <input
                         type="url"
                         placeholder="Link (optional)"
                         value={collabUrl}
                         onChange={(e) => setCollabUrl(e.target.value)}
-                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                        className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-bolty-500/50 transition-colors"
                       />
                     </>
                   )}
@@ -1119,7 +1119,7 @@ export default function ReposPage() {
                     placeholder="Role / contribution (optional)"
                     value={collabRole}
                     onChange={(e) => setCollabRole(e.target.value)}
-                    className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-monad-500/50 transition-colors"
+                    className="w-full rounded-xl px-3 py-2 text-xs bg-zinc-900/70 border border-zinc-800 text-white placeholder:text-zinc-700 outline-none focus:border-bolty-500/50 transition-colors"
                   />
 
                   {collabType !== 'USER' && (
@@ -1170,7 +1170,7 @@ export default function ReposPage() {
       {/* Repos Grid */}
       {loading ? (
         <div className="text-center py-20">
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto" />
+          <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-bolty-400 animate-spin mx-auto" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1220,7 +1220,7 @@ export default function ReposPage() {
                   {/* Badges overlay */}
                   <div className="absolute top-2 right-2 flex items-center gap-1.5">
                     {repo.isLocked && (
-                      <Badge className="rounded-full bg-monad-500/20 border border-monad-500/30 px-2 py-0.5 text-xs font-mono text-monad-400 flex items-center gap-1">
+                      <Badge className="rounded-full bg-bolty-500/20 border border-bolty-500/30 px-2 py-0.5 text-xs font-mono text-bolty-400 flex items-center gap-1">
                         <Lock className="w-2.5 h-2.5" strokeWidth={2} /> locked
                       </Badge>
                     )}
@@ -1239,8 +1239,8 @@ export default function ReposPage() {
                         className="w-5 h-5 rounded-full border border-white/20 object-cover"
                       />
                     ) : (
-                      <div className="w-5 h-5 rounded-full bg-monad-500/20 border border-monad-500/20 flex items-center justify-center">
-                        <span className="text-monad-400 font-light" style={{ fontSize: '0.5rem' }}>
+                      <div className="w-5 h-5 rounded-full bg-bolty-500/20 border border-bolty-500/20 flex items-center justify-center">
+                        <span className="text-bolty-400 font-light" style={{ fontSize: '0.5rem' }}>
                           {(repo.user.username || 'U').charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -1264,7 +1264,7 @@ export default function ReposPage() {
                               />
                             ) : (
                               <span
-                                className="text-monad-400 font-light"
+                                className="text-bolty-400 font-light"
                                 style={{ fontSize: '0.45rem' }}
                               >
                                 {c.name.charAt(0).toUpperCase()}
@@ -1293,13 +1293,13 @@ export default function ReposPage() {
                   )}
                   <div className="flex items-center gap-1.5 mb-1">
                     {repo.isLocked && (
-                      <Lock className="w-3 h-3 text-monad-400/60 shrink-0" strokeWidth={1.5} />
+                      <Lock className="w-3 h-3 text-bolty-400/60 shrink-0" strokeWidth={1.5} />
                     )}
                     <a
                       href={repo.isLocked ? '#' : repo.githubUrl}
                       target={repo.isLocked ? undefined : '_blank'}
                       rel="noopener noreferrer"
-                      className="font-mono font-light text-sm text-monad-400 hover:text-monad-300 transition-colors truncate"
+                      className="font-mono font-light text-sm text-bolty-400 hover:text-bolty-300 transition-colors truncate"
                     >
                       {repo.name}
                     </a>
@@ -1327,7 +1327,7 @@ export default function ReposPage() {
                             href={repo.websiteUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-zinc-600 hover:text-monad-400 transition-colors"
+                            className="text-zinc-600 hover:text-bolty-400 transition-colors"
                           >
                             <Globe className="w-3 h-3" strokeWidth={1.5} />
                           </a>
@@ -1337,7 +1337,7 @@ export default function ReposPage() {
                             href={repo.twitterUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-zinc-600 hover:text-monad-400 transition-colors"
+                            className="text-zinc-600 hover:text-bolty-400 transition-colors"
                           >
                             <Twitter className="w-3 h-3" strokeWidth={1.5} />
                           </a>
@@ -1352,7 +1352,7 @@ export default function ReposPage() {
                     <button
                       onClick={() => vote(repo.id, 'UP')}
                       disabled={!isAuthenticated}
-                      className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-monad-400 hover:bg-monad-400/10 rounded transition-colors disabled:opacity-30"
+                      className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-bolty-400 hover:bg-bolty-400/10 rounded transition-colors disabled:opacity-30"
                     >
                       <ArrowUp className="w-3 h-3" strokeWidth={2} /> {repo.upvotes}
                     </button>
@@ -1368,7 +1368,7 @@ export default function ReposPage() {
                     {repo.user.username && (
                       <Link
                         href={`/dm?user=${repo.user.username}`}
-                        className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:text-monad-400 hover:bg-monad-400/10 rounded transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 text-xs font-mono text-zinc-500 hover:text-bolty-400 hover:bg-bolty-400/10 rounded transition-colors"
                         title={`Message @${repo.user.username}`}
                       >
                         <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -1388,7 +1388,7 @@ export default function ReposPage() {
                     ) : (
                       <button
                         onClick={() => download(repo.id, repo.githubUrl)}
-                        className="text-xs py-1.5 px-3 font-mono text-monad-400 border rounded-lg transition-all hover:bg-monad-500/10"
+                        className="text-xs py-1.5 px-3 font-mono text-bolty-400 border rounded-lg transition-all hover:bg-bolty-500/10"
                         style={{ borderColor: 'rgba(131,110,249,0.25)' }}
                       >
                         Download
@@ -1432,7 +1432,7 @@ export default function ReposPage() {
               className="col-span-3 text-center py-20 border border-dashed rounded-2xl"
               style={{ borderColor: 'rgba(131,110,249,0.15)' }}
             >
-              <GitBranch className="w-10 h-10 text-monad-400/20 mx-auto mb-3" strokeWidth={1} />
+              <GitBranch className="w-10 h-10 text-bolty-400/20 mx-auto mb-3" strokeWidth={1} />
               <p className="text-zinc-600 font-mono text-sm">
                 No repositories found. Be the first to publish.
               </p>

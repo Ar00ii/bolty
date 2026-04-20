@@ -131,7 +131,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search agents, repos..."
-                  className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-monad-400/50 transition-colors"
+                  className="w-64 pl-8 pr-3 py-1.5 bg-zinc-800/80 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-500 outline-none focus:border-bolty-400/50 transition-colors"
                   onKeyDown={(e) => {
                     if (e.key === 'Escape') {
                       setSearchOpen(false);
@@ -196,7 +196,7 @@ export function Navbar({ menuOpen, setMenuOpen, sidebarCollapsed }: NavbarProps)
                     className="w-7 h-7 rounded-full border border-zinc-700"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-full bg-monad-500/20 border border-monad-500/30 flex items-center justify-center text-monad-400 text-xs font-light">
+                  <div className="w-7 h-7 rounded-full bg-bolty-500/20 border border-bolty-500/30 flex items-center justify-center text-bolty-400 text-xs font-light">
                     {displayLabel[0]?.toUpperCase()}
                   </div>
                 )}
