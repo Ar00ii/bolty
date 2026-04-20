@@ -224,7 +224,7 @@ export default function AgentDetailPage() {
       const [postsData, relatedData] = await Promise.all([
         api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => [] as AgentPost[]),
         api.get<RelatedListing[]>(`/market/${id}/related`).catch(() => [] as RelatedListing[]),
-        loadReviews(),
+        loadReviews().catch(() => {}),
       ]);
       setPosts(postsData || []);
       setRelated(relatedData || []);

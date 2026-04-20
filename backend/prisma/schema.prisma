@@ -122,6 +122,7 @@ model ChatMessage {
   reports Report[]
 
   @@index([userId, createdAt])
+  @@index([isDeleted, createdAt])
   @@map("chat_messages")
 }
 
@@ -392,6 +393,8 @@ model DirectMessage {
 
   @@index([senderId, receiverId])
   @@index([receiverId, createdAt])
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, senderId, createdAt])
   @@map("direct_messages")
 }
 

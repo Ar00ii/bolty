@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ReputationReason } from '@prisma/client';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
@@ -114,7 +115,7 @@ export class ReputationService {
         data: {
           userId,
           points,
-          reason: reason as unknown as any,
+          reason: reason as ReputationReason,
           resourceId: resourceId || null,
           note: note || null,
         },

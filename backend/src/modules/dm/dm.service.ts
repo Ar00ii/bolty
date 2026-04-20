@@ -65,7 +65,7 @@ export class DmService {
           { senderId: peerId, receiverId: userId },
         ],
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       take,
       include: {
         sender: { select: { id: true, username: true, avatarUrl: true } },
@@ -94,6 +94,7 @@ export class DmService {
       this.prisma.directMessage.findMany({
         where: { OR: [{ senderId: userId }, { receiverId: userId }] },
         orderBy: { createdAt: 'desc' },
+        take: 500,
         select: {
           senderId: true,
           receiverId: true,

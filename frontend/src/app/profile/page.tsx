@@ -498,7 +498,17 @@ export default function ProfilePage() {
       .get<any>('/market/api-keys')
       .then((keys) => {
         if (Array.isArray(keys)) {
-          setApiKeys(keys);
+          setApiKeys(
+            keys.map((k: any) => ({
+              id: k.id,
+              name: k.label || k.name || 'Unnamed',
+              key: k.key || '',
+              preview: k.lastFour ? `blt_••••••••••••••••••••••••${k.lastFour}` : (k.preview || ''),
+              createdAt: k.createdAt,
+              lastUsed: k.lastUsedAt || k.lastUsed || null,
+              scopes: k.scopes || [],
+            })),
+          );
         }
       })
       .catch(() => setApiKeys([]));
@@ -832,7 +842,16 @@ export default function ProfilePage() {
 
   const handleGenerateAPIKey = async (name: string) => {
     try {
-      const newKey = await api.post<APIKey>('/market/api-keys', { name });
+      const raw = await api.post<any>('/market/api-keys', { label: name });
+      const newKey: APIKey = {
+        id: raw.id,
+        name: raw.label || name,
+        key: raw.key || '',
+        preview: raw.lastFour ? `blt_••••••••••••••••••••••••${raw.lastFour}` : (raw.preview || ''),
+        createdAt: raw.createdAt,
+        lastUsed: raw.lastUsedAt || null,
+        scopes: raw.scopes || [],
+      };
       setApiKeys([...apiKeys, newKey]);
     } catch (err) {
       console.error('Failed to generate API key:', err);

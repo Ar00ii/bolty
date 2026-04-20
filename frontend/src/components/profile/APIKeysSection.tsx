@@ -189,7 +189,7 @@ export const APIKeysSection: React.FC<APIKeysSectionProps> = ({
                         boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
                       }}
                     >
-                      {apiKey.scopes[0] || 'read'}
+                      {apiKey.scopes?.[0] || 'read'}
                     </span>
                   </div>
 

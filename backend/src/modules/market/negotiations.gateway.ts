@@ -116,6 +116,11 @@ export class NegotiationsGateway
       return;
     }
 
+    if (!negotiation.listing) {
+      client.emit('error', { message: 'Negotiation listing not found' });
+      return;
+    }
+
     if (negotiation.buyerId !== userId && negotiation.listing.sellerId !== userId) {
       client.emit('error', { message: 'Unauthorized: you are not a participant' });
       this.logger.warn(`Unauthorized join attempt: user ${userId} on negotiation ${negotiationId}`);

@@ -112,8 +112,8 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
         orderId: data.orderId,
         content: message.content,
         senderId: message.senderId,
-        senderUsername: message.sender.username,
-        senderAvatar: message.sender.avatarUrl,
+        senderUsername: message.sender?.username ?? null,
+        senderAvatar: message.sender?.avatarUrl ?? null,
         createdAt: message.createdAt,
       };
 

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { ServiceCategory } from '@prisma/client';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
@@ -55,7 +56,7 @@ export class ServicesService {
       data: {
         title: sanitizeText(dto.title.slice(0, 120)),
         description: sanitizeText(dto.description.slice(0, 3000)),
-        category: dto.category as unknown as any,
+        category: dto.category as ServiceCategory,
         skills: (dto.skills || []).map((s) => sanitizeText(s.slice(0, 50))).slice(0, 15),
         minBudget: dto.minBudget || null,
         maxBudget: dto.maxBudget || null,
