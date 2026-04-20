@@ -23,7 +23,8 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
     <div
       className="relative overflow-hidden border-b grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,1fr)] gap-8 lg:gap-0 px-6 sm:px-10 lg:px-0 min-h-[calc(100vh-64px)] lg:min-h-[calc(100vh-90px)]"
       style={{
-        background: 'linear-gradient(to left bottom, #1a0b3d, rgba(0,0,0,0) 22%), #0a0a0f',
+        background:
+          'linear-gradient(to left bottom, rgba(26,11,61,0.55), rgba(0,0,0,0) 45%), #0a0a0f',
         borderColor: 'rgba(39,39,39)',
       }}
     >
@@ -131,18 +132,18 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
           className="absolute top-0 right-0 w-full"
           style={{
             aspectRatio: '630 / 591',
-            background: 'radial-gradient(circle at 50% 50%, #836EF9 0%, transparent 70%)',
-            filter: 'blur(60px)',
-            opacity: 0.32,
+            background: 'radial-gradient(circle at 60% 45%, #836EF9 0%, transparent 72%)',
+            filter: 'blur(90px)',
+            opacity: 0.18,
           }}
         />
         <div
           className="absolute bottom-0 right-0 w-2/3"
           style={{
             aspectRatio: '1 / 1',
-            background: 'radial-gradient(circle at 50% 50%, #a78bfa 0%, transparent 70%)',
-            filter: 'blur(80px)',
-            opacity: 0.22,
+            background: 'radial-gradient(circle at 50% 50%, #a78bfa 0%, transparent 72%)',
+            filter: 'blur(110px)',
+            opacity: 0.1,
           }}
         />
       </motion.div>
