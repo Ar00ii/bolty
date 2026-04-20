@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
 
 import { FlickeringGrid } from '@/components/ui/flickering-grid';
-import { useRouter } from 'next/navigation';
-import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useState, useEffect } from 'react';
 
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -271,11 +271,21 @@ function SuccessBanner({ message }: { message: string }) {
 }
 
 // -- Main Component ----
-export default function AuthPage() {
+export default function AuthPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <AuthPage />
+    </Suspense>
+  );
+}
+
+function AuthPage() {
   const { isAuthenticated, isLoading: authLoading, refresh } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>('login');
+  const initialTab = searchParams.get('tab') === 'register' ? 'register' : 'login';
+  const [tab, setTab] = useState<'login' | 'register' | 'forgot' | 'reset-sent'>(initialTab);
 
   // Login state
   const [loginIdentifier, setLoginIdentifier] = useState('');
