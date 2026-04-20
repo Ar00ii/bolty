@@ -198,6 +198,14 @@ export class MarketController {
   }
 
   @Public()
+  @Get('pulse')
+  getPulse(@Query('limit') limit?: string) {
+    const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 15;
+    const bounded = Math.min(50, Math.max(1, parsed));
+    return this.marketService.getMarketPulse(bounded);
+  }
+
+  @Public()
   @Get('top-sellers')
   getTopSellers(@Query('limit') limit?: string) {
     const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 12;

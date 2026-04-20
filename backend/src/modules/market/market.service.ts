@@ -14,6 +14,8 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { NotificationsService } from '../notifications/notifications.service';
 
+import { MarketGateway } from './market.gateway';
+
 interface CreateListingDto {
   title: string;
   description: string;
@@ -40,9 +42,81 @@ export class MarketService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly notifications: NotificationsService,
+    private readonly gateway: MarketGateway,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
+    });
+  }
+
+  // ── 24h activity cache ────────────────────────────────────────────────────
+  // Recomputed lazily on each getListings call. Cheap enough (one groupBy).
+
+  private async compute24hStats(
+    listingIds: string[],
+  ): Promise<Map<string, { sales24h: number; volumeEth24h: number }>> {
+    const result = new Map<string, { sales24h: number; volumeEth24h: number }>();
+    if (listingIds.length === 0) return result;
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+    const rows = await this.prisma.marketPurchase.findMany({
+      where: { listingId: { in: listingIds }, createdAt: { gte: since } },
+      select: { listingId: true, amountWei: true },
+    });
+
+    for (const row of rows) {
+      const prev = result.get(row.listingId) ?? { sales24h: 0, volumeEth24h: 0 };
+      const amount = row.amountWei ? Number(row.amountWei) / 1e18 : 0;
+      result.set(row.listingId, {
+        sales24h: prev.sales24h + 1,
+        volumeEth24h: prev.volumeEth24h + (Number.isFinite(amount) ? amount : 0),
+      });
+    }
+    return result;
+  }
+
+  private async compute7dSparklines(
+    listingIds: string[],
+  ): Promise<Map<string, number[]>> {
+    const result = new Map<string, number[]>();
+    if (listingIds.length === 0) return result;
+    const now = Date.now();
+    const since = new Date(now - 7 * 24 * 60 * 60 * 1000);
+
+    const rows = await this.prisma.marketPurchase.findMany({
+      where: { listingId: { in: listingIds }, createdAt: { gte: since } },
+      select: { listingId: true, createdAt: true },
+    });
+
+    // 7 daily buckets for each listing
+    for (const id of listingIds) result.set(id, new Array(7).fill(0));
+    for (const row of rows) {
+      const bucket = Math.min(
+        6,
+        Math.floor((now - row.createdAt.getTime()) / (24 * 60 * 60 * 1000)),
+      );
+      const idx = 6 - bucket;
+      const arr = result.get(row.listingId);
+      if (arr) arr[idx] += 1;
+    }
+    return result;
+  }
+
+  private async attachActivityStats<T extends { id: string }>(listings: T[]) {
+    if (listings.length === 0) return listings;
+    const ids = listings.map((l) => l.id);
+    const [stats24h, spark] = await Promise.all([
+      this.compute24hStats(ids),
+      this.compute7dSparklines(ids),
+    ]);
+    return listings.map((l) => {
+      const s = stats24h.get(l.id) ?? { sales24h: 0, volumeEth24h: 0 };
+      return {
+        ...l,
+        sales24h: s.sales24h,
+        volumeEth24h: Number(s.volumeEth24h.toFixed(4)),
+        sparkline7d: spark.get(l.id) ?? new Array(7).fill(0),
+      };
     });
   }
 
@@ -159,7 +233,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // AI security scan
     const scan = await this.scanContent(title, description);
 
-    return this.prisma.marketListing.create({
+    const created = await this.prisma.marketListing.create({
       data: {
         title,
         description,
@@ -182,6 +256,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       },
       include: { seller: { select: { id: true, username: true, avatarUrl: true } } },
     });
+
+    if (created.status === 'ACTIVE') {
+      this.gateway.emitNewListing({
+        listingId: created.id,
+        title: created.title,
+        type: created.type,
+        price: created.price,
+        currency: created.currency,
+        tags: created.tags ?? [],
+        seller: created.seller,
+        createdAt: created.createdAt.toISOString(),
+      });
+    }
+
+    return created;
   }
 
   async getListings(params: {
@@ -246,8 +335,92 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.marketListing.count({ where }),
     ]);
 
-    const data = await this.attachReviewStats(rawListings);
+    const withReviews = await this.attachReviewStats(rawListings);
+    const data = await this.attachActivityStats(withReviews);
     return { data, total, page, pages: Math.ceil(total / take) };
+  }
+
+  async getMarketPulse(limit = 15) {
+    const now = Date.now();
+    const since24h = new Date(now - 24 * 60 * 60 * 1000);
+
+    const [
+      totalActive,
+      sales24hRows,
+      recentTrades,
+      recentListings,
+      uniqueBuyers24h,
+      totalListings,
+      totalSales,
+    ] = await Promise.all([
+      this.prisma.marketListing.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.marketPurchase.findMany({
+        where: { createdAt: { gte: since24h } },
+        select: { amountWei: true },
+      }),
+      this.prisma.marketPurchase.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          createdAt: true,
+          amountWei: true,
+          buyer: { select: { id: true, username: true, avatarUrl: true } },
+          seller: { select: { id: true, username: true } },
+          listing: {
+            select: { id: true, title: true, type: true, currency: true, price: true },
+          },
+        },
+      }),
+      this.prisma.marketListing.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          price: true,
+          currency: true,
+          tags: true,
+          createdAt: true,
+          seller: { select: { id: true, username: true, avatarUrl: true } },
+        },
+      }),
+      this.prisma.marketPurchase.findMany({
+        where: { createdAt: { gte: since24h } },
+        select: { buyerId: true },
+        distinct: ['buyerId'],
+      }),
+      this.prisma.marketListing.count(),
+      this.prisma.marketPurchase.count(),
+    ]);
+
+    const volumeEth24h = sales24hRows.reduce((acc, r) => {
+      const v = r.amountWei ? Number(r.amountWei) / 1e18 : 0;
+      return acc + (Number.isFinite(v) ? v : 0);
+    }, 0);
+
+    return {
+      stats: {
+        activeListings: totalActive,
+        totalListings,
+        totalSales,
+        sales24h: sales24hRows.length,
+        volumeEth24h: Number(volumeEth24h.toFixed(4)),
+        traders24h: uniqueBuyers24h.length,
+      },
+      recentTrades: recentTrades.map((t) => ({
+        id: t.id,
+        createdAt: t.createdAt,
+        amountWei: t.amountWei ?? '0',
+        priceEth: t.amountWei ? Number(t.amountWei) / 1e18 : null,
+        buyer: t.buyer,
+        seller: t.seller,
+        listing: t.listing,
+      })),
+      recentListings,
+    };
   }
 
   async getListingFacets() {
@@ -348,9 +521,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         return b.listing.createdAt.getTime() - a.listing.createdAt.getTime();
       });
 
-    const data = await this.attachReviewStats(
+    const withReviews = await this.attachReviewStats(
       ranked.slice(skip, skip + take).map((r) => r.listing),
     );
+    const data = await this.attachActivityStats(withReviews);
 
     return { data, total, page, pages: Math.ceil(total / take) };
   }
@@ -1052,6 +1226,36 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     } catch (err) {
       this.logger.warn(
         `Failed to emit sale notification: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    // Broadcast to live market feed (fire-and-forget, public data only)
+    try {
+      const [buyerUser, sellerUser] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: buyerId },
+          select: { id: true, username: true, avatarUrl: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: listing.sellerId },
+          select: { id: true, username: true },
+        }),
+      ]);
+      const eth = verifiedAmountWei ? Number(verifiedAmountWei) / 1e18 : null;
+      this.gateway.emitSale({
+        listingId: listing.id,
+        listingTitle: listing.title,
+        listingType: listing.type,
+        amountWei: verifiedAmountWei ?? '0',
+        priceEth: eth !== null && Number.isFinite(eth) ? Number(eth.toFixed(6)) : null,
+        currency: listing.currency,
+        buyer: buyerUser ?? { id: buyerId, username: null, avatarUrl: null },
+        seller: sellerUser ?? { id: listing.sellerId, username: null },
+        createdAt: purchase.createdAt.toISOString(),
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Failed to broadcast sale event: ${err instanceof Error ? err.message : err}`,
       );
     }
 
