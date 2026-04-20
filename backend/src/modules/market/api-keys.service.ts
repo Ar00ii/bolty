@@ -92,6 +92,7 @@ export class ApiKeysService {
       data: {
         userId,
         keyHash,
+        keyPrefix: plainKey.slice(0, 12),
         keyLastFour: plainKey.slice(-4),
         label: label || null,
       },
@@ -198,30 +199,33 @@ export class ApiKeysService {
   }
 
   /**
-   * Verify an API key and update last used timestamp
+   * Verify an API key and update last used timestamp.
+   *
+   * Filter by keyPrefix first so we only bcrypt-compare the (typically 0-1)
+   * candidates whose prefix matches instead of every row in the table. Legacy
+   * keys created before the migration have a null keyPrefix — for those we
+   * still need to scan, but that set shrinks to zero as old keys are rotated.
    */
   async verifyApiKey(plainKey: string): Promise<{ userId: string; keyId: string } | null> {
-    // Get all keys and check them
-    const allKeys = await this.prisma.userApiKey.findMany({
-      select: {
-        id: true,
-        keyHash: true,
-        userId: true,
-      },
+    const prefix = plainKey.slice(0, 12);
+    const candidates = await this.prisma.userApiKey.findMany({
+      where: { OR: [{ keyPrefix: prefix }, { keyPrefix: null }] },
+      select: { id: true, keyHash: true, userId: true, keyPrefix: true },
     });
 
-    for (const keyRecord of allKeys) {
+    for (const keyRecord of candidates) {
       const isValid = await bcrypt.compare(plainKey, keyRecord.keyHash);
       if (isValid) {
-        // Update last used timestamp
+        // Backfill the prefix on legacy rows so subsequent verifies hit the
+        // fast path; also update lastUsedAt.
         await this.prisma.userApiKey.update({
           where: { id: keyRecord.id },
-          data: { lastUsedAt: new Date() },
+          data: {
+            lastUsedAt: new Date(),
+            ...(keyRecord.keyPrefix == null ? { keyPrefix: prefix } : {}),
+          },
         });
-        return {
-          userId: keyRecord.userId,
-          keyId: keyRecord.id,
-        };
+        return { userId: keyRecord.userId, keyId: keyRecord.id };
       }
     }
 

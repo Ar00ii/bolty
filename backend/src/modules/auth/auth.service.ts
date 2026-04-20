@@ -16,6 +16,7 @@ import * as QRCode from 'qrcode';
 import * as speakeasy from 'speakeasy';
 import { v4 as uuidv4 } from 'uuid';
 
+import { encryptToken } from '../../common/crypto/token-cipher.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { EmailService } from '../email/email.service';
@@ -574,7 +575,7 @@ export class AuthService {
         githubId: githubProfile.id,
         githubLogin: githubProfile.login,
         avatarUrl: githubProfile.avatar_url,
-        githubToken: githubProfile.accessToken ?? undefined,
+        githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : undefined,
       },
     });
     this.logger.log(`GitHub linked for user ${userId}: @${githubProfile.login}`);
@@ -621,7 +622,9 @@ export class AuthService {
           data: {
             githubId: githubProfile.id,
             githubLogin: githubProfile.login,
-            githubToken: githubProfile.accessToken ?? undefined,
+            githubToken: githubProfile.accessToken
+              ? encryptToken(githubProfile.accessToken)
+              : undefined,
             avatarUrl: existingByUsername.avatarUrl || githubProfile.avatar_url,
             lastLoginAt: new Date(),
           },
@@ -635,7 +638,7 @@ export class AuthService {
             username: githubProfile.login,
             avatarUrl: githubProfile.avatar_url,
             bio: githubProfile.bio,
-            githubToken: githubProfile.accessToken ?? null,
+            githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : null,
             userTag,
           },
         });
@@ -647,7 +650,9 @@ export class AuthService {
         data: {
           githubLogin: githubProfile.login,
           avatarUrl: githubProfile.avatar_url,
-          githubToken: githubProfile.accessToken ?? undefined,
+          githubToken: githubProfile.accessToken
+            ? encryptToken(githubProfile.accessToken)
+            : undefined,
           lastLoginAt: new Date(),
         },
       });

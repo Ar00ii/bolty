@@ -133,6 +133,7 @@ export class MarketController {
     return this.apiKeysService.renameApiKey(userId, keyId, body.label ?? null);
   }
 
+  @Throttle({ default: { limit: 3, ttl: 60_000 } })
   @Post('api-keys/:id/request-delete-verification')
   requestDeleteVerification(
     @Param('id') keyId: string,
@@ -142,6 +143,9 @@ export class MarketController {
     return this.apiKeysService.requestDeleteVerification(userId, keyId, userEmail);
   }
 
+  // Brute-forcing a 6-digit code is only 10^6 guesses — throttle aggressively
+  // so an attacker with a hijacked session can't exhaust the keyspace.
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Delete('api-keys/:id')
   @HttpCode(HttpStatus.OK)
   async deleteApiKey(

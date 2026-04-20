@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { ethers } from 'ethers';
 
+import { decryptToken } from '../../common/crypto/token-cipher.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
@@ -122,7 +123,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         where: { id: userId },
         select: { githubToken: true },
       });
-      token = userRecord?.githubToken ?? undefined;
+      token = decryptToken(userRecord?.githubToken) ?? undefined;
     }
 
     // No token at all — user connected GitHub before but token is gone, needs re-auth
