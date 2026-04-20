@@ -56,7 +56,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       {!isAuth && <BackToTop />}
       <UnifiedHeader />
 
-      <div className={`flex ${!isHome && !isAuth ? 'pt-16' : ''}`}>
+      <div className={`flex ${!isHome && !isAuth && !isLegal ? 'pt-16' : ''}`}>
         <div className="flex-1 w-full min-w-0">
           <main
             id="main-content"

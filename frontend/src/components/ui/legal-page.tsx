@@ -31,7 +31,7 @@ export function LegalPage({
             'radial-gradient(ellipse 80% 55% at 50% 0%, rgba(131,110,249,0.14), transparent 70%)',
         }}
       />
-      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16">
         <header className="mb-10">
           <div className="flex items-center gap-3 mb-4">
             <div
