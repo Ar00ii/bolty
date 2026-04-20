@@ -204,7 +204,7 @@ export function StandardSidebar() {
           background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
         }}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-[6px]">
             <span
               className="w-[6px] h-[6px] rounded-full"
@@ -227,41 +227,6 @@ export function StandardSidebar() {
           >
             disconnect
           </button>
-        </div>
-        <div
-          className="flex items-center justify-between rounded-lg"
-          style={{
-            padding: '10px 12px',
-            background: '#121214',
-            border: '1px solid #1f1f23',
-          }}
-        >
-          <div>
-            <div
-              className="font-mono"
-              style={{ fontSize: '18px', color: '#e4e4e7', fontWeight: 400 }}
-            >
-              12.847
-            </div>
-            <div className="font-mono mt-[1px]" style={{ fontSize: '10.5px', color: '#52525b' }}>
-              MON · $4,218.20
-            </div>
-          </div>
-          <Link
-            href="/profile?tab=billing"
-            className="rounded-md transition-colors"
-            style={{
-              fontSize: '12px',
-              padding: '6px 10px',
-              background: '#836EF9',
-              color: 'white',
-              fontWeight: 400,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#a594ff')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#836EF9')}
-          >
-            Buy →
-          </Link>
         </div>
       </div>
     </aside>
