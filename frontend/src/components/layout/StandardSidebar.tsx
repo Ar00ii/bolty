@@ -1,30 +1,22 @@
 'use client';
 
 import {
-  BarChart3,
   Bell,
   BookOpen,
-  Bot,
+  ChevronRight,
   ChevronsUpDown,
   FileText,
   Flame,
-  GitBranch,
-  Globe,
   Heart,
-  Home,
-  Key,
+  LayoutGrid,
   Library,
   LifeBuoy,
   MessageCircle,
   MessageSquare,
-  Plus,
   Search,
   Settings,
   ShoppingBag,
-  Sparkles,
   Trophy,
-  User,
-  Users,
   Wallet,
   type LucideIcon,
 } from 'lucide-react';
@@ -43,6 +35,7 @@ interface NavItem {
   hot?: boolean;
   dot?: boolean;
   kbd?: string;
+  expandable?: boolean;
 }
 
 interface NavSection {
@@ -52,57 +45,38 @@ interface NavSection {
 
 const NAV: NavSection[] = [
   {
-    section: 'Workspace',
+    section: 'Discover',
     items: [
-      { label: 'Overview', icon: Home, href: '/market', kbd: 'G O' },
-      { label: 'My Profile', icon: User, href: '/profile', kbd: 'G P' },
-      { label: 'Orders', icon: ShoppingBag, href: '/orders' },
+      { label: 'Marketplace', icon: LayoutGrid, href: '/market', expandable: true },
+      { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
     ],
   },
   {
-    section: 'Marketplace',
+    section: 'My work',
     items: [
-      { label: 'AI Agents', icon: Bot, href: '/market/agents', count: 1284, hot: true },
-      { label: 'Repositories', icon: GitBranch, href: '/market/repos', count: 892 },
-      { label: 'Top Sellers', icon: Users, href: '/market/sellers' },
       { label: 'Library', icon: Library, href: '/market/library' },
       { label: 'Saved', icon: Heart, href: '/market/favorites' },
-      { label: 'Seller Dashboard', icon: BarChart3, href: '/market/seller' },
+      { label: 'Orders', icon: ShoppingBag, href: '/orders', expandable: true },
     ],
   },
   {
-    section: 'Network',
+    section: 'Community',
     items: [
-      { label: 'Global Chat', icon: Globe, href: '/chat', badge: '128 live' },
-      { label: 'Messages', icon: MessageCircle, href: '/dm', count: 3, dot: true },
+      { label: 'Chat', icon: MessageSquare, href: '/chat' },
+      { label: 'Messages', icon: MessageCircle, href: '/dm' },
       { label: 'Notifications', icon: Bell, href: '/notifications' },
-      { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
     ],
   },
   {
     section: 'Account',
     items: [
       { label: 'Wallet', icon: Wallet, href: '/profile?tab=wallet' },
-      { label: 'Bolty AI', icon: Sparkles, href: '/ai' },
-      { label: 'API Keys', icon: Key, href: '/api-keys' },
-      { label: 'Docs', icon: BookOpen, href: '/docs/agent-protocol' },
+      { label: 'Settings', icon: Settings, href: '/profile', expandable: true },
       { label: 'How it works', icon: FileText, href: '/how-it-works' },
+      { label: 'Docs', icon: BookOpen, href: '/docs/agent-protocol' },
       { label: 'Help', icon: LifeBuoy, href: '/help' },
-      { label: 'Settings', icon: Settings, href: '/profile?tab=security' },
     ],
   },
-];
-
-interface PinnedItem {
-  label: string;
-  color: string;
-  href: string;
-}
-
-const PINNED: PinnedItem[] = [
-  { label: 'CodeReviewer-v3', color: '#836EF9', href: '/market/agents' },
-  { label: 'monorepo-toolkit', color: '#06B6D4', href: '/market/repos' },
-  { label: 'price-oracle.eth', color: '#EC4899', href: '/market/agents' },
 ];
 
 function isItemActive(pathname: string, href: string): boolean {
@@ -220,57 +194,6 @@ export function StandardSidebar() {
             })}
           </div>
         ))}
-
-        {/* Pinned section */}
-        <div className="mt-4">
-          <div
-            className="font-mono text-[10px] uppercase px-[10px] pb-[6px] flex items-center justify-between"
-            style={{ color: '#52525b', letterSpacing: '0.12em' }}
-          >
-            <span>Pinned</span>
-            <button
-              type="button"
-              className="p-[2px] transition-colors"
-              style={{ color: '#52525b' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#e4e4e7')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}
-              title="Pin item"
-            >
-              <Plus className="w-[14px] h-[14px]" strokeWidth={1.75} />
-            </button>
-          </div>
-          {PINNED.map((p) => (
-            <Link
-              key={p.label}
-              href={p.href}
-              className="grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group"
-              style={{
-                gridTemplateColumns: '10px 16px 1fr auto',
-                color: '#a1a1aa',
-                fontSize: '13px',
-                fontWeight: 300,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#e4e4e7';
-                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = '#a1a1aa';
-                e.currentTarget.style.background = 'transparent';
-              }}
-            >
-              <span />
-              <span
-                className="w-[7px] h-[7px] rounded-[2px] shrink-0"
-                style={{ background: p.color }}
-              />
-              <span className="truncate font-mono" style={{ fontSize: '11.5px' }}>
-                {p.label}
-              </span>
-              <span />
-            </Link>
-          ))}
-        </div>
       </div>
 
       {/* Wallet footer */}
@@ -454,6 +377,11 @@ function SidebarItemMeta({ item }: { item: NavItem }) {
       >
         {item.kbd}
       </span>
+    );
+  }
+  if (item.expandable) {
+    return (
+      <ChevronRight className="w-[14px] h-[14px]" strokeWidth={1.75} style={{ color: '#52525b' }} />
     );
   }
   return null;
