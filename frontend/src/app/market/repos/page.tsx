@@ -213,7 +213,7 @@ function RepoCard({
       className="flex flex-col rounded-xl border transition-all duration-200 overflow-hidden hover:border-monad-500/30 hover:shadow-[0_0_20px_rgba(131,110,249,0.08)]"
       style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.07)' }}
     >
-      <div className="p-4 flex-1">
+      <Link href={`/market/repos/${repo.id}`} className="p-4 flex-1 block hover:bg-white/[0.01]">
         {/* Repo header */}
         <div className="flex items-start gap-3 mb-3">
           {repo.logoUrl ? (
@@ -298,7 +298,7 @@ function RepoCard({
             {repo.downloadCount}
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* Footer */}
       <div
