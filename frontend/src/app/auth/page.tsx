@@ -474,22 +474,6 @@ function AuthPage() {
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
-      {/* Back button — pinned top-left of the viewport, never moves */}
-      <button
-        type="button"
-        onClick={handleBack}
-        aria-label="Go back"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
-        style={{
-          background: 'rgba(9,9,11,0.6)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
-        }}
-      >
-        <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
-        Back
-      </button>
 
       {/* Flickering grid — sits between gradient and orbs, masked to fade at edges */}
       <FlickeringGrid
@@ -549,6 +533,25 @@ function AuthPage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className="relative z-10 w-full max-w-md max-h-[calc(100vh-4rem)] overflow-y-auto px-1"
       >
+        {/* Back button */}
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={handleBack}
+            aria-label="Go back"
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-400 hover:text-white transition-colors"
+            style={{
+              background: 'rgba(9,9,11,0.6)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+            }}
+          >
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+            Back
+          </button>
+        </div>
+
         {/* Header */}
         <motion.div
           className="text-center mb-8"
