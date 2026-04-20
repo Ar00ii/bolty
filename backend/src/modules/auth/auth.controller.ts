@@ -157,8 +157,6 @@ export class AuthController {
   // ── 2FA Management ────────────────────────────────────────────────────────
 
   @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('2fa/enable/request')
