@@ -99,14 +99,15 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         <div className="flex flex-wrap gap-3">
           <Link
             href={isAuthenticated ? '/market' : '/auth?tab=register'}
-            className="hover:opacity-85 transition-opacity inline-flex items-center gap-2.5 bg-white text-[#0a0a0f] px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl font-bold whitespace-nowrap"
+            className="hover:opacity-85 transition-opacity inline-flex items-center gap-2.5 bg-white text-[#0a0a0f] px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl whitespace-nowrap"
+            style={{ fontWeight: 700 }}
           >
             {isAuthenticated ? 'Open marketplace' : 'Start selling'}
             <span className="text-[0.9em]">›</span>
           </Link>
           <Link
             href="/market"
-            className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl font-bold text-white whitespace-nowrap transition-all hover:brightness-110"
+            className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3.5 sm:py-5 text-base sm:text-lg lg:text-xl text-white whitespace-nowrap transition-all hover:brightness-110"
             style={{
               background: 'rgba(131,110,249,0.08)',
               boxShadow:
