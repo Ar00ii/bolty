@@ -114,7 +114,7 @@ export class UsersController {
           cb(null, crypto.randomUUID());
         },
       }),
-      limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB max
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
       fileFilter: (_req, file, cb) => {
         if (ALLOWED_IMAGE_MIMETYPES.has(file.mimetype)) {
           cb(null, true);
