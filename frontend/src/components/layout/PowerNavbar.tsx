@@ -170,7 +170,8 @@ export function PowerNavbar() {
         </span>
       </button>
 
-      {/* Notification bell */}
+      {/* Notification bell (signed-in only) */}
+      {isAuthenticated && (
       <button
         type="button"
         onClick={() => router.push('/notifications')}
@@ -210,8 +211,27 @@ export function PowerNavbar() {
           </span>
         )}
       </button>
+      )}
 
-      {/* Avatar */}
+      {/* Signed-out: show Sign in CTA instead of avatar */}
+      {!isAuthenticated && (
+        <Link
+          href="/auth"
+          className="text-[13px] transition-colors px-3 py-1.5 rounded-md"
+          style={{
+            color: '#e4e4e7',
+            background: 'rgba(131,110,249,0.15)',
+            border: '1px solid rgba(131,110,249,0.3)',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.25)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.15)')}
+        >
+          Sign in
+        </Link>
+      )}
+
+      {/* Avatar (signed-in only) */}
+      {isAuthenticated && (
       <div ref={profileRef} className="relative">
         <button
           type="button"
@@ -311,6 +331,7 @@ export function PowerNavbar() {
           </div>
         )}
       </div>
+      )}
     </header>
   );
 }

@@ -119,6 +119,7 @@ export function StandardSidebar() {
   const { user, logout } = useAuth();
 
   const walletAddress = user?.walletAddress ?? '0x4f2a0000000000000000000000000000000000E91c';
+  const isAuthenticated = !!user;
 
   return (
     <aside
@@ -206,7 +207,7 @@ export function StandardSidebar() {
         ))}
       </div>
 
-      {/* Wallet footer */}
+      {/* Footer: wallet chip + disconnect when signed in, Sign-in CTA when signed out */}
       <div
         className="p-3"
         style={{
@@ -214,30 +215,46 @@ export function StandardSidebar() {
           background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
         }}
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-[6px]">
-            <span
-              className="w-[6px] h-[6px] rounded-full"
-              style={{
-                background: '#22c55e',
-                boxShadow: '0 0 8px rgba(34,197,94,0.6)',
-              }}
-            />
-            <span className="font-mono text-[11px]" style={{ color: '#a1a1aa' }}>
-              {shortenAddress(walletAddress)}
-            </span>
+        {isAuthenticated ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-[6px]">
+              <span
+                className="w-[6px] h-[6px] rounded-full"
+                style={{
+                  background: '#22c55e',
+                  boxShadow: '0 0 8px rgba(34,197,94,0.6)',
+                }}
+              />
+              <span className="font-mono text-[11px]" style={{ color: '#a1a1aa' }}>
+                {shortenAddress(walletAddress)}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => logout?.()}
+              className="font-mono text-[10px] transition-colors"
+              style={{ color: '#52525b' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}
+            >
+              disconnect
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => logout?.()}
-            className="font-mono text-[10px] transition-colors"
-            style={{ color: '#52525b' }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}
+        ) : (
+          <Link
+            href="/auth"
+            className="block text-center rounded-md py-2 text-[12px] transition-colors"
+            style={{
+              background: 'rgba(131,110,249,0.15)',
+              border: '1px solid rgba(131,110,249,0.3)',
+              color: '#e4e4e7',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.15)')}
           >
-            disconnect
-          </button>
-        </div>
+            Sign in
+          </Link>
+        )}
       </div>
     </aside>
   );
