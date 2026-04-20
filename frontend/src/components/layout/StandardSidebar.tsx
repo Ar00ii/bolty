@@ -143,25 +143,22 @@ export function StandardSidebar() {
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
         <div className="min-w-0 flex items-center">
-          <div
-            className="text-[14px] truncate"
+          <span
+            className="text-xl truncate"
             style={{
-              color: '#e4e4e7',
-              fontWeight: 300,
               fontFamily: 'Inter, system-ui, sans-serif',
+              fontWeight: 700,
               letterSpacing: '-0.3px',
+              background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
             }}
           >
-            {user?.displayName || user?.username
-              ? `${user.displayName || user.username}'s Workspace`
-              : 'Bolty Workspace'}
-          </div>
+            BoltyNetwork
+          </span>
         </div>
-        <ChevronsUpDown
-          className="w-[14px] h-[14px]"
-          style={{ color: '#52525b' }}
-          strokeWidth={1.75}
-        />
+        <span />
       </Link>
 
       {/* Search trigger */}
