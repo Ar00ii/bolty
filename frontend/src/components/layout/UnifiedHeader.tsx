@@ -93,7 +93,7 @@ export function UnifiedHeader() {
             className="flex items-center gap-2 hover:opacity-85 transition-opacity relative"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/bolty-neon-crt.png" alt="Bolty" className="h-7 w-auto object-contain" />
+            <img src="/LogoNew.png" alt="Bolty" className="h-9 w-9 object-contain" />
             <span className="text-white font-light text-sm md:text-base hidden sm:inline tracking-[0.005em]">
               BoltyNetwork
             </span>
