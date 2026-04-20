@@ -479,7 +479,7 @@ function AuthPage() {
         type="button"
         onClick={handleBack}
         aria-label="Go back"
-        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
         style={{
           background: 'rgba(9,9,11,0.6)',
           border: '1px solid rgba(255,255,255,0.08)',
