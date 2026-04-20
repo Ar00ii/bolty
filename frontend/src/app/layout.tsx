@@ -118,7 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap"
+          href="https://api.fontshare.com/v2/css?f[]=general-sans@300,400,500,600,700&display=swap"
           rel="stylesheet"
         />
         <script
