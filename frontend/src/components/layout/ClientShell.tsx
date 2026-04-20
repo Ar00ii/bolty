@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 
 import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
@@ -34,9 +34,13 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         <ShortcutsModal />
         <BackToTop />
         <div className="flex">
-          <StandardSidebar />
+          <Suspense fallback={<div className="hidden lg:block w-[264px] shrink-0" />}>
+            <StandardSidebar />
+          </Suspense>
           <div className="flex-1 w-full min-w-0 flex flex-col">
-            <PowerNavbar />
+            <Suspense fallback={<div style={{ height: 56 }} />}>
+              <PowerNavbar />
+            </Suspense>
             <main id="main-content" tabIndex={-1} className="flex-1 relative focus:outline-none">
               {children}
             </main>
