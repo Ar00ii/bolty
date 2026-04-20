@@ -132,14 +132,9 @@ export function StandardSidebar() {
           borderBottom: '1px solid #1f1f23',
         }}
       >
-        <div
-          className="w-[30px] h-[30px] grid place-items-center font-mono font-semibold text-[14px] text-white rounded-lg"
-          style={{
-            background: 'linear-gradient(135deg, #836EF9 0%, #5b3fd1 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08), 0 4px 14px rgba(131,110,249,0.25)',
-          }}
-        >
-          B
+        <div className="w-[30px] h-[30px] grid place-items-center rounded-lg overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/bolty-neon-crt.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
         <div className="min-w-0">
           <div className="text-[13px] truncate" style={{ color: '#e4e4e7', fontWeight: 400 }}>
