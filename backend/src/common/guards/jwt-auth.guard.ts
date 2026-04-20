@@ -29,8 +29,12 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context) as Promise<boolean>;
   }
 
-  handleRequest<TUser = AuthUser>(err: Error | null, user: TUser | null): TUser {
-    if (err !== null || user === null) {
+  handleRequest<TUser = AuthUser>(err: Error | null, user: TUser | false | null): TUser {
+    // passport-jwt signals auth failure with `user === false` (missing token,
+    // bad signature, expired). A strict `user === null` check lets `false`
+    // slip through, leaving `req.user = false` and downstream code hitting
+    // `undefined` for user.id. Reject on any falsy user.
+    if (err || !user) {
       throw err ?? new UnauthorizedException('Authentication required');
     }
     return user;
