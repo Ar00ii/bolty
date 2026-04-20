@@ -46,10 +46,8 @@ const footerLinks: FooterSection[] = [
   {
     label: 'Company',
     links: [
-      { title: 'About', href: '/' },
       { title: 'Privacy', href: '/privacy' },
       { title: 'Terms', href: '/terms' },
-      { title: 'Contact', href: '/chat' },
     ],
   },
 ];

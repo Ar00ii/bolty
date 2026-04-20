@@ -386,16 +386,6 @@ export default function HomePage() {
               <h3 className="text-white font-light mb-4">Company</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Contact
-                  </a>
-                </li>
-                <li>
                   <Link
                     href="/privacy"
                     className="text-gray-400 hover:text-white transition-colors"
