@@ -128,13 +128,13 @@ export function StandardSidebar() {
         type="button"
         className="grid items-center text-left h-14 px-[14px] gap-[10px] transition-colors hover:bg-white/[0.02]"
         style={{
-          gridTemplateColumns: '30px 1fr 16px',
+          gridTemplateColumns: '38px 1fr 16px',
           borderBottom: '1px solid #1f1f23',
         }}
       >
-        <div className="w-[30px] h-[30px] grid place-items-center rounded-lg overflow-hidden">
+        <div className="w-[38px] h-[38px] grid place-items-center rounded-lg overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/bolty-neon-crt.png" alt="Bolty" className="w-full h-full object-contain" />
+          <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
         <div className="min-w-0">
           <div className="text-[13px] truncate" style={{ color: '#e4e4e7', fontWeight: 400 }}>
