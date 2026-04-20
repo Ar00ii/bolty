@@ -1179,24 +1179,44 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Could not verify transaction on-chain');
     }
 
-    const purchase = await this.prisma.marketPurchase.create({
-      data: {
-        txHash,
-        amountWei: verifiedAmountWei,
-        buyerId,
-        sellerId: listing.sellerId,
-        listingId,
-        negotiationId: negotiationId || null,
-        verified: true,
-        status: 'PENDING_DELIVERY',
-        platformFeeTxHash: useEscrow ? null : platformFeeTxHash || null,
-        platformFeeWei: useEscrow ? null : platformFeeWei || null,
-        consentSignature: consentSignature || null,
-        consentMessage: consentMessage || null,
-        escrowContract: useEscrow ? escrowContract : null,
-        escrowStatus: useEscrow ? 'FUNDED' : 'NONE',
-      },
-    });
+    let purchase;
+    try {
+      purchase = await this.prisma.marketPurchase.create({
+        data: {
+          txHash,
+          amountWei: verifiedAmountWei,
+          buyerId,
+          sellerId: listing.sellerId,
+          listingId,
+          negotiationId: negotiationId || null,
+          verified: true,
+          status: 'PENDING_DELIVERY',
+          platformFeeTxHash: useEscrow ? null : platformFeeTxHash || null,
+          platformFeeWei: useEscrow ? null : platformFeeWei || null,
+          consentSignature: consentSignature || null,
+          consentMessage: consentMessage || null,
+          escrowContract: useEscrow ? escrowContract : null,
+          escrowStatus: useEscrow ? 'FUNDED' : 'NONE',
+        },
+      });
+    } catch (err: unknown) {
+      // Two concurrent requests raced past the findFirst check above and both
+      // reached create. The unique index on (listingId, buyerId) kicks one
+      // out with P2002 — surface it as an idempotent "already purchased"
+      // instead of bubbling up a 500.
+      if (
+        err &&
+        typeof err === 'object' &&
+        'code' in err &&
+        (err as { code: string }).code === 'P2002'
+      ) {
+        const existing = await this.prisma.marketPurchase.findFirst({
+          where: { listingId, buyerId },
+        });
+        if (existing) return { success: true, alreadyPurchased: true, purchase: existing };
+      }
+      throw err;
+    }
 
     // Auto-create welcome message in order chat
     try {

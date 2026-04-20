@@ -19,23 +19,29 @@ export class SocialService {
     if (!receiver) throw new NotFoundException('User not found');
     if (receiver.id === senderId) throw new BadRequestException('You cannot add yourself');
 
-    const existing = await this.prisma.friendship.findFirst({
-      where: {
-        OR: [
-          { senderId, receiverId: receiver.id },
-          { senderId: receiver.id, receiverId: senderId },
-        ],
-      },
+    // Wrap the "delete DECLINED row, then re-create" in a transaction so two
+    // concurrent re-requests can't both succeed past the delete and then
+    // collide on the (senderId, receiverId) unique constraint with an
+    // unhandled P2002.
+    await this.prisma.$transaction(async (tx) => {
+      const existing = await tx.friendship.findFirst({
+        where: {
+          OR: [
+            { senderId, receiverId: receiver.id },
+            { senderId: receiver.id, receiverId: senderId },
+          ],
+        },
+      });
+
+      if (existing) {
+        if (existing.status === 'ACCEPTED') throw new ConflictException('Already friends');
+        if (existing.status === 'PENDING') throw new ConflictException('Request already sent');
+        // DECLINED — delete and re-create below
+        await tx.friendship.delete({ where: { id: existing.id } });
+      }
+
+      await tx.friendship.create({ data: { senderId, receiverId: receiver.id } });
     });
-
-    if (existing) {
-      if (existing.status === 'ACCEPTED') throw new ConflictException('Already friends');
-      if (existing.status === 'PENDING') throw new ConflictException('Request already sent');
-      // If DECLINED, delete and re-request
-      await this.prisma.friendship.delete({ where: { id: existing.id } });
-    }
-
-    await this.prisma.friendship.create({ data: { senderId, receiverId: receiver.id } });
   }
 
   async respondToRequest(userId: string, requestId: string, accept: boolean): Promise<void> {

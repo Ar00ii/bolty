@@ -240,6 +240,7 @@ model MarketPurchase {
 
   messages OrderMessage[]
 
+  @@unique([listingId, buyerId], name: "market_purchases_listing_buyer_unique")
   @@index([buyerId, listingId])
   @@index([sellerId, status])
   @@map("market_purchases")
@@ -724,6 +725,7 @@ model UserApiKey {
   createdAt DateTime @default(now())
 
   keyHash     String    @unique // bcrypt hash of the actual key
+  keyPrefix   String? // first 12 chars of plain key, indexed — lets verifyApiKey skip bcrypt-comparing every row
   keyLastFour String? // last 4 chars of the key for UI identification
   label       String? // optional label (e.g., "Production", "CI/CD")
   lastUsedAt  DateTime?
@@ -732,6 +734,7 @@ model UserApiKey {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([keyPrefix])
   @@map("user_api_keys")
 }
 
