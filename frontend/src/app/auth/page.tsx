@@ -1,7 +1,16 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  KeyRound,
+  Mail,
+  Zap,
+} from 'lucide-react';
 
 import { FlickeringGrid } from '@/components/ui/flickering-grid';
 import Link from 'next/link';
@@ -449,6 +458,14 @@ function AuthPage() {
     }
   };
 
+  const handleBack = () => {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push('/');
+    }
+  };
+
   // -- Render ----
   return (
     <div
@@ -457,6 +474,23 @@ function AuthPage() {
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
+      {/* Back button — top-left, above all visual layers */}
+      <button
+        type="button"
+        onClick={handleBack}
+        aria-label="Go back"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
+        style={{
+          background: 'rgba(9,9,11,0.55)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
+      >
+        <ArrowLeft className="w-4 h-4" strokeWidth={1.75} />
+        Back
+      </button>
+
       {/* Flickering grid — sits between gradient and orbs, masked to fade at edges */}
       <FlickeringGrid
         className="absolute inset-0 z-0 pointer-events-none"

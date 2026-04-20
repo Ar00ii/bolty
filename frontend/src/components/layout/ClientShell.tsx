@@ -62,9 +62,9 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       </a>
       <CommandPalette />
       <ShortcutsModal />
-      <FloatingTopBar />
+      {!isAuth && <FloatingTopBar />}
       {!isAuth && <BackToTop />}
-      <UnifiedHeader />
+      {!isAuth && <UnifiedHeader />}
 
       <div className={`flex ${!isHome && !isAuth && !isLegal ? 'pt-16' : ''}`}>
         <div className="flex-1 w-full min-w-0">
