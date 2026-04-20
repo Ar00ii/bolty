@@ -516,9 +516,9 @@ textarea {
   /* ── Neon / branded buttons ── */
   .btn-neon {
     @apply relative px-4 py-2 text-sm font-light
-           text-monad-400 border border-monad-400/30 rounded-lg
+           text-bolty-400 border border-bolty-400/30 rounded-lg
            transition-all duration-200 cursor-pointer
-           hover:border-monad-400/60 hover:text-white hover:bg-monad-400/10;
+           hover:border-bolty-400/60 hover:text-white hover:bg-bolty-400/10;
   }
   .btn-neon:hover {
     box-shadow: 0 0 16px rgba(131, 110, 249, 0.15);
@@ -588,7 +588,7 @@ textarea {
   }
   .terminal-badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light
-           border border-monad-400/20 text-monad-400 bg-monad-500/5;
+           border border-bolty-400/20 text-bolty-400 bg-bolty-500/5;
   }
 
   .status-online {
@@ -826,7 +826,7 @@ textarea {
   }
 
   .prompt {
-    @apply text-monad-400 select-none font-mono;
+    @apply text-bolty-400 select-none font-mono;
   }
   .prompt::before {
     content: '> ';
@@ -2589,15 +2589,15 @@ aside button[data-active='true']::after {
   border-color: var(--mk-surface-3) !important;
 }
 
-/* Monad accents used in the app (purple-ish too) */
-.mk-scope .text-monad-400,
-.mk-scope .text-monad-500,
-.mk-scope .text-monad-600,
-.mk-scope .bg-monad-400\/10,
-.mk-scope .bg-monad-500\/5,
-.mk-scope .border-monad-400\/20,
-.mk-scope .border-monad-400\/30,
-.mk-scope .border-monad-400\/60 {
+/* Bolty accents used in the app (purple-ish too) */
+.mk-scope .text-bolty-400,
+.mk-scope .text-bolty-500,
+.mk-scope .text-bolty-600,
+.mk-scope .bg-bolty-400\/10,
+.mk-scope .bg-bolty-500\/5,
+.mk-scope .border-bolty-400\/20,
+.mk-scope .border-bolty-400\/30,
+.mk-scope .border-bolty-400\/60 {
   color: var(--mk-text-secondary) !important;
   background-color: transparent !important;
   border-color: var(--mk-surface-3) !important;

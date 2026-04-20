@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Plus, Search } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect } from 'react';
@@ -168,51 +168,6 @@ export function PowerNavbar() {
         </span>
       </button>
 
-      {/* Deploy agent CTA */}
-      <Link
-        href="/market/seller"
-        className="hidden md:inline-flex items-center gap-[6px] rounded-lg transition-colors"
-        style={{
-          padding: '6px 11px',
-          fontSize: '12.5px',
-          fontWeight: 400,
-          background: '#836EF9',
-          color: 'white',
-          boxShadow: '0 0 0 1px rgba(131,110,249,0.3), 0 4px 14px rgba(131,110,249,0.25)',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = '#a594ff')}
-        onMouseLeave={(e) => (e.currentTarget.style.background = '#836EF9')}
-      >
-        <Plus className="w-[13px] h-[13px]" strokeWidth={2} />
-        Deploy agent
-      </Link>
-
-      {/* Divider */}
-      <div
-        className="hidden md:block shrink-0"
-        style={{ width: '1px', height: '22px', background: '#1f1f23' }}
-      />
-
-      {/* Network pill */}
-      <div
-        className="hidden md:flex items-center gap-[7px] rounded-full font-mono"
-        style={{
-          padding: '5px 10px',
-          background: '#0c0c0f',
-          border: '1px solid #1f1f23',
-          fontSize: '11px',
-          color: '#a1a1aa',
-        }}
-      >
-        <span
-          className="w-[6px] h-[6px] rounded-full"
-          style={{ background: '#22c55e', boxShadow: '0 0 8px rgba(34,197,94,0.5)' }}
-        />
-        <span>Monad</span>
-        <span style={{ color: '#52525b' }}>·</span>
-        <span style={{ color: '#71717a' }}>#8,492,118</span>
-      </div>
-
       {/* Notification bell */}
       <button
         type="button"
@@ -233,18 +188,19 @@ export function PowerNavbar() {
         <Bell className="w-[15px] h-[15px]" strokeWidth={1.6} />
         {/* Placeholder count — wire to real unread count later */}
         <span
-          className="absolute font-mono grid place-items-center"
+          className="absolute inline-flex items-center justify-center"
           style={{
-            top: '4px',
-            right: '4px',
-            minWidth: '14px',
-            height: '14px',
-            padding: '0 3px',
-            borderRadius: '7px',
+            top: '2px',
+            right: '2px',
+            minWidth: '15px',
+            height: '15px',
+            padding: '0 4px',
+            borderRadius: '999px',
             background: '#836EF9',
             color: 'white',
-            fontSize: '9px',
+            fontSize: '9.5px',
             fontWeight: 600,
+            lineHeight: 1,
             border: '1.5px solid #09090b',
           }}
         >

@@ -66,7 +66,7 @@ export default function ProfileSetupPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
       </div>
     );
   }

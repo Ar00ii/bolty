@@ -234,9 +234,7 @@ function MarketScreener() {
             ? {
                 ...l,
                 sales24h: (l.sales24h || 0) + 1,
-                volumeEth24h: Number(
-                  ((l.volumeEth24h || 0) + (ev.priceEth || 0)).toFixed(4),
-                ),
+                volumeEth24h: Number(((l.volumeEth24h || 0) + (ev.priceEth || 0)).toFixed(4)),
               }
             : l,
         ),
@@ -271,9 +269,7 @@ function MarketScreener() {
               stats: {
                 ...p.stats,
                 sales24h: p.stats.sales24h + 1,
-                volumeEth24h: Number(
-                  (p.stats.volumeEth24h + (ev.priceEth || 0)).toFixed(4),
-                ),
+                volumeEth24h: Number((p.stats.volumeEth24h + (ev.priceEth || 0)).toFixed(4)),
               },
             }
           : p,
@@ -366,7 +362,7 @@ function MarketScreener() {
   return (
     <div className="min-h-screen pb-20">
       {/* Header */}
-      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+      <header className="px-6 pt-4 pb-4 md:px-10 md:pt-5">
         <div className="mx-auto max-w-[1400px]">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div>
@@ -567,7 +563,14 @@ function StatTile({
 function NewLaunchesTicker({
   items,
 }: {
-  items: Array<{ id: string; title: string; type: ListingType; price: number; currency: string; createdAt: string }>;
+  items: Array<{
+    id: string;
+    title: string;
+    type: ListingType;
+    price: number;
+    currency: string;
+    createdAt: string;
+  }>;
 }) {
   if (items.length === 0) return null;
   const doubled = [...items, ...items];
@@ -580,7 +583,8 @@ function NewLaunchesTicker({
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
         }}
       >
-        <div className="flex items-center gap-1.5 px-3 text-[10.5px] uppercase tracking-[0.16em] text-[#22c55e] font-medium whitespace-nowrap absolute left-0 top-0 bottom-0 z-10 pr-3"
+        <div
+          className="flex items-center gap-1.5 px-3 text-[10.5px] uppercase tracking-[0.16em] text-[#22c55e] font-medium whitespace-nowrap absolute left-0 top-0 bottom-0 z-10 pr-3"
           style={{
             background: 'linear-gradient(90deg, rgba(10,10,14,0.95) 70%, transparent)',
           }}
@@ -602,9 +606,15 @@ function NewLaunchesTicker({
                 key={`${item.id}-${i}`}
                 className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
               >
-                <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: TYPE_ACCENT[item.type] }} />
+                <Icon
+                  className="w-3 h-3"
+                  strokeWidth={1.75}
+                  style={{ color: TYPE_ACCENT[item.type] }}
+                />
                 <span>{item.title}</span>
-                <span className="font-mono text-[#b4a7ff]">{formatEth(item.price)} {item.currency}</span>
+                <span className="font-mono text-[#b4a7ff]">
+                  {formatEth(item.price)} {item.currency}
+                </span>
                 <span className="text-zinc-600">· {timeAgo(item.createdAt)} ago</span>
               </Link>
             );
@@ -613,21 +623,19 @@ function NewLaunchesTicker({
       </div>
       <style jsx>{`
         @keyframes bolty-ticker {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(-50%);
+          }
         }
       `}</style>
     </section>
   );
 }
 
-function TypeTabs({
-  value,
-  onChange,
-}: {
-  value: TypeFilter;
-  onChange: (v: TypeFilter) => void;
-}) {
+function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFilter) => void }) {
   const tabs: { key: TypeFilter; label: string }[] = [
     { key: 'ALL', label: 'All' },
     { key: 'AI_AGENT', label: 'Agents' },
@@ -652,8 +660,7 @@ function TypeTabs({
           style={{
             color: value === t.key ? '#ffffff' : '#a1a1aa',
             background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
-            boxShadow:
-              value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
           }}
         >
           {t.label}
@@ -829,9 +836,7 @@ function Row({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-[13px] font-normal text-white truncate">
-                {listing.title}
-              </span>
+              <span className="text-[13px] font-normal text-white truncate">{listing.title}</span>
               {isLive && (
                 <span
                   className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded"
@@ -874,8 +879,7 @@ function Row({
         <div className="text-right text-[12px] text-zinc-300 font-light">
           {listing.reviewCount ? (
             <span>
-              <span className="text-[#f59e0b]">★</span>{' '}
-              {(listing.reviewAverage ?? 0).toFixed(1)}
+              <span className="text-[#f59e0b]">★</span> {(listing.reviewAverage ?? 0).toFixed(1)}
               <span className="text-zinc-600 ml-0.5 text-[10px]">({listing.reviewCount})</span>
             </span>
           ) : (
@@ -890,11 +894,7 @@ function Row({
           >
             {listing.seller.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={listing.seller.avatarUrl}
-                alt=""
-                className="w-full h-full object-cover"
-              />
+              <img src={listing.seller.avatarUrl} alt="" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
                 {(listing.seller.username || '?')[0].toUpperCase()}
@@ -998,9 +998,7 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
           <Icon className="w-3 h-3" strokeWidth={1.75} style={{ color: accent }} />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[11.5px] text-white truncate font-light">
-            {trade.listing.title}
-          </div>
+          <div className="text-[11.5px] text-white truncate font-light">{trade.listing.title}</div>
           <div className="text-[10px] text-zinc-500 font-light truncate">
             <span className="text-[#22c55e]">@{trade.buyer.username || 'anon'}</span>
             <span className="text-zinc-600"> bought from </span>

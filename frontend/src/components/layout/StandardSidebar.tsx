@@ -1,12 +1,15 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   Bell,
   BookOpen,
+  Bot,
   ChevronRight,
   ChevronsUpDown,
   FileText,
   Flame,
+  GitBranch,
   Heart,
   LayoutGrid,
   Library,
@@ -22,9 +25,15 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
+
+interface NavChild {
+  label: string;
+  icon?: LucideIcon;
+  href: string;
+}
 
 interface NavItem {
   label: string;
@@ -35,7 +44,7 @@ interface NavItem {
   hot?: boolean;
   dot?: boolean;
   kbd?: string;
-  expandable?: boolean;
+  children?: NavChild[];
 }
 
 interface NavSection {
@@ -47,7 +56,15 @@ const NAV: NavSection[] = [
   {
     section: 'Discover',
     items: [
-      { label: 'Marketplace', icon: LayoutGrid, href: '/market', expandable: true },
+      {
+        label: 'Marketplace',
+        icon: LayoutGrid,
+        href: '/market',
+        children: [
+          { label: 'Agents', icon: Bot, href: '/market/agents' },
+          { label: 'Repos', icon: GitBranch, href: '/market/repos' },
+        ],
+      },
       { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
     ],
   },
@@ -56,7 +73,7 @@ const NAV: NavSection[] = [
     items: [
       { label: 'Library', icon: Library, href: '/market/library' },
       { label: 'Saved', icon: Heart, href: '/market/favorites' },
-      { label: 'Orders', icon: ShoppingBag, href: '/orders', expandable: true },
+      { label: 'Orders', icon: ShoppingBag, href: '/orders' },
     ],
   },
   {
@@ -71,7 +88,7 @@ const NAV: NavSection[] = [
     section: 'Account',
     items: [
       { label: 'Wallet', icon: Wallet, href: '/profile?tab=wallet' },
-      { label: 'Settings', icon: Settings, href: '/profile', expandable: true },
+      { label: 'Settings', icon: Settings, href: '/profile' },
       { label: 'How it works', icon: FileText, href: '/how-it-works' },
       { label: 'Docs', icon: BookOpen, href: '/docs/agent-protocol' },
       { label: 'Help', icon: LifeBuoy, href: '/help' },
@@ -141,7 +158,7 @@ export function StandardSidebar() {
                 boxShadow: '0 0 8px rgba(34,197,94,0.6)',
               }}
             />
-            Monad Mainnet
+            Bolty Mainnet
           </div>
         </div>
         <ChevronsUpDown
@@ -204,7 +221,7 @@ export function StandardSidebar() {
           background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
         }}
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-[6px]">
             <span
               className="w-[6px] h-[6px] rounded-full"
@@ -228,41 +245,6 @@ export function StandardSidebar() {
             disconnect
           </button>
         </div>
-        <div
-          className="flex items-center justify-between rounded-lg"
-          style={{
-            padding: '10px 12px',
-            background: '#121214',
-            border: '1px solid #1f1f23',
-          }}
-        >
-          <div>
-            <div
-              className="font-mono"
-              style={{ fontSize: '18px', color: '#e4e4e7', fontWeight: 400 }}
-            >
-              12.847
-            </div>
-            <div className="font-mono mt-[1px]" style={{ fontSize: '10.5px', color: '#52525b' }}>
-              MON · $4,218.20
-            </div>
-          </div>
-          <Link
-            href="/profile?tab=billing"
-            className="rounded-md transition-colors"
-            style={{
-              fontSize: '12px',
-              padding: '6px 10px',
-              background: '#836EF9',
-              color: 'white',
-              fontWeight: 400,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = '#a594ff')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = '#836EF9')}
-          >
-            Buy →
-          </Link>
-        </div>
       </div>
     </aside>
   );
@@ -271,40 +253,87 @@ export function StandardSidebar() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; active: boolean }) {
+  const pathname = usePathname();
+  const hasChildren = !!item.children && item.children.length > 0;
+
+  // Child is considered active if its exact href matches the current route
+  const childActiveHref = hasChildren
+    ? item.children!.find(
+        (c) => pathname === c.href.split('?')[0] || pathname.startsWith(c.href.split('?')[0] + '/'),
+      )?.href
+    : undefined;
+
+  // Auto-open when a child is active (e.g. landing on /market/agents)
+  const [open, setOpen] = useState<boolean>(!!childActiveHref || active);
+  useEffect(() => {
+    if (childActiveHref) setOpen(true);
+  }, [childActiveHref]);
+
+  // Hover-to-open with a short close delay so crossing the parent↔children
+  // gap doesn't snap it shut.
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = setTimeout(() => {
+      // Only close if nothing inside keeps it pinned open
+      if (!childActiveHref) setOpen(false);
+    }, 120);
+  };
+  useEffect(() => () => cancelClose(), []);
+
+  const handleGroupEnter = () => {
+    if (!hasChildren) return;
+    cancelClose();
+    setOpen(true);
+  };
+  const handleGroupLeave = () => {
+    if (!hasChildren) return;
+    scheduleClose();
+  };
+
   const iconColor = active ? '#a594ff' : '#71717a';
 
-  return (
-    <Link
-      href={item.href}
-      className="grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group relative"
-      style={{
-        gridTemplateColumns: '10px 16px 1fr auto',
-        color: active ? '#e4e4e7' : '#a1a1aa',
-        background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
-        fontSize: '13px',
-        fontWeight: 300,
-      }}
-      onMouseEnter={(e) => {
-        if (!active) {
-          e.currentTarget.style.color = '#e4e4e7';
-          e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-        }
-        const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-        if (iconEl) iconEl.style.color = '#a594ff';
-        const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
-        if (kbdEl) kbdEl.style.opacity = '1';
-      }}
-      onMouseLeave={(e) => {
-        if (!active) {
-          e.currentTarget.style.color = '#a1a1aa';
-          e.currentTarget.style.background = 'transparent';
-        }
-        const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-        if (iconEl) iconEl.style.color = iconColor;
-        const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
-        if (kbdEl) kbdEl.style.opacity = '0';
-      }}
-    >
+  const rowStyle: React.CSSProperties = {
+    gridTemplateColumns: '10px 16px 1fr auto',
+    color: active ? '#e4e4e7' : '#a1a1aa',
+    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+    fontSize: '13px',
+    fontWeight: 300,
+  };
+
+  const rowClassName =
+    'grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group relative w-full text-left';
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
+    if (!active) {
+      e.currentTarget.style.color = '#e4e4e7';
+      e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+    }
+    const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
+    if (iconEl) iconEl.style.color = '#a594ff';
+    const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
+    if (kbdEl) kbdEl.style.opacity = '1';
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
+    if (!active) {
+      e.currentTarget.style.color = '#a1a1aa';
+      e.currentTarget.style.background = 'transparent';
+    }
+    const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
+    if (iconEl) iconEl.style.color = iconColor;
+    const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
+    if (kbdEl) kbdEl.style.opacity = '0';
+  };
+
+  const body = (
+    <>
       <span
         className="font-mono leading-none"
         style={{ fontSize: '13px', color: '#836EF9', width: '10px' }}
@@ -315,12 +344,115 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
         <Icon className="w-4 h-4" strokeWidth={1.5} />
       </span>
       <span className="truncate whitespace-nowrap">{item.label}</span>
-      <SidebarItemMeta item={item} />
-    </Link>
+      <SidebarItemMeta item={item} open={open} />
+    </>
+  );
+
+  if (!hasChildren) {
+    return (
+      <Link
+        href={item.href}
+        className={rowClassName}
+        style={rowStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div onMouseEnter={handleGroupEnter} onMouseLeave={handleGroupLeave}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className={rowClassName}
+        style={rowStyle}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {body}
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            key="children"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div className="mt-0.5 mb-1 pl-[22px] relative">
+              {/* left rail */}
+              <span
+                className="absolute top-1 bottom-1 w-px"
+                style={{ left: '15px', background: '#1f1f23' }}
+              />
+              {item.children!.map((c) => {
+                const ChildIcon = c.icon;
+                const isActive =
+                  pathname === c.href.split('?')[0] ||
+                  pathname.startsWith(c.href.split('?')[0] + '/');
+                return (
+                  <Link
+                    key={c.href}
+                    href={c.href}
+                    className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
+                    style={{
+                      color: isActive ? '#e4e4e7' : '#a1a1aa',
+                      background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
+                      fontSize: '12.5px',
+                      fontWeight: 300,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#e4e4e7';
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isActive) {
+                        e.currentTarget.style.color = '#a1a1aa';
+                        e.currentTarget.style.background = 'transparent';
+                      }
+                    }}
+                  >
+                    {ChildIcon && (
+                      <ChildIcon
+                        className="w-[14px] h-[14px] shrink-0"
+                        strokeWidth={1.5}
+                        style={{ color: isActive ? '#a594ff' : '#71717a' }}
+                      />
+                    )}
+                    <span className="truncate">{c.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
 
-function SidebarItemMeta({ item }: { item: NavItem }) {
+function SidebarItemMeta({ item, open }: { item: NavItem; open?: boolean }) {
+  if (item.children && item.children.length > 0) {
+    return (
+      <ChevronRight
+        className="w-[14px] h-[14px] transition-transform"
+        strokeWidth={1.75}
+        style={{
+          color: '#52525b',
+          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+        }}
+      />
+    );
+  }
   if (item.badge) {
     return (
       <span
@@ -377,11 +509,6 @@ function SidebarItemMeta({ item }: { item: NavItem }) {
       >
         {item.kbd}
       </span>
-    );
-  }
-  if (item.expandable) {
-    return (
-      <ChevronRight className="w-[14px] h-[14px]" strokeWidth={1.75} style={{ color: '#52525b' }} />
     );
   }
   return null;

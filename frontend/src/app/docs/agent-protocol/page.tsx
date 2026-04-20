@@ -103,7 +103,7 @@ function Section({
           <button
             onClick={copyLink}
             aria-label={`Copy link to ${title}`}
-            className="text-monad-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
+            className="text-bolty-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
             title={copied ? 'Link copied' : 'Copy link to section'}
           >
             {copied ? '✓' : '#'}
@@ -122,7 +122,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function Mono({ children }: { children: React.ReactNode }) {
   return (
-    <code className="font-mono text-monad-300 bg-monad-500/10 rounded px-1.5 py-0.5 text-xs">
+    <code className="font-mono text-bolty-300 bg-bolty-500/10 rounded px-1.5 py-0.5 text-xs">
       {children}
     </code>
   );
@@ -186,7 +186,7 @@ export default function AgentProtocolPage() {
                     }}
                     aria-current={isActive ? 'location' : undefined}
                     className={`relative block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-colors ${
-                      isActive ? 'text-monad-300' : 'text-zinc-500 hover:text-monad-400'
+                      isActive ? 'text-bolty-300' : 'text-zinc-500 hover:text-bolty-400'
                     }`}
                   >
                     {isActive && (
@@ -311,7 +311,7 @@ export default function AgentProtocolPage() {
                   className="card p-4 space-y-1.5"
                   style={{ borderColor: 'rgba(131,110,249,0.12)' }}
                 >
-                  <div className="text-xs font-mono font-light text-monad-300">{label}</div>
+                  <div className="text-xs font-mono font-light text-bolty-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -363,7 +363,7 @@ export default function AgentProtocolPage() {
                 ['messages', 'Full conversation history ordered oldest → newest'],
               ].map(([field, desc]) => (
                 <div key={field} className="flex gap-3 text-xs">
-                  <span className="font-mono text-monad-300 w-36 flex-shrink-0">{field}</span>
+                  <span className="font-mono text-bolty-300 w-36 flex-shrink-0">{field}</span>
                   <span className="text-zinc-500">{desc}</span>
                 </div>
               ))}
@@ -473,7 +473,7 @@ export default function AgentProtocolPage() {
                 },
               ].map(({ event, when, notes }) => (
                 <div key={event} className="card flex gap-4 px-4 py-3">
-                  <code className="font-mono text-monad-300 text-xs w-48 flex-shrink-0 pt-0.5">
+                  <code className="font-mono text-bolty-300 text-xs w-48 flex-shrink-0 pt-0.5">
                     {event}
                   </code>
                   <div>
@@ -501,7 +501,7 @@ export default function AgentProtocolPage() {
                 'Rate limit: one call per turn, max 15 turns per negotiation',
               ].map((rule) => (
                 <div key={rule} className="flex items-start gap-2 text-xs text-zinc-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-monad-500 flex-shrink-0 mt-1.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-bolty-500 flex-shrink-0 mt-1.5" />
                   {rule}
                 </div>
               ))}
@@ -671,7 +671,7 @@ app.listen(3000);`}
               background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)',
             }}
           >
-            <p className="text-xs font-light text-monad-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-light text-bolty-400 uppercase tracking-wider mb-3">
               Ready to connect?
             </p>
             <h3 className="text-xl font-light text-white mb-3">

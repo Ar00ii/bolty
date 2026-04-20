@@ -299,7 +299,7 @@ function Avatar({
   }
   return (
     <div
-      className={`${cls} rounded-full bg-monad-500/15 border border-monad-500/25 flex items-center justify-center text-monad-400 font-light flex-shrink-0`}
+      className={`${cls} rounded-full bg-bolty-500/15 border border-bolty-500/25 flex items-center justify-center text-bolty-400 font-light flex-shrink-0`}
     >
       {(name || 'U')[0]?.toUpperCase()}
     </div>
@@ -1073,7 +1073,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
       </div>
     );
   }
@@ -1216,7 +1216,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => avatarInputRef.current?.click()}
                       disabled={avatarUploading}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-monad-500/30 text-[var(--text-muted)] hover:text-monad-400 transition-all disabled:opacity-50"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/30 text-[var(--text-muted)] hover:text-bolty-400 transition-all disabled:opacity-50"
                     >
                       {avatarUploading ? 'Uploading...' : 'Change photo'}
                     </button>
@@ -1233,8 +1233,8 @@ export default function ProfilePage() {
                 <form onSubmit={handleSaveGeneral} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Field label="Username">
-                      <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                        <span className="px-3 text-monad-400 font-mono text-sm select-none">@</span>
+                      <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                        <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
                         <input
                           type="text"
                           value={username}
@@ -1273,12 +1273,12 @@ export default function ProfilePage() {
                   </Field>
 
                   {userTag && (
-                    <div className="flex items-center justify-between bg-monad-500/5 border border-monad-500/15 rounded-xl px-4 py-3">
+                    <div className="flex items-center justify-between bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3">
                       <div>
                         <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
                           User ID
                         </div>
-                        <div className="font-mono text-monad-400 font-light">#{userTag}</div>
+                        <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
                       </div>
                       <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
                         Others can find you
@@ -1507,7 +1507,7 @@ export default function ProfilePage() {
                     title="Professional Network"
                     subtitle="Build meaningful connections with developers and expand your professional community."
                   />
-                  <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-monad-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                  <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                     <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
                     <input
                       type="text"
@@ -1517,7 +1517,7 @@ export default function ProfilePage() {
                       className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                     />
                     {searching ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin flex-shrink-0" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin flex-shrink-0" />
                     ) : (
                       searchQuery && (
                         <button
@@ -1547,13 +1547,13 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                               {u.username && <span>@{u.username}</span>}
-                              {u.userTag && <span className="text-monad-400/70">#{u.userTag}</span>}
+                              {u.userTag && <span className="text-bolty-400/70">#{u.userTag}</span>}
                             </div>
                           </div>
                           <button
                             onClick={() => handleSendFriendRequest(u.id)}
                             disabled={sendingTo === u.id}
-                            className="text-xs text-monad-400 border border-monad-500/30 hover:border-monad-400/60 hover:bg-monad-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
+                            className="text-xs text-bolty-400 border border-bolty-500/30 hover:border-bolty-400/60 hover:bg-bolty-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
                           >
                             {sendingTo === u.id ? '...' : '+ Add'}
                           </button>
@@ -1573,7 +1573,7 @@ export default function ProfilePage() {
                 <div className="profile-content-card">
                   {friendsLoading ? (
                     <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-monad-400 animate-spin" />
+                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
                       Loading...
                     </div>
                   ) : (
@@ -1602,14 +1602,14 @@ export default function ProfilePage() {
                                 <div className="flex-1 min-w-0">
                                   <Link
                                     href={`/u/${req.from.username}`}
-                                    className="text-sm font-light text-[var(--text)] hover:text-monad-300 transition-colors"
+                                    className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
                                   >
                                     {req.from.displayName || req.from.username}
                                   </Link>
                                   <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                                     {req.from.username && <span>@{req.from.username}</span>}
                                     {req.from.userTag && (
-                                      <span className="text-monad-400/60">#{req.from.userTag}</span>
+                                      <span className="text-bolty-400/60">#{req.from.userTag}</span>
                                     )}
                                   </div>
                                 </div>
@@ -1652,7 +1652,7 @@ export default function ProfilePage() {
                             {friends.map((f) => (
                               <div
                                 key={f.id}
-                                className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-monad-500/40 hover:shadow-lg transition-all duration-200"
+                                className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-bolty-500/40 hover:shadow-lg transition-all duration-200"
                               >
                                 <Avatar
                                   src={f.friend.avatarUrl}
@@ -1662,21 +1662,21 @@ export default function ProfilePage() {
                                 <div className="flex-1 min-w-0">
                                   <Link
                                     href={`/u/${f.friend.username}`}
-                                    className="text-xs font-light text-[var(--text)] hover:text-monad-300 transition-colors truncate block"
+                                    className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
                                   >
                                     {f.friend.displayName || f.friend.username}
                                   </Link>
                                   <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
                                     {f.friend.username && <span>@{f.friend.username}</span>}
                                     {f.friend.userTag && (
-                                      <span className="text-monad-400/50">#{f.friend.userTag}</span>
+                                      <span className="text-bolty-400/50">#{f.friend.userTag}</span>
                                     )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                   <Link
                                     href={`/dm?peer=${f.friend.id}`}
-                                    className="text-xs text-monad-400 border border-monad-500/25 hover:border-monad-400/50 hover:bg-monad-500/8 px-2 py-1 rounded-lg transition-all duration-200"
+                                    className="text-xs text-bolty-400 border border-bolty-500/25 hover:border-bolty-400/50 hover:bg-bolty-500/8 px-2 py-1 rounded-lg transition-all duration-200"
                                     title="Direct message"
                                   >
                                     DM
@@ -2362,8 +2362,8 @@ export default function ProfilePage() {
                         typeColor = 'text-emerald-400';
                         typeBg = 'bg-emerald-500/10';
                       } else if (action.toLowerCase().includes('api')) {
-                        typeColor = 'text-monad-400';
-                        typeBg = 'bg-monad-500/10';
+                        typeColor = 'text-bolty-400';
+                        typeBg = 'bg-bolty-500/10';
                       } else if (
                         action.toLowerCase().includes('error') ||
                         action.toLowerCase().includes('failed')
@@ -2381,7 +2381,7 @@ export default function ProfilePage() {
                       return (
                         <div
                           key={idx}
-                          className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-monad-500/20 hover:bg-monad-500/2 transition-all duration-200 group"
+                          className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-bolty-500/20 hover:bg-bolty-500/2 transition-all duration-200 group"
                         >
                           <div
                             className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`}

@@ -125,8 +125,8 @@ const TYPE_LABELS: Record<string, string> = {
   OTHER: 'other',
 };
 const TYPE_COLORS: Record<string, string> = {
-  BOT: 'text-monad-400/80 border-monad-400/25 bg-monad-400/5',
-  AI_AGENT: 'text-monad-400/70 border-monad-400/20 bg-monad-400/5',
+  BOT: 'text-bolty-400/80 border-bolty-400/25 bg-bolty-400/5',
+  AI_AGENT: 'text-bolty-400/70 border-bolty-400/20 bg-bolty-400/5',
   SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
@@ -460,10 +460,10 @@ const ROLE_LABELS: Record<string, string> = {
   seller_agent: 'agent',
 };
 const ROLE_COLORS: Record<string, string> = {
-  buyer: 'bg-monad-500/10 border-monad-500/20 text-monad-300',
+  buyer: 'bg-bolty-500/10 border-bolty-500/20 text-bolty-300',
   seller: 'bg-zinc-800/50 border-zinc-700/30 text-zinc-300',
-  buyer_agent: 'bg-monad-500/8 border-monad-500/15 text-monad-200',
-  seller_agent: 'bg-monad-500/10 border-monad-500/15 text-monad-300',
+  buyer_agent: 'bg-bolty-500/8 border-bolty-500/15 text-bolty-200',
+  seller_agent: 'bg-bolty-500/10 border-bolty-500/15 text-bolty-300',
 };
 
 const FIELD_HELP = {
@@ -567,7 +567,7 @@ interface TipProps {
 function Tip({ message, variant = 'info' }: TipProps) {
   if (!message) return null;
   const colorMap = {
-    info: 'text-monad-300',
+    info: 'text-bolty-300',
     success: 'text-green-300',
     warning: 'text-yellow-300',
   };
@@ -951,14 +951,14 @@ function NegotiationModal({
           style={{ borderColor: 'rgba(131,110,249,0.15)' }}
         >
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-monad-400 animate-pulse shrink-0" />
-            <span className="text-monad-400 font-mono text-xs font-light shrink-0">
+            <div className="w-2 h-2 rounded-full bg-bolty-400 animate-pulse shrink-0" />
+            <span className="text-bolty-400 font-mono text-xs font-light shrink-0">
               negotiate://
             </span>
             <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
             {neg && (
               <span
-                className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-monad-400'}`}
+                className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-bolty-400'}`}
               >
                 [{neg.status.toLowerCase()}]
               </span>
@@ -979,8 +979,8 @@ function NegotiationModal({
             style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}
           >
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-monad-400 shrink-0" strokeWidth={1.5} />
-              <p className="text-monad-400 text-xs font-mono">
+              <Zap className="w-3.5 h-3.5 text-bolty-400 shrink-0" strokeWidth={1.5} />
+              <p className="text-bolty-400 text-xs font-mono">
                 AI agents negotiating automatically
               </p>
             </div>
@@ -1050,8 +1050,8 @@ function NegotiationModal({
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
           {loading && (
             <div className="text-center py-12">
-              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-monad-400 animate-spin mx-auto mb-3" />
-              <p className="text-monad-400 text-xs font-mono animate-pulse">
+              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-bolty-400 animate-spin mx-auto mb-3" />
+              <p className="text-bolty-400 text-xs font-mono animate-pulse">
                 initializing negotiation protocol...
               </p>
             </div>
@@ -1068,14 +1068,14 @@ function NegotiationModal({
                   style={{ boxShadow: isAgent ? '0 0 16px rgba(131,110,249,0.08)' : undefined }}
                 >
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    {isAgent && <Zap className="w-2.5 h-2.5 text-monad-400" strokeWidth={2} />}
+                    {isAgent && <Zap className="w-2.5 h-2.5 text-bolty-400" strokeWidth={2} />}
                     <span className="text-zinc-500 text-[10px] uppercase tracking-wider">
                       {ROLE_LABELS[msg.fromRole]}
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   {msg.proposedPrice != null && (
-                    <div className="mt-2 pt-2 border-t border-current/15 font-light text-monad-300">
+                    <div className="mt-2 pt-2 border-t border-current/15 font-light text-bolty-300">
                       ⬡ {msg.proposedPrice} {neg.listing?.currency}
                     </div>
                   )}
@@ -1094,15 +1094,15 @@ function NegotiationModal({
                   background: 'rgba(131,110,249,0.06)',
                 }}
               >
-                <Zap className="w-3 h-3 text-monad-400" strokeWidth={2} />
-                <span className="text-xs font-mono text-monad-400/80">
+                <Zap className="w-3 h-3 text-bolty-400" strokeWidth={2} />
+                <span className="text-xs font-mono text-bolty-400/80">
                   {agentTyping === 'seller_agent' ? 'seller' : 'buyer'} agent thinking
                 </span>
                 <span className="flex gap-0.5">
                   {[0, 1, 2].map((i) => (
                     <span
                       key={i}
-                      className="w-1 h-1 rounded-full bg-monad-400 animate-bounce"
+                      className="w-1 h-1 rounded-full bg-bolty-400 animate-bounce"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     />
                   ))}
@@ -1182,7 +1182,7 @@ function NegotiationModal({
                   background: 'rgba(131,110,249,0.07)',
                 }}
               >
-                <p className="text-monad-300 font-mono text-sm font-light mb-1">✓ PAYMENT SENT</p>
+                <p className="text-bolty-300 font-mono text-sm font-light mb-1">✓ PAYMENT SENT</p>
                 <p className="text-zinc-500 text-xs font-mono mb-3">
                   Check your DMs to coordinate with the seller.
                 </p>
@@ -1353,7 +1353,7 @@ function AgentCard({
             className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
             style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}
           >
-            <Bot className="w-4.5 h-4.5 text-monad-400" strokeWidth={1.75} />
+            <Bot className="w-4.5 h-4.5 text-bolty-400" strokeWidth={1.75} />
           </div>
           <div className="min-w-0">
             <h3 className="text-[13px] font-light text-white truncate leading-tight">
@@ -1367,8 +1367,8 @@ function AgentCard({
                   className="w-3.5 h-3.5 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-monad-500/20 flex items-center justify-center">
-                  <span className="text-[7px] font-light text-monad-400">
+                <div className="w-3.5 h-3.5 rounded-full bg-bolty-500/20 flex items-center justify-center">
+                  <span className="text-[7px] font-light text-bolty-400">
                     {(listing.seller.username || 'A').charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -1390,7 +1390,7 @@ function AgentCard({
                 color: '#a78bfa',
               }}
             >
-              <span className="w-1 h-1 rounded-full bg-monad-400 animate-pulse inline-block" />
+              <span className="w-1 h-1 rounded-full bg-bolty-400 animate-pulse inline-block" />
               AI
             </span>
           )}
@@ -1546,8 +1546,8 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
         className="flex items-center gap-2 px-3 py-2 border-b"
         style={{ borderColor: 'rgba(131,110,249,0.1)' }}
       >
-        <Key className="w-3 h-3 text-monad-400" />
-        <span className="text-monad-400 font-mono text-xs font-light">API Keys</span>
+        <Key className="w-3 h-3 text-bolty-400" />
+        <span className="text-bolty-400 font-mono text-xs font-light">API Keys</span>
         <span className="text-zinc-600 font-mono text-xs ml-auto">{keys.length}/3</span>
       </div>
 
@@ -1722,7 +1722,7 @@ function MyAgentCard({
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
           style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}
         >
-          <Bot className="w-4 h-4 text-monad-400" strokeWidth={1.5} />
+          <Bot className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -1733,7 +1733,7 @@ function MyAgentCard({
               {listing.type.toLowerCase().replace('_', ' ')}
             </Badge>
             {listing.agentEndpoint && (
-              <Badge className="rounded-full bg-monad-500/15 border border-monad-500/25 px-2 py-0 text-xs font-mono text-monad-400">
+              <Badge className="rounded-full bg-bolty-500/15 border border-bolty-500/25 px-2 py-0 text-xs font-mono text-bolty-400">
                 AI endpoint
               </Badge>
             )}
@@ -1744,7 +1744,7 @@ function MyAgentCard({
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
-            <span className="font-mono font-light text-monad-300">
+            <span className="font-mono font-light text-bolty-300">
               {listing.price} {listing.currency}
             </span>
             {listing.minPrice != null && (
@@ -2326,7 +2326,7 @@ function CreateListingForm({
                   className={`mk-wizard__dropzone ${uploadedFile ? 'mk-wizard__dropzone--done' : ''}`}
                 >
                   {uploading ? (
-                    <p className="text-xs font-light text-monad-400 animate-pulse">
+                    <p className="text-xs font-light text-bolty-400 animate-pulse">
                       {scanning ? 'scanning for security threats...' : 'uploading...'}
                     </p>
                   ) : uploadedFile ? (
@@ -2426,7 +2426,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowSandbox(true)}
-                className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="w-full py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -2440,7 +2440,7 @@ function CreateListingForm({
             <button
               type="button"
               onClick={() => setShowIntegrations(true)}
-              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+              className="w-full py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
               style={{
                 borderColor: 'rgba(131,110,249,0.2)',
                 background: 'rgba(131,110,249,0.05)',
@@ -2573,7 +2573,7 @@ function CreateListingForm({
             <button
               type="button"
               onClick={() => setShowTiers(true)}
-              className="w-full py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+              className="w-full py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
               style={{
                 borderColor: 'rgba(131,110,249,0.2)',
                 background: 'rgba(131,110,249,0.05)',
@@ -2729,7 +2729,7 @@ function CreateListingForm({
                           className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                           style={{ background: 'rgba(131,110,249,0.2)' }}
                         >
-                          <Bot className="w-5 h-5 text-monad-300" />
+                          <Bot className="w-5 h-5 text-bolty-300" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="text-sm font-light text-zinc-100 truncate">
@@ -2789,7 +2789,7 @@ function CreateListingForm({
                         style={{ borderColor: 'rgba(255,255,255,0.05)' }}
                       >
                         <span className="text-xs text-zinc-600">Starting at</span>
-                        <span className="text-lg font-light text-monad-300">
+                        <span className="text-lg font-light text-bolty-300">
                           {form.price || '0'} {form.currency}
                         </span>
                       </div>
@@ -2879,7 +2879,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowApiDocs(true)}
-                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -2890,7 +2890,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowCodeSnippets(true)}
-                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -2901,7 +2901,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowAnalytics(true)}
-                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -2912,7 +2912,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowReadme(true)}
-                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -2923,7 +2923,7 @@ function CreateListingForm({
               <button
                 type="button"
                 onClick={() => setShowTeam(true)}
-                className="py-2 px-4 rounded-lg text-xs font-light text-monad-300 border transition-all hover:border-monad-500/40"
+                className="py-2 px-4 rounded-lg text-xs font-light text-bolty-300 border transition-all hover:border-bolty-500/40"
                 style={{
                   borderColor: 'rgba(131,110,249,0.2)',
                   background: 'rgba(131,110,249,0.05)',
@@ -3032,15 +3032,15 @@ function CreateListingForm({
                 </p>
                 <div className="space-y-2 text-xs font-light text-zinc-400">
                   <div className="flex items-start gap-2">
-                    <span className="text-monad-300 mt-1">→</span>
+                    <span className="text-bolty-300 mt-1">→</span>
                     <span>Share your agent URL with others</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-monad-300 mt-1">→</span>
+                    <span className="text-bolty-300 mt-1">→</span>
                     <span>Monitor usage and earnings in your dashboard</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-monad-300 mt-1">→</span>
+                    <span className="text-bolty-300 mt-1">→</span>
                     <span>Update and manage versions anytime</span>
                   </div>
                 </div>
@@ -3317,7 +3317,7 @@ function CreateListingForm({
                         setNewTierName('');
                       }
                     }}
-                    className="px-3 py-2 rounded-lg text-xs font-light text-monad-300 border transition-all"
+                    className="px-3 py-2 rounded-lg text-xs font-light text-bolty-300 border transition-all"
                     style={{
                       borderColor: 'rgba(131,110,249,0.4)',
                       background: 'rgba(131,110,249,0.1)',
@@ -3352,7 +3352,7 @@ function CreateListingForm({
                         }}
                       >
                         <p className="font-light text-zinc-300 mb-2">{tier.name}</p>
-                        <p className="text-lg font-light text-monad-300 mb-2">
+                        <p className="text-lg font-light text-bolty-300 mb-2">
                           ${tier.price || '0'}
                         </p>
                         <p className="text-zinc-600 text-xs mb-2">{tier.features || '—'}</p>
@@ -3509,7 +3509,7 @@ function CreateListingForm({
                           className="w-full text-xs px-2 py-1 rounded bg-black/30 text-zinc-300 border border-zinc-700"
                         />
                       )}
-                      <button className="text-xs px-2 py-1 rounded text-monad-300 border border-monad-500/20 hover:border-monad-500/40 transition-all">
+                      <button className="text-xs px-2 py-1 rounded text-bolty-300 border border-bolty-500/20 hover:border-bolty-500/40 transition-all">
                         Test Connection
                       </button>
                     </div>
@@ -3794,7 +3794,7 @@ function CreateListingForm({
                       .map((data, i) => (
                         <div
                           key={i}
-                          className="flex-1 rounded-t transition-all hover:bg-monad-500/50"
+                          className="flex-1 rounded-t transition-all hover:bg-bolty-500/50"
                           style={{
                             height: `${(data.requests / 80) * 100}%`,
                             background: 'rgba(131,110,249,0.4)',
@@ -3858,7 +3858,7 @@ function CreateListingForm({
                       </div>
                       <div>
                         <p className="text-xs text-zinc-600">Active Users</p>
-                        <p className="text-2xl font-light text-monad-300">
+                        <p className="text-2xl font-light text-bolty-300">
                           {generateAnalyticsData(form.title).users}
                         </p>
                       </div>
@@ -3931,7 +3931,7 @@ function CreateListingForm({
                     onClick={() => setSelectedSnippet(lang)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-light border transition-all ${
                       selectedSnippet === lang
-                        ? 'bg-monad-500/20 border-monad-500/40 text-monad-300'
+                        ? 'bg-bolty-500/20 border-bolty-500/40 text-bolty-300'
                         : 'bg-transparent border-white/10 text-zinc-500 hover:border-white/20'
                     }`}
                   >
@@ -3954,7 +3954,7 @@ function CreateListingForm({
                 }}
               >
                 <p className="text-xs font-light text-zinc-300">
-                  💡 Replace <code className="text-monad-300">YOUR_API_KEY</code> with your actual
+                  💡 Replace <code className="text-bolty-300">YOUR_API_KEY</code> with your actual
                   API key from your dashboard.
                 </p>
               </div>
@@ -4515,7 +4515,7 @@ function AgentsPageContent() {
                     whileHover={active ? undefined : { y: -1 }}
                     transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                     className={`relative text-xs px-3 py-1.5 rounded-lg transition-colors ${
-                      active ? 'text-monad-300' : 'text-zinc-500 hover:text-zinc-300'
+                      active ? 'text-bolty-300' : 'text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     {active && (

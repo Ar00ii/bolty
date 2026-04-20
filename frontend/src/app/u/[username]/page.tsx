@@ -106,7 +106,7 @@ export default function PublicProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-monad-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
       </div>
     );
   }
@@ -117,7 +117,7 @@ export default function PublicProfilePage() {
         <div className="text-center">
           <div className="text-4xl font-mono text-zinc-700 mb-2">404</div>
           <div className="text-zinc-400 text-sm">User not found</div>
-          <Link href="/" className="text-monad-400 text-sm hover:text-monad-300 mt-3 inline-block">
+          <Link href="/" className="text-bolty-400 text-sm hover:text-bolty-300 mt-3 inline-block">
             ← back home
           </Link>
         </div>

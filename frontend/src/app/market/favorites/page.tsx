@@ -86,13 +86,6 @@ export default function FavoritesPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-page)' }}>
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div
-          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[500px] h-[400px] rounded-full blur-3xl opacity-25"
-          style={{ background: 'radial-gradient(circle, #EC4899 0%, transparent 70%)' }}
-        />
-      </div>
-
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <Link
           href="/market"

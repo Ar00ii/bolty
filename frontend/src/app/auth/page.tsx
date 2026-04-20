@@ -207,7 +207,7 @@ function Field({
           autoComplete={autoComplete}
           className="w-full px-4 py-2.5 rounded-lg bg-zinc-900/50 border border-zinc-800 text-white
                      placeholder:text-zinc-600 text-sm
-                     focus:outline-none focus:border-monad-500/60 focus:bg-zinc-900
+                     focus:outline-none focus:border-bolty-500/60 focus:bg-zinc-900
                      transition-all duration-200"
           animate={{
             borderColor: focused ? 'rgba(131, 110, 249, 0.6)' : 'rgb(39, 39, 42)',
@@ -469,19 +469,19 @@ function AuthPage() {
   // -- Render ----
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
+      className="h-screen w-screen flex flex-col items-center justify-center relative px-4 py-8 overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
-      {/* Back button — top-left, above all visual layers */}
+      {/* Back button — pinned top-left of the viewport, never moves */}
       <button
         type="button"
         onClick={handleBack}
         aria-label="Go back"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
+        className="fixed top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-zinc-300 hover:text-white transition-colors"
         style={{
-          background: 'rgba(9,9,11,0.55)',
+          background: 'rgba(9,9,11,0.6)',
           border: '1px solid rgba(255,255,255,0.08)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
@@ -547,7 +547,7 @@ function AuthPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-md max-h-[calc(100vh-4rem)] overflow-y-auto px-1"
       >
         {/* Header */}
         <motion.div
@@ -667,7 +667,7 @@ function AuthPage() {
                 className="space-y-4"
               >
                 <div
-                  className="p-4 rounded-lg border border-monad-500/20"
+                  className="p-4 rounded-lg border border-bolty-500/20"
                   style={{ background: 'rgba(131,110,249,0.05)' }}
                 >
                   <p className="text-xs text-zinc-400 leading-relaxed">
@@ -688,7 +688,7 @@ function AuthPage() {
                     autoComplete="one-time-code"
                     className="w-full px-4 py-3 rounded-lg bg-zinc-900/60 border border-zinc-800 text-white
                              text-center text-2xl font-mono tracking-[0.3em] outline-none
-                             focus:border-monad-500/50 focus:ring-1 focus:ring-monad-500/20
+                             focus:border-bolty-500/50 focus:ring-1 focus:ring-bolty-500/20
                              transition-all placeholder:text-zinc-700"
                   />
                 </div>
@@ -769,7 +769,7 @@ function AuthPage() {
                           clearMessages();
                         }}
                         whileHover={{ color: '#a78bfa' }}
-                        className="text-xs text-zinc-600 hover:text-monad-400 transition-colors font-light"
+                        className="text-xs text-zinc-600 hover:text-bolty-400 transition-colors font-light"
                       >
                         Forgot password?
                       </motion.button>
@@ -781,7 +781,7 @@ function AuthPage() {
                   disabled={anyLoading}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                  className="w-full py-2.5 rounded-lg bg-bolty-500 hover:bg-bolty-600 text-white font-light transition-all
                            disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
                 >
                   {loading === 'email' ? (
@@ -859,7 +859,7 @@ function AuthPage() {
                   disabled={anyLoading}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                  className="w-full py-2.5 rounded-lg bg-bolty-500 hover:bg-bolty-600 text-white font-light transition-all
                            disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
                 >
                   {loading === 'email' ? (
@@ -882,14 +882,14 @@ function AuthPage() {
                   By creating an account you agree to our{' '}
                   <Link
                     href="/terms"
-                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                    className="text-zinc-500 hover:text-bolty-400 underline underline-offset-2 transition-colors"
                   >
                     Terms
                   </Link>{' '}
                   and{' '}
                   <Link
                     href="/privacy"
-                    className="text-zinc-500 hover:text-monad-400 underline underline-offset-2 transition-colors"
+                    className="text-zinc-500 hover:text-bolty-400 underline underline-offset-2 transition-colors"
                   >
                     Privacy
                   </Link>
@@ -930,7 +930,7 @@ function AuthPage() {
                   disabled={loading === 'forgot'}
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 rounded-lg bg-monad-500 hover:bg-monad-600 text-white font-light transition-all
+                  className="w-full py-2.5 rounded-lg bg-bolty-500 hover:bg-bolty-600 text-white font-light transition-all
                            disabled:opacity-50 disabled:cursor-not-allowed mt-6 flex items-center justify-center gap-2"
                 >
                   {loading === 'forgot' ? (
