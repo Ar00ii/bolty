@@ -195,23 +195,29 @@ export default function LeaderboardPage() {
               <span className="text-[10px] uppercase tracking-[0.16em] text-zinc-500 font-medium flex-shrink-0">
                 Tiers
               </span>
-              {RANK_TIERS.map((r) => (
-                <div key={r.rank} className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="text-[13px] leading-none" aria-hidden="true">
-                    {r.icon}
-                  </span>
-                  <span className="text-[11px] font-light" style={{ color: r.color }}>
-                    {r.label}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-600">
-                    {r.rank === 'CAMPEON'
-                      ? 'Top 5'
-                      : r.threshold >= 1000
-                        ? `${(r.threshold / 1000).toFixed(0)}k+`
-                        : `${r.threshold}+`}
-                  </span>
-                </div>
-              ))}
+              {RANK_TIERS.map((r) => {
+                const Icon = r.icon;
+                return (
+                  <div key={r.rank} className="flex items-center gap-1.5 flex-shrink-0">
+                    <Icon
+                      className="w-3 h-3 flex-shrink-0"
+                      strokeWidth={1.75}
+                      style={{ color: r.color }}
+                      aria-hidden="true"
+                    />
+                    <span className="text-[11px] font-light" style={{ color: r.color }}>
+                      {r.label}
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-600">
+                      {r.rank === 'CAMPEON'
+                        ? 'Top 5'
+                        : r.threshold >= 1000
+                          ? `${(r.threshold / 1000).toFixed(0)}k+`
+                          : `${r.threshold}+`}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

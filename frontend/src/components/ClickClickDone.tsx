@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Hammer, Medal } from 'lucide-react';
 import React from 'react';
 
 export function ClickClickDone() {
@@ -220,10 +221,10 @@ export function ClickClickDone() {
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       {[
-                        { label: 'Iron', icon: '🔩' },
-                        { label: 'Bronze', icon: '🥉' },
-                        { label: 'Silver', icon: '🥈' },
-                        { label: 'Gold', icon: '🥇' },
+                        { label: 'Iron', Icon: Hammer },
+                        { label: 'Bronze', Icon: Medal },
+                        { label: 'Silver', Icon: Medal },
+                        { label: 'Gold', Icon: Medal },
                       ].map((tier) => (
                         <div
                           key={tier.label}
@@ -238,7 +239,7 @@ export function ClickClickDone() {
                             gap: '6px',
                           }}
                         >
-                          <span aria-hidden="true">{tier.icon}</span>
+                          <tier.Icon size={12} strokeWidth={1.75} aria-hidden="true" />
                           {tier.label}
                         </div>
                       ))}

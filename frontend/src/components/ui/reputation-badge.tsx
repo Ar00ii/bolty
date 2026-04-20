@@ -1,11 +1,12 @@
 'use client';
 
+import { Crown, Gem, Hammer, Medal, Star, Trophy, type LucideIcon } from 'lucide-react';
 import React from 'react';
 
 export interface ReputationInfo {
   points: number;
   label: string;
-  icon: string;
+  icon: LucideIcon;
   color: string;
   tier: number; // 0–7 for bar fill
   description?: string;
@@ -15,7 +16,7 @@ export interface ReputationInfo {
 export interface RankDefinition {
   rank: 'HIERRO' | 'BRONCE' | 'PLATA' | 'ORO' | 'PLATINO' | 'DIAMANTE' | 'MAESTRIA' | 'CAMPEON';
   label: string;
-  icon: string;
+  icon: LucideIcon;
   color: string;
   threshold: number;
   description: string;
@@ -28,7 +29,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'HIERRO',
     label: 'Iron',
-    icon: '🔩',
+    icon: Hammer,
     color: '#78716c',
     threshold: 0,
     description: 'Just getting started on the platform',
@@ -36,7 +37,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'BRONCE',
     label: 'Bronze',
-    icon: '🥉',
+    icon: Medal,
     color: '#cd7f32',
     threshold: 25,
     description: 'Actively contributing to the community',
@@ -44,7 +45,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'PLATA',
     label: 'Silver',
-    icon: '🥈',
+    icon: Medal,
     color: '#9ca3af',
     threshold: 50,
     description: 'Established developer with proven contributions',
@@ -52,7 +53,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'ORO',
     label: 'Gold',
-    icon: '🥇',
+    icon: Medal,
     color: '#f59e0b',
     threshold: 120,
     description: 'Highly respected community member',
@@ -60,7 +61,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'PLATINO',
     label: 'Platinum',
-    icon: '⭐',
+    icon: Star,
     color: '#a855f7',
     threshold: 250,
     description: 'Elite developer with exceptional track record',
@@ -68,7 +69,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'DIAMANTE',
     label: 'Diamond',
-    icon: '💎',
+    icon: Gem,
     color: '#38bdf8',
     threshold: 500,
     description: 'Top-tier contributor trusted by thousands',
@@ -76,7 +77,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'MAESTRIA',
     label: 'Master',
-    icon: '👑',
+    icon: Crown,
     color: '#ec4899',
     threshold: 1000,
     description: 'Master of the craft — exceptional standing',
@@ -84,7 +85,7 @@ export const RANK_TIERS: RankDefinition[] = [
   {
     rank: 'CAMPEON',
     label: 'Champion',
-    icon: '🏆',
+    icon: Trophy,
     color: '#836ef9',
     threshold: 2000,
     description: 'Champion — reserved for the top 5 of the ecosystem',
@@ -125,11 +126,12 @@ export function ReputationBadge({
   showLabel = false,
 }: ReputationBadgeProps) {
   const rank = getReputationRank(points);
+  const Icon = rank.icon;
 
   const sizes = {
-    sm: { container: 'gap-1 px-1.5 py-0.5', label: 'text-[10px]', dot: 'w-1.5 h-1.5' },
-    md: { container: 'gap-1 px-2 py-1', label: 'text-[10px]', dot: 'w-2 h-2' },
-    lg: { container: 'gap-1.5 px-2.5 py-1', label: 'text-xs', dot: 'w-2 h-2' },
+    sm: { container: 'gap-1 px-1.5 py-0.5', label: 'text-[10px]', icon: 'w-3 h-3' },
+    md: { container: 'gap-1 px-2 py-1', label: 'text-[10px]', icon: 'w-3.5 h-3.5' },
+    lg: { container: 'gap-1.5 px-2.5 py-1', label: 'text-xs', icon: 'w-4 h-4' },
   };
 
   const s = sizes[size];
@@ -144,9 +146,12 @@ export function ReputationBadge({
       }}
       title={`${rank.label} · ${points.toLocaleString()} rays`}
     >
-      <span className={`${s.label} leading-none flex-shrink-0`} aria-hidden="true">
-        {rank.icon}
-      </span>
+      <Icon
+        className={`${s.icon} flex-shrink-0`}
+        strokeWidth={1.75}
+        style={{ color: rank.color }}
+        aria-hidden="true"
+      />
       {showLabel && <span className={s.label}>{rank.label}</span>}
       {showPoints && (
         <span className={s.label}>

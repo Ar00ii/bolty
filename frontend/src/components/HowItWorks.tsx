@@ -9,7 +9,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, ShoppingCart, Upload, Zap, Trophy, GitBranch } from 'lucide-react';
+import {
+  ArrowRight,
+  GitBranch,
+  Hammer,
+  Medal,
+  ShoppingCart,
+  Trophy,
+  Upload,
+  Zap,
+} from 'lucide-react';
 import React, { memo } from 'react';
 
 const STEP_CARD_STYLE = {
@@ -234,19 +243,22 @@ export const HowItWorks = memo(() => {
                 </div>
                 <div className="space-y-2">
                   {[
-                    { label: 'Iron', icon: '🔩', color: '#78716c' },
-                    { label: 'Bronze', icon: '🥉', color: '#cd7f32' },
-                    { label: 'Silver', icon: '🥈', color: '#9ca3af' },
-                    { label: 'Gold', icon: '🥇', color: '#f59e0b' },
+                    { label: 'Iron', Icon: Hammer, color: '#78716c' },
+                    { label: 'Bronze', Icon: Medal, color: '#cd7f32' },
+                    { label: 'Silver', Icon: Medal, color: '#9ca3af' },
+                    { label: 'Gold', Icon: Medal, color: '#f59e0b' },
                   ].map((tier) => (
                     <div
                       key={tier.label}
                       className="flex items-center gap-2.5 px-3 py-2 rounded-lg"
                       style={RANK_CHIP_STYLE(tier.color)}
                     >
-                      <span className="text-[13px] leading-none flex-shrink-0" aria-hidden="true">
-                        {tier.icon}
-                      </span>
+                      <tier.Icon
+                        className="w-3.5 h-3.5 flex-shrink-0"
+                        strokeWidth={1.75}
+                        style={{ color: tier.color }}
+                        aria-hidden="true"
+                      />
                       <span
                         className="text-[12px] font-light tracking-[0.005em]"
                         style={{ color: tier.color }}
