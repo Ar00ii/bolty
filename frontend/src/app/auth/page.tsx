@@ -2,6 +2,8 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, AlertTriangle, Eye, EyeOff, Mail, KeyRound, Zap } from 'lucide-react';
+
+import { FlickeringGrid } from '@/components/ui/flickering-grid';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
@@ -444,6 +446,23 @@ export default function AuthPage() {
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
+      {/* Flickering grid — sits between gradient and orbs, masked to fade at edges */}
+      <FlickeringGrid
+        className="absolute inset-0 z-0 pointer-events-none"
+        squareSize={4}
+        gridGap={6}
+        color="#836EF9"
+        maxOpacity={0.35}
+        flickerChance={0.12}
+      />
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 60% 55% at 50% 50%, transparent 0%, rgba(10,10,14,0.7) 55%, rgba(10,10,14,0.95) 100%)',
+        }}
+      />
+
       {/* Animated background orbs */}
       <motion.div
         className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
