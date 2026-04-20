@@ -22,9 +22,16 @@ export interface NotificationItem {
   meta: Record<string, unknown> | null;
 }
 
-export function useNotificationsPoll(isAuthenticated: boolean) {
+export function useNotificationsPoll(
+  isAuthenticated: boolean,
+  onNew?: (notification: NotificationItem) => void,
+) {
   const [count, setCount] = useState(0);
   const socketRef = useRef<Socket | null>(null);
+  const onNewRef = useRef(onNew);
+  useEffect(() => {
+    onNewRef.current = onNew;
+  });
 
   const refresh = useCallback(async () => {
     try {
@@ -52,8 +59,9 @@ export function useNotificationsPoll(isAuthenticated: boolean) {
     });
     socketRef.current = socket;
 
-    socket.on('notification:new', () => {
+    socket.on('notification:new', (notification: NotificationItem) => {
       setCount((c) => c + 1);
+      onNewRef.current?.(notification);
     });
     socket.on('notification:read', () => {
       setCount((c) => Math.max(0, c - 1));

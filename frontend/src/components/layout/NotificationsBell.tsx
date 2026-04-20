@@ -39,11 +39,20 @@ function timeAgo(iso: string) {
 }
 
 export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const { count, refresh, setCount } = useNotificationsPoll(isAuthenticated);
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  const { count, refresh, setCount } = useNotificationsPoll(isAuthenticated, (n) => {
+    if (openRef.current) {
+      setItems((prev) => [n, ...prev]);
+    }
+  });
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
