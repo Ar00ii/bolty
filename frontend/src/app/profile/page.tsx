@@ -31,6 +31,7 @@ const UsageSection = dynamicImport(
   () => import('@/components/profile/UsageSection').then((m) => m.UsageSection),
   { ssr: false },
 );
+import { GradientText } from '@/components/ui/GradientText';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -1130,73 +1131,132 @@ export default function ProfilePage() {
   const userEmail = (user as { email?: string })?.email;
   const profileUrl = username ? `/u/${username}` : null;
 
-  return (
-    <div className="profile-container min-h-screen pt-8 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* ── Sidebar Menu ──────────────────────────────────────────── */}
-          <div className="lg:col-span-1">
-            <nav className="profile-menu-sidebar sticky top-20 lg:space-y-2 lg:space-x-0 space-x-2 space-y-0 flex lg:flex-col overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-              {[
-                { id: 'general' as Tab, label: 'General', Icon: IconUser },
-                { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
-                { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
-                { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-                { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
-                { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
-                { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
-                { id: 'security' as Tab, label: 'Security', Icon: IconShield },
-                { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-                { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
-              ].map(({ id, label, Icon }) => {
-                const active = tab === id;
-                return (
-                  <motion.button
-                    key={id}
-                    onClick={() => setTab(id)}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className="profile-menu-item min-w-fit lg:w-full lg:min-w-0"
-                    style={active ? { color: '#b4a7ff' } : undefined}
-                    title={label}
-                  >
-                    {active && (
-                      <>
-                        <motion.span
-                          layoutId="profile-menu-pill"
-                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                          className="absolute inset-0 rounded-md lg:rounded-lg"
-                          style={{
-                            background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                            boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                          }}
-                        />
-                        <motion.span
-                          layoutId="profile-menu-bar"
-                          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                          aria-hidden="true"
-                          className="hidden lg:block absolute left-0 top-1 bottom-1 w-[2px] rounded-r"
-                          style={{
-                            background:
-                              'linear-gradient(to bottom, transparent 0%, #836ef9 30%, #836ef9 70%, transparent 100%)',
-                          }}
-                        />
-                      </>
-                    )}
-                    <div className="relative z-10 profile-menu-icon">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="relative z-10 profile-menu-label">{label}</span>
-                  </motion.button>
-                );
-              })}
-            </nav>
-          </div>
+  const tabItems = [
+    { id: 'general' as Tab, label: 'General', Icon: IconUser },
+    { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
+    { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
+    { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
+    { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
+    { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
+    { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
+    { id: 'security' as Tab, label: 'Security', Icon: IconShield },
+    { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
+    { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
+  ];
+  const activeTab = tabItems.find((t) => t.id === tab) ?? tabItems[0];
 
-          {/* ── Main content panel ───────────────────────────────────── */}
-          <div className="lg:col-span-3 profile-content">
+  return (
+    <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
+      {/* Ambient brand glows */}
+      <div
+        className="absolute -top-40 -left-40 w-[560px] h-[560px] rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+      />
+      <div
+        className="absolute top-[40vh] -right-40 w-[480px] h-[480px] rounded-full opacity-[0.12] blur-3xl pointer-events-none"
+        style={{ background: 'radial-gradient(circle, #06B6D4 0%, transparent 70%)' }}
+      />
+
+      {/* ── Sticky hero header ───────────────────────────────────────── */}
+      <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
+          <div className="min-w-0">
+            <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-2 flex items-center gap-2">
+              <Link href="/" className="hover:text-zinc-300 transition-colors">
+                Home
+              </Link>
+              <span className="text-zinc-700">/</span>
+              <span className="text-zinc-300">Profile</span>
+              <span className="text-zinc-700">/</span>
+              <span className="text-[#b4a7ff]">{activeTab.label}</span>
+            </div>
+            <h1
+              className="font-light text-white"
+              style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', lineHeight: 1.1 }}
+            >
+              <GradientText gradient="purple">{activeTab.label}</GradientText>
+            </h1>
+            <p className="text-[13px] sm:text-sm text-zinc-400 mt-1 font-light">
+              Manage your identity, security and connections on Bolty.
+            </p>
+          </div>
+          {profileUrl && (
+            <Link
+              href={profileUrl}
+              className="group hidden sm:inline-flex items-center gap-2 rounded-lg h-10 px-3.5 text-[12.5px] font-medium text-white transition-colors self-start sm:self-end"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
+              }}
+            >
+              <IconArrow className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors" />
+              <span className="tracking-[0.005em]">View public profile</span>
+            </Link>
+          )}
+        </div>
+
+        {/* ── Horizontal tab bar ──────────────────────────────────── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <nav
+            className="profile-menu-bar flex items-center gap-1 overflow-x-auto pb-2 -mb-px"
+            role="tablist"
+            aria-label="Profile sections"
+          >
+            {tabItems.map(({ id, label, Icon }) => {
+              const active = tab === id;
+              return (
+                <motion.button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
+                  className="profile-menu-item"
+                  style={active ? { color: '#ffffff' } : undefined}
+                  role="tab"
+                  aria-selected={active}
+                  title={label}
+                >
+                  {active && (
+                    <>
+                      <motion.span
+                        layoutId="profile-menu-pill"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        className="absolute inset-x-0 inset-y-1 rounded-lg"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 18px -6px rgba(131,110,249,0.55)',
+                        }}
+                      />
+                      <motion.span
+                        layoutId="profile-menu-bar"
+                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                        aria-hidden="true"
+                        className="absolute left-3 right-3 -bottom-px h-[2px] rounded-full"
+                        style={{
+                          background:
+                            'linear-gradient(90deg, transparent 0%, #836ef9 30%, #836ef9 70%, transparent 100%)',
+                        }}
+                      />
+                    </>
+                  )}
+                  <div className="relative z-10 profile-menu-icon">
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span className="relative z-10 profile-menu-label">{label}</span>
+                </motion.button>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* ── Main content ─────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10">
+        <div className="profile-content">
             {/* ════════════════════════════════════════════
           GENERAL
       ════════════════════════════════════════════ */}
@@ -2473,12 +2533,10 @@ export default function ProfilePage() {
                 )}
               </div>
             )}
-          </div>
-          {/* end main content panel */}
         </div>
-        {/* end grid */}
+        {/* end profile-content */}
       </div>
-      {/* end container */}
+      {/* end max-w-7xl */}
     </div>
   );
 }
