@@ -1,30 +1,33 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import {
-  Library,
-  Download,
+  ArrowUpRight,
   Bot,
-  GitBranch,
-  Zap,
-  Package,
-  Star,
-  Play,
-  ExternalLink,
   Clock,
+  Download,
+  ExternalLink,
+  GitBranch,
+  Library,
+  Package,
+  Play,
   Search,
+  Sparkles,
+  Star,
+  TrendingUp,
   X,
+  Zap,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { GradientText } from '@/components/ui/GradientText';
 import { api, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+type TypeFilter = 'ALL' | ListingType;
 
 interface LibraryItem {
   orderId: string;
@@ -50,29 +53,56 @@ interface LibraryItem {
   } | null;
 }
 
-const TYPE_META: Record<
-  ListingType,
-  {
-    label: string;
-    color: string;
-    Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  }
-> = {
-  AI_AGENT: { label: 'AI Agent', color: '#a855f7', Icon: Bot },
-  BOT: { label: 'Bot', color: '#836EF9', Icon: Bot },
-  SCRIPT: { label: 'Script', color: '#06B6D4', Icon: Zap },
-  REPO: { label: 'Repo', color: '#3b82f6', Icon: GitBranch },
-  OTHER: { label: 'Other', color: '#64748b', Icon: Package },
+const TYPE_ICON: Record<ListingType, LucideIcon> = {
+  REPO: GitBranch,
+  BOT: Bot,
+  AI_AGENT: Bot,
+  SCRIPT: Zap,
+  OTHER: Package,
 };
 
-function timeAgo(d: string) {
+const TYPE_LABEL: Record<ListingType, string> = {
+  REPO: 'Repo',
+  BOT: 'Bot',
+  AI_AGENT: 'Agent',
+  SCRIPT: 'Script',
+  OTHER: 'Other',
+};
+
+const TYPE_ACCENT: Record<ListingType, string> = {
+  REPO: '#06B6D4',
+  BOT: '#836EF9',
+  AI_AGENT: '#836EF9',
+  SCRIPT: '#EC4899',
+  OTHER: '#94a3b8',
+};
+
+function timeAgo(d: string | Date) {
   const diff = Date.now() - new Date(d).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m}m ago`;
+  const s = Math.floor(diff / 1000);
+  if (s < 5) return 'now';
+  if (s < 60) return `${s}s`;
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 24) return `${h}h`;
+  return `${Math.floor(h / 24)}d`;
+}
+
+function formatEth(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n === 0) return '0';
+  if (n < 0.0001) return '<0.0001';
+  if (n < 1) return n.toFixed(4);
+  if (n < 100) return n.toFixed(3);
+  return n.toFixed(2);
+}
+
+function formatNumber(n: number): string {
+  if (!Number.isFinite(n)) return '0';
+  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'k';
+  return n.toString();
 }
 
 function formatBytes(b: number) {
@@ -86,7 +116,7 @@ export default function LibraryPage() {
   const router = useRouter();
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'AI_AGENT' | 'BOT' | 'SCRIPT' | 'REPO'>('all');
+  const [filter, setFilter] = useState<TypeFilter>('ALL');
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
@@ -110,336 +140,264 @@ export default function LibraryPage() {
     })();
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || loading) {
+  const q = query.trim().toLowerCase();
+  const visible = useMemo(
+    () =>
+      items.filter((i) => {
+        if (!i.listing) return false;
+        if (filter !== 'ALL' && i.listing.type !== filter) return false;
+        if (q) {
+          const haystack = [
+            i.listing.title,
+            i.listing.seller.username ?? '',
+            ...(i.listing.tags || []),
+          ]
+            .join(' ')
+            .toLowerCase();
+          if (!haystack.includes(q)) return false;
+        }
+        return true;
+      }),
+    [items, filter, q],
+  );
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = {};
+    for (const i of items) {
+      if (!i.listing) continue;
+      c[i.listing.type] = (c[i.listing.type] || 0) + 1;
+    }
+    return c;
+  }, [items]);
+
+  const totalSpent = useMemo(
+    () =>
+      items.reduce((sum, i) => {
+        if (!i.listing) return sum;
+        return sum + (Number.isFinite(i.listing.price) ? i.listing.price : 0);
+      }, 0),
+    [items],
+  );
+
+  const downloadable = useMemo(
+    () => items.filter((i) => i.listing?.fileKey).length,
+    [items],
+  );
+
+  const liveAgents = useMemo(
+    () => items.filter((i) => i.listing?.agentEndpoint || i.listing?.agentUrl).length,
+    [items],
+  );
+
+  const thisMonth = useMemo(() => {
+    const since = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return items.filter((i) => new Date(i.purchasedAt).getTime() >= since).length;
+  }, [items]);
+
+  if (isLoading || (loading && items.length === 0)) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity }}
-        />
+      <div className="min-h-screen pb-20 px-6 md:px-10 pt-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div
+            className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            Loading your library…
+          </div>
+        </div>
       </div>
     );
   }
 
-  const q = query.trim().toLowerCase();
-  const visible = items.filter((i) => {
-    if (!i.listing) return false;
-    if (filter !== 'all' && i.listing.type !== filter) return false;
-    if (q) {
-      const haystack = [i.listing.title, i.listing.seller.username ?? '', ...(i.listing.tags || [])]
-        .join(' ')
-        .toLowerCase();
-      if (!haystack.includes(q)) return false;
-    }
-    return true;
-  });
-
-  const counts = items.reduce(
-    (acc, i) => {
-      if (!i.listing) return acc;
-      acc[i.listing.type] = (acc[i.listing.type] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>,
-  );
-
   return (
-    <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
-      <div
-        className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
-      />
-
-      <div className="border-b border-white/8 sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6">
-          <div className="text-[11px] uppercase tracking-widest text-zinc-500 mb-2 flex items-center gap-2">
-            <Link href="/market" className="hover:text-zinc-300">
-              Marketplace
-            </Link>
-            <span>/</span>
-            <span className="text-zinc-300">Library</span>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light text-white">
-                <GradientText gradient="purple">Your library</GradientText>
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+                <Library className="w-3.5 h-3.5" strokeWidth={1.75} />
+                <span>Library</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
+                Your library
               </h1>
-              <p className="text-[13px] sm:text-sm text-zinc-400 mt-1">
-                Everything you've purchased, all in one place.
+              <p className="text-[12.5px] text-zinc-500 font-light mt-1">
+                Everything you own — agents, bots, scripts and repos — one click away.
               </p>
             </div>
-            <div className="inline-flex items-center gap-2 text-xs text-zinc-400 shrink-0">
-              <Library className="w-4 h-4" />
-              {items.length} item{items.length === 1 ? '' : 's'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10 space-y-6">
-        {items.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <>
-            {/* Search + filters */}
-            <div
-              className="relative rounded-xl overflow-hidden p-4 space-y-3"
+            <Link
+              href="/market"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
               }}
             >
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} />
+              Browse marketplace
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Stats strip */}
+      <section className="px-6 md:px-10 mb-4">
+        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+          <StatTile
+            label="Items owned"
+            value={formatNumber(items.length)}
+            sub={`${thisMonth} this month`}
+            accent="#836EF9"
+          />
+          <StatTile
+            label="Total spent"
+            value={`${formatEth(totalSpent)} ETH`}
+            sub="across all orders"
+            accent="#EC4899"
+          />
+          <StatTile
+            label="Downloads"
+            value={formatNumber(downloadable)}
+            sub="files ready"
+            accent="#22c55e"
+          />
+          <StatTile
+            label="Live agents"
+            value={formatNumber(liveAgents)}
+            sub="interactive"
+            accent="#06B6D4"
+          />
+        </div>
+      </section>
+
+      {/* Empty state */}
+      {items.length === 0 ? (
+        <section className="px-6 md:px-10">
+          <div className="mx-auto max-w-[1400px]">
+            <EmptyState />
+          </div>
+        </section>
+      ) : (
+        <>
+          {/* Filters */}
+          <section className="px-6 md:px-10 mb-3">
+            <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+              <div
+                className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
                 style={{
-                  background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                  background: 'rgba(0,0,0,0.4)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
                 }}
-              />
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+              >
+                <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
                 <input
                   ref={searchRef}
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search your library…"
-                  className="w-full rounded-lg pl-10 pr-16 py-2.5 text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
-                    boxShadow:
-                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-                  }}
+                  className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                  {query ? (
-                    <button
-                      onClick={() => setQuery('')}
-                      aria-label="Clear search"
-                      className="w-6 h-6 rounded-md flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  ) : (
-                    <kbd
-                      className="hidden sm:inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-md text-[10px] font-medium text-zinc-500 leading-none"
-                      style={{
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      /
-                    </kbd>
-                  )}
-                </div>
+                {query ? (
+                  <button
+                    onClick={() => setQuery('')}
+                    aria-label="Clear search"
+                    className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                ) : (
+                  <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                    /
+                  </kbd>
+                )}
               </div>
 
-              <div className="relative flex flex-wrap items-center gap-2">
+              <div
+                className="flex items-center gap-0.5 rounded-lg p-0.5 ml-auto"
+                style={{
+                  background: 'rgba(0,0,0,0.4)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }}
+              >
                 <FilterChip
                   label="All"
                   count={items.length}
-                  active={filter === 'all'}
-                  onClick={() => setFilter('all')}
+                  active={filter === 'ALL'}
+                  onClick={() => setFilter('ALL')}
                 />
                 {(['AI_AGENT', 'BOT', 'SCRIPT', 'REPO'] as const).map((t) => {
                   const c = counts[t] || 0;
                   if (c === 0) return null;
-                  const meta = TYPE_META[t];
                   return (
                     <FilterChip
                       key={t}
-                      label={meta.label}
+                      label={TYPE_LABEL[t]}
                       count={c}
                       active={filter === t}
                       onClick={() => setFilter(t)}
-                      accent={meta.color}
+                      accent={TYPE_ACCENT[t]}
                     />
                   );
                 })}
               </div>
             </div>
+          </section>
 
-            {/* Items */}
-            <div className="grid gap-4">
-              {visible.map((item, idx) => {
-                if (!item.listing) return null;
-                const meta = TYPE_META[item.listing.type] || TYPE_META.OTHER;
-                return (
-                  <motion.div
-                    key={item.orderId}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      delay: Math.min(idx * 0.035, 0.35),
-                      duration: 0.32,
-                      ease: [0.22, 0.61, 0.36, 1],
-                    }}
-                    whileHover={{ y: -3 }}
-                    className="group relative rounded-2xl overflow-hidden p-5"
-                    style={{
-                      background:
-                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                      boxShadow:
-                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
-                    }}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute inset-x-0 top-0 h-px"
-                      style={{
-                        background: `linear-gradient(90deg, transparent 0%, ${meta.color}80 50%, transparent 100%)`,
-                      }}
-                    />
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -top-24 -right-24 w-56 h-56 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ background: `${meta.color}22` }}
-                    />
-                    <div className="relative flex items-start gap-4">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${meta.color}22 0%, ${meta.color}08 100%)`,
-                          border: `1px solid ${meta.color}3a`,
-                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${meta.color}30`,
-                        }}
-                      >
-                        <meta.Icon className="w-5 h-5" style={{ color: meta.color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-start justify-between gap-2">
-                          <div className="min-w-0">
-                            <Link
-                              href={`/market/agents/${item.listing.id}`}
-                              className="block text-[15px] font-normal text-white hover:text-[#b4a7ff] truncate tracking-[0.005em] transition-colors"
-                            >
-                              {item.listing.title}
-                            </Link>
-                            <div className="text-[11px] text-zinc-500 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <span className="inline-flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                Purchased {timeAgo(item.purchasedAt)}
-                              </span>
-                              <span className="text-zinc-400">
-                                {item.listing.price} {item.listing.currency}
-                              </span>
-                              <span>· @{item.listing.seller.username || 'anon'}</span>
-                              {item.myRating !== null && (
-                                <span className="inline-flex items-center gap-1 text-amber-300">
-                                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                  {item.myRating}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <StatusPill status={item.status} />
-                        </div>
-
-                        {item.listing.tags && item.listing.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-1.5">
-                            {item.listing.tags.slice(0, 6).map((t) => (
-                              <span
-                                key={t}
-                                className="text-[10px] px-2 py-0.5 rounded-full text-zinc-400"
-                                style={{
-                                  background: 'rgba(255,255,255,0.04)',
-                                  border: '1px solid rgba(255,255,255,0.08)',
-                                }}
-                              >
-                                #{t}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {item.listing.fileKey && item.listing.fileName && (
-                            <a
-                              href={`${API_URL}/market/files/${item.listing.fileKey}`}
-                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-white transition-all hover:brightness-110"
-                              style={{
-                                background:
-                                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
-                                boxShadow:
-                                  'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 18px -4px rgba(131,110,249,0.5)',
-                              }}
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                              Download{' '}
-                              <span className="text-[#c9beff]">
-                                {item.listing.fileName}
-                                {item.listing.fileSize
-                                  ? ` · ${formatBytes(item.listing.fileSize)}`
-                                  : ''}
-                              </span>
-                            </a>
-                          )}
-                          {item.listing.agentEndpoint && (
-                            <Link
-                              href={`/market/agents/${item.listing.id}`}
-                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-200 hover:text-white transition-colors"
-                              style={{
-                                background: 'rgba(255,255,255,0.04)',
-                                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                              }}
-                            >
-                              <Play className="w-3.5 h-3.5" />
-                              Open live demo
-                            </Link>
-                          )}
-                          {item.listing.agentUrl && (
-                            <a
-                              href={item.listing.agentUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-200 hover:text-white transition-colors"
-                              style={{
-                                background: 'rgba(255,255,255,0.04)',
-                                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                              }}
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              Open agent
-                            </a>
-                          )}
-                          <Link
-                            href={`/orders/${item.orderId}`}
-                            className="inline-flex items-center gap-2 h-8 px-3 rounded-md text-[11.5px] font-medium text-zinc-400 hover:text-white transition-colors"
-                            style={{
-                              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-                            }}
-                          >
-                            View order
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-              {visible.length === 0 && (
-                <div
-                  className="relative rounded-2xl overflow-hidden p-10 text-center"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                    boxShadow:
-                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-                  }}
-                >
-                  <p className="text-[13px] text-zinc-400">
-                    {query ? `No items match "${query}".` : 'No items match this filter.'}
-                  </p>
-                </div>
-              )}
+          {/* Table */}
+          <section className="px-6 md:px-10">
+            <div className="mx-auto max-w-[1400px]">
+              <LibraryTable items={visible} query={query} />
             </div>
-          </>
-        )}
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Components ──────────────────────────────────────────────────────────
+
+function StatTile({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  accent: string;
+}) {
+  return (
+    <div
+      className="relative rounded-xl px-4 py-3 overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+        }}
+      />
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+        {label}
       </div>
+      <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
+        {value}
+      </div>
+      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -459,58 +417,217 @@ function FilterChip({
 }) {
   const c = accent || '#836EF9';
   return (
-    <motion.button
+    <button
+      type="button"
       onClick={onClick}
-      whileTap={{ scale: 0.96 }}
-      transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-      className={`relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-medium transition-colors tracking-[0.005em] ${
-        active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-      }`}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-light transition"
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+        color: active ? '#ffffff' : '#a1a1aa',
+        background: active ? `${c}22` : 'transparent',
+        boxShadow: active ? `inset 0 0 0 1px ${c}5a` : 'none',
       }}
     >
-      {active && (
-        <motion.span
-          layoutId="library-filter-pill"
-          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-          className="absolute inset-0 rounded-md"
-          style={{
-            background: `linear-gradient(180deg, ${c}38 0%, ${c}10 100%)`,
-            boxShadow: `inset 0 0 0 1px ${c}5a, 0 0 14px -4px ${c}70`,
-          }}
-        />
-      )}
-      <span className="relative z-10">{label}</span>
+      {label}
       <span
-        className="relative z-10 text-[10px]"
-        style={{ color: active ? `${c}ee` : 'rgba(161,161,170,0.7)' }}
+        className="text-[10.5px] font-mono tabular-nums"
+        style={{ color: active ? `${c}ee` : '#71717a' }}
       >
         {count}
       </span>
-    </motion.button>
+    </button>
   );
 }
 
-function StatusPill({ status }: { status: string }) {
-  const tone =
-    status === 'COMPLETED'
-      ? { color: '#6ee7b7', bg: 'rgba(16,185,129,0.12)', ring: 'rgba(16,185,129,0.3)' }
-      : status === 'DISPUTED'
-        ? { color: '#fda4af', bg: 'rgba(244,63,94,0.12)', ring: 'rgba(244,63,94,0.3)' }
-        : { color: '#d4d4d8', bg: 'rgba(113,113,122,0.14)', ring: 'rgba(113,113,122,0.3)' };
+function LibraryTable({ items, query }: { items: LibraryItem[]; query: string }) {
+  if (items.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-12 text-center"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        <div className="text-sm font-light text-zinc-300">
+          {query ? `No items match "${query}".` : 'No items match this filter.'}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <span
-      className="text-[10px] uppercase tracking-[0.12em] font-medium px-2 py-0.5 rounded-md whitespace-nowrap"
+    <div
+      className="rounded-xl overflow-hidden"
       style={{
-        color: tone.color,
-        background: tone.bg,
-        boxShadow: `inset 0 0 0 1px ${tone.ring}`,
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      {status.toLowerCase().replace(/_/g, ' ')}
-    </span>
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_80px_90px_80px_90px_220px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+        <span className="text-center">#</span>
+        <span>Item</span>
+        <span>Type</span>
+        <span className="text-right">Price</span>
+        <span className="text-right">Rating</span>
+        <span className="text-right">Purchased</span>
+        <span className="hidden md:block">Actions</span>
+        <span />
+      </div>
+      <ul>
+        {items.map((item, i) => {
+          if (!item.listing) return null;
+          return <LibraryRow key={item.orderId} item={item} index={i} />;
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function LibraryRow({ item, index }: { item: LibraryItem; index: number }) {
+  const l = item.listing!;
+  const Icon = TYPE_ICON[l.type] ?? Package;
+  const accent = TYPE_ACCENT[l.type];
+
+  return (
+    <li>
+      <div className="group relative grid grid-cols-[28px_minmax(0,1fr)_80px_90px_80px_90px_220px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all hover:bg-white/[0.02]">
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: accent, opacity: 0.55 }}
+        />
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <Link
+          href={`/market/agents/${l.id}`}
+          className="min-w-0 flex items-center gap-2.5 hover:text-white transition"
+        >
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${accent}18`,
+              boxShadow: `inset 0 0 0 1px ${accent}40`,
+            }}
+          >
+            <Icon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: accent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-normal text-white truncate">{l.title}</div>
+            <div className="text-[10.5px] text-zinc-500 font-light flex items-center gap-1.5 truncate">
+              <span>@{l.seller.username || 'anon'}</span>
+              {(l.tags || []).slice(0, 2).map((t) => (
+                <span key={t} className="text-zinc-600">
+                  · {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        </Link>
+
+        <div>
+          <span
+            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium"
+            style={{
+              color: accent,
+              background: `${accent}14`,
+              boxShadow: `inset 0 0 0 1px ${accent}40`,
+            }}
+          >
+            {TYPE_LABEL[l.type]}
+          </span>
+        </div>
+
+        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+          {formatEth(l.price)}
+          <span className="text-zinc-600 ml-1 text-[10px]">{l.currency}</span>
+        </div>
+
+        <div className="text-right text-[11.5px] font-light">
+          {item.myRating !== null ? (
+            <span className="inline-flex items-center gap-0.5 text-amber-300 font-mono tabular-nums">
+              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+              {item.myRating}
+            </span>
+          ) : (
+            <span className="text-zinc-700">—</span>
+          )}
+        </div>
+
+        <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums flex items-center justify-end gap-1">
+          <Clock className="w-3 h-3 text-zinc-600" strokeWidth={1.75} />
+          {timeAgo(item.purchasedAt)}
+        </div>
+
+        <div className="hidden md:flex items-center gap-1.5 min-w-0">
+          {l.fileKey && l.fileName && (
+            <a
+              href={`${API_URL}/market/files/${l.fileKey}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10.5px] font-medium text-white transition hover:brightness-110 truncate"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+              }}
+              title={`${l.fileName}${l.fileSize ? ' · ' + formatBytes(l.fileSize) : ''}`}
+            >
+              <Download className="w-3 h-3" strokeWidth={1.75} />
+              Download
+            </a>
+          )}
+          {l.agentEndpoint && (
+            <Link
+              href={`/market/agents/${l.id}`}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10.5px] font-medium text-zinc-200 hover:text-white transition"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              }}
+            >
+              <Play className="w-3 h-3" strokeWidth={1.75} />
+              Run
+            </Link>
+          )}
+          {l.agentUrl && !l.agentEndpoint && (
+            <a
+              href={l.agentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10.5px] font-medium text-zinc-200 hover:text-white transition"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              }}
+            >
+              <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
+              Open
+            </a>
+          )}
+          <Link
+            href={`/orders/${item.orderId}`}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10.5px] font-light text-zinc-400 hover:text-white transition"
+            style={{
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            Order
+          </Link>
+        </div>
+
+        <Link
+          href={`/market/agents/${l.id}`}
+          className="flex items-center justify-end"
+          aria-label="Open listing"
+        >
+          <ArrowUpRight
+            className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+            strokeWidth={1.75}
+          />
+        </Link>
+      </div>
+    </li>
   );
 }
 
@@ -519,13 +636,12 @@ function EmptyState() {
     <div
       className="relative rounded-2xl overflow-hidden p-14 text-center"
       style={{
-        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-        boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       <span
-        aria-hidden="true"
+        aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
@@ -533,7 +649,7 @@ function EmptyState() {
         }}
       />
       <span
-        aria-hidden="true"
+        aria-hidden
         className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-30"
         style={{ background: 'rgba(131,110,249,0.25)' }}
       />
@@ -548,22 +664,21 @@ function EmptyState() {
       >
         <Library className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
       </div>
-      <h2 className="relative text-[15px] font-normal text-white tracking-[0.005em] mb-1.5">
-        Your library is empty
-      </h2>
-      <p className="relative text-[12px] text-zinc-500 mb-6 max-w-md mx-auto leading-relaxed">
-        Buy your first AI agent, repo, or script and it'll show up here — always one click away.
+      <h2 className="relative text-[15px] font-normal text-white mb-1.5">Your library is empty</h2>
+      <p className="relative text-[12px] text-zinc-500 mb-6 max-w-md mx-auto font-light">
+        Buy your first AI agent, repo, bot or script — everything lives here and is one click away.
       </p>
       <Link
         href="/market"
-        className="relative inline-flex items-center gap-2 h-8 px-3.5 rounded-md text-[11.5px] font-medium text-white transition-all hover:brightness-110"
+        className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 18px -4px rgba(131,110,249,0.5)',
+            'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
         }}
       >
-        Browse the marketplace
+        <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+        Browse marketplace
       </Link>
     </div>
   );
