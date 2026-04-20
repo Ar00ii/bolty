@@ -159,8 +159,15 @@ export default function ChatPage() {
       setNotice('');
     });
     socket.on('disconnect', () => setConnected(false));
-    socket.on('history', (msgs: ChatMessage[]) => setMessages(msgs));
-    socket.on('newMessage', (msg: ChatMessage) => setMessages((prev) => [...prev, msg]));
+    // Cap kept in sync with server history size so the DOM never grows past
+    // ~200 message rows even in a busy room.
+    socket.on('history', (msgs: ChatMessage[]) => setMessages(msgs.slice(-200)));
+    socket.on('newMessage', (msg: ChatMessage) =>
+      setMessages((prev) => {
+        const next = [...prev, msg];
+        return next.length > 200 ? next.slice(next.length - 200) : next;
+      }),
+    );
     socket.on('userCount', (count: number) => setUserCount(count));
     socket.on('error', (err: { message: string }) => {
       setNotice(err.message);
@@ -318,18 +325,15 @@ export default function ChatPage() {
               </p>
             </div>
           )}
-          {messages.map((msg, idx) => {
+          {messages.map((msg) => {
             const isMe = msg.userId === user?.id;
             return (
-              <motion.div
+              // No per-item motion wrapper — the old staggered fade-in
+              // re-ran on every re-render as new messages arrived, which
+              // torched perf once the room filled up. A plain div keeps the
+              // DOM cheap; CSS can still animate the container if desired.
+              <div
                 key={msg.id}
-                initial={{ opacity: 0, y: 6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{
-                  duration: 0.24,
-                  ease: [0.22, 0.61, 0.36, 1],
-                  delay: Math.min(idx * 0.012, 0.18),
-                }}
                 className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}
               >
                 {/* Avatar */}
@@ -418,7 +422,7 @@ export default function ChatPage() {
                     <X className="w-3 h-3" />
                   </button>
                 )}
-              </motion.div>
+              </div>
             );
           })}
           <div ref={bottomRef} />
