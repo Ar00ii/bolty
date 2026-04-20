@@ -146,8 +146,13 @@ class ApiClient {
   async upload<T>(path: string, formData: FormData): Promise<T> {
     let response: Response;
     try {
+      const headers: Record<string, string> = {};
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
       response = await fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
+        headers,
         credentials: 'include',
         body: formData,
         // No Content-Type — browser sets multipart/form-data with boundary
@@ -179,9 +184,13 @@ class ApiClient {
   ): Promise<void> {
     let response: Response;
     try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      const csrfToken = this.getCsrfToken();
+      if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+
       response = await fetch(`${this.baseUrl}${path}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         credentials: 'include',
         body: JSON.stringify(body),
       });

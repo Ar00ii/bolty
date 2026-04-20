@@ -40,6 +40,24 @@ export class AuthService {
   private readonly NONCE_TTL = 300; // 5 minutes
   private readonly JWT_SECRET: string;
 
+  /**
+   * Grace cache for refresh-token rotation.
+   *
+   * When a user has multiple tabs open (or the client retries a flaky network
+   * call), two concurrent /auth/refresh requests arrive carrying the same jti.
+   * The first rotates the token; the second used to see a hash mismatch and
+   * revoke the whole session, which is exactly what was kicking users out on
+   * reload. Instead, we remember the last rotation for each user for a short
+   * window and replay it for any follower that presents the same now-retired
+   * jti — nobody has to log in again.
+   */
+  private readonly refreshGrace = new Map<
+    string,
+    { retiredJti: string; tokens: AuthTokens; expiresAt: number }
+  >();
+  private readonly REFRESH_GRACE_MS = 30_000;
+  private readonly refreshLocks = new Map<string, Promise<AuthTokens>>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -128,26 +146,58 @@ export class AuthService {
     }
 
     const userId = payload.sub;
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.refreshToken) {
-      throw new UnauthorizedException('Invalid refresh token');
+
+    // If another tab just rotated with this exact jti, replay that rotation's
+    // result so we don't nuke the session in a concurrent-refresh race.
+    const grace = this.refreshGrace.get(userId);
+    if (grace && grace.retiredJti === payload.jti && grace.expiresAt > Date.now()) {
+      return grace.tokens;
     }
 
-    const isValid = await bcrypt.compare(payload.jti, user.refreshToken);
-    if (!isValid) {
-      // Possible token theft — invalidate everything
-      await this.revokeAllTokens(userId);
-      throw new UnauthorizedException('Invalid refresh token');
-    }
+    // Serialize concurrent refreshes for the same user — only the first does
+    // the DB work, followers await the same promise.
+    const inflight = this.refreshLocks.get(userId);
+    if (inflight) return inflight;
 
-    return this.generateTokens(userId);
+    const work = (async () => {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user || !user.refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const isValid = await bcrypt.compare(payload.jti, user.refreshToken);
+      if (!isValid) {
+        // Jti doesn't match AND it's not a replayable race — treat as stale
+        // and force a re-login, but don't revoke other active sessions.
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const tokens = await this.generateTokens(userId);
+      this.refreshGrace.set(userId, {
+        retiredJti: payload.jti,
+        tokens,
+        expiresAt: Date.now() + this.REFRESH_GRACE_MS,
+      });
+      return tokens;
+    })();
+
+    this.refreshLocks.set(userId, work);
+    try {
+      return await work;
+    } finally {
+      this.refreshLocks.delete(userId);
+    }
   }
 
   async revokeAllTokens(userId: string): Promise<void> {
-    await this.prisma.user.update({
+    // updateMany is a no-op when the user was already deleted instead of
+    // throwing P2025 — logout should never 500 on a missing-user edge case.
+    await this.prisma.user.updateMany({
       where: { id: userId },
       data: { refreshToken: null },
     });
+    this.refreshGrace.delete(userId);
+    this.refreshLocks.delete(userId);
     this.logger.warn(`All tokens revoked for user ${userId}`);
   }
 

@@ -1,8 +1,12 @@
 /**
- * Hook for managing global AI agent chat WebSocket connection
+ * Hook for managing the global AI-agents chat — wires up to the backend
+ * ChatGateway at namespace `/chat` (events: `sendMessage`, `history`,
+ * `newMessage`, `userCount`, `error`).
  */
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
+
+import { WS_URL } from '@/lib/api/client';
 
 export interface ChatMessage {
   id: string;
@@ -14,6 +18,27 @@ export interface ChatMessage {
   type: 'user' | 'agent' | 'system';
 }
 
+interface ServerMessage {
+  id: string;
+  content: string;
+  userId: string;
+  username: string;
+  avatarUrl?: string | null;
+  createdAt: string;
+}
+
+function toChatMessage(m: ServerMessage): ChatMessage {
+  return {
+    id: m.id,
+    agentId: m.userId,
+    agentName: m.username || 'User',
+    agentAvatar: m.avatarUrl ?? undefined,
+    content: m.content,
+    timestamp: m.createdAt,
+    type: 'user',
+  };
+}
+
 export function useAgentChat() {
   const socketRef = useRef<Socket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -21,36 +46,32 @@ export function useAgentChat() {
   const [activeAgents, setActiveAgents] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize WebSocket connection
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_URL || '', {
-      path: '/socket.io',
-      query: { room: 'global-chat' },
+    const socket = io(`${WS_URL}/chat`, {
+      withCredentials: true,
+      transports: ['websocket'],
     });
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       setIsConnected(true);
       setIsLoading(false);
     });
+    socket.on('disconnect', () => setIsConnected(false));
 
-    socket.on('chat-message', (message: ChatMessage) => {
-      setMessages((prev) => [...prev, message]);
-    });
-
-    socket.on('load-history', (history: ChatMessage[]) => {
-      setMessages(history);
+    socket.on('history', (recent: ServerMessage[]) => {
+      setMessages(recent.map(toChatMessage));
       setIsLoading(false);
     });
 
-    socket.on('agent-count', (count: number) => {
-      setActiveAgents(count);
+    socket.on('newMessage', (m: ServerMessage) => {
+      setMessages((prev) => {
+        if (prev.some((x) => x.id === m.id)) return prev;
+        return [...prev, toChatMessage(m)];
+      });
     });
 
-    socket.on('disconnect', () => {
-      setIsConnected(false);
-    });
-
-    socketRef.current = socket;
+    socket.on('userCount', (count: number) => setActiveAgents(count));
 
     return () => {
       socket.disconnect();
@@ -58,20 +79,11 @@ export function useAgentChat() {
     };
   }, []);
 
-  const sendMessage = useCallback((content: string, agentName: string, agentId?: string) => {
-    if (!socketRef.current) return;
-
-    socketRef.current.emit('send-message', {
-      content,
-      agentName,
-      agentId: agentId || 'user',
-      type: agentId ? 'agent' : 'user',
-    });
+  const sendMessage = useCallback((content: string) => {
+    socketRef.current?.emit('sendMessage', { content });
   }, []);
 
-  const clearChat = useCallback(() => {
-    setMessages([]);
-  }, []);
+  const clearChat = useCallback(() => setMessages([]), []);
 
   return {
     messages,

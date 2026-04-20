@@ -113,6 +113,11 @@ export default function DmPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Latest refs so socket handlers see fresh values without re-subscribing on
+  // every activePeer/user change (which would tear down & reopen the socket
+  // and race with in-flight messages).
+  const activePeerRef = useRef<Contact['user'] | null>(null);
+  const userIdRef = useRef<string | undefined>(undefined);
 
   const CATEGORIES: { id: ContactCategory; label: string; icon: React.ReactNode }[] = [
     { id: 'all', label: 'All', icon: <MessageSquare size={14} /> },
@@ -135,6 +140,14 @@ export default function DmPage() {
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {
+    activePeerRef.current = activePeer;
+  }, [activePeer]);
+
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!isAuthenticated) return;
     const socket = io(`${WS_URL}/dm`, { withCredentials: true, transports: ['websocket'] });
     socketRef.current = socket;
@@ -153,27 +166,29 @@ export default function DmPage() {
         messages: DMMessage[];
         isAgentNegotiation?: boolean;
       }) => {
-        if (activePeer?.id === peerId || msgs.length > 0) {
+        if (activePeerRef.current?.id === peerId) {
           setMessages(msgs);
           setIsAgentChat(isAgentNegotiation ?? false);
         }
       },
     );
     socket.on('newDM', ({ peerId, message }: { peerId: string; message: DMMessage }) => {
+      const activeId = activePeerRef.current?.id;
+      const myId = userIdRef.current;
+      const belongsToActive = activeId === peerId;
       setMessages((prev) => {
+        if (!belongsToActive) return prev;
         if (prev.find((m) => m.id === message.id)) return prev;
-        if (activePeer?.id === peerId || message.senderId === user?.id) return [...prev, message];
-        return prev;
+        return [...prev, message];
       });
       setContacts((prev) =>
         prev.map((c) => {
           if (c.user.id !== peerId) return c;
-          const isActive = activePeer?.id === peerId;
           return {
             ...c,
             lastMessage: message.content.slice(0, 60),
             lastAt: message.createdAt,
-            unread: isActive ? c.unread : c.unread + (message.senderId !== user?.id ? 1 : 0),
+            unread: belongsToActive ? c.unread : c.unread + (message.senderId !== myId ? 1 : 0),
           };
         }),
       );
@@ -187,13 +202,16 @@ export default function DmPage() {
     return () => {
       socket.disconnect();
     };
-  }, [isAuthenticated, user?.id, activePeer?.id]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const openConversation = useCallback((contact: Contact) => {
+    // Update the ref synchronously so the 'conversation' handler accepts the
+    // payload that arrives before React flushes the state update.
+    activePeerRef.current = contact.user;
     setActivePeer(contact.user);
     setMessages([]);
     socketRef.current?.emit('openConversation', { peerId: contact.user.id });
