@@ -86,6 +86,7 @@ export class WalletAuthService {
     signature: string,
     nonce: string,
   ): Promise<void> {
+    if (!userId) throw new UnauthorizedException('Authentication required');
     const normalized = address.toLowerCase();
     if (!ethers.isAddress(address)) throw new UnauthorizedException('Invalid Ethereum address');
 
