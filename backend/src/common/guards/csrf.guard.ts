@@ -1,46 +1,60 @@
 import * as crypto from 'crypto';
 
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+  SetMetadata,
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 
+export const SKIP_CSRF_KEY = 'skipCsrf';
+export const SkipCsrf = (): ClassDecorator & MethodDecorator => SetMetadata(SKIP_CSRF_KEY, true);
+
 /**
- * CSRF Guard — Double-submit cookie pattern
+ * CSRF Guard — Double-submit cookie pattern.
  *
- * How it works:
- * 1. Server generates a CSRF token and sends it as a non-httpOnly cookie
- * 2. Client (JS) reads the cookie value
- * 3. On mutation (POST/PUT/PATCH/DELETE), client sends token as X-CSRF-Token header
- * 4. Server validates: header token === cookie token
- * 5. If they match, the request is from the same origin (CSRF protection)
+ * The cookie is issued with Domain=COOKIE_DOMAIN (e.g. ".boltynetwork.xyz") so
+ * the frontend JS — which runs on a different subdomain than the API — can
+ * actually read it via document.cookie and mirror it back as a header.
  *
- * Why this works:
- * - A cross-site attacker can see the cookie (non-httpOnly) but cannot read it (httpOnly on origin would block)
- * - The attacker cannot set the header from their own domain (SameSite + CORS restrictions)
- * - The client can only set custom headers if they're in the CORS allowlist
+ * Endpoints that don't have an authenticated session to abuse (login, register,
+ * wallet nonce/verify, oauth callbacks, refresh) can opt out with @SkipCsrf().
  */
 @Injectable()
 export class CsrfGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     const response = context.switchToHttp().getResponse<Response>();
     const method = request.method.toUpperCase();
 
-    // GET, HEAD, OPTIONS requests don't need CSRF validation (safe methods)
+    // Safe methods never require CSRF — just refresh the cookie so the client
+    // has a fresh token ready for the next mutation.
     if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-      // Emit a fresh CSRF token for subsequent mutations
-      this.emitCsrfToken(response);
+      this.emitCsrfToken(request, response);
       return true;
     }
 
-    // For mutations (POST, PUT, PATCH, DELETE), validate CSRF token
+    const skip = this.reflector.getAllAndOverride<boolean>(SKIP_CSRF_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skip) {
+      this.emitCsrfToken(request, response);
+      return true;
+    }
+
     const headerToken = request.get('X-CSRF-Token');
-    const cookieToken = request.cookies['X-CSRF-Token'];
+    const cookieToken = request.cookies?.['X-CSRF-Token'];
 
     if (!headerToken || !cookieToken) {
       throw new ForbiddenException('Missing CSRF token (header or cookie)');
     }
 
-    // Constant-time comparison to prevent timing attacks
     if (!this.timingSafeEqual(headerToken, cookieToken)) {
       throw new ForbiddenException('CSRF token mismatch');
     }
@@ -48,28 +62,26 @@ export class CsrfGuard implements CanActivate {
     return true;
   }
 
-  /**
-   * Emit a new CSRF token to the client via non-httpOnly cookie
-   * The client reads this cookie and sends it back as a header
-   */
-  private emitCsrfToken(response: Response): void {
+  private emitCsrfToken(request: Request, response: Response): void {
+    // Don't rewrite an existing cookie — reading JS would race between tabs.
+    if (request.cookies?.['X-CSRF-Token']) return;
+
     const token = crypto.randomBytes(32).toString('hex');
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieDomain = process.env.COOKIE_DOMAIN;
+
     response.cookie('X-CSRF-Token', token, {
-      httpOnly: false, // JavaScript can read this (intentional for CSRF pattern)
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Prevent cross-site cookie sending
-      maxAge: 3600000, // 1 hour
+      httpOnly: false,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 3600000,
       path: '/',
+      ...(cookieDomain ? { domain: cookieDomain } : {}),
     });
   }
 
-  /**
-   * Constant-time string comparison to prevent timing attacks
-   */
   private timingSafeEqual(a: string, b: string): boolean {
-    if (a.length !== b.length) {
-      return false;
-    }
+    if (a.length !== b.length) return false;
     let result = 0;
     for (let i = 0; i < a.length; i++) {
       result |= a.charCodeAt(i) ^ b.charCodeAt(i);
