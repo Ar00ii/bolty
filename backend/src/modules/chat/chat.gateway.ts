@@ -163,7 +163,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         createdAt: message.createdAt,
       });
     } catch (err: unknown) {
-      const error = err as Error;
+      const error = err instanceof Error ? err : new Error(String(err));
       client.emit('error', { message: error.message });
     }
   }
@@ -179,7 +179,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.chatService.reportMessage(data.messageId, client.userId, data.reason);
       client.emit('reportSuccess', { message: 'Report submitted' });
     } catch (err: unknown) {
-      const error = err as Error;
+      const error = err instanceof Error ? err : new Error(String(err));
       client.emit('error', { message: error.message });
     }
   }
