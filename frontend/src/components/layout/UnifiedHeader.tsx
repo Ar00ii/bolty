@@ -86,11 +86,11 @@ export function UnifiedHeader() {
           WebkitBackdropFilter: 'blur(14px) saturate(140%)',
         }}
       >
-        <div className="max-w-[1400px] mx-auto pl-1 pr-4 md:pl-2 md:pr-8 h-16 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto pl-0 pr-4 md:pr-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-3 hover:opacity-85 transition-opacity relative"
+            className="flex items-center gap-2 hover:opacity-85 transition-opacity relative"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -105,7 +105,15 @@ export function UnifiedHeader() {
                 filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.35))',
               }}
             />
-            <span className="text-white font-light text-xl md:text-2xl hidden sm:inline tracking-[0.005em]">
+            <span
+              className="text-white text-lg md:text-xl hidden sm:inline"
+              style={{
+                fontFamily: "'Orbitron', system-ui, sans-serif",
+                fontWeight: 600,
+                letterSpacing: '0.04em',
+                textShadow: '0 0 12px rgba(131,110,249,0.35)',
+              }}
+            >
               BoltyNetwork
             </span>
           </Link>
