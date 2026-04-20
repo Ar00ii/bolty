@@ -208,7 +208,15 @@ function Field({
             onClick={() => setShowPassword(!showPassword)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-400 transition-colors"
+            className="text-zinc-600 hover:text-zinc-400 transition-colors"
+            style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              overflow: 'visible',
+            }}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
             <motion.div animate={{ rotate: showPassword ? 0 : 180 }} transition={{ duration: 0.2 }}>
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
