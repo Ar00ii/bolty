@@ -3,15 +3,34 @@
 export const dynamic = 'force-dynamic';
 
 import { motion } from 'framer-motion';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { AgentDashboard } from '@/components/profile/AgentDashboard';
-import { APIKeysSection } from '@/components/profile/APIKeysSection';
-import { IntegrationsSection } from '@/components/profile/IntegrationsSection';
-import { NotificationsSection } from '@/components/profile/NotificationsSection';
-import { UsageSection } from '@/components/profile/UsageSection';
+// Profile has 5+ sibling tabs but the user only sees one at a time. Defer
+// the non-active panels so the initial /profile bundle is the identity form
+// plus whichever tab is currently mounted, not every tab's code at once.
+const AgentDashboard = dynamicImport(
+  () => import('@/components/profile/AgentDashboard').then((m) => m.AgentDashboard),
+  { ssr: false },
+);
+const APIKeysSection = dynamicImport(
+  () => import('@/components/profile/APIKeysSection').then((m) => m.APIKeysSection),
+  { ssr: false },
+);
+const IntegrationsSection = dynamicImport(
+  () => import('@/components/profile/IntegrationsSection').then((m) => m.IntegrationsSection),
+  { ssr: false },
+);
+const NotificationsSection = dynamicImport(
+  () => import('@/components/profile/NotificationsSection').then((m) => m.NotificationsSection),
+  { ssr: false },
+);
+const UsageSection = dynamicImport(
+  () => import('@/components/profile/UsageSection').then((m) => m.UsageSection),
+  { ssr: false },
+);
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';

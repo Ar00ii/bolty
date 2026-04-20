@@ -22,6 +22,8 @@ import { RedisService } from '../../common/redis/redis.service';
 import { EmailService } from '../email/email.service';
 import { UsersService } from '../users/users.service';
 
+import { invalidateUserCache } from './strategies/jwt.strategy';
+
 export interface JwtPayload {
   sub: string;
   username?: string;
@@ -419,6 +421,7 @@ export class AuthService {
       },
     });
 
+    invalidateUserCache(userId);
     await this.redis.del(`2fa_secret:${userId}`);
     this.logger.log(`2FA enabled for user ${userId}`);
   }
@@ -440,6 +443,7 @@ export class AuthService {
         twoFactorSecret: null,
       },
     });
+    invalidateUserCache(userId);
     this.logger.log(`2FA disabled for user ${userId}`);
   }
 
@@ -481,6 +485,7 @@ export class AuthService {
     if (existing) throw new ConflictException('This email is already in use');
 
     await this.prisma.user.update({ where: { id: userId }, data: { email: newEmail } });
+    invalidateUserCache(userId);
     await this.redis.del(`email_change:${userId}`);
     this.logger.log(`Email changed for user ${userId} → ${newEmail}`);
   }
@@ -580,6 +585,7 @@ export class AuthService {
           : undefined,
       },
     });
+    invalidateUserCache(userId);
     this.logger.log(`GitHub linked for user ${userId}: @${githubProfile.login}`);
   }
 
@@ -588,6 +594,7 @@ export class AuthService {
       where: { id: userId },
       data: { githubId: null, githubLogin: null, githubToken: null },
     });
+    invalidateUserCache(userId);
     this.logger.log(`GitHub unlinked for user ${userId}`);
   }
 
