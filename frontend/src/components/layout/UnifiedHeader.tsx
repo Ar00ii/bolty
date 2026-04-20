@@ -111,10 +111,7 @@ export function UnifiedHeader() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 800,
                 letterSpacing: '-0.02em',
-                background: 'linear-gradient(90deg, #e2d9ff 0%, #c4b5fd 50%, #a78bfa 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
+                color: '#ffffff',
               }}
             >
               BoltyNetwork
