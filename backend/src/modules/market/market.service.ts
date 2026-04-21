@@ -1340,8 +1340,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     const [topAgents, topDevs] = await Promise.all([
-      this.getTopAgents(8),
-      this.getTopDevelopers(8),
+      this.getTopAgents(10),
+      this.getTopDevelopers(10),
     ]);
     const data = { topAgents, topDevs };
     this.tickerCache = { at: now, data };

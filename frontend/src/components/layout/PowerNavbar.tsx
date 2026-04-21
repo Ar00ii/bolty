@@ -309,37 +309,112 @@ export function PowerNavbar() {
 
         {profileOpen && (
           <div
-            className="absolute right-0 mt-2 rounded-xl py-1 overflow-hidden"
+            className="absolute right-0 mt-2 rounded-xl overflow-hidden"
             style={{
-              top: 'calc(100% + 4px)',
-              minWidth: '200px',
+              top: 'calc(100% + 6px)',
+              minWidth: '260px',
               background: '#121214',
               border: '1px solid #2a2a30',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
             }}
           >
-            <div className="px-3 py-2" style={{ borderBottom: '1px solid #1f1f23' }}>
-              <p className="text-[13px] truncate" style={{ color: '#e4e4e7' }}>
-                {user?.displayName || user?.username || 'Account'}
-              </p>
-              {user?.username && (
-                <p className="text-[11px] truncate" style={{ color: '#71717a' }}>
-                  @{user.username}
-                </p>
+            <div
+              className="px-3.5 py-3 flex items-center gap-3"
+              style={{
+                borderBottom: '1px solid #1f1f23',
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0) 100%)',
+              }}
+            >
+              {user?.avatarUrl ? (
+                <span
+                  className="grid place-items-center rounded-full overflow-hidden flex-shrink-0"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    border: userRank
+                      ? `1.5px solid ${userRank.color}`
+                      : '1px solid rgba(255,255,255,0.12)',
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                </span>
+              ) : (
+                <span
+                  className="grid place-items-center rounded-full font-mono text-white flex-shrink-0"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    background: 'linear-gradient(135deg, #ec4899, #836EF9)',
+                    fontSize: '13px',
+                    border: userRank
+                      ? `1.5px solid ${userRank.color}`
+                      : '1px solid rgba(255,255,255,0.12)',
+                  }}
+                >
+                  {initials}
+                </span>
               )}
+              <div className="flex-1 min-w-0">
+                <p
+                  className="text-[13px] leading-tight truncate"
+                  style={{ color: '#e4e4e7', fontWeight: 400 }}
+                >
+                  {user?.displayName || user?.username || 'Account'}
+                </p>
+                {user?.username && (
+                  <p className="text-[11px] leading-tight truncate mt-0.5" style={{ color: '#71717a' }}>
+                    @{user.username}
+                  </p>
+                )}
+                {userRank && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <span
+                      className="inline-flex items-center gap-1 px-1.5 py-[1.5px] rounded font-mono uppercase"
+                      style={{
+                        background: `${userRank.color}14`,
+                        color: userRank.color,
+                        border: `1px solid ${userRank.color}38`,
+                        fontSize: 9,
+                        letterSpacing: '0.1em',
+                      }}
+                    >
+                      <userRank.icon
+                        style={{ color: userRank.color, width: 9, height: 9 }}
+                        strokeWidth={2.5}
+                      />
+                      {userRank.label}
+                    </span>
+                    <span
+                      className="font-mono"
+                      style={{ color: '#a1a1aa', fontSize: 10.5 }}
+                    >
+                      {(user?.reputationPoints ?? 0).toLocaleString()} rays
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-            <DropdownLink href="/profile" label="Profile" onSelect={() => setProfileOpen(false)} />
-            <DropdownLink href="/orders" label="Orders" onSelect={() => setProfileOpen(false)} />
-            <DropdownLink
-              href="/api-keys"
-              label="API Keys"
-              onSelect={() => setProfileOpen(false)}
-            />
-            <DropdownLink
-              href="/profile?tab=security"
-              label="Settings"
-              onSelect={() => setProfileOpen(false)}
-            />
+            <div className="py-1">
+              <DropdownLink href="/profile" label="Profile" onSelect={() => setProfileOpen(false)} />
+              <DropdownLink href="/orders" label="Orders" onSelect={() => setProfileOpen(false)} />
+              <DropdownLink
+                href="/api-keys"
+                label="API Keys"
+                onSelect={() => setProfileOpen(false)}
+              />
+              <DropdownLink
+                href="/reputation/leaderboard"
+                label="Leaderboard"
+                onSelect={() => setProfileOpen(false)}
+              />
+              <DropdownLink
+                href="/profile?tab=security"
+                label="Settings"
+                onSelect={() => setProfileOpen(false)}
+              />
+            </div>
             <button
               type="button"
               onClick={async () => {
@@ -347,9 +422,9 @@ export function PowerNavbar() {
                 await logout?.();
                 router.push('/');
               }}
-              className="w-full text-left px-3 py-2 text-[13px] transition-colors"
+              className="w-full text-left px-3.5 py-2.5 text-[12.5px] transition-colors"
               style={{ color: '#ef4444', borderTop: '1px solid #1f1f23' }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.06)')}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               Sign out
