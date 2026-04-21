@@ -18,6 +18,7 @@ import {
   BadRequestException,
   Res,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
 import { IsString, IsOptional, MaxLength, MinLength, Matches, IsUrl } from 'class-validator';
@@ -80,6 +81,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly stepUp: StepUpService,
+    private readonly config: ConfigService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -142,7 +144,13 @@ export class UsersController {
   )
   async uploadAvatar(@CurrentUser('id') userId: string, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
-    const avatarUrl = `/api/v1/users/avatars/${file.filename}`;
+    // Store an absolute URL so `<img src>` resolves against the backend origin,
+    // not the frontend's. Fixes avatars disappearing on reload when frontend
+    // and backend live on different origins.
+    const appUrl = (this.config.get<string>('APP_URL') || '').replace(/\/+$/, '');
+    const avatarUrl = appUrl
+      ? `${appUrl}/api/v1/users/avatars/${file.filename}`
+      : `/api/v1/users/avatars/${file.filename}`;
     await this.usersService.updateProfile(userId, { avatarUrl });
     return { avatarUrl };
   }
