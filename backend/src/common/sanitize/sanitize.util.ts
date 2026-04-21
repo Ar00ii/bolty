@@ -41,9 +41,11 @@ export function isAlphanumericSafe(input: string): boolean {
  * - Link-local addresses (169.254.0.0/16, fe80::/10)
  * - Metadata endpoints (169.254.169.254)
  * - Protocols other than HTTP/HTTPS
+ * - Hostnames in internal TLDs (.internal, .local, .localhost)
  *
  * Does NOT:
- * - Do DNS resolution (vulnerable to rebinding) — caller should resolve and re-validate
+ * - Do DNS resolution (vulnerable to rebinding) — use isSafeUrlResolving
+ *   when actually making the request, and pin the resolved IP.
  * - Block all internal services (only IP ranges)
  *
  * Use with timeout and rate limiting to prevent slow SSRF attacks.
@@ -57,14 +59,68 @@ export function isSafeUrl(url: string): boolean {
       return false;
     }
 
-    const hostname = parsed.hostname;
+    // Credentials in the URL can leak internal auth headers to third parties
+    if (parsed.username || parsed.password) {
+      return false;
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
     if (!hostname) return false;
+
+    // Block known-internal TLDs that resolve via split-horizon DNS
+    if (
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost') ||
+      hostname.endsWith('.internal') ||
+      hostname.endsWith('.local')
+    ) {
+      return false;
+    }
 
     // Check if it matches a private IP range
     return !isPrivateIp(hostname);
   } catch {
     return false;
   }
+}
+
+/**
+ * DNS-resolving SSRF guard — call RIGHT before performing the request.
+ * Returns the pinned IP to reuse for the actual connection so that a
+ * second lookup cannot rebind the hostname to a private range between
+ * validation and connect.
+ *
+ * NOTE: callers should pass the returned IP to axios via a custom
+ * `lookup` or pass `{ host: ip, headers: { Host: originalHostname } }`.
+ */
+export async function isSafeUrlResolving(
+  url: string,
+): Promise<{ ok: true; ip: string; family: 4 | 6 } | { ok: false; reason: string }> {
+  if (!isSafeUrl(url)) return { ok: false, reason: 'Blocked URL' };
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { ok: false, reason: 'Invalid URL' };
+  }
+  const hostname = parsed.hostname;
+  // Literal IPs are already covered by isSafeUrl; still resolve the host
+  // via the OS resolver for named hosts to refuse any private target.
+  const dns = await import('dns');
+  const addrs = await new Promise<{ address: string; family: number }[]>((resolve) => {
+    dns.lookup(hostname, { all: true, verbatim: true }, (err, result) => {
+      if (err || !result) return resolve([]);
+      resolve(result);
+    });
+  });
+  if (addrs.length === 0) return { ok: false, reason: 'DNS resolution failed' };
+  for (const a of addrs) {
+    if (isPrivateIp(a.address)) {
+      return { ok: false, reason: `Resolved to private IP ${a.address}` };
+    }
+  }
+  const first = addrs[0];
+  return { ok: true, ip: first.address, family: first.family === 6 ? 6 : 4 };
 }
 
 /**
