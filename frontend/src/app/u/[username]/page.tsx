@@ -1,9 +1,10 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { Bot, GitBranch, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { api, ApiError } from '@/lib/api/client';
@@ -43,6 +44,17 @@ interface PublicProfile {
   _count: { repositories: number };
 }
 
+interface SellerListing {
+  id: string;
+  title: string;
+  description: string | null;
+  type: 'AI_AGENT' | 'BOT' | 'SCRIPT' | 'REPO' | 'OTHER';
+  price: number;
+  currency: string;
+  tags: string[];
+  repository?: { id: string; name: string; githubUrl: string; language: string | null } | null;
+}
+
 type FriendStatus = 'none' | 'pending_sent' | 'pending_received' | 'friends' | 'self';
 
 export default function PublicProfilePage() {
@@ -50,6 +62,7 @@ export default function PublicProfilePage() {
   const username = params.username as string;
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [sellerListings, setSellerListings] = useState<SellerListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const { user: currentUser, isAuthenticated } = useAuth();
@@ -60,10 +73,20 @@ export default function PublicProfilePage() {
 
   useEffect(() => {
     if (!username) return;
-    api
-      .get<PublicProfile>(`/users/${username}`)
-      .then((p) => {
+    Promise.allSettled([
+      api.get<PublicProfile>(`/users/${username}`),
+      api.get<{ listings: SellerListing[] }>(`/market/sellers/${username}`),
+    ])
+      .then(([profileRes, sellerRes]) => {
+        if (profileRes.status !== 'fulfilled') {
+          setNotFound(true);
+          return;
+        }
+        const p = profileRes.value;
         setProfile({ ...p, avatarUrl: resolveAssetUrl(p.avatarUrl) });
+        if (sellerRes.status === 'fulfilled') {
+          setSellerListings(sellerRes.value.listings || []);
+        }
         if (isAuthenticated && currentUser) {
           if (currentUser.id === p.id) {
             setFriendStatus('self');
@@ -78,9 +101,25 @@ export default function PublicProfilePage() {
           }
         }
       })
-      .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [username]);
+
+  // Map repo.id → market listing id so locked repo cards can link straight
+  // to the buy page (visitors paying to unlock the source).
+  const repoListingMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const l of sellerListings) {
+      if (l.type === 'REPO' && l.repository?.id) {
+        map[l.repository.id] = l.id;
+      }
+    }
+    return map;
+  }, [sellerListings]);
+
+  const agentListings = useMemo(
+    () => sellerListings.filter((l) => l.type !== 'REPO'),
+    [sellerListings],
+  );
 
   const handleFriendAction = async () => {
     if (!isAuthenticated || friendStatus === 'self') return;
@@ -456,9 +495,157 @@ export default function PublicProfilePage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {profile.repositories.map((repo, idx) => (
+              {profile.repositories.map((repo, idx) => {
+                const listingId = repoListingMap[repo.id];
+                const titleEl = repo.isLocked ? (
+                  <span className="text-[#b4a7ff] font-mono font-light text-sm truncate">
+                    {repo.name}
+                  </span>
+                ) : (
+                  <a
+                    href={repo.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#b4a7ff] font-mono font-light text-sm truncate hover:text-white transition-colors"
+                  >
+                    {repo.name}
+                  </a>
+                );
+
+                const body = (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                      }}
+                    />
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{ background: 'rgba(131,110,249,0.18)' }}
+                    />
+                    <div className="relative flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {repo.isLocked && (
+                          <Lock
+                            className="w-3.5 h-3.5 shrink-0"
+                            strokeWidth={2}
+                            style={{ color: '#b4a7ff' }}
+                            aria-label="Locked — available to unlock"
+                          />
+                        )}
+                        {titleEl}
+                      </div>
+                      {repo.language && (
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded text-zinc-400 shrink-0 ml-2"
+                          style={{
+                            background: 'rgba(255,255,255,0.04)',
+                            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          {repo.language}
+                        </span>
+                      )}
+                    </div>
+
+                    {repo.isLocked && repo.lockedPriceUsd ? (
+                      <div
+                        className="relative text-[11px] font-mono px-2 py-0.5 rounded inline-block mb-2"
+                        style={{
+                          color: '#c4b5fd',
+                          background: 'rgba(131,110,249,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                        }}
+                      >
+                        ${repo.lockedPriceUsd.toFixed(2)} USD to unlock
+                      </div>
+                    ) : (
+                      repo.description && (
+                        <p className="relative text-zinc-400 text-xs leading-relaxed mb-2 line-clamp-2">
+                          {repo.description}
+                        </p>
+                      )
+                    )}
+
+                    <div className="relative flex items-center gap-3 text-zinc-500 text-[11px] font-mono">
+                      <span>★ {repo.stars}</span>
+                      <span>⑂ {repo.forks}</span>
+                      <span>↓ {repo.downloadCount}</span>
+                    </div>
+                  </>
+                );
+
+                const cardStyle = {
+                  background:
+                    'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+                } as const;
+
+                // If the repo is locked and has an associated market listing,
+                // wrap the whole card in a Link to the buy page so visitors
+                // can purchase access with one click.
+                return repo.isLocked && listingId ? (
+                  <motion.div
+                    key={repo.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(idx * 0.04, 0.4),
+                      duration: 0.32,
+                      ease: [0.22, 0.61, 0.36, 1],
+                    }}
+                    whileHover={{ y: -3 }}
+                  >
+                    <Link
+                      href={`/market/agents/${listingId}`}
+                      className="group relative rounded-xl overflow-hidden p-4 transition-all block"
+                      style={cardStyle}
+                      aria-label={`Unlock ${repo.name}`}
+                    >
+                      {body}
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key={repo.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      delay: Math.min(idx * 0.04, 0.4),
+                      duration: 0.32,
+                      ease: [0.22, 0.61, 0.36, 1],
+                    }}
+                    whileHover={{ y: -3 }}
+                    className="group relative rounded-xl overflow-hidden p-4 transition-all"
+                    style={cardStyle}
+                  >
+                    {body}
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* AI Agents */}
+        {agentListings.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-[11px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-4 flex items-center gap-2">
+              <Bot className="w-3 h-3" strokeWidth={2} />
+              AI Agents
+              <span className="text-zinc-600 normal-case tracking-normal text-[11px]">
+                · {agentListings.length}
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {agentListings.map((l, idx) => (
                 <motion.div
-                  key={repo.id}
+                  key={l.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
@@ -467,86 +654,66 @@ export default function PublicProfilePage() {
                     ease: [0.22, 0.61, 0.36, 1],
                   }}
                   whileHover={{ y: -3 }}
-                  className="group relative rounded-xl overflow-hidden p-4 transition-all"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                    boxShadow:
-                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
-                  }}
                 >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                  <Link
+                    href={`/market/agents/${l.id}`}
+                    className="group relative rounded-xl overflow-hidden p-4 transition-all block"
                     style={{
                       background:
-                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                        'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
                     }}
-                  />
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: 'rgba(131,110,249,0.18)' }}
-                  />
-                  <div className="relative flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {repo.isLocked && <span className="text-amber-300 shrink-0">🔒</span>}
-                      {repo.isLocked ? (
-                        <span className="text-amber-300 font-mono font-light text-sm truncate">
-                          {repo.name}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                      }}
+                    />
+                    <div className="relative flex items-start justify-between mb-2 gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        {l.type === 'REPO' ? (
+                          <GitBranch
+                            className="w-3.5 h-3.5 shrink-0"
+                            strokeWidth={2}
+                            style={{ color: '#b4a7ff' }}
+                          />
+                        ) : (
+                          <Bot
+                            className="w-3.5 h-3.5 shrink-0"
+                            strokeWidth={2}
+                            style={{ color: '#b4a7ff' }}
+                          />
+                        )}
+                        <span className="text-[#b4a7ff] font-mono font-light text-sm truncate">
+                          {l.title}
                         </span>
-                      ) : (
-                        <a
-                          href={repo.githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#b4a7ff] font-mono font-light text-sm truncate hover:text-white transition-colors"
-                        >
-                          {repo.name}
-                        </a>
-                      )}
-                    </div>
-                    {repo.language && (
+                      </div>
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded text-zinc-400 shrink-0 ml-2"
+                        className="text-[11px] font-mono px-2 py-0.5 rounded shrink-0"
                         style={{
-                          background: 'rgba(255,255,255,0.04)',
-                          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                          color: '#c4b5fd',
+                          background: 'rgba(131,110,249,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
                         }}
                       >
-                        {repo.language}
+                        {l.price} {l.currency}
                       </span>
-                    )}
-                  </div>
-
-                  {repo.isLocked && repo.lockedPriceUsd ? (
-                    <div
-                      className="relative text-[11px] text-amber-300 font-mono px-2 py-0.5 rounded inline-block mb-2"
-                      style={{
-                        background: 'rgba(245,158,11,0.1)',
-                        boxShadow: 'inset 0 0 0 1px rgba(245,158,11,0.25)',
-                      }}
-                    >
-                      ${repo.lockedPriceUsd.toFixed(2)} USD to unlock
                     </div>
-                  ) : (
-                    repo.description && (
-                      <p className="relative text-zinc-400 text-xs leading-relaxed mb-2 line-clamp-2">
-                        {repo.description}
+                    {l.description && (
+                      <p className="relative text-zinc-400 text-xs leading-relaxed line-clamp-2">
+                        {l.description}
                       </p>
-                    )
-                  )}
-
-                  <div className="relative flex items-center gap-3 text-zinc-500 text-[11px] font-mono">
-                    <span>★ {repo.stars}</span>
-                    <span>⑂ {repo.forks}</span>
-                    <span>↓ {repo.downloadCount}</span>
-                  </div>
+                    )}
+                  </Link>
                 </motion.div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

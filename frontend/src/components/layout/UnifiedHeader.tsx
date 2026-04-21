@@ -23,6 +23,7 @@ import { usePathname } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react';
 
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
+import { getReputationRank } from '@/components/ui/reputation-badge';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -197,13 +198,42 @@ export function UnifiedHeader() {
                   whileTap={{ scale: 0.97 }}
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 px-1.5 py-1 rounded-lg hover:bg-white/[0.04] transition-colors"
+                  style={{ overflow: 'visible' }}
                 >
-                  <UserAvatar
-                    src={user?.avatarUrl}
-                    name={user?.displayName || user?.username}
-                    userId={user?.id}
-                    size={28}
-                  />
+                  <span className="relative inline-flex" style={{ overflow: 'visible' }}>
+                    <UserAvatar
+                      src={user?.avatarUrl}
+                      name={user?.displayName || user?.username}
+                      userId={user?.id}
+                      size={28}
+                    />
+                    {(() => {
+                      const rank = getReputationRank(user?.reputationPoints ?? 0);
+                      const RankIcon = rank.icon;
+                      return (
+                        <span
+                          className="absolute grid place-items-center rounded-full"
+                          style={{
+                            bottom: -2,
+                            right: -2,
+                            width: 14,
+                            height: 14,
+                            background: '#09090b',
+                            border: `1.5px solid ${rank.color}`,
+                            boxShadow: `0 0 0 1.5px #09090b, 0 0 8px -1px ${rank.color}88`,
+                            zIndex: 1,
+                          }}
+                          title={`${rank.label} · ${(user?.reputationPoints ?? 0).toLocaleString()} rays`}
+                        >
+                          <RankIcon
+                            style={{ color: rank.color, width: 8, height: 8 }}
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
+                        </span>
+                      );
+                    })()}
+                  </span>
                   <ChevronDown
                     className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${
                       profileOpen ? 'rotate-180' : ''

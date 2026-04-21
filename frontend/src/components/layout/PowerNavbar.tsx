@@ -270,12 +270,12 @@ export function PowerNavbar() {
 
         {/* Avatar (signed-in only) */}
         {isAuthenticated && (
-          <div ref={profileRef} className="relative">
+          <div ref={profileRef} className="relative" style={{ overflow: 'visible' }}>
             <button
               type="button"
               onClick={() => setProfileOpen((v) => !v)}
               className="relative flex items-center gap-2 rounded-full transition-colors"
-              style={{ padding: '3px' }}
+              style={{ padding: '5px', overflow: 'visible' }}
               onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               aria-label="Account menu"
@@ -290,13 +290,14 @@ export function PowerNavbar() {
                 <span
                   className="absolute grid place-items-center rounded-full"
                   style={{
-                    bottom: '-3px',
-                    right: '-3px',
+                    bottom: 0,
+                    right: 0,
                     width: '14px',
                     height: '14px',
                     background: '#09090b',
                     border: `1.5px solid ${userRank.color}`,
-                    boxShadow: `0 0 6px -1px ${userRank.color}80`,
+                    boxShadow: `0 0 0 1.5px #09090b, 0 0 8px -1px ${userRank.color}88`,
+                    zIndex: 1,
                   }}
                   title={`${userRank.label} · ${user?.reputationPoints ?? 0} rays`}
                 >
@@ -310,8 +311,8 @@ export function PowerNavbar() {
                 <span
                   className="absolute rounded-full"
                   style={{
-                    bottom: '2px',
-                    right: '2px',
+                    bottom: '4px',
+                    right: '4px',
                     width: '9px',
                     height: '9px',
                     background: '#22c55e',
