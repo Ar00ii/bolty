@@ -13,6 +13,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+import { PrismaService } from '../../common/prisma/prisma.service';
+
 import { DmService } from './dm.service';
 
 interface AuthenticatedSocket extends Socket {
@@ -82,11 +84,31 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
   /** 20 messages per 10 seconds per user */
   private readonly rateLimiter = new WsRateLimiter(20, 10_000);
 
+  /**
+   * Short-lived ban cache so we don't hit Postgres on every single event.
+   * 30s TTL is low enough to revoke a live session quickly after a ban.
+   */
+  private banCache = new Map<string, { banned: boolean; expiresAt: number }>();
+
   constructor(
     private readonly dmService: DmService,
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
+
+  private async isBanned(userId: string): Promise<boolean> {
+    const now = Date.now();
+    const cached = this.banCache.get(userId);
+    if (cached && cached.expiresAt > now) return cached.banned;
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isBanned: true },
+    });
+    const banned = user?.isBanned === true;
+    this.banCache.set(userId, { banned, expiresAt: now + 30_000 });
+    return banned;
+  }
 
   async handleConnection(client: Socket) {
     try {
@@ -150,6 +172,11 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { peerId: string },
   ) {
     if (!client.userId) throw new WsException('Unauthorized');
+    if (await this.isBanned(client.userId)) {
+      client.emit('error', { message: 'Account is banned' });
+      client.disconnect();
+      return;
+    }
     try {
       const messages = await this.dmService.getConversation(client.userId, data.peerId);
       client.emit('conversation', { peerId: data.peerId, messages });
@@ -166,6 +193,11 @@ export class DmGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { receiverId: string; content: string },
   ) {
     if (!client.userId) throw new WsException('Unauthorized');
+    if (await this.isBanned(client.userId)) {
+      client.emit('error', { message: 'Account is banned' });
+      client.disconnect();
+      return;
+    }
     if (!this.rateLimiter.isAllowed(client.userId)) {
       client.emit('error', { message: 'Rate limit exceeded. Slow down.' });
       return;
