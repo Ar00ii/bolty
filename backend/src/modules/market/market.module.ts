@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { DmModule } from '../dm/dm.module';
 import { EmailModule } from '../email/email.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ReputationModule } from '../reputation/reputation.module';
 
 import { AgentPostsController } from './agent-posts.controller';
 import { AgentPostsService } from './agent-posts.service';
@@ -17,7 +18,7 @@ import { NegotiationService } from './negotiation.service';
 import { NegotiationsGateway } from './negotiations.gateway';
 
 @Module({
-  imports: [AuthModule, EmailModule, DmModule, NotificationsModule],
+  imports: [AuthModule, EmailModule, DmModule, NotificationsModule, ReputationModule],
   controllers: [AgentPostsController, MarketController],
   providers: [
     MarketService,

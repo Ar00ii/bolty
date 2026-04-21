@@ -173,7 +173,7 @@ export function StandardSidebar() {
         style={{
           background: '#09090b',
           border: '1px solid #1f1f23',
-          color: '#71717a',
+          color: '#ffffff',
         }}
         onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#2a2a30')}
         onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1f1f23')}
@@ -185,7 +185,7 @@ export function StandardSidebar() {
           style={{
             background: '#18181b',
             border: '1px solid #2a2a30',
-            color: '#71717a',
+            color: '#ffffff',
           }}
         >
           ⌘K
@@ -198,7 +198,7 @@ export function StandardSidebar() {
           <div key={sect.section} className="mt-4 first:mt-0">
             <div
               className="font-mono text-[10px] uppercase px-[10px] pb-[6px]"
-              style={{ color: '#a1a1aa', letterSpacing: '0.16em', fontWeight: 600 }}
+              style={{ color: '#ffffff', letterSpacing: '0.16em', fontWeight: 600 }}
             >
               {sect.section.toUpperCase()}
             </div>
@@ -228,7 +228,7 @@ export function StandardSidebar() {
                   boxShadow: '0 0 8px rgba(34,197,94,0.6)',
                 }}
               />
-              <span className="font-mono text-[11px]" style={{ color: '#a1a1aa' }}>
+              <span className="font-mono text-[11px]" style={{ color: '#ffffff' }}>
                 {shortenAddress(walletAddress)}
               </span>
             </div>
@@ -236,9 +236,9 @@ export function StandardSidebar() {
               type="button"
               onClick={() => logout?.()}
               className="font-mono text-[10px] transition-colors"
-              style={{ color: '#a1a1aa' }}
+              style={{ color: '#ffffff' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
             >
               disconnect
             </button>
@@ -310,11 +310,11 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     scheduleClose();
   };
 
-  const iconColor = active ? '#a594ff' : '#71717a';
+  const iconColor = active ? '#a594ff' : '#ffffff';
 
   const rowStyle: React.CSSProperties = {
     gridTemplateColumns: '10px 16px 1fr auto',
-    color: active ? '#e4e4e7' : '#a1a1aa',
+    color: active ? '#ffffff' : '#ffffff',
     background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
     fontSize: '13px',
     fontWeight: 300,
@@ -325,7 +325,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
     if (!active) {
-      e.currentTarget.style.color = '#e4e4e7';
+      e.currentTarget.style.color = '#ffffff';
       e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
     }
     const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
@@ -336,7 +336,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
     if (!active) {
-      e.currentTarget.style.color = '#a1a1aa';
+      e.currentTarget.style.color = '#ffffff';
       e.currentTarget.style.background = 'transparent';
     }
     const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
@@ -415,20 +415,18 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                     href={c.href}
                     className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
                     style={{
-                      color: isActive ? '#e4e4e7' : '#a1a1aa',
+                      color: '#ffffff',
                       background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
                       fontSize: '12.5px',
                       fontWeight: 300,
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
-                        e.currentTarget.style.color = '#e4e4e7';
                         e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
-                        e.currentTarget.style.color = '#a1a1aa';
                         e.currentTarget.style.background = 'transparent';
                       }
                     }}
@@ -437,7 +435,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                       <ChildIcon
                         className="w-[14px] h-[14px] shrink-0"
                         strokeWidth={1.5}
-                        style={{ color: isActive ? '#a594ff' : '#71717a' }}
+                        style={{ color: isActive ? '#a594ff' : '#ffffff' }}
                       />
                     )}
                     <span className="truncate">{c.label}</span>

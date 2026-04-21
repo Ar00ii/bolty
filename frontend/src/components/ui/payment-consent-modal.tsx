@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Shield, AlertTriangle, Lock, X, Zap, Check } from 'lucide-react';
+import { Shield, AlertTriangle, Lock, X, Check } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { isEscrowEnabled } from '@/lib/wallet/escrow';
@@ -376,10 +376,6 @@ export function PaymentConsentModal({
             >
               {signing ? 'Signing…' : `Sign & pay with ${currency}`}
             </motion.button>
-          </div>
-          <div className="px-5 pb-4 flex items-center justify-center gap-1.5 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
-            <Zap className="w-3 h-3 text-cyan-400/70" strokeWidth={2.2} />
-            Powered by Base network
           </div>
         </motion.div>
       </motion.div>

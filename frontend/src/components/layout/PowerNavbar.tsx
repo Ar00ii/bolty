@@ -165,38 +165,6 @@ export function PowerNavbar() {
 
         <div className="flex-1" />
 
-        {/* Powered by Base network */}
-        <a
-          href="https://base.org"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:inline-flex items-center gap-1.5 rounded-full shrink-0 transition-colors"
-          style={{
-            padding: '4px 10px',
-            fontSize: '10px',
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: '#60a5fa',
-            background: 'rgba(96,165,250,0.08)',
-            border: '1px solid rgba(96,165,250,0.25)',
-          }}
-          title="Powered by Base network — Ethereum Layer 2"
-          aria-label="Powered by Base network"
-        >
-          <span
-            aria-hidden="true"
-            style={{
-              width: 6,
-              height: 6,
-              borderRadius: 9999,
-              background: '#60a5fa',
-              boxShadow: '0 0 6px #60a5fa',
-            }}
-          />
-          Powered by Base
-        </a>
-
         {/* Command search */}
         <button
           type="button"
@@ -207,16 +175,14 @@ export function PowerNavbar() {
             padding: '7px 10px',
             background: '#0c0c0f',
             border: '1px solid #1f1f23',
-            color: '#52525b',
+            color: '#ffffff',
             fontSize: '12.5px',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderColor = '#2a2a30';
-            e.currentTarget.style.color = '#71717a';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.borderColor = '#1f1f23';
-            e.currentTarget.style.color = '#52525b';
           }}
         >
           <Search className="w-[13px] h-[13px] shrink-0" strokeWidth={2} />
@@ -229,7 +195,7 @@ export function PowerNavbar() {
                 padding: '1px 5px',
                 background: '#18181b',
                 border: '1px solid #2a2a30',
-                color: '#71717a',
+                color: '#ffffff',
               }}
             >
               ⌘
@@ -241,7 +207,7 @@ export function PowerNavbar() {
                 padding: '1px 5px',
                 background: '#18181b',
                 border: '1px solid #2a2a30',
-                color: '#71717a',
+                color: '#ffffff',
               }}
             >
               K
