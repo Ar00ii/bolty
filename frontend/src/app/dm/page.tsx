@@ -161,7 +161,7 @@ export default function DmPage() {
   });
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) router.push('/auth');
+    if (!isLoading && !isAuthenticated) router.replace('/auth');
   }, [isAuthenticated, isLoading, router]);
 
   useEffect(() => {

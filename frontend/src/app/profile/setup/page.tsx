@@ -25,7 +25,7 @@ export default function ProfileSetupPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      router.push('/auth');
+      router.replace('/auth');
       return;
     }
     // Pre-fill with existing data

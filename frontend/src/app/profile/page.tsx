@@ -546,7 +546,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      router.push('/auth');
+      router.replace('/auth');
       return;
     }
     setUsername(user.username || '');
