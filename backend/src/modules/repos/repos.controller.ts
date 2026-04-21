@@ -45,13 +45,14 @@ import { ReposService } from './repos.service';
 
 const LOGO_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'logos');
 
-// Only allow static images — no GIFs, no video, no executables
+// Only allow static raster images. SVG is deliberately excluded — an SVG
+// served from the same origin can execute inline <script> and steal
+// session cookies via stored XSS.
 const ALLOWED_IMAGE_MIMETYPES = new Set([
   'image/png',
   'image/jpeg',
   'image/jpg',
   'image/webp',
-  'image/svg+xml',
 ]);
 
 class PublishRepoDto {
@@ -290,7 +291,7 @@ export class ReposController {
         } else {
           cb(
             new BadRequestException(
-              'Only static images are allowed (PNG, JPG, WebP, SVG). GIFs and other formats are not permitted.',
+              'Only static raster images are allowed (PNG, JPG, WebP). SVGs, GIFs and other formats are not permitted.',
             ),
             false,
           );
@@ -324,6 +325,12 @@ export class ReposController {
     }
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    // Defence-in-depth for legacy SVGs that may still be on disk from
+    // before image/svg+xml was removed from the allowlist: nosniff blocks
+    // browsers from treating a .svg-as-image/png as SVG, and the sandbox
+    // CSP neutralises any inline <script> even if it does.
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'");
     res.sendFile(filePath, { headers: { 'Cache-Control': 'public, max-age=86400' } });
   }
 
