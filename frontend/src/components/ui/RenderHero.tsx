@@ -128,9 +128,8 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="relative hidden lg:flex items-center justify-end"
+        className="relative hidden lg:flex items-center justify-center pr-[6.25%]"
       >
-        {/* Placeholder for Lottie animation */}
         <div
           className="absolute top-0 right-0 w-full"
           style={{
@@ -148,6 +147,16 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             filter: 'blur(110px)',
             opacity: 0.1,
           }}
+        />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/imglanding-removebg-preview.png"
+          alt=""
+          className="relative z-10 w-full max-w-[560px] xl:max-w-[640px] h-auto object-contain select-none pointer-events-none"
+          style={{
+            filter: 'drop-shadow(0 30px 60px rgba(131,110,249,0.25))',
+          }}
+          draggable={false}
         />
       </motion.div>
     </div>
