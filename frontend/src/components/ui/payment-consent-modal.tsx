@@ -1,28 +1,42 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Shield, AlertTriangle, Lock, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Shield, AlertTriangle, Lock, X, Zap, Check } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { isEscrowEnabled } from '@/lib/wallet/escrow';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
+export type PaymentMethod = 'ETH' | 'BOLTY';
+
 interface PaymentConsentModalProps {
   listingTitle: string;
   sellerAddress: string;
-  sellerAmountETH: string; // 97.5% of total
-  platformFeeETH: string; // 2.5% of total
+  /** @deprecated fee breakdown is now computed from `totalETH` + selected method */
+  sellerAmountETH?: string;
+  /** @deprecated fee breakdown is now computed from `totalETH` + selected method */
+  platformFeeETH?: string;
   totalETH: string;
-  totalUsd: string; // total in USD
+  totalUsd: string;
   buyerAddress: string;
-  onConsent: (signature: string, message: string) => void;
+  onConsent: (signature: string, message: string, paymentMethod: PaymentMethod) => void;
   onCancel: () => void;
+}
+
+// Base network dual-fee model: ETH = 7%, BOLTY = 3% (preferred).
+const FEE_BPS: Record<PaymentMethod, number> = { ETH: 700, BOLTY: 300 };
+
+function splitFee(totalStr: string, method: PaymentMethod): { seller: string; fee: string } {
+  const total = Number(totalStr);
+  if (!Number.isFinite(total) || total <= 0) return { seller: '0.000000', fee: '0.000000' };
+  const feeRate = FEE_BPS[method] / 10000;
+  const fee = total * feeRate;
+  const seller = total - fee;
+  return { seller: seller.toFixed(6), fee: fee.toFixed(6) };
 }
 
 export function PaymentConsentModal({
   listingTitle,
   sellerAddress,
-  sellerAmountETH,
-  platformFeeETH,
   totalETH,
   totalUsd,
   buyerAddress,
@@ -32,8 +46,17 @@ export function PaymentConsentModal({
   const [signing, setSigning] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
+  // Default to BOLTY — it's the cheaper option we want to nudge users to.
+  const [method, setMethod] = useState<PaymentMethod>('BOLTY');
 
   const escrow = isEscrowEnabled();
+  const { seller: sellerAmount, fee: platformFee } = useMemo(
+    () => splitFee(totalETH, method),
+    [totalETH, method],
+  );
+  const feePct = method === 'ETH' ? '7%' : '3%';
+  const sellerPct = method === 'ETH' ? '93%' : '97%';
+  const currency = method === 'ETH' ? 'ETH' : 'BOLTY';
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -63,17 +86,17 @@ export function PaymentConsentModal({
       const timestamp = new Date().toISOString();
       const escrowTerms = escrow
         ? [
-            '1. Funds will be deposited into the Bolty Escrow smart contract.',
+            '1. Funds will be deposited into the Bolty Escrow smart contract on Base (chainId 8453).',
             '2. The seller will NOT receive payment until I confirm delivery.',
             '3. I can open a dispute if the seller does not deliver.',
             '4. After 14 days without dispute, funds auto-release to the seller.',
             '5. Disputes are resolved by the Bolty admin.',
-            '6. Smart contract interactions require gas fees.',
+            '6. Smart contract interactions on Base require gas fees (paid in ETH).',
             '7. This cryptographic signature constitutes irrevocable proof of my consent.',
             '8. I have the technical knowledge required to conduct this transaction.',
           ]
         : [
-            '1. This is a voluntary peer-to-peer transaction on the Ethereum blockchain.',
+            '1. This is a voluntary peer-to-peer transaction on Base (Ethereum Layer 2).',
             '2. Blockchain transactions are FINAL and IRREVERSIBLE once confirmed.',
             '3. Bolty Platform is NOT a custodian and does NOT hold or escrow funds.',
             '4. Bolty Platform bears NO liability for disputes, fraud, or losses.',
@@ -87,15 +110,17 @@ export function PaymentConsentModal({
         `=== BOLTY PLATFORM — PAYMENT CONSENT DOCUMENT${escrow ? ' (ESCROW)' : ''} ===`,
         '',
         `Date: ${timestamp}`,
+        `Network: Base (Ethereum L2, chainId 8453)`,
+        `Payment method: ${method}${method === 'BOLTY' ? ' (ERC-20, lower fee)' : ' (native)'}`,
         `Buyer wallet:  ${buyerAddress}`,
         `Seller wallet: ${sellerAddress}`,
         `Listing: ${listingTitle}`,
         escrow ? 'Mode: ESCROW (funds held until delivery confirmed)' : 'Mode: DIRECT PAYMENT',
         '',
         'PAYMENT BREAKDOWN:',
-        `  To seller:        ${sellerAmountETH} ETH  (97.5%)`,
-        `  Platform fee:     ${platformFeeETH} ETH   (2.5%)`,
-        `  Total:            ${totalETH} ETH`,
+        `  To seller:        ${sellerAmount} ${currency}  (${sellerPct})`,
+        `  Platform fee:     ${platformFee} ${currency}   (${feePct})`,
+        `  Total:            ${totalETH} ${currency}`,
         '',
         'BY SIGNING THIS DOCUMENT I CONFIRM:',
         ...escrowTerms,
@@ -109,7 +134,7 @@ export function PaymentConsentModal({
         params: [message, accounts[0]],
       })) as string;
 
-      onConsent(signature, message);
+      onConsent(signature, message, method);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied') || msg.includes('User denied')) {
@@ -160,8 +185,8 @@ export function PaymentConsentModal({
             <div className="flex items-center gap-2.5">
               <Shield className="w-4 h-4 text-bolty-400" />
               <span className="font-light text-white text-sm">Payment Consent</span>
-              <span className="text-[10px] font-mono text-bolty-400/60 border border-bolty-400/20 px-1.5 py-0.5 rounded">
-                BETA
+              <span className="text-[10px] font-mono text-cyan-300/80 border border-cyan-400/25 px-1.5 py-0.5 rounded">
+                BASE
               </span>
             </div>
             <motion.button
@@ -176,10 +201,36 @@ export function PaymentConsentModal({
             </motion.button>
           </div>
 
+          {/* Payment method selector */}
+          <div className="px-5 pt-5">
+            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">
+              Choose payment method on Base
+            </p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <MethodCard
+                active={method === 'ETH'}
+                onClick={() => setMethod('ETH')}
+                title="ETH"
+                subtitle="Base network"
+                fee="7% fee"
+                accent="#60a5fa"
+              />
+              <MethodCard
+                active={method === 'BOLTY'}
+                onClick={() => setMethod('BOLTY')}
+                title="BOLTY"
+                subtitle="Base network · cheaper"
+                fee="3% fee"
+                accent="#836EF9"
+                highlighted
+              />
+            </div>
+          </div>
+
           {/* Warning / Info */}
           {escrow ? (
             <div
-              className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl"
+              className="mx-5 mt-4 flex gap-3 p-3.5 rounded-xl"
               style={{
                 background: 'rgba(34,197,94,0.06)',
                 border: '1px solid rgba(34,197,94,0.2)',
@@ -187,13 +238,13 @@ export function PaymentConsentModal({
             >
               <Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-green-300/80 leading-relaxed">
-                <strong>Escrow protected.</strong> Funds are held in a smart contract until you
-                confirm delivery. You can dispute if the seller doesn&apos;t deliver.
+                <strong>Escrow protected.</strong> Funds are held in a smart contract on Base until
+                you confirm delivery. You can dispute if the seller doesn&apos;t deliver.
               </p>
             </div>
           ) : (
             <div
-              className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl"
+              className="mx-5 mt-4 flex gap-3 p-3.5 rounded-xl"
               style={{
                 background: 'rgba(234,179,8,0.06)',
                 border: '1px solid rgba(234,179,8,0.2)',
@@ -201,8 +252,8 @@ export function PaymentConsentModal({
             >
               <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-yellow-300/80 leading-relaxed">
-                <strong>Peer-to-peer blockchain transaction.</strong> Payments are irreversible.
-                Bolty is not responsible for disputes or losses.
+                <strong>Peer-to-peer Base transaction.</strong> Payments are irreversible. Bolty is
+                not responsible for disputes or losses.
               </p>
             </div>
           )}
@@ -221,15 +272,19 @@ export function PaymentConsentModal({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-zinc-400">
-                  To seller <span className="text-zinc-600 font-mono text-xs">(97.5%)</span>
+                  To seller <span className="text-zinc-600 font-mono text-xs">({sellerPct})</span>
                 </span>
-                <span className="text-white font-mono">{sellerAmountETH} ETH</span>
+                <span className="text-white font-mono">
+                  {sellerAmount} {currency}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-400">
-                  Platform fee <span className="text-zinc-600 font-mono text-xs">(2.5%)</span>
+                  Platform fee <span className="text-zinc-600 font-mono text-xs">({feePct})</span>
                 </span>
-                <span className="text-white font-mono">{platformFeeETH} ETH</span>
+                <span className="text-white font-mono">
+                  {platformFee} {currency}
+                </span>
               </div>
               <div
                 className="flex justify-between pt-2 border-t"
@@ -239,7 +294,9 @@ export function PaymentConsentModal({
                   Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
                 </span>
                 <div className="text-right">
-                  <span className="text-bolty-300 font-mono font-light">{totalETH} ETH</span>
+                  <span className="text-bolty-300 font-mono font-light">
+                    {totalETH} {currency}
+                  </span>
                   <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
                 </div>
               </div>
@@ -254,7 +311,7 @@ export function PaymentConsentModal({
             <p className="text-zinc-400 font-light">By signing you confirm:</p>
             {escrow ? (
               <ol className="list-decimal list-inside space-y-0.5 mt-1">
-                <li>Funds will be deposited into the Bolty Escrow smart contract.</li>
+                <li>Funds will be deposited into the Bolty Escrow contract on Base.</li>
                 <li>The seller will NOT receive payment until I confirm delivery.</li>
                 <li>I can dispute within 14 days if the seller does not deliver.</li>
                 <li>After 14 days without dispute, funds auto-release to the seller.</li>
@@ -263,7 +320,7 @@ export function PaymentConsentModal({
               </ol>
             ) : (
               <ol className="list-decimal list-inside space-y-0.5 mt-1">
-                <li>All blockchain transactions are final and irreversible.</li>
+                <li>All Base transactions are final and irreversible.</li>
                 <li>Bolty Platform does not hold, escrow, or guarantee any funds.</li>
                 <li>You have independently verified the seller and listing.</li>
                 <li>Bolty Platform bears no liability for disputes, fraud, or losses.</li>
@@ -287,8 +344,8 @@ export function PaymentConsentModal({
               htmlFor="consent-check"
               className="text-xs text-zinc-400 cursor-pointer leading-relaxed"
             >
-              I have read and understood all terms. I voluntarily consent to this transaction and
-              accept all associated risks.
+              I have read and understood all terms. I voluntarily consent to this transaction on
+              Base network and accept all associated risks.
             </label>
           </div>
 
@@ -317,11 +374,77 @@ export function PaymentConsentModal({
                 border: '1px solid rgba(131,110,249,0.45)',
               }}
             >
-              {signing ? 'Signing…' : 'Sign & Continue'}
+              {signing ? 'Signing…' : `Sign & pay with ${currency}`}
             </motion.button>
+          </div>
+          <div className="px-5 pb-4 flex items-center justify-center gap-1.5 text-[10px] font-mono text-zinc-600 uppercase tracking-widest">
+            <Zap className="w-3 h-3 text-cyan-400/70" strokeWidth={2.2} />
+            Powered by Base network
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
+  );
+}
+
+function MethodCard({
+  active,
+  onClick,
+  title,
+  subtitle,
+  fee,
+  accent,
+  highlighted,
+}: {
+  active: boolean;
+  onClick: () => void;
+  title: string;
+  subtitle: string;
+  fee: string;
+  accent: string;
+  highlighted?: boolean;
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileTap={{ scale: 0.98 }}
+      className="relative text-left p-3 rounded-xl transition-colors"
+      style={{
+        background: active ? `${accent}18` : 'rgba(255,255,255,0.02)',
+        border: `1px solid ${active ? `${accent}80` : 'rgba(255,255,255,0.06)'}`,
+      }}
+    >
+      {highlighted && !active && (
+        <span
+          className="absolute top-1.5 right-1.5 text-[8.5px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded"
+          style={{
+            background: `${accent}22`,
+            color: accent,
+            border: `1px solid ${accent}50`,
+          }}
+        >
+          Cheaper
+        </span>
+      )}
+      {active && (
+        <span
+          className="absolute top-1.5 right-1.5 grid place-items-center w-4 h-4 rounded-full"
+          style={{ background: accent }}
+        >
+          <Check className="w-2.5 h-2.5 text-black" strokeWidth={3} />
+        </span>
+      )}
+      <div className="flex items-center gap-1.5">
+        <span className="text-sm font-light text-white">{title}</span>
+      </div>
+      <p className="text-[10px] text-zinc-500 mt-0.5 leading-snug">{subtitle}</p>
+      <p
+        className="text-[11px] font-mono mt-1.5"
+        style={{ color: active ? accent : 'rgba(255,255,255,0.5)' }}
+      >
+        {fee}
+      </p>
+    </motion.button>
   );
 }

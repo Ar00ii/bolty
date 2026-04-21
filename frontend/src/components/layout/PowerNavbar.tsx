@@ -163,6 +163,38 @@ export function PowerNavbar() {
 
         <div className="flex-1" />
 
+        {/* Powered by Base network */}
+        <a
+          href="https://base.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:inline-flex items-center gap-1.5 rounded-full shrink-0 transition-colors"
+          style={{
+            padding: '4px 10px',
+            fontSize: '10px',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: '#60a5fa',
+            background: 'rgba(96,165,250,0.08)',
+            border: '1px solid rgba(96,165,250,0.25)',
+          }}
+          title="Powered by Base network — Ethereum Layer 2"
+          aria-label="Powered by Base network"
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 9999,
+              background: '#60a5fa',
+              boxShadow: '0 0 6px #60a5fa',
+            }}
+          />
+          Powered by Base
+        </a>
+
         {/* Command search */}
         <button
           type="button"

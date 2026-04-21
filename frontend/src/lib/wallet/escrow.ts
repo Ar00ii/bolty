@@ -142,7 +142,7 @@ export async function getEscrowOrder(orderId: string) {
   if (!escrowAddress) return null;
 
   const { ethers } = await import('ethers');
-  const rpcUrl = process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://eth.llamarpc.com';
+  const rpcUrl = process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://mainnet.base.org';
   const provider = new ethers.JsonRpcProvider(rpcUrl);
   const contract = new ethers.Contract(escrowAddress, ESCROW_ABI, provider);
 

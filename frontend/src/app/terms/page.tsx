@@ -66,14 +66,15 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          Payments on Bolty are settled on-chain (ETH and ERC-20 tokens on supported networks). Once
-          funds are committed to the BoltyEscrow smart contract, the outcome of the trade is
+          Payments on Bolty settle on-chain on the Base network (Ethereum Layer 2, chainId 8453).
+          Once funds are committed to the BoltyEscrow smart contract, the outcome of the trade is
           governed by that contract. Bolty is not a custodian and cannot reverse, refund, or
           intercept on-chain transactions.
         </p>
         <p>
-          Bolty charges a platform fee of 2.5% on each completed sale. Fees are deducted
-          automatically at settlement.
+          Bolty supports exactly two payment methods, both on Base:
+          <strong> ETH</strong> (platform fee 7%) and <strong>BOLTY</strong> (platform fee 3% —
+          the cheaper, preferred option). Fees are deducted automatically at settlement.
         </p>
         <p>
           You are solely responsible for paying any taxes, duties, or reporting obligations that

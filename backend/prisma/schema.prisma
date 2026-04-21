@@ -181,11 +181,11 @@ model RepoPurchase {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  txHash    String  @unique // Ethereum tx hash (seller payment, 97.5%)
+  txHash    String  @unique // Base tx hash (seller payment: 93% ETH path / 97% BOLTY path)
   verified  Boolean @default(false)
   amountWei String  @default("0") // stored as string to avoid precision loss
 
-  // Platform commission (2.5%)
+  // Platform commission on Base: 7% for ETH payments, 3% for BOLTY payments.
   platformFeeTxHash String? // Bolty commission tx hash
   platformFeeWei    String? // commission amount in wei
 
@@ -213,7 +213,7 @@ model MarketPurchase {
   amountWei String  @default("0")
   verified  Boolean @default(false)
 
-  // Platform commission (2.5%)
+  // Platform commission on Base: 7% for ETH payments, 3% for BOLTY payments.
   platformFeeTxHash String?
   platformFeeWei    String?
 
@@ -415,7 +415,7 @@ model MarketListing {
   description   String             @db.Text
   type          ListingType
   price         Float              @default(0)
-  currency      String             @default("SOL")
+  currency      String             @default("ETH")
   tags          String[]
   repositoryId  String?
   repository    Repository?        @relation(fields: [repositoryId], references: [id], onDelete: SetNull)

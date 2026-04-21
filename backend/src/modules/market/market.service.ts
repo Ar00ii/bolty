@@ -237,7 +237,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         description,
         type: dto.type,
         price: dto.price,
-        currency: dto.currency || 'SOL',
+        currency: dto.currency || 'ETH',
         tags: (dto.tags || []).map((t) => sanitizeText(t.slice(0, 50))).slice(0, 10),
         sellerId,
         repositoryId: dto.repositoryId || null,
@@ -1151,7 +1151,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Listing price is not representable on-chain');
     }
 
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
     const configuredEscrow = this.config.get<string>('ESCROW_CONTRACT', '');
     const sellerWallet = listing.seller.walletAddress;
@@ -1565,7 +1565,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (!platformWallet) {
       throw new BadRequestException('Platform wallet not configured — boosts disabled');
     }
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
     const tokenContract = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const receipt = await provider.getTransactionReceipt(txHash);

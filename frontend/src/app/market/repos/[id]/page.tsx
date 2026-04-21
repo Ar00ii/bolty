@@ -708,7 +708,7 @@ function ActionsCard({
       {locked && (
         <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
           <Shield className="inline w-3 h-3 mr-1 -mt-0.5" />
-          Payment split 97.5% seller / 2.5% platform.
+          Base network · Platform fee: 7% (ETH) or 3% (BOLTY).
         </p>
       )}
     </div>
