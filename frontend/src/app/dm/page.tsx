@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { API_URL, WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -49,36 +50,24 @@ function Avatar({
   size = 8,
   badge,
   reputationPoints,
+  userId,
 }: {
   name?: string | null;
   url?: string | null;
   size?: number;
   badge?: 'agent' | 'online';
   reputationPoints?: number | null;
+  userId?: string | null;
 }) {
-  const sizeClass = `w-${size} h-${size}`;
+  // Tailwind h-/w-/ classes are in rem units (4 = 16px, 8 = 32px, …). Match
+  // the numeric prop to the old behaviour so callers don't need to change.
+  const px = size * 4;
   const rank = typeof reputationPoints === 'number' ? getReputationRank(reputationPoints) : null;
   const RankIcon = rank?.icon;
 
   return (
-    <div className="relative">
-      {url ? (
-        <img
-          src={url}
-          alt={name || ''}
-          className={`${sizeClass} rounded-full object-cover flex-shrink-0`}
-        />
-      ) : (
-        <div
-          className={`${sizeClass} rounded-full flex-shrink-0 flex items-center justify-center text-bolty-300 font-light text-xs`}
-          style={{
-            background: 'linear-gradient(135deg, rgba(167,137,250,0.2), rgba(131,110,249,0.15))',
-            border: '1px solid rgba(167,137,250,0.3)',
-          }}
-        >
-          {(name || '?')[0].toUpperCase()}
-        </div>
-      )}
+    <div className="relative inline-block" style={{ width: px, height: px }}>
+      <UserAvatar src={url} name={name} userId={userId} size={px} />
       {rank && RankIcon ? (
         <span
           className="absolute grid place-items-center rounded-full"
@@ -522,6 +511,7 @@ export default function DmPage() {
                   <Avatar
                     name={c.user.username}
                     url={c.user.avatarUrl}
+                    userId={c.user.id}
                     size={10}
                     badge={c.type === 'agent' ? 'agent' : 'online'}
                   />
@@ -650,6 +640,7 @@ export default function DmPage() {
                   <Avatar
                     name={activePeer.username}
                     url={activePeer.avatarUrl}
+                    userId={activePeer.id}
                     size={10}
                     badge={isAgentChat ? 'agent' : 'online'}
                   />
@@ -754,7 +745,12 @@ export default function DmPage() {
                             className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}
                           >
                             {!isMe && (
-                              <Avatar name={msg.senderUsername} url={msg.senderAvatar} size={9} />
+                              <Avatar
+                                name={msg.senderUsername}
+                                url={msg.senderAvatar}
+                                userId={msg.senderId}
+                                size={9}
+                              />
                             )}
                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               <p className="text-xs font-light text-zinc-400 mb-1">

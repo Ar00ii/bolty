@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+
+import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 interface UserAvatarProps {
   src?: string | null;
@@ -31,9 +33,15 @@ function initials(name: string | null | undefined): string {
 /**
  * Canonical avatar component. Renders the user's uploaded picture when
  * available, otherwise a branded gradient disc with the user's initials.
- * Replaces the assorted one-off `<div><span>{letter[0]}</span></div>`
- * placeholders scattered across the app so we never show a plain grey
- * circle again.
+ *
+ * Design notes:
+ *  - `src` is pushed through `resolveAssetUrl` so legacy relative paths
+ *    like `/api/v1/users/avatars/<uuid>` resolve against the backend
+ *    origin instead of 404-ing against the frontend origin.
+ *  - An `onError` handler swaps in the initials fallback if the image
+ *    fails to load (dead URL, CORS, wrong origin), so we never show the
+ *    broken-image icon + alt text that users were complaining about.
+ *  - `src` changes reset the error flag so retries after re-upload work.
  */
 export function UserAvatar({
   src,
@@ -43,19 +51,26 @@ export function UserAvatar({
   className = '',
   ring = false,
 }: UserAvatarProps) {
+  const resolved = resolveAssetUrl(src);
+  const [errored, setErrored] = useState(false);
+  useEffect(() => {
+    setErrored(false);
+  }, [resolved]);
+
   const seed = userId || name || '';
   const hue = hashHue(seed || 'bolty');
   const letters = initials(name);
   const bg = `linear-gradient(135deg, hsl(${hue}, 72%, 62%) 0%, hsl(${(hue + 40) % 360}, 68%, 52%) 100%)`;
   const ringStyle = ring ? { boxShadow: '0 0 0 2px rgba(131,110,249,0.35)' } : {};
 
-  if (src) {
+  if (resolved && !errored) {
     return (
       <img
-        src={src}
+        src={resolved}
         alt={name || 'avatar'}
         width={size}
         height={size}
+        onError={() => setErrored(true)}
         className={`rounded-full object-cover ${className}`}
         style={{
           width: size,

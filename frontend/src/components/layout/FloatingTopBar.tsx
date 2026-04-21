@@ -8,6 +8,7 @@ import React from 'react';
 import { useState, useRef, useEffect } from 'react';
 
 import { NotificationsBell } from '@/components/layout/NotificationsBell';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 export function FloatingTopBar() {
@@ -122,24 +123,13 @@ export function FloatingTopBar() {
           aria-haspopup="menu"
           aria-expanded={profileOpen}
         >
-          {user?.avatarUrl ? (
-            <img
-              src={user.avatarUrl}
-              alt="profile"
-              className="w-6 h-6 rounded-lg object-cover flex-shrink-0"
-              style={{ border: '1px solid rgba(255,255,255,0.10)' }}
-            />
-          ) : (
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-semibold text-white flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.2)',
-              }}
-            >
-              {(user?.displayName || user?.username || 'U')[0]?.toUpperCase()}
-            </div>
-          )}
+          <UserAvatar
+            src={user?.avatarUrl}
+            name={user?.displayName || user?.username}
+            userId={user?.id}
+            size={24}
+            className="flex-shrink-0"
+          />
 
           <span className="text-[12px] font-light text-zinc-300 max-w-[96px] truncate">
             {user?.displayName || user?.username || 'User'}
@@ -179,21 +169,13 @@ export function FloatingTopBar() {
               />
               {/* User Info */}
               <div className="px-3.5 py-3 border-b border-white/[0.06] flex items-center gap-2.5">
-                {user?.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt=""
-                    className="w-8 h-8 rounded-lg object-cover flex-shrink-0"
-                    style={{ border: '1px solid rgba(255,255,255,0.08)' }}
-                  />
-                ) : (
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white flex-shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)' }}
-                  >
-                    {(user?.displayName || user?.username || 'U')[0]?.toUpperCase()}
-                  </div>
-                )}
+                <UserAvatar
+                  src={user?.avatarUrl}
+                  name={user?.displayName || user?.username}
+                  userId={user?.id}
+                  size={32}
+                  className="flex-shrink-0"
+                />
                 <div className="min-w-0">
                   <p className="text-[13px] font-light text-white truncate">
                     {user?.displayName || user?.username}
