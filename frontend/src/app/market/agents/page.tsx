@@ -80,7 +80,7 @@ interface ApiKeyInfo {
 interface NegotiationMessage {
   id: string;
   createdAt: string;
-  fromRole: 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent';
+  fromRole: 'buyer' | 'seller' | 'buyer_agent' | 'seller_agent' | 'system';
   content: string;
   proposedPrice?: number | null;
 }
@@ -707,6 +707,30 @@ function NegotiationModal({
             setAgentTyping(role);
             // Auto-clear after 5s as safety net
             setTimeout(() => setAgentTyping(null), 5000);
+          },
+        );
+
+        socket.on(
+          'negotiation:error',
+          ({ stage, message }: { stage: string; message: string }) => {
+            setAgentTyping(null);
+            setNeg((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    messages: [
+                      ...prev.messages,
+                      {
+                        id: `err-${Date.now()}`,
+                        fromRole: 'system',
+                        content: `Agent ${stage.replace('_', ' ')} failed: ${message}. Try switching to human mode.`,
+                        proposedPrice: null,
+                        createdAt: new Date().toISOString(),
+                      } as NegotiationMessage,
+                    ],
+                  }
+                : prev,
+            );
           },
         );
 
