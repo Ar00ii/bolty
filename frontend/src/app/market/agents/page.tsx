@@ -37,8 +37,10 @@ import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useStepUp } from '@/lib/auth/useStepUp';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
@@ -1828,6 +1830,7 @@ function CreateListingForm({
   onCancel: () => void;
 }) {
   const { refresh } = useAuth();
+  const { runWithStepUp, stepUpOpen, stepUpMessage, submit, dismiss } = useStepUp<MarketListing>();
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [form, setForm] = useState({
     title: '',
@@ -1985,7 +1988,14 @@ function CreateListingForm({
             }
           : {}),
       };
-      const result = await api.post<MarketListing>('/market', payload);
+      // Publishing a listing is a sensitive op — the backend's step-up
+      // guard returns STEP_UP_REQUIRED when 2FA is enabled. Wrap the call
+      // with `runWithStepUp` so the authenticator-code modal actually
+      // opens instead of just showing a dead "Confirm with your
+      // authenticator code" error on the review step.
+      const result = await runWithStepUp((code?: string) =>
+        api.post<MarketListing>('/market', code ? { ...payload, twoFactorCode: code } : payload),
+      );
       await refresh();
       setDeploySuccess(true);
       // Show success for 2 seconds then call onCreated
@@ -1993,7 +2003,11 @@ function CreateListingForm({
         onCreated(result);
       }, 2000);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to create listing');
+      if (err instanceof Error && err.message === 'Cancelled') {
+        // User dismissed the 2FA modal — leave the form as-is.
+      } else {
+        setError(err instanceof ApiError ? err.message : 'Failed to create listing');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -4101,6 +4115,18 @@ function CreateListingForm({
           </div>
         </div>
       )}
+
+      <VerificationCodeModal
+        open={stepUpOpen}
+        source="totp"
+        title="Confirm agent deploy"
+        subtitle={
+          stepUpMessage ||
+          'Enter your authenticator code to publish this agent to the marketplace.'
+        }
+        onSubmit={submit}
+        onClose={dismiss}
+      />
     </div>
   );
 }
