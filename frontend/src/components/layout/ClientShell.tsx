@@ -6,6 +6,7 @@ import React, { Suspense, useEffect } from 'react';
 import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
+import { LiveToastBridge } from '@/components/layout/LiveToastBridge';
 import { PowerNavbar } from '@/components/layout/PowerNavbar';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { StandardSidebar } from '@/components/layout/StandardSidebar';
@@ -33,6 +34,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         <CommandPalette />
         <ShortcutsModal />
         <BackToTop />
+        <LiveToastBridge />
         <div className="flex">
           <Suspense fallback={<div className="hidden lg:block w-[264px] shrink-0" />}>
             <StandardSidebar />
@@ -54,6 +56,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
       <CommandPalette />
       <ShortcutsModal />
+      {!isAuth && <LiveToastBridge />}
       {!isAuth && <FloatingTopBar />}
       {!isAuth && <BackToTop />}
       {!isAuth && <UnifiedHeader />}
