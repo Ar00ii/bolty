@@ -43,6 +43,10 @@ import { useStepUp } from '@/lib/auth/useStepUp';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import {
+  isWalletConnectConfigured,
+  linkWalletConnect,
+} from '@/lib/wallet/walletconnect';
 
 type Tab =
   | 'general'
@@ -909,6 +913,36 @@ export default function ProfilePage() {
       setWalletMsg('Wallet linked to your account.');
     } catch (err) {
       setWalletErr(err instanceof ApiError ? err.message : 'Could not link wallet.');
+    } finally {
+      setWalletLoading(false);
+    }
+  };
+
+  const handleConnectWalletConnect = async () => {
+    setWalletLoading(true);
+    setWalletErr('');
+    setWalletMsg('');
+    try {
+      if (!isWalletConnectConfigured()) {
+        setWalletErr(
+          'WalletConnect is not configured on this deployment. Ask the admin to set NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID.',
+        );
+        return;
+      }
+      // If the user already has a primary wallet linked, add as additional.
+      const additional = !!walletAddress;
+      await linkWalletConnect({ additional });
+      await loadLinkedWallets();
+      await refresh();
+      setWalletMsg('WalletConnect wallet linked to your account.');
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Could not link WalletConnect wallet.';
+      setWalletErr(msg);
     } finally {
       setWalletLoading(false);
     }
@@ -1982,37 +2016,47 @@ export default function ProfilePage() {
                 </button>
               )}
 
-              {/* Supported wallets grid */}
+              {/* Supported wallets */}
               <div className="border-t border-white/8 pt-5">
                 <div className="text-xs uppercase tracking-widest text-white/50 mb-3">
                   Supported wallets
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {[
-                    { id: 'metamask', label: 'MetaMask', href: 'https://metamask.io', provider: 'METAMASK' },
-                    { id: 'walletconnect', label: 'WalletConnect', href: 'https://walletconnect.com', provider: 'WALLETCONNECT' },
-                    { id: 'uniswap', label: 'Uniswap', href: 'https://wallet.uniswap.org', provider: 'UNISWAP' },
-                    { id: 'coinbase', label: 'Coinbase', href: 'https://www.coinbase.com/wallet', provider: 'COINBASE' },
-                    { id: 'rainbow', label: 'Rainbow', href: 'https://rainbow.me', provider: 'RAINBOW' },
-                  ].map((w) => (
-                    <a
-                      key={w.id}
-                      href={w.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-lg border border-white/8 bg-white/[0.02] hover:bg-white/5 hover:border-white/15 transition-all group"
-                    >
-                      <WalletProviderIcon provider={w.provider} size={22} />
-                      <span className="text-xs sm:text-sm text-white/70 group-hover:text-white/90 truncate">
-                        {w.label}
-                      </span>
-                    </a>
-                  ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* MetaMask — browser extension */}
+                  <button
+                    type="button"
+                    onClick={walletAddress ? handleAddAdditionalWallet : handleConnectWallet}
+                    disabled={walletLoading}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-white/8 bg-white/[0.02] hover:bg-white/5 hover:border-white/15 transition-all group disabled:opacity-50 text-left"
+                  >
+                    <WalletProviderIcon provider="METAMASK" size={22} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs sm:text-sm text-white/80 group-hover:text-white truncate">
+                        MetaMask
+                      </div>
+                      <div className="text-[10px] text-white/40">Browser extension</div>
+                    </div>
+                  </button>
+
+                  {/* WalletConnect — real SDK flow */}
+                  <button
+                    type="button"
+                    onClick={handleConnectWalletConnect}
+                    disabled={walletLoading}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-white/8 bg-white/[0.02] hover:bg-white/5 hover:border-white/15 transition-all group disabled:opacity-50 text-left"
+                  >
+                    <WalletProviderIcon provider="WALLETCONNECT" size={22} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs sm:text-sm text-white/80 group-hover:text-white truncate">
+                        WalletConnect
+                      </div>
+                      <div className="text-[10px] text-white/40">Scan QR · mobile wallets</div>
+                    </div>
+                  </button>
                 </div>
                 <p className="text-[11px] text-white/40 mt-3 leading-relaxed">
-                  MetaMask is the primary signer on Bolty. WalletConnect and other wallets link via
-                  MetaMask-compatible signing. Add multiple wallets to choose which one pays during
-                  checkout.
+                  Click a wallet to link it. MetaMask opens its browser extension.
+                  WalletConnect shows a QR you can scan from any compatible mobile wallet.
                 </p>
               </div>
             </div>
