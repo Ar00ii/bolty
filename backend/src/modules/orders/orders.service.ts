@@ -18,6 +18,56 @@ const ORDER_INCLUDE = {
   listing: { select: { id: true, title: true, type: true, price: true, currency: true } },
 } as const;
 
+const REPO_PURCHASE_INCLUDE = {
+  buyer: { select: { id: true, username: true, avatarUrl: true } },
+  repository: {
+    select: {
+      id: true,
+      name: true,
+      lockedPriceUsd: true,
+      userId: true,
+      user: { select: { id: true, username: true, avatarUrl: true } },
+    },
+  },
+} as const;
+
+// Shape repo purchase rows so the /orders feed can render them with the
+// same type as market purchases. Repos are delivered on purchase (the
+// download URL is returned synchronously), so they always surface as
+// COMPLETED with no escrow step.
+function mapRepoPurchase(rp: {
+  id: string;
+  createdAt: Date;
+  txHash: string;
+  amountWei: string;
+  buyer: { id: string; username: string | null; avatarUrl: string | null };
+  repository: {
+    id: string;
+    name: string;
+    lockedPriceUsd: number | null;
+    user: { id: string; username: string | null; avatarUrl: string | null };
+  };
+}) {
+  return {
+    id: rp.id,
+    createdAt: rp.createdAt,
+    status: 'COMPLETED' as const,
+    escrowStatus: 'NONE' as const,
+    escrowContract: null as string | null,
+    amountWei: rp.amountWei,
+    txHash: rp.txHash,
+    listing: {
+      id: rp.repository.id,
+      title: rp.repository.name,
+      type: 'REPO' as const,
+      price: rp.repository.lockedPriceUsd ?? 0,
+      currency: 'USD' as const,
+    },
+    buyer: rp.buyer,
+    seller: rp.repository.user,
+  };
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
@@ -26,26 +76,70 @@ export class OrdersService {
     private readonly escrow: EscrowService,
   ) {}
 
-  /** All orders where the user is the buyer */
+  /** All orders where the user is the buyer (market + repo purchases combined) */
   async getBuyerOrders(userId: string) {
-    return this.prisma.marketPurchase.findMany({
-      where: { buyerId: userId },
-      orderBy: { createdAt: 'desc' },
-      include: ORDER_INCLUDE,
-    });
+    const [marketOrders, repoOrders] = await Promise.all([
+      this.prisma.marketPurchase.findMany({
+        where: { buyerId: userId },
+        orderBy: { createdAt: 'desc' },
+        include: ORDER_INCLUDE,
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { buyerId: userId, verified: true },
+        orderBy: { createdAt: 'desc' },
+        include: REPO_PURCHASE_INCLUDE,
+      }),
+    ]);
+    const merged = [...marketOrders, ...repoOrders.map(mapRepoPurchase)];
+    return merged.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  /** All orders where the user is the seller */
+  /** All orders where the user is the seller (market + repo purchases combined) */
   async getSellerOrders(userId: string) {
-    return this.prisma.marketPurchase.findMany({
-      where: { sellerId: userId },
-      orderBy: { createdAt: 'desc' },
-      include: ORDER_INCLUDE,
-    });
+    const [marketOrders, repoOrders] = await Promise.all([
+      this.prisma.marketPurchase.findMany({
+        where: { sellerId: userId },
+        orderBy: { createdAt: 'desc' },
+        include: ORDER_INCLUDE,
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { verified: true, repository: { userId } },
+        orderBy: { createdAt: 'desc' },
+        include: REPO_PURCHASE_INCLUDE,
+      }),
+    ]);
+    const merged = [...marketOrders, ...repoOrders.map(mapRepoPurchase)];
+    return merged.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  /** Single order — only buyer or seller can view */
+  /** Single order — only buyer or seller can view. Returns repo purchases
+   *  in the unified shape so read-only views (the detail page) don't 404,
+   *  while mutating handlers must call `requireMarketOrder` instead. */
   async getOrder(orderId: string, userId: string) {
+    const order = await this.prisma.marketPurchase.findUnique({
+      where: { id: orderId },
+      include: ORDER_INCLUDE,
+    });
+    if (!order) {
+      const repo = await this.prisma.repoPurchase.findUnique({
+        where: { id: orderId },
+        include: REPO_PURCHASE_INCLUDE,
+      });
+      if (!repo) throw new NotFoundException('Order not found');
+      if (repo.buyerId !== userId && repo.repository.user.id !== userId) {
+        throw new ForbiddenException('Access denied');
+      }
+      return mapRepoPurchase(repo);
+    }
+    if (order.buyerId !== userId && order.sellerId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+    return order;
+  }
+
+  /** Mutation-safe variant — rejects repo purchases because those are
+   *  delivered synchronously and have no status machine. */
+  private async requireMarketOrder(orderId: string, userId: string) {
     const order = await this.prisma.marketPurchase.findUnique({
       where: { id: orderId },
       include: ORDER_INCLUDE,
@@ -59,7 +153,7 @@ export class OrdersService {
 
   /** Seller marks order as in progress */
   async markInProgress(orderId: string, userId: string) {
-    const order = await this.getOrder(orderId, userId);
+    const order = await this.requireMarketOrder(orderId, userId);
     if (order.sellerId !== userId) throw new ForbiddenException('Only seller can update status');
     if (order.status !== 'PENDING_DELIVERY') {
       throw new BadRequestException('Order must be in PENDING_DELIVERY to mark as in progress');
@@ -73,7 +167,7 @@ export class OrdersService {
 
   /** Seller marks order as delivered (with optional delivery note) */
   async markDelivered(orderId: string, userId: string, deliveryNote?: string) {
-    const order = await this.getOrder(orderId, userId);
+    const order = await this.requireMarketOrder(orderId, userId);
     if (order.sellerId !== userId)
       throw new ForbiddenException('Only seller can mark as delivered');
     if (!['PENDING_DELIVERY', 'IN_PROGRESS'].includes(order.status)) {
@@ -114,7 +208,7 @@ export class OrdersService {
    * escrow.release() first and pass the resulting tx hash.
    */
   async markCompleted(orderId: string, userId: string, escrowReleaseTx?: string) {
-    const order = await this.getOrder(orderId, userId);
+    const order = await this.requireMarketOrder(orderId, userId);
     if (order.buyerId !== userId) throw new ForbiddenException('Only buyer can mark as completed');
     if (order.status !== 'DELIVERED') {
       throw new BadRequestException('Order must be DELIVERED before completing');
@@ -159,7 +253,7 @@ export class OrdersService {
    * escrow contract and must pass the tx hash so we can verify it on chain.
    */
   async dispute(orderId: string, userId: string, options?: { txHash?: string; reason?: string }) {
-    const order = await this.getOrder(orderId, userId);
+    const order = await this.requireMarketOrder(orderId, userId);
     if (order.status === 'COMPLETED' || order.status === 'DISPUTED') {
       throw new BadRequestException('Cannot dispute this order');
     }
@@ -230,7 +324,7 @@ export class OrdersService {
       throw new BadRequestException(`Message must be 1-${MAX_MSG_LENGTH} characters`);
     }
 
-    const order = await this.getOrder(orderId, senderId); // auth check
+    const order = await this.requireMarketOrder(orderId, senderId); // auth check + real row
 
     const message = await this.prisma.orderMessage.create({
       data: {
@@ -286,14 +380,32 @@ export class OrdersService {
 
   /** Stats for seller dashboard */
   async getSellerStats(userId: string) {
-    const [total, pending, inProgress, delivered, completed, disputed] = await Promise.all([
+    const [
+      marketTotal,
+      pending,
+      inProgress,
+      delivered,
+      marketCompleted,
+      disputed,
+      repoCompleted,
+    ] = await Promise.all([
       this.prisma.marketPurchase.count({ where: { sellerId: userId } }),
       this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'PENDING_DELIVERY' } }),
       this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'IN_PROGRESS' } }),
       this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'DELIVERED' } }),
       this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'COMPLETED' } }),
       this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'DISPUTED' } }),
+      this.prisma.repoPurchase.count({
+        where: { verified: true, repository: { userId } },
+      }),
     ]);
-    return { total, pending, inProgress, delivered, completed, disputed };
+    return {
+      total: marketTotal + repoCompleted,
+      pending,
+      inProgress,
+      delivered,
+      completed: marketCompleted + repoCompleted,
+      disputed,
+    };
   }
 }
