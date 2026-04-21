@@ -22,6 +22,7 @@ import { RedisService } from '../../common/redis/redis.service';
 import { EmailService } from '../email/email.service';
 import { UsersService } from '../users/users.service';
 
+import { StepUpService } from './step-up.service';
 import { invalidateUserCache } from './strategies/jwt.strategy';
 
 export interface JwtPayload {
@@ -68,6 +69,7 @@ export class AuthService {
     private readonly redis: RedisService,
     _usersService: UsersService,
     private readonly emailService: EmailService,
+    private readonly stepUp: StepUpService,
   ) {
     // Validate JWT_SECRET exists and has minimum length (security-critical)
     const jwtSecret = this.config.get<string>('JWT_SECRET');
@@ -467,7 +469,17 @@ export class AuthService {
 
   // ── Email Change ──────────────────────────────────────────────────────────
 
-  async requestEmailChange(userId: string, newEmail: string, password: string): Promise<void> {
+  async requestEmailChange(
+    userId: string,
+    newEmail: string,
+    password: string,
+    twoFactorCode?: string,
+  ): Promise<void> {
+    // 2FA step-up before touching the recovery channel. Without this, a
+    // compromised password + an unlocked session can silently pivot the
+    // account email to an attacker-controlled address.
+    await this.stepUp.assert(userId, twoFactorCode);
+
     const email = newEmail.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -510,7 +522,12 @@ export class AuthService {
 
   // ── Delete Account ────────────────────────────────────────────────────────
 
-  async requestDeleteAccount(userId: string): Promise<void> {
+  async requestDeleteAccount(userId: string, twoFactorCode?: string): Promise<void> {
+    // Require 2FA step-up — account deletion is irreversible, and an
+    // email-OTP-only flow lets anyone with brief inbox access nuke
+    // the account (which would also release the username for squatting).
+    await this.stepUp.assert(userId, twoFactorCode);
+
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     if (!user.email)

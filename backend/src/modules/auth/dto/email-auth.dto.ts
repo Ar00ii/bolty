@@ -81,6 +81,11 @@ export class RequestEmailChangeDto {
 
   @IsString()
   password!: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{6}$/)
+  twoFactorCode?: string;
 }
 
 export class ConfirmEmailChangeDto {

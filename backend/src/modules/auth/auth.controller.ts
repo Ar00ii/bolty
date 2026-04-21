@@ -190,7 +190,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('email/change-request')
   async requestEmailChange(@CurrentUser('id') userId: string, @Body() dto: RequestEmailChangeDto) {
-    await this.authService.requestEmailChange(userId, dto.newEmail, dto.password);
+    await this.authService.requestEmailChange(
+      userId,
+      dto.newEmail,
+      dto.password,
+      dto.twoFactorCode,
+    );
     return { success: true };
   }
 
@@ -209,8 +214,11 @@ export class AuthController {
   @Throttle({ default: { limit: 3, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('account/delete-request')
-  async requestDeleteAccount(@CurrentUser('id') userId: string) {
-    await this.authService.requestDeleteAccount(userId);
+  async requestDeleteAccount(
+    @CurrentUser('id') userId: string,
+    @Body() body: { twoFactorCode?: string } = {},
+  ) {
+    await this.authService.requestDeleteAccount(userId, body.twoFactorCode);
     return { success: true };
   }
 

@@ -1085,11 +1085,21 @@ export default function ProfilePage() {
     setSecMsg('');
     setEmailLoading(true);
     try {
-      await api.post('/auth/email/change-request', { newEmail, password: emailPassword });
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.post('/auth/email/change-request', {
+          newEmail,
+          password: emailPassword,
+          twoFactorCode,
+        }),
+      );
       setEmailStep('otp');
       setSecMsg(`Verification code sent to ${newEmail}.`);
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to send verification code.');
+      if (err instanceof Error && err.message === 'Cancelled') {
+        setSecErr('');
+      } else {
+        setSecErr(err instanceof ApiError ? err.message : 'Failed to send verification code.');
+      }
     } finally {
       setEmailLoading(false);
     }
@@ -1120,11 +1130,17 @@ export default function ProfilePage() {
     setSecMsg('');
     setRequestingDelete(true);
     try {
-      await api.post('/auth/account/delete-request', {});
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.post('/auth/account/delete-request', { twoFactorCode }),
+      );
       setDeleteStep('otp');
       setSecMsg('A confirmation code has been sent to your email.');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code.');
+      if (err instanceof Error && err.message === 'Cancelled') {
+        setSecErr('');
+      } else {
+        setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code.');
+      }
     } finally {
       setRequestingDelete(false);
     }
