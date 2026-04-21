@@ -27,6 +27,7 @@ import { diskStorage } from 'multer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { StepUpService } from '../auth/step-up.service';
 
 import { UsersService } from './users.service';
 
@@ -65,11 +66,21 @@ class UpdateProfileDto {
   @IsUrl({ require_protocol: false }, { message: 'Invalid website URL' })
   @MaxLength(200)
   websiteUrl?: string;
+
+  // Optional 6-digit TOTP code, required when the user has 2FA enabled and is
+  // changing their username (the only field that affects their public identity).
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{6}$/)
+  twoFactorCode?: string;
 }
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly stepUp: StepUpService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
@@ -80,8 +91,13 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
   async updateProfile(@CurrentUser('id') userId: string, @Body() dto: UpdateProfileDto) {
+    // Step-up auth required when changing the public handle (username).
+    if (dto.username !== undefined) {
+      await this.stepUp.assert(userId, dto.twoFactorCode);
+    }
+    const { twoFactorCode: _drop, ...payload } = dto;
     try {
-      return await this.usersService.updateProfile(userId, dto);
+      return await this.usersService.updateProfile(userId, payload);
     } catch (err: unknown) {
       // Prisma unique constraint violation (P2002)
       if (

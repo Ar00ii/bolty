@@ -425,16 +425,15 @@ function AuthPage() {
         username: regUsername.trim(),
         password: regPassword,
       });
-      setSuccess('Account created! You can now sign in.');
-      setTimeout(() => {
-        setTab('login');
-        clearMessages();
-        setRegEmail('');
-        setRegUsername('');
-        setRegPassword('');
-        setRegConfirm('');
-        setLoginIdentifier(regEmail.trim());
-      }, 1500);
+      // Registration also signs the user in via http-only cookies. Send them
+      // straight to the mandatory 2FA setup screen — Bolty requires every
+      // account to be protected.
+      setSuccess('Account created. Setting up two-factor authentication...');
+      setRegEmail('');
+      setRegUsername('');
+      setRegPassword('');
+      setRegConfirm('');
+      window.location.href = '/onboarding/2fa';
     } catch (err) {
       setError(mapError(err));
     } finally {

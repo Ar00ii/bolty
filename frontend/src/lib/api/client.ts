@@ -12,6 +12,8 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    public readonly code?: string,
+    public readonly details?: Record<string, unknown>,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -86,6 +88,15 @@ class ApiClient {
     return 'Request failed';
   }
 
+  private extractCode(error: unknown): string | undefined {
+    if (!error || typeof error !== 'object') return undefined;
+    const top = (error as { code?: unknown }).code;
+    if (typeof top === 'string') return top;
+    const nested = (error as { message?: { code?: unknown } }).message;
+    if (nested && typeof nested === 'object' && typeof nested.code === 'string') return nested.code;
+    return undefined;
+  }
+
   private async tryRefreshToken(): Promise<boolean> {
     if (this.isRefreshing) return false;
     this.isRefreshing = true;
@@ -135,7 +146,12 @@ class ApiClient {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      throw new ApiError(this.parseError(error), response.status);
+      throw new ApiError(
+        this.parseError(error),
+        response.status,
+        this.extractCode(error),
+        error as Record<string, unknown>,
+      );
     }
 
     const contentType = response.headers.get('content-type');
@@ -189,7 +205,12 @@ class ApiClient {
       if (Array.isArray(raw)) msg = String(raw[0] || 'Upload failed');
       else if (typeof raw === 'string' && raw) msg = raw;
       else msg = 'Upload failed';
-      throw new ApiError(msg, response.status);
+      throw new ApiError(
+        msg,
+        response.status,
+        this.extractCode(error),
+        error as Record<string, unknown>,
+      );
     }
     return response.json() as Promise<T>;
   }

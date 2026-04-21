@@ -31,7 +31,14 @@ const UsageSection = dynamicImport(
   () => import('@/components/profile/UsageSection').then((m) => m.UsageSection),
   { ssr: false },
 );
+const AvatarCropperModal = dynamicImport(
+  () => import('@/components/profile/AvatarCropperModal').then((m) => m.AvatarCropperModal),
+  { ssr: false },
+);
 import { GradientText } from '@/components/ui/GradientText';
+import { getReputationRank } from '@/components/ui/reputation-badge';
+import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
+import { useStepUp } from '@/lib/auth/useStepUp';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -442,6 +449,10 @@ export default function ProfilePage() {
   const [avatarMsg, setAvatarMsg] = useState('');
   const [avatarErr, setAvatarErr] = useState('');
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
+
+  // Step-up auth (TOTP) for sensitive ops
+  const stepUp = useStepUp<unknown>();
 
   // Agent endpoint
   const [agentEndpoint, setAgentEndpoint] = useState('');
@@ -712,46 +723,59 @@ export default function ProfilePage() {
     setGenErr('');
     setGenMsg('');
     try {
-      await api.patch('/users/profile', {
-        username: username.trim(),
-        displayName: displayName.trim() || undefined,
-        bio: bio.trim() || undefined,
-      });
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.patch('/users/profile', {
+          username: username.trim(),
+          displayName: displayName.trim() || undefined,
+          bio: bio.trim() || undefined,
+          twoFactorCode,
+        }),
+      );
       await refresh();
       setGenMsg('Profile saved successfully.');
       setTimeout(() => setGenMsg(''), 3000);
     } catch (err) {
+      if (err instanceof Error && err.message === 'Cancelled') return;
       setGenErr(err instanceof ApiError ? err.message : 'Failed to save profile.');
     } finally {
       setGenSaving(false);
     }
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    if (avatarInputRef.current) avatarInputRef.current.value = '';
     if (!file) return;
+    setAvatarErr('');
+    setAvatarMsg('');
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setAvatarErr('Image is larger than 10 MB. Please pick a smaller file.');
+      return;
+    }
+    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+      setAvatarErr('Only PNG, JPG or WebP images are allowed.');
+      return;
+    }
+    setPendingAvatarFile(file);
+  };
+
+  const handleAvatarSave = async (blob: Blob) => {
     setAvatarUploading(true);
     setAvatarErr('');
     setAvatarMsg('');
     try {
-      const MAX_SIZE = 10 * 1024 * 1024;
-      if (file.size > MAX_SIZE) {
-        throw new Error('Image is larger than 10 MB. Please pick a smaller file.');
-      }
-      if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
-        throw new Error('Only PNG, JPG or WebP images are allowed.');
-      }
       const form = new FormData();
-      form.append('file', file);
+      form.append('file', blob, 'avatar.jpg');
       await api.upload('/users/upload-avatar', form);
       await refresh();
       setAvatarMsg('Avatar updated.');
       setTimeout(() => setAvatarMsg(''), 3000);
     } catch (err) {
       setAvatarErr(err instanceof Error ? err.message : 'Upload failed');
+      throw err;
     } finally {
       setAvatarUploading(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = '';
     }
   };
 
@@ -1271,8 +1295,9 @@ export default function ProfilePage() {
 
                 {/* Avatar upload */}
                 <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
+                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                   <div
-                    className="relative group flex-shrink-0 cursor-pointer"
+                    className="relative group cursor-pointer"
                     onClick={() => avatarInputRef.current?.click()}
                   >
                     <Avatar
@@ -1280,6 +1305,35 @@ export default function ProfilePage() {
                       name={user?.displayName || user?.username}
                       size="lg"
                     />
+                    {(() => {
+                      const pts = (user as { reputationPoints?: number } | null)?.reputationPoints ?? 0;
+                      const rank = getReputationRank(pts);
+                      const RankIcon = rank.icon;
+                      return (
+                        <span
+                          className="absolute"
+                          style={{
+                            right: -2,
+                            bottom: -2,
+                            width: 18,
+                            height: 18,
+                            borderRadius: '9999px',
+                            background: '#0a0a0e',
+                            border: `1.5px solid ${rank.color}`,
+                            boxShadow: `0 0 0 1.5px #0a0a0e, 0 0 8px -1px ${rank.color}88`,
+                            display: 'grid',
+                            placeItems: 'center',
+                          }}
+                          title={`${rank.label} · ${pts.toLocaleString()} rays`}
+                          aria-hidden
+                        >
+                          <RankIcon
+                            style={{ color: rank.color, width: 10, height: 10 }}
+                            strokeWidth={2}
+                          />
+                        </span>
+                      );
+                    })()}
                     <div className="absolute inset-0 rounded-full bg-gray-950/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       {avatarUploading ? (
                         <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
@@ -1304,6 +1358,27 @@ export default function ProfilePage() {
                         </svg>
                       )}
                     </div>
+                  </div>
+                  {(() => {
+                    const pts =
+                      (user as { reputationPoints?: number } | null)?.reputationPoints ?? 0;
+                    const rank = getReputationRank(pts);
+                    return (
+                      <span
+                        className="px-2 py-[2px] rounded-full font-mono whitespace-nowrap"
+                        style={{
+                          fontSize: 10,
+                          background: `${rank.color}12`,
+                          color: rank.color,
+                          border: `1px solid ${rank.color}38`,
+                          letterSpacing: '0.06em',
+                        }}
+                        title={`${pts.toLocaleString()} rays`}
+                      >
+                        {rank.label.toUpperCase()}
+                      </span>
+                    );
+                  })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-light text-[var(--text)] mb-0.5">
@@ -1333,6 +1408,12 @@ export default function ProfilePage() {
                     accept="image/png,image/jpeg,image/webp"
                     className="hidden"
                     onChange={handleAvatarUpload}
+                  />
+                  <AvatarCropperModal
+                    open={!!pendingAvatarFile}
+                    file={pendingAvatarFile}
+                    onClose={() => setPendingAvatarFile(null)}
+                    onSave={handleAvatarSave}
                   />
                 </div>
 
@@ -2537,6 +2618,17 @@ export default function ProfilePage() {
         {/* end profile-content */}
       </div>
       {/* end max-w-7xl */}
+      <VerificationCodeModal
+        open={stepUp.stepUpOpen}
+        source={stepUp.stepUpSource}
+        onClose={stepUp.dismiss}
+        onSubmit={stepUp.submit}
+        title="Confirm with your authenticator"
+        subtitle={
+          stepUp.stepUpMessage ||
+          'Enter the 6-digit code from your authenticator app to confirm this change.'
+        }
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { getReputationRank } from '@/components/ui/reputation-badge';
 import { API_URL, WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -47,14 +48,18 @@ function Avatar({
   url,
   size = 8,
   badge,
+  reputationPoints,
 }: {
   name?: string | null;
   url?: string | null;
   size?: number;
   badge?: 'agent' | 'online';
+  reputationPoints?: number | null;
 }) {
-  const sz = `w-${size} h-${size}`;
   const sizeClass = `w-${size} h-${size}`;
+  const rank =
+    typeof reputationPoints === 'number' ? getReputationRank(reputationPoints) : null;
+  const RankIcon = rank?.icon;
 
   return (
     <div className="relative">
@@ -75,12 +80,33 @@ function Avatar({
           {(name || '?')[0].toUpperCase()}
         </div>
       )}
-      {badge === 'agent' && (
+      {rank && RankIcon ? (
+        <span
+          className="absolute grid place-items-center rounded-full"
+          style={{
+            bottom: -3,
+            right: -3,
+            width: Math.max(11, Math.round(size * 1.4)),
+            height: Math.max(11, Math.round(size * 1.4)),
+            background: '#0a0a0e',
+            border: `1.5px solid ${rank.color}`,
+          }}
+          title={`${rank.label} · ${reputationPoints!.toLocaleString()} rays`}
+        >
+          <RankIcon
+            style={{
+              color: rank.color,
+              width: Math.max(7, Math.round(size * 0.9)),
+              height: Math.max(7, Math.round(size * 0.9)),
+            }}
+            strokeWidth={2.25}
+          />
+        </span>
+      ) : badge === 'agent' ? (
         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-bolty-400 rounded-full border border-black" />
-      )}
-      {badge === 'online' && (
+      ) : badge === 'online' ? (
         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-black" />
-      )}
+      ) : null}
     </div>
   );
 }

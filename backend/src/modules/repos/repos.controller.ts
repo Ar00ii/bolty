@@ -39,6 +39,7 @@ import { diskStorage } from 'multer';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { StepUpService } from '../auth/step-up.service';
 
 import { ReposService } from './repos.service';
 
@@ -174,7 +175,10 @@ class ListReposQuery {
 
 @Controller('repos')
 export class ReposController {
-  constructor(private readonly reposService: ReposService) {}
+  constructor(
+    private readonly reposService: ReposService,
+    private readonly stepUp: StepUpService,
+  ) {}
 
   @Public()
   @Get()
@@ -344,7 +348,12 @@ export class ReposController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  deleteRepo(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
+  async deleteRepo(
+    @Param('id') repoId: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { twoFactorCode?: string } = {},
+  ) {
+    await this.stepUp.assert(userId, body.twoFactorCode);
     return this.reposService.deleteRepository(userId, repoId);
   }
 
