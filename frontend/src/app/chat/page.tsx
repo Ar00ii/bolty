@@ -1,12 +1,14 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Send, X, Bot, User as UserIcon, Smile } from 'lucide-react';
+import { Send, X, MessagesSquare, Smile } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { GradientText } from '@/components/ui/GradientText';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -262,7 +264,7 @@ export default function ChatPage() {
     );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 h-[calc(100vh-4rem)]">
+    <div className="mx-auto w-full max-w-5xl px-4 sm:px-6 py-6 sm:py-10 h-[calc(100vh-4rem)]">
       <div
         className="relative flex flex-col h-full rounded-2xl overflow-hidden"
         style={{
@@ -271,6 +273,27 @@ export default function ChatPage() {
             '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
+        {/* Corner brackets — match the landing hero */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 z-10"
+          style={{ borderColor: 'rgba(131,110,249,0.35)' }}
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 z-10"
+          style={{ borderColor: 'rgba(131,110,249,0.35)' }}
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 z-10"
+          style={{ borderColor: 'rgba(131,110,249,0.18)' }}
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 z-10"
+          style={{ borderColor: 'rgba(131,110,249,0.18)' }}
+        />
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
@@ -281,47 +304,73 @@ export default function ChatPage() {
         />
         {/* Header */}
         <div
-          className="relative px-5 py-4 flex items-center justify-between"
+          className="relative px-4 sm:px-6 py-4 flex items-center justify-between"
           style={{
             borderBottom: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(131,110,249,0.04)',
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0.02) 100%)',
           }}
         >
           <div className="flex items-center gap-3">
             <div
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(6,182,212,0.1) 100%)',
                 boxShadow:
                   'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.45)',
               }}
             >
-              <Bot className="w-4 h-4" strokeWidth={1.5} style={{ color: '#b4a7ff' }} />
+              <MessagesSquare className="w-4 h-4" strokeWidth={1.5} style={{ color: '#b4a7ff' }} />
             </div>
             <div>
-              <h1 className="text-sm font-light text-white">Community Chat</h1>
+              <h1 className="text-base sm:text-lg font-light text-white tracking-[-0.005em]">
+                <GradientText>Community</GradientText> Chat
+              </h1>
               <div className="flex items-center gap-1.5">
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-bolty-400 animate-pulse' : 'bg-red-500'}`}
+                  className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400 animate-pulse' : 'bg-red-500'}`}
                 />
-                <span className="text-xs" style={{ color: 'rgba(161,161,170,0.6)' }}>
-                  {connected ? 'connected' : 'disconnected'}
+                <span className="text-[11px] font-light" style={{ color: 'rgba(161,161,170,0.7)' }}>
+                  {connected ? 'Connected · live' : 'Reconnecting…'}
                 </span>
               </div>
             </div>
           </div>
-          <span className="text-xs font-mono" style={{ color: 'rgba(161,161,170,0.4)' }}>
-            {userCount} online
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="hidden sm:inline-flex w-1.5 h-1.5 rounded-full bg-emerald-400"
+              style={{ boxShadow: '0 0 8px rgba(52,211,153,0.6)' }}
+            />
+            <span
+              className="text-[11px] uppercase tracking-[0.18em] font-medium"
+              style={{ color: 'rgba(161,161,170,0.6)' }}
+            >
+              {userCount.toLocaleString()} online
+            </span>
+          </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
           {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-sm font-mono" style={{ color: 'rgba(161,161,170,0.3)' }}>
-                {'// No messages yet. Be the first to say something.'}
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-4">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(6,182,212,0.08) 100%)',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 22px -6px rgba(131,110,249,0.45)',
+                }}
+              >
+                <MessagesSquare className="w-5 h-5" style={{ color: '#b4a7ff' }} />
+              </div>
+              <p className="text-sm font-light text-white/70">
+                <GradientText>It&apos;s quiet in here.</GradientText>
+              </p>
+              <p className="text-xs font-light max-w-xs" style={{ color: 'rgba(161,161,170,0.55)' }}>
+                Say hi, share what you&apos;re building, or ask the community for feedback.
               </p>
             </div>
           )}
@@ -334,29 +383,14 @@ export default function ChatPage() {
               // DOM cheap; CSS can still animate the container if desired.
               <div key={msg.id} className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}>
                 {/* Avatar */}
-                <div
-                  className="shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"
-                  style={
-                    isMe
-                      ? {
-                          background: 'rgba(131,110,249,0.2)',
-                          border: '1px solid rgba(131,110,249,0.3)',
-                        }
-                      : {
-                          background: 'rgba(255,255,255,0.07)',
-                          border: '1px solid rgba(255,255,255,0.1)',
-                        }
-                  }
-                >
-                  {msg.avatarUrl ? (
-                    <img src={msg.avatarUrl} alt="" className="w-full h-full object-cover" />
-                  ) : isMe ? (
-                    <UserIcon className="w-4 h-4 text-bolty-400" strokeWidth={2} />
-                  ) : (
-                    <span className="text-xs font-light text-zinc-400">
-                      {(msg.username || 'U')[0].toUpperCase()}
-                    </span>
-                  )}
+                <div className="shrink-0 self-end mb-1">
+                  <UserAvatar
+                    src={msg.avatarUrl}
+                    name={msg.username || (isMe ? user?.username || undefined : null)}
+                    userId={msg.userId}
+                    size={32}
+                    ring={isMe}
+                  />
                 </div>
 
                 {/* Bubble */}

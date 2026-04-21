@@ -35,8 +35,10 @@ const DottedSurface = dynamicImport(
   () => import('@/components/ui/dotted-surface').then((m) => m.DottedSurface),
   { ssr: false },
 );
+import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useStepUp } from '@/lib/auth/useStepUp';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -155,6 +157,7 @@ const SORTS = [
 export default function ReposPage() {
   const { isAuthenticated, user } = useAuth();
   const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
+  const { runWithStepUp, stepUpOpen, stepUpMessage, submit, dismiss } = useStepUp();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [ghRepos, setGhRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -244,10 +247,14 @@ export default function ReposPage() {
     setDeletingId(repoId);
     setError('');
     try {
-      await api.delete(`/repos/${repoId}`);
+      await runWithStepUp((twoFactorCode?: string) =>
+        api.delete(`/repos/${repoId}`, twoFactorCode ? { twoFactorCode } : undefined),
+      );
       setRepos((prev) => prev.filter((r) => r.id !== repoId));
       setConfirmDeleteId(null);
     } catch (err) {
+      // Silent cancel from the step-up modal isn't worth surfacing as an error.
+      if (err instanceof Error && err.message === 'Cancelled') return;
       setError(err instanceof ApiError ? err.message : 'Failed to delete repository');
     } finally {
       setDeletingId(null);
@@ -1466,6 +1473,17 @@ export default function ReposPage() {
         />
       )}
       {walletPicker}
+      <VerificationCodeModal
+        open={stepUpOpen}
+        source="totp"
+        title="Confirm repository delete"
+        subtitle={
+          stepUpMessage ||
+          'Enter your authenticator code to permanently remove this repository.'
+        }
+        onSubmit={submit}
+        onClose={dismiss}
+      />
     </div>
   );
 }
