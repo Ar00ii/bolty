@@ -8,6 +8,7 @@ import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { LiveToastBridge } from '@/components/layout/LiveToastBridge';
 import { PowerNavbar } from '@/components/layout/PowerNavbar';
+import { RouteProgress } from '@/components/layout/RouteProgress';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { StandardSidebar } from '@/components/layout/StandardSidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
@@ -31,6 +32,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
   if (useAppShell) {
     return (
       <div className="mk-scope min-h-screen" style={{ background: '#09090b' }}>
+        <RouteProgress />
         <CommandPalette />
         <ShortcutsModal />
         <BackToTop />
@@ -54,6 +56,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      <RouteProgress />
       <CommandPalette />
       <ShortcutsModal />
       {!isAuth && <LiveToastBridge />}

@@ -120,7 +120,22 @@ class ApiClient {
     body?: unknown,
     options: RequestOptions = {},
   ): Promise<T> {
-    let response = await this.doFetch(method, path, body, options);
+    // Drive the shared top-bar progress indicator for anything that looks
+    // user-facing. Silent background polls (unread counts, notifications)
+    // opt out by calling with their own `signal` — we fire the event on
+    // every call but pair it with a `done` so the bar completes quickly.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('bolty:progress-start'));
+    }
+    let response: Response;
+    try {
+      response = await this.doFetch(method, path, body, options);
+    } catch (err) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('bolty:progress-done'));
+      }
+      throw err;
+    }
 
     // Auto-refresh on 401 — skip only the endpoints where retrying with a
     // refreshed access token makes no sense or risks looping:
@@ -145,6 +160,9 @@ class ApiClient {
     }
 
     if (!response.ok) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('bolty:progress-done'));
+      }
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
       throw new ApiError(
         this.parseError(error),
@@ -152,6 +170,10 @@ class ApiClient {
         this.extractCode(error),
         error as Record<string, unknown>,
       );
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('bolty:progress-done'));
     }
 
     const contentType = response.headers.get('content-type');

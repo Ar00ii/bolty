@@ -6,6 +6,8 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
@@ -17,6 +19,7 @@ import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { ChartService } from '../chart/chart.service';
 import { EmailService } from '../email/email.service';
+import { MarketGateway } from '../market/market.gateway';
 import { ReputationService } from '../reputation/reputation.service';
 
 @Injectable()
@@ -31,10 +34,41 @@ export class ReposService {
     private readonly chart: ChartService,
     private readonly reputation: ReputationService,
     private readonly email: EmailService,
+    @Inject(forwardRef(() => MarketGateway))
+    private readonly marketGateway: MarketGateway,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
     });
+  }
+
+  /**
+   * Poll for a tx receipt, handling the common case where the buyer's wallet
+   * has broadcast the tx but the Base RPC hasn't indexed it yet (receipt =
+   * null). Waits up to `timeoutMs` before giving up. Fixes the "failed to
+   * verify transaction" false-positive when the purchase API runs faster
+   * than the block is mined.
+   */
+  private async waitForReceipt(
+    provider: ethers.JsonRpcProvider,
+    txHash: string,
+    timeoutMs = 30_000,
+  ): Promise<ethers.TransactionReceipt | null> {
+    const deadline = Date.now() + timeoutMs;
+    let delay = 1500;
+    // First shot — most txs mined within ~2s on Base, so no sleep on attempt 0.
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      try {
+        const receipt = await provider.getTransactionReceipt(txHash);
+        if (receipt) return receipt;
+      } catch (err) {
+        this.logger.warn(`receipt fetch err for ${txHash}: ${err instanceof Error ? err.message : err}`);
+      }
+      if (Date.now() >= deadline) return null;
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay * 1.5, 5000);
+    }
   }
 
   /** Parse JSON from Claude response text */
@@ -609,7 +643,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   async trackDownload(repositoryId: string, userId: string) {
     const repo = await this.prisma.repository.findUnique({
       where: { id: repositoryId },
-      select: { cloneUrl: true, githubUrl: true, isLocked: true },
+      select: { cloneUrl: true, githubUrl: true, isLocked: true, userId: true },
     });
     if (!repo) throw new NotFoundException('Repository not found');
 
@@ -618,8 +652,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Invalid repository URL');
     }
 
-    // Locked repos: only paying buyers get the download URL
-    if (repo.isLocked) {
+    // Locked repos: only the owner OR a paying buyer gets the download URL.
+    // Owners always have access to their own content — without this the owner
+    // can't pull their own repo back after locking it.
+    if (repo.isLocked && repo.userId !== userId) {
       const purchase = await this.prisma.repoPurchase.findFirst({
         where: { buyerId: userId, repositoryId, verified: true },
         select: { id: true },
@@ -690,21 +726,54 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Seller has no wallet address configured');
     }
 
-    // ── Expected payment amount ──────────────────────────────────────────
-    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to wei via
-    // the live ETH/USD oracle so an attacker can't pay dust for a $1k repo.
-    // We refuse to proceed if the oracle is unhealthy (ChartService returns
-    // a hardcoded 2000 fallback on failure; we don't treat that as
-    // authoritative — the frontend should just ask the user to retry).
     if (!(repo.lockedPriceUsd && repo.lockedPriceUsd > 0)) {
       throw new BadRequestException('Repository price is not set');
     }
+
+    // ── Persist the attempt FIRST ────────────────────────────────────────
+    // Guarantee a row exists for this txHash so the buyer's payment is
+    // always captured — even if the on-chain verification below fails or
+    // times out. A stuck verification must never make a confirmed payment
+    // vanish from the buyer's library / orders.
+    const pending = await this.prisma.repoPurchase.upsert({
+      where: { txHash },
+      create: {
+        txHash,
+        buyerId,
+        repositoryId: repoId,
+        amountWei: '0',
+        verified: false,
+        platformFeeTxHash: platformFeeTxHash || null,
+        consentSignature: consentSignature || null,
+        consentMessage: consentMessage || null,
+      },
+      update: {},
+    });
+    // If this txHash was submitted by a different buyer or for a different
+    // repo, refuse — the unique txHash is one-to-one with a payment.
+    if (pending.buyerId !== buyerId || pending.repositoryId !== repoId) {
+      throw new BadRequestException('Transaction hash already linked to another purchase');
+    }
+    // If we already verified this exact tx (retry after success), short-circuit.
+    if (pending.verified) {
+      return {
+        success: true,
+        purchaseId: pending.id,
+        downloadUrl: repo.githubUrl + '/archive/refs/heads/main.zip',
+      };
+    }
+
+    // ── Expected payment amount ──────────────────────────────────────────
+    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to wei via
+    // the live ETH/USD oracle so an attacker can't pay dust for a $1k repo.
     const ethPrice = await this.chart.getEthPrice().catch(() => null);
     if (!ethPrice || !(ethPrice.price > 0)) {
       throw new BadRequestException('Price oracle unavailable, try again shortly');
     }
-    // Allow 3% slippage between quote and confirmation.
-    const minEth = (repo.lockedPriceUsd / ethPrice.price) * 0.97;
+    // Allow 5% slippage between quote and confirmation — ETH can move a
+    // couple percent while MetaMask is open and the old 3% window was
+    // rejecting real payments after tiny oracle drifts.
+    const minEth = (repo.lockedPriceUsd / ethPrice.price) * 0.95;
     let expectedTotalWei: bigint;
     try {
       expectedTotalWei = ethers.parseEther(minEth.toFixed(18));
@@ -714,8 +783,6 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // Base network dual-fee model:
     //   - ETH payment   → 7% platform fee (93% to seller).
     //   - BOLTY payment → 3% platform fee (97% to seller; we incentivize BOLTY).
-    // We detect the token path below based on whether BOLTY_TOKEN_CONTRACT
-    // is configured AND a Transfer event to the seller exists in the receipt.
     const tokenContractCfg = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
     const isBoltyPath = !!tokenContractCfg;
     const feeBps = isBoltyPath ? 300n : 700n;
@@ -744,17 +811,23 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     // ── On-chain verification (Base network, chainId 8453) ─────────────────
     const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const tokenContract = tokenContractCfg;
 
-    let verified = false;
     let amountWei = '0';
 
     try {
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const receipt = await provider.getTransactionReceipt(txHash);
+      // Retry the receipt up to 30s — on Base most txs mine in ~2s but the
+      // frontend sometimes calls /purchase a beat too early.
+      const receipt = await this.waitForReceipt(provider, txHash, 30_000);
 
-      if (!receipt || receipt.status !== 1) {
-        throw new BadRequestException('Transaction failed or not found');
+      if (!receipt) {
+        throw new BadRequestException(
+          'Transaction is still pending — wait a few seconds and try again',
+        );
+      }
+      if (receipt.status !== 1) {
+        throw new BadRequestException('Transaction reverted on-chain');
       }
 
       if (tokenContract) {
@@ -769,17 +842,13 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         );
         if (!transferLog) throw new BadRequestException('No valid token transfer found');
         const paid = BigInt(transferLog.data);
-        // BOLTY token has 18 decimals; amounts are quoted in the same scale as ETH
         if (paid < expectedSellerWei) {
           throw new BadRequestException(
             `Paid amount (${paid.toString()}) is below expected price (${expectedSellerWei.toString()})`,
           );
         }
         amountWei = paid.toString();
-        verified = true;
       } else {
-        // ETH payment — check direct transfer. The receipt has already been
-        // fetched above; grab the full tx in parallel with the earlier call.
         const tx = await provider.getTransaction(txHash);
         if (!tx) throw new BadRequestException('Transaction not found');
         if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
@@ -791,7 +860,6 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           );
         }
         amountWei = tx.value.toString();
-        verified = true;
       }
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
@@ -805,14 +873,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     if (platformWallet && platformFeeTxHash) {
       try {
-        const provider = new ethers.JsonRpcProvider(rpcUrl);
         const [feeReceipt, feeTx] = await Promise.all([
-          provider.getTransactionReceipt(platformFeeTxHash),
+          this.waitForReceipt(provider, platformFeeTxHash, 30_000),
           provider.getTransaction(platformFeeTxHash),
         ]);
 
-        if (!feeReceipt || feeReceipt.status !== 1) {
-          throw new BadRequestException('Platform fee transaction failed or not found');
+        if (!feeReceipt) {
+          throw new BadRequestException('Platform fee transaction still pending — retry shortly');
+        }
+        if (feeReceipt.status !== 1) {
+          throw new BadRequestException('Platform fee transaction reverted');
         }
         if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
           throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
@@ -832,19 +902,72 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       }
     }
 
-    const purchase = await this.prisma.repoPurchase.create({
+    // Upgrade the pending row to verified.
+    const purchase = await this.prisma.repoPurchase.update({
+      where: { id: pending.id },
       data: {
-        txHash,
-        buyerId,
-        repositoryId: repoId,
+        verified: true,
         amountWei,
-        verified,
-        platformFeeTxHash: platformFeeTxHash || null,
         platformFeeWei: platformFeeWei || null,
-        consentSignature: consentSignature || null,
-        consentMessage: consentMessage || null,
       },
     });
+
+    // Broadcast to the live market feed so the public trade ticker /
+    // recent-sales panels pick it up alongside agent/listing purchases.
+    try {
+      const [buyerUser, sellerUser] = await Promise.all([
+        this.prisma.user.findUnique({
+          where: { id: buyerId },
+          select: { id: true, username: true, avatarUrl: true },
+        }),
+        this.prisma.user.findUnique({
+          where: { id: repo.userId },
+          select: { id: true, username: true },
+        }),
+      ]);
+      const eth = amountWei ? Number(amountWei) / 1e18 : null;
+      this.marketGateway.emitSale({
+        listingId: repo.id,
+        listingTitle: repo.name,
+        listingType: 'REPO',
+        amountWei: amountWei ?? '0',
+        priceEth: eth !== null && Number.isFinite(eth) ? Number(eth.toFixed(6)) : null,
+        currency: isBoltyPath ? 'BOLTY' : 'ETH',
+        buyer: buyerUser ?? { id: buyerId, username: null, avatarUrl: null },
+        seller: sellerUser ?? { id: repo.userId, username: null },
+        createdAt: purchase.createdAt.toISOString(),
+      });
+    } catch (err) {
+      this.logger.warn(
+        `Failed to broadcast repo sale event: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    // Reputation: award the seller for a confirmed repo sale. FIRST_SALE
+    // lifetime bonus if this is their very first verified sale across any
+    // surface (market listings + repo purchases counted together).
+    try {
+      const [priorMarketSales, priorRepoSales] = await Promise.all([
+        this.prisma.marketPurchase.count({
+          where: { sellerId: repo.userId, verified: true },
+        }),
+        this.prisma.repoPurchase.count({
+          where: { verified: true, repository: { userId: repo.userId }, id: { not: purchase.id } },
+        }),
+      ]);
+      const reason = priorMarketSales + priorRepoSales === 0 ? 'FIRST_SALE' : 'REPO_SOLD';
+      this.reputation
+        .awardPoints(repo.userId, reason, purchase.id, repo.name)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for repo sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+    } catch (err) {
+      this.logger.warn(
+        `Reputation award skipped for repo sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
 
     // Purchase confirmation emails (fire-and-forget)
     (async () => {

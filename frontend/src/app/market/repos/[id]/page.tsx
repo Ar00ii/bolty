@@ -134,7 +134,7 @@ function resolveLogoUrl(url: string | null | undefined): string | null {
 export default function RepoDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
 
   const [repo, setRepo] = useState<RepositoryDetail | null>(null);
@@ -259,23 +259,55 @@ export default function RepoDetailPage() {
           ],
         })) as string;
       }
-      const result = await api.post<{ success: boolean; downloadUrl?: string }>(
-        `/repos/${repo.id}/purchase`,
-        { txHash, platformFeeTxHash, consentSignature: signature, consentMessage: message },
-      );
+      // Retry the verify POST if the backend reports the tx is still pending.
+      // The RPC can lag a few seconds behind wallet confirmation, and we
+      // don't want to leave the buyer stranded after money has left their
+      // wallet. The backend persists the attempt on first call so even
+      // aborted retries won't lose the purchase record.
+      const submitPurchase = async (): Promise<{ success: boolean; downloadUrl?: string }> => {
+        const maxAttempts = 4;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            return await api.post<{ success: boolean; downloadUrl?: string }>(
+              `/repos/${repo.id}/purchase`,
+              {
+                txHash,
+                platformFeeTxHash,
+                consentSignature: signature,
+                consentMessage: message,
+              },
+            );
+          } catch (err) {
+            const apiMsg = err instanceof ApiError ? err.message.toLowerCase() : '';
+            const retryable =
+              apiMsg.includes('pending') ||
+              apiMsg.includes('still') ||
+              apiMsg.includes('not found');
+            if (!retryable || attempt === maxAttempts) throw err;
+            await new Promise((r) => setTimeout(r, 2500 * attempt));
+          }
+        }
+        throw new Error('Verification retry exhausted');
+      };
+
+      const result = await submitPurchase();
       if (result.success && result.downloadUrl) {
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
       }
       await load();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setError(
-        msg.includes('rejected')
-          ? 'Payment cancelled'
-          : err instanceof ApiError
-            ? err.message
+      if (err instanceof ApiError && err.status >= 400) {
+        setError(
+          `${err.message}. Your payment was captured — check /orders and retry if needed.`,
+        );
+      } else {
+        setError(
+          msg.includes('rejected')
+            ? 'Payment cancelled'
             : 'Payment failed: ' + msg.slice(0, 80),
-      );
+        );
+      }
     }
   };
 
@@ -539,6 +571,7 @@ export default function RepoDetailPage() {
               onCopy={copyInstall}
               copied={copiedCmd}
               isAuthenticated={isAuthenticated}
+              isOwner={!!user && repo.user.id === user.id}
             />
             <SellerCard user={repo.user} />
             <StatsCard repo={repo} />
@@ -606,6 +639,7 @@ function ActionsCard({
   onCopy,
   copied,
   isAuthenticated,
+  isOwner,
 }: {
   repo: RepositoryDetail;
   onDownload: () => void;
@@ -614,8 +648,10 @@ function ActionsCard({
   onCopy: () => void;
   copied: boolean;
   isAuthenticated: boolean;
+  isOwner?: boolean;
 }) {
-  const locked = repo.isLocked && repo.lockedPriceUsd;
+  // Owners never see the unlock button — they already own the content.
+  const locked = repo.isLocked && repo.lockedPriceUsd && !isOwner;
   return (
     <div
       className="relative rounded-xl p-5 overflow-hidden"

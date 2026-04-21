@@ -195,6 +195,7 @@ function CopyInstallButton({ name }: { name: string }) {
 function RepoCard({
   repo,
   isAuthenticated,
+  userId,
   onVote,
   onDownload,
   onUnlock,
@@ -206,6 +207,7 @@ function RepoCard({
   onDownload: (id: string, url: string) => void;
   onUnlock: (repo: Repository) => void;
 }) {
+  const isOwner = !!userId && repo.user.id === userId;
   return (
     <div
       className="flex flex-col rounded-xl border transition-all duration-200 overflow-hidden hover:border-bolty-500/30 hover:shadow-[0_0_20px_rgba(131,110,249,0.08)]"
@@ -325,7 +327,7 @@ function RepoCard({
           <CopyInstallButton name={repo.name} />
         </div>
         <div>
-          {repo.isLocked && repo.lockedPriceUsd ? (
+          {repo.isLocked && repo.lockedPriceUsd && !isOwner ? (
             <button
               onClick={() => onUnlock(repo)}
               className="px-3 py-1.5 rounded-full text-xs font-light text-white transition-all hover:shadow-[0_0_12px_rgba(131,110,249,0.4)]"
