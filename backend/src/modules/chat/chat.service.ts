@@ -30,7 +30,7 @@ export class ChatService {
     content: string;
     userId: string;
     createdAt: Date;
-    user: { username: string | null; avatarUrl: string | null };
+    user: { username: string | null; avatarUrl: string | null; reputationPoints: number };
   }> {
     // ── Input validation ──────────────────────────────────────────────────
     if (!content || typeof content !== 'string') {
@@ -80,7 +80,7 @@ export class ChatService {
       },
       include: {
         user: {
-          select: { username: true, avatarUrl: true },
+          select: { username: true, avatarUrl: true, reputationPoints: true },
         },
       },
     });
@@ -96,7 +96,7 @@ export class ChatService {
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       include: {
         user: {
-          select: { username: true, avatarUrl: true, id: true },
+          select: { username: true, avatarUrl: true, id: true, reputationPoints: true },
         },
       },
     });

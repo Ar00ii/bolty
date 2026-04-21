@@ -170,7 +170,9 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
     try {
       const message = await this.prisma.chatMessage.create({
         data: { content, userId },
-        include: { user: { select: { username: true, avatarUrl: true } } },
+        include: {
+          user: { select: { username: true, avatarUrl: true, reputationPoints: true } },
+        },
       });
       // Push directly to the gateway (bypasses ChatService rate limiter — bots
       // already respect their own per-bot cooldown above).
@@ -180,6 +182,7 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
         userId: message.userId,
         username: message.user.username,
         avatarUrl: message.user.avatarUrl,
+        reputationPoints: message.user.reputationPoints,
         createdAt: message.createdAt,
       });
     } catch (err) {
