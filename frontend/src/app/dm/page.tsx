@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
@@ -110,6 +110,14 @@ function SendIcon() {
 type ContactCategory = 'all' | 'friends' | 'agents' | 'random' | 'pending';
 
 export default function DmPage() {
+  return (
+    <Suspense fallback={null}>
+      <DmPageInner />
+    </Suspense>
+  );
+}
+
+function DmPageInner() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
