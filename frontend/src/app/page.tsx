@@ -128,27 +128,27 @@ export default function HomePage() {
             avatarUrls={[
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=coder&backgroundColor=836ef9',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Nova&backgroundColor=836ef9',
               },
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=hacker&backgroundColor=a78bfa',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Atlas&backgroundColor=06b6d4',
               },
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=maker&backgroundColor=c4b5fd',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Echo&backgroundColor=ec4899',
               },
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=builder&backgroundColor=7c3aed',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Orion&backgroundColor=a78bfa',
               },
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=shipper&backgroundColor=8b5cf6',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Iris&backgroundColor=22c55e',
               },
               {
                 imageUrl:
-                  'https://api.dicebear.com/9.x/thumbs/svg?seed=artist&backgroundColor=a855f7',
+                  'https://api.dicebear.com/9.x/notionists/svg?seed=Kai&backgroundColor=f59e0b',
               },
             ]}
           />

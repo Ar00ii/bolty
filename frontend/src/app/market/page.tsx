@@ -368,7 +368,7 @@ function MarketScreener() {
         <div className="mx-auto max-w-[1400px]">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">
             <div>
-              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
+              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-200 uppercase tracking-[0.18em] mb-2">
                 <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
                 <span>Bolty Screener</span>
                 <LiveDot />
@@ -434,13 +434,13 @@ function MarketScreener() {
       <section className="px-6 md:px-10 mt-5 mb-3">
         <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1 flex-1 min-w-[240px] max-w-md px-3 py-1.5 rounded-lg bg-black/40 border border-white/10">
-            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+            <Search className="w-3.5 h-3.5 text-zinc-200" strokeWidth={1.75} />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search agents, repos, bots, tags…"
-              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-600"
+              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-400"
             />
           </div>
 
@@ -551,13 +551,13 @@ function StatTile({
           background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
         }}
       />
-      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500 mb-1">
+      <div className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-200 mb-1">
         {label}
       </div>
       <div className="font-mono text-xl md:text-2xl font-light text-white tabular-nums">
         {value}
       </div>
-      <div className="text-[10.5px] text-zinc-500 font-light mt-0.5">{sub}</div>
+      <div className="text-[10.5px] text-zinc-200 font-light mt-0.5">{sub}</div>
     </div>
   );
 }
@@ -617,7 +617,7 @@ function NewLaunchesTicker({
                 <span className="font-mono text-[#b4a7ff]">
                   {formatEth(item.price)} {item.currency}
                 </span>
-                <span className="text-zinc-600">· {timeAgo(item.createdAt)} ago</span>
+                <span className="text-zinc-300">· {timeAgo(item.createdAt)} ago</span>
               </Link>
             );
           })}
@@ -660,7 +660,7 @@ function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFi
           onClick={() => onChange(t.key)}
           className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
           style={{
-            color: value === t.key ? '#ffffff' : '#a1a1aa',
+            color: value === t.key ? '#ffffff' : '#d4d4d8',
             background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
             boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
           }}
@@ -689,7 +689,7 @@ function SortChip({
       onClick={onClick}
       className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
       style={{
-        color: active ? '#ffffff' : '#a1a1aa',
+        color: active ? '#ffffff' : '#d4d4d8',
         background: active ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.02)',
         boxShadow: active
           ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
@@ -716,7 +716,7 @@ function ScreenerTable({
   if (loading && listings.length === 0) {
     return (
       <div
-        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-200 font-light"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
@@ -737,7 +737,7 @@ function ScreenerTable({
         }}
       >
         <div className="text-sm font-light text-zinc-300">No listings match your filters.</div>
-        <div className="text-xs font-light text-zinc-500 mt-1">
+        <div className="text-xs font-light text-zinc-200 mt-1">
           Try changing the type or clearing the search.
         </div>
       </div>
@@ -752,7 +752,7 @@ function ScreenerTable({
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-200 font-medium border-b border-white/5">
         <span className="text-center">#</span>
         <span>Listing</span>
         <span className="text-right">Price</span>
@@ -822,7 +822,7 @@ function Row({
           />
         )}
 
-        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+        <span className="text-[11px] text-zinc-300 font-mono text-center tabular-nums">
           {index + 1}
         </span>
 
@@ -852,21 +852,21 @@ function Row({
                 </span>
               )}
             </div>
-            <div className="text-[10.5px] text-zinc-500 font-light flex items-center gap-1">
+            <div className="text-[10.5px] text-zinc-200 font-light flex items-center gap-1">
               <span style={{ color: accent }}>{TYPE_LABEL[listing.type]}</span>
               {(listing.tags || []).slice(0, 2).map((t) => (
-                <span key={t} className="text-zinc-600">
+                <span key={t} className="text-zinc-300">
                   · {t}
                 </span>
               ))}
-              <span className="text-zinc-600">· {timeAgo(listing.createdAt)} ago</span>
+              <span className="text-zinc-300">· {timeAgo(listing.createdAt)} ago</span>
             </div>
           </div>
         </div>
 
         <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
           {formatEth(listing.price)}
-          <span className="text-zinc-600 ml-1 text-[10px]">{listing.currency}</span>
+          <span className="text-zinc-300 ml-1 text-[10px]">{listing.currency}</span>
         </div>
 
         <div className="text-right font-mono tabular-nums text-[12px]">
@@ -882,10 +882,10 @@ function Row({
           {listing.reviewCount ? (
             <span>
               <span className="text-[#f59e0b]">★</span> {(listing.reviewAverage ?? 0).toFixed(1)}
-              <span className="text-zinc-600 ml-0.5 text-[10px]">({listing.reviewCount})</span>
+              <span className="text-zinc-300 ml-0.5 text-[10px]">({listing.reviewCount})</span>
             </span>
           ) : (
-            <span className="text-zinc-600">—</span>
+            <span className="text-zinc-300">—</span>
           )}
         </div>
 
@@ -898,7 +898,7 @@ function Row({
               // eslint-disable-next-line @next/next/no-img-element
               <img src={listing.seller.avatarUrl} alt="" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-500">
+              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-200">
                 {(listing.seller.username || '?')[0].toUpperCase()}
               </div>
             )}
@@ -907,7 +907,7 @@ function Row({
         </div>
 
         <ArrowUpRight
-          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          className="w-3.5 h-3.5 text-zinc-300 group-hover:text-white transition"
           strokeWidth={1.75}
         />
       </Link>
@@ -916,7 +916,7 @@ function Row({
 }
 
 function SalesCell({ sales }: { sales: number }) {
-  if (sales === 0) return <span className="text-zinc-600">0</span>;
+  if (sales === 0) return <span className="text-zinc-300">0</span>;
   return (
     <span className="inline-flex items-center gap-0.5 text-[#22c55e]">
       <ArrowUpRight className="w-3 h-3" strokeWidth={2} />
@@ -963,14 +963,14 @@ function LiveTradesFeed({ trades }: { trades: Pulse['recentTrades'] }) {
       }}
     >
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
-        <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
+        <div className="flex items-center gap-1.5 text-[10.5px] uppercase tracking-[0.16em] text-zinc-200 font-medium">
           Live trades
           <LiveDot />
         </div>
-        <span className="text-[10px] text-zinc-600 font-light">{trades.length}</span>
+        <span className="text-[10px] text-zinc-300 font-light">{trades.length}</span>
       </div>
       {trades.length === 0 ? (
-        <div className="px-3 py-10 text-center text-[12px] text-zinc-500 font-light">
+        <div className="px-3 py-10 text-center text-[12px] text-zinc-200 font-light">
           Waiting for the first trade…
         </div>
       ) : (
@@ -1001,9 +1001,9 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-[11.5px] text-white truncate font-light">{trade.listing.title}</div>
-          <div className="text-[10px] text-zinc-500 font-light truncate">
+          <div className="text-[10px] text-zinc-200 font-light truncate">
             <span className="text-[#22c55e]">@{trade.buyer.username || 'anon'}</span>
-            <span className="text-zinc-600"> bought from </span>
+            <span className="text-zinc-300"> bought from </span>
             <span className="text-zinc-400">@{trade.seller.username || 'anon'}</span>
           </div>
         </div>
@@ -1011,7 +1011,7 @@ function TradeRow({ trade }: { trade: Pulse['recentTrades'][number] }) {
           <div className="font-mono text-[11.5px] text-[#b4a7ff] tabular-nums">
             {formatEth(trade.priceEth)}
           </div>
-          <div className="text-[10px] text-zinc-600 font-light">{timeAgo(trade.createdAt)}</div>
+          <div className="text-[10px] text-zinc-300 font-light">{timeAgo(trade.createdAt)}</div>
         </div>
       </Link>
     </li>
