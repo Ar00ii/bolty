@@ -332,10 +332,7 @@ export default function ChatPage() {
               // re-ran on every re-render as new messages arrived, which
               // torched perf once the room filled up. A plain div keeps the
               // DOM cheap; CSS can still animate the container if desired.
-              <div
-                key={msg.id}
-                className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}
-              >
+              <div key={msg.id} className={`flex gap-3 group ${isMe ? 'flex-row-reverse' : ''}`}>
                 {/* Avatar */}
                 <div
                   className="shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center"

@@ -534,7 +534,7 @@ export default function ProfilePage() {
               id: k.id,
               name: k.label || k.name || 'Unnamed',
               key: k.key || '',
-              preview: k.lastFour ? `blt_••••••••••••••••••••••••${k.lastFour}` : (k.preview || ''),
+              preview: k.lastFour ? `blt_••••••••••••••••••••••••${k.lastFour}` : k.preview || '',
               createdAt: k.createdAt,
               lastUsed: k.lastUsedAt || k.lastUsed || null,
               scopes: k.scopes || [],
@@ -877,9 +877,12 @@ export default function ProfilePage() {
 
   const handleDeleteAPIKey = async (id: string) => {
     try {
-      await api.delete(`/market/api-keys/${id}`);
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.delete(`/market/api-keys/${id}`, { twoFactorCode }),
+      );
       setApiKeys(apiKeys.filter((k) => k.id !== id));
     } catch (err) {
+      if (err instanceof Error && err.message === 'Cancelled') return;
       console.error('Failed to delete API key:', err);
     }
   };
@@ -1082,11 +1085,21 @@ export default function ProfilePage() {
     setSecMsg('');
     setEmailLoading(true);
     try {
-      await api.post('/auth/email/change-request', { newEmail, password: emailPassword });
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.post('/auth/email/change-request', {
+          newEmail,
+          password: emailPassword,
+          twoFactorCode,
+        }),
+      );
       setEmailStep('otp');
       setSecMsg(`Verification code sent to ${newEmail}.`);
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to send verification code.');
+      if (err instanceof Error && err.message === 'Cancelled') {
+        setSecErr('');
+      } else {
+        setSecErr(err instanceof ApiError ? err.message : 'Failed to send verification code.');
+      }
     } finally {
       setEmailLoading(false);
     }
@@ -1117,11 +1130,17 @@ export default function ProfilePage() {
     setSecMsg('');
     setRequestingDelete(true);
     try {
-      await api.post('/auth/account/delete-request', {});
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.post('/auth/account/delete-request', { twoFactorCode }),
+      );
       setDeleteStep('otp');
       setSecMsg('A confirmation code has been sent to your email.');
     } catch (err) {
-      setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code.');
+      if (err instanceof Error && err.message === 'Cancelled') {
+        setSecErr('');
+      } else {
+        setSecErr(err instanceof ApiError ? err.message : 'Failed to send confirmation code.');
+      }
     } finally {
       setRequestingDelete(false);
     }
@@ -1281,21 +1300,21 @@ export default function ProfilePage() {
       {/* ── Main content ─────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10">
         <div className="profile-content">
-            {/* ════════════════════════════════════════════
+          {/* ════════════════════════════════════════════
           GENERAL
       ════════════════════════════════════════════ */}
-            {tab === 'general' && (
-              <div className="profile-content-card">
-                <SectionHeader
-                  title="General Information"
-                  subtitle="Your public identity on Bolty."
-                />
-                <Alert type="success" msg={genMsg} />
-                <Alert type="error" msg={genErr} />
+          {tab === 'general' && (
+            <div className="profile-content-card">
+              <SectionHeader
+                title="General Information"
+                subtitle="Your public identity on Bolty."
+              />
+              <Alert type="success" msg={genMsg} />
+              <Alert type="error" msg={genErr} />
 
-                {/* Avatar upload */}
-                <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
-                  <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+              {/* Avatar upload */}
+              <div className="flex items-center gap-6 p-6 rounded-xl border border-[rgba(168,85,247,0.15)] bg-gradient-to-r from-[rgba(168,85,247,0.05)] to-transparent mb-6">
+                <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
                   <div
                     className="relative group cursor-pointer"
                     onClick={() => avatarInputRef.current?.click()}
@@ -1306,7 +1325,8 @@ export default function ProfilePage() {
                       size="lg"
                     />
                     {(() => {
-                      const pts = (user as { reputationPoints?: number } | null)?.reputationPoints ?? 0;
+                      const pts =
+                        (user as { reputationPoints?: number } | null)?.reputationPoints ?? 0;
                       const rank = getReputationRank(pts);
                       const RankIcon = rank.icon;
                       return (
@@ -1379,1241 +1399,1235 @@ export default function ProfilePage() {
                       </span>
                     );
                   })()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-light text-[var(--text)] mb-0.5">
-                      Profile photo
-                    </div>
-                    <div className="text-xs text-[var(--text-muted)] mb-2">
-                      PNG, JPG or WebP · max 3 MB
-                    </div>
-                    {avatarMsg && typeof avatarMsg === 'string' && (
-                      <div className="text-xs text-emerald-400">{avatarMsg}</div>
-                    )}
-                    {avatarErr && typeof avatarErr === 'string' && (
-                      <div className="text-xs text-red-400">{avatarErr}</div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => avatarInputRef.current?.click()}
-                      disabled={avatarUploading}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/30 text-[var(--text-muted)] hover:text-bolty-400 transition-all disabled:opacity-50"
-                    >
-                      {avatarUploading ? 'Uploading...' : 'Change photo'}
-                    </button>
-                  </div>
-                  <input
-                    ref={avatarInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                  />
-                  <AvatarCropperModal
-                    open={!!pendingAvatarFile}
-                    file={pendingAvatarFile}
-                    onClose={() => setPendingAvatarFile(null)}
-                    onSave={handleAvatarSave}
-                  />
                 </div>
-
-                <form onSubmit={handleSaveGeneral} className="space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Username">
-                      <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                        <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
-                        <input
-                          type="text"
-                          value={username}
-                          onChange={(e) =>
-                            setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))
-                          }
-                          className="flex-1 bg-transparent py-2.5 pr-4 text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
-                          maxLength={30}
-                          required
-                          placeholder="yourhandle"
-                        />
-                      </div>
-                    </Field>
-                    <Field label="Display Name">
-                      <Input
-                        type="text"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        maxLength={50}
-                        placeholder="Your full name"
-                      />
-                    </Field>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-light text-[var(--text)] mb-0.5">Profile photo</div>
+                  <div className="text-xs text-[var(--text-muted)] mb-2">
+                    PNG, JPG or WebP · max 3 MB
                   </div>
+                  {avatarMsg && typeof avatarMsg === 'string' && (
+                    <div className="text-xs text-emerald-400">{avatarMsg}</div>
+                  )}
+                  {avatarErr && typeof avatarErr === 'string' && (
+                    <div className="text-xs text-red-400">{avatarErr}</div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/30 text-[var(--text-muted)] hover:text-bolty-400 transition-all disabled:opacity-50"
+                  >
+                    {avatarUploading ? 'Uploading...' : 'Change photo'}
+                  </button>
+                </div>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+                <AvatarCropperModal
+                  open={!!pendingAvatarFile}
+                  file={pendingAvatarFile}
+                  onClose={() => setPendingAvatarFile(null)}
+                  onSave={handleAvatarSave}
+                />
+              </div>
 
-                  <Field label="Bio">
-                    <Textarea
-                      value={bio}
-                      onChange={(e) => setBio(e.target.value)}
-                      rows={3}
-                      maxLength={300}
-                      placeholder="A short description about yourself..."
-                    />
-                    <div className="text-right text-xs text-[var(--text-muted)] mt-1">
-                      {bio.length} / 300
+              <form onSubmit={handleSaveGeneral} className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Field label="Username">
+                    <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                      <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
+                      <input
+                        type="text"
+                        value={username}
+                        onChange={(e) =>
+                          setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))
+                        }
+                        className="flex-1 bg-transparent py-2.5 pr-4 text-sm text-[var(--text)] font-mono outline-none placeholder:text-[var(--text-muted)]"
+                        maxLength={30}
+                        required
+                        placeholder="yourhandle"
+                      />
                     </div>
                   </Field>
+                  <Field label="Display Name">
+                    <Input
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      maxLength={50}
+                      placeholder="Your full name"
+                    />
+                  </Field>
+                </div>
 
-                  {userTag && (
-                    <div className="flex items-center justify-between bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3">
-                      <div>
-                        <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
-                          User ID
-                        </div>
-                        <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
+                <Field label="Bio">
+                  <Textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    rows={3}
+                    maxLength={300}
+                    placeholder="A short description about yourself..."
+                  />
+                  <div className="text-right text-xs text-[var(--text-muted)] mt-1">
+                    {bio.length} / 300
+                  </div>
+                </Field>
+
+                {userTag && (
+                  <div className="flex items-center justify-between bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3">
+                    <div>
+                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
+                        User ID
                       </div>
-                      <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
-                        Others can find you
-                        <br />
-                        by searching #{userTag}
-                      </div>
+                      <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
                     </div>
-                  )}
+                    <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
+                      Others can find you
+                      <br />
+                      by searching #{userTag}
+                    </div>
+                  </div>
+                )}
 
-                  <SaveButton loading={genSaving} />
-                </form>
-              </div>
-            )}
+                <SaveButton loading={genSaving} />
+              </form>
+            </div>
+          )}
 
-            {/* ════════════════════════════════════════════
+          {/* ════════════════════════════════════════════
           SOCIAL  — blue tint
       ════════════════════════════════════════════ */}
-            {tab === 'social' && (
-              <div className="profile-content-card">
-                <SectionHeader
-                  title="Social Links"
-                  subtitle="Connect your online presence to your Bolty profile."
-                />
-                <Alert type="success" msg={socMsg} />
-                <Alert type="error" msg={socErr} />
+          {tab === 'social' && (
+            <div className="profile-content-card">
+              <SectionHeader
+                title="Social Links"
+                subtitle="Connect your online presence to your Bolty profile."
+              />
+              <Alert type="success" msg={socMsg} />
+              <Alert type="error" msg={socErr} />
 
-                <form onSubmit={handleSaveSocial} className="space-y-6">
-                  {(
-                    [
-                      {
-                        key: 'twitter',
-                        label: 'X / Twitter',
-                        icon: (
-                          <svg
-                            className="w-4 h-4 text-[var(--text-muted)]"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                          </svg>
-                        ),
-                        value: twitterUrl,
-                        setter: setTwitterUrl,
-                        placeholder: 'https://x.com/yourhandle',
-                      },
-                      {
-                        key: 'linkedin',
-                        label: 'LinkedIn',
-                        icon: (
-                          <svg
-                            className="w-4 h-4 text-blue-400"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                          </svg>
-                        ),
-                        value: linkedinUrl,
-                        setter: setLinkedinUrl,
-                        placeholder: 'https://linkedin.com/in/yourprofile',
-                      },
-                      {
-                        key: 'website',
-                        label: 'Website',
-                        icon: <IconGlobe className="w-4 h-4 text-[var(--text-muted)]" />,
-                        value: websiteUrl,
-                        setter: setWebsiteUrl,
-                        placeholder: 'https://yourwebsite.com',
-                      },
-                    ] as Array<{
-                      key: string;
-                      label: string;
-                      icon: React.ReactNode;
-                      value: string;
-                      setter: (v: string) => void;
-                      placeholder: string;
-                    }>
-                  ).map((item) => (
-                    <Field key={item.key} label={item.label}>
-                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
-                        {item.icon}
-                        <input
-                          type="url"
-                          value={item.value}
-                          onChange={(e) => item.setter(e.target.value)}
-                          placeholder={item.placeholder}
-                          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
-                        />
-                        {item.value && (
-                          <button
-                            type="button"
-                            onClick={() => item.setter('')}
-                            className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
-                          >
-                            <IconX className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
-                    </Field>
-                  ))}
+              <form onSubmit={handleSaveSocial} className="space-y-6">
+                {(
+                  [
+                    {
+                      key: 'twitter',
+                      label: 'X / Twitter',
+                      icon: (
+                        <svg
+                          className="w-4 h-4 text-[var(--text-muted)]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                      ),
+                      value: twitterUrl,
+                      setter: setTwitterUrl,
+                      placeholder: 'https://x.com/yourhandle',
+                    },
+                    {
+                      key: 'linkedin',
+                      label: 'LinkedIn',
+                      icon: (
+                        <svg
+                          className="w-4 h-4 text-blue-400"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                      ),
+                      value: linkedinUrl,
+                      setter: setLinkedinUrl,
+                      placeholder: 'https://linkedin.com/in/yourprofile',
+                    },
+                    {
+                      key: 'website',
+                      label: 'Website',
+                      icon: <IconGlobe className="w-4 h-4 text-[var(--text-muted)]" />,
+                      value: websiteUrl,
+                      setter: setWebsiteUrl,
+                      placeholder: 'https://yourwebsite.com',
+                    },
+                  ] as Array<{
+                    key: string;
+                    label: string;
+                    icon: React.ReactNode;
+                    value: string;
+                    setter: (v: string) => void;
+                    placeholder: string;
+                  }>
+                ).map((item) => (
+                  <Field key={item.key} label={item.label}>
+                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
+                      {item.icon}
+                      <input
+                        type="url"
+                        value={item.value}
+                        onChange={(e) => item.setter(e.target.value)}
+                        placeholder={item.placeholder}
+                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
+                      />
+                      {item.value && (
+                        <button
+                          type="button"
+                          onClick={() => item.setter('')}
+                          className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+                        >
+                          <IconX className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </Field>
+                ))}
 
-                  <div className="pt-2">
-                    <SaveButton loading={socSaving} label="Save social links" />
-                  </div>
-                </form>
-              </div>
-            )}
+                <div className="pt-2">
+                  <SaveButton loading={socSaving} label="Save social links" />
+                </div>
+              </form>
+            </div>
+          )}
 
-            {/* ════════════════════════════════════════════
+          {/* ════════════════════════════════════════════
           WALLET
       ════════════════════════════════════════════ */}
-            {tab === 'wallet' && (
+          {tab === 'wallet' && (
+            <div className="profile-content-card">
+              <SectionHeader
+                title="Wallet"
+                subtitle="Connect your MetaMask wallet to enable on-chain transactions."
+              />
+              <Alert type="success" msg={walletMsg} />
+              <Alert type="error" msg={walletErr} />
+
+              {walletAddress ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                      <IconWallet className="w-6 h-6 text-emerald-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
+                        Connected
+                      </div>
+                      <div className="font-mono text-sm text-[var(--text)] truncate">
+                        {walletAddress}
+                      </div>
+                      <div className="text-xs text-[var(--text-muted)] mt-0.5">MetaMask</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectWallet}
+                    disabled={walletLoading}
+                    className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {walletLoading ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
+                        Disconnecting...
+                      </>
+                    ) : (
+                      'Disconnect Wallet'
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{
+                          background:
+                            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 18px -4px rgba(131,110,249,0.45)',
+                        }}
+                      >
+                        <IconWallet className="w-6 h-6 text-[#b4a7ff]" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-light text-[var(--text)] mb-1">MetaMask</div>
+                        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+                          Connect your MetaMask wallet to make payments, receive earnings, and
+                          participate in on-chain transactions on Bolty.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleConnectWallet}
+                    disabled={walletLoading}
+                    className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    }}
+                  >
+                    {walletLoading ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                        Connecting...
+                      </>
+                    ) : (
+                      <>
+                        <IconWallet className="w-4 h-4" />
+                        Connect MetaMask
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ════════════════════════════════════════════
+          API KEYS
+      ════════════════════════════════════════════ */}
+          {tab === 'api-keys' && (
+            <APIKeysSection
+              apiKeys={apiKeys}
+              onDelete={handleDeleteAPIKey}
+              onGenerate={handleGenerateAPIKey}
+              onCopy={handleCopyAPIKey}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════
+          FRIENDS
+      ════════════════════════════════════════════ */}
+          {tab === 'friends' && (
+            <div className="space-y-4">
+              {/* Search */}
               <div className="profile-content-card">
                 <SectionHeader
-                  title="Wallet"
-                  subtitle="Connect your MetaMask wallet to enable on-chain transactions."
+                  title="Professional Network"
+                  subtitle="Build meaningful connections with developers and expand your professional community."
                 />
-                <Alert type="success" msg={walletMsg} />
-                <Alert type="error" msg={walletErr} />
+                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                  <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by @username or user ID..."
+                    className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
+                  />
+                  {searching ? (
+                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin flex-shrink-0" />
+                  ) : (
+                    searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setSearchResults([]);
+                        }}
+                        className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+                      >
+                        <IconX className="w-4 h-4" />
+                      </button>
+                    )
+                  )}
+                </div>
 
-                {walletAddress ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-                      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                        <IconWallet className="w-6 h-6 text-emerald-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
-                          Connected
+                {searchResults.length > 0 && (
+                  <div className="mt-3 rounded-xl border border-[var(--border)] overflow-hidden">
+                    {searchResults.map((u, i) => (
+                      <div
+                        key={u.id}
+                        className={`flex items-center gap-3 px-4 py-3 hover:bg-white/3 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}
+                      >
+                        <Avatar src={u.avatarUrl} name={u.displayName || u.username} size="sm" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-light text-[var(--text)] truncate">
+                            {u.displayName || u.username}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+                            {u.username && <span>@{u.username}</span>}
+                            {u.userTag && <span className="text-bolty-400/70">#{u.userTag}</span>}
+                          </div>
                         </div>
-                        <div className="font-mono text-sm text-[var(--text)] truncate">
-                          {walletAddress}
-                        </div>
-                        <div className="text-xs text-[var(--text-muted)] mt-0.5">MetaMask</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleDisconnectWallet}
-                      disabled={walletLoading}
-                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {walletLoading ? (
-                        <>
-                          <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
-                          Disconnecting...
-                        </>
-                      ) : (
-                        'Disconnect Wallet'
-                      )}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]">
-                      <div className="flex items-start gap-4">
-                        <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{
-                            background:
-                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                            boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 18px -4px rgba(131,110,249,0.45)',
-                          }}
+                        <button
+                          onClick={() => handleSendFriendRequest(u.id)}
+                          disabled={sendingTo === u.id}
+                          className="text-xs text-bolty-400 border border-bolty-500/30 hover:border-bolty-400/60 hover:bg-bolty-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
                         >
-                          <IconWallet className="w-6 h-6 text-[#b4a7ff]" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-light text-[var(--text)] mb-1">MetaMask</div>
-                          <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                            Connect your MetaMask wallet to make payments, receive earnings, and
-                            participate in on-chain transactions on Bolty.
-                          </p>
-                        </div>
+                          {sendingTo === u.id ? '...' : '+ Add'}
+                        </button>
                       </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleConnectWallet}
-                      disabled={walletLoading}
-                      className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
-                      style={{
-                        background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                        boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-                      }}
-                    >
-                      {walletLoading ? (
-                        <>
-                          <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                          Connecting...
-                        </>
-                      ) : (
-                        <>
-                          <IconWallet className="w-4 h-4" />
-                          Connect MetaMask
-                        </>
-                      )}
-                    </button>
+                    ))}
+                  </div>
+                )}
+
+                {searchQuery.trim() && !searching && searchResults.length === 0 && (
+                  <div className="mt-3 text-center py-6 text-xs text-[var(--text-muted)] font-mono border border-[var(--border)] rounded-xl">
+                    No users found for &quot;{searchQuery}&quot;
                   </div>
                 )}
               </div>
-            )}
 
-            {/* ════════════════════════════════════════════
-          API KEYS
-      ════════════════════════════════════════════ */}
-            {tab === 'api-keys' && (
-              <APIKeysSection
-                apiKeys={apiKeys}
-                onDelete={handleDeleteAPIKey}
-                onGenerate={handleGenerateAPIKey}
-                onCopy={handleCopyAPIKey}
-              />
-            )}
-
-            {/* ════════════════════════════════════════════
-          FRIENDS
-      ════════════════════════════════════════════ */}
-            {tab === 'friends' && (
-              <div className="space-y-4">
-                {/* Search */}
-                <div className="profile-content-card">
-                  <SectionHeader
-                    title="Professional Network"
-                    subtitle="Build meaningful connections with developers and expand your professional community."
-                  />
-                  <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                    <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search by @username or user ID..."
-                      className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
-                    />
-                    {searching ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin flex-shrink-0" />
-                    ) : (
-                      searchQuery && (
-                        <button
-                          onClick={() => {
-                            setSearchQuery('');
-                            setSearchResults([]);
-                          }}
-                          className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
-                        >
-                          <IconX className="w-4 h-4" />
-                        </button>
-                      )
-                    )}
+              {/* Requests + list */}
+              <div className="profile-content-card">
+                {friendsLoading ? (
+                  <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
+                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
+                    Loading...
                   </div>
-
-                  {searchResults.length > 0 && (
-                    <div className="mt-3 rounded-xl border border-[var(--border)] overflow-hidden">
-                      {searchResults.map((u, i) => (
-                        <div
-                          key={u.id}
-                          className={`flex items-center gap-3 px-4 py-3 hover:bg-white/3 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}
-                        >
-                          <Avatar src={u.avatarUrl} name={u.displayName || u.username} size="sm" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-light text-[var(--text)] truncate">
-                              {u.displayName || u.username}
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
-                              {u.username && <span>@{u.username}</span>}
-                              {u.userTag && <span className="text-bolty-400/70">#{u.userTag}</span>}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => handleSendFriendRequest(u.id)}
-                            disabled={sendingTo === u.id}
-                            className="text-xs text-bolty-400 border border-bolty-500/30 hover:border-bolty-400/60 hover:bg-bolty-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
-                          >
-                            {sendingTo === u.id ? '...' : '+ Add'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {searchQuery.trim() && !searching && searchResults.length === 0 && (
-                    <div className="mt-3 text-center py-6 text-xs text-[var(--text-muted)] font-mono border border-[var(--border)] rounded-xl">
-                      No users found for &quot;{searchQuery}&quot;
-                    </div>
-                  )}
-                </div>
-
-                {/* Requests + list */}
-                <div className="profile-content-card">
-                  {friendsLoading ? (
-                    <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
-                      <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
-                      Loading...
-                    </div>
-                  ) : (
-                    <div className="space-y-5">
-                      {/* Pending requests */}
-                      {friendRequests.length > 0 && (
-                        <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">
-                              {friendRequests.length} pending request
-                              {friendRequests.length !== 1 ? 's' : ''}
-                            </span>
-                          </div>
-                          <div className="space-y-2">
-                            {friendRequests.map((req) => (
-                              <div
-                                key={req.id}
-                                className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/15 rounded-xl px-4 py-3"
-                              >
-                                <Avatar
-                                  src={req.from.avatarUrl}
-                                  name={req.from.displayName || req.from.username}
-                                  size="sm"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <Link
-                                    href={`/u/${req.from.username}`}
-                                    className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
-                                  >
-                                    {req.from.displayName || req.from.username}
-                                  </Link>
-                                  <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
-                                    {req.from.username && <span>@{req.from.username}</span>}
-                                    {req.from.userTag && (
-                                      <span className="text-bolty-400/60">#{req.from.userTag}</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2 shrink-0">
-                                  <button
-                                    onClick={() => handleRespondToRequest(req.id, true)}
-                                    disabled={friendActionId === req.id}
-                                    className="text-xs text-emerald-400 border border-emerald-500/25 hover:border-emerald-400/50 hover:bg-emerald-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
-                                  >
-                                    Accept
-                                  </button>
-                                  <button
-                                    onClick={() => handleRespondToRequest(req.id, false)}
-                                    disabled={friendActionId === req.id}
-                                    className="text-xs text-[var(--text-muted)] border border-[var(--border)] hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
-                                  >
-                                    Decline
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Friends list */}
-                      {friends.length === 0 && friendRequests.length === 0 ? (
-                        <div className="text-center py-10">
-                          <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
-                          <p className="text-sm text-[var(--text-muted)]">
-                            Start building your network — search for developers to connect with.
-                          </p>
-                        </div>
-                      ) : friends.length > 0 ? (
-                        <div>
-                          {friendRequests.length > 0 && (
-                            <div className="border-t border-[var(--border)] pt-4" />
-                          )}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {friends.map((f) => (
-                              <div
-                                key={f.id}
-                                className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-bolty-500/40 hover:shadow-lg transition-all duration-200"
-                              >
-                                <Avatar
-                                  src={f.friend.avatarUrl}
-                                  name={f.friend.displayName || f.friend.username}
-                                  size="sm"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <Link
-                                    href={`/u/${f.friend.username}`}
-                                    className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
-                                  >
-                                    {f.friend.displayName || f.friend.username}
-                                  </Link>
-                                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
-                                    {f.friend.username && <span>@{f.friend.username}</span>}
-                                    {f.friend.userTag && (
-                                      <span className="text-bolty-400/50">#{f.friend.userTag}</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Link
-                                    href={`/dm?peer=${f.friend.id}`}
-                                    className="text-xs text-bolty-400 border border-bolty-500/25 hover:border-bolty-400/50 hover:bg-bolty-500/8 px-2 py-1 rounded-lg transition-all duration-200"
-                                    title="Direct message"
-                                  >
-                                    DM
-                                  </Link>
-                                  <button
-                                    onClick={() => handleUnfriend(f.friend.id)}
-                                    disabled={friendActionId === f.friend.id}
-                                    className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/25 px-2 py-1 rounded-lg transition-all duration-200 disabled:opacity-50"
-                                    title="Remove friend"
-                                  >
-                                    <IconX className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* ════════════════════════════════════════════
-          AI AGENT — Professional SaaS Dashboard
-      ════════════════════════════════════════════ */}
-            {tab === 'agent' && <AgentDashboard />}
-
-            {/* USAGE */}
-            {tab === 'usage' && (
-              <UsageSection
-                data={{
-                  totalCalls: usageStats.totalCallsThisMonth || 0,
-                  maxCalls: usageStats.maxCallsAllowed || 100000,
-                  activeAgents: usageStats.activeAgents || 0,
-                  last24hCalls: usageStats.last24hCalls || 0,
-                  lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
-                }}
-              />
-            )}
-
-            {/* NOTIFICATIONS */}
-            {tab === 'notifications' && (
-              <NotificationsSection
-                settings={{
-                  emailOnErrors: notifErrors,
-                  weeklyReport: notifReports,
-                  monthlyReport: false,
-                  deploymentAlerts: true,
-                }}
-                email={userEmail || ''}
-                onUpdate={async (settings) => {
-                  setNotifErrors(settings.emailOnErrors);
-                  setNotifReports(settings.weeklyReport);
-                }}
-              />
-            )}
-
-            {/* INTEGRATIONS */}
-            {tab === 'integrations' && (
-              <IntegrationsSection
-                integrations={(() => {
-                  // Build default list with user's real state
-                  const defaults = [
-                    {
-                      id: 'metamask',
-                      category: 'wallet',
-                      name: 'MetaMask',
-                      description: 'Connect your MetaMask wallet for transactions',
-                      connected: !!walletAddress,
-                      connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
-                      verified: true,
-                    },
-                    {
-                      id: 'walletconnect',
-                      category: 'wallet',
-                      name: 'WalletConnect',
-                      description: 'Connect via WalletConnect protocol',
-                      connected: false,
-                    },
-                    {
-                      id: 'ledger',
-                      category: 'wallet',
-                      name: 'Ledger',
-                      description: 'Hardware wallet integration',
-                      connected: false,
-                    },
-                    {
-                      id: 'twitter',
-                      category: 'social',
-                      name: 'Twitter/X',
-                      description: 'Share your achievements and activity',
-                      connected: !!twitterUrl,
-                      connectedAs: twitterUrl
-                        ? (() => {
-                            try {
-                              return new URL(twitterUrl).pathname.replace(/^\//, '');
-                            } catch {
-                              return twitterUrl;
-                            }
-                          })()
-                        : undefined,
-                    },
-                    {
-                      id: 'discord',
-                      category: 'social',
-                      name: 'Discord',
-                      description: 'Join community updates and notifications',
-                      connected: false,
-                    },
-                    {
-                      id: 'github-social',
-                      category: 'social',
-                      name: 'GitHub',
-                      description: 'Link your development profile',
-                      connected: !!githubLogin,
-                      connectedAs: githubLogin || undefined,
-                    },
-                    {
-                      id: 'two-factor',
-                      category: 'security',
-                      name: '2FA Authentication',
-                      description: 'Enable two-factor authentication',
-                      connected: twoFAEnabled,
-                    },
-                    {
-                      id: 'api-keys',
-                      category: 'security',
-                      name: 'API Keys',
-                      description: 'Manage API keys for programmatic access',
-                      connected: true,
-                    },
-                  ];
-
-                  // Deduplicate: use API data if available, otherwise use defaults
-                  const seen = new Set<string>();
-                  const merged: any[] = [];
-
-                  // First add from API integrations
-                  if (integrations.length > 0) {
-                    integrations.forEach((int: any) => {
-                      const integrationConfig: Record<string, any> = {
-                        metamask: { category: 'wallet' },
-                        walletconnect: { category: 'wallet' },
-                        ledger: { category: 'wallet' },
-                        twitter: { category: 'social' },
-                        discord: { category: 'social' },
-                        'github-social': { category: 'social' },
-                        'two-factor': { category: 'security' },
-                        'api-keys': { category: 'security' },
-                      };
-                      const config = integrationConfig[int.id] || {
-                        category: int.category || 'service',
-                      };
-                      const item = {
-                        id: int.id,
-                        category: config.category,
-                        name: int.name || int.provider,
-                        description: int.description || 'Connect this integration',
-                        connected: int.connected,
-                        connectedAs: int.connectedAs,
-                        lastUsedAt: int.lastUsedAt,
-                        verified: int.verified,
-                      };
-                      if (!seen.has(int.id)) {
-                        merged.push(item);
-                        seen.add(int.id);
-                      }
-                    });
-                  }
-
-                  // Then add defaults that aren't already in merged list
-                  defaults.forEach((def) => {
-                    if (!seen.has(def.id)) {
-                      merged.push(def);
-                      seen.add(def.id);
-                    } else {
-                      // Update with real state if default
-                      const idx = merged.findIndex((m) => m.id === def.id);
-                      if (idx !== -1 && !integrations.length) {
-                        merged[idx] = { ...merged[idx], ...def };
-                      }
-                    }
-                  });
-
-                  return merged;
-                })()}
-                onConnect={async (id: string) => {
-                  if (id === 'metamask') {
-                    await handleConnectWallet();
-                    return;
-                  }
-                  if (id === 'github-social') {
-                    handleLinkGitHub();
-                    return;
-                  }
-                  try {
-                    await api.post('/users/integrations', { provider: id, name: id });
-                    const ints = await api.get<any>('/users/integrations');
-                    setIntegrations(Array.isArray(ints) ? ints : []);
-                  } catch (err) {
-                    console.error('Failed to connect:', err);
-                  }
-                }}
-                onDisconnect={async (id: string) => {
-                  if (id === 'metamask') {
-                    await handleDisconnectWallet();
-                    return;
-                  }
-                  if (id === 'github-social') {
-                    await handleUnlinkGitHub();
-                    return;
-                  }
-                  try {
-                    await api.delete(`/users/integrations/${id}`);
-                    const ints = await api.get<any>('/users/integrations');
-                    setIntegrations(Array.isArray(ints) ? ints : []);
-                  } catch (err) {
-                    console.error('Failed to disconnect:', err);
-                  }
-                }}
-              />
-            )}
-
-            {/* ════════════════════════════════════════════
-          SECURITY
-      ════════════════════════════════════════════ */}
-            {tab === 'security' && (
-              <div className="space-y-4">
-                {/* ── Email address ── */}
-                <div className="profile-content-card">
-                  <SectionHeader
-                    title="Email Address"
-                    subtitle="Update the email address associated with your account."
-                  />
-                  <Alert type="success" msg={secMsg} />
-                  <Alert type="error" msg={secErr} />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
-                    <div>
-                      <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
-                        Current email
-                      </div>
-                      <div className="text-sm font-light text-[var(--text)]">
-                        {userEmail || '—'}
-                      </div>
-                    </div>
-                    {emailStep === 'idle' && (
-                      <button
-                        type="button"
-                        onClick={() => setEmailStep('form')}
-                        className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
-                      >
-                        Change
-                      </button>
-                    )}
-                  </div>
-
-                  {emailStep === 'form' && (
-                    <form onSubmit={handleRequestEmailChange} className="space-y-4">
-                      <Field label="New Email Address">
-                        <Input
-                          type="email"
-                          value={newEmail}
-                          onChange={(e) => setNewEmail(e.target.value)}
-                          required
-                          placeholder="new@example.com"
-                        />
-                      </Field>
-                      <Field label="Current Password">
-                        <Input
-                          type="password"
-                          value={emailPassword}
-                          onChange={(e) => setEmailPassword(e.target.value)}
-                          required
-                          placeholder="••••••••"
-                        />
-                      </Field>
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
-                          disabled={emailLoading}
-                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
-                          style={{
-                            background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                            boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
-                          }}
-                        >
-                          {emailLoading ? 'Sending...' : 'Send verification code'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEmailStep('idle');
-                            setNewEmail('');
-                            setEmailPassword('');
-                          }}
-                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-
-                  {emailStep === 'otp' && (
-                    <form onSubmit={handleConfirmEmailChange} className="space-y-4">
-                      <p className="text-sm text-[var(--text-secondary)] font-light">
-                        A 6-digit code was sent to{' '}
-                        <span className="text-purple-400">{newEmail}</span>.
-                      </p>
-                      <Field label="Verification Code">
-                        <Input
-                          type="text"
-                          value={emailOtp}
-                          onChange={(e) =>
-                            setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
-                          }
-                          placeholder="000000"
-                          maxLength={6}
-                        />
-                      </Field>
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
-                          disabled={emailLoading || emailOtp.length !== 6}
-                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
-                          style={{
-                            background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                            boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
-                          }}
-                        >
-                          {emailLoading ? 'Confirming...' : 'Confirm email change'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEmailStep('idle')}
-                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-
-                {/* ── Two-Factor Authentication ── */}
-                <div className="profile-content-card">
-                  <SectionHeader
-                    title="Two-Factor Authentication"
-                    subtitle="Add an extra layer of security to your account."
-                  />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`w-2 h-2 rounded-full ${twoFAEnabled ? 'bg-emerald-400' : 'bg-zinc-500'}`}
-                      />
+                ) : (
+                  <div className="space-y-5">
+                    {/* Pending requests */}
+                    {friendRequests.length > 0 && (
                       <div>
-                        <div className="text-sm font-light text-[var(--text)]">
-                          {twoFAEnabled ? '2FA is enabled' : '2FA is disabled'}
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                          <span className="text-xs font-mono text-amber-400 uppercase tracking-widest">
+                            {friendRequests.length} pending request
+                            {friendRequests.length !== 1 ? 's' : ''}
+                          </span>
                         </div>
-                        <div className="text-xs text-[var(--text-muted)]">
-                          {twoFAEnabled
-                            ? 'Your account is protected with two-factor authentication.'
-                            : 'Enable 2FA to secure your account with a verification code.'}
-                        </div>
-                      </div>
-                    </div>
-                    {enable2FAStep === 'idle' && (
-                      <button
-                        type="button"
-                        onClick={handle2FAToggle}
-                        disabled={toggling2FA || (twoFAEnabled && !disable2FAPassword)}
-                        className={`text-xs px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
-                          twoFAEnabled
-                            ? 'border-red-500/25 text-red-400 hover:border-red-500/40 hover:bg-red-500/5'
-                            : 'border-emerald-500/25 text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/5'
-                        }`}
-                      >
-                        {toggling2FA ? '...' : twoFAEnabled ? 'Disable' : 'Enable'}
-                      </button>
-                    )}
-                  </div>
-
-                  {twoFAEnabled && enable2FAStep === 'idle' && (
-                    <Field label="Password required to disable 2FA">
-                      <Input
-                        type="password"
-                        value={disable2FAPassword}
-                        onChange={(e) => setDisable2FAPassword(e.target.value)}
-                        placeholder="Enter your password"
-                      />
-                    </Field>
-                  )}
-
-                  {enable2FAStep === 'scan' && (
-                    <div className="space-y-5 mt-2">
-                      <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
-                        {twoFAQrCode ? (
-                          <div className="flex justify-center md:justify-start">
+                        <div className="space-y-2">
+                          {friendRequests.map((req) => (
                             <div
-                              className="p-3 rounded-xl bg-white"
-                              style={{
-                                boxShadow:
-                                  '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
-                              }}
+                              key={req.id}
+                              className="flex items-center gap-3 bg-amber-500/5 border border-amber-500/15 rounded-xl px-4 py-3"
                             >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={twoFAQrCode}
-                                alt="2FA QR code"
-                                width={180}
-                                height={180}
-                                className="block w-[180px] h-[180px]"
+                              <Avatar
+                                src={req.from.avatarUrl}
+                                name={req.from.displayName || req.from.username}
+                                size="sm"
                               />
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="w-[180px] h-[180px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center">
-                            <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-purple-400 animate-spin" />
-                          </div>
-                        )}
-                        <div className="space-y-3 min-w-0">
-                          <div>
-                            <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
-                              Step 1 · Scan
-                            </div>
-                            <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
-                              Open an authenticator app (Google Authenticator, 1Password, Authy…)
-                              and scan this QR code.
-                            </p>
-                          </div>
-                          {twoFASecret && (
-                            <div>
-                              <div className="text-xs uppercase tracking-widest text-[var(--text-muted)] mb-1">
-                                Can&apos;t scan? Manual key
-                              </div>
-                              <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2">
-                                <code className="flex-1 font-mono text-[11px] text-[var(--text)] break-all">
-                                  {twoFASecret}
-                                </code>
-                                <button
-                                  type="button"
-                                  onClick={handleCopy2FASecret}
-                                  className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                              <div className="flex-1 min-w-0">
+                                <Link
+                                  href={`/u/${req.from.username}`}
+                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
                                 >
-                                  {twoFASecretCopied ? 'Copied' : 'Copy'}
+                                  {req.from.displayName || req.from.username}
+                                </Link>
+                                <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+                                  {req.from.username && <span>@{req.from.username}</span>}
+                                  {req.from.userTag && (
+                                    <span className="text-bolty-400/60">#{req.from.userTag}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex gap-2 shrink-0">
+                                <button
+                                  onClick={() => handleRespondToRequest(req.id, true)}
+                                  disabled={friendActionId === req.id}
+                                  className="text-xs text-emerald-400 border border-emerald-500/25 hover:border-emerald-400/50 hover:bg-emerald-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  onClick={() => handleRespondToRequest(req.id, false)}
+                                  disabled={friendActionId === req.id}
+                                  className="text-xs text-[var(--text-muted)] border border-[var(--border)] hover:border-zinc-500 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                >
+                                  Decline
                                 </button>
                               </div>
                             </div>
-                          )}
+                          ))}
                         </div>
                       </div>
+                    )}
 
-                      <div className="space-y-3">
-                        <div className="text-xs uppercase tracking-widest text-purple-300/80">
-                          Step 2 · Verify
+                    {/* Friends list */}
+                    {friends.length === 0 && friendRequests.length === 0 ? (
+                      <div className="text-center py-10">
+                        <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
+                        <p className="text-sm text-[var(--text-muted)]">
+                          Start building your network — search for developers to connect with.
+                        </p>
+                      </div>
+                    ) : friends.length > 0 ? (
+                      <div>
+                        {friendRequests.length > 0 && (
+                          <div className="border-t border-[var(--border)] pt-4" />
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {friends.map((f) => (
+                            <div
+                              key={f.id}
+                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-bolty-500/40 hover:shadow-lg transition-all duration-200"
+                            >
+                              <Avatar
+                                src={f.friend.avatarUrl}
+                                name={f.friend.displayName || f.friend.username}
+                                size="sm"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <Link
+                                  href={`/u/${f.friend.username}`}
+                                  className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
+                                >
+                                  {f.friend.displayName || f.friend.username}
+                                </Link>
+                                <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
+                                  {f.friend.username && <span>@{f.friend.username}</span>}
+                                  {f.friend.userTag && (
+                                    <span className="text-bolty-400/50">#{f.friend.userTag}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Link
+                                  href={`/dm?peer=${f.friend.id}`}
+                                  className="text-xs text-bolty-400 border border-bolty-500/25 hover:border-bolty-400/50 hover:bg-bolty-500/8 px-2 py-1 rounded-lg transition-all duration-200"
+                                  title="Direct message"
+                                >
+                                  DM
+                                </Link>
+                                <button
+                                  onClick={() => handleUnfriend(f.friend.id)}
+                                  disabled={friendActionId === f.friend.id}
+                                  className="text-xs text-[var(--text-muted)] hover:text-red-400 border border-[var(--border)] hover:border-red-400/25 px-2 py-1 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                  title="Remove friend"
+                                >
+                                  <IconX className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        <Field label="6-digit code from your authenticator">
-                          <Input
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            value={enable2FACode}
-                            onChange={(e) =>
-                              setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
-                            }
-                            placeholder="000000"
-                            maxLength={6}
-                          />
-                        </Field>
                       </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleEnable2FAConfirm}
-                          disabled={toggling2FA || enable2FACode.length !== 6}
-                          className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
-                          style={{
-                            background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                            boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
-                          }}
-                        >
-                          {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEnable2FAStep('idle');
-                            setEnable2FACode('');
-                            setTwoFAQrCode(null);
-                            setTwoFASecret(null);
-                          }}
-                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
+          {/* ════════════════════════════════════════════
+          AI AGENT — Professional SaaS Dashboard
+      ════════════════════════════════════════════ */}
+          {tab === 'agent' && <AgentDashboard />}
+
+          {/* USAGE */}
+          {tab === 'usage' && (
+            <UsageSection
+              data={{
+                totalCalls: usageStats.totalCallsThisMonth || 0,
+                maxCalls: usageStats.maxCallsAllowed || 100000,
+                activeAgents: usageStats.activeAgents || 0,
+                last24hCalls: usageStats.last24hCalls || 0,
+                lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
+              }}
+            />
+          )}
+
+          {/* NOTIFICATIONS */}
+          {tab === 'notifications' && (
+            <NotificationsSection
+              settings={{
+                emailOnErrors: notifErrors,
+                weeklyReport: notifReports,
+                monthlyReport: false,
+                deploymentAlerts: true,
+              }}
+              email={userEmail || ''}
+              onUpdate={async (settings) => {
+                setNotifErrors(settings.emailOnErrors);
+                setNotifReports(settings.weeklyReport);
+              }}
+            />
+          )}
+
+          {/* INTEGRATIONS */}
+          {tab === 'integrations' && (
+            <IntegrationsSection
+              integrations={(() => {
+                // Build default list with user's real state
+                const defaults = [
+                  {
+                    id: 'metamask',
+                    category: 'wallet',
+                    name: 'MetaMask',
+                    description: 'Connect your MetaMask wallet for transactions',
+                    connected: !!walletAddress,
+                    connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
+                    verified: true,
+                  },
+                  {
+                    id: 'walletconnect',
+                    category: 'wallet',
+                    name: 'WalletConnect',
+                    description: 'Connect via WalletConnect protocol',
+                    connected: false,
+                  },
+                  {
+                    id: 'ledger',
+                    category: 'wallet',
+                    name: 'Ledger',
+                    description: 'Hardware wallet integration',
+                    connected: false,
+                  },
+                  {
+                    id: 'twitter',
+                    category: 'social',
+                    name: 'Twitter/X',
+                    description: 'Share your achievements and activity',
+                    connected: !!twitterUrl,
+                    connectedAs: twitterUrl
+                      ? (() => {
+                          try {
+                            return new URL(twitterUrl).pathname.replace(/^\//, '');
+                          } catch {
+                            return twitterUrl;
+                          }
+                        })()
+                      : undefined,
+                  },
+                  {
+                    id: 'discord',
+                    category: 'social',
+                    name: 'Discord',
+                    description: 'Join community updates and notifications',
+                    connected: false,
+                  },
+                  {
+                    id: 'github-social',
+                    category: 'social',
+                    name: 'GitHub',
+                    description: 'Link your development profile',
+                    connected: !!githubLogin,
+                    connectedAs: githubLogin || undefined,
+                  },
+                  {
+                    id: 'two-factor',
+                    category: 'security',
+                    name: '2FA Authentication',
+                    description: 'Enable two-factor authentication',
+                    connected: twoFAEnabled,
+                  },
+                  {
+                    id: 'api-keys',
+                    category: 'security',
+                    name: 'API Keys',
+                    description: 'Manage API keys for programmatic access',
+                    connected: true,
+                  },
+                ];
+
+                // Deduplicate: use API data if available, otherwise use defaults
+                const seen = new Set<string>();
+                const merged: any[] = [];
+
+                // First add from API integrations
+                if (integrations.length > 0) {
+                  integrations.forEach((int: any) => {
+                    const integrationConfig: Record<string, any> = {
+                      metamask: { category: 'wallet' },
+                      walletconnect: { category: 'wallet' },
+                      ledger: { category: 'wallet' },
+                      twitter: { category: 'social' },
+                      discord: { category: 'social' },
+                      'github-social': { category: 'social' },
+                      'two-factor': { category: 'security' },
+                      'api-keys': { category: 'security' },
+                    };
+                    const config = integrationConfig[int.id] || {
+                      category: int.category || 'service',
+                    };
+                    const item = {
+                      id: int.id,
+                      category: config.category,
+                      name: int.name || int.provider,
+                      description: int.description || 'Connect this integration',
+                      connected: int.connected,
+                      connectedAs: int.connectedAs,
+                      lastUsedAt: int.lastUsedAt,
+                      verified: int.verified,
+                    };
+                    if (!seen.has(int.id)) {
+                      merged.push(item);
+                      seen.add(int.id);
+                    }
+                  });
+                }
+
+                // Then add defaults that aren't already in merged list
+                defaults.forEach((def) => {
+                  if (!seen.has(def.id)) {
+                    merged.push(def);
+                    seen.add(def.id);
+                  } else {
+                    // Update with real state if default
+                    const idx = merged.findIndex((m) => m.id === def.id);
+                    if (idx !== -1 && !integrations.length) {
+                      merged[idx] = { ...merged[idx], ...def };
+                    }
+                  }
+                });
+
+                return merged;
+              })()}
+              onConnect={async (id: string) => {
+                if (id === 'metamask') {
+                  await handleConnectWallet();
+                  return;
+                }
+                if (id === 'github-social') {
+                  handleLinkGitHub();
+                  return;
+                }
+                try {
+                  await api.post('/users/integrations', { provider: id, name: id });
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to connect:', err);
+                }
+              }}
+              onDisconnect={async (id: string) => {
+                if (id === 'metamask') {
+                  await handleDisconnectWallet();
+                  return;
+                }
+                if (id === 'github-social') {
+                  await handleUnlinkGitHub();
+                  return;
+                }
+                try {
+                  await api.delete(`/users/integrations/${id}`);
+                  const ints = await api.get<any>('/users/integrations');
+                  setIntegrations(Array.isArray(ints) ? ints : []);
+                } catch (err) {
+                  console.error('Failed to disconnect:', err);
+                }
+              }}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════
+          SECURITY
+      ════════════════════════════════════════════ */}
+          {tab === 'security' && (
+            <div className="space-y-4">
+              {/* ── Email address ── */}
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Email Address"
+                  subtitle="Update the email address associated with your account."
+                />
+                <Alert type="success" msg={secMsg} />
+                <Alert type="error" msg={secErr} />
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                  <div>
+                    <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
+                      Current email
                     </div>
-                  )}
-                </div>
-
-                {/* ── Password ── */}
-                <div className="profile-content-card">
-                  <SectionHeader
-                    title="Password"
-                    subtitle="Change your password via a secure email reset link."
-                  />
-                  <Alert type="success" msg={pwMsg} />
-                  <Alert type="error" msg={pwErr} />
-
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
-                    <div className="min-w-0">
-                      <div className="text-sm font-light text-[var(--text)] mb-0.5">
-                        {pwStep === 'sent' ? 'Reset link sent' : 'Password reset'}
-                      </div>
-                      <div className="text-xs text-[var(--text-muted)]">
-                        {pwStep === 'sent'
-                          ? `Check ${userEmail || 'your inbox'} for instructions.`
-                          : 'We will email you a one-time link to set a new password.'}
-                      </div>
-                    </div>
+                    <div className="text-sm font-light text-[var(--text)]">{userEmail || '—'}</div>
+                  </div>
+                  {emailStep === 'idle' && (
                     <button
                       type="button"
-                      onClick={handleRequestPasswordReset}
-                      disabled={pwLoading || !userEmail}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                      onClick={() => setEmailStep('form')}
+                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
                     >
-                      {pwLoading
-                        ? 'Sending...'
-                        : pwStep === 'sent'
-                          ? 'Resend link'
-                          : 'Send reset link'}
+                      Change
                     </button>
-                  </div>
+                  )}
                 </div>
 
-                {/* ── Delete Account ── */}
-                <div className="profile-content-card">
-                  <SectionHeader
-                    title="Delete Account"
-                    subtitle="Permanently delete your account and all associated data."
-                  />
-
-                  {deleteStep === 'idle' && (
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
-                        This action is irreversible. All your data, agents, listings, and
-                        transaction history will be permanently removed.
-                      </div>
+                {emailStep === 'form' && (
+                  <form onSubmit={handleRequestEmailChange} className="space-y-4">
+                    <Field label="New Email Address">
+                      <Input
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        required
+                        placeholder="new@example.com"
+                      />
+                    </Field>
+                    <Field label="Current Password">
+                      <Input
+                        type="password"
+                        value={emailPassword}
+                        onChange={(e) => setEmailPassword(e.target.value)}
+                        required
+                        placeholder="••••••••"
+                      />
+                    </Field>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={emailLoading}
+                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        {emailLoading ? 'Sending...' : 'Send verification code'}
+                      </button>
                       <button
                         type="button"
-                        onClick={() => setDeleteStep('confirm')}
-                        className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200"
+                        onClick={() => {
+                          setEmailStep('idle');
+                          setNewEmail('');
+                          setEmailPassword('');
+                        }}
+                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
                       >
-                        Delete my account
+                        Cancel
                       </button>
                     </div>
-                  )}
+                  </form>
+                )}
 
-                  {deleteStep === 'confirm' && (
-                    <div className="space-y-4">
-                      <p className="text-sm text-[var(--text-secondary)] font-light">
-                        Are you sure? We will send a confirmation code to your email.
-                      </p>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleRequestDeleteAccount}
-                          disabled={requestingDelete}
-                          className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-light disabled:opacity-50 transition-all"
-                        >
-                          {requestingDelete ? 'Sending code...' : 'Yes, send confirmation code'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDeleteStep('idle')}
-                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-                        >
-                          Cancel
-                        </button>
+                {emailStep === 'otp' && (
+                  <form onSubmit={handleConfirmEmailChange} className="space-y-4">
+                    <p className="text-sm text-[var(--text-secondary)] font-light">
+                      A 6-digit code was sent to <span className="text-purple-400">{newEmail}</span>
+                      .
+                    </p>
+                    <Field label="Verification Code">
+                      <Input
+                        type="text"
+                        value={emailOtp}
+                        onChange={(e) => setEmailOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        placeholder="000000"
+                        maxLength={6}
+                      />
+                    </Field>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={emailLoading || emailOtp.length !== 6}
+                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        {emailLoading ? 'Confirming...' : 'Confirm email change'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEmailStep('idle')}
+                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+
+              {/* ── Two-Factor Authentication ── */}
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Two-Factor Authentication"
+                  subtitle="Add an extra layer of security to your account."
+                />
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] mb-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full ${twoFAEnabled ? 'bg-emerald-400' : 'bg-zinc-500'}`}
+                    />
+                    <div>
+                      <div className="text-sm font-light text-[var(--text)]">
+                        {twoFAEnabled ? '2FA is enabled' : '2FA is disabled'}
+                      </div>
+                      <div className="text-xs text-[var(--text-muted)]">
+                        {twoFAEnabled
+                          ? 'Your account is protected with two-factor authentication.'
+                          : 'Enable 2FA to secure your account with a verification code.'}
                       </div>
                     </div>
+                  </div>
+                  {enable2FAStep === 'idle' && (
+                    <button
+                      type="button"
+                      onClick={handle2FAToggle}
+                      disabled={toggling2FA || (twoFAEnabled && !disable2FAPassword)}
+                      className={`text-xs px-3 py-1.5 rounded-lg border transition-all disabled:opacity-50 ${
+                        twoFAEnabled
+                          ? 'border-red-500/25 text-red-400 hover:border-red-500/40 hover:bg-red-500/5'
+                          : 'border-emerald-500/25 text-emerald-400 hover:border-emerald-500/40 hover:bg-emerald-500/5'
+                      }`}
+                    >
+                      {toggling2FA ? '...' : twoFAEnabled ? 'Disable' : 'Enable'}
+                    </button>
                   )}
+                </div>
 
-                  {deleteStep === 'otp' && (
-                    <form onSubmit={handleDeleteAccount} className="space-y-4">
-                      <p className="text-sm text-[var(--text-secondary)] font-light">
-                        Enter the confirmation code sent to your email to permanently delete your
-                        account.
-                      </p>
-                      <Alert type="error" msg={secErr} />
-                      <Field label="Confirmation Code">
+                {twoFAEnabled && enable2FAStep === 'idle' && (
+                  <Field label="Password required to disable 2FA">
+                    <Input
+                      type="password"
+                      value={disable2FAPassword}
+                      onChange={(e) => setDisable2FAPassword(e.target.value)}
+                      placeholder="Enter your password"
+                    />
+                  </Field>
+                )}
+
+                {enable2FAStep === 'scan' && (
+                  <div className="space-y-5 mt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                      {twoFAQrCode ? (
+                        <div className="flex justify-center md:justify-start">
+                          <div
+                            className="p-3 rounded-xl bg-white"
+                            style={{
+                              boxShadow:
+                                '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={twoFAQrCode}
+                              alt="2FA QR code"
+                              width={180}
+                              height={180}
+                              className="block w-[180px] h-[180px]"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-[180px] h-[180px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-purple-400 animate-spin" />
+                        </div>
+                      )}
+                      <div className="space-y-3 min-w-0">
+                        <div>
+                          <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
+                            Step 1 · Scan
+                          </div>
+                          <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                            Open an authenticator app (Google Authenticator, 1Password, Authy…) and
+                            scan this QR code.
+                          </p>
+                        </div>
+                        {twoFASecret && (
+                          <div>
+                            <div className="text-xs uppercase tracking-widest text-[var(--text-muted)] mb-1">
+                              Can&apos;t scan? Manual key
+                            </div>
+                            <div className="flex items-center gap-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg px-3 py-2">
+                              <code className="flex-1 font-mono text-[11px] text-[var(--text)] break-all">
+                                {twoFASecret}
+                              </code>
+                              <button
+                                type="button"
+                                onClick={handleCopy2FASecret}
+                                className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                              >
+                                {twoFASecretCopied ? 'Copied' : 'Copy'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="text-xs uppercase tracking-widest text-purple-300/80">
+                        Step 2 · Verify
+                      </div>
+                      <Field label="6-digit code from your authenticator">
                         <Input
                           type="text"
-                          value={deleteOtp}
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          value={enable2FACode}
                           onChange={(e) =>
-                            setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                            setEnable2FACode(e.target.value.replace(/\D/g, '').slice(0, 6))
                           }
                           placeholder="000000"
                           maxLength={6}
                         />
                       </Field>
-                      <div className="flex gap-2">
-                        <button
-                          type="submit"
-                          disabled={deleting || deleteOtp.length !== 6}
-                          className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-light disabled:opacity-50 transition-all"
-                        >
-                          {deleting ? 'Deleting...' : 'Permanently delete account'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDeleteStep('idle');
-                            setDeleteOtp('');
-                          }}
-                          className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* ACTIVITY LOG */}
-            {tab === 'activity' && (
-              <div className="profile-content-card">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-lg font-light text-[var(--text)]">Activity Log</h2>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Timeline of your account and platform activity
-                    </p>
-                  </div>
-                  <select className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text)]">
-                    <option>All Activities</option>
-                    <option>Login</option>
-                    <option>API Calls</option>
-                    <option>Settings</option>
-                    <option>Security</option>
-                  </select>
-                </div>
-
-                {activityLog && activityLog.length > 0 ? (
-                  <div className="space-y-1">
-                    {activityLog.map((log: any, idx: number) => {
-                      const timestamp = new Date(log.timestamp || log.createdAt);
-                      const now = new Date();
-                      const diffMs = now.getTime() - timestamp.getTime();
-                      const diffMins = Math.floor(diffMs / 60000);
-                      const diffHours = Math.floor(diffMs / 3600000);
-                      const diffDays = Math.floor(diffMs / 86400000);
-
-                      let timeStr = 'just now';
-                      if (diffMins < 60) {
-                        timeStr = diffMins <= 0 ? 'just now' : `${diffMins}m ago`;
-                      } else if (diffHours < 24) {
-                        timeStr = `${diffHours}h ago`;
-                      } else if (diffDays < 7) {
-                        timeStr = `${diffDays}d ago`;
-                      } else {
-                        timeStr = timestamp.toLocaleDateString();
-                      }
-
-                      // Determine activity type and color
-                      const action = log.action || log.type || 'Activity';
-                      let typeColor = 'text-zinc-400';
-                      let typeBg = 'bg-zinc-500/10';
-                      if (action.toLowerCase().includes('login')) {
-                        typeColor = 'text-emerald-400';
-                        typeBg = 'bg-emerald-500/10';
-                      } else if (action.toLowerCase().includes('api')) {
-                        typeColor = 'text-bolty-400';
-                        typeBg = 'bg-bolty-500/10';
-                      } else if (
-                        action.toLowerCase().includes('error') ||
-                        action.toLowerCase().includes('failed')
-                      ) {
-                        typeColor = 'text-red-400';
-                        typeBg = 'bg-red-500/10';
-                      } else if (
-                        action.toLowerCase().includes('update') ||
-                        action.toLowerCase().includes('change')
-                      ) {
-                        typeColor = 'text-amber-400';
-                        typeBg = 'bg-amber-500/10';
-                      }
-
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-bolty-500/20 hover:bg-bolty-500/2 transition-all duration-200 group"
-                        >
-                          <div
-                            className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap mb-1">
-                              <span
-                                className={`text-xs font-mono px-2 py-1 rounded ${typeBg} ${typeColor}`}
-                              >
-                                {action}
-                              </span>
-                              <span className="text-xs text-[var(--text-muted)] ml-auto">
-                                {timeStr}
-                              </span>
-                            </div>
-                            {log.description && (
-                              <p className="text-sm text-[var(--text-muted)] mb-1">
-                                {log.description}
-                              </p>
-                            )}
-                            {log.metadata && (
-                              <div className="text-xs text-[var(--text-muted)] font-mono bg-black/20 p-2 rounded border border-[var(--border)] overflow-x-auto max-w-full">
-                                {typeof log.metadata === 'string'
-                                  ? log.metadata
-                                  : JSON.stringify(log.metadata, null, 2).substring(0, 200)}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mx-auto mb-3">
-                      <IconCpu className="w-5 h-5 text-[var(--text-muted)]" />
                     </div>
-                    <p className="text-sm text-[var(--text-muted)]">No activity recorded yet</p>
-                    <p className="text-xs text-[var(--text-muted)] mt-1">
-                      Your account activity will appear here
-                    </p>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleEnable2FAConfirm}
+                        disabled={toggling2FA || enable2FACode.length !== 6}
+                        className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
+                        style={{
+                          background:
+                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                          boxShadow:
+                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                        }}
+                      >
+                        {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEnable2FAStep('idle');
+                          setEnable2FACode('');
+                          setTwoFAQrCode(null);
+                          setTwoFASecret(null);
+                        }}
+                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-            )}
+
+              {/* ── Password ── */}
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Password"
+                  subtitle="Change your password via a secure email reset link."
+                />
+                <Alert type="success" msg={pwMsg} />
+                <Alert type="error" msg={pwErr} />
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)]">
+                  <div className="min-w-0">
+                    <div className="text-sm font-light text-[var(--text)] mb-0.5">
+                      {pwStep === 'sent' ? 'Reset link sent' : 'Password reset'}
+                    </div>
+                    <div className="text-xs text-[var(--text-muted)]">
+                      {pwStep === 'sent'
+                        ? `Check ${userEmail || 'your inbox'} for instructions.`
+                        : 'We will email you a one-time link to set a new password.'}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRequestPasswordReset}
+                    disabled={pwLoading || !userEmail}
+                    className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                  >
+                    {pwLoading
+                      ? 'Sending...'
+                      : pwStep === 'sent'
+                        ? 'Resend link'
+                        : 'Send reset link'}
+                  </button>
+                </div>
+              </div>
+
+              {/* ── Delete Account ── */}
+              <div className="profile-content-card">
+                <SectionHeader
+                  title="Delete Account"
+                  subtitle="Permanently delete your account and all associated data."
+                />
+
+                {deleteStep === 'idle' && (
+                  <div className="space-y-4">
+                    <div className="p-4 rounded-xl border border-red-500/15 bg-red-500/5 text-sm text-red-300/80 font-light leading-relaxed">
+                      This action is irreversible. All your data, agents, listings, and transaction
+                      history will be permanently removed.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDeleteStep('confirm')}
+                      className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200"
+                    >
+                      Delete my account
+                    </button>
+                  </div>
+                )}
+
+                {deleteStep === 'confirm' && (
+                  <div className="space-y-4">
+                    <p className="text-sm text-[var(--text-secondary)] font-light">
+                      Are you sure? We will send a confirmation code to your email.
+                    </p>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleRequestDeleteAccount}
+                        disabled={requestingDelete}
+                        className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-400 text-sm font-light disabled:opacity-50 transition-all"
+                      >
+                        {requestingDelete ? 'Sending code...' : 'Yes, send confirmation code'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeleteStep('idle')}
+                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {deleteStep === 'otp' && (
+                  <form onSubmit={handleDeleteAccount} className="space-y-4">
+                    <p className="text-sm text-[var(--text-secondary)] font-light">
+                      Enter the confirmation code sent to your email to permanently delete your
+                      account.
+                    </p>
+                    <Alert type="error" msg={secErr} />
+                    <Field label="Confirmation Code">
+                      <Input
+                        type="text"
+                        value={deleteOtp}
+                        onChange={(e) =>
+                          setDeleteOtp(e.target.value.replace(/\D/g, '').slice(0, 6))
+                        }
+                        placeholder="000000"
+                        maxLength={6}
+                      />
+                    </Field>
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={deleting || deleteOtp.length !== 6}
+                        className="flex-1 py-3 rounded-xl border border-red-500/40 bg-red-500/15 hover:bg-red-500/25 text-red-300 text-sm font-light disabled:opacity-50 transition-all"
+                      >
+                        {deleting ? 'Deleting...' : 'Permanently delete account'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeleteStep('idle');
+                          setDeleteOtp('');
+                        }}
+                        className="px-4 py-3 rounded-xl text-sm font-light border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ACTIVITY LOG */}
+          {tab === 'activity' && (
+            <div className="profile-content-card">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-light text-[var(--text)]">Activity Log</h2>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    Timeline of your account and platform activity
+                  </p>
+                </div>
+                <select className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text)]">
+                  <option>All Activities</option>
+                  <option>Login</option>
+                  <option>API Calls</option>
+                  <option>Settings</option>
+                  <option>Security</option>
+                </select>
+              </div>
+
+              {activityLog && activityLog.length > 0 ? (
+                <div className="space-y-1">
+                  {activityLog.map((log: any, idx: number) => {
+                    const timestamp = new Date(log.timestamp || log.createdAt);
+                    const now = new Date();
+                    const diffMs = now.getTime() - timestamp.getTime();
+                    const diffMins = Math.floor(diffMs / 60000);
+                    const diffHours = Math.floor(diffMs / 3600000);
+                    const diffDays = Math.floor(diffMs / 86400000);
+
+                    let timeStr = 'just now';
+                    if (diffMins < 60) {
+                      timeStr = diffMins <= 0 ? 'just now' : `${diffMins}m ago`;
+                    } else if (diffHours < 24) {
+                      timeStr = `${diffHours}h ago`;
+                    } else if (diffDays < 7) {
+                      timeStr = `${diffDays}d ago`;
+                    } else {
+                      timeStr = timestamp.toLocaleDateString();
+                    }
+
+                    // Determine activity type and color
+                    const action = log.action || log.type || 'Activity';
+                    let typeColor = 'text-zinc-400';
+                    let typeBg = 'bg-zinc-500/10';
+                    if (action.toLowerCase().includes('login')) {
+                      typeColor = 'text-emerald-400';
+                      typeBg = 'bg-emerald-500/10';
+                    } else if (action.toLowerCase().includes('api')) {
+                      typeColor = 'text-bolty-400';
+                      typeBg = 'bg-bolty-500/10';
+                    } else if (
+                      action.toLowerCase().includes('error') ||
+                      action.toLowerCase().includes('failed')
+                    ) {
+                      typeColor = 'text-red-400';
+                      typeBg = 'bg-red-500/10';
+                    } else if (
+                      action.toLowerCase().includes('update') ||
+                      action.toLowerCase().includes('change')
+                    ) {
+                      typeColor = 'text-amber-400';
+                      typeBg = 'bg-amber-500/10';
+                    }
+
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-bolty-500/20 hover:bg-bolty-500/2 transition-all duration-200 group"
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span
+                              className={`text-xs font-mono px-2 py-1 rounded ${typeBg} ${typeColor}`}
+                            >
+                              {action}
+                            </span>
+                            <span className="text-xs text-[var(--text-muted)] ml-auto">
+                              {timeStr}
+                            </span>
+                          </div>
+                          {log.description && (
+                            <p className="text-sm text-[var(--text-muted)] mb-1">
+                              {log.description}
+                            </p>
+                          )}
+                          {log.metadata && (
+                            <div className="text-xs text-[var(--text-muted)] font-mono bg-black/20 p-2 rounded border border-[var(--border)] overflow-x-auto max-w-full">
+                              {typeof log.metadata === 'string'
+                                ? log.metadata
+                                : JSON.stringify(log.metadata, null, 2).substring(0, 200)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mx-auto mb-3">
+                    <IconCpu className="w-5 h-5 text-[var(--text-muted)]" />
+                  </div>
+                  <p className="text-sm text-[var(--text-muted)]">No activity recorded yet</p>
+                  <p className="text-xs text-[var(--text-muted)] mt-1">
+                    Your account activity will appear here
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {/* end profile-content */}
       </div>

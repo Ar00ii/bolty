@@ -15,6 +15,7 @@ import { decryptToken } from '../../common/crypto/token-cipher.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { ChartService } from '../chart/chart.service';
 
 @Injectable()
 export class ReposService {
@@ -25,6 +26,7 @@ export class ReposService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
+    private readonly chart: ChartService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -320,10 +322,79 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       twitterUrl?: string;
     },
   ) {
-    const isPrivate = githubRepoData.private === true;
     const isLocked = githubRepoData.isLocked === true;
 
-    // Private repos must be locked with a price
+    // ── GitHub ownership verification ─────────────────────────────────────
+    // Never trust the client's copy of id/full_name/stars/private — that's
+    // how a user publishes someone else's repo under their own account.
+    // Pull the authoritative repo metadata from the GitHub API using the
+    // caller's OAuth token and require that they are the owner (or a
+    // repo admin). Mass-assignable client fields are then overwritten.
+    const ownerRecord = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { githubToken: true, githubLogin: true },
+    });
+    const token = decryptToken(ownerRecord?.githubToken) ?? undefined;
+    if (!token) {
+      throw new ForbiddenException('Reconnect GitHub to publish this repository');
+    }
+    if (!/^[\w.-]+\/[\w.-]+$/.test(githubRepoData.full_name)) {
+      throw new BadRequestException('Invalid repository full name');
+    }
+    interface GithubRepoPayload {
+      id: number;
+      name: string;
+      full_name: string;
+      description: string | null;
+      language: string | null;
+      stargazers_count: number;
+      forks_count: number;
+      html_url: string;
+      clone_url: string;
+      topics: string[] | null;
+      private: boolean;
+      owner: { login: string };
+      permissions?: { admin?: boolean };
+    }
+    let authoritative: GithubRepoPayload;
+    try {
+      const resp = await axios.get<GithubRepoPayload>(
+        `https://api.github.com/repos/${githubRepoData.full_name}`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'Bolty-Platform/1.0',
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 10_000,
+          validateStatus: () => true,
+        },
+      );
+      if (resp.status === 404) {
+        throw new NotFoundException('Repository not found on GitHub');
+      }
+      if (resp.status === 401 || resp.status === 403) {
+        throw new ForbiddenException('GitHub token lacks permission for this repository');
+      }
+      if (resp.status !== 200 || !resp.data?.id) {
+        throw new BadRequestException('Could not fetch repository metadata from GitHub');
+      }
+      authoritative = resp.data;
+    } catch (err) {
+      if (err instanceof NotFoundException || err instanceof ForbiddenException) throw err;
+      if (err instanceof BadRequestException) throw err;
+      this.logger.error(`GitHub verify failed: ${err instanceof Error ? err.message : err}`);
+      throw new BadRequestException('Could not verify repository ownership with GitHub');
+    }
+
+    const isOwner =
+      authoritative.owner.login.toLowerCase() === (ownerRecord?.githubLogin || '').toLowerCase();
+    const isAdmin = authoritative.permissions?.admin === true;
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('You do not own this repository');
+    }
+    const isPrivate = authoritative.private;
+
     if (isPrivate && !isLocked) {
       throw new BadRequestException(
         'Private repositories must be published as locked with a price',
@@ -335,37 +406,47 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     // Validate URLs — only for public (non-private) repos since private clone URLs need auth
     if (!isPrivate) {
-      if (!isSafeUrl(githubRepoData.html_url) || !isSafeUrl(githubRepoData.clone_url)) {
+      if (!isSafeUrl(authoritative.html_url) || !isSafeUrl(authoritative.clone_url)) {
         throw new BadRequestException('Invalid repository URLs');
       }
-    } else if (!isSafeUrl(githubRepoData.html_url)) {
+    } else if (!isSafeUrl(authoritative.html_url)) {
       throw new BadRequestException('Invalid repository URL');
     }
 
-    // AI content security scan
+    // AI content security scan (use authoritative name/desc/topics)
     const scan = await this.scanRepoContent(
-      githubRepoData.name,
-      githubRepoData.description || '',
-      githubRepoData.topics || [],
+      authoritative.name,
+      authoritative.description || '',
+      authoritative.topics || [],
     );
     if (!scan.safe) {
-      this.logger.warn(`Repo ${githubRepoData.name} rejected by AI scanner: ${scan.reason}`);
+      this.logger.warn(`Repo ${authoritative.name} rejected by AI scanner: ${scan.reason}`);
       throw new ForbiddenException(`Repository rejected by security scanner: ${scan.reason}`);
     }
 
+    // Block cross-user hijack: if another Bolty account already claimed
+    // this GitHub repo id, only that owner may update it.
+    const existing = await this.prisma.repository.findUnique({
+      where: { githubRepoId: String(authoritative.id) },
+      select: { userId: true },
+    });
+    if (existing && existing.userId !== userId) {
+      throw new ForbiddenException('This repository is already published under another account');
+    }
+
     return this.prisma.repository.upsert({
-      where: { githubRepoId: String(githubRepoData.id) },
+      where: { githubRepoId: String(authoritative.id) },
       create: {
-        githubRepoId: String(githubRepoData.id),
-        name: githubRepoData.name.slice(0, 100),
-        fullName: githubRepoData.full_name.slice(0, 200),
-        description: githubRepoData.description?.slice(0, 1000),
-        language: githubRepoData.language?.slice(0, 50),
-        stars: githubRepoData.stargazers_count,
-        forks: githubRepoData.forks_count,
-        githubUrl: githubRepoData.html_url,
-        cloneUrl: githubRepoData.clone_url,
-        topics: githubRepoData.topics || [],
+        githubRepoId: String(authoritative.id),
+        name: authoritative.name.slice(0, 100),
+        fullName: authoritative.full_name.slice(0, 200),
+        description: authoritative.description?.slice(0, 1000) || null,
+        language: authoritative.language?.slice(0, 50) || null,
+        stars: authoritative.stargazers_count,
+        forks: authoritative.forks_count,
+        githubUrl: authoritative.html_url,
+        cloneUrl: authoritative.clone_url,
+        topics: authoritative.topics || [],
         isPrivate,
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
@@ -375,9 +456,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         userId,
       },
       update: {
-        stars: githubRepoData.stargazers_count,
-        forks: githubRepoData.forks_count,
-        description: githubRepoData.description?.slice(0, 1000),
+        stars: authoritative.stargazers_count,
+        forks: authoritative.forks_count,
+        description: authoritative.description?.slice(0, 1000) || null,
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
         logoUrl: githubRepoData.logoUrl?.slice(0, 500) || null,
@@ -508,10 +589,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   // ── Download tracking ─────────────────────────────────────────────────────
 
-  async trackDownload(repositoryId: string) {
+  async trackDownload(repositoryId: string, userId: string) {
     const repo = await this.prisma.repository.findUnique({
       where: { id: repositoryId },
-      select: { cloneUrl: true, githubUrl: true },
+      select: { cloneUrl: true, githubUrl: true, isLocked: true },
     });
     if (!repo) throw new NotFoundException('Repository not found');
 
@@ -520,10 +601,28 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Invalid repository URL');
     }
 
-    await this.prisma.repository.update({
-      where: { id: repositoryId },
-      data: { downloadCount: { increment: 1 } },
-    });
+    // Locked repos: only paying buyers get the download URL
+    if (repo.isLocked) {
+      const purchase = await this.prisma.repoPurchase.findFirst({
+        where: { buyerId: userId, repositoryId, verified: true },
+        select: { id: true },
+      });
+      if (!purchase) {
+        throw new ForbiddenException('Purchase required to download this repository');
+      }
+    }
+
+    // Dedupe metric inflation: one download counted per user per 24h.
+    // Otherwise a single account can loop this endpoint to game rankings.
+    const dedupKey = `repo_dl:${repositoryId}:${userId}`;
+    const seen = await this.redis.get(dedupKey);
+    if (!seen) {
+      await this.redis.set(dedupKey, '1', 86_400);
+      await this.prisma.repository.update({
+        where: { id: repositoryId },
+        data: { downloadCount: { increment: 1 } },
+      });
+    }
 
     return { downloadUrl: repo.githubUrl + '/archive/refs/heads/main.zip' };
   }
@@ -574,6 +673,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Seller has no wallet address configured');
     }
 
+    // ── Expected payment amount ──────────────────────────────────────────
+    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to wei via
+    // the live ETH/USD oracle so an attacker can't pay dust for a $1k repo.
+    // We refuse to proceed if the oracle is unhealthy (ChartService returns
+    // a hardcoded 2000 fallback on failure; we don't treat that as
+    // authoritative — the frontend should just ask the user to retry).
+    if (!(repo.lockedPriceUsd && repo.lockedPriceUsd > 0)) {
+      throw new BadRequestException('Repository price is not set');
+    }
+    const ethPrice = await this.chart.getEthPrice().catch(() => null);
+    if (!ethPrice || !(ethPrice.price > 0)) {
+      throw new BadRequestException('Price oracle unavailable, try again shortly');
+    }
+    // Allow 3% slippage between quote and confirmation.
+    const minEth = (repo.lockedPriceUsd / ethPrice.price) * 0.97;
+    let expectedTotalWei: bigint;
+    try {
+      expectedTotalWei = ethers.parseEther(minEth.toFixed(18));
+    } catch {
+      throw new BadRequestException('Repository price is not representable on-chain');
+    }
+    // Seller gets 97.5%, platform commission is 2.5% in a separate tx.
+    const expectedSellerWei = (expectedTotalWei * 975n) / 1000n;
+    const expectedPlatformFeeWei = (expectedTotalWei * 25n) / 1000n;
+
     // ── Consent signature verification ────────────────────────────────────
     if (consentSignature && consentMessage) {
       try {
@@ -620,7 +744,14 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
             '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
         );
         if (!transferLog) throw new BadRequestException('No valid token transfer found');
-        amountWei = BigInt(transferLog.data).toString();
+        const paid = BigInt(transferLog.data);
+        // BOLTY token has 18 decimals; amounts are quoted in the same scale as ETH
+        if (paid < expectedSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${paid.toString()}) is below expected price (${expectedSellerWei.toString()})`,
+          );
+        }
+        amountWei = paid.toString();
         verified = true;
       } else {
         // ETH payment — check direct transfer
@@ -628,6 +759,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         if (!tx) throw new BadRequestException('Transaction not found');
         if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
           throw new BadRequestException('Transaction recipient does not match seller');
+        }
+        if (BigInt(tx.value) < expectedSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedSellerWei.toString()} wei)`,
+          );
         }
         amountWei = tx.value.toString();
         verified = true;
@@ -653,6 +789,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         }
         if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
           throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
+        }
+        if (BigInt(feeTx.value) < expectedPlatformFeeWei) {
+          throw new BadRequestException(
+            `Platform fee (${feeTx.value.toString()} wei) is below expected (${expectedPlatformFeeWei.toString()} wei)`,
+          );
         }
         platformFeeWei = feeTx.value.toString();
       } catch (err) {

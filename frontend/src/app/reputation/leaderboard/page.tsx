@@ -312,9 +312,7 @@ export default function LeaderboardPage() {
           <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#836EF9">
             <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
             Top Developers
-            <span className="ml-1 text-[10.5px] font-mono opacity-70">
-              {annotated.length}
-            </span>
+            <span className="ml-1 text-[10.5px] font-mono opacity-70">{annotated.length}</span>
           </TabButton>
           <TabButton active={tab === 'agents'} onClick={() => setTab('agents')} accent="#EC4899">
             <Flame className="w-3.5 h-3.5" strokeWidth={1.75} />
@@ -350,7 +348,8 @@ export default function LeaderboardPage() {
                 className="rounded-xl px-6 py-12 text-center"
                 style={{
                   background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                  boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
                 }}
               >
                 <Package className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
@@ -434,59 +433,61 @@ export default function LeaderboardPage() {
 
       {/* Developers table */}
       {tab === 'devs' && (
-      <section className="px-6 md:px-10">
-        <div className="mx-auto max-w-[1200px]">
-          {loading ? (
-            <div
-              className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
-              style={{
-                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-              }}
-            >
-              Loading leaderboard…
-            </div>
-          ) : visible.length === 0 ? (
-            <div
-              className="rounded-xl px-6 py-12 text-center"
-              style={{
-                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-              }}
-            >
-              <Trophy className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
-              <p className="text-[13px] text-zinc-300 font-light">
-                {annotated.length === 0
-                  ? 'No rankings yet. Be the first to earn rays.'
-                  : 'No developers match your filters.'}
-              </p>
-            </div>
-          ) : (
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{
-                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-              }}
-            >
-              <div className="grid grid-cols-[40px_minmax(0,1fr)_110px_70px_70px_90px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
-                <span className="text-center">#</span>
-                <span>Builder</span>
-                <span>Rank</span>
-                <span className="text-right hidden md:block">Repos</span>
-                <span className="text-right hidden md:block">Listings</span>
-                <span className="text-right">Rays</span>
-                <span />
+        <section className="px-6 md:px-10">
+          <div className="mx-auto max-w-[1200px]">
+            {loading ? (
+              <div
+                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+                }}
+              >
+                Loading leaderboard…
               </div>
-              <ul>
-                {visible.map((entry) => (
-                  <LeaderboardRow key={entry.id} entry={entry} />
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </section>
+            ) : visible.length === 0 ? (
+              <div
+                className="rounded-xl px-6 py-12 text-center"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
+              >
+                <Trophy className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
+                <p className="text-[13px] text-zinc-300 font-light">
+                  {annotated.length === 0
+                    ? 'No rankings yet. Be the first to earn rays.'
+                    : 'No developers match your filters.'}
+                </p>
+              </div>
+            ) : (
+              <div
+                className="rounded-xl overflow-hidden"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                  boxShadow:
+                    '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
+              >
+                <div className="grid grid-cols-[40px_minmax(0,1fr)_110px_70px_70px_90px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">
+                  <span className="text-center">#</span>
+                  <span>Builder</span>
+                  <span>Rank</span>
+                  <span className="text-right hidden md:block">Repos</span>
+                  <span className="text-right hidden md:block">Listings</span>
+                  <span className="text-right">Rays</span>
+                  <span />
+                </div>
+                <ul>
+                  {visible.map((entry) => (
+                    <LeaderboardRow key={entry.id} entry={entry} />
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
       )}
     </div>
   );
@@ -522,7 +523,8 @@ function TabButton({
 }
 
 function TopAgentCard({ entry, position }: { entry: TopAgentEntry; position: number }) {
-  const medal = position === 1 ? '#f59e0b' : position === 2 ? '#cbd5e1' : position === 3 ? '#cd7f32' : null;
+  const medal =
+    position === 1 ? '#f59e0b' : position === 2 ? '#cbd5e1' : position === 3 ? '#cd7f32' : null;
   return (
     <li>
       <Link
@@ -530,8 +532,7 @@ function TopAgentCard({ entry, position }: { entry: TopAgentEntry; position: num
         className="group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all hover:scale-[1.005]"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.65), rgba(10,10,14,0.65))',
-          boxShadow:
-            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
         {entry.boosted && (

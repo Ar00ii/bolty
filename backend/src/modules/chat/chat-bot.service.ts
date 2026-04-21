@@ -7,16 +7,23 @@ import { ChatGateway } from './chat.gateway';
 
 // Roster of bot personas seeded into the public chat. Each row becomes a User
 // row with isBot=true so bot messages are visually indistinguishable from real
-// users (avatars, usernames, ranks all render normally).
+// users (avatars, usernames, ranks all render normally). Avatars use DiceBear
+// "bottts-neutral" seeded by username so every bot has a unique, deterministic
+// robot avatar — no extra upload or storage needed.
+const BOT_AVATAR = (seed: string) =>
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${seed}&backgroundType=gradientLinear&backgroundColor=b6e3f4,c0aede,ffdfbf`;
+
 const BOT_PERSONAS = [
-  { username: 'nyx', displayName: 'Nyx', tag: '#0001', rep: 4200 },
-  { username: 'kiara', displayName: 'Kiara', tag: '#0002', rep: 1850 },
-  { username: 'hex', displayName: 'Hex', tag: '#0003', rep: 920 },
-  { username: 'rune', displayName: 'Rune', tag: '#0004', rep: 540 },
-  { username: 'echo', displayName: 'Echo', tag: '#0005', rep: 280 },
-  { username: 'vex', displayName: 'Vex', tag: '#0006', rep: 130 },
-  { username: 'luma', displayName: 'Luma', tag: '#0007', rep: 75 },
-  { username: 'orin', displayName: 'Orin', tag: '#0008', rep: 30 },
+  { username: 'nyx_bot', displayName: 'Nyx Trading Bot', tag: '#0001', rep: 4200 },
+  { username: 'kiara_bot', displayName: 'Kiara Research Bot', tag: '#0002', rep: 1850 },
+  { username: 'hex_bot', displayName: 'Hex Code Bot', tag: '#0003', rep: 920 },
+  { username: 'rune_bot', displayName: 'Rune Dev Bot', tag: '#0004', rep: 540 },
+  { username: 'echo_bot', displayName: 'Echo Market Bot', tag: '#0005', rep: 280 },
+  { username: 'vex_bot', displayName: 'Vex Builder Bot', tag: '#0006', rep: 130 },
+  { username: 'luma_bot', displayName: 'Luma Data Bot', tag: '#0007', rep: 75 },
+  { username: 'orin_bot', displayName: 'Orin Deploy Bot', tag: '#0008', rep: 30 },
+  { username: 'zarak_bot', displayName: 'Zarak Audit Bot', tag: '#0009', rep: 3120 },
+  { username: 'quark_bot', displayName: 'Quark Signals Bot', tag: '#0010', rep: 2480 },
 ];
 
 // A small library of believable, on-brand chatter — short, lowercase, varied.
@@ -104,9 +111,17 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
   private async seedBots() {
     const ids: string[] = [];
     for (const p of BOT_PERSONAS) {
+      const avatarUrl = BOT_AVATAR(p.username);
       const user = await this.prisma.user.upsert({
         where: { username: p.username },
-        update: { isBot: true },
+        // Keep avatar + displayName in sync on every boot so tweaks to the
+        // BOT_PERSONAS roster propagate without a manual DB reset.
+        update: {
+          isBot: true,
+          avatarUrl,
+          displayName: p.displayName,
+          bio: 'Bolty trading bot',
+        },
         create: {
           username: p.username,
           displayName: p.displayName,
@@ -114,7 +129,8 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
           isBot: true,
           reputationPoints: p.rep,
           profileSetup: true,
-          bio: 'Bolty community bot',
+          avatarUrl,
+          bio: 'Bolty trading bot',
         },
         select: { id: true },
       });

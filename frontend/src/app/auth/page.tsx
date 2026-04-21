@@ -478,7 +478,6 @@ function AuthPage() {
         background: 'linear-gradient(135deg, #0a0a0a 0%, #0f0f1a 50%, #1a0033 100%)',
       }}
     >
-
       {/* Flickering grid — sits between gradient and orbs, masked to fade at edges */}
       <FlickeringGrid
         className="absolute inset-0 z-0 pointer-events-none"

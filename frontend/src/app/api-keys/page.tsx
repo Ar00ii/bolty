@@ -26,6 +26,7 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useStepUp } from '@/lib/auth/useStepUp';
 
 interface ApiKeyInfo {
   id: string;
@@ -580,7 +581,7 @@ export default function ApiKeysPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
+  const stepUp = useStepUp();
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -609,18 +610,17 @@ export default function ApiKeysPage() {
 
   const handleDelete = async (keyId: string) => {
     try {
-      await api.post(`/market/api-keys/${keyId}/request-delete-verification`, {});
-      setRevokeTarget(keyId);
+      // When 2FA is enabled the first call returns STEP_UP_REQUIRED; the hook
+      // opens the TOTP modal and replays with the code. When 2FA is disabled
+      // the first call succeeds immediately.
+      await stepUp.runWithStepUp((code) =>
+        api.delete(`/market/api-keys/${keyId}`, { twoFactorCode: code }),
+      );
+      setKeys((prev) => prev.filter((k) => k.id !== keyId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to start revoke flow');
+      if (err instanceof Error && err.message === 'Cancelled') return;
+      setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
     }
-  };
-
-  const submitRevoke = async (code: string) => {
-    if (!revokeTarget) return;
-    await api.delete(`/market/api-keys/${revokeTarget}`, { code });
-    setKeys((prev) => prev.filter((k) => k.id !== revokeTarget));
-    setRevokeTarget(null);
   };
 
   const handleRename = async (keyId: string, label: string | null) => {
@@ -812,12 +812,14 @@ export default function ApiKeysPage() {
       </div>
 
       <VerificationCodeModal
-        open={!!revokeTarget}
-        onClose={() => setRevokeTarget(null)}
-        onSubmit={submitRevoke}
+        open={stepUp.stepUpOpen}
+        onClose={stepUp.dismiss}
+        onSubmit={stepUp.submit}
         title="Revoke API key"
-        subtitle="We just sent a 6-digit verification code to your email."
-        source="email"
+        subtitle={
+          stepUp.stepUpMessage || 'Enter the 6-digit code from your authenticator app to confirm.'
+        }
+        source={stepUp.stepUpSource}
       />
     </div>
   );

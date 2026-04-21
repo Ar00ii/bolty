@@ -22,6 +22,7 @@ import { RedisService } from '../../common/redis/redis.service';
 import { EmailService } from '../email/email.service';
 import { UsersService } from '../users/users.service';
 
+import { StepUpService } from './step-up.service';
 import { invalidateUserCache } from './strategies/jwt.strategy';
 
 export interface JwtPayload {
@@ -68,6 +69,7 @@ export class AuthService {
     private readonly redis: RedisService,
     _usersService: UsersService,
     private readonly emailService: EmailService,
+    private readonly stepUp: StepUpService,
   ) {
     // Validate JWT_SECRET exists and has minimum length (security-critical)
     const jwtSecret = this.config.get<string>('JWT_SECRET');
@@ -312,8 +314,12 @@ export class AuthService {
 
     // 2FA required — using TOTP (Authenticator app)
     if (user.twoFactorEnabled) {
+      // Single-use jti: verifyLogin2FA atomically deletes it on success,
+      // so a stolen/copied tempToken can only mint tokens once.
+      const jti = uuidv4();
+      await this.redis.set(`2fa_jti:${jti}`, user.id, 600);
       const tempToken = this.jwtService.sign(
-        { sub: user.id, scope: 'pending_2fa' },
+        { sub: user.id, scope: 'pending_2fa', jti },
         { expiresIn: '10m' },
       );
       return { twoFactorRequired: true, tempToken };
@@ -323,15 +329,27 @@ export class AuthService {
   }
 
   async verifyLogin2FA(tempToken: string, code: string): Promise<AuthTokens> {
-    let payload: { sub: string; scope: string };
+    let payload: { sub: string; scope: string; jti?: string };
     try {
-      payload = this.jwtService.verify<{ sub: string; scope: string }>(tempToken);
+      payload = this.jwtService.verify<{ sub: string; scope: string; jti?: string }>(tempToken);
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
     if (payload.scope !== 'pending_2fa') {
       throw new UnauthorizedException('Invalid token scope');
+    }
+
+    // Reject replay: the jti is burnt only on successful verification
+    // (see below). A missing/mismatched jti means this tempToken was
+    // already consumed or never issued by us.
+    if (!payload.jti) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const jtiKey = `2fa_jti:${payload.jti}`;
+    const jtiOwner = await this.redis.get(jtiKey);
+    if (!jtiOwner || jtiOwner !== payload.sub) {
+      throw new UnauthorizedException('Token has already been used');
     }
 
     // Get user and their TOTP secret
@@ -365,7 +383,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired verification code');
     }
 
-    // Clear attempts on success
+    // Burn the jti so the tempToken cannot be replayed, then clear
+    // brute-force counter.
+    await this.redis.del(jtiKey);
     await this.redis.del(attemptsKey);
     return this.generateTokens(payload.sub);
   }
@@ -449,7 +469,17 @@ export class AuthService {
 
   // ── Email Change ──────────────────────────────────────────────────────────
 
-  async requestEmailChange(userId: string, newEmail: string, password: string): Promise<void> {
+  async requestEmailChange(
+    userId: string,
+    newEmail: string,
+    password: string,
+    twoFactorCode?: string,
+  ): Promise<void> {
+    // 2FA step-up before touching the recovery channel. Without this, a
+    // compromised password + an unlocked session can silently pivot the
+    // account email to an attacker-controlled address.
+    await this.stepUp.assert(userId, twoFactorCode);
+
     const email = newEmail.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -492,7 +522,12 @@ export class AuthService {
 
   // ── Delete Account ────────────────────────────────────────────────────────
 
-  async requestDeleteAccount(userId: string): Promise<void> {
+  async requestDeleteAccount(userId: string, twoFactorCode?: string): Promise<void> {
+    // Require 2FA step-up — account deletion is irreversible, and an
+    // email-OTP-only flow lets anyone with brief inbox access nuke
+    // the account (which would also release the username for squatting).
+    await this.stepUp.assert(userId, twoFactorCode);
+
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
     if (!user.email)
@@ -612,47 +647,47 @@ export class AuthService {
     });
 
     if (!user) {
-      // Check if a user with this GitHub username already exists (e.g. registered by email)
-      // If so, link GitHub to that existing account instead of creating a duplicate
-      const existingByUsername = await this.prisma.user.findUnique({
-        where: { username: githubProfile.login },
-      });
-
-      if (existingByUsername) {
-        // Only link if the account doesn't already have a different GitHub ID
-        if (existingByUsername.githubId && existingByUsername.githubId !== githubProfile.id) {
-          throw new ConflictException(
-            'This username is already linked to a different GitHub account',
-          );
+      // NO auto-linking by username. Previously, if an email-registered
+      // user "alice" existed on Bolty and someone signed in with GitHub
+      // user "alice", we merged the GitHub identity into that account and
+      // handed the OAuth caller a session for it — straightforward account
+      // takeover (GitHub username != proof of Bolty identity).
+      //
+      // Policy: new githubId → always create a new account. Username
+      // collisions get a suffix so the existing account is untouched.
+      // Linking an existing Bolty account to GitHub must happen via the
+      // authenticated /auth/link-github flow.
+      let username = githubProfile.login;
+      const clash = await this.prisma.user.findUnique({ where: { username } });
+      if (clash) {
+        // Try a handful of deterministic suffixes before falling back to random
+        for (let i = 0; i < 5; i++) {
+          const candidate = `${githubProfile.login}-gh${Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, '0')}`;
+          const exists = await this.prisma.user.findUnique({ where: { username: candidate } });
+          if (!exists) {
+            username = candidate;
+            break;
+          }
         }
-        this.logger.log(`Linking GitHub to existing user: ${githubProfile.login}`);
-        user = await this.prisma.user.update({
-          where: { id: existingByUsername.id },
-          data: {
-            githubId: githubProfile.id,
-            githubLogin: githubProfile.login,
-            githubToken: githubProfile.accessToken
-              ? encryptToken(githubProfile.accessToken)
-              : undefined,
-            avatarUrl: existingByUsername.avatarUrl || githubProfile.avatar_url,
-            lastLoginAt: new Date(),
-          },
-        });
-      } else {
-        const userTag = await this.generateUserTag();
-        user = await this.prisma.user.create({
-          data: {
-            githubId: githubProfile.id,
-            githubLogin: githubProfile.login,
-            username: githubProfile.login,
-            avatarUrl: githubProfile.avatar_url,
-            bio: githubProfile.bio,
-            githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : null,
-            userTag,
-          },
-        });
-        this.logger.log(`New GitHub user created: ${githubProfile.login}`);
+        if (username === githubProfile.login) {
+          username = `gh-${githubProfile.id}`;
+        }
       }
+      const userTag = await this.generateUserTag();
+      user = await this.prisma.user.create({
+        data: {
+          githubId: githubProfile.id,
+          githubLogin: githubProfile.login,
+          username,
+          avatarUrl: githubProfile.avatar_url,
+          bio: githubProfile.bio,
+          githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : null,
+          userTag,
+        },
+      });
+      this.logger.log(`New GitHub user created: ${githubProfile.login} (username=${username})`);
     } else {
       user = await this.prisma.user.update({
         where: { id: user.id },

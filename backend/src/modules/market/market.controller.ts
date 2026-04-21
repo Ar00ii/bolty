@@ -158,9 +158,12 @@ export class MarketController {
   async deleteApiKey(
     @Param('id') keyId: string,
     @CurrentUser('id') userId: string,
-    @Body() body: { code: string },
+    @Body() body: { twoFactorCode?: string },
   ) {
-    return this.apiKeysService.verifyAndDeleteApiKey(userId, keyId, body.code);
+    // Gate behind TOTP step-up so a hijacked session can't silently revoke
+    // keys. No-op when 2FA is disabled on the account.
+    await this.stepUp.assert(userId, body?.twoFactorCode);
+    return this.apiKeysService.deleteApiKey(keyId, userId);
   }
 
   // ── Listings ───────────────────────────────────────────────────────────────
@@ -246,7 +249,7 @@ export class MarketController {
   boostListing(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
-    @Body() body: { durationDays?: number; amountTokens?: number },
+    @Body() body: { durationDays?: number; amountTokens?: number; txHash?: string },
   ) {
     return this.marketService.boostListing(id, userId, body || {});
   }

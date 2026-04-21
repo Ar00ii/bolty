@@ -134,29 +134,37 @@ type TickerItem =
     };
 
 function useTickerItems(data: TickerData): TickerItem[] {
+  // Interleave agents and devs so the bar feels mixed, not "all agents, then all devs".
+  const agents = data.topAgents.slice(0, 10);
+  const devs = data.topDevs.slice(0, 10);
   const items: TickerItem[] = [];
-  for (const a of data.topAgents.slice(0, 8)) {
-    items.push({
-      key: `a-${a.id}`,
-      kind: 'agent',
-      href: `/market/agents/${a.id}`,
-      title: a.title,
-      sales: a.sales,
-      sellerUsername: a.sellerUsername,
-      sellerAvatar: a.sellerAvatar,
-    });
-  }
-  for (const d of data.topDevs.slice(0, 8)) {
-    items.push({
-      key: `d-${d.id}`,
-      kind: 'dev',
-      href: d.username ? `/u/${d.username}` : '#',
-      username: d.username,
-      displayName: d.displayName,
-      avatarUrl: d.avatarUrl,
-      reputationPoints: d.reputationPoints,
-      totalSales: d.totalSales,
-    });
+  const max = Math.max(agents.length, devs.length);
+  for (let i = 0; i < max; i++) {
+    const a = agents[i];
+    if (a) {
+      items.push({
+        key: `a-${a.id}`,
+        kind: 'agent',
+        href: `/market/agents/${a.id}`,
+        title: a.title,
+        sales: a.sales,
+        sellerUsername: a.sellerUsername,
+        sellerAvatar: a.sellerAvatar,
+      });
+    }
+    const d = devs[i];
+    if (d) {
+      items.push({
+        key: `d-${d.id}`,
+        kind: 'dev',
+        href: d.username ? `/u/${d.username}` : '#',
+        username: d.username,
+        displayName: d.displayName,
+        avatarUrl: d.avatarUrl,
+        reputationPoints: d.reputationPoints,
+        totalSales: d.totalSales,
+      });
+    }
   }
   return items;
 }

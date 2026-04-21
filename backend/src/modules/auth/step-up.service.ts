@@ -7,8 +7,10 @@ import { RedisService } from '../../common/redis/redis.service';
 /**
  * Step-up authentication: requires the user to prove possession of their
  * second factor for sensitive actions (changing username, deleting an agent,
- * removing a repo, etc.). When 2FA is not enabled the request is allowed
- * through, so we never lock people out of their own account.
+ * removing a repo, etc.). When the user has not enrolled 2FA yet we force
+ * them to enroll first — the frontend catches `TWO_FACTOR_NOT_ENROLLED`
+ * and redirects to /onboarding/2fa so a compromised session can't silently
+ * mutate account state.
  */
 @Injectable()
 export class StepUpService {
@@ -25,8 +27,11 @@ export class StepUpService {
     if (!user) throw new UnauthorizedException('User not found');
 
     if (!user.twoFactorEnabled || !user.twoFactorSecret) {
-      // Step-up is a no-op when the user has not enrolled.
-      return;
+      throw new BadRequestException({
+        code: 'TWO_FACTOR_NOT_ENROLLED',
+        message: 'Enable two-factor authentication to perform this action',
+        source: 'totp',
+      });
     }
 
     if (!code || !/^\d{6}$/.test(code)) {

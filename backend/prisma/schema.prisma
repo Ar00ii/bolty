@@ -459,6 +459,7 @@ model ListingBoost {
   amountTokens Float         @default(0) // BOLTY tokens spent
   durationDays Int           @default(7)
   expiresAt    DateTime
+  txHash       String?       @unique
 
   @@index([listingId, createdAt])
   @@index([buyerId, createdAt])

@@ -179,10 +179,7 @@ export default function LibraryPage() {
     [items],
   );
 
-  const downloadable = useMemo(
-    () => items.filter((i) => i.listing?.fileKey).length,
-    [items],
-  );
+  const downloadable = useMemo(() => items.filter((i) => i.listing?.fileKey).length, [items]);
 
   const liveAgents = useMemo(
     () => items.filter((i) => i.listing?.agentEndpoint || i.listing?.agentUrl).length,

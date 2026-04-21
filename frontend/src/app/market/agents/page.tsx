@@ -2067,12 +2067,7 @@ function CreateListingForm({
             Step {step} of {steps.length} · {completion}% complete
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="mk-wizard__close"
-          aria-label="Close"
-        >
+        <button type="button" onClick={onCancel} className="mk-wizard__close" aria-label="Close">
           <X className="w-4 h-4" strokeWidth={1.75} />
         </button>
       </div>

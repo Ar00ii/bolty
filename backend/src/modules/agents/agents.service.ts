@@ -3,6 +3,7 @@ import { AgentStatus, ActivityStatus, Prisma } from '@prisma/client';
 import axios from 'axios';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { isSafeUrl, isSafeUrlResolving } from '../../common/sanitize/sanitize.util';
 
 export interface CreateAgentDto {
   name: string;
@@ -166,10 +167,31 @@ export class AgentsService {
 
     const startTime = Date.now();
 
+    // Resolve DNS and block if any returned address is private — otherwise
+    // a user could register webhookUrl=http://attacker.com and rebind it
+    // to 127.0.0.1 between the URL-validation step and this request.
+    const check = await isSafeUrlResolving(agent.webhookUrl);
+    if (!check.ok) {
+      await this.logActivity(agentId, 'webhook_test', 'FAILED', {
+        responseTime: 0,
+        error: `Blocked: ${check.reason}`,
+      });
+      return {
+        success: false,
+        responseTime: 0,
+        error: `Webhook URL blocked (${check.reason})`,
+      };
+    }
+
     try {
       const response = await axios.post(agent.webhookUrl, payload, {
         timeout: this.WEBHOOK_TIMEOUT,
         validateStatus: () => true, // Accept all status codes
+        maxRedirects: 0, // a 302 could punt us to an internal host
+        // Pin the resolved IP so a second lookup can't be rebound.
+        lookup: (_hostname, _options, cb) => {
+          cb(null, check.ip, check.family);
+        },
       });
 
       const responseTime = Date.now() - startTime;
@@ -306,16 +328,17 @@ export class AgentsService {
   }
 
   /**
-   * Validate webhook URL format
+   * Validate webhook URL format + SSRF guards
    */
   private isValidWebhookUrl(url: string): boolean {
+    if (!isSafeUrl(url)) return false;
     try {
       const parsed = new URL(url);
       // Must be HTTPS in production
       if (process.env.NODE_ENV === 'production' && parsed.protocol !== 'https:') {
         return false;
       }
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      return true;
     } catch {
       return false;
     }

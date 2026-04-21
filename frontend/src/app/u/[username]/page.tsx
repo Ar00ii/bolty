@@ -291,16 +291,29 @@ export default function PublicProfilePage() {
                     >
                       {friendLoading ? (
                         <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
                         </svg>
-                      ) : friendStatus === 'friends'
-                          ? 'Friends'
-                          : friendStatus === 'pending_received'
-                            ? 'Accept request'
-                            : friendStatus === 'pending_sent'
-                              ? 'Pending'
-                              : 'Add friend'}
+                      ) : friendStatus === 'friends' ? (
+                        'Friends'
+                      ) : friendStatus === 'pending_received' ? (
+                        'Accept request'
+                      ) : friendStatus === 'pending_sent' ? (
+                        'Pending'
+                      ) : (
+                        'Add friend'
+                      )}
                     </button>
                   )}
                   {friendMsg && <span className="text-[11px] text-emerald-300">{friendMsg}</span>}

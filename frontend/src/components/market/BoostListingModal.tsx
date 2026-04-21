@@ -1,10 +1,12 @@
 'use client';
 
+import { BrowserProvider, Contract, parseEther } from 'ethers';
 import { Flame, Loader2, Rocket } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api/client';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface BoostTier {
   days: number;
@@ -13,6 +15,8 @@ interface BoostTier {
 
 interface BoostPricingResponse {
   currency: string;
+  platformWallet: string | null;
+  tokenContract: string | null;
   tiers: BoostTier[];
 }
 
@@ -50,12 +54,43 @@ export function BoostListingModal({
     setSubmitting(true);
     setError(null);
     try {
+      const tier = pricing?.tiers.find((t) => t.days === selectedDays);
+      if (!pricing || !tier) throw new Error('Pricing not loaded');
+      if (!pricing.platformWallet) {
+        throw new Error('Boosts are not configured on this deployment');
+      }
+      const mm = getMetaMaskProvider();
+      if (!mm) throw new Error('Connect MetaMask to pay for a boost');
+
+      const provider = new BrowserProvider(mm as unknown as import('ethers').Eip1193Provider);
+      const signer = await provider.getSigner();
+      const amountWei = parseEther(tier.price.toString());
+
+      let txHash: string;
+      if (pricing.tokenContract) {
+        // ERC-20 transfer(platformWallet, amountWei)
+        const erc20 = new Contract(
+          pricing.tokenContract,
+          ['function transfer(address,uint256) returns (bool)'],
+          signer,
+        );
+        const sent = await erc20.transfer(pricing.platformWallet, amountWei);
+        txHash = sent.hash;
+      } else {
+        // Plain ETH transfer
+        const sent = await signer.sendTransaction({
+          to: pricing.platformWallet,
+          value: amountWei,
+        });
+        txHash = sent.hash;
+      }
+
       const result = await api.post<{
         ok: boolean;
         boostedUntil: string;
         durationDays: number;
         amountTokens: number;
-      }>(`/market/${listingId}/boost`, { durationDays: selectedDays });
+      }>(`/market/${listingId}/boost`, { durationDays: selectedDays, txHash });
       onBoosted(result.boostedUntil);
       onClose();
     } catch (e: unknown) {
@@ -71,13 +106,7 @@ export function BoostListingModal({
   const selectedTier = pricing?.tiers.find((t) => t.days === selectedDays);
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={onClose}
-      title="Boost listing"
-      subtitle={listingTitle}
-      size="md"
-    >
+    <Modal isOpen={open} onClose={onClose} title="Boost listing" subtitle={listingTitle} size="md">
       <div className="space-y-5">
         <div
           className="rounded-lg p-3 flex items-start gap-3"
@@ -101,13 +130,15 @@ export function BoostListingModal({
         )}
 
         <div className="grid grid-cols-5 gap-1.5">
-          {(pricing?.tiers || [
-            { days: 1, price: 5 },
-            { days: 3, price: 12 },
-            { days: 7, price: 25 },
-            { days: 14, price: 45 },
-            { days: 30, price: 80 },
-          ]).map((tier) => {
+          {(
+            pricing?.tiers || [
+              { days: 1, price: 5 },
+              { days: 3, price: 12 },
+              { days: 7, price: 25 },
+              { days: 14, price: 45 },
+              { days: 30, price: 80 },
+            ]
+          ).map((tier) => {
             const active = tier.days === selectedDays;
             return (
               <button
@@ -132,9 +163,7 @@ export function BoostListingModal({
           })}
         </div>
 
-        {error && (
-          <div className="text-[12px] text-red-300 font-light">{error}</div>
-        )}
+        {error && <div className="text-[12px] text-red-300 font-light">{error}</div>}
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="text-[11.5px] text-zinc-500 font-light">

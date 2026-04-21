@@ -123,11 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
              ready. Fontshare's "General Sans" + "Clash Display" links were
              dropped — the few spots that used General Sans now fall back to
              Inter, which is visually close and already loaded. */}
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"

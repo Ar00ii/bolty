@@ -67,6 +67,16 @@ export class AgentSandboxService {
     fileMimeType: string,
     context: SandboxContext,
   ): Promise<SandboxResponse | null> {
+    // Hard gate: this spawn()-based sandbox is a stopgap, not a security
+    // boundary. Running arbitrary user-uploaded code on the API host in
+    // production is unacceptable — require explicit opt-in via
+    // AGENT_SANDBOX_ALLOW_UNSAFE=true (set only for local dev/CI).
+    const allowUnsafe = (process.env.AGENT_SANDBOX_ALLOW_UNSAFE || '').toLowerCase() === 'true';
+    if (process.env.NODE_ENV === 'production' && !allowUnsafe) {
+      this.logger.error('Refusing to run user agent script in production without isolated runtime');
+      return null;
+    }
+
     const runtime = this.detectRuntime(fileName, fileMimeType);
     if (!runtime) {
       this.logger.warn(`Unsupported runtime for file: ${fileName}`);
