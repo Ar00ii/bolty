@@ -259,10 +259,11 @@ export class ReposController {
     return this.reposService.checkPurchased(userId, repoId);
   }
 
-  @Public()
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 30, ttl: 3600000 } })
   @Post(':id/download')
-  trackDownload(@Param('id') repoId: string) {
-    return this.reposService.trackDownload(repoId);
+  trackDownload(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
+    return this.reposService.trackDownload(repoId, userId);
   }
 
   // ── Logo image upload (drag-and-drop, static images only) ────────────────

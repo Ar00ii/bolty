@@ -589,10 +589,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   // ── Download tracking ─────────────────────────────────────────────────────
 
-  async trackDownload(repositoryId: string) {
+  async trackDownload(repositoryId: string, userId: string) {
     const repo = await this.prisma.repository.findUnique({
       where: { id: repositoryId },
-      select: { cloneUrl: true, githubUrl: true },
+      select: { cloneUrl: true, githubUrl: true, isLocked: true },
     });
     if (!repo) throw new NotFoundException('Repository not found');
 
@@ -601,10 +601,28 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Invalid repository URL');
     }
 
-    await this.prisma.repository.update({
-      where: { id: repositoryId },
-      data: { downloadCount: { increment: 1 } },
-    });
+    // Locked repos: only paying buyers get the download URL
+    if (repo.isLocked) {
+      const purchase = await this.prisma.repoPurchase.findFirst({
+        where: { buyerId: userId, repositoryId, verified: true },
+        select: { id: true },
+      });
+      if (!purchase) {
+        throw new ForbiddenException('Purchase required to download this repository');
+      }
+    }
+
+    // Dedupe metric inflation: one download counted per user per 24h.
+    // Otherwise a single account can loop this endpoint to game rankings.
+    const dedupKey = `repo_dl:${repositoryId}:${userId}`;
+    const seen = await this.redis.get(dedupKey);
+    if (!seen) {
+      await this.redis.set(dedupKey, '1', 86_400);
+      await this.prisma.repository.update({
+        where: { id: repositoryId },
+        data: { downloadCount: { increment: 1 } },
+      });
+    }
 
     return { downloadUrl: repo.githubUrl + '/archive/refs/heads/main.zip' };
   }
