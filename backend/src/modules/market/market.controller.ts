@@ -249,7 +249,7 @@ export class MarketController {
   boostListing(
     @Param('id') id: string,
     @CurrentUser('id') userId: string,
-    @Body() body: { durationDays?: number; amountTokens?: number },
+    @Body() body: { durationDays?: number; amountTokens?: number; txHash?: string },
   ) {
     return this.marketService.boostListing(id, userId, body || {});
   }

@@ -1485,7 +1485,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   async boostListing(
     listingId: string,
     userId: string,
-    input: { durationDays?: number; amountTokens?: number },
+    input: { durationDays?: number; amountTokens?: number; txHash?: string },
   ) {
     const days = Math.min(30, Math.max(1, Math.floor(input.durationDays ?? 7)));
     // Fixed pricing tiers (in BOLTY tokens) — keep simple/predictable for now.
@@ -1502,6 +1502,57 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
     if (listing.sellerId !== userId) {
       throw new ForbiddenException('Only the seller can boost this listing');
+    }
+
+    // ── On-chain payment verification ─────────────────────────────────────
+    // Previously boosts were free: whoever called this endpoint just got a
+    // boost. Require a txHash and verify the token/ETH transfer to the
+    // platform wallet before crediting.
+    const txHash = (input.txHash || '').trim();
+    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+      throw new BadRequestException('A valid payment txHash is required to boost');
+    }
+    const dupBoost = await this.prisma.listingBoost.findUnique({ where: { txHash } });
+    if (dupBoost) throw new ForbiddenException('Transaction already used for a boost');
+
+    const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
+    if (!platformWallet) {
+      throw new BadRequestException('Platform wallet not configured — boosts disabled');
+    }
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const tokenContract = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const receipt = await provider.getTransactionReceipt(txHash);
+    if (!receipt || receipt.status !== 1) {
+      throw new BadRequestException('Payment transaction failed or not found');
+    }
+    // Boosts are priced in BOLTY tokens (18 decimals); the same scale
+    // applies whether we accept the token or raw ETH as a fallback.
+    const expectedWei = ethers.parseEther(price.toString());
+    if (tokenContract) {
+      const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+      const transferLog = receipt.logs.find(
+        (log) =>
+          log.address.toLowerCase() === tokenContract.toLowerCase() &&
+          log.topics[0] === TRANSFER_TOPIC &&
+          log.topics[2] &&
+          '0x' + log.topics[2].slice(26).toLowerCase() === platformWallet.toLowerCase(),
+      );
+      if (!transferLog) {
+        throw new BadRequestException('No valid BOLTY transfer to platform wallet found');
+      }
+      if (BigInt(transferLog.data) < expectedWei) {
+        throw new BadRequestException('Payment is below the required boost amount');
+      }
+    } else {
+      const tx = await provider.getTransaction(txHash);
+      if (!tx) throw new BadRequestException('Payment transaction not found');
+      if (tx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
+        throw new BadRequestException('Payment recipient does not match platform wallet');
+      }
+      if (BigInt(tx.value) < expectedWei) {
+        throw new BadRequestException('Payment is below the required boost amount');
+      }
     }
 
     // Extend any in-flight boost rather than overwrite — buyers stack durations.
@@ -1523,6 +1574,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           amountTokens: price,
           durationDays: days,
           expiresAt,
+          txHash,
         },
       }),
     ]);
@@ -1539,6 +1591,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   getBoostPricing() {
     return {
       currency: 'BOLTY',
+      platformWallet: this.config.get<string>('PLATFORM_WALLET', '') || null,
+      tokenContract: this.config.get<string>('BOLTY_TOKEN_CONTRACT', '') || null,
       tiers: [
         { days: 1, price: 5 },
         { days: 3, price: 12 },
