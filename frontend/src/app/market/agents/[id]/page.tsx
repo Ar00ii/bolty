@@ -34,6 +34,7 @@ import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
+import { useToast } from '@/lib/hooks/useToast';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -187,7 +188,8 @@ function FavoriteButton({ listingId }: { listingId: string }) {
 export default function AgentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const { addToast } = useToast();
 
   const [listing, setListing] = useState<MarketListing | null>(null);
   const [posts, setPosts] = useState<AgentPost[]>([]);
@@ -243,6 +245,23 @@ export default function AgentDetailPage() {
     if (!isAuthenticated) {
       router.push('/auth');
       return;
+    }
+    if (listing && user && listing.seller.id === user.id) {
+      addToast("That's your own listing — buyers are the ones who start negotiations.", 'info');
+      return;
+    }
+    if (listing && listing.status !== 'ACTIVE') {
+      addToast('This listing is not active. The seller may have paused it.', 'warning');
+      return;
+    }
+    // Agents without a live endpoint or uploaded file fall back to a Claude
+    // auto-negotiator on the backend, so we still let the chat open but warn
+    // the buyer up-front so they know it's the fallback flow.
+    if (listing && !listing.agentEndpoint && !listing.fileKey) {
+      addToast(
+        "Seller hasn't wired a live agent — using Bolty's auto-negotiator instead.",
+        'info',
+      );
     }
     router.push(`/market/agents?negotiate=${id}`);
   };

@@ -11,6 +11,7 @@ import {
   Clock,
   Download,
   GitBranch,
+  Handshake,
   Lock,
   MessageCircle,
   Package,
@@ -27,15 +28,36 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { api, API_URL } from '@/lib/api/client';
+import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
-
-const API = API_URL;
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
+type NegotiationStatus = 'ACTIVE' | 'AGREED' | 'REJECTED' | 'EXPIRED';
+type NegotiationMode = 'AI_AI' | 'HUMAN';
+
+interface NegotiationRow {
+  id: string;
+  status: NegotiationStatus;
+  mode: NegotiationMode;
+  agreedPrice: number | null;
+  turnCount: number;
+  createdAt: string;
+  updatedAt: string;
+  buyerId: string;
+  listing: {
+    id: string;
+    title: string;
+    price: number;
+    currency: string;
+    type: ListingType;
+    minPrice: number | null;
+  };
+  buyer: { id: string; username: string | null };
+  messages: Array<{ id: string; fromRole: string; content: string; createdAt: string }>;
+}
 
 interface Order {
   id: string;
@@ -184,13 +206,14 @@ function downloadOrdersCsv(orders: Order[], kind: 'buying' | 'selling') {
 export default function OrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [tab, setTab] = useState<'buying' | 'selling'>('buying');
+  const [tab, setTab] = useState<'buying' | 'selling' | 'negotiations'>('buying');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [search, setSearch] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
   const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
   const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
+  const [negotiations, setNegotiations] = useState<NegotiationRow[]>([]);
   const [stats, setStats] = useState<SellerStats | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -198,14 +221,16 @@ export default function OrdersPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const [buyOrders, sellOrders, sellerStats] = await Promise.all([
+      const [buyOrders, sellOrders, sellerStats, negs] = await Promise.all([
         api.get<Order[]>('/orders').catch(() => null),
         api.get<Order[]>('/orders/selling').catch(() => null),
         api.get<SellerStats>('/orders/seller/stats').catch(() => null),
+        api.get<NegotiationRow[]>('/market/negotiations').catch(() => null),
       ]);
       if (buyOrders) setBuyerOrders(buyOrders);
       if (sellOrders) setSellerOrders(sellOrders);
       if (sellerStats) setStats(sellerStats);
+      if (negs) setNegotiations(negs);
     } finally {
       setLoading(false);
     }
@@ -224,24 +249,37 @@ export default function OrdersPage() {
     );
   }
 
-  const baseOrders = tab === 'buying' ? buyerOrders : sellerOrders;
+  const baseOrders = tab === 'selling' ? sellerOrders : buyerOrders;
   const q = search.trim().toLowerCase();
-  const searched = q
-    ? baseOrders.filter((o) => {
-        const counterparty = tab === 'buying' ? o.seller.username : o.buyer.username;
-        return (
-          o.listing.title.toLowerCase().includes(q) ||
-          (counterparty || '').toLowerCase().includes(q) ||
-          o.id.toLowerCase().includes(q)
-        );
-      })
-    : baseOrders;
+  const searched =
+    tab === 'negotiations'
+      ? []
+      : q
+        ? baseOrders.filter((o) => {
+            const counterparty = tab === 'buying' ? o.seller.username : o.buyer.username;
+            return (
+              o.listing.title.toLowerCase().includes(q) ||
+              (counterparty || '').toLowerCase().includes(q) ||
+              o.id.toLowerCase().includes(q)
+            );
+          })
+        : baseOrders;
   const orders =
     statusFilter === 'ALL' ? searched : searched.filter((o) => o.status === statusFilter);
   const statusCounts = searched.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] || 0) + 1;
     return acc;
   }, {});
+
+  const filteredNegotiations =
+    tab === 'negotiations' && q
+      ? negotiations.filter(
+          (n) =>
+            n.listing.title.toLowerCase().includes(q) ||
+            (n.buyer.username || '').toLowerCase().includes(q) ||
+            n.id.toLowerCase().includes(q),
+        )
+      : negotiations;
 
   // Buyer-side quick metrics
   const buyingMetrics = useMemo(() => {
@@ -286,9 +324,11 @@ export default function OrdersPage() {
                 Track every purchase, sale and escrow release in one feed.
               </p>
             </div>
-            {baseOrders.length > 0 && (
+            {tab !== 'negotiations' && baseOrders.length > 0 && (
               <button
-                onClick={() => downloadOrdersCsv(baseOrders, tab)}
+                onClick={() =>
+                  downloadOrdersCsv(baseOrders, tab === 'selling' ? 'selling' : 'buying')
+                }
                 className="inline-flex items-center gap-1.5 text-[12px] text-zinc-300 hover:text-white h-9 px-3 rounded-lg transition-colors"
                 style={{
                   background:
@@ -307,7 +347,7 @@ export default function OrdersPage() {
       </header>
 
       {/* Stats strip */}
-      <section className="px-6 md:px-10 mb-4">
+      <section className={`px-6 md:px-10 mb-4 ${tab === 'negotiations' ? 'hidden' : ''}`}>
         <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
           {tab === 'buying' ? (
             <>
@@ -390,6 +430,12 @@ export default function OrdersPage() {
                 count: sellerOrders.length,
                 icon: TrendingUp,
               },
+              {
+                key: 'negotiations' as const,
+                label: 'Negotiations',
+                count: negotiations.length,
+                icon: Handshake,
+              },
             ].map(({ key, label, count, icon: Icon }) => {
               const active = tab === key;
               return (
@@ -422,7 +468,9 @@ export default function OrdersPage() {
           </div>
 
           {/* Search */}
-          {baseOrders.length > 0 && (
+          {(tab === 'negotiations'
+            ? negotiations.length > 0
+            : baseOrders.length > 0) && (
             <div
               className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
               style={{
@@ -455,7 +503,11 @@ export default function OrdersPage() {
           )}
 
           {/* Status chips */}
-          <div className="flex items-center gap-1 ml-auto flex-wrap">
+          <div
+            className={`flex items-center gap-1 ml-auto flex-wrap ${
+              tab === 'negotiations' ? 'hidden' : ''
+            }`}
+          >
             {STATUS_FILTER_ORDER.map((s) => {
               const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
               const active = statusFilter === s;
@@ -491,12 +543,23 @@ export default function OrdersPage() {
       {/* Table */}
       <section className="px-6 md:px-10">
         <div className="mx-auto max-w-[1400px]">
-          <OrdersTable
-            orders={orders}
-            tab={tab}
-            loading={loading}
-            onRowClick={(id) => router.push(`/orders/${id}`)}
-          />
+          {tab === 'negotiations' ? (
+            <NegotiationsTable
+              negotiations={filteredNegotiations}
+              loading={loading}
+              userId={user.id}
+              onRowClick={(n) =>
+                router.push(`/market/agents?negotiate=${n.listing.id}`)
+              }
+            />
+          ) : (
+            <OrdersTable
+              orders={orders}
+              tab={tab === 'selling' ? 'selling' : 'buying'}
+              loading={loading}
+              onRowClick={(id) => router.push(`/orders/${id}`)}
+            />
+          )}
         </div>
       </section>
     </div>
@@ -825,6 +888,229 @@ function OrderRow({
         {/* Age */}
         <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums">
           {timeAgo(order.createdAt)}
+        </div>
+
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
+          strokeWidth={1.75}
+        />
+      </div>
+    </li>
+  );
+}
+
+const NEG_STATUS_CONFIG: Record<
+  NegotiationStatus,
+  { label: string; color: string }
+> = {
+  ACTIVE: { label: 'Active', color: '#06B6D4' },
+  AGREED: { label: 'Deal', color: '#22c55e' },
+  REJECTED: { label: 'Rejected', color: '#ef4444' },
+  EXPIRED: { label: 'Expired', color: '#94a3b8' },
+};
+
+function NegotiationsTable({
+  negotiations,
+  loading,
+  userId,
+  onRowClick,
+}: {
+  negotiations: NegotiationRow[];
+  loading: boolean;
+  userId: string;
+  onRowClick: (n: NegotiationRow) => void;
+}) {
+  if (loading && negotiations.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+        }}
+      >
+        Loading negotiations…
+      </div>
+    );
+  }
+
+  if (!loading && negotiations.length === 0) {
+    return (
+      <div
+        className="relative rounded-xl px-6 py-16 text-center overflow-hidden"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+          }}
+        />
+        <div
+          className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+          style={{
+            background:
+              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            border: '1px solid rgba(131,110,249,0.35)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+          }}
+        >
+          <Handshake className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
+        </div>
+        <p className="relative text-[14px] text-white font-normal">No negotiations yet</p>
+        <p className="relative text-[12px] text-zinc-500 mt-1.5 mb-5 max-w-sm mx-auto font-light">
+          Hit Negotiate on any agent listing and your AI will start haggling with the seller&apos;s
+          agent. Past chats land here.
+        </p>
+        <Link
+          href="/market/agents"
+          className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+            boxShadow:
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+          }}
+        >
+          <Bot className="w-3.5 h-3.5" strokeWidth={1.75} /> Browse agents
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="rounded-xl overflow-hidden"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <ul>
+        {negotiations.map((n, i) => (
+          <NegoRow
+            key={n.id}
+            index={i}
+            neg={n}
+            userId={userId}
+            onClick={() => onRowClick(n)}
+          />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function NegoRow({
+  neg,
+  index,
+  userId,
+  onClick,
+}: {
+  neg: NegotiationRow;
+  index: number;
+  userId: string;
+  onClick: () => void;
+}) {
+  const cfg = NEG_STATUS_CONFIG[neg.status];
+  const TypeIcon = TYPE_ICON[neg.listing.type] ?? Package;
+  const typeAccent = TYPE_ACCENT[neg.listing.type];
+  const isBuyer = neg.buyerId === userId;
+  const lastMsg = neg.messages[0];
+  const asking = `${neg.listing.price} ${neg.listing.currency}`;
+  const agreed =
+    neg.agreedPrice !== null && neg.agreedPrice !== undefined
+      ? `${neg.agreedPrice} ${neg.listing.currency}`
+      : null;
+
+  return (
+    <li>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_110px_110px_120px_70px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] w-full text-left transition-all hover:bg-white/[0.02] cursor-pointer"
+      >
+        <span
+          aria-hidden
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: cfg.color, opacity: 0.6 }}
+        />
+
+        <span className="text-[11px] text-zinc-600 font-mono text-center tabular-nums">
+          {index + 1}
+        </span>
+
+        <div className="min-w-0 flex items-center gap-2.5">
+          <div
+            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
+            style={{
+              background: `${typeAccent}18`,
+              boxShadow: `inset 0 0 0 1px ${typeAccent}40`,
+            }}
+          >
+            <TypeIcon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: typeAccent }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13px] font-normal text-white truncate">
+              {neg.listing.title}
+            </div>
+            <div className="text-[10.5px] text-zinc-500 font-light truncate">
+              <span className="text-zinc-600">{isBuyer ? 'Buying' : 'Selling'}</span>
+              <span className="text-zinc-700 mx-1">·</span>
+              <span className="font-mono text-zinc-600">{neg.mode}</span>
+              {lastMsg && (
+                <>
+                  <span className="text-zinc-700 mx-1">·</span>
+                  <span className="truncate">{lastMsg.content.slice(0, 80)}</span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div className="min-w-0">
+          <span
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium"
+            style={{
+              color: cfg.color,
+              background: `${cfg.color}14`,
+              boxShadow: `inset 0 0 0 1px ${cfg.color}44`,
+            }}
+          >
+            {cfg.label}
+          </span>
+        </div>
+
+        {/* Turns */}
+        <div className="text-[11px] text-zinc-400 font-mono tabular-nums">
+          {neg.turnCount} turn{neg.turnCount === 1 ? '' : 's'}
+        </div>
+
+        {/* Price */}
+        <div className="text-right font-mono tabular-nums text-[12px]">
+          {agreed ? (
+            <span className="text-emerald-400">{agreed}</span>
+          ) : (
+            <span className="text-zinc-500">ask {asking}</span>
+          )}
+        </div>
+
+        {/* Age */}
+        <div className="text-right text-[11px] text-zinc-500 font-mono tabular-nums">
+          {timeAgo(neg.updatedAt)}
         </div>
 
         <ArrowUpRight
