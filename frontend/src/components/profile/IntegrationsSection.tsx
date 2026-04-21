@@ -6,8 +6,10 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 
 interface Integration {
+  // Wallet connections live in the dedicated Wallet tab and are deliberately
+  // omitted from this section.
   id: string;
-  category: 'wallet' | 'social' | 'service' | 'security';
+  category: 'social' | 'service' | 'security';
   name: string;
   description: string;
   icon?: React.ReactNode;
@@ -33,13 +35,7 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
     return <span className="text-sm font-medium tracking-wider">API</span>;
   }
 
-  if (id === 'ledger') {
-    return <span className="text-sm font-medium tracking-wider">LDG</span>;
-  }
-
   const logoMap: Record<string, string> = {
-    metamask: '/integrations/metamask.png',
-    walletconnect: '/integrations/walletconnect.png',
     twitter: '/integrations/X.png',
     discord: '/integrations/discord.png',
     'github-social': '/integrations/github.png',
@@ -57,7 +53,6 @@ const IntegrationLogo: React.FC<{ id: string }> = ({ id }) => {
 
 const getCategoryLabel = (category: string) => {
   const labels = {
-    wallet: 'Web3 Wallets',
     social: 'Social Networks',
     security: 'Security',
     service: 'Services',
@@ -67,7 +62,6 @@ const getCategoryLabel = (category: string) => {
 
 const getCategoryColor = (category: string) => {
   const colors: Record<string, string> = {
-    wallet: '245,158,11',
     social: '6,182,212',
     security: '239,68,68',
     service: '131,110,249',
@@ -160,7 +154,7 @@ export const IntegrationsSection: React.FC<IntegrationsSectionProps> = ({
     }
   };
 
-  const categories = ['wallet', 'social', 'security', 'service'] as const;
+  const categories = ['social', 'security', 'service'] as const;
   const connectedCount = integrations.filter((i) => i.connected).length;
 
   useEffect(() => {

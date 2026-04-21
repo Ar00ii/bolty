@@ -2283,31 +2283,10 @@ export default function ProfilePage() {
           {tab === 'integrations' && (
             <IntegrationsSection
               integrations={(() => {
-                // Build default list with user's real state
+                // Wallet connections live in the dedicated Wallet tab — we
+                // don't re-surface them here to avoid a duplicate surface
+                // that opened a web page instead of a real extension.
                 const defaults = [
-                  {
-                    id: 'metamask',
-                    category: 'wallet',
-                    name: 'MetaMask',
-                    description: 'Connect your MetaMask wallet for transactions',
-                    connected: !!walletAddress,
-                    connectedAs: walletAddress?.slice(0, 10) + '...' || undefined,
-                    verified: true,
-                  },
-                  {
-                    id: 'walletconnect',
-                    category: 'wallet',
-                    name: 'WalletConnect',
-                    description: 'Connect via WalletConnect protocol',
-                    connected: false,
-                  },
-                  {
-                    id: 'ledger',
-                    category: 'wallet',
-                    name: 'Ledger',
-                    description: 'Hardware wallet integration',
-                    connected: false,
-                  },
                   {
                     id: 'twitter',
                     category: 'social',
@@ -2359,13 +2338,13 @@ export default function ProfilePage() {
                 const seen = new Set<string>();
                 const merged: any[] = [];
 
-                // First add from API integrations
+                // First add from API integrations, skipping any wallet entries
+                // that older deployments may still return from the backend.
+                const WALLET_IDS = new Set(['metamask', 'walletconnect', 'ledger', 'coinbase', 'rainbow', 'uniswap']);
                 if (integrations.length > 0) {
                   integrations.forEach((int: any) => {
+                    if (WALLET_IDS.has(int.id) || int.category === 'wallet') return;
                     const integrationConfig: Record<string, any> = {
-                      metamask: { category: 'wallet' },
-                      walletconnect: { category: 'wallet' },
-                      ledger: { category: 'wallet' },
                       twitter: { category: 'social' },
                       discord: { category: 'social' },
                       'github-social': { category: 'social' },
@@ -2409,10 +2388,6 @@ export default function ProfilePage() {
                 return merged;
               })()}
               onConnect={async (id: string) => {
-                if (id === 'metamask') {
-                  await handleConnectWallet();
-                  return;
-                }
                 if (id === 'github-social') {
                   handleLinkGitHub();
                   return;
@@ -2426,10 +2401,6 @@ export default function ProfilePage() {
                 }
               }}
               onDisconnect={async (id: string) => {
-                if (id === 'metamask') {
-                  await handleDisconnectWallet();
-                  return;
-                }
                 if (id === 'github-social') {
                   await handleUnlinkGitHub();
                   return;
