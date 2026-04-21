@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
@@ -112,6 +112,7 @@ type ContactCategory = 'all' | 'friends' | 'agents' | 'random' | 'pending';
 export default function DmPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [activePeer, setActivePeer] = useState<Contact['user'] | null>(null);
   const [messages, setMessages] = useState<DMMessage[]>([]);
@@ -234,6 +235,54 @@ export default function DmPage() {
     );
     setSidebarOpen(false);
   }, []);
+
+  // Auto-open a conversation when ?peer=<userId or username> is present.
+  const peerParamHandledRef = useRef(false);
+  useEffect(() => {
+    if (!connected || peerParamHandledRef.current) return;
+    const peerParam = searchParams?.get('peer');
+    if (!peerParam) return;
+    peerParamHandledRef.current = true;
+
+    const usernameParam = searchParams?.get('username');
+    const avatarParam = searchParams?.get('avatar');
+    const isUuid = /^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/i.test(peerParam);
+
+    const open = async () => {
+      let peerId = peerParam;
+      let peerUsername: string | null = usernameParam ?? peerParam;
+      let peerAvatar: string | null = avatarParam ?? null;
+
+      if (!isUuid) {
+        try {
+          const resp = await fetch(`${API_URL}/users/${encodeURIComponent(peerParam)}`, {
+            credentials: 'include',
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            peerId = data.id;
+            peerUsername = data.username ?? peerUsername;
+            peerAvatar = data.avatarUrl ?? peerAvatar;
+          }
+        } catch {
+          // fall through with raw values
+        }
+      }
+
+      const peer: Contact['user'] = {
+        id: peerId,
+        username: peerUsername,
+        avatarUrl: peerAvatar,
+      };
+      activePeerRef.current = peer;
+      setActivePeer(peer);
+      setMessages([]);
+      socketRef.current?.emit('openConversation', { peerId });
+      setSidebarOpen(false);
+    };
+
+    void open();
+  }, [connected, searchParams]);
 
   const sendMessage = useCallback(() => {
     const content = input.trim();

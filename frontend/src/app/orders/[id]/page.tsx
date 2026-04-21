@@ -11,6 +11,7 @@ import {
   Copy,
   Check,
   FileText,
+  MessageCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -416,7 +417,7 @@ export default function OrderDetailPage() {
             }}
           >
             <Avatar user={peer} size={36} />
-            <div>
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>
                 @{peer?.username || 'Unknown'}
               </div>
@@ -424,6 +425,29 @@ export default function OrderDetailPage() {
                 {isSeller ? 'Buyer' : 'Seller'}
               </div>
             </div>
+            {peer?.id && (
+              <Link
+                href={`/dm?peer=${peer.id}${peer.username ? `&username=${encodeURIComponent(peer.username)}` : ''}`}
+                title={`Message @${peer.username || 'user'} privately`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '0.4rem 0.65rem',
+                  borderRadius: 8,
+                  fontSize: '0.72rem',
+                  fontWeight: 500,
+                  color: '#b4a7ff',
+                  background: 'rgba(131, 110, 249, 0.12)',
+                  border: '1px solid rgba(131, 110, 249, 0.25)',
+                  textDecoration: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <MessageCircle size={12} strokeWidth={2} />
+                Direct message
+              </Link>
+            )}
           </div>
 
           {/* Messages */}

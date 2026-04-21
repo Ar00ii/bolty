@@ -12,6 +12,7 @@ import {
   Download,
   GitBranch,
   Lock,
+  MessageCircle,
   Package,
   Search,
   ShoppingBag,
@@ -706,10 +707,17 @@ function OrderRow({
 
   return (
     <li>
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onClick}
-        className="group relative grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] w-full text-left transition-all hover:bg-white/[0.02]"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_110px_90px_110px_140px_70px_28px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] w-full text-left transition-all hover:bg-white/[0.02] cursor-pointer"
       >
         <span
           aria-hidden
@@ -801,6 +809,17 @@ function OrderRow({
             )}
           </div>
           <span className="truncate">@{peer?.username || 'anon'}</span>
+          {peer?.id && (
+            <Link
+              href={`/dm?peer=${peer.id}${peer.username ? `&username=${encodeURIComponent(peer.username)}` : ''}`}
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Message @${peer.username || 'user'}`}
+              title={`Message @${peer.username || 'user'}`}
+              className="ml-auto w-5 h-5 rounded-md flex items-center justify-center text-zinc-500 hover:text-[#b4a7ff] hover:bg-white/10 transition flex-shrink-0"
+            >
+              <MessageCircle className="w-3 h-3" strokeWidth={1.75} />
+            </Link>
+          )}
         </div>
 
         {/* Age */}
@@ -812,7 +831,7 @@ function OrderRow({
           className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition"
           strokeWidth={1.75}
         />
-      </button>
+      </div>
     </li>
   );
 }
