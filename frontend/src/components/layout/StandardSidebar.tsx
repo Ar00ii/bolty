@@ -51,7 +51,7 @@ interface NavSection {
   items: NavItem[];
 }
 
-const NAV: NavSection[] = [
+export const NAV: NavSection[] = [
   {
     section: 'Discover',
     items: [
@@ -94,7 +94,11 @@ const NAV: NavSection[] = [
   },
 ];
 
-function isItemActive(pathname: string, searchParams: URLSearchParams, href: string): boolean {
+export function isItemActive(
+  pathname: string,
+  searchParams: URLSearchParams,
+  href: string,
+): boolean {
   const [cleanHref, query] = href.split('?');
   if (cleanHref === '/market') return pathname === '/market';
   if (cleanHref === '/profile') {
