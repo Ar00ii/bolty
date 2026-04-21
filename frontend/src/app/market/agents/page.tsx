@@ -38,7 +38,7 @@ import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
-import { api, ApiError } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useStepUp } from '@/lib/auth/useStepUp';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
@@ -1214,19 +1214,38 @@ function NegotiationModal({
               >
                 <p className="text-bolty-300 font-mono text-sm font-light mb-1">✓ PAYMENT SENT</p>
                 <p className="text-zinc-500 text-xs font-mono mb-3">
-                  Check your DMs to coordinate with the seller.
+                  {listing.fileKey
+                    ? 'Your file is ready — download below or open messages with the seller.'
+                    : 'Check your DMs to coordinate with the seller.'}
                 </p>
-                <Link
-                  href="/dm"
-                  className="inline-block text-xs font-mono font-light py-2 px-4 rounded-xl transition-all"
-                  style={{
-                    background: 'rgba(131,110,249,0.2)',
-                    border: '1px solid rgba(131,110,249,0.4)',
-                    color: '#c4b5fd',
-                  }}
-                >
-                  open messages →
-                </Link>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
+                  {listing.fileKey && (
+                    <a
+                      href={`${API_URL}/market/files/${listing.fileKey}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-mono font-light py-2 px-4 rounded-xl transition-all hover:opacity-90"
+                      style={{
+                        background: 'linear-gradient(135deg,#836EF9,#6b4fe0)',
+                        border: '1px solid rgba(131,110,249,0.5)',
+                        color: 'white',
+                      }}
+                    >
+                      ⬇ download {listing.fileName || 'file'}
+                    </a>
+                  )}
+                  <Link
+                    href="/dm"
+                    className="inline-block text-xs font-mono font-light py-2 px-4 rounded-xl transition-all"
+                    style={{
+                      background: 'rgba(131,110,249,0.2)',
+                      border: '1px solid rgba(131,110,249,0.4)',
+                      color: '#c4b5fd',
+                    }}
+                  >
+                    open messages →
+                  </Link>
+                </div>
               </div>
             </div>
           )}

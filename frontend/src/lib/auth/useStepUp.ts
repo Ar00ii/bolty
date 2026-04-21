@@ -45,10 +45,17 @@ export function useStepUp<T = unknown>() {
         }
         throw err;
       }
-      if (
+      // Accept both the explicit `code` field and older/legacy response shapes
+      // where only the message text reaches the client — some proxies strip
+      // nested objects and we don't want the modal to silently stay closed.
+      const isStepUp =
         err instanceof ApiError &&
-        (err.code === 'STEP_UP_REQUIRED' || err.code === 'STEP_UP_INVALID')
-      ) {
+        (err.code === 'STEP_UP_REQUIRED' ||
+          err.code === 'STEP_UP_INVALID' ||
+          (err.status === 400 &&
+            typeof err.message === 'string' &&
+            /authenticator code/i.test(err.message)));
+      if (isStepUp && err instanceof ApiError) {
         return new Promise<T>((resolve, reject) => {
           setPending({
             source: 'totp',
@@ -61,7 +68,13 @@ export function useStepUp<T = unknown>() {
                   setPending(null);
                 })
                 .catch((retryErr) => {
-                  if (retryErr instanceof ApiError && retryErr.code === 'STEP_UP_INVALID') {
+                  const retryIsInvalid =
+                    retryErr instanceof ApiError &&
+                    (retryErr.code === 'STEP_UP_INVALID' ||
+                      (retryErr.status === 400 &&
+                        typeof retryErr.message === 'string' &&
+                        /invalid authenticator|authenticator code/i.test(retryErr.message)));
+                  if (retryIsInvalid && retryErr instanceof ApiError) {
                     // Keep modal open with new error message
                     setPending((cur) => (cur ? { ...cur, message: retryErr.message } : cur));
                     return;

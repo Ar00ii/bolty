@@ -52,6 +52,7 @@ interface LibraryItem {
     fileMimeType: string | null;
     status: string;
     seller: { id: string; username: string | null; avatarUrl: string | null };
+    repositoryId?: string;
   } | null;
 }
 
@@ -973,6 +974,31 @@ function LibraryRow({ item, index }: { item: LibraryItem; index: number }) {
               <Download className="w-3 h-3" strokeWidth={1.75} />
               Download
             </a>
+          )}
+          {l.type === 'REPO' && l.repositoryId && (
+            <button
+              onClick={async () => {
+                try {
+                  const { downloadUrl } = await api.post<{ downloadUrl: string }>(
+                    `/repos/${l.repositoryId}/download`,
+                    {},
+                  );
+                  window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+                } catch {
+                  if (l.agentUrl) window.open(l.agentUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10.5px] font-medium text-white transition hover:brightness-110 truncate"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+              }}
+              title="Download repository"
+            >
+              <Download className="w-3 h-3" strokeWidth={1.75} />
+              Download
+            </button>
           )}
           {l.agentEndpoint && (
             <Link

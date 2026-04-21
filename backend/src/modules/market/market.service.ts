@@ -884,30 +884,50 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   }
 
   async getMyLibrary(buyerId: string) {
-    const purchases = await this.prisma.marketPurchase.findMany({
-      where: { buyerId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        listing: {
-          select: {
-            id: true,
-            title: true,
-            type: true,
-            price: true,
-            currency: true,
-            tags: true,
-            agentUrl: true,
-            agentEndpoint: true,
-            fileKey: true,
-            fileName: true,
-            fileSize: true,
-            fileMimeType: true,
-            status: true,
-            seller: { select: { id: true, username: true, avatarUrl: true } },
+    const [purchases, repoPurchases] = await Promise.all([
+      this.prisma.marketPurchase.findMany({
+        where: { buyerId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          listing: {
+            select: {
+              id: true,
+              title: true,
+              type: true,
+              price: true,
+              currency: true,
+              tags: true,
+              agentUrl: true,
+              agentEndpoint: true,
+              fileKey: true,
+              fileName: true,
+              fileSize: true,
+              fileMimeType: true,
+              status: true,
+              seller: { select: { id: true, username: true, avatarUrl: true } },
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { buyerId },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          repository: {
+            select: {
+              id: true,
+              name: true,
+              fullName: true,
+              description: true,
+              topics: true,
+              lockedPriceUsd: true,
+              githubUrl: true,
+              user: { select: { id: true, username: true, avatarUrl: true } },
+            },
+          },
+        },
+      }),
+    ]);
     const listingIds = purchases.map((p) => p.listing?.id).filter((id): id is string => !!id);
     const myReviews =
       listingIds.length > 0
@@ -918,7 +938,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         : [];
     const reviewMap = new Map(myReviews.map((r) => [r.listingId, r.rating]));
 
-    return purchases.map((p) => ({
+    const marketItems = purchases.map((p) => ({
       orderId: p.id,
       purchasedAt: p.createdAt,
       status: p.status,
@@ -926,6 +946,42 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       listing: p.listing,
       myRating: p.listing ? (reviewMap.get(p.listing.id) ?? null) : null,
     }));
+
+    // Repo purchases are stored in a separate table but belong in the buyer's
+    // library so they surface alongside agent/bot/script purchases.
+    const repoItems = repoPurchases
+      .filter((rp) => rp.repository)
+      .map((rp) => {
+        const r = rp.repository!;
+        return {
+          orderId: rp.id,
+          purchasedAt: rp.createdAt,
+          status: 'COMPLETED',
+          escrowStatus: 'NONE',
+          myRating: null as number | null,
+          listing: {
+            id: r.id,
+            title: r.name,
+            type: 'REPO' as const,
+            price: r.lockedPriceUsd ?? 0,
+            currency: 'USD',
+            tags: r.topics || [],
+            agentUrl: r.githubUrl,
+            agentEndpoint: null,
+            fileKey: null,
+            fileName: null,
+            fileSize: null,
+            fileMimeType: null,
+            status: 'ACTIVE',
+            seller: r.user,
+            repositoryId: r.id,
+          },
+        };
+      });
+
+    return [...marketItems, ...repoItems].sort(
+      (a, b) => new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime(),
+    );
   }
 
   // ── Reviews ────────────────────────────────────────────────────────────────
