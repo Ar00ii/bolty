@@ -32,14 +32,15 @@ const REPO_PURCHASE_INCLUDE = {
 } as const;
 
 // Shape repo purchase rows so the /orders feed can render them with the
-// same type as market purchases. Repos are delivered on purchase (the
-// download URL is returned synchronously), so they always surface as
-// COMPLETED with no escrow step.
+// same type as market purchases. Verified repos surface as COMPLETED;
+// unverified rows surface as PENDING_DELIVERY so the buyer sees their
+// payment was captured even if on-chain verification timed out.
 function mapRepoPurchase(rp: {
   id: string;
   createdAt: Date;
   txHash: string;
   amountWei: string;
+  verified: boolean;
   buyer: { id: string; username: string | null; avatarUrl: string | null };
   repository: {
     id: string;
@@ -51,11 +52,12 @@ function mapRepoPurchase(rp: {
   return {
     id: rp.id,
     createdAt: rp.createdAt,
-    status: 'COMPLETED' as const,
+    status: (rp.verified ? 'COMPLETED' : 'PENDING_DELIVERY') as 'COMPLETED' | 'PENDING_DELIVERY',
     escrowStatus: 'NONE' as const,
     escrowContract: null as string | null,
     amountWei: rp.amountWei,
     txHash: rp.txHash,
+    verified: rp.verified,
     listing: {
       id: rp.repository.id,
       title: rp.repository.name,
@@ -87,8 +89,11 @@ export class OrdersService {
         take: 100,
         include: ORDER_INCLUDE,
       }),
+      // Include unverified repo purchases so the buyer can see their
+      // payment was captured even when on-chain verification is still
+      // pending (or failed and needs retry).
       this.prisma.repoPurchase.findMany({
-        where: { buyerId: userId, verified: true },
+        where: { buyerId: userId },
         orderBy: { createdAt: 'desc' },
         take: 100,
         include: REPO_PURCHASE_INCLUDE,

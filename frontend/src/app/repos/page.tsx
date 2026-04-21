@@ -1392,7 +1392,7 @@ export default function ReposPage() {
                         <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
                       </Link>
                     )}
-                    {repo.isLocked ? (
+                    {repo.isLocked && repo.user.username !== user?.username ? (
                       <button
                         onClick={() => payAndUnlock(repo)}
                         className="text-xs py-1.5 px-3 font-mono font-light text-white rounded-lg transition-all hover:opacity-90"

@@ -30,5 +30,6 @@ import { NegotiationsGateway } from './negotiations.gateway';
     AgentScanService,
     ApiKeysService,
   ],
+  exports: [MarketGateway],
 })
 export class MarketModule {}
