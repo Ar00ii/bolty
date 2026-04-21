@@ -521,6 +521,8 @@ export default function ProfilePage() {
   // Notifications
   const [notifErrors, setNotifErrors] = useState(true);
   const [notifReports, setNotifReports] = useState(true);
+  const [notifMonthly, setNotifMonthly] = useState(false);
+  const [notifDeployments, setNotifDeployments] = useState(true);
 
   // Usage stats
   const [usageStats, setUsageStats] = useState<any>({
@@ -576,8 +578,10 @@ export default function ProfilePage() {
     api
       .get<any>('/users/preferences/notifications')
       .then((prefs) => {
-        setNotifErrors(prefs.emailOnErrors || true);
-        setNotifReports(prefs.emailWeeklyReport || true);
+        setNotifErrors(prefs.emailOnErrors ?? true);
+        setNotifReports(prefs.emailWeeklyReport ?? true);
+        setNotifMonthly(prefs.emailMonthlyReport ?? false);
+        setNotifDeployments(prefs.emailDeploymentAlerts ?? true);
       })
       .catch(() => {});
   }, [user, isLoading, router]);
@@ -2429,13 +2433,21 @@ export default function ProfilePage() {
               settings={{
                 emailOnErrors: notifErrors,
                 weeklyReport: notifReports,
-                monthlyReport: false,
-                deploymentAlerts: true,
+                monthlyReport: notifMonthly,
+                deploymentAlerts: notifDeployments,
               }}
               email={userEmail || ''}
               onUpdate={async (settings) => {
+                await api.patch('/users/preferences/notifications', {
+                  emailOnErrors: settings.emailOnErrors,
+                  emailWeeklyReport: settings.weeklyReport,
+                  emailMonthlyReport: settings.monthlyReport,
+                  emailDeploymentAlerts: settings.deploymentAlerts,
+                });
                 setNotifErrors(settings.emailOnErrors);
                 setNotifReports(settings.weeklyReport);
+                setNotifMonthly(settings.monthlyReport);
+                setNotifDeployments(settings.deploymentAlerts);
               }}
             />
           )}
