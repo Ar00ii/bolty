@@ -101,7 +101,7 @@ export function PowerNavbar() {
   const userRank = user ? getReputationRank(user.reputationPoints ?? 0) : null;
 
   return (
-    <div className="sticky top-0 z-30">
+    <div className="sticky top-0 z-50">
       <header
         className="flex items-center gap-3 px-[18px]"
         style={{
