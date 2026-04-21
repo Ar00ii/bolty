@@ -71,12 +71,9 @@ export class AgentSandboxService {
     // boundary. Running arbitrary user-uploaded code on the API host in
     // production is unacceptable — require explicit opt-in via
     // AGENT_SANDBOX_ALLOW_UNSAFE=true (set only for local dev/CI).
-    const allowUnsafe =
-      (process.env.AGENT_SANDBOX_ALLOW_UNSAFE || '').toLowerCase() === 'true';
+    const allowUnsafe = (process.env.AGENT_SANDBOX_ALLOW_UNSAFE || '').toLowerCase() === 'true';
     if (process.env.NODE_ENV === 'production' && !allowUnsafe) {
-      this.logger.error(
-        'Refusing to run user agent script in production without isolated runtime',
-      );
+      this.logger.error('Refusing to run user agent script in production without isolated runtime');
       return null;
     }
 

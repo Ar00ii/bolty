@@ -48,12 +48,7 @@ const LOGO_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'logos');
 // Only allow static raster images. SVG is deliberately excluded — an SVG
 // served from the same origin can execute inline <script> and steal
 // session cookies via stored XSS.
-const ALLOWED_IMAGE_MIMETYPES = new Set([
-  'image/png',
-  'image/jpeg',
-  'image/jpg',
-  'image/webp',
-]);
+const ALLOWED_IMAGE_MIMETYPES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp']);
 
 class PublishRepoDto {
   @IsNumber()
