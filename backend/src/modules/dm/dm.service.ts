@@ -2,12 +2,16 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText } from '../../common/sanitize/sanitize.util';
+import { NotificationsService } from '../notifications/notifications.service';
 
 const MAX_DM_LENGTH = 2000;
 
 @Injectable()
 export class DmService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async sendMessage(senderId: string, receiverId: string, content: string) {
     if (!content || typeof content !== 'string') {
@@ -32,15 +36,16 @@ export class DmService {
       }),
       this.prisma.user.findUnique({
         where: { id: senderId },
-        select: { isBanned: true },
+        select: { id: true, isBanned: true, username: true, displayName: true },
       }),
     ]);
     if (!receiver) throw new ForbiddenException('User not found');
     if (!sender || sender.isBanned) throw new ForbiddenException('Account restricted');
 
-    return this.prisma.directMessage.create({
+    const safeContent = sanitizeText(trimmed);
+    const message = await this.prisma.directMessage.create({
       data: {
-        content: sanitizeText(trimmed),
+        content: safeContent,
         senderId,
         receiverId,
       },
@@ -48,6 +53,23 @@ export class DmService {
         sender: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
+
+    // Fire-and-forget notification — never let a notification failure block
+    // the DM round-trip the user is waiting for.
+    this.notifications
+      .create({
+        userId: receiverId,
+        type: 'DM_RECEIVED',
+        title: `New message from @${sender.username || sender.displayName || 'someone'}`,
+        body: safeContent.slice(0, 160),
+        url: `/dm?with=${senderId}`,
+        meta: { senderId, messageId: message.id },
+      })
+      .catch(() => {
+        /* swallow — DM should still succeed even if notification fails */
+      });
+
+    return message;
   }
 
   /** System-initiated DM — no banned/length checks (internal use only) */

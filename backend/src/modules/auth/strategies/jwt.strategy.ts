@@ -23,6 +23,8 @@ type CachedUser = {
   websiteUrl: string | null;
   email: string | null;
   twoFactorEnabled: boolean;
+  reputationPoints: number;
+  userTag: string | null;
 };
 
 // In-memory LRU-ish cache for authenticated user rows. Every API call used to
@@ -109,6 +111,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         websiteUrl: true,
         email: true,
         twoFactorEnabled: true,
+        reputationPoints: true,
+        userTag: true,
       },
     });
 

@@ -32,6 +32,23 @@ interface LeaderboardEntry {
   _count: { repositories: number; marketListings: number };
 }
 
+interface TopAgentEntry {
+  id: string;
+  title: string;
+  price: number;
+  currency: string;
+  type: string;
+  tags: string[];
+  sales: number;
+  boosted: boolean;
+  sellerId: string;
+  sellerUsername: string | null;
+  sellerAvatar: string | null;
+  sellerReputation: number;
+}
+
+type LeaderboardTab = 'devs' | 'agents';
+
 const RAYS_INFO = [
   { reason: 'REPO_PUBLISHED', label: 'Publish a repository', rays: 15 },
   { reason: 'REPO_UPVOTE_RECEIVED', label: 'Receive an upvote', rays: 5 },
@@ -51,19 +68,38 @@ function formatNumber(n: number) {
 
 export default function LeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [topAgents, setTopAgents] = useState<TopAgentEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [rankFilter, setRankFilter] = useState<string>('ALL');
   const [showHelp, setShowHelp] = useState(false);
+  const [tab, setTab] = useState<LeaderboardTab>('devs');
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
 
   useEffect(() => {
-    api
-      .get<LeaderboardEntry[]>('/reputation/leaderboard?limit=50')
-      .then((data) => setLeaderboard(Array.isArray(data) ? data : []))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+    async function load() {
+      const [devs, ticker] = await Promise.all([
+        api
+          .get<LeaderboardEntry[]>('/reputation/leaderboard?limit=50')
+          .catch(() => [] as LeaderboardEntry[]),
+        api
+          .get<{ topAgents: TopAgentEntry[]; topDevs: unknown[] }>('/market/leaderboard')
+          .catch(() => ({ topAgents: [] as TopAgentEntry[], topDevs: [] })),
+      ]);
+      if (cancelled) return;
+      setLeaderboard(Array.isArray(devs) ? devs : []);
+      setTopAgents(Array.isArray(ticker?.topAgents) ? ticker.topAgents : []);
+      setLoading(false);
+    }
+    load();
+    // Refresh every 30s for the live "real-time" feel.
+    const id = setInterval(load, 30_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, []);
 
   const annotated = useMemo(() => {
@@ -270,8 +306,71 @@ export default function LeaderboardPage() {
         </section>
       )}
 
-      {/* Filters */}
-      {!loading && annotated.length > 0 && (
+      {/* Tab switcher: developers vs agents */}
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1200px] flex items-center gap-2">
+          <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#836EF9">
+            <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
+            Top Developers
+            <span className="ml-1 text-[10.5px] font-mono opacity-70">
+              {annotated.length}
+            </span>
+          </TabButton>
+          <TabButton active={tab === 'agents'} onClick={() => setTab('agents')} accent="#EC4899">
+            <Flame className="w-3.5 h-3.5" strokeWidth={1.75} />
+            Top Agents
+            <span className="ml-1 text-[10.5px] font-mono opacity-70">{topAgents.length}</span>
+          </TabButton>
+          <span className="ml-auto inline-flex items-center gap-1.5 text-[10.5px] text-zinc-500 font-mono">
+            <span
+              className="inline-block w-1.5 h-1.5 rounded-full"
+              style={{ background: '#22c55e', boxShadow: '0 0 8px #22c55e' }}
+            />
+            live · refreshes every 30s
+          </span>
+        </div>
+      </section>
+
+      {/* Top Agents grid */}
+      {tab === 'agents' && (
+        <section className="px-6 md:px-10">
+          <div className="mx-auto max-w-[1200px]">
+            {loading ? (
+              <div
+                className="rounded-xl px-6 py-16 text-center text-sm text-zinc-500 font-light"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+                }}
+              >
+                Loading top agents…
+              </div>
+            ) : topAgents.length === 0 ? (
+              <div
+                className="rounded-xl px-6 py-12 text-center"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                  boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
+              >
+                <Package className="w-6 h-6 text-zinc-600 mx-auto mb-3" strokeWidth={1.5} />
+                <p className="text-[13px] text-zinc-300 font-light">
+                  No agent sales yet. Be the first to publish & sell.
+                </p>
+              </div>
+            ) : (
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {topAgents.map((a, i) => (
+                  <TopAgentCard key={a.id} entry={a} position={i + 1} />
+                ))}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Filters (developer tab only) */}
+      {tab === 'devs' && !loading && annotated.length > 0 && (
         <section className="px-6 md:px-10 mb-3">
           <div className="mx-auto max-w-[1200px] flex items-center gap-2 flex-wrap">
             <div
@@ -333,7 +432,8 @@ export default function LeaderboardPage() {
         </section>
       )}
 
-      {/* Table */}
+      {/* Developers table */}
+      {tab === 'devs' && (
       <section className="px-6 md:px-10">
         <div className="mx-auto max-w-[1200px]">
           {loading ? (
@@ -387,7 +487,107 @@ export default function LeaderboardPage() {
           )}
         </div>
       </section>
+      )}
     </div>
+  );
+}
+
+function TabButton({
+  active,
+  onClick,
+  accent,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  accent: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12.5px] font-light transition-all"
+      style={{
+        color: active ? '#ffffff' : '#a1a1aa',
+        background: active ? `${accent}1f` : 'rgba(255,255,255,0.02)',
+        boxShadow: active
+          ? `inset 0 0 0 1px ${accent}66, 0 0 16px -8px ${accent}88`
+          : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TopAgentCard({ entry, position }: { entry: TopAgentEntry; position: number }) {
+  const medal = position === 1 ? '#f59e0b' : position === 2 ? '#cbd5e1' : position === 3 ? '#cd7f32' : null;
+  return (
+    <li>
+      <Link
+        href={`/market/agents/${entry.id}`}
+        className="group relative flex items-center gap-3 rounded-xl px-3 py-3 transition-all hover:scale-[1.005]"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.65), rgba(10,10,14,0.65))',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}
+      >
+        {entry.boosted && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-xl"
+            style={{
+              boxShadow: '0 0 0 1px rgba(236,72,153,0.5), 0 0 24px -8px rgba(236,72,153,0.45)',
+            }}
+          />
+        )}
+        <span
+          className="inline-flex items-center justify-center w-7 h-7 rounded-md text-[11px] font-mono tabular-nums font-medium flex-shrink-0"
+          style={{
+            color: medal || '#a1a1aa',
+            background: `${medal || '#a1a1aa'}14`,
+            boxShadow: `inset 0 0 0 1px ${medal || '#a1a1aa'}40`,
+          }}
+        >
+          {position === 1 ? <Crown className="w-3.5 h-3.5" strokeWidth={2} /> : position}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 min-w-0">
+            {entry.boosted && (
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-[1px] rounded-full text-[9.5px] font-mono uppercase flex-shrink-0"
+                style={{
+                  color: '#f9a8d4',
+                  background: 'rgba(236,72,153,0.14)',
+                  border: '1px solid rgba(236,72,153,0.36)',
+                  letterSpacing: '0.12em',
+                }}
+              >
+                <Flame className="w-2.5 h-2.5" strokeWidth={2.5} /> Boost
+              </span>
+            )}
+            <span className="text-[13px] text-white font-normal truncate">{entry.title}</span>
+          </div>
+          <div className="text-[10.5px] text-zinc-500 font-light mt-0.5 flex items-center gap-2 min-w-0">
+            <span className="truncate">@{entry.sellerUsername || 'anon'}</span>
+            <span className="text-zinc-700">·</span>
+            <span className="font-mono tabular-nums" style={{ color: '#22c55e' }}>
+              {entry.sales} sales
+            </span>
+            <span className="text-zinc-700">·</span>
+            <span className="font-mono tabular-nums text-zinc-400">
+              {entry.price} {entry.currency}
+            </span>
+          </div>
+        </div>
+        <ArrowUpRight
+          className="w-3.5 h-3.5 text-zinc-700 group-hover:text-zinc-300 transition flex-shrink-0"
+          strokeWidth={1.75}
+        />
+      </Link>
+    </li>
   );
 }
 

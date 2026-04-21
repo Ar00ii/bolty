@@ -217,6 +217,33 @@ export class MarketController {
     return this.marketService.getTopSellers(bounded);
   }
 
+  @Public()
+  @Get('ticker')
+  getTicker() {
+    return this.marketService.getTickerSnapshot();
+  }
+
+  @Public()
+  @Get('leaderboard')
+  getLeaderboard() {
+    return this.marketService.getLeaderboard();
+  }
+
+  @Public()
+  @Get('boost-pricing')
+  getBoostPricing() {
+    return this.marketService.getBoostPricing();
+  }
+
+  @Post(':id/boost')
+  boostListing(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { durationDays?: number; amountTokens?: number },
+  ) {
+    return this.marketService.boostListing(id, userId, body || {});
+  }
+
   // Must be defined before :id to avoid route clash
   // Protected: only users who purchased the listing can download
   @Get('files/:key')

@@ -61,6 +61,11 @@ model User {
   isBanned  Boolean  @default(false)
   banReason String?
 
+  // Bot account — used by the chat seeder to populate public chat with
+  // simulated activity. Bot users skip rate limiting and don't appear in
+  // most "real" listings (leaderboard, user search, etc).
+  isBot Boolean @default(false)
+
   // Reputation
   reputationPoints Int @default(0)
 
@@ -95,6 +100,7 @@ model User {
   integrations           UserIntegration[]
   aiAgents               Agent[]
   raysPurchases          RaysPurchase[]
+  listingBoosts          ListingBoost[]
 
   @@map("users")
 }
@@ -430,10 +436,33 @@ model MarketListing {
   apiKeys       AgentApiKey[]
   purchases     MarketPurchase[]
   reviews       MarketReview[]
+  // ── Boost / promotion ──────────────────────────────────────────────────────
+  // When set in the future, the listing is considered "boosted" and ranks
+  // higher in /market browse + appears on the homepage ticker. Cleared
+  // automatically once the timestamp passes.
+  boostedUntil  DateTime?
+  boosts        ListingBoost[]
 
   @@index([sellerId, status])
   @@index([status, createdAt])
+  @@index([boostedUntil])
   @@map("market_listings")
+}
+
+model ListingBoost {
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  listingId    String
+  listing      MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyerId      String
+  buyer        User          @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  amountTokens Float         @default(0) // BOLTY tokens spent
+  durationDays Int           @default(7)
+  expiresAt    DateTime
+
+  @@index([listingId, createdAt])
+  @@index([buyerId, createdAt])
+  @@map("listing_boosts")
 }
 
 model MarketReview {
@@ -776,6 +805,10 @@ enum NotificationType {
   MARKET_ORDER_DELIVERED
   MARKET_ORDER_COMPLETED
   MARKET_NEGOTIATION_MESSAGE
+  DM_RECEIVED
+  FRIEND_REQUEST
+  FRIEND_ACCEPTED
+  LISTING_BOOSTED
   SYSTEM
 }
 
