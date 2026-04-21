@@ -339,16 +339,16 @@ export function CommandPalette() {
               }}
             />
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
-              <Search className="w-4 h-4 text-zinc-500 shrink-0" strokeWidth={1.75} />
+              <Search className="w-4 h-4 text-white shrink-0" strokeWidth={1.75} />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onKeyDown}
                 placeholder="Search listings, jump to pages…"
-                className="flex-1 bg-transparent text-[13px] text-white placeholder-zinc-600 focus:outline-none tracking-[0.005em]"
+                className="flex-1 bg-transparent text-[13px] text-white placeholder-white/70 focus:outline-none tracking-[0.005em]"
               />
-              <kbd className="text-[10px] font-medium text-zinc-500 border border-white/10 bg-white/[0.03] rounded px-1.5 py-0.5 leading-none">
+              <kbd className="text-[10px] font-medium text-white border border-white/10 bg-white/[0.03] rounded px-1.5 py-0.5 leading-none">
                 Esc
               </kbd>
             </div>

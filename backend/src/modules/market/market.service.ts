@@ -13,6 +13,7 @@ import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ReputationService } from '../reputation/reputation.service';
 
 import { MarketGateway } from './market.gateway';
 
@@ -43,6 +44,7 @@ export class MarketService {
     private readonly config: ConfigService,
     private readonly notifications: NotificationsService,
     private readonly gateway: MarketGateway,
+    private readonly reputation: ReputationService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -266,6 +268,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         seller: created.seller,
         createdAt: created.createdAt.toISOString(),
       });
+
+      // Reputation: AI agents are worth more than generic listings because
+      // they take more effort to publish (wiring an endpoint, API keys, etc.).
+      const reason = created.type === 'AI_AGENT' ? 'AI_AGENT_PUBLISHED' : 'LISTING_PUBLISHED';
+      this.reputation
+        .awardPoints(sellerId, reason, created.id, created.title)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for listing ${created.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
     }
 
     return created;
@@ -1343,6 +1356,26 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     } catch (err) {
       this.logger.warn(
         `Failed to broadcast sale event: ${err instanceof Error ? err.message : err}`,
+      );
+    }
+
+    // Reputation: award the seller for a confirmed sale. FIRST_SALE lifetime
+    // bonus if this is their first verified purchase.
+    try {
+      const priorSales = await this.prisma.marketPurchase.count({
+        where: { sellerId: listing.sellerId, verified: true, id: { not: purchase.id } },
+      });
+      const reason = priorSales === 0 ? 'FIRST_SALE' : 'LISTING_SOLD';
+      this.reputation
+        .awardPoints(listing.sellerId, reason, purchase.id, listing.title)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+    } catch (err) {
+      this.logger.warn(
+        `Reputation award skipped for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
       );
     }
 

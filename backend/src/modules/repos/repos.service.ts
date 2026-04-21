@@ -16,6 +16,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { ChartService } from '../chart/chart.service';
+import { ReputationService } from '../reputation/reputation.service';
 
 @Injectable()
 export class ReposService {
@@ -27,6 +28,7 @@ export class ReposService {
     private readonly redis: RedisService,
     private readonly config: ConfigService,
     private readonly chart: ChartService,
+    private readonly reputation: ReputationService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -434,7 +436,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new ForbiddenException('This repository is already published under another account');
     }
 
-    return this.prisma.repository.upsert({
+    const saved = await this.prisma.repository.upsert({
       where: { githubRepoId: String(authoritative.id) },
       create: {
         githubRepoId: String(authoritative.id),
@@ -466,6 +468,19 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         twitterUrl: githubRepoData.twitterUrl?.slice(0, 500) || null,
       },
     });
+
+    // Only award reputation on first-time publish (not on update).
+    if (!existing) {
+      this.reputation
+        .awardPoints(userId, 'REPO_PUBLISHED', saved.id, saved.fullName)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for repo ${saved.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+    }
+
+    return saved;
   }
 
   // ── List platform repositories ────────────────────────────────────────────

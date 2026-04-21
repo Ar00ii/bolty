@@ -148,16 +148,6 @@ export function RenderHero({ isAuthenticated = false }: RenderHeroProps) {
             opacity: 0.1,
           }}
         />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/imglanding-removebg-preview.png"
-          alt=""
-          className="relative z-10 w-full max-w-[560px] xl:max-w-[640px] h-auto object-contain select-none pointer-events-none"
-          style={{
-            filter: 'drop-shadow(0 30px 60px rgba(131,110,249,0.25))',
-          }}
-          draggable={false}
-        />
       </motion.div>
     </div>
   );
