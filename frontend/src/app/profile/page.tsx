@@ -85,6 +85,18 @@ interface FriendRequest {
   createdAt: string;
 }
 
+interface SentFriendRequest {
+  id: string;
+  to: {
+    id: string;
+    username: string | null;
+    displayName: string | null;
+    avatarUrl: string | null;
+    userTag?: string | null;
+  };
+  createdAt: string;
+}
+
 interface UserSearchResult {
   id: string;
   username: string | null;
@@ -450,7 +462,10 @@ export default function ProfilePage() {
   // Friends
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [sentRequests, setSentRequests] = useState<SentFriendRequest[]>([]);
   const [friendsLoading, setFriendsLoading] = useState(false);
+  const [friendsErr, setFriendsErr] = useState('');
+  const [friendsMsg, setFriendsMsg] = useState('');
   const [friendActionId, setFriendActionId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
@@ -617,15 +632,22 @@ export default function ProfilePage() {
 
   const loadFriends = useCallback(async () => {
     setFriendsLoading(true);
+    setFriendsErr('');
     try {
-      const [f, r] = await Promise.all([
+      const [f, r, s] = await Promise.all([
         api.get<Friend[]>('/social/friends'),
         api.get<FriendRequest[]>('/social/friends/requests'),
+        api
+          .get<SentFriendRequest[]>('/social/friends/sent')
+          .catch(() => [] as SentFriendRequest[]),
       ]);
       setFriends(f);
       setFriendRequests(r);
-    } catch {
-      /* silent */
+      setSentRequests(s);
+    } catch (err) {
+      setFriendsErr(
+        err instanceof ApiError ? err.message : 'Could not load your network right now.',
+      );
     } finally {
       setFriendsLoading(false);
     }
@@ -803,11 +825,15 @@ export default function ProfilePage() {
     setSocErr('');
     setSocMsg('');
     try {
+      // Send explicit `null` for cleared fields so the backend persists the
+      // removal. Sending `undefined` drops the key from the JSON payload,
+      // which the service used to interpret as "leave unchanged".
       await api.patch('/users/profile', {
-        twitterUrl: twitterUrl.trim() || undefined,
-        linkedinUrl: linkedinUrl.trim() || undefined,
-        websiteUrl: websiteUrl.trim() || undefined,
+        twitterUrl: twitterUrl.trim() === '' ? null : twitterUrl.trim(),
+        linkedinUrl: linkedinUrl.trim() === '' ? null : linkedinUrl.trim(),
+        websiteUrl: websiteUrl.trim() === '' ? null : websiteUrl.trim(),
       });
+      await refresh();
       setSocMsg('Social links saved.');
       setTimeout(() => setSocMsg(''), 3000);
     } catch (err) {
@@ -1135,23 +1161,52 @@ export default function ProfilePage() {
 
   const handleRespondToRequest = async (requestId: string, accept: boolean) => {
     setFriendActionId(requestId);
+    setFriendsErr('');
+    setFriendsMsg('');
     try {
       await api.post(`/social/friends/respond/${requestId}`, { accept });
+      setFriendsMsg(accept ? 'Friend request accepted.' : 'Friend request declined.');
+      setTimeout(() => setFriendsMsg(''), 2500);
       await loadFriends();
-    } catch {
-      /* silent */
+    } catch (err) {
+      setFriendsErr(
+        err instanceof ApiError ? err.message : 'Could not respond to this request.',
+      );
     } finally {
       setFriendActionId(null);
     }
   };
 
   const handleUnfriend = async (targetId: string) => {
+    if (!confirm('Remove this connection? You can send a new request later.')) return;
     setFriendActionId(targetId);
+    setFriendsErr('');
+    setFriendsMsg('');
     try {
       await api.delete(`/social/friends/${targetId}`);
+      setFriendsMsg('Connection removed.');
+      setTimeout(() => setFriendsMsg(''), 2500);
       await loadFriends();
-    } catch {
-      /* silent */
+    } catch (err) {
+      setFriendsErr(err instanceof ApiError ? err.message : 'Could not remove connection.');
+    } finally {
+      setFriendActionId(null);
+    }
+  };
+
+  const handleCancelSentRequest = async (targetId: string) => {
+    setFriendActionId(targetId);
+    setFriendsErr('');
+    setFriendsMsg('');
+    try {
+      // Backend exposes DELETE /social/friends/:targetId which removes any
+      // friendship row in any state, including PENDING outgoing ones.
+      await api.delete(`/social/friends/${targetId}`);
+      setFriendsMsg('Friend request cancelled.');
+      setTimeout(() => setFriendsMsg(''), 2500);
+      await loadFriends();
+    } catch (err) {
+      setFriendsErr(err instanceof ApiError ? err.message : 'Could not cancel the request.');
     } finally {
       setFriendActionId(null);
     }
@@ -1159,11 +1214,16 @@ export default function ProfilePage() {
 
   const handleSendFriendRequest = async (targetId: string) => {
     setSendingTo(targetId);
+    setFriendsErr('');
+    setFriendsMsg('');
     try {
       await api.post('/social/friends/request', { targetId });
       setSearchResults((prev) => prev.filter((u) => u.id !== targetId));
-    } catch {
-      /* silent */
+      setFriendsMsg('Friend request sent.');
+      setTimeout(() => setFriendsMsg(''), 2500);
+      await loadFriends();
+    } catch (err) {
+      setFriendsErr(err instanceof ApiError ? err.message : 'Could not send friend request.');
     } finally {
       setSendingTo(null);
     }
@@ -2085,6 +2145,8 @@ export default function ProfilePage() {
                   title="Professional Network"
                   subtitle="Build meaningful connections with developers and expand your professional community."
                 />
+                <Alert type="success" msg={friendsMsg} />
+                <Alert type="error" msg={friendsErr} />
                 <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
                   <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
                   <input
@@ -2213,8 +2275,59 @@ export default function ProfilePage() {
                       </div>
                     )}
 
+                    {/* Sent / outgoing requests */}
+                    {sentRequests.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="w-1.5 h-1.5 rounded-full bg-bolty-400" />
+                          <span className="text-xs font-mono text-bolty-300 uppercase tracking-widest">
+                            {sentRequests.length} sent request
+                            {sentRequests.length !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {sentRequests.map((req) => (
+                            <div
+                              key={req.id}
+                              className="flex items-center gap-3 bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3"
+                            >
+                              <Avatar
+                                src={req.to.avatarUrl}
+                                name={req.to.displayName || req.to.username}
+                                size="sm"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <Link
+                                  href={`/u/${req.to.username}`}
+                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
+                                >
+                                  {req.to.displayName || req.to.username}
+                                </Link>
+                                <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
+                                  {req.to.username && <span>@{req.to.username}</span>}
+                                  {req.to.userTag && (
+                                    <span className="text-bolty-400/60">#{req.to.userTag}</span>
+                                  )}
+                                  <span className="text-white/30">· awaiting response</span>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleCancelSentRequest(req.to.id)}
+                                disabled={friendActionId === req.to.id}
+                                className="text-xs text-[var(--text-muted)] border border-[var(--border)] hover:border-red-400/25 hover:text-red-400 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
+                              >
+                                {friendActionId === req.to.id ? '...' : 'Cancel'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Friends list */}
-                    {friends.length === 0 && friendRequests.length === 0 ? (
+                    {friends.length === 0 &&
+                    friendRequests.length === 0 &&
+                    sentRequests.length === 0 ? (
                       <div className="text-center py-10">
                         <IconUsers className="w-8 h-8 text-[var(--text-muted)] mx-auto mb-2 opacity-30" />
                         <p className="text-sm text-[var(--text-muted)]">

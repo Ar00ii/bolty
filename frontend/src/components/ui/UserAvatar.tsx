@@ -1,0 +1,89 @@
+'use client';
+
+import React from 'react';
+
+interface UserAvatarProps {
+  src?: string | null;
+  name?: string | null;
+  userId?: string | null;
+  size?: number;
+  className?: string;
+  ring?: boolean;
+}
+
+// Deterministic hue from a string — gives each fallback avatar its own
+// subtle tint while staying inside the brand palette (indigo/violet/cyan).
+function hashHue(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return ((h % 360) + 360) % 360;
+}
+
+function initials(name: string | null | undefined): string {
+  if (!name) return '?';
+  // Keep letters/digits (ASCII + common Latin extended) and spaces.
+  const cleaned = name.replace(/[^A-Za-z0-9À-ſ ]/g, '').trim();
+  if (!cleaned) return name.trim()[0]?.toUpperCase() || '?';
+  const parts = cleaned.split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase() ?? '').join('') || cleaned[0].toUpperCase();
+}
+
+/**
+ * Canonical avatar component. Renders the user's uploaded picture when
+ * available, otherwise a branded gradient disc with the user's initials.
+ * Replaces the assorted one-off `<div><span>{letter[0]}</span></div>`
+ * placeholders scattered across the app so we never show a plain grey
+ * circle again.
+ */
+export function UserAvatar({
+  src,
+  name,
+  userId,
+  size = 32,
+  className = '',
+  ring = false,
+}: UserAvatarProps) {
+  const seed = userId || name || '';
+  const hue = hashHue(seed || 'bolty');
+  const letters = initials(name);
+  const bg = `linear-gradient(135deg, hsl(${hue}, 72%, 62%) 0%, hsl(${(hue + 40) % 360}, 68%, 52%) 100%)`;
+  const ringStyle = ring ? { boxShadow: '0 0 0 2px rgba(131,110,249,0.35)' } : {};
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={name || 'avatar'}
+        width={size}
+        height={size}
+        className={`rounded-full object-cover ${className}`}
+        style={{
+          width: size,
+          height: size,
+          border: '1px solid rgba(255,255,255,0.08)',
+          ...ringStyle,
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`rounded-full flex items-center justify-center text-white font-light select-none ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: bg,
+        fontSize: Math.max(10, Math.floor(size * 0.4)),
+        letterSpacing: '0.02em',
+        border: '1px solid rgba(255,255,255,0.12)',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(0,0,0,0.18)' +
+          (ring ? ', 0 0 0 2px rgba(131,110,249,0.35)' : ''),
+      }}
+      aria-label={name || 'avatar'}
+    >
+      {letters}
+    </div>
+  );
+}

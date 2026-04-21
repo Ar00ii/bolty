@@ -21,7 +21,15 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
-import { IsString, IsOptional, MaxLength, MinLength, Matches, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  MaxLength,
+  MinLength,
+  Matches,
+  ValidateIf,
+  IsUrl,
+} from 'class-validator';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
 
@@ -54,20 +62,26 @@ class UpdateProfileDto {
   @MaxLength(300)
   bio?: string;
 
+  // URL fields accept `null` or empty string to clear the link. `@ValidateIf`
+  // skips URL validation when the value is falsy so the backend persists the
+  // removal instead of rejecting the payload with "Invalid URL".
   @IsOptional()
+  @ValidateIf((_obj, value) => value !== null && value !== '')
   @IsUrl({ require_protocol: false }, { message: 'Invalid Twitter URL' })
   @MaxLength(200)
-  twitterUrl?: string;
+  twitterUrl?: string | null;
 
   @IsOptional()
+  @ValidateIf((_obj, value) => value !== null && value !== '')
   @IsUrl({ require_protocol: false }, { message: 'Invalid LinkedIn URL' })
   @MaxLength(200)
-  linkedinUrl?: string;
+  linkedinUrl?: string | null;
 
   @IsOptional()
+  @ValidateIf((_obj, value) => value !== null && value !== '')
   @IsUrl({ require_protocol: false }, { message: 'Invalid website URL' })
   @MaxLength(200)
-  websiteUrl?: string;
+  websiteUrl?: string | null;
 
   // Optional 6-digit TOTP code, required when the user has 2FA enabled and is
   // changing their username (the only field that affects their public identity).

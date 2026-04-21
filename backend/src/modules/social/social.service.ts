@@ -56,13 +56,16 @@ export class SocialService {
   }
 
   async unfriend(userId: string, targetId: string): Promise<void> {
+    // Accept any friendship the caller is part of — ACCEPTED removes the
+    // connection, PENDING cancels an outgoing or incoming request. The
+    // OR clause already scopes to rows involving `userId`, so there's no
+    // way to delete somebody else's friendship.
     const friendship = await this.prisma.friendship.findFirst({
       where: {
         OR: [
           { senderId: userId, receiverId: targetId },
           { senderId: targetId, receiverId: userId },
         ],
-        status: FriendshipStatus.ACCEPTED,
       },
     });
     if (!friendship) throw new NotFoundException('Friendship not found');

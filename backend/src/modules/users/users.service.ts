@@ -7,9 +7,9 @@ interface UpdateProfileData {
   username?: string;
   displayName?: string;
   bio?: string;
-  twitterUrl?: string;
-  linkedinUrl?: string;
-  websiteUrl?: string;
+  twitterUrl?: string | null;
+  linkedinUrl?: string | null;
+  websiteUrl?: string | null;
   agentEndpoint?: string | null;
   avatarUrl?: string;
 }
