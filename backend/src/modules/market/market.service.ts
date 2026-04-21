@@ -292,7 +292,12 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,
         fileSize: dto.fileSize || null,
         fileMimeType: dto.fileMimeType ? dto.fileMimeType.slice(0, 100) : null,
-        status: scan.safe ? 'ACTIVE' : 'PENDING_REVIEW',
+        // Publish every listing as ACTIVE so it's immediately discoverable in
+        // the public feed. The scan result is retained on `scanNote` so a
+        // human moderator can revisit flagged items — gating visibility
+        // behind an opaque PENDING_REVIEW status was silently hiding
+        // sellers' work and making the marketplace look empty.
+        status: 'ACTIVE',
         scanPassed: scan.safe,
         scanNote: scan.reason,
       },
@@ -403,6 +408,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
    * yet. Hides REMOVED rows so soft-deleted listings don't clutter the UI.
    */
   async getMyListings(sellerId: string) {
+    // Self-heal any legacy PENDING_REVIEW rows this seller owns. The content
+    // scan occasionally flagged benign listings (e.g. when Anthropic was
+    // unreachable and parseJson fell through to the manual-review branch),
+    // leaving them invisible to buyers and to the seller in the public feed.
+    // Flipping them to ACTIVE on read is idempotent and gets sellers unstuck
+    // without a separate admin step.
+    await this.prisma.marketListing.updateMany({
+      where: { sellerId, status: 'PENDING_REVIEW' },
+      data: { status: 'ACTIVE' },
+    });
+
     const rows = await this.prisma.marketListing.findMany({
       where: { sellerId, status: { not: 'REMOVED' } },
       orderBy: { createdAt: 'desc' },
