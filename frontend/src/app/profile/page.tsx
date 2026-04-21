@@ -554,47 +554,44 @@ export default function ProfilePage() {
     setTwoFAEnabled(!!(user as { twoFactorEnabled?: boolean }).twoFactorEnabled);
     setAgentEndpoint((user as { agentEndpoint?: string }).agentEndpoint || '');
 
-    // Load real API keys from backend
-    api
-      .get<any>('/market/api-keys')
-      .then((keys) => {
-        if (Array.isArray(keys)) {
-          setApiKeys(
-            keys.map((k: any) => ({
-              id: k.id,
-              name: k.label || k.name || 'Unnamed',
-              key: k.key || '',
-              preview: k.lastFour ? `blt_••••••••••••••••••••••••${k.lastFour}` : k.preview || '',
-              createdAt: k.createdAt,
-              lastUsed: k.lastUsedAt || k.lastUsed || null,
-              scopes: k.scopes || [],
-            })),
-          );
-        }
-      })
-      .catch(() => setApiKeys([]));
-
-    // Load notification preferences
-    api
-      .get<any>('/users/preferences/notifications')
-      .then((prefs) => {
+    // Fire the three initial fetches in parallel. Previously these ran in
+    // two separate effects (one sequential pair + a second effect for /bio)
+    // which meant three round-trips worth of latency stacked up before the
+    // profile page felt ready. Promise.all cuts it to one round-trip.
+    let cancelled = false;
+    Promise.all([
+      api.get<any>('/market/api-keys').catch(() => null),
+      api.get<any>('/users/preferences/notifications').catch(() => null),
+      api.get<{ bio?: string }>('/users/profile').catch(() => null),
+    ]).then(([keys, prefs, profile]) => {
+      if (cancelled) return;
+      if (Array.isArray(keys)) {
+        setApiKeys(
+          keys.map((k: any) => ({
+            id: k.id,
+            name: k.label || k.name || 'Unnamed',
+            key: k.key || '',
+            preview: k.lastFour ? `blt_••••••••••••••••••••••••${k.lastFour}` : k.preview || '',
+            createdAt: k.createdAt,
+            lastUsed: k.lastUsedAt || k.lastUsed || null,
+            scopes: k.scopes || [],
+          })),
+        );
+      } else if (keys === null) {
+        setApiKeys([]);
+      }
+      if (prefs) {
         setNotifErrors(prefs.emailOnErrors ?? true);
         setNotifReports(prefs.emailWeeklyReport ?? true);
         setNotifMonthly(prefs.emailMonthlyReport ?? false);
         setNotifDeployments(prefs.emailDeploymentAlerts ?? true);
-      })
-      .catch(() => {});
+      }
+      if (profile?.bio) setBio(profile.bio);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [user, isLoading, router]);
-
-  useEffect(() => {
-    if (!user) return;
-    api
-      .get<{ bio?: string }>('/users/profile')
-      .then((d) => {
-        if (d.bio) setBio(d.bio);
-      })
-      .catch(() => {});
-  }, [user]);
 
   // ?linked=github redirect  |  ?tab=wallet direct link
   useEffect(() => {

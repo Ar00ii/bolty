@@ -76,17 +76,21 @@ export class OrdersService {
     private readonly escrow: EscrowService,
   ) {}
 
-  /** All orders where the user is the buyer (market + repo purchases combined) */
+  /** All orders where the user is the buyer (market + repo purchases combined).
+   *  Capped at 100 rows per side to keep the payload cheap; the UI shows the
+   *  most recent first and we don't need older history on the list page. */
   async getBuyerOrders(userId: string) {
     const [marketOrders, repoOrders] = await Promise.all([
       this.prisma.marketPurchase.findMany({
         where: { buyerId: userId },
         orderBy: { createdAt: 'desc' },
+        take: 100,
         include: ORDER_INCLUDE,
       }),
       this.prisma.repoPurchase.findMany({
         where: { buyerId: userId, verified: true },
         orderBy: { createdAt: 'desc' },
+        take: 100,
         include: REPO_PURCHASE_INCLUDE,
       }),
     ]);
@@ -100,11 +104,13 @@ export class OrdersService {
       this.prisma.marketPurchase.findMany({
         where: { sellerId: userId },
         orderBy: { createdAt: 'desc' },
+        take: 100,
         include: ORDER_INCLUDE,
       }),
       this.prisma.repoPurchase.findMany({
         where: { verified: true, repository: { userId } },
         orderBy: { createdAt: 'desc' },
+        take: 100,
         include: REPO_PURCHASE_INCLUDE,
       }),
     ]);

@@ -220,6 +220,10 @@ function MarketScreener() {
     const socket = io(`${WS_URL}/market`, {
       transports: ['websocket'],
       withCredentials: true,
+      timeout: 8000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
     });
     socketRef.current = socket;
 

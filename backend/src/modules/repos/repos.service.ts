@@ -778,7 +778,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         amountWei = paid.toString();
         verified = true;
       } else {
-        // ETH payment — check direct transfer
+        // ETH payment — check direct transfer. The receipt has already been
+        // fetched above; grab the full tx in parallel with the earlier call.
         const tx = await provider.getTransaction(txHash);
         if (!tx) throw new BadRequestException('Transaction not found');
         if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
@@ -805,8 +806,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (platformWallet && platformFeeTxHash) {
       try {
         const provider = new ethers.JsonRpcProvider(rpcUrl);
-        const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
-        const feeTx = await provider.getTransaction(platformFeeTxHash);
+        const [feeReceipt, feeTx] = await Promise.all([
+          provider.getTransactionReceipt(platformFeeTxHash),
+          provider.getTransaction(platformFeeTxHash),
+        ]);
 
         if (!feeReceipt || feeReceipt.status !== 1) {
           throw new BadRequestException('Platform fee transaction failed or not found');

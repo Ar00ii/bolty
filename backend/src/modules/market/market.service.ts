@@ -904,6 +904,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.marketPurchase.findMany({
         where: { buyerId },
         orderBy: { createdAt: 'desc' },
+        take: 200,
         include: {
           listing: {
             select: {
@@ -928,6 +929,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.repoPurchase.findMany({
         where: { buyerId },
         orderBy: { createdAt: 'desc' },
+        take: 200,
         include: {
           repository: {
             select: {
@@ -1336,11 +1338,15 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     try {
       const provider = new ethers.JsonRpcProvider(rpcUrl);
-      const receipt = await provider.getTransactionReceipt(txHash);
+      // Fetch receipt + tx in parallel — these are independent RPC round-trips
+      // and batching them halves the purchase-verification latency.
+      const [receipt, tx] = await Promise.all([
+        provider.getTransactionReceipt(txHash),
+        provider.getTransaction(txHash),
+      ]);
       if (!receipt || receipt.status !== 1) {
         throw new BadRequestException('Transaction failed or not found');
       }
-      const tx = await provider.getTransaction(txHash);
       if (!tx) throw new BadRequestException('Transaction not found');
 
       if (useEscrow) {
@@ -1372,8 +1378,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         // Verify platform commission (legacy only — escrow handles split automatically)
         if (platformWallet && platformFeeTxHash) {
           try {
-            const feeReceipt = await provider.getTransactionReceipt(platformFeeTxHash);
-            const feeTx = await provider.getTransaction(platformFeeTxHash);
+            const [feeReceipt, feeTx] = await Promise.all([
+              provider.getTransactionReceipt(platformFeeTxHash),
+              provider.getTransaction(platformFeeTxHash),
+            ]);
             if (!feeReceipt || feeReceipt.status !== 1) {
               throw new BadRequestException('Platform fee transaction failed or not found');
             }
@@ -1578,14 +1586,20 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   // ── Ticker / Leaderboard ───────────────────────────────────────────────────
   // Cheap aggregate used by the global header marquee + leaderboard page.
-  // Cached in-process for 30s — the queries are ~5x groupBy / findMany so a
-  // bursty homepage shouldn't hammer Postgres on every load.
+  // Cached in-process for 90s — the queries are ~5x groupBy / findMany each
+  // so a bursty homepage shouldn't hammer Postgres on every load. The
+  // leaderboard is also cached separately (slightly longer payload, same TTL)
+  // so /leaderboard doesn't recompute on every navigation.
   private tickerCache: { at: number; data: { topAgents: unknown[]; topDevs: unknown[] } } | null =
     null;
+  private leaderboardCache: {
+    at: number;
+    data: { topAgents: unknown[]; topDevs: unknown[] };
+  } | null = null;
 
   async getTickerSnapshot() {
     const now = Date.now();
-    if (this.tickerCache && now - this.tickerCache.at < 30_000) {
+    if (this.tickerCache && now - this.tickerCache.at < 90_000) {
       return this.tickerCache.data;
     }
 
@@ -1731,12 +1745,20 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   }
 
   async getLeaderboard() {
-    // Two-tab leaderboard payload — top agents (by sales) + top devs (by rep)
+    // Two-tab leaderboard payload — top agents (by sales) + top devs (by rep).
+    // Cached 90s: each tab runs ~5 aggregate queries, so the /leaderboard
+    // page was the single slowest endpoint on cold navigation.
+    const now = Date.now();
+    if (this.leaderboardCache && now - this.leaderboardCache.at < 90_000) {
+      return this.leaderboardCache.data;
+    }
     const [topAgents, topDevs] = await Promise.all([
       this.getTopAgents(25),
       this.getTopDevelopers(25),
     ]);
-    return { topAgents, topDevs };
+    const data = { topAgents, topDevs };
+    this.leaderboardCache = { at: now, data };
+    return data;
   }
 
   // ── Listing boosts ─────────────────────────────────────────────────────────
@@ -1836,8 +1858,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         },
       }),
     ]);
-    // Drop the ticker cache so the boost shows up immediately.
+    // Drop the ticker + leaderboard caches so the boost shows up immediately.
     this.tickerCache = null;
+    this.leaderboardCache = null;
     return {
       ok: true,
       boostedUntil: updated.boostedUntil,

@@ -38,6 +38,10 @@ export function useUnreadDMs(isAuthenticated: boolean) {
     const socket = io(`${WS_URL}/dm`, {
       withCredentials: true,
       transports: ['websocket'],
+      timeout: 8000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
     });
 
     // New DM delivered to this user — just bump, don't round-trip the API.
