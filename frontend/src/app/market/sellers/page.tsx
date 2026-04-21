@@ -401,7 +401,10 @@ export default function TopSellersPage() {
                         </span>
                         {s.avgRating !== null && (
                           <span className="inline-flex items-center gap-1.5">
-                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            <Star
+                              className="w-3 h-3"
+                              style={{ color: '#b4a7ff', fill: '#b4a7ff' }}
+                            />
                             {s.avgRating.toFixed(2)}
                             <span className="text-zinc-600">({s.reviewCount})</span>
                           </span>
