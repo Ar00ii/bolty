@@ -226,37 +226,77 @@ export class UsersService {
   async getUsageStats(userId: string) {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    // Count API key uses (orders as proxy)
-    const totalOrders = await this.prisma.marketPurchase.count({
-      where: { buyerId: userId, createdAt: { gte: monthStart } },
-    });
-
-    // Count this month's purchases
-    const lastApiUse = await this.prisma.marketPurchase.findFirst({
-      where: { buyerId: userId },
-      orderBy: { createdAt: 'desc' },
-      select: { createdAt: true },
-    });
-
-    // Count active agents (market listings)
-    const activeListings = await this.prisma.marketListing.count({
-      where: { sellerId: userId, status: 'ACTIVE' },
-    });
-
-    // Count last 24h activity
     const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const last24hOrders = await this.prisma.marketPurchase.count({
-      where: { buyerId: userId, createdAt: { gte: last24h } },
-    });
+    const last30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [
+      purchasesThisMonth,
+      lastPurchase,
+      activeListings,
+      last24hPurchases,
+      salesThisMonth,
+      repoPurchasesThisMonth,
+      lastApiUse,
+      activeApiKeys,
+      last30dPurchases,
+    ] = await Promise.all([
+      this.prisma.marketPurchase.count({
+        where: { buyerId: userId, createdAt: { gte: monthStart } },
+      }),
+      this.prisma.marketPurchase.findFirst({
+        where: { buyerId: userId },
+        orderBy: { createdAt: 'desc' },
+        select: { createdAt: true },
+      }),
+      this.prisma.marketListing.count({
+        where: { sellerId: userId, status: 'ACTIVE' },
+      }),
+      this.prisma.marketPurchase.count({
+        where: { buyerId: userId, createdAt: { gte: last24h } },
+      }),
+      this.prisma.marketPurchase.count({
+        where: { sellerId: userId, verified: true, createdAt: { gte: monthStart } },
+      }),
+      this.prisma.repoPurchase.count({
+        where: { buyerId: userId, createdAt: { gte: monthStart } },
+      }),
+      this.prisma.userApiKey.findFirst({
+        where: { userId, lastUsedAt: { not: null } },
+        orderBy: { lastUsedAt: 'desc' },
+        select: { lastUsedAt: true },
+      }),
+      this.prisma.userApiKey.count({ where: { userId } }),
+      this.prisma.marketPurchase.count({
+        where: { buyerId: userId, createdAt: { gte: last30d } },
+      }),
+    ]);
+
+    // ── Legacy compat ───────────────────────────────────────────────────────
+    // Older UI reads `totalCallsThisMonth` / `last24hCalls` / `maxCallsAllowed`.
+    // We keep those fields mapped to real data (combined purchases from market
+    // + repos this month) and also surface the richer per-category breakdown
+    // so the new UI can drop the misleading "API calls" label.
+    const activityThisMonth = purchasesThisMonth + repoPurchasesThisMonth;
 
     return {
-      totalCallsThisMonth: totalOrders,
+      // Legacy fields (preserved for backward compat)
+      totalCallsThisMonth: activityThisMonth,
       maxCallsAllowed: 100000,
       activeAgents: activeListings,
-      last24hCalls: last24hOrders,
+      last24hCalls: last24hPurchases,
       lastResetDate: monthStart.toISOString(),
-      lastUsedAt: lastApiUse?.createdAt || null,
+      lastUsedAt: lastPurchase?.createdAt || null,
+
+      // New, honest breakdown
+      purchasesThisMonth,
+      repoPurchasesThisMonth,
+      salesThisMonth,
+      activeListings,
+      last24hPurchases,
+      last30dPurchases,
+      apiKeysCount: activeApiKeys,
+      lastApiUsedAt: lastApiUse?.lastUsedAt ?? null,
+      lastPurchaseAt: lastPurchase?.createdAt ?? null,
     };
   }
 

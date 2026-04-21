@@ -536,4 +536,98 @@ export class EmailService {
     const text = `Order #${orderInfo.orderId.substring(0, 8)}: ${orderInfo.status}`;
     await this.send(to, subject, html, text);
   }
+
+  // ── Purchase confirmation ──────────────────────────────────────────────────
+
+  async sendPurchaseConfirmation(
+    to: string,
+    recipient: 'buyer' | 'seller',
+    data: {
+      buyerUsername: string;
+      sellerUsername: string;
+      listingTitle: string;
+      orderId: string;
+      amountLabel: string; // already formatted, e.g. "0.042 ETH" or "125 BOLTY"
+      txHash?: string | null;
+      purchaseKind: 'listing' | 'repo';
+    },
+  ): Promise<void> {
+    const isBuyer = recipient === 'buyer';
+    const ordersUrl = `${this.appUrl}/orders/${data.orderId}`;
+    const subject = isBuyer
+      ? `Purchase confirmed — ${data.listingTitle}`
+      : `New sale — ${data.listingTitle} (${data.amountLabel})`;
+    const preheader = isBuyer
+      ? `You bought ${data.listingTitle} for ${data.amountLabel}`
+      : `@${data.buyerUsername} bought ${data.listingTitle} for ${data.amountLabel}`;
+
+    const counterpartyLabel = isBuyer ? 'Seller' : 'Buyer';
+    const counterpartyHandle = isBuyer ? data.sellerUsername : data.buyerUsername;
+    const greeting = isBuyer ? data.buyerUsername : data.sellerUsername;
+    const headline = isBuyer ? 'Purchase confirmed' : 'New sale';
+    const intro = isBuyer
+      ? 'Your payment was verified on-chain. Access is now available in your orders dashboard.'
+      : 'A buyer completed payment for one of your listings. Coordinate delivery from the order page.';
+
+    const txBlock = data.txHash
+      ? `
+        <tr>
+          <td style="padding-top:12px;">
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">TRANSACTION</p>
+            <p style="margin:0;font-size:12px;color:#18181b;font-family:'Courier New',monospace;word-break:break-all;">${data.txHash}</p>
+          </td>
+        </tr>`
+      : '';
+
+    const html = this.shell(
+      subject,
+      preheader,
+      bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">${headline}</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">
+        Hi <strong style="color:#18181b;">@${greeting}</strong>,<br/>
+        ${intro}
+      </p>
+
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+        <tr>
+          <td style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:20px 24px;">
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">${data.purchaseKind === 'repo' ? 'REPOSITORY' : 'LISTING'}</p>
+            <p style="margin:0 0 16px;font-size:16px;font-weight:700;color:#09090b;">${data.listingTitle}</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">AMOUNT</p>
+            <p style="margin:0 0 16px;font-size:28px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">${data.amountLabel}</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">${counterpartyLabel.toUpperCase()}</p>
+            <p style="margin:0 0 16px;font-size:14px;font-weight:600;color:#09090b;">@${counterpartyHandle}</p>
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">ORDER ID</p>
+            <p style="margin:0;font-size:13px;color:#18181b;font-family:'Courier New',monospace;">${data.orderId}</p>
+            ${txBlock}
+          </td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:20px;">
+        <tr>
+          <td align="center">
+            <a href="${ordersUrl}" style="display:inline-block;background:#09090b;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;border-radius:10px;padding:14px 32px;">
+              ${isBuyer ? 'Open your order' : 'View order details'} &rarr;
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0;font-size:13px;color:#71717a;">
+        Or copy this link: <a href="${ordersUrl}" style="color:#a855f7;text-decoration:none;">${ordersUrl}</a>
+      </p>
+    `),
+    );
+    const text =
+      `${headline}\n\n` +
+      `${isBuyer ? 'You bought' : `@${data.buyerUsername} bought`} ${data.listingTitle} for ${data.amountLabel}.\n` +
+      `${counterpartyLabel}: @${counterpartyHandle}\n` +
+      `Order: ${data.orderId}\n` +
+      (data.txHash ? `Tx: ${data.txHash}\n` : '') +
+      `\nOpen your order: ${ordersUrl}`;
+
+    await this.send(to, subject, html, text);
+  }
 }

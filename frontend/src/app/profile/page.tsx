@@ -38,6 +38,7 @@ const AvatarCropperModal = dynamicImport(
 import { GradientText } from '@/components/ui/GradientText';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
+import { WalletProviderIcon, walletProviderLabel } from '@/components/ui/WalletIcons';
 import { useStepUp } from '@/lib/auth/useStepUp';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -423,6 +424,19 @@ export default function ProfilePage() {
   const [walletLoading, setWalletLoading] = useState(false);
   const [walletMsg, setWalletMsg] = useState('');
   const [walletErr, setWalletErr] = useState('');
+  interface LinkedWallet {
+    id: string;
+    address: string;
+    label: string | null;
+    provider: string;
+    isPrimary: boolean;
+    createdAt: string;
+  }
+  const [linkedWallets, setLinkedWallets] = useState<LinkedWallet[]>([]);
+  const [walletActionId, setWalletActionId] = useState<string | null>(null);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+  const [walletLabelEditingId, setWalletLabelEditingId] = useState<string | null>(null);
+  const [walletLabelDraft, setWalletLabelDraft] = useState('');
 
   // Connections
   const [unlinkingGitHub, setUnlinkingGitHub] = useState(false);
@@ -825,6 +839,7 @@ export default function ProfilePage() {
       })) as string;
       await api.post('/auth/link/wallet', { address, signature, nonce });
       await refresh();
+      await loadLinkedWallets();
       setWalletMsg('MetaMask wallet linked to your account.');
     } catch (err) {
       setWalletErr(err instanceof ApiError ? err.message : 'Wallet connection failed.');
@@ -841,6 +856,7 @@ export default function ProfilePage() {
     try {
       await api.delete('/auth/link/wallet');
       await refresh();
+      await loadLinkedWallets();
       setWalletMsg('Wallet removed from your account.');
     } catch (err) {
       setWalletErr(err instanceof ApiError ? err.message : 'Failed to remove wallet.');
@@ -848,6 +864,120 @@ export default function ProfilePage() {
       setWalletLoading(false);
     }
   };
+
+  const loadLinkedWallets = useCallback(async () => {
+    try {
+      const data = await api.get<LinkedWallet[]>('/users/wallets');
+      setLinkedWallets(Array.isArray(data) ? data : []);
+    } catch {
+      setLinkedWallets([]);
+    }
+  }, []);
+
+  const handleAddAdditionalWallet = async () => {
+    setWalletLoading(true);
+    setWalletErr('');
+    setWalletMsg('');
+    try {
+      const eth = getMetaMaskProvider();
+      if (!eth) {
+        setWalletErr('MetaMask not detected. Please install the MetaMask extension.');
+        return;
+      }
+      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
+      const address = accounts[0];
+      if (!address) {
+        setWalletErr('No account selected in MetaMask.');
+        return;
+      }
+      const { nonce, message } = await api.post<{ nonce: string; message: string }>(
+        '/auth/link/wallet/nonce',
+        { address },
+      );
+      const signature = (await eth.request({
+        method: 'personal_sign',
+        params: [message, address],
+      })) as string;
+      await api.post('/auth/link/wallet/additional', {
+        address,
+        signature,
+        nonce,
+        provider: 'METAMASK',
+      });
+      await loadLinkedWallets();
+      await refresh();
+      setWalletMsg('Wallet linked to your account.');
+    } catch (err) {
+      setWalletErr(err instanceof ApiError ? err.message : 'Could not link wallet.');
+    } finally {
+      setWalletLoading(false);
+    }
+  };
+
+  const handleRemoveLinkedWallet = async (walletId: string) => {
+    if (!confirm('Remove this wallet from your account?')) return;
+    setWalletActionId(walletId);
+    setWalletErr('');
+    setWalletMsg('');
+    try {
+      await api.delete(`/users/wallets/${walletId}`);
+      await loadLinkedWallets();
+      await refresh();
+      setWalletMsg('Wallet removed.');
+    } catch (err) {
+      setWalletErr(err instanceof ApiError ? err.message : 'Failed to remove wallet.');
+    } finally {
+      setWalletActionId(null);
+    }
+  };
+
+  const handleSetPrimaryWallet = async (walletId: string) => {
+    setWalletActionId(walletId);
+    setWalletErr('');
+    setWalletMsg('');
+    try {
+      await api.post(`/users/wallets/${walletId}/primary`, {});
+      await loadLinkedWallets();
+      await refresh();
+      setWalletMsg('Primary wallet updated.');
+    } catch (err) {
+      setWalletErr(err instanceof ApiError ? err.message : 'Failed to set primary wallet.');
+    } finally {
+      setWalletActionId(null);
+    }
+  };
+
+  const handleCopyAddress = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopiedAddress(address);
+      setTimeout(() => setCopiedAddress(null), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleSaveWalletLabel = async (walletId: string) => {
+    setWalletActionId(walletId);
+    try {
+      const label = walletLabelDraft.trim().slice(0, 60) || null;
+      await api.patch(`/users/wallets/${walletId}`, { label });
+      await loadLinkedWallets();
+      setWalletLabelEditingId(null);
+      setWalletLabelDraft('');
+    } catch (err) {
+      setWalletErr(err instanceof ApiError ? err.message : 'Failed to save label.');
+    } finally {
+      setWalletActionId(null);
+    }
+  };
+
+  // Load linked wallets when the Wallet tab is active.
+  useEffect(() => {
+    if (!user) return;
+    if (tab !== 'wallet') return;
+    loadLinkedWallets();
+  }, [user, tab, loadLinkedWallets]);
 
   const handleLinkGitHub = () => {
     // Delegate to backend — it knows the client_id + callback URL from env and
@@ -1598,73 +1728,198 @@ export default function ProfilePage() {
           {tab === 'wallet' && (
             <div className="profile-content-card">
               <SectionHeader
-                title="Wallet"
-                subtitle="Connect your MetaMask wallet to enable on-chain transactions."
+                title="Wallets"
+                subtitle="Connect and manage the wallets you use to pay, receive earnings, and sign transactions on Bolty."
               />
               <Alert type="success" msg={walletMsg} />
               <Alert type="error" msg={walletErr} />
 
-              {walletAddress ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
-                      <IconWallet className="w-6 h-6 text-emerald-400" />
+              {/* Linked wallets list */}
+              {linkedWallets.length > 0 ? (
+                <div className="space-y-3 mb-6">
+                  {linkedWallets.map((w) => {
+                    const short = `${w.address.slice(0, 6)}…${w.address.slice(-4)}`;
+                    const copied = copiedAddress === w.address;
+                    const isEditing = walletLabelEditingId === w.id;
+                    return (
+                      <div
+                        key={w.id}
+                        className={`rounded-xl border ${
+                          w.isPrimary
+                            ? 'border-emerald-500/30 bg-emerald-500/5'
+                            : 'border-[var(--border)] bg-[var(--bg-elevated)]'
+                        } p-4 sm:p-5`}
+                      >
+                        <div className="flex items-start gap-3 sm:gap-4">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                            <WalletProviderIcon provider={w.provider} size={28} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <span className="text-sm font-light text-white/90">
+                                {walletProviderLabel(w.provider)}
+                              </span>
+                              {w.isPrimary && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] uppercase tracking-widest border border-emerald-500/30 bg-emerald-500/10 text-emerald-300">
+                                  Primary
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <code className="font-mono text-xs sm:text-sm text-white/80 truncate">
+                                <span className="hidden sm:inline">{w.address}</span>
+                                <span className="sm:hidden">{short}</span>
+                              </code>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyAddress(w.address)}
+                                className="inline-flex items-center justify-center w-7 h-7 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors flex-shrink-0"
+                                aria-label="Copy address"
+                                title={copied ? 'Copied!' : 'Copy address'}
+                              >
+                                {copied ? (
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <polyline points="20 6 9 17 4 12" />
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                  </svg>
+                                )}
+                              </button>
+                            </div>
+                            {/* Label row */}
+                            <div className="mt-2">
+                              {isEditing ? (
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={walletLabelDraft}
+                                    onChange={(e) => setWalletLabelDraft(e.target.value)}
+                                    placeholder="Label (e.g. Trading, Cold storage)"
+                                    maxLength={60}
+                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/90 placeholder-white/40 focus:outline-none focus:border-[#836EF9]/50"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveWalletLabel(w.id)}
+                                    disabled={walletActionId === w.id}
+                                    className="text-xs px-3 py-1.5 rounded-lg bg-[#836EF9]/80 hover:bg-[#836EF9] text-white disabled:opacity-50"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setWalletLabelEditingId(null);
+                                      setWalletLabelDraft('');
+                                    }}
+                                    className="text-xs px-2 py-1.5 rounded-lg border border-white/15 text-white/70 hover:bg-white/5"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setWalletLabelEditingId(w.id);
+                                    setWalletLabelDraft(w.label || '');
+                                  }}
+                                  className="text-xs text-white/50 hover:text-white/80 transition-colors"
+                                >
+                                  {w.label ? `“${w.label}”` : '+ Add label'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Actions */}
+                        <div className="mt-3 flex flex-col sm:flex-row gap-2">
+                          {!w.isPrimary && (
+                            <button
+                              type="button"
+                              onClick={() => handleSetPrimaryWallet(w.id)}
+                              disabled={walletActionId === w.id}
+                              className="flex-1 text-xs px-3 py-2 rounded-lg border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-300 disabled:opacity-50"
+                            >
+                              {walletActionId === w.id ? 'Updating…' : 'Make primary'}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveLinkedWallet(w.id)}
+                            disabled={walletActionId === w.id || (w.isPrimary && linkedWallets.length === 1 && !!walletAddress)}
+                            title={
+                              w.isPrimary && linkedWallets.length === 1
+                                ? 'Use the card above to disconnect your only wallet'
+                                : 'Remove this wallet'
+                            }
+                            className="flex-1 text-xs px-3 py-2 rounded-lg border border-red-500/25 bg-red-500/5 hover:bg-red-500/10 text-red-400 disabled:opacity-40"
+                          >
+                            {walletActionId === w.id ? 'Removing…' : 'Remove'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : walletAddress ? (
+                // Primary exists but sidecar hasn't returned yet — keep a clean card
+                <div className="mb-6 flex items-center gap-4 p-4 sm:p-5 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                    <WalletProviderIcon provider="METAMASK" size={28} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
+                      Connected
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs text-emerald-400 uppercase tracking-widest mb-1">
-                        Connected
-                      </div>
-                      <div className="font-mono text-sm text-[var(--text)] truncate">
-                        {walletAddress}
-                      </div>
-                      <div className="text-xs text-[var(--text-muted)] mt-0.5">MetaMask</div>
+                    <div className="font-mono text-xs sm:text-sm text-white/90 truncate">
+                      {walletAddress}
                     </div>
                   </div>
                   <button
                     type="button"
-                    onClick={handleDisconnectWallet}
-                    disabled={walletLoading}
-                    className="w-full py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                    onClick={() => handleCopyAddress(walletAddress)}
+                    className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 text-white/70 flex-shrink-0"
+                    aria-label="Copy address"
                   >
-                    {walletLoading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
-                        Disconnecting...
-                      </>
+                    {copiedAddress === walletAddress ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     ) : (
-                      'Disconnect Wallet'
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
                     )}
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="p-5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)]">
-                    <div className="flex items-start gap-4">
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{
-                          background:
-                            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 18px -4px rgba(131,110,249,0.45)',
-                        }}
-                      >
-                        <IconWallet className="w-6 h-6 text-[#b4a7ff]" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-light text-[var(--text)] mb-1">MetaMask</div>
-                        <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                          Connect your MetaMask wallet to make payments, receive earnings, and
-                          participate in on-chain transactions on Bolty.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+              ) : null}
+
+              {/* Primary connect/disconnect CTAs for the legacy single-wallet flow */}
+              {walletAddress ? (
+                <div className="flex flex-col sm:flex-row gap-2 mb-6">
                   <button
                     type="button"
-                    onClick={handleConnectWallet}
+                    onClick={handleAddAdditionalWallet}
                     disabled={walletLoading}
-                    className="w-full py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                    className="flex-1 py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
@@ -1675,17 +1930,91 @@ export default function ProfilePage() {
                     {walletLoading ? (
                       <>
                         <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        Connecting...
+                        Linking…
                       </>
                     ) : (
                       <>
-                        <IconWallet className="w-4 h-4" />
-                        Connect MetaMask
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                        Link another wallet
                       </>
                     )}
                   </button>
+                  <button
+                    type="button"
+                    onClick={handleDisconnectWallet}
+                    disabled={walletLoading}
+                    className="flex-1 py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {walletLoading ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
+                        Disconnecting…
+                      </>
+                    ) : (
+                      'Disconnect primary wallet'
+                    )}
+                  </button>
                 </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleConnectWallet}
+                  disabled={walletLoading}
+                  className="w-full mb-6 py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  }}
+                >
+                  {walletLoading ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Connecting…
+                    </>
+                  ) : (
+                    <>
+                      <WalletProviderIcon provider="METAMASK" size={18} />
+                      Connect MetaMask
+                    </>
+                  )}
+                </button>
               )}
+
+              {/* Supported wallets grid */}
+              <div className="border-t border-white/8 pt-5">
+                <div className="text-xs uppercase tracking-widest text-white/50 mb-3">
+                  Supported wallets
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: 'metamask', label: 'MetaMask', href: 'https://metamask.io', provider: 'METAMASK' },
+                    { id: 'walletconnect', label: 'WalletConnect', href: 'https://walletconnect.com', provider: 'WALLETCONNECT' },
+                    { id: 'uniswap', label: 'Uniswap', href: 'https://wallet.uniswap.org', provider: 'UNISWAP' },
+                    { id: 'coinbase', label: 'Coinbase', href: 'https://www.coinbase.com/wallet', provider: 'COINBASE' },
+                    { id: 'rainbow', label: 'Rainbow', href: 'https://rainbow.me', provider: 'RAINBOW' },
+                  ].map((w) => (
+                    <a
+                      key={w.id}
+                      href={w.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-lg border border-white/8 bg-white/[0.02] hover:bg-white/5 hover:border-white/15 transition-all group"
+                    >
+                      <WalletProviderIcon provider={w.provider} size={22} />
+                      <span className="text-xs sm:text-sm text-white/70 group-hover:text-white/90 truncate">
+                        {w.label}
+                      </span>
+                    </a>
+                  ))}
+                </div>
+                <p className="text-[11px] text-white/40 mt-3 leading-relaxed">
+                  MetaMask is the primary signer on Bolty. WalletConnect and other wallets link via
+                  MetaMask-compatible signing. Add multiple wallets to choose which one pays during
+                  checkout.
+                </p>
+              </div>
             </div>
           )}
 
@@ -1920,6 +2249,15 @@ export default function ProfilePage() {
                 activeAgents: usageStats.activeAgents || 0,
                 last24hCalls: usageStats.last24hCalls || 0,
                 lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
+                purchasesThisMonth: usageStats.purchasesThisMonth || 0,
+                repoPurchasesThisMonth: usageStats.repoPurchasesThisMonth || 0,
+                salesThisMonth: usageStats.salesThisMonth || 0,
+                activeListings: usageStats.activeListings || 0,
+                last24hPurchases: usageStats.last24hPurchases || 0,
+                last30dPurchases: usageStats.last30dPurchases || 0,
+                apiKeysCount: usageStats.apiKeysCount || 0,
+                lastApiUsedAt: usageStats.lastApiUsedAt || null,
+                lastPurchaseAt: usageStats.lastPurchaseAt || null,
               }}
             />
           )}

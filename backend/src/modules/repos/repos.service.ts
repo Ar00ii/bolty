@@ -16,6 +16,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { ChartService } from '../chart/chart.service';
+import { EmailService } from '../email/email.service';
 import { ReputationService } from '../reputation/reputation.service';
 
 @Injectable()
@@ -29,6 +30,7 @@ export class ReposService {
     private readonly config: ConfigService,
     private readonly chart: ChartService,
     private readonly reputation: ReputationService,
+    private readonly email: EmailService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -840,6 +842,49 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         consentMessage: consentMessage || null,
       },
     });
+
+    // Purchase confirmation emails (fire-and-forget)
+    (async () => {
+      try {
+        const parties = await this.prisma.user.findMany({
+          where: { id: { in: [buyerId, repo.userId] } },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            notificationPreference: { select: { emailOrderUpdates: true } },
+          },
+        });
+        const buyerRec = parties.find((p) => p.id === buyerId);
+        const sellerRec = parties.find((p) => p.id === repo.userId);
+        const currency = isBoltyPath ? 'BOLTY' : 'ETH';
+        const amount = amountWei ? Number(amountWei) / 1e18 : 0;
+        const amountLabel = Number.isFinite(amount) && amount > 0
+          ? `${amount.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')} ${currency}`
+          : `$${repo.lockedPriceUsd ?? 0}`;
+        const payload = {
+          buyerUsername: buyerRec?.username || 'buyer',
+          sellerUsername: sellerRec?.username || 'seller',
+          listingTitle: repo.name,
+          orderId: purchase.id,
+          amountLabel,
+          txHash: purchase.txHash,
+          purchaseKind: 'repo' as const,
+        };
+        const buyerOptIn = buyerRec?.notificationPreference?.emailOrderUpdates !== false;
+        const sellerOptIn = sellerRec?.notificationPreference?.emailOrderUpdates !== false;
+        if (buyerRec?.email && buyerOptIn) {
+          await this.email.sendPurchaseConfirmation(buyerRec.email, 'buyer', payload);
+        }
+        if (sellerRec?.email && sellerOptIn) {
+          await this.email.sendPurchaseConfirmation(sellerRec.email, 'seller', payload);
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Repo purchase email failed for ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    })();
 
     return {
       success: true,

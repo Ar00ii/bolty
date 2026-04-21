@@ -343,6 +343,25 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @HttpCode(HttpStatus.OK)
+  @Post('link/wallet/additional')
+  async linkAdditionalWallet(
+    @CurrentUser('id') userId: string,
+    @Body() dto: VerifyEthereumDto & { provider?: string; label?: string },
+  ) {
+    const wallet = await this.walletAuthService.linkAdditionalWallet(
+      userId,
+      dto.address,
+      dto.signature,
+      dto.nonce,
+      dto.provider,
+      dto.label,
+    );
+    return { success: true, wallet };
+  }
+
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Delete('link/wallet')
   async unlinkWallet(@CurrentUser('id') userId: string) {

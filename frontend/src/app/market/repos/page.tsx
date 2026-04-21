@@ -34,6 +34,7 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
+import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -1200,6 +1201,7 @@ function ReposMarketPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('tab') === 'mine' ? 'mine' : 'market';
+  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
 
   const [activeTab, setActiveTab] = useState<'market' | 'mine'>(initialTab);
 
@@ -1361,18 +1363,19 @@ function ReposMarketPageContent() {
     const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
     const platformWei = totalWei - sellerWei;
     try {
-      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+      const buyerAddress = await pickWallet();
       setConsentModal({
         repo,
         sellerWallet,
-        buyerAddress: accounts[0],
+        buyerAddress,
         sellerWei,
         platformWei,
         totalWei,
         totalUsd,
       });
-    } catch {
-      setError('Could not connect to MetaMask');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
+      setError(msg);
     }
   };
 
@@ -1811,6 +1814,7 @@ function ReposMarketPageContent() {
           onCancel={() => setConsentModal(null)}
         />
       )}
+      {walletPicker}
     </div>
   );
 }

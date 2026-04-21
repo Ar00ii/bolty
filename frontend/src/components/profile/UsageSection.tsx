@@ -1,272 +1,265 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { TrendingUp, AlertCircle, Users } from 'lucide-react';
+import {
+  Activity,
+  Clock,
+  Key,
+  Package,
+  ShoppingBag,
+  Store,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import React from 'react';
 
 interface UsageData {
-  totalCalls: number;
-  maxCalls: number;
-  activeAgents: number;
-  last24hCalls: number;
-  lastResetDate: string;
+  // Legacy fields preserved for backward compat
+  totalCalls?: number;
+  maxCalls?: number;
+  activeAgents?: number;
+  last24hCalls?: number;
+  lastResetDate?: string;
+  // New honest breakdown
+  purchasesThisMonth?: number;
+  repoPurchasesThisMonth?: number;
+  salesThisMonth?: number;
+  activeListings?: number;
+  last24hPurchases?: number;
+  last30dPurchases?: number;
+  apiKeysCount?: number;
+  lastApiUsedAt?: string | null;
+  lastPurchaseAt?: string | null;
 }
 
 interface UsageSectionProps {
   data: UsageData;
 }
 
-export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
-  const usagePercent = (data.totalCalls / data.maxCalls) * 100;
-  const isWarning = usagePercent > 80;
-  const isError = usagePercent > 95;
+function timeAgo(date: string | null | undefined): string {
+  if (!date) return 'Never';
+  const ms = Date.now() - new Date(date).getTime();
+  if (ms < 60_000) return 'Just now';
+  const m = Math.round(ms / 60_000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 30) return `${d}d ago`;
+  const mo = Math.round(d / 30);
+  return `${mo}mo ago`;
+}
 
-  const progressColor = isError ? '#ef4444' : isWarning ? '#f59e0b' : '#836EF9';
-  const progressGlow = isError
-    ? 'rgba(239,68,68,0.55)'
-    : isWarning
-      ? 'rgba(245,158,11,0.55)'
-      : 'rgba(131,110,249,0.55)';
+export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
+  const purchases = data.purchasesThisMonth ?? data.totalCalls ?? 0;
+  const repos = data.repoPurchasesThisMonth ?? 0;
+  const sales = data.salesThisMonth ?? 0;
+  const listings = data.activeListings ?? data.activeAgents ?? 0;
+  const last24h = data.last24hPurchases ?? data.last24hCalls ?? 0;
+  const last30d = data.last30dPurchases ?? 0;
+  const apiKeys = data.apiKeysCount ?? 0;
+  const resetDate = data.lastResetDate || new Date().toISOString();
+  const totalThisMonth = purchases + repos + sales;
+
+  // Trend indicator — compare last 24h vs average daily over 30d
+  const avgDaily = last30d / 30;
+  const trendUp = last24h > avgDaily;
 
   return (
-    <div className="profile-content-card space-y-6">
+    <div className="profile-content-card space-y-4 sm:space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-light text-white">Usage & Analytics</h2>
-        <p className="text-sm text-gray-400 mt-1">Monitor your API usage and activity</p>
+        <h2 className="text-xl font-light text-white">Usage &amp; Activity</h2>
+        <p className="text-sm text-white/50 mt-1">
+          Live activity on your account. Resets monthly on the{' '}
+          <span className="tabular-nums text-white/70">
+            {new Date(resetDate).toLocaleDateString('en-US', {
+              month: 'long',
+              day: 'numeric',
+            })}
+          </span>
+          .
+        </p>
       </div>
 
-      {/* Main Usage Metric */}
+      {/* Hero metric — total activity this month */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-        className="relative p-6 rounded-xl overflow-hidden space-y-4"
+        className="relative p-5 sm:p-6 rounded-xl overflow-hidden"
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
           boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
         }}
       >
-        <div
+        <span
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
               'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
           }}
         />
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
-              API Calls This Month
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <div className="min-w-0">
+            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-white/50 mb-2">
+              Activity this month
             </p>
-            <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
-              {data.totalCalls.toLocaleString()}
+            <p className="text-3xl sm:text-4xl font-light text-white tabular-nums tracking-[-0.01em]">
+              {totalThisMonth.toLocaleString()}
             </p>
-            <p className="text-xs text-zinc-500 mt-1 tabular-nums">
-              of {data.maxCalls.toLocaleString()} included
-            </p>
-          </div>
-          <div className="text-right">
-            <p
-              className="text-4xl font-light tabular-nums tracking-[-0.02em]"
-              style={{
-                color: progressColor,
-                textShadow: `0 0 14px ${progressGlow}`,
-              }}
-            >
-              {Math.round(usagePercent)}%
+            <p className="text-xs text-white/50 mt-1">
+              Combined transactions (buys, sales, repo unlocks)
             </p>
           </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div
-          className="relative w-full h-2 rounded-full overflow-hidden"
-          style={{
-            background: 'linear-gradient(180deg, rgba(8,8,12,0.8) 0%, rgba(4,4,8,0.8) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
-          }}
-        >
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(usagePercent, 100)}%` }}
-            transition={{ duration: 0.9, ease: [0.22, 0.61, 0.36, 1], delay: 0.2 }}
-            className="h-full rounded-full"
+          <div
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
             style={{
-              background: `linear-gradient(90deg, ${progressColor}cc 0%, ${progressColor} 100%)`,
-              boxShadow: `0 0 12px -2px ${progressGlow}`,
-            }}
-          />
-        </div>
-
-        {(isWarning || isError) && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.24, ease: [0.22, 0.61, 0.36, 1] }}
-            className="relative flex items-center gap-2 p-3 rounded-lg overflow-hidden"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.03) 100%)',
-              boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+              background: trendUp ? 'rgba(34,197,94,0.08)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${trendUp ? 'rgba(34,197,94,0.28)' : 'rgba(255,255,255,0.08)'}`,
             }}
           >
-            <motion.span
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-              className="flex"
+            <TrendingUp
+              className={`w-3.5 h-3.5 ${trendUp ? 'text-emerald-400' : 'text-white/40'}`}
+            />
+            <span
+              className={`text-xs tabular-nums ${trendUp ? 'text-emerald-300' : 'text-white/50'}`}
             >
-              <AlertCircle className="w-4 h-4 text-[#fda4af] flex-shrink-0" />
-            </motion.span>
-            <p className="text-[13px] text-[#fda4af] tracking-[0.005em]">
-              {isError
-                ? 'You have reached 95% of your usage limit'
-                : 'You are approaching your usage limit'}
-            </p>
-          </motion.div>
-        )}
-
-        <p className="text-xs text-zinc-500">
-          Resets on{' '}
-          <span className="text-zinc-400 tabular-nums">
-            {new Date(data.lastResetDate).toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-            })}
-          </span>
-        </p>
+              {last24h} last 24h
+            </span>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Active Agents */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
-          whileHover={{ y: -2 }}
-          className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-          }}
-        >
-          <div
-            className="absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.4) 50%, transparent 100%)',
-            }}
-          />
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
-              Active Agents
-            </p>
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(6,182,212,0.22) 0%, rgba(6,182,212,0.06) 100%)',
-                boxShadow:
-                  'inset 0 0 0 1px rgba(6,182,212,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(6,182,212,0.45)',
-              }}
-            >
-              <Users className="w-3.5 h-3.5 text-[#67e8f9]" />
-            </div>
-          </div>
-          <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
-            {data.activeAgents}
-          </p>
-          <p className="text-xs text-zinc-500 mt-2">Currently deployed</p>
-        </motion.div>
-
-        {/* Last 24h */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.14, duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
-          whileHover={{ y: -2 }}
-          className="relative p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
-          style={{
-            background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
-          }}
-        >
-          <div
-            className="absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
-            }}
-          />
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
-              Last 24h
-            </p>
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
-              }}
-            >
-              <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" />
-            </div>
-          </div>
-          <p className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
-            {data.last24hCalls.toLocaleString()}
-          </p>
-          <p className="text-xs text-zinc-500 mt-2">API calls</p>
-        </motion.div>
+      {/* Breakdown grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <StatCard
+          delay={0.08}
+          accent="#06B6D4"
+          label="Listings active"
+          value={listings}
+          sub="Currently published"
+          Icon={Store}
+        />
+        <StatCard
+          delay={0.12}
+          accent="#836EF9"
+          label="Purchases"
+          value={purchases}
+          sub="AI agents / tools"
+          Icon={ShoppingBag}
+        />
+        <StatCard
+          delay={0.16}
+          accent="#EC4899"
+          label="Repo unlocks"
+          value={repos}
+          sub="Paid repositories"
+          Icon={Package}
+        />
+        <StatCard
+          delay={0.20}
+          accent="#22c55e"
+          label="Sales"
+          value={sales}
+          sub="Things you sold"
+          Icon={Activity}
+        />
+        <StatCard
+          delay={0.24}
+          accent="#f59e0b"
+          label="API keys"
+          value={apiKeys}
+          sub={
+            data.lastApiUsedAt
+              ? `Last used ${timeAgo(data.lastApiUsedAt)}`
+              : 'None used yet'
+          }
+          Icon={Key}
+        />
+        <StatCard
+          delay={0.28}
+          accent="#b4a7ff"
+          label="Last 30 days"
+          value={last30d}
+          sub={`Last purchase ${timeAgo(data.lastPurchaseAt ?? null)}`}
+          Icon={Clock}
+        />
       </div>
 
-      {/* Upgrade Section */}
-      {usagePercent > 80 && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-          className="relative p-5 rounded-xl overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
-            boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.32), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 28px -8px rgba(131,110,249,0.35)',
-          }}
-        >
-          <div
-            className="absolute inset-x-0 top-0 h-px"
-            style={{
-              background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
-            }}
-          />
-          <p className="text-[15px] font-light text-white mb-1 tracking-[-0.005em]">
-            Need more capacity?
-          </p>
-          <p className="text-[13px] text-zinc-400 mb-4 tracking-[0.005em]">
-            Upgrade to a higher plan to increase your API call limits
-          </p>
-          <motion.button
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-            className="w-full px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-              boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-            }}
-          >
-            View Plans
-          </motion.button>
-        </motion.div>
-      )}
+      {/* Helper note */}
+      <div
+        className="flex items-start gap-3 p-3 sm:p-4 rounded-xl"
+        style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px dashed rgba(255,255,255,0.07)',
+        }}
+      >
+        <Users className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-white/55 leading-relaxed">
+          These numbers come straight from your on-chain activity on Bolty. Sales and purchases are
+          only counted after payment is verified on Base.
+        </p>
+      </div>
     </div>
   );
 };
 
 UsageSection.displayName = 'UsageSection';
+
+// ── Stat card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  delay,
+  accent,
+  label,
+  value,
+  sub,
+  Icon,
+}: {
+  delay: number;
+  accent: string;
+  label: string;
+  value: number;
+  sub: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+      whileHover={{ y: -2 }}
+      className="relative p-3 sm:p-4 rounded-xl overflow-hidden transition-colors hover:brightness-110"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <span
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${accent}66 50%, transparent 100%)`,
+        }}
+      />
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <p className="text-[9.5px] sm:text-[10.5px] uppercase tracking-[0.18em] font-medium text-white/50 truncate">
+          {label}
+        </p>
+        <div
+          className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{
+            background: `linear-gradient(135deg, ${accent}33 0%, ${accent}0d 100%)`,
+            boxShadow: `inset 0 0 0 1px ${accent}60, 0 0 12px -4px ${accent}aa`,
+          }}
+        >
+          <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+        </div>
+      </div>
+      <p className="text-2xl sm:text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
+        {value.toLocaleString()}
+      </p>
+      <p className="text-[11px] sm:text-xs text-white/50 mt-1.5 sm:mt-2 truncate">{sub}</p>
+    </motion.div>
+  );
+}

@@ -12,6 +12,7 @@ import { ethers } from 'ethers';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ReputationService } from '../reputation/reputation.service';
 
@@ -45,6 +46,7 @@ export class MarketService {
     private readonly notifications: NotificationsService,
     private readonly gateway: MarketGateway,
     private readonly reputation: ReputationService,
+    private readonly email: EmailService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -1378,6 +1380,48 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         `Reputation award skipped for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
       );
     }
+
+    // Purchase confirmation emails to both parties (fire-and-forget)
+    (async () => {
+      try {
+        const parties = await this.prisma.user.findMany({
+          where: { id: { in: [buyerId, listing.sellerId] } },
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            notificationPreference: { select: { emailOrderUpdates: true } },
+          },
+        });
+        const buyerRec = parties.find((p) => p.id === buyerId);
+        const sellerRec = parties.find((p) => p.id === listing.sellerId);
+        const eth = verifiedAmountWei ? Number(verifiedAmountWei) / 1e18 : 0;
+        const amountLabel = Number.isFinite(eth) && eth > 0
+          ? `${eth.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')} ${listing.currency || 'ETH'}`
+          : `${listing.price} ${listing.currency || 'ETH'}`;
+        const payload = {
+          buyerUsername: buyerRec?.username || 'buyer',
+          sellerUsername: sellerRec?.username || 'seller',
+          listingTitle: listing.title,
+          orderId: purchase.id,
+          amountLabel,
+          txHash: purchase.txHash,
+          purchaseKind: 'listing' as const,
+        };
+        const buyerOptIn = buyerRec?.notificationPreference?.emailOrderUpdates !== false;
+        const sellerOptIn = sellerRec?.notificationPreference?.emailOrderUpdates !== false;
+        if (buyerRec?.email && buyerOptIn) {
+          await this.email.sendPurchaseConfirmation(buyerRec.email, 'buyer', payload);
+        }
+        if (sellerRec?.email && sellerOptIn) {
+          await this.email.sendPurchaseConfirmation(sellerRec.email, 'seller', payload);
+        }
+      } catch (err) {
+        this.logger.warn(
+          `Purchase email failed for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    })();
 
     return { success: true, purchase, orderId: purchase.id, escrow: useEscrow };
   }
