@@ -350,17 +350,18 @@ export function PowerNavbar() {
 
             {profileOpen && (
               <div
-                className="absolute right-0 mt-2 rounded-xl overflow-hidden"
+                className="absolute right-0 mt-2 rounded-xl overflow-hidden z-50 flex flex-col"
                 style={{
                   top: 'calc(100% + 6px)',
                   minWidth: '260px',
+                  maxHeight: 'calc(100vh - 80px)',
                   background: '#121214',
                   border: '1px solid #2a2a30',
                   boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
                 }}
               >
                 <div
-                  className="px-3.5 py-3 flex items-center gap-3"
+                  className="px-3.5 py-3 flex items-start gap-3 shrink-0"
                   style={{
                     borderBottom: '1px solid #1f1f23',
                     background:
@@ -437,7 +438,7 @@ export function PowerNavbar() {
                     )}
                   </div>
                 </div>
-                <div className="py-1">
+                <div className="py-1 overflow-y-auto flex-1 min-h-0">
                   <DropdownLink
                     href="/profile"
                     label="Profile"
@@ -471,7 +472,7 @@ export function PowerNavbar() {
                     await logout?.();
                     router.push('/');
                   }}
-                  className="w-full text-left px-3.5 py-2.5 text-[12.5px] transition-colors"
+                  className="w-full text-left px-3.5 py-2.5 text-[12.5px] transition-colors shrink-0"
                   style={{ color: '#ef4444', borderTop: '1px solid #1f1f23' }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.08)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
