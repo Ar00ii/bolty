@@ -612,47 +612,47 @@ export class AuthService {
     });
 
     if (!user) {
-      // Check if a user with this GitHub username already exists (e.g. registered by email)
-      // If so, link GitHub to that existing account instead of creating a duplicate
-      const existingByUsername = await this.prisma.user.findUnique({
-        where: { username: githubProfile.login },
-      });
-
-      if (existingByUsername) {
-        // Only link if the account doesn't already have a different GitHub ID
-        if (existingByUsername.githubId && existingByUsername.githubId !== githubProfile.id) {
-          throw new ConflictException(
-            'This username is already linked to a different GitHub account',
-          );
+      // NO auto-linking by username. Previously, if an email-registered
+      // user "alice" existed on Bolty and someone signed in with GitHub
+      // user "alice", we merged the GitHub identity into that account and
+      // handed the OAuth caller a session for it — straightforward account
+      // takeover (GitHub username != proof of Bolty identity).
+      //
+      // Policy: new githubId → always create a new account. Username
+      // collisions get a suffix so the existing account is untouched.
+      // Linking an existing Bolty account to GitHub must happen via the
+      // authenticated /auth/link-github flow.
+      let username = githubProfile.login;
+      const clash = await this.prisma.user.findUnique({ where: { username } });
+      if (clash) {
+        // Try a handful of deterministic suffixes before falling back to random
+        for (let i = 0; i < 5; i++) {
+          const candidate = `${githubProfile.login}-gh${Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, '0')}`;
+          const exists = await this.prisma.user.findUnique({ where: { username: candidate } });
+          if (!exists) {
+            username = candidate;
+            break;
+          }
         }
-        this.logger.log(`Linking GitHub to existing user: ${githubProfile.login}`);
-        user = await this.prisma.user.update({
-          where: { id: existingByUsername.id },
-          data: {
-            githubId: githubProfile.id,
-            githubLogin: githubProfile.login,
-            githubToken: githubProfile.accessToken
-              ? encryptToken(githubProfile.accessToken)
-              : undefined,
-            avatarUrl: existingByUsername.avatarUrl || githubProfile.avatar_url,
-            lastLoginAt: new Date(),
-          },
-        });
-      } else {
-        const userTag = await this.generateUserTag();
-        user = await this.prisma.user.create({
-          data: {
-            githubId: githubProfile.id,
-            githubLogin: githubProfile.login,
-            username: githubProfile.login,
-            avatarUrl: githubProfile.avatar_url,
-            bio: githubProfile.bio,
-            githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : null,
-            userTag,
-          },
-        });
-        this.logger.log(`New GitHub user created: ${githubProfile.login}`);
+        if (username === githubProfile.login) {
+          username = `gh-${githubProfile.id}`;
+        }
       }
+      const userTag = await this.generateUserTag();
+      user = await this.prisma.user.create({
+        data: {
+          githubId: githubProfile.id,
+          githubLogin: githubProfile.login,
+          username,
+          avatarUrl: githubProfile.avatar_url,
+          bio: githubProfile.bio,
+          githubToken: githubProfile.accessToken ? encryptToken(githubProfile.accessToken) : null,
+          userTag,
+        },
+      });
+      this.logger.log(`New GitHub user created: ${githubProfile.login} (username=${username})`);
     } else {
       user = await this.prisma.user.update({
         where: { id: user.id },
