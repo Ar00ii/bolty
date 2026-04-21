@@ -106,18 +106,38 @@ export class MarketService {
 
   private async attachActivityStats<T extends { id: string }>(listings: T[]) {
     if (listings.length === 0) return listings;
-    const ids = listings.map((l) => l.id);
+    const map = await this.computeActivityMap(listings.map((l) => l.id));
+    return this.mergeActivityStats(listings, map);
+  }
+
+  private async computeActivityMap(ids: string[]) {
+    if (ids.length === 0) {
+      return {
+        stats24h: new Map<string, { sales24h: number; volumeEth24h: number }>(),
+        spark: new Map<string, number[]>(),
+      };
+    }
     const [stats24h, spark] = await Promise.all([
       this.compute24hStats(ids),
       this.compute7dSparklines(ids),
     ]);
+    return { stats24h, spark };
+  }
+
+  private mergeActivityStats<T extends { id: string }>(
+    listings: T[],
+    map: {
+      stats24h: Map<string, { sales24h: number; volumeEth24h: number }>;
+      spark: Map<string, number[]>;
+    },
+  ) {
     return listings.map((l) => {
-      const s = stats24h.get(l.id) ?? { sales24h: 0, volumeEth24h: 0 };
+      const s = map.stats24h.get(l.id) ?? { sales24h: 0, volumeEth24h: 0 };
       return {
         ...l,
         sales24h: s.sales24h,
         volumeEth24h: Number(s.volumeEth24h.toFixed(4)),
-        sparkline7d: spark.get(l.id) ?? new Array(7).fill(0),
+        sparkline7d: map.spark.get(l.id) ?? new Array(7).fill(0),
       };
     });
   }
@@ -368,8 +388,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.prisma.marketListing.count({ where }),
     ]);
 
-    const withReviews = await this.attachReviewStats(rawListings);
-    const data = await this.attachActivityStats(withReviews);
+    const [withReviews, activityMap] = await Promise.all([
+      this.attachReviewStats(rawListings),
+      this.computeActivityMap(rawListings.map((l) => l.id)),
+    ]);
+    const data = this.mergeActivityStats(withReviews, activityMap);
     return { data, total, page, pages: Math.ceil(total / take) };
   }
 

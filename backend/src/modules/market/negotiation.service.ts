@@ -378,6 +378,10 @@ export class NegotiationService {
       await this.runBuyerTurn(negId);
     } catch (err) {
       this.logger.error(`kickOffAiAiLoop error for ${negId}`, err);
+      this.gateway.emitError(negId, {
+        stage: 'kickoff',
+        message: (err as Error).message || 'Negotiation failed to start',
+      });
     }
   }
 
@@ -442,6 +446,10 @@ export class NegotiationService {
       await this.runSellerTurn(negId);
     } catch (err) {
       this.logger.error(`runBuyerTurn error for ${negId}`, err);
+      this.gateway.emitError(negId, {
+        stage: 'buyer_turn',
+        message: (err as Error).message || 'Buyer agent turn failed',
+      });
     }
   }
 
@@ -487,6 +495,10 @@ export class NegotiationService {
       await this.runBuyerTurn(negId);
     } catch (err) {
       this.logger.error(`runSellerTurn error for ${negId}`, err);
+      this.gateway.emitError(negId, {
+        stage: 'seller_turn',
+        message: (err as Error).message || 'Seller agent turn failed',
+      });
     }
   }
 

@@ -200,4 +200,15 @@ export class NegotiationsGateway
   emitAgentTyping(negotiationId: string, role: 'buyer_agent' | 'seller_agent') {
     this.server.to(`neg:${negotiationId}`).emit('negotiation:agent-typing', { role });
   }
+
+  /**
+   * Something went wrong in a background AI turn — surface it to the room
+   * so the UI can show a non-silent failure state instead of a hung spinner.
+   */
+  emitError(
+    negotiationId: string,
+    data: { stage: 'seller_turn' | 'buyer_turn' | 'kickoff'; message: string },
+  ) {
+    this.server.to(`neg:${negotiationId}`).emit('negotiation:error', data);
+  }
 }
