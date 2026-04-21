@@ -461,12 +461,30 @@ function AuthPage() {
 
   const handleBack = () => {
     if (typeof window === 'undefined') return;
-    const referrer = document.referrer;
-    const sameOrigin = referrer && new URL(referrer).origin === window.location.origin;
-    if (sameOrigin) {
+    // Protected pages (/chat, /profile, /dm, …) now `router.replace('/auth')`
+    // when the user isn't authenticated, so they aren't in the SPA history
+    // anymore. That means `history.back()` from /auth correctly jumps past
+    // them to the originating page. If there's nothing before /auth (direct
+    // landing or replaced-as-first-entry), fall back to the homepage so the
+    // button never feels dead.
+    let sameOriginReferrer = false;
+    try {
+      sameOriginReferrer =
+        !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+    } catch {
+      sameOriginReferrer = false;
+    }
+    const hasHistoryEntry = window.history.length > 1;
+    if (sameOriginReferrer && hasHistoryEntry) {
       window.history.back();
+      // Safety net: if back() is a no-op (stuck on /auth), force-navigate
+      // to the homepage shortly after so the user isn't trapped.
+      const start = window.location.href;
+      setTimeout(() => {
+        if (window.location.href === start) router.replace('/');
+      }, 350);
     } else {
-      router.push('/');
+      router.replace('/');
     }
   };
 

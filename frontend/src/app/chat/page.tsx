@@ -142,7 +142,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/auth');
+      // replace (not push) so the back button on /auth skips this page
+      // and takes the user back to wherever they were before.
+      router.replace('/auth');
     }
   }, [isAuthenticated, isLoading, router]);
 

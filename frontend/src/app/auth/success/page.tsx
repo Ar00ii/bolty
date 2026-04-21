@@ -22,7 +22,7 @@ export default function AuthSuccessPage() {
   useEffect(() => {
     if (isLoading) return;
     if (!user) {
-      router.push('/auth');
+      router.replace('/auth');
       return;
     }
     if (!user.profileSetup) {

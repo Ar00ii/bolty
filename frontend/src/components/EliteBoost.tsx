@@ -262,7 +262,7 @@ export function EliteBoost() {
 
   return (
     <section
-      className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
+      className="flex flex-col gap-2 py-12 sm:py-20 px-5 sm:px-[7%] max-w-[1810px] mx-auto relative"
       style={{ background: '#0d0d0d', border: '1px solid rgba(255, 255, 255, 0.1)' }}
     >
       {/* Heading */}
@@ -270,24 +270,19 @@ export function EliteBoost() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="text-white"
+        className="text-white text-[34px] leading-[1.1] sm:text-5xl md:text-6xl lg:text-[64px] lg:leading-[1.05]"
         style={{
-          fontSize: '64px',
           fontWeight: 300,
-          lineHeight: 1.05,
-          letterSpacing: '-1.28px',
+          letterSpacing: '-0.02em',
         }}
       >
         Boost: Dominate the Trending Market.
       </motion.h2>
 
       <p
-        className="text-white/70"
+        className="text-white/70 text-base sm:text-lg md:text-[20px] mt-3 sm:mt-4 max-w-[480px]"
         style={{
-          fontSize: '20px',
           lineHeight: '1.5',
-          maxWidth: '480px',
-          marginTop: '16px',
         }}
       >
         Power up your AI agent with Boost. Climb rankings, gain exponential visibility, and unlock
@@ -295,26 +290,16 @@ export function EliteBoost() {
       </p>
 
       {/* Platform Features - Masonry Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '24px',
-          paddingTop: '60px',
-        }}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 pt-8 sm:pt-10 md:pt-[60px]">
         {/* 1. Publish Repository - Large (top-left) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0 }}
-          className="flex flex-col gap-8 rounded-lg border p-6"
+          className="flex flex-col gap-6 md:gap-8 rounded-lg border p-5 sm:p-6 min-h-[360px] md:min-h-[500px] md:[grid-column:1/2] md:[grid-row:1/3]"
           style={{
             borderColor: '#272727',
             background: '#1a1a1a',
-            gridColumn: '1 / 2',
-            gridRow: '1 / 3',
-            minHeight: '500px',
           }}
         >
           <div className="flex flex-col gap-4">
@@ -333,20 +318,18 @@ export function EliteBoost() {
             </div>
             <div className="flex flex-col gap-3">
               <h3
-                className="text-white font-normal"
+                className="text-white font-normal text-[20px] sm:text-[22px] md:text-[24px]"
                 style={{
-                  fontSize: '24px',
                   lineHeight: 1.15,
-                  letterSpacing: '-0.8px',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {features[0].name}
               </h3>
               <p
-                className="font-normal"
+                className="font-normal text-sm sm:text-[15px] md:text-[16px]"
                 style={{
-                  fontSize: '16px',
-                  lineHeight: 1.38,
+                  lineHeight: 1.45,
                   color: '#e3e3e3',
                 }}
               >
@@ -379,13 +362,10 @@ export function EliteBoost() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="flex flex-col gap-8 rounded-lg border p-6"
+          className="flex flex-col gap-6 md:gap-8 rounded-lg border p-5 sm:p-6 min-h-[240px] md:min-h-[280px] md:[grid-column:2/4] md:[grid-row:1/2]"
           style={{
             borderColor: '#272727',
             background: '#1a1a1a',
-            gridColumn: '2 / 4',
-            gridRow: '1 / 2',
-            minHeight: '280px',
           }}
         >
           <div className="flex flex-col gap-4">
@@ -404,20 +384,18 @@ export function EliteBoost() {
             </div>
             <div className="flex flex-col gap-3">
               <h3
-                className="text-white font-normal"
+                className="text-white font-normal text-[20px] sm:text-[22px] md:text-[24px]"
                 style={{
-                  fontSize: '24px',
                   lineHeight: 1.15,
-                  letterSpacing: '-0.8px',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {features[1].name}
               </h3>
               <p
-                className="font-normal"
+                className="font-normal text-sm sm:text-[15px] md:text-[16px]"
                 style={{
-                  fontSize: '16px',
-                  lineHeight: 1.38,
+                  lineHeight: 1.45,
                   color: '#e3e3e3',
                 }}
               >
@@ -451,13 +429,10 @@ export function EliteBoost() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col gap-8 rounded-lg border p-6"
+          className="flex flex-col gap-6 md:gap-8 rounded-lg border p-5 sm:p-6 min-h-[240px] md:min-h-[280px] md:[grid-column:2/4] md:[grid-row:2/3]"
           style={{
             borderColor: '#272727',
             background: '#1a1a1a',
-            gridColumn: '2 / 4',
-            gridRow: '2 / 3',
-            minHeight: '280px',
           }}
         >
           <div className="flex flex-col gap-4">
@@ -476,20 +451,18 @@ export function EliteBoost() {
             </div>
             <div className="flex flex-col gap-3">
               <h3
-                className="text-white font-normal"
+                className="text-white font-normal text-[20px] sm:text-[22px] md:text-[24px]"
                 style={{
-                  fontSize: '24px',
                   lineHeight: 1.15,
-                  letterSpacing: '-0.8px',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {features[3].name}
               </h3>
               <p
-                className="font-normal"
+                className="font-normal text-sm sm:text-[15px] md:text-[16px]"
                 style={{
-                  fontSize: '16px',
-                  lineHeight: 1.38,
+                  lineHeight: 1.45,
                   color: '#e3e3e3',
                 }}
               >
@@ -523,13 +496,10 @@ export function EliteBoost() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.45 }}
-          className="flex flex-col gap-8 rounded-lg border p-6"
+          className="flex flex-col gap-6 md:gap-8 rounded-lg border p-5 sm:p-6 min-h-[260px] md:min-h-[350px] md:[grid-column:1/4] md:[grid-row:3/4]"
           style={{
             borderColor: '#272727',
             background: '#1a1a1a',
-            gridColumn: '1 / 4',
-            gridRow: '3 / 4',
-            minHeight: '350px',
           }}
         >
           <div className="flex flex-col gap-4">
@@ -548,20 +518,18 @@ export function EliteBoost() {
             </div>
             <div className="flex flex-col gap-3">
               <h3
-                className="text-white font-normal"
+                className="text-white font-normal text-[20px] sm:text-[22px] md:text-[24px]"
                 style={{
-                  fontSize: '24px',
                   lineHeight: 1.15,
-                  letterSpacing: '-0.8px',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {features[2].name}
               </h3>
               <p
-                className="font-normal"
+                className="font-normal text-sm sm:text-[15px] md:text-[16px]"
                 style={{
-                  fontSize: '16px',
-                  lineHeight: 1.38,
+                  lineHeight: 1.45,
                   color: '#e3e3e3',
                 }}
               >

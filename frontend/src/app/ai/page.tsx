@@ -68,7 +68,7 @@ export default function AiPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) router.push('/auth');
+    if (!authLoading && !isAuthenticated) router.replace('/auth');
   }, [authLoading, isAuthenticated, router]);
 
   const loadSessions = useCallback(async () => {
