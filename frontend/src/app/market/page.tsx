@@ -20,6 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, WS_URL } from '@/lib/api/client';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -890,19 +891,12 @@ function Row({
         </div>
 
         <div className="hidden md:flex items-center gap-1.5 text-[11.5px] text-zinc-400 font-light truncate">
-          <div
-            className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          >
-            {listing.seller.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={listing.seller.avatarUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-[10px] text-zinc-200">
-                {(listing.seller.username || '?')[0].toUpperCase()}
-              </div>
-            )}
-          </div>
+          <UserAvatar
+            src={listing.seller.avatarUrl}
+            name={listing.seller.username}
+            userId={listing.seller.id}
+            size={20}
+          />
           <span className="truncate">@{listing.seller.username || 'unknown'}</span>
         </div>
 
