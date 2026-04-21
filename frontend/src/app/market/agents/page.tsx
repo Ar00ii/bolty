@@ -1960,8 +1960,22 @@ function CreateListingForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title.trim() || !form.description.trim()) {
-      setError('Title and description are required');
+    // Run every step's validator so we never submit a partially-invalid
+    // form. If any step has issues, surface the errors, jump back to the
+    // earliest broken step and bail before we hit the backend.
+    const allErrors: Record<string, string> = {};
+    let firstBrokenStep: 1 | 2 | 3 | 4 | 5 | 6 | null = null;
+    for (const s of [1, 2, 3, 4, 5] as const) {
+      const errs = validateStep(s);
+      if (Object.keys(errs).length > 0) {
+        Object.assign(allErrors, errs);
+        if (firstBrokenStep === null) firstBrokenStep = s;
+      }
+    }
+    if (firstBrokenStep !== null) {
+      setFieldErrors((prev) => ({ ...prev, ...allErrors }));
+      setError('Some required fields are missing — jumping you back.');
+      setStep(firstBrokenStep);
       return;
     }
     setSubmitting(true);
@@ -2015,21 +2029,59 @@ function CreateListingForm({
 
   const field = (key: keyof typeof form, value: string) => setForm((p) => ({ ...p, [key]: value }));
 
-  const canProceedToStep = (currentStep: number): boolean => {
+  // Per-step validation returning a map of field → error so the wizard
+  // can render errors inline on each input instead of dumping a generic
+  // "fill in required fields" at the bottom after the user has already
+  // walked past step 6.
+  const validateStep = (currentStep: number): Record<string, string> => {
+    const errs: Record<string, string> = {};
     switch (currentStep) {
       case 1:
-        return form.title.trim() !== '' && form.description.trim() !== '';
+        if (!form.title.trim()) errs.title = 'Title is required';
+        else if (form.title.trim().length < 3) errs.title = 'Title must be at least 3 characters';
+        if (!form.description.trim()) errs.description = 'Description is required';
+        else if (form.description.trim().length < 20)
+          errs.description = 'Description must be at least 20 characters';
+        break;
       case 2:
-        return true;
+        break;
       case 3:
-        return form.agentEndpoint.trim() !== '' || !ACCEPTS_AGENT_ENDPOINT.has(form.type);
+        if (ACCEPTS_AGENT_ENDPOINT.has(form.type)) {
+          if (!form.agentEndpoint.trim()) {
+            errs.agentEndpoint = 'Negotiation webhook is required for this agent type';
+          } else if (!validators.url(form.agentEndpoint)) {
+            errs.agentEndpoint = 'Invalid webhook URL';
+          }
+        }
+        break;
       case 4:
-        return form.price !== '';
+        if (!form.price) {
+          errs.price = 'Price is required';
+        } else if (!validators.price(form.price)) {
+          errs.price = 'Price must be a positive number';
+        }
+        if (form.minPrice) {
+          if (!validators.price(form.minPrice)) {
+            errs.minPrice = 'Floor price must be a positive number';
+          } else if (form.price && parseFloat(form.minPrice) > parseFloat(form.price)) {
+            errs.minPrice = 'Floor price cannot exceed price';
+          }
+        }
+        break;
       case 5:
-        return form.version !== '';
-      default:
-        return true;
+        if (!form.version) errs.version = 'Version is required';
+        break;
     }
+    return errs;
+  };
+
+  const FIELD_LABELS: Record<string, string> = {
+    title: 'Title',
+    description: 'Description',
+    agentEndpoint: 'Negotiation webhook',
+    price: 'Price',
+    minPrice: 'Floor price',
+    version: 'Version',
   };
 
   const steps = [
@@ -2089,14 +2141,38 @@ function CreateListingForm({
         </button>
       </div>
 
-      {/* Step progress */}
+      {/* Step progress — click to jump back to a completed step */}
       <div className="mk-wizard__steps">
-        {steps.map((s) => (
-          <div
-            key={s.num}
-            className={`mk-wizard__step ${s.num <= step ? 'mk-wizard__step--done' : ''}`}
-          />
-        ))}
+        {steps.map((s) => {
+          const hasError =
+            (s.num === 1 && (fieldErrors.title || fieldErrors.description)) ||
+            (s.num === 3 && fieldErrors.agentEndpoint) ||
+            (s.num === 4 && (fieldErrors.price || fieldErrors.minPrice)) ||
+            (s.num === 5 && fieldErrors.version);
+          return (
+            <button
+              key={s.num}
+              type="button"
+              onClick={() => {
+                if (s.num < step) {
+                  setError('');
+                  setStep(s.num as 1 | 2 | 3 | 4 | 5 | 6);
+                }
+              }}
+              disabled={s.num >= step}
+              aria-label={`Step ${s.num}: ${s.label}`}
+              title={s.label}
+              className={`mk-wizard__step ${s.num <= step ? 'mk-wizard__step--done' : ''} ${
+                hasError ? 'mk-wizard__step--error' : ''
+              }`}
+              style={
+                hasError
+                  ? { background: 'rgba(239,68,68,0.6)', cursor: s.num < step ? 'pointer' : 'default' }
+                  : { cursor: s.num < step ? 'pointer' : 'default' }
+              }
+            />
+          );
+        })}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -2161,19 +2237,34 @@ function CreateListingForm({
                         : 'e.g., Custom Analytics Tool'
                 }
                 value={form.title}
-                onChange={(e) => field('title', e.target.value)}
+                onChange={(e) => {
+                  field('title', e.target.value);
+                  if (fieldErrors.title) {
+                    setFieldErrors((p) => {
+                      const copy = { ...p };
+                      delete copy.title;
+                      return copy;
+                    });
+                  }
+                }}
                 maxLength={100}
                 required
                 className="w-full text-sm px-3 py-2 rounded-lg font-light"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: fieldErrors.title
+                    ? '1px solid rgba(239,68,68,0.35)'
+                    : '1px solid rgba(255,255,255,0.08)',
                   color: '#e4e4e7',
                   outline: 'none',
                 }}
               />
               <div className="flex items-center justify-between">
-                <p className="text-xs text-zinc-600 mt-1">{form.title.length}/100</p>
+                {fieldErrors.title ? (
+                  <p className="text-xs text-red-400 mt-1">{fieldErrors.title}</p>
+                ) : (
+                  <p className="text-xs text-zinc-600 mt-1">{form.title.length}/100</p>
+                )}
               </div>
               <Tip message={getTips.title(form.title.length)} />
             </div>
@@ -2187,20 +2278,35 @@ function CreateListingForm({
               <textarea
                 placeholder="What does your agent do? What problems does it solve?"
                 value={form.description}
-                onChange={(e) => field('description', e.target.value)}
+                onChange={(e) => {
+                  field('description', e.target.value);
+                  if (fieldErrors.description) {
+                    setFieldErrors((p) => {
+                      const copy = { ...p };
+                      delete copy.description;
+                      return copy;
+                    });
+                  }
+                }}
                 maxLength={1000}
                 rows={4}
                 required
                 className="w-full text-sm px-3 py-2 rounded-lg font-light resize-none"
                 style={{
                   background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: fieldErrors.description
+                    ? '1px solid rgba(239,68,68,0.35)'
+                    : '1px solid rgba(255,255,255,0.08)',
                   color: '#e4e4e7',
                   outline: 'none',
                 }}
               />
               <div className="flex items-center justify-between">
-                <p className="text-xs text-zinc-600 mt-1">{form.description.length}/1000</p>
+                {fieldErrors.description ? (
+                  <p className="text-xs text-red-400 mt-1">{fieldErrors.description}</p>
+                ) : (
+                  <p className="text-xs text-zinc-600 mt-1">{form.description.length}/1000</p>
+                )}
               </div>
               <Tip message={getTips.description(form.description.length)} />
             </div>
@@ -2949,6 +3055,39 @@ function CreateListingForm({
           </div>
         )}
 
+        {/* Step-level error summary */}
+        {(() => {
+          const stepFieldErrs = Object.entries(fieldErrors).filter(([key]) => {
+            if (step === 1) return key === 'title' || key === 'description';
+            if (step === 3) return key === 'agentEndpoint';
+            if (step === 4) return key === 'price' || key === 'minPrice';
+            if (step === 5) return key === 'version';
+            return false;
+          });
+          if (stepFieldErrs.length === 0) return null;
+          return (
+            <div
+              className="rounded-lg p-3 border"
+              style={{
+                background: 'rgba(239,68,68,0.05)',
+                borderColor: 'rgba(239,68,68,0.25)',
+              }}
+              role="alert"
+            >
+              <p className="text-xs font-light text-red-300 mb-1">
+                Fix {stepFieldErrs.length === 1 ? 'this' : 'these'} before continuing:
+              </p>
+              <ul className="text-xs font-light text-red-200/90 space-y-0.5 pl-3">
+                {stepFieldErrs.map(([key, msg]) => (
+                  <li key={key}>
+                    • {FIELD_LABELS[key] || key}: {msg}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
+
         {/* Error */}
         {error && step !== 5 && <p className="text-red-400 font-light text-xs">{error}</p>}
 
@@ -2957,7 +3096,10 @@ function CreateListingForm({
           {step > 1 && (
             <button
               type="button"
-              onClick={() => setStep((prev) => (prev - 1) as any)}
+              onClick={() => {
+                setError('');
+                setStep((prev) => (prev - 1) as any);
+              }}
               className="mk-wizard__secondary"
             >
               Back
@@ -2969,10 +3111,25 @@ function CreateListingForm({
               type="button"
               onClick={() => {
                 setError('');
-                if (canProceedToStep(step)) {
+                const errs = validateStep(step);
+                setFieldErrors((prev) => {
+                  const next = { ...prev, ...errs };
+                  // clear any resolved errors for this step's fields
+                  if (step === 1) {
+                    if (!errs.title) delete next.title;
+                    if (!errs.description) delete next.description;
+                  } else if (step === 3) {
+                    if (!errs.agentEndpoint) delete next.agentEndpoint;
+                  } else if (step === 4) {
+                    if (!errs.price) delete next.price;
+                    if (!errs.minPrice) delete next.minPrice;
+                  } else if (step === 5) {
+                    if (!errs.version) delete next.version;
+                  }
+                  return next;
+                });
+                if (Object.keys(errs).length === 0) {
                   setStep((prev) => (prev + 1) as any);
-                } else {
-                  setError('Please fill in the required fields');
                 }
               }}
               className="mk-wizard__primary"
