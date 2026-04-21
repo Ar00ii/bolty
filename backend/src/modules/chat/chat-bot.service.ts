@@ -126,9 +126,10 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
   private pickLine(): string {
     // Prefer lines we haven't used recently
     const pool = BOT_LINES.filter((l) => !this.recentLines.includes(l));
-    const line = pool.length > 0
-      ? pool[Math.floor(Math.random() * pool.length)]
-      : BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)];
+    const line =
+      pool.length > 0
+        ? pool[Math.floor(Math.random() * pool.length)]
+        : BOT_LINES[Math.floor(Math.random() * BOT_LINES.length)];
     this.recentLines.push(line);
     if (this.recentLines.length > MAX_RECENT) this.recentLines.shift();
     return line;
