@@ -31,6 +31,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { StepUpService } from '../auth/step-up.service';
 
 import { UsersService } from './users.service';
+import { WalletsService } from './wallets.service';
 
 const AVATAR_UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'avatars');
 const ALLOWED_IMAGE_MIMETYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
@@ -82,6 +83,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly stepUp: StepUpService,
     private readonly config: ConfigService,
+    private readonly walletsService: WalletsService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -232,6 +234,36 @@ export class UsersController {
   @Delete('integrations/:id')
   removeIntegration(@CurrentUser('id') userId: string, @Param('id') integrationId: string) {
     return this.usersService.removeIntegration(userId, integrationId);
+  }
+
+  // ── Linked wallets ────────────────────────────────────────────────────────
+
+  @UseGuards(JwtAuthGuard)
+  @Get('wallets')
+  listWallets(@CurrentUser('id') userId: string) {
+    return this.walletsService.listWallets(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('wallets/:id')
+  removeWallet(@CurrentUser('id') userId: string, @Param('id') walletId: string) {
+    return this.walletsService.removeWallet(userId, walletId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('wallets/:id/primary')
+  setPrimaryWallet(@CurrentUser('id') userId: string, @Param('id') walletId: string) {
+    return this.walletsService.setPrimary(userId, walletId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('wallets/:id')
+  updateWalletLabel(
+    @CurrentUser('id') userId: string,
+    @Param('id') walletId: string,
+    @Body() body: { label?: string | null },
+  ) {
+    return this.walletsService.updateLabel(userId, walletId, body?.label ?? null);
   }
 
   @Public()

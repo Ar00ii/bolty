@@ -101,8 +101,38 @@ model User {
   aiAgents               Agent[]
   raysPurchases          RaysPurchase[]
   listingBoosts          ListingBoost[]
+  linkedWallets          UserWallet[]
 
   @@map("users")
+}
+
+// Additional wallets a user has linked (on top of the primary `walletAddress`
+// on the user row). Lets the buyer pick which one to pay from before a
+// purchase and surfaces labeled wallets in the profile.
+model UserWallet {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId   String
+  address  String
+  label    String? // human label (e.g. "Hardware wallet", "Burner")
+  provider WalletProvider @default(OTHER)
+  isPrimary Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, address])
+  @@index([userId])
+  @@map("user_wallets")
+}
+
+enum WalletProvider {
+  METAMASK
+  WALLETCONNECT
+  COINBASE
+  RAINBOW
+  UNISWAP
+  OTHER
 }
 
 enum UserRole {

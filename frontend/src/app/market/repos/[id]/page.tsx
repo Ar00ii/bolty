@@ -28,6 +28,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -134,6 +135,7 @@ export default function RepoDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
 
   const [repo, setRepo] = useState<RepositoryDetail | null>(null);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -218,17 +220,18 @@ export default function RepoDetailPage() {
     const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
     const platformWei = totalWei - sellerWei;
     try {
-      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+      const buyerAddress = await pickWallet();
       setConsent({
         sellerWallet,
-        buyerAddress: accounts[0],
+        buyerAddress,
         sellerWei,
         platformWei,
         totalWei,
         totalUsd,
       });
-    } catch {
-      setError('Could not connect to MetaMask');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
+      setError(msg);
     }
   };
 
@@ -557,6 +560,7 @@ export default function RepoDetailPage() {
           onCancel={() => setConsent(null)}
         />
       )}
+      {walletPicker}
     </div>
   );
 }

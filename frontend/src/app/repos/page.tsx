@@ -38,6 +38,7 @@ const DottedSurface = dynamicImport(
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
+import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {
@@ -153,6 +154,7 @@ const SORTS = [
 
 export default function ReposPage() {
   const { isAuthenticated, user } = useAuth();
+  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [ghRepos, setGhRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -447,10 +449,10 @@ export default function ReposPage() {
     const platformWei = totalWei - sellerWei;
     let buyerAddress: string;
     try {
-      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
-      buyerAddress = accounts[0];
-    } catch {
-      setError('Could not connect to MetaMask');
+      buyerAddress = await pickWallet();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
+      setError(msg);
       return;
     }
     setConsentModal({
@@ -1463,6 +1465,7 @@ export default function ReposPage() {
           onCancel={() => setConsentModal(null)}
         />
       )}
+      {walletPicker}
     </div>
   );
 }

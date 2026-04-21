@@ -40,6 +40,7 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
+import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
@@ -646,6 +647,7 @@ function NegotiationModal({
   const [message, setMessage] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
   const [error, setError] = useState('');
+  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
   const [agentTyping, setAgentTyping] = useState<'buyer_agent' | 'seller_agent' | null>(null);
   const [switchPending, setSwitchPending] = useState<{ requestedBy: string } | null>(null);
   const [requestingSwitch, setRequestingSwitch] = useState(false);
@@ -838,10 +840,10 @@ function NegotiationModal({
       const totalUsd = neg.agreedPrice * ethPrice;
       const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
       const platformWei = totalWei - sellerWei;
-      const accounts = (await ethereum.request({ method: 'eth_requestAccounts' })) as string[];
+      const buyerAddress = await pickWallet();
       setConsentData({
         sellerWallet,
-        buyerAddress: accounts[0],
+        buyerAddress,
         sellerWei,
         platformWei,
         totalWei,
@@ -1331,6 +1333,7 @@ function NegotiationModal({
           onCancel={() => setConsentData(null)}
         />
       )}
+      {walletPicker}
     </div>
   );
 }
