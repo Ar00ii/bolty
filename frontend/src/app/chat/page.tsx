@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 import { GradientText } from '@/components/ui/GradientText';
+import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { WS_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -18,6 +19,7 @@ interface ChatMessage {
   userId: string;
   username: string | null;
   avatarUrl: string | null;
+  reputationPoints?: number;
   createdAt: string;
 }
 
@@ -402,9 +404,27 @@ export default function ChatPage() {
                       (msg.username ? (
                         <Link
                           href={`/u/${msg.username}`}
-                          className="text-xs font-light text-bolty-400 hover:text-bolty-300 transition-colors"
+                          className="text-xs font-light text-bolty-400 hover:text-bolty-300 transition-colors inline-flex items-center gap-1.5"
                         >
                           {msg.username}
+                          {(() => {
+                            const rank = getReputationRank(msg.reputationPoints ?? 0);
+                            const RankIcon = rank.icon;
+                            return (
+                              <span
+                                className="inline-flex items-center justify-center rounded-full"
+                                title={`${rank.label} · ${msg.reputationPoints ?? 0} rep`}
+                                style={{
+                                  width: 14,
+                                  height: 14,
+                                  background: `linear-gradient(135deg, ${rank.color}26 0%, ${rank.color}0d 100%)`,
+                                  boxShadow: `inset 0 0 0 1px ${rank.color}66`,
+                                }}
+                              >
+                                <RankIcon size={8} color={rank.color} strokeWidth={2.25} />
+                              </span>
+                            );
+                          })()}
                         </Link>
                       ) : (
                         <span

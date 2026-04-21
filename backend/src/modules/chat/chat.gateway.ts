@@ -130,6 +130,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           userId: m.userId,
           username: m.user.username,
           avatarUrl: m.user.avatarUrl,
+          reputationPoints: m.user.reputationPoints,
           createdAt: m.createdAt,
         })),
       );
@@ -173,6 +174,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId: message.userId,
         username: message.user.username,
         avatarUrl: message.user.avatarUrl,
+        reputationPoints: message.user.reputationPoints,
         createdAt: message.createdAt,
       });
     } catch (err: unknown) {
