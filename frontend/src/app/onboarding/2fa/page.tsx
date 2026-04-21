@@ -32,6 +32,7 @@ function Onboarding2FAInner() {
   const router = useRouter();
   const search = useSearchParams();
   const next = search.get('next') || '/profile';
+  const reason = search.get('reason');
 
   const [step, setStep] = useState<Step>('loading');
   const [qrCode, setQrCode] = useState<string | null>(null);
@@ -133,6 +134,20 @@ function Onboarding2FAInner() {
           <p className="text-sm text-zinc-400 font-light">
             Bolty requires two-factor authentication for every account. It only takes a minute.
           </p>
+          {reason === 'sensitive' && (
+            <div
+              className="mt-4 inline-flex items-start gap-2 text-[12px] text-purple-200/90 text-left px-3 py-2 rounded-lg"
+              style={{
+                background: 'rgba(131,110,249,0.08)',
+                border: '1px solid rgba(131,110,249,0.3)',
+              }}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+              <span>
+                That action requires 2FA. Finish setup now and we&apos;ll send you back to continue.
+              </span>
+            </div>
+          )}
         </div>
 
         {step === 'loading' && (

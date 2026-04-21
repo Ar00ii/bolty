@@ -34,6 +34,17 @@ export function useStepUp<T = unknown>() {
     try {
       return await action();
     } catch (err) {
+      // Account hasn't enrolled 2FA yet — the only safe response for a
+      // sensitive op is to bounce the user to the enrollment page. Coming
+      // back from onboarding (?next=...) re-renders the original screen so
+      // the user can retry.
+      if (err instanceof ApiError && err.code === 'TWO_FACTOR_NOT_ENROLLED') {
+        if (typeof window !== 'undefined') {
+          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/onboarding/2fa?next=${next}&reason=sensitive`;
+        }
+        throw err;
+      }
       if (
         err instanceof ApiError &&
         (err.code === 'STEP_UP_REQUIRED' || err.code === 'STEP_UP_INVALID')
