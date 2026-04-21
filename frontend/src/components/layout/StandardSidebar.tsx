@@ -198,9 +198,9 @@ export function StandardSidebar() {
           <div key={sect.section} className="mt-4 first:mt-0">
             <div
               className="font-mono text-[10px] uppercase px-[10px] pb-[6px]"
-              style={{ color: '#52525b', letterSpacing: '0.12em' }}
+              style={{ color: '#a1a1aa', letterSpacing: '0.16em', fontWeight: 600 }}
             >
-              {sect.section}
+              {sect.section.toUpperCase()}
             </div>
             {sect.items.map((item) => {
               const Icon = item.icon;
@@ -215,7 +215,6 @@ export function StandardSidebar() {
       <div
         className="p-3"
         style={{
-          borderTop: '1px solid #1f1f23',
           background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
         }}
       >
@@ -237,9 +236,9 @@ export function StandardSidebar() {
               type="button"
               onClick={() => logout?.()}
               className="font-mono text-[10px] transition-colors"
-              style={{ color: '#52525b' }}
+              style={{ color: '#a1a1aa' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#52525b')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#a1a1aa')}
             >
               disconnect
             </button>
@@ -378,9 +377,8 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
 
   return (
     <div onMouseEnter={handleGroupEnter} onMouseLeave={handleGroupLeave}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
+      <Link
+        href={item.href}
         aria-expanded={open}
         className={rowClassName}
         style={rowStyle}
@@ -388,7 +386,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
         onMouseLeave={handleMouseLeave}
       >
         {body}
-      </button>
+      </Link>
 
       <AnimatePresence initial={false}>
         {open && (

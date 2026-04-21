@@ -90,8 +90,8 @@ img {
   --border: #1e1e24;
   --border-hover: #2e2e38;
   --text: #e4e4e7;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-secondary: #d4d4d8;
+  --text-muted: #a1a1aa;
   --brand: #836ef9;
   --brand-dim: rgba(131, 110, 249, 0.08);
   --brand-hover: #9580ff;
@@ -1708,7 +1708,7 @@ aside button[data-active='true']::after {
 }
 
 .profile-menu-item {
-  @apply relative inline-flex items-center justify-center gap-2 h-10 px-3.5 rounded-lg transition-colors duration-150 text-zinc-400 hover:text-zinc-200 font-light text-[12.5px] flex-shrink-0 whitespace-nowrap;
+  @apply relative inline-flex items-center justify-center gap-2 h-10 px-3.5 rounded-lg transition-colors duration-150 text-zinc-300 hover:text-white font-light text-[12.5px] flex-shrink-0 whitespace-nowrap;
   letter-spacing: 0.005em;
 }
 

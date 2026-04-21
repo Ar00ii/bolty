@@ -1204,13 +1204,13 @@ export default function ProfilePage() {
       <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
           <div className="min-w-0">
-            <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 font-medium mb-2 flex items-center gap-2">
-              <Link href="/" className="hover:text-zinc-300 transition-colors">
+            <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-200 font-medium mb-2 flex items-center gap-2">
+              <Link href="/" className="hover:text-white transition-colors">
                 Home
               </Link>
-              <span className="text-zinc-700">/</span>
+              <span className="text-zinc-400">/</span>
               <span className="text-zinc-300">Profile</span>
-              <span className="text-zinc-700">/</span>
+              <span className="text-zinc-400">/</span>
               <span className="text-[#b4a7ff]">{activeTab.label}</span>
             </div>
             <h1
@@ -1219,7 +1219,7 @@ export default function ProfilePage() {
             >
               <GradientText gradient="purple">{activeTab.label}</GradientText>
             </h1>
-            <p className="text-[13px] sm:text-sm text-zinc-400 mt-1 font-light">
+            <p className="text-[13px] sm:text-sm text-zinc-300 mt-1 font-light">
               Manage your identity, security and connections on Bolty.
             </p>
           </div>
@@ -1874,7 +1874,7 @@ export default function ProfilePage() {
                                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
                                   {f.friend.username && <span>@{f.friend.username}</span>}
                                   {f.friend.userTag && (
-                                    <span className="text-bolty-400/50">#{f.friend.userTag}</span>
+                                    <span className="text-bolty-300">#{f.friend.userTag}</span>
                                   )}
                                 </div>
                               </div>
