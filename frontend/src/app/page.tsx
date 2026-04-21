@@ -14,7 +14,7 @@ import {
   Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { ClickClickDone } from '@/components/ClickClickDone';
 import { EliteBoost } from '@/components/EliteBoost';
@@ -22,7 +22,9 @@ import { FeaturesGrid } from '@/components/FeaturesGrid';
 import { AvatarCircles } from '@/components/ui/AvatarCircles';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { RenderHero } from '@/components/ui/RenderHero';
+import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 // Data
 const FEATURES = [
@@ -107,8 +109,45 @@ const TESTIMONIALS = [
   },
 ];
 
+interface CommunityUser {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  avatarUrl: string | null;
+}
+
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
+  const [communityAvatars, setCommunityAvatars] = useState<
+    { imageUrl: string; profileUrl?: string }[]
+  >([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get<{ users: CommunityUser[]; totalCount: number }>('/users/community?limit=6')
+      .then((data) => {
+        if (cancelled) return;
+        const avatars: { imageUrl: string; profileUrl?: string }[] = [];
+        for (const u of data.users || []) {
+          const imageUrl = resolveAssetUrl(u.avatarUrl);
+          if (!imageUrl) continue;
+          avatars.push({
+            imageUrl,
+            profileUrl: u.username ? `/u/${u.username}` : undefined,
+          });
+        }
+        setCommunityAvatars(avatars);
+        setTotalMembers(Math.max(0, (data.totalCount || 0) - avatars.length));
+      })
+      .catch(() => {
+        // Silent fail — the section just won't render without real data.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
@@ -116,48 +155,21 @@ export default function HomePage() {
       <RenderHero isAuthenticated={isAuthenticated} />
 
       {/* ── COMMUNITY SOCIAL PROOF ── */}
-      <div className="py-8 px-[7%] max-w-[1810px] mx-auto border-b border-white/[0.06]">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex items-center justify-center gap-4"
-        >
-          <AvatarCircles
-            numPeople={12400}
-            avatarUrls={[
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Nova&backgroundColor=836ef9',
-              },
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Atlas&backgroundColor=06b6d4',
-              },
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Echo&backgroundColor=ec4899',
-              },
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Orion&backgroundColor=a78bfa',
-              },
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Iris&backgroundColor=22c55e',
-              },
-              {
-                imageUrl:
-                  'https://api.dicebear.com/9.x/notionists/svg?seed=Kai&backgroundColor=f59e0b',
-              },
-            ]}
-          />
-          <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
-            Share your work with <span className="text-white/70 font-normal">millions</span> of
-            developers worldwide.
-          </p>
-        </motion.div>
-      </div>
+      {communityAvatars.length > 0 && (
+        <div className="py-8 px-[7%] max-w-[1810px] mx-auto border-b border-white/[0.06]">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-center gap-4"
+          >
+            <AvatarCircles numPeople={totalMembers} avatarUrls={communityAvatars} />
+            <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
+              Share your work with other developers worldwide.
+            </p>
+          </motion.div>
+        </div>
+      )}
 
       {/* ── CLICK CLICK DONE ── */}
       <ClickClickDone />

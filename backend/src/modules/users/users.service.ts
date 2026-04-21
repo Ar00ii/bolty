@@ -50,6 +50,34 @@ export class UsersService {
   }
 
   /** Search users by username (partial) or userTag exact (pass "#1234") */
+  /**
+   * Public community snapshot used by the landing page — a handful of real
+   * members with avatars plus the total number of registered accounts.
+   * Only surfaces users that have set a username and avatar so the result
+   * looks populated instead of showing blank placeholders.
+   */
+  async getCommunityShowcase(limit = 6) {
+    const [users, totalCount] = await Promise.all([
+      this.prisma.user.findMany({
+        where: {
+          isBanned: false,
+          avatarUrl: { not: null },
+          username: { not: null },
+        },
+        orderBy: [{ reputationPoints: 'desc' }, { lastLoginAt: 'desc' }],
+        take: Math.min(Math.max(limit, 1), 20),
+        select: {
+          id: true,
+          username: true,
+          displayName: true,
+          avatarUrl: true,
+        },
+      }),
+      this.prisma.user.count({ where: { isBanned: false } }),
+    ]);
+    return { users, totalCount };
+  }
+
   async search(query: string) {
     const q = query.trim().slice(0, 50);
     if (!q) return [];
