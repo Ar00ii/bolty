@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 interface PublicRepo {
   id: string;
@@ -62,7 +63,7 @@ export default function PublicProfilePage() {
     api
       .get<PublicProfile>(`/users/${username}`)
       .then((p) => {
-        setProfile(p);
+        setProfile({ ...p, avatarUrl: resolveAssetUrl(p.avatarUrl) });
         if (isAuthenticated && currentUser) {
           if (currentUser.id === p.id) {
             setFriendStatus('self');

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 import { api } from '@/lib/api/client';
+import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 export interface User {
   id: string;
@@ -45,7 +46,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUser = useCallback(async () => {
     try {
       const data = await api.get<User>('/auth/me');
-      setUser(data);
+      // Legacy uploads stored a relative `/api/v1/...` avatar path; normalise
+      // to an absolute URL so `<img src>` resolves against the backend origin.
+      setUser({ ...data, avatarUrl: resolveAssetUrl(data.avatarUrl) });
     } catch {
       setUser(null);
     } finally {

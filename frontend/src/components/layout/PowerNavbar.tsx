@@ -105,6 +105,8 @@ export function PowerNavbar() {
       <header
         className="flex items-center gap-3 px-[18px]"
         style={{
+          position: 'relative',
+          zIndex: 2,
           height: '56px',
           borderBottom: '1px solid #1f1f23',
           background: 'rgba(9,9,11,0.85)',
