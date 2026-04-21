@@ -1123,6 +1123,34 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const dupTx = await this.prisma.marketPurchase.findUnique({ where: { txHash } });
     if (dupTx) throw new ForbiddenException('Transaction already recorded');
 
+    // ── Expected payment amount ──────────────────────────────────────────
+    // If the buyer negotiated, honor the agreed price; otherwise the sticker
+    // price. This is the value we check the on-chain tx against — without it
+    // an attacker can pay 1 wei for a 10 ETH listing.
+    let expectedPrice = listing.price;
+    if (negotiationId) {
+      const neg = await this.prisma.agentNegotiation.findUnique({
+        where: { id: negotiationId },
+        select: { buyerId: true, listingId: true, status: true, agreedPrice: true },
+      });
+      if (!neg || neg.buyerId !== buyerId || neg.listingId !== listingId) {
+        throw new ForbiddenException('Negotiation does not match this purchase');
+      }
+      if (neg.status !== 'AGREED' || neg.agreedPrice == null) {
+        throw new BadRequestException('Negotiation is not in AGREED state');
+      }
+      expectedPrice = neg.agreedPrice;
+    }
+    if (!(expectedPrice > 0)) {
+      throw new BadRequestException('Listing price is not set');
+    }
+    let expectedWei: bigint;
+    try {
+      expectedWei = ethers.parseEther(expectedPrice.toString());
+    } catch {
+      throw new BadRequestException('Listing price is not representable on-chain');
+    }
+
     const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
     const configuredEscrow = this.config.get<string>('ESCROW_CONTRACT', '');
@@ -1173,11 +1201,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         if (tx.to?.toLowerCase() !== escrowContract.toLowerCase()) {
           throw new BadRequestException('Transaction was not sent to escrow contract');
         }
+        if (BigInt(tx.value) < expectedWei) {
+          throw new BadRequestException(
+            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedWei.toString()} wei)`,
+          );
+        }
         verifiedAmountWei = tx.value.toString();
       } else {
         // ── Legacy direct mode: verify payment to seller ─────────────────
         if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
           throw new BadRequestException('Transaction recipient does not match seller wallet');
+        }
+        if (BigInt(tx.value) < expectedWei) {
+          throw new BadRequestException(
+            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedWei.toString()} wei)`,
+          );
         }
         verifiedAmountWei = tx.value.toString();
 
