@@ -14,7 +14,16 @@ export interface ReputationInfo {
 }
 
 export interface RankDefinition {
-  rank: 'HIERRO' | 'BRONCE' | 'PLATA' | 'ORO' | 'PLATINO' | 'DIAMANTE' | 'MAESTRIA' | 'CAMPEON';
+  rank:
+    | 'HIERRO'
+    | 'BRONCE'
+    | 'PLATA'
+    | 'ORO'
+    | 'PLATINO'
+    | 'DIAMANTE'
+    | 'MAESTRIA'
+    | 'CAMPEON'
+    | 'LEYENDA';
   label: string;
   icon: LucideIcon;
   color: string;
@@ -89,6 +98,14 @@ export const RANK_TIERS: RankDefinition[] = [
     color: '#836ef9',
     threshold: 2000,
     description: 'Champion — reserved for the top 5 of the ecosystem',
+  },
+  {
+    rank: 'LEYENDA',
+    label: 'Legend',
+    icon: Crown,
+    color: '#fbbf24',
+    threshold: 5000,
+    description: 'Legend — only a handful of builders ever reach this rank',
   },
 ];
 

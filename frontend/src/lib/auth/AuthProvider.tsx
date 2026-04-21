@@ -18,6 +18,8 @@ export interface User {
   websiteUrl: string | null;
   email: string | null;
   twoFactorEnabled: boolean;
+  reputationPoints?: number;
+  userTag?: string | null;
 }
 
 interface AuthContextType {

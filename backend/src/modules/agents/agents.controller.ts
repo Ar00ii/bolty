@@ -14,13 +14,17 @@ import {
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { StepUpService } from '../auth/step-up.service';
 
 import { AgentsService, CreateAgentDto, UpdateAgentDto } from './agents.service';
 
 @Controller('agents')
 @UseGuards(JwtAuthGuard)
 export class AgentsController {
-  constructor(private readonly agentsService: AgentsService) {}
+  constructor(
+    private readonly agentsService: AgentsService,
+    private readonly stepUp: StepUpService,
+  ) {}
 
   /**
    * Create a new agent
@@ -28,8 +32,13 @@ export class AgentsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createAgent(@CurrentUser() user: { sub: string }, @Body() dto: CreateAgentDto) {
-    const agent = await this.agentsService.createAgent(user.sub, dto);
+  async createAgent(
+    @CurrentUser() user: { sub: string },
+    @Body() dto: CreateAgentDto & { twoFactorCode?: string },
+  ) {
+    await this.stepUp.assert(user.sub, dto.twoFactorCode);
+    const { twoFactorCode: _drop, ...payload } = dto;
+    const agent = await this.agentsService.createAgent(user.sub, payload);
     return {
       success: true,
       agent,
@@ -86,7 +95,12 @@ export class AgentsController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAgent(@Param('id') agentId: string, @CurrentUser() user: { sub: string }) {
+  async deleteAgent(
+    @Param('id') agentId: string,
+    @CurrentUser() user: { sub: string },
+    @Body() body: { twoFactorCode?: string } = {},
+  ) {
+    await this.stepUp.assert(user.sub, body.twoFactorCode);
     await this.agentsService.deleteAgent(agentId, user.sub);
   }
 

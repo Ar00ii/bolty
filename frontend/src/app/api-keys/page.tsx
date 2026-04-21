@@ -23,6 +23,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -579,6 +580,7 @@ export default function ApiKeysPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [revokeTarget, setRevokeTarget] = useState<string | null>(null);
 
   const fetchKeys = useCallback(async () => {
     try {
@@ -608,13 +610,17 @@ export default function ApiKeysPage() {
   const handleDelete = async (keyId: string) => {
     try {
       await api.post(`/market/api-keys/${keyId}/request-delete-verification`, {});
-      const code = prompt('Verification code sent to your email:');
-      if (!code) return;
-      await api.delete(`/market/api-keys/${keyId}`, { code });
-      setKeys((prev) => prev.filter((k) => k.id !== keyId));
+      setRevokeTarget(keyId);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to revoke key');
+      setError(err instanceof ApiError ? err.message : 'Failed to start revoke flow');
     }
+  };
+
+  const submitRevoke = async (code: string) => {
+    if (!revokeTarget) return;
+    await api.delete(`/market/api-keys/${revokeTarget}`, { code });
+    setKeys((prev) => prev.filter((k) => k.id !== revokeTarget));
+    setRevokeTarget(null);
   };
 
   const handleRename = async (keyId: string, label: string | null) => {
@@ -804,6 +810,15 @@ export default function ApiKeysPage() {
           </ul>
         </div>
       </div>
+
+      <VerificationCodeModal
+        open={!!revokeTarget}
+        onClose={() => setRevokeTarget(null)}
+        onSubmit={submitRevoke}
+        title="Revoke API key"
+        subtitle="We just sent a 6-digit verification code to your email."
+        source="email"
+      />
     </div>
   );
 }

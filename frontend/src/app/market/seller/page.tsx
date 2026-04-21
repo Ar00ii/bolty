@@ -12,6 +12,7 @@ import {
   ArrowUpRight,
   Download,
   Plus,
+  Rocket,
   Search,
   X,
 } from 'lucide-react';
@@ -19,6 +20,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { BoostListingModal } from '@/components/market/BoostListingModal';
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -36,6 +38,7 @@ interface SellerListing {
   revenue: number;
   reviewAverage: number | null;
   reviewCount: number;
+  boostedUntil?: string | null;
 }
 
 interface RecentSale {
@@ -132,6 +135,7 @@ export default function SellerDashboardPage() {
     'sales',
   );
   const [listingQuery, setListingQuery] = useState('');
+  const [boostTarget, setBoostTarget] = useState<SellerListing | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
 
@@ -514,7 +518,10 @@ export default function SellerDashboardPage() {
                       No listings match “{listingQuery}”.
                     </div>
                   )}
-                  {sortedListings.map((l, idx) => (
+                  {sortedListings.map((l, idx) => {
+                    const isBoosted =
+                      l.boostedUntil && new Date(l.boostedUntil).getTime() > Date.now();
+                    return (
                     <motion.div
                       key={l.id}
                       initial={{ opacity: 0, x: -6 }}
@@ -524,12 +531,10 @@ export default function SellerDashboardPage() {
                         duration: 0.26,
                         ease: [0.22, 0.61, 0.36, 1],
                       }}
+                      className="relative"
                     >
-                      <Link
-                        href={`/market/agents/${l.id}`}
-                        className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors">
+                        <Link href={`/market/agents/${l.id}`} className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-white truncate">
                               {l.title}
@@ -543,6 +548,19 @@ export default function SellerDashboardPage() {
                             >
                               {l.status.toLowerCase()}
                             </span>
+                            {isBoosted && (
+                              <span
+                                className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                                style={{
+                                  color: '#f9a8d4',
+                                  background: 'rgba(236,72,153,0.12)',
+                                  border: '1px solid rgba(236,72,153,0.36)',
+                                }}
+                              >
+                                <Rocket className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                Boosted
+                              </span>
+                            )}
                           </div>
                           <div className="mt-1 text-[11px] text-zinc-500 flex items-center gap-3">
                             <span>
@@ -556,7 +574,7 @@ export default function SellerDashboardPage() {
                             )}
                             <span>· {l.type.toLowerCase()}</span>
                           </div>
-                        </div>
+                        </Link>
                         <div className="text-right">
                           <div className="text-sm font-medium text-white">{l.sales}</div>
                           <div className="text-[10px] uppercase tracking-widest text-zinc-500">
@@ -571,10 +589,37 @@ export default function SellerDashboardPage() {
                             {l.currency}
                           </div>
                         </div>
-                        <ArrowUpRight className="w-4 h-4 text-zinc-600" />
-                      </Link>
+                        {l.status === 'ACTIVE' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setBoostTarget(l);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-light transition-all"
+                            style={{
+                              color: isBoosted ? '#f9a8d4' : '#d4d4d8',
+                              background: isBoosted
+                                ? 'rgba(236,72,153,0.18)'
+                                : 'rgba(255,255,255,0.04)',
+                              boxShadow: isBoosted
+                                ? 'inset 0 0 0 1px rgba(236,72,153,0.45)'
+                                : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                            }}
+                            title={isBoosted ? 'Extend boost' : 'Buy a boost for this listing'}
+                          >
+                            <Rocket className="w-3 h-3" strokeWidth={2} />
+                            {isBoosted ? 'Extend' : 'Boost'}
+                          </button>
+                        )}
+                        <Link href={`/market/agents/${l.id}`}>
+                          <ArrowUpRight className="w-4 h-4 text-zinc-600" />
+                        </Link>
+                      </div>
                     </motion.div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
 
@@ -675,6 +720,28 @@ export default function SellerDashboardPage() {
           </>
         )}
       </div>
+      {boostTarget && (
+        <BoostListingModal
+          open
+          onClose={() => setBoostTarget(null)}
+          listingId={boostTarget.id}
+          listingTitle={boostTarget.title}
+          currentBoostedUntil={boostTarget.boostedUntil ?? null}
+          onBoosted={(boostedUntil) => {
+            setData((d) =>
+              d
+                ? {
+                    ...d,
+                    listings: d.listings.map((l) =>
+                      l.id === boostTarget.id ? { ...l, boostedUntil } : l,
+                    ),
+                  }
+                : d,
+            );
+            setBoostTarget(null);
+          }}
+        />
+      )}
     </div>
   );
 }

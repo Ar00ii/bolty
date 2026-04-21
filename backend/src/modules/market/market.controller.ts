@@ -30,6 +30,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { StepUpService } from '../auth/step-up.service';
 
 import { AgentScanService } from './agent-scan.service';
 import { ApiKeysService } from './api-keys.service';
@@ -51,6 +52,11 @@ interface CreateListingBody {
   fileName?: string;
   fileSize?: number;
   fileMimeType?: string;
+  twoFactorCode?: string;
+}
+
+interface DeleteListingBody {
+  twoFactorCode?: string;
 }
 
 interface PurchaseListingBody {
@@ -109,6 +115,7 @@ export class MarketController {
     private readonly negotiationService: NegotiationService,
     private readonly agentScanService: AgentScanService,
     private readonly apiKeysService: ApiKeysService,
+    private readonly stepUp: StepUpService,
   ) {}
 
   // ── API Keys ───────────────────────────────────────────────────────────────
@@ -215,6 +222,33 @@ export class MarketController {
     const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 12;
     const bounded = Math.min(48, Math.max(1, parsed));
     return this.marketService.getTopSellers(bounded);
+  }
+
+  @Public()
+  @Get('ticker')
+  getTicker() {
+    return this.marketService.getTickerSnapshot();
+  }
+
+  @Public()
+  @Get('leaderboard')
+  getLeaderboard() {
+    return this.marketService.getLeaderboard();
+  }
+
+  @Public()
+  @Get('boost-pricing')
+  getBoostPricing() {
+    return this.marketService.getBoostPricing();
+  }
+
+  @Post(':id/boost')
+  boostListing(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { durationDays?: number; amountTokens?: number },
+  ) {
+    return this.marketService.boostListing(id, userId, body || {});
   }
 
   // Must be defined before :id to avoid route clash
@@ -374,12 +408,14 @@ export class MarketController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createListing(@CurrentUser('id') userId: string, @Body() body: CreateListingBody) {
+  async createListing(@CurrentUser('id') userId: string, @Body() body: CreateListingBody) {
     // Validate agentEndpoint if provided
     if (body.agentEndpoint && !isSafeUrl(body.agentEndpoint)) {
       throw new BadRequestException('Invalid or unsafe agent endpoint URL');
     }
-    return this.marketService.createListing(userId, body);
+    await this.stepUp.assert(userId, body.twoFactorCode);
+    const { twoFactorCode: _drop, ...payload } = body;
+    return this.marketService.createListing(userId, payload);
   }
 
   @Post(':id/purchase')
@@ -405,7 +441,12 @@ export class MarketController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteListing(@Param('id') id: string, @CurrentUser('id') userId: string) {
+  async deleteListing(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: DeleteListingBody = {},
+  ) {
+    await this.stepUp.assert(userId, body.twoFactorCode);
     await this.marketService.deleteListing(id, userId);
   }
 

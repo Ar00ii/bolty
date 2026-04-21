@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+import { getReputationRank } from '@/components/ui/reputation-badge';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
@@ -36,6 +37,7 @@ interface PublicProfile {
   websiteUrl: string | null;
   role: string;
   createdAt: string;
+  reputationPoints?: number;
   repositories: PublicRepo[];
   _count: { repositories: number };
 }
@@ -161,30 +163,74 @@ export default function PublicProfilePage() {
           />
           <div className="relative flex flex-col sm:flex-row gap-6">
             {/* Avatar */}
-            <div className="shrink-0">
-              {profile.avatarUrl ? (
-                <img
-                  src={profile.avatarUrl}
-                  alt={displayName || ''}
-                  className="w-24 h-24 rounded-2xl"
-                  style={{
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
-                  }}
-                />
-              ) : (
-                <div
-                  className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-light text-[#b4a7ff]"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px -6px rgba(131,110,249,0.5)',
-                  }}
-                >
-                  {displayName?.[0]?.toUpperCase()}
-                </div>
-              )}
+            <div className="shrink-0 flex flex-col items-center gap-2">
+              <div className="relative">
+                {profile.avatarUrl ? (
+                  <img
+                    src={profile.avatarUrl}
+                    alt={displayName || ''}
+                    className="w-24 h-24 rounded-2xl"
+                    style={{
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-light text-[#b4a7ff]"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      boxShadow:
+                        'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px -6px rgba(131,110,249,0.5)',
+                    }}
+                  >
+                    {displayName?.[0]?.toUpperCase()}
+                  </div>
+                )}
+                {(() => {
+                  const rays = profile.reputationPoints ?? 0;
+                  const rank = getReputationRank(rays);
+                  const RankIcon = rank.icon;
+                  return (
+                    <span
+                      className="absolute grid place-items-center rounded-full"
+                      style={{
+                        bottom: -6,
+                        right: -6,
+                        width: 32,
+                        height: 32,
+                        background: '#09090b',
+                        border: `2px solid ${rank.color}`,
+                        boxShadow: `0 0 16px -2px ${rank.color}aa`,
+                      }}
+                      title={`${rank.label} · ${rays.toLocaleString()} rays`}
+                    >
+                      <RankIcon
+                        style={{ color: rank.color, width: 16, height: 16 }}
+                        strokeWidth={2}
+                      />
+                    </span>
+                  );
+                })()}
+              </div>
+              {(() => {
+                const rays = profile.reputationPoints ?? 0;
+                const rank = getReputationRank(rays);
+                return (
+                  <span
+                    className="px-2 py-0.5 rounded-full font-mono text-[10px] uppercase whitespace-nowrap"
+                    style={{
+                      background: `${rank.color}14`,
+                      color: rank.color,
+                      border: `1px solid ${rank.color}38`,
+                      letterSpacing: '0.08em',
+                    }}
+                  >
+                    {rank.label}
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Info */}

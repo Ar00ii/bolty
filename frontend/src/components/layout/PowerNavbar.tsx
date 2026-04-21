@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 
+import { MarketTicker } from '@/components/layout/MarketTicker';
+import { getReputationRank } from '@/components/ui/reputation-badge';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
 
@@ -73,18 +75,23 @@ export function PowerNavbar() {
       .join('')
       .toUpperCase() || 'U';
 
+  const userRank = user
+    ? getReputationRank(user.reputationPoints ?? 0)
+    : null;
+
   return (
-    <header
-      className="sticky top-0 z-30 flex items-center gap-3 px-[18px]"
-      style={{
-        height: '56px',
-        borderBottom: '1px solid #1f1f23',
-        background: 'rgba(9,9,11,0.85)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)',
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-      }}
-    >
+    <div className="sticky top-0 z-30">
+      <header
+        className="flex items-center gap-3 px-[18px]"
+        style={{
+          height: '56px',
+          borderBottom: '1px solid #1f1f23',
+          background: 'rgba(9,9,11,0.85)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        }}
+      >
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-[13px] min-w-0 shrink">
         {crumbs.map((c, i) => {
@@ -265,17 +272,39 @@ export function PowerNavbar() {
               {initials}
             </span>
           )}
-          <span
-            className="absolute rounded-full"
-            style={{
-              bottom: '2px',
-              right: '2px',
-              width: '9px',
-              height: '9px',
-              background: '#22c55e',
-              border: '2px solid #09090b',
-            }}
-          />
+          {userRank ? (
+            <span
+              className="absolute grid place-items-center rounded-full"
+              style={{
+                bottom: '-3px',
+                right: '-3px',
+                width: '14px',
+                height: '14px',
+                background: '#09090b',
+                border: `1.5px solid ${userRank.color}`,
+                boxShadow: `0 0 6px -1px ${userRank.color}80`,
+              }}
+              title={`${userRank.label} · ${user?.reputationPoints ?? 0} rays`}
+            >
+              <userRank.icon
+                style={{ color: userRank.color, width: 8, height: 8 }}
+                strokeWidth={2.5}
+                aria-hidden="true"
+              />
+            </span>
+          ) : (
+            <span
+              className="absolute rounded-full"
+              style={{
+                bottom: '2px',
+                right: '2px',
+                width: '9px',
+                height: '9px',
+                background: '#22c55e',
+                border: '2px solid #09090b',
+              }}
+            />
+          )}
         </button>
 
         {profileOpen && (
@@ -329,64 +358,8 @@ export function PowerNavbar() {
         )}
       </div>
       )}
-    </header>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Ticker — hidden on narrow screens. Stub values; wire to real feeds later.
-// ─────────────────────────────────────────────────────────────────────────────
-
-function Ticker() {
-  return (
-    <div
-      className="hidden xl:flex items-center gap-[14px] rounded-full"
-      style={{
-        marginLeft: '18px',
-        padding: '5px 14px',
-        background: '#0c0c0f',
-        border: '1px solid #1f1f23',
-      }}
-    >
-      <TickerItem label="MON" value="$0.328" delta="+4.21%" up />
-      <TickerSep />
-      <TickerItem label="GAS" value="12 gwei" />
-      <TickerSep />
-      <TickerItem label="RAYS" value="2,847" delta="+18" up />
-    </div>
-  );
-}
-
-function TickerSep() {
-  return <span style={{ width: '1px', height: '14px', background: '#1f1f23' }} />;
-}
-
-function TickerItem({
-  label,
-  value,
-  delta,
-  up,
-}: {
-  label: string;
-  value: string;
-  delta?: string;
-  up?: boolean;
-}) {
-  return (
-    <div className="flex items-baseline gap-[6px] font-mono" style={{ fontSize: '11px' }}>
-      <span
-        style={{
-          color: '#52525b',
-          fontSize: '10px',
-          letterSpacing: '0.08em',
-        }}
-      >
-        {label}
-      </span>
-      <span style={{ color: '#e4e4e7' }}>{value}</span>
-      {delta && (
-        <span style={{ color: up ? '#22c55e' : '#ef4444', fontSize: '10.5px' }}>{delta}</span>
-      )}
+      </header>
+      <MarketTicker />
     </div>
   );
 }

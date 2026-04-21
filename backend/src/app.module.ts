@@ -13,6 +13,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { AgentsModule } from './modules/agents/agents.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { StepUpModule } from './modules/auth/step-up.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DmModule } from './modules/dm/dm.module';
@@ -59,6 +60,7 @@ import { UsersModule } from './modules/users/users.module';
     AgentsModule,
     RaysModule,
     AuthModule,
+    StepUpModule,
     ChatModule,
     AiModule,
     SocialModule,

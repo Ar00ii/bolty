@@ -1,0 +1,99 @@
+'use client';
+
+import { useCallback, useState } from 'react';
+
+import { ApiError } from '@/lib/api/client';
+
+interface PendingStepUp<T> {
+  /** Resolve when the user enters a valid code, reject when they cancel */
+  resolve: (code: string) => void;
+  reject: (err: Error) => void;
+  /** "totp" or "email" — drives the modal copy */
+  source: 'totp' | 'email';
+  /** Original error so callers can render context */
+  message: string;
+  /** Carries the original action so we can replay with the code */
+  retry: (code: string) => Promise<T>;
+}
+
+/**
+ * Helper hook for the step-up auth flow. Pattern:
+ *
+ *   const { runWithStepUp, stepUp, submit, dismiss } = useStepUp();
+ *   await runWithStepUp((code) => api.patch('/users/profile', { username, twoFactorCode: code }));
+ *
+ * The hook calls the action with code=undefined first. If the backend
+ * answers with `STEP_UP_REQUIRED`, the modal opens. After the user submits
+ * their TOTP, the action is replayed with the code attached.
+ */
+export function useStepUp<T = unknown>() {
+  const [pending, setPending] = useState<PendingStepUp<T> | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const runWithStepUp = useCallback(async (action: (code?: string) => Promise<T>): Promise<T> => {
+    try {
+      return await action();
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        (err.code === 'STEP_UP_REQUIRED' || err.code === 'STEP_UP_INVALID')
+      ) {
+        return new Promise<T>((resolve, reject) => {
+          setPending({
+            source: 'totp',
+            message: err.message,
+            retry: action,
+            resolve: (code: string) => {
+              action(code)
+                .then((r) => {
+                  resolve(r);
+                  setPending(null);
+                })
+                .catch((retryErr) => {
+                  if (retryErr instanceof ApiError && retryErr.code === 'STEP_UP_INVALID') {
+                    // Keep modal open with new error message
+                    setPending((cur) => (cur ? { ...cur, message: retryErr.message } : cur));
+                    return;
+                  }
+                  reject(retryErr instanceof Error ? retryErr : new Error('Action failed'));
+                  setPending(null);
+                });
+            },
+            reject: (e: Error) => {
+              reject(e);
+              setPending(null);
+            },
+          });
+        });
+      }
+      throw err;
+    }
+  }, []);
+
+  const submit = useCallback(
+    async (code: string) => {
+      if (!pending) return;
+      setSubmitting(true);
+      try {
+        pending.resolve(code);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [pending],
+  );
+
+  const dismiss = useCallback(() => {
+    if (pending) pending.reject(new Error('Cancelled'));
+  }, [pending]);
+
+  return {
+    runWithStepUp,
+    stepUpOpen: !!pending,
+    stepUpMessage: pending?.message,
+    stepUpSource: pending?.source ?? 'totp',
+    submitting,
+    submit,
+    dismiss,
+  };
+}

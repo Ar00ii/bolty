@@ -953,6 +953,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         currency: true,
         status: true,
         createdAt: true,
+        boostedUntil: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -1323,5 +1324,190 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     await this.prisma.marketListing.update({ where: { id }, data: { status: 'REMOVED' } });
+  }
+
+  // ── Ticker / Leaderboard ───────────────────────────────────────────────────
+  // Cheap aggregate used by the global header marquee + leaderboard page.
+  // Cached in-process for 30s — the queries are ~5x groupBy / findMany so a
+  // bursty homepage shouldn't hammer Postgres on every load.
+  private tickerCache: { at: number; data: { topAgents: unknown[]; topDevs: unknown[] } } | null =
+    null;
+
+  async getTickerSnapshot() {
+    const now = Date.now();
+    if (this.tickerCache && now - this.tickerCache.at < 30_000) {
+      return this.tickerCache.data;
+    }
+
+    const [topAgents, topDevs] = await Promise.all([
+      this.getTopAgents(8),
+      this.getTopDevelopers(8),
+    ]);
+    const data = { topAgents, topDevs };
+    this.tickerCache = { at: now, data };
+    return data;
+  }
+
+  async getTopAgents(limit = 10) {
+    const sales = await this.prisma.marketPurchase.groupBy({
+      by: ['listingId'],
+      _count: { _all: true },
+      orderBy: { _count: { listingId: 'desc' } },
+      take: limit,
+    });
+    if (sales.length === 0) return [];
+
+    const listings = await this.prisma.marketListing.findMany({
+      where: {
+        id: { in: sales.map((s) => s.listingId) },
+        status: 'ACTIVE',
+      },
+      select: {
+        id: true,
+        title: true,
+        price: true,
+        currency: true,
+        type: true,
+        tags: true,
+        boostedUntil: true,
+        seller: {
+          select: { id: true, username: true, avatarUrl: true, reputationPoints: true },
+        },
+      },
+    });
+    const salesByListing = new Map(sales.map((s) => [s.listingId, s._count._all]));
+    const byId = new Map(listings.map((l) => [l.id, l]));
+
+    return sales
+      .map((s) => {
+        const l = byId.get(s.listingId);
+        if (!l) return null;
+        return {
+          id: l.id,
+          title: l.title,
+          price: l.price,
+          currency: l.currency,
+          type: l.type,
+          tags: l.tags,
+          sales: salesByListing.get(l.id) || 0,
+          boosted: l.boostedUntil ? l.boostedUntil.getTime() > Date.now() : false,
+          sellerId: l.seller.id,
+          sellerUsername: l.seller.username,
+          sellerAvatar: l.seller.avatarUrl,
+          sellerReputation: l.seller.reputationPoints,
+        };
+      })
+      .filter((a): a is NonNullable<typeof a> => a !== null);
+  }
+
+  async getTopDevelopers(limit = 10) {
+    const devs = await this.prisma.user.findMany({
+      where: { isBanned: false, isBot: false, reputationPoints: { gt: 0 } },
+      orderBy: [{ reputationPoints: 'desc' }, { createdAt: 'asc' }],
+      take: limit,
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        reputationPoints: true,
+        bio: true,
+      },
+    });
+    if (devs.length === 0) return [];
+
+    const salesGroup = await this.prisma.marketPurchase.groupBy({
+      by: ['sellerId'],
+      where: { sellerId: { in: devs.map((d) => d.id) } },
+      _count: { _all: true },
+    });
+    const salesById = new Map(salesGroup.map((s) => [s.sellerId, s._count._all]));
+
+    return devs.map((d) => ({
+      id: d.id,
+      username: d.username,
+      displayName: d.displayName,
+      avatarUrl: d.avatarUrl,
+      reputationPoints: d.reputationPoints,
+      bio: d.bio,
+      totalSales: salesById.get(d.id) || 0,
+    }));
+  }
+
+  async getLeaderboard() {
+    // Two-tab leaderboard payload — top agents (by sales) + top devs (by rep)
+    const [topAgents, topDevs] = await Promise.all([
+      this.getTopAgents(25),
+      this.getTopDevelopers(25),
+    ]);
+    return { topAgents, topDevs };
+  }
+
+  // ── Listing boosts ─────────────────────────────────────────────────────────
+  async boostListing(
+    listingId: string,
+    userId: string,
+    input: { durationDays?: number; amountTokens?: number },
+  ) {
+    const days = Math.min(30, Math.max(1, Math.floor(input.durationDays ?? 7)));
+    // Fixed pricing tiers (in BOLTY tokens) — keep simple/predictable for now.
+    const priceByDays: Record<number, number> = { 1: 5, 3: 12, 7: 25, 14: 45, 30: 80 };
+    const price = priceByDays[days] ?? Math.ceil(days * 4);
+
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      select: { id: true, sellerId: true, status: true, title: true, boostedUntil: true },
+    });
+    if (!listing) throw new NotFoundException('Listing not found');
+    if (listing.status !== 'ACTIVE') {
+      throw new BadRequestException('Only active listings can be boosted');
+    }
+    if (listing.sellerId !== userId) {
+      throw new ForbiddenException('Only the seller can boost this listing');
+    }
+
+    // Extend any in-flight boost rather than overwrite — buyers stack durations.
+    const baseFrom =
+      listing.boostedUntil && listing.boostedUntil.getTime() > Date.now()
+        ? listing.boostedUntil
+        : new Date();
+    const expiresAt = new Date(baseFrom.getTime() + days * 24 * 60 * 60 * 1000);
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.marketListing.update({
+        where: { id: listingId },
+        data: { boostedUntil: expiresAt },
+      }),
+      this.prisma.listingBoost.create({
+        data: {
+          listingId,
+          buyerId: userId,
+          amountTokens: price,
+          durationDays: days,
+          expiresAt,
+        },
+      }),
+    ]);
+    // Drop the ticker cache so the boost shows up immediately.
+    this.tickerCache = null;
+    return {
+      ok: true,
+      boostedUntil: updated.boostedUntil,
+      durationDays: days,
+      amountTokens: price,
+    };
+  }
+
+  getBoostPricing() {
+    return {
+      currency: 'BOLTY',
+      tiers: [
+        { days: 1, price: 5 },
+        { days: 3, price: 12 },
+        { days: 7, price: 25 },
+        { days: 14, price: 45 },
+        { days: 30, price: 80 },
+      ],
+    };
   }
 }

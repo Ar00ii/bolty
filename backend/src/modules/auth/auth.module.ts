@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { StepUpService } from './step-up.service';
 import { GitHubStrategy } from './strategies/github.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { WalletAuthService } from './wallet-auth.service';
@@ -38,7 +39,7 @@ import { WalletAuthService } from './wallet-auth.service';
     EmailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, WalletAuthService, JwtStrategy, GitHubStrategy],
+  providers: [AuthService, WalletAuthService, StepUpService, JwtStrategy, GitHubStrategy],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
