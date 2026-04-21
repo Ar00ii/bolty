@@ -54,13 +54,37 @@ export function MarketTicker() {
   }, []);
 
   const items = useTickerItems(data);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const update = () => setViewportWidth(containerRef.current?.clientWidth || window.innerWidth);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   if (items.length === 0) return null;
 
-  // Duplicate items so the marquee loops seamlessly.
-  const loop = [...items, ...items];
+  // Each entry is ~240px wide on average (badge + avatar + text + gap).
+  // Ensure each half of the track is at least 1.5× the viewport so the
+  // marquee looks continuous even when only a couple of top-5 items exist.
+  const AVG_ITEM_PX = 240;
+  const halfTargetPx = Math.max(1200, viewportWidth * 1.5);
+  const itemsPerHalf = Math.max(items.length, Math.ceil(halfTargetPx / AVG_ITEM_PX));
+  const repeats = Math.ceil(itemsPerHalf / items.length);
+  const half = Array.from({ length: repeats }, () => items).flat();
+  // Two identical halves → animating translateX 0→-50% produces a seamless loop.
+  const loop = [...half, ...half];
+
+  // Constant pixels/sec so visual speed is independent of how many items exist.
+  const SPEED_PX_PER_SEC = 70;
+  const durationSec = Math.max(30, (half.length * AVG_ITEM_PX) / SPEED_PX_PER_SEC);
 
   return (
     <div
+      ref={containerRef}
       className="relative overflow-hidden hidden md:block"
       style={{
         background: 'rgba(9,9,11,0.96)',
@@ -85,9 +109,9 @@ export function MarketTicker() {
       />
       <div
         ref={trackRef}
-        className="ticker-track flex items-center gap-7 h-full whitespace-nowrap"
+        className="ticker-track flex items-center gap-7 h-full whitespace-nowrap w-max"
         style={{
-          animation: `ticker-slide ${Math.max(28, loop.length * 4)}s linear infinite`,
+          animation: `ticker-slide ${durationSec}s linear infinite`,
           willChange: 'transform',
         }}
       >
