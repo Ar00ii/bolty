@@ -90,12 +90,13 @@ export class EscrowService {
     const { txHash, expectedContract, expectedMethod, orderId, expectedSender } = params;
     const provider = this.getProvider();
 
-    const receipt = await provider.getTransactionReceipt(txHash);
+    const [receipt, tx] = await Promise.all([
+      provider.getTransactionReceipt(txHash),
+      provider.getTransaction(txHash),
+    ]);
     if (!receipt || receipt.status !== 1) {
       throw new BadRequestException('Transaction failed or not found on chain');
     }
-
-    const tx = await provider.getTransaction(txHash);
     if (!tx) throw new BadRequestException('Transaction not found');
 
     if (!tx.to || tx.to.toLowerCase() !== expectedContract.toLowerCase()) {

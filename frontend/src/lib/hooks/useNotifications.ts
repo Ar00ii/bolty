@@ -56,6 +56,10 @@ export function useNotificationsPoll(
     const socket = io(`${WS_URL}/notifications`, {
       withCredentials: true,
       transports: ['websocket'],
+      timeout: 8000,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 500,
+      reconnectionDelayMax: 3000,
     });
     socketRef.current = socket;
 
