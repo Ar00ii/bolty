@@ -27,10 +27,7 @@ import {
   type NotificationType,
 } from '@/lib/hooks/useNotifications';
 
-const TYPE_META: Record<
-  NotificationType,
-  { icon: LucideIcon; color: string; label: string }
-> = {
+const TYPE_META: Record<NotificationType, { icon: LucideIcon; color: string; label: string }> = {
   MARKET_NEW_SALE: { icon: DollarSign, color: '#22c55e', label: 'Sale' },
   MARKET_NEW_REVIEW: { icon: Star, color: '#f59e0b', label: 'Review' },
   MARKET_ORDER_DELIVERED: { icon: Package, color: '#06B6D4', label: 'Delivery' },
@@ -336,8 +333,7 @@ export default function NotificationsPage() {
               className="rounded-xl overflow-hidden"
               style={{
                 background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
-                boxShadow:
-                  '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
               }}
             >
               <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_70px_28px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium border-b border-white/5">

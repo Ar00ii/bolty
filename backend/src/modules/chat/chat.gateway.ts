@@ -117,9 +117,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         username: payload.username || 'Anonymous',
       });
 
-      // Send recent messages on connect
+      // Send recent messages on connect. Flatten the nested `user` relation so
+      // the payload shape matches the `newMessage` event the client already
+      // renders — otherwise `msg.username` is undefined and the UI falls back
+      // to an "anonymous" label for every historical message.
       const recent = await this.chatService.getRecentMessages(50);
-      client.emit('history', recent);
+      client.emit(
+        'history',
+        recent.map((m) => ({
+          id: m.id,
+          content: m.content,
+          userId: m.userId,
+          username: m.user.username,
+          avatarUrl: m.user.avatarUrl,
+          createdAt: m.createdAt,
+        })),
+      );
 
       // Broadcast user count
       this.server.emit('userCount', this.connectedUsers.size);

@@ -57,8 +57,7 @@ function Avatar({
   reputationPoints?: number | null;
 }) {
   const sizeClass = `w-${size} h-${size}`;
-  const rank =
-    typeof reputationPoints === 'number' ? getReputationRank(reputationPoints) : null;
+  const rank = typeof reputationPoints === 'number' ? getReputationRank(reputationPoints) : null;
   const RankIcon = rank?.icon;
 
   return (
@@ -336,12 +335,17 @@ export default function DmPage() {
             'lg:relative lg:translate-x-0 lg:w-72 lg:inset-auto lg:z-auto',
             'lg:pt-0 lg:pb-0 lg:px-0 lg:overflow-y-visible lg:pointer-events-auto',
           ].join(' ')}
-          style={sidebarOpen ? {
-            background: 'linear-gradient(180deg, rgba(12,12,16,0.99) 0%, rgba(7,7,11,0.99) 100%)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '4px 0 24px -4px rgba(0,0,0,0.6), 1px 0 0 rgba(255,255,255,0.04)',
-          } : {}}
+          style={
+            sidebarOpen
+              ? {
+                  background:
+                    'linear-gradient(180deg, rgba(12,12,16,0.99) 0%, rgba(7,7,11,0.99) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  boxShadow: '4px 0 24px -4px rgba(0,0,0,0.6), 1px 0 0 rgba(255,255,255,0.04)',
+                }
+              : {}
+          }
         >
           {/* Mobile close button */}
           <button

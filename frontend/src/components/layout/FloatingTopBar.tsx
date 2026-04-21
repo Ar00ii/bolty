@@ -110,7 +110,15 @@ export function FloatingTopBar() {
         <button
           onClick={() => setProfileOpen(!profileOpen)}
           className={`${chipClass} h-9 pl-1.5 pr-2.5 gap-2`}
-          style={profileOpen ? { ...chipStyle, boxShadow: '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.06)' } : chipStyle}
+          style={
+            profileOpen
+              ? {
+                  ...chipStyle,
+                  boxShadow:
+                    '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                }
+              : chipStyle
+          }
           aria-haspopup="menu"
           aria-expanded={profileOpen}
         >
@@ -153,7 +161,8 @@ export function FloatingTopBar() {
               transition={{ duration: 0.2, ease: [0.22, 0.61, 0.36, 1] }}
               className="absolute top-full right-0 mt-2 w-56 rounded-2xl overflow-hidden z-50"
               style={{
-                background: 'linear-gradient(180deg, rgba(16,16,22,0.98) 0%, rgba(9,9,13,0.98) 100%)',
+                background:
+                  'linear-gradient(180deg, rgba(16,16,22,0.98) 0%, rgba(9,9,13,0.98) 100%)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
                 boxShadow:
@@ -210,7 +219,10 @@ export function FloatingTopBar() {
                   onClick={() => setProfileOpen(false)}
                   className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-light text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
                 >
-                  <Settings className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" strokeWidth={1.75} />
+                  <Settings
+                    className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0"
+                    strokeWidth={1.75}
+                  />
                   Settings
                 </Link>
               </div>

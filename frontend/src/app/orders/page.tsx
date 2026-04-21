@@ -58,10 +58,7 @@ interface SellerStats {
   disputed: number;
 }
 
-const STATUS_CONFIG: Record<
-  OrderStatus,
-  { label: string; icon: LucideIcon; color: string }
-> = {
+const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: LucideIcon; color: string }> = {
   PENDING_DELIVERY: { label: 'Pending', icon: Clock, color: '#f59e0b' },
   IN_PROGRESS: { label: 'In progress', icon: Package, color: '#06B6D4' },
   DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
@@ -283,9 +280,7 @@ export default function OrdersPage() {
                 <span>Bolty Orders</span>
                 <LiveDot />
               </div>
-              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
-                Orders
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">Orders</h1>
               <p className="text-[12.5px] text-zinc-500 font-light mt-1">
                 Track every purchase, sale and escrow release in one feed.
               </p>
@@ -381,12 +376,20 @@ export default function OrdersPage() {
               boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
-            {(
-              [
-                { key: 'buying' as const, label: 'Buying', count: buyerOrders.length, icon: ShoppingBag },
-                { key: 'selling' as const, label: 'Selling', count: sellerOrders.length, icon: TrendingUp },
-              ]
-            ).map(({ key, label, count, icon: Icon }) => {
+            {[
+              {
+                key: 'buying' as const,
+                label: 'Buying',
+                count: buyerOrders.length,
+                icon: ShoppingBag,
+              },
+              {
+                key: 'selling' as const,
+                label: 'Selling',
+                count: sellerOrders.length,
+                icon: TrendingUp,
+              },
+            ].map(({ key, label, count, icon: Icon }) => {
               const active = tab === key;
               return (
                 <button
@@ -729,19 +732,13 @@ function OrderRow({
             <TypeIcon className="w-3.5 h-3.5" strokeWidth={1.75} style={{ color: typeAccent }} />
           </div>
           <div className="min-w-0">
-            <div className="text-[13px] font-normal text-white truncate">
-              {order.listing.title}
-            </div>
+            <div className="text-[13px] font-normal text-white truncate">{order.listing.title}</div>
             <div className="text-[10.5px] text-zinc-500 font-light truncate">
-              <span className="font-mono text-zinc-600">
-                #{order.id.slice(0, 8)}
-              </span>
+              <span className="font-mono text-zinc-600">#{order.id.slice(0, 8)}</span>
               {order.txHash && (
                 <>
                   <span className="text-zinc-700 mx-1">·</span>
-                  <span className="font-mono text-zinc-600">
-                    {order.txHash.slice(0, 10)}…
-                  </span>
+                  <span className="font-mono text-zinc-600">{order.txHash.slice(0, 10)}…</span>
                 </>
               )}
             </div>

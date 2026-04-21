@@ -27,8 +27,18 @@ interface DisputedOrder {
   escrowDisputedAt: string | null;
   amountWei: string;
   listing: { id: string; title: string; type: string; price: number; currency: string };
-  buyer: { id: string; username: string | null; avatarUrl: string | null; walletAddress: string | null };
-  seller: { id: string; username: string | null; avatarUrl: string | null; walletAddress: string | null };
+  buyer: {
+    id: string;
+    username: string | null;
+    avatarUrl: string | null;
+    walletAddress: string | null;
+  };
+  seller: {
+    id: string;
+    username: string | null;
+    avatarUrl: string | null;
+    walletAddress: string | null;
+  };
 }
 
 type Phase = 'idle' | 'signing' | 'confirming' | 'done' | 'error';
@@ -124,12 +134,7 @@ export default function AdminDisputesPage() {
         ) : (
           <div className="space-y-3">
             {disputes.map((d, i) => (
-              <DisputeRow
-                key={d.id}
-                order={d}
-                index={i}
-                onOpen={() => setSelected(d)}
-              />
+              <DisputeRow key={d.id} order={d} index={i} onOpen={() => setSelected(d)} />
             ))}
           </div>
         )}
@@ -166,8 +171,9 @@ function Header({ count }: { count: number }) {
         )}
       </h1>
       <p className="mt-3 text-sm font-light text-zinc-400 max-w-2xl">
-        Review disputed escrow orders. To resolve, call <code className="text-zinc-300">resolve()</code> on the
-        escrow contract from the admin wallet, then confirm the decision here with the transaction hash.
+        Review disputed escrow orders. To resolve, call{' '}
+        <code className="text-zinc-300">resolve()</code> on the escrow contract from the admin
+        wallet, then confirm the decision here with the transaction hash.
       </p>
     </div>
   );
@@ -179,8 +185,7 @@ function EmptyState() {
       className="rounded-xl p-12 text-center"
       style={{
         background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-        boxShadow:
-          '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       <CheckCircle2 className="w-8 h-8 mx-auto mb-3 text-[#22c55e]" strokeWidth={1.5} />
@@ -248,8 +253,7 @@ function DisputeRow({
             </span>
           </div>
           <div className="text-[11px] text-zinc-500 font-light">
-            Buyer{' '}
-            <span className="text-zinc-300">@{order.buyer.username || 'unknown'}</span>
+            Buyer <span className="text-zinc-300">@{order.buyer.username || 'unknown'}</span>
             <span className="mx-1 opacity-40">↔</span>
             Seller <span className="text-zinc-300">@{order.seller.username || 'unknown'}</span>
             <span className="mx-1 opacity-40">·</span>
@@ -368,7 +372,10 @@ function ResolveModal({
         </div>
 
         <div className="p-5 space-y-4 text-[13px] font-light">
-          <DetailRow label="Order ID" value={<code className="text-zinc-300 text-[11px]">{order.id}</code>} />
+          <DetailRow
+            label="Order ID"
+            value={<code className="text-zinc-300 text-[11px]">{order.id}</code>}
+          />
           <DetailRow
             label="Amount"
             value={

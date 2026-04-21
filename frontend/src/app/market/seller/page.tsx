@@ -522,102 +522,102 @@ export default function SellerDashboardPage() {
                     const isBoosted =
                       l.boostedUntil && new Date(l.boostedUntil).getTime() > Date.now();
                     return (
-                    <motion.div
-                      key={l.id}
-                      initial={{ opacity: 0, x: -6 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{
-                        delay: Math.min(idx * 0.025, 0.3),
-                        duration: 0.26,
-                        ease: [0.22, 0.61, 0.36, 1],
-                      }}
-                      className="relative"
-                    >
-                      <div className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors">
-                        <Link href={`/market/agents/${l.id}`} className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-white truncate">
-                              {l.title}
-                            </span>
-                            <span
-                              className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded ${
-                                l.status === 'ACTIVE'
-                                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                                  : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
-                              }`}
-                            >
-                              {l.status.toLowerCase()}
-                            </span>
-                            {isBoosted && (
+                      <motion.div
+                        key={l.id}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{
+                          delay: Math.min(idx * 0.025, 0.3),
+                          duration: 0.26,
+                          ease: [0.22, 0.61, 0.36, 1],
+                        }}
+                        className="relative"
+                      >
+                        <div className="flex items-center gap-4 px-5 py-4 hover:bg-white/[0.02] transition-colors">
+                          <Link href={`/market/agents/${l.id}`} className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-white truncate">
+                                {l.title}
+                              </span>
                               <span
-                                className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded inline-flex items-center gap-1"
-                                style={{
-                                  color: '#f9a8d4',
-                                  background: 'rgba(236,72,153,0.12)',
-                                  border: '1px solid rgba(236,72,153,0.36)',
-                                }}
+                                className={`text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded ${
+                                  l.status === 'ACTIVE'
+                                    ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                                    : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
+                                }`}
                               >
-                                <Rocket className="w-2.5 h-2.5" strokeWidth={2.5} />
-                                Boosted
+                                {l.status.toLowerCase()}
                               </span>
-                            )}
-                          </div>
-                          <div className="mt-1 text-[11px] text-zinc-500 flex items-center gap-3">
-                            <span>
-                              {l.price} {l.currency}
-                            </span>
-                            {l.reviewAverage !== null && l.reviewCount > 0 && (
-                              <span className="inline-flex items-center gap-1">
-                                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                                {l.reviewAverage.toFixed(1)} ({l.reviewCount})
+                              {isBoosted && (
+                                <span
+                                  className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                                  style={{
+                                    color: '#f9a8d4',
+                                    background: 'rgba(236,72,153,0.12)',
+                                    border: '1px solid rgba(236,72,153,0.36)',
+                                  }}
+                                >
+                                  <Rocket className="w-2.5 h-2.5" strokeWidth={2.5} />
+                                  Boosted
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 text-[11px] text-zinc-500 flex items-center gap-3">
+                              <span>
+                                {l.price} {l.currency}
                               </span>
-                            )}
-                            <span>· {l.type.toLowerCase()}</span>
+                              {l.reviewAverage !== null && l.reviewCount > 0 && (
+                                <span className="inline-flex items-center gap-1">
+                                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                  {l.reviewAverage.toFixed(1)} ({l.reviewCount})
+                                </span>
+                              )}
+                              <span>· {l.type.toLowerCase()}</span>
+                            </div>
+                          </Link>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-white">{l.sales}</div>
+                            <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+                              sales
+                            </div>
                           </div>
-                        </Link>
-                        <div className="text-right">
-                          <div className="text-sm font-medium text-white">{l.sales}</div>
-                          <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-                            sales
+                          <div className="text-right min-w-[80px]">
+                            <div className="text-sm font-medium text-purple-300">
+                              {l.revenue.toFixed(2)}
+                            </div>
+                            <div className="text-[10px] uppercase tracking-widest text-zinc-500">
+                              {l.currency}
+                            </div>
                           </div>
+                          {l.status === 'ACTIVE' && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setBoostTarget(l);
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-light transition-all"
+                              style={{
+                                color: isBoosted ? '#f9a8d4' : '#d4d4d8',
+                                background: isBoosted
+                                  ? 'rgba(236,72,153,0.18)'
+                                  : 'rgba(255,255,255,0.04)',
+                                boxShadow: isBoosted
+                                  ? 'inset 0 0 0 1px rgba(236,72,153,0.45)'
+                                  : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                              }}
+                              title={isBoosted ? 'Extend boost' : 'Buy a boost for this listing'}
+                            >
+                              <Rocket className="w-3 h-3" strokeWidth={2} />
+                              {isBoosted ? 'Extend' : 'Boost'}
+                            </button>
+                          )}
+                          <Link href={`/market/agents/${l.id}`}>
+                            <ArrowUpRight className="w-4 h-4 text-zinc-600" />
+                          </Link>
                         </div>
-                        <div className="text-right min-w-[80px]">
-                          <div className="text-sm font-medium text-purple-300">
-                            {l.revenue.toFixed(2)}
-                          </div>
-                          <div className="text-[10px] uppercase tracking-widest text-zinc-500">
-                            {l.currency}
-                          </div>
-                        </div>
-                        {l.status === 'ACTIVE' && (
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setBoostTarget(l);
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-light transition-all"
-                            style={{
-                              color: isBoosted ? '#f9a8d4' : '#d4d4d8',
-                              background: isBoosted
-                                ? 'rgba(236,72,153,0.18)'
-                                : 'rgba(255,255,255,0.04)',
-                              boxShadow: isBoosted
-                                ? 'inset 0 0 0 1px rgba(236,72,153,0.45)'
-                                : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                            }}
-                            title={isBoosted ? 'Extend boost' : 'Buy a boost for this listing'}
-                          >
-                            <Rocket className="w-3 h-3" strokeWidth={2} />
-                            {isBoosted ? 'Extend' : 'Boost'}
-                          </button>
-                        )}
-                        <Link href={`/market/agents/${l.id}`}>
-                          <ArrowUpRight className="w-4 h-4 text-zinc-600" />
-                        </Link>
-                      </div>
-                    </motion.div>
+                      </motion.div>
                     );
                   })}
                 </div>

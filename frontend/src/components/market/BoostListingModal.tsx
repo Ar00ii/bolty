@@ -71,13 +71,7 @@ export function BoostListingModal({
   const selectedTier = pricing?.tiers.find((t) => t.days === selectedDays);
 
   return (
-    <Modal
-      isOpen={open}
-      onClose={onClose}
-      title="Boost listing"
-      subtitle={listingTitle}
-      size="md"
-    >
+    <Modal isOpen={open} onClose={onClose} title="Boost listing" subtitle={listingTitle} size="md">
       <div className="space-y-5">
         <div
           className="rounded-lg p-3 flex items-start gap-3"
@@ -101,13 +95,15 @@ export function BoostListingModal({
         )}
 
         <div className="grid grid-cols-5 gap-1.5">
-          {(pricing?.tiers || [
-            { days: 1, price: 5 },
-            { days: 3, price: 12 },
-            { days: 7, price: 25 },
-            { days: 14, price: 45 },
-            { days: 30, price: 80 },
-          ]).map((tier) => {
+          {(
+            pricing?.tiers || [
+              { days: 1, price: 5 },
+              { days: 3, price: 12 },
+              { days: 7, price: 25 },
+              { days: 14, price: 45 },
+              { days: 30, price: 80 },
+            ]
+          ).map((tier) => {
             const active = tier.days === selectedDays;
             return (
               <button
@@ -132,9 +128,7 @@ export function BoostListingModal({
           })}
         </div>
 
-        {error && (
-          <div className="text-[12px] text-red-300 font-light">{error}</div>
-        )}
+        {error && <div className="text-[12px] text-red-300 font-light">{error}</div>}
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="text-[11.5px] text-zinc-500 font-light">

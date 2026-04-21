@@ -48,10 +48,7 @@ function Onboarding2FAInner() {
       router.replace('/auth?tab=login');
       return;
     }
-    if (
-      (user as { twoFactorEnabled?: boolean }).twoFactorEnabled &&
-      !initialised.current
-    ) {
+    if ((user as { twoFactorEnabled?: boolean }).twoFactorEnabled && !initialised.current) {
       router.replace(next);
       return;
     }
