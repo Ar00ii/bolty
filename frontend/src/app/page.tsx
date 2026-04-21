@@ -119,7 +119,7 @@ interface CommunityUser {
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const [communityAvatars, setCommunityAvatars] = useState<
-    { imageUrl: string; profileUrl?: string }[]
+    { imageUrl: string; profileUrl?: string; initial?: string }[]
   >([]);
   const [totalMembers, setTotalMembers] = useState<number>(0);
 
@@ -129,13 +129,17 @@ export default function HomePage() {
       .get<{ users: CommunityUser[]; totalCount: number }>('/users/community?limit=6')
       .then((data) => {
         if (cancelled) return;
-        const avatars: { imageUrl: string; profileUrl?: string }[] = [];
+        const avatars: { imageUrl: string; profileUrl?: string; initial?: string }[] = [];
         for (const u of data.users || []) {
           const imageUrl = resolveAssetUrl(u.avatarUrl);
-          if (!imageUrl) continue;
+          const initial = (u.displayName || u.username || 'U').trim().charAt(0).toUpperCase();
+          // Still include the entry even when the avatar URL is missing —
+          // the component will render a letter-only fallback circle so the
+          // social-proof row stays visually complete.
           avatars.push({
-            imageUrl,
+            imageUrl: imageUrl || '',
             profileUrl: u.username ? `/u/${u.username}` : undefined,
+            initial,
           });
         }
         setCommunityAvatars(avatars);
