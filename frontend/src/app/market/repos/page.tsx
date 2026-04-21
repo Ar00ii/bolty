@@ -21,10 +21,6 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Code2,
-  Terminal,
-  ArrowUpRight,
-  Package,
   Shield,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -1189,162 +1185,6 @@ function RepoStat({
   );
 }
 
-const CLI_SNIPPETS: Record<'cli' | 'git' | 'curl', string> = {
-  cli: `# Install the bolty CLI
-npm i -g @bolty/cli
-
-# Authenticate once
-bolty login
-
-# Clone any listing (paid or free)
-bolty repo clone @alice/rag-toolkit`,
-  git: `# Add the bolty remote for a specific repo
-git clone https://packages.bolty.dev/gh/alice/rag-toolkit.git
-
-# Or add as a submodule
-git submodule add https://packages.bolty.dev/gh/alice/rag-toolkit.git`,
-  curl: `# Resolve a signed tarball URL (valid 60s)
-curl -H "Authorization: Bearer $BOLTY_API_KEY" \\
-  https://api.bolty.dev/v1/repos/alice/rag-toolkit/tarball \\
-  -o rag-toolkit.tgz
-
-tar xzf rag-toolkit.tgz`,
-};
-
-function RepoCliPanel() {
-  const [mode, setMode] = useState<'cli' | 'git' | 'curl'>('cli');
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(CLI_SNIPPETS[mode]);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* noop */
-    }
-  };
-
-  return (
-    <div
-      className="relative rounded-xl overflow-hidden mb-6"
-      style={{
-        border: '1px solid rgba(255,255,255,0.08)',
-        background:
-          'linear-gradient(135deg, rgba(59,130,246,0.06) 0%, rgba(131,110,249,0.04) 100%), rgba(0,0,0,0.4)',
-        backdropFilter: 'blur(6px)',
-      }}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr]">
-        <div className="p-5 md:p-6 border-b md:border-b-0 md:border-r border-white/8">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <span
-              className="w-7 h-7 rounded-md flex items-center justify-center"
-              style={{
-                background: 'rgba(59,130,246,0.12)',
-                border: '1px solid rgba(59,130,246,0.3)',
-              }}
-            >
-              <Package className="w-3.5 h-3.5 text-blue-300" />
-            </span>
-            <span className="text-[11px] uppercase tracking-[0.25em] text-blue-300/80 font-light">
-              Install & integrate
-            </span>
-          </div>
-          <h3 className="text-lg text-white font-light mb-2">Pull any repo, any runtime</h3>
-          <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
-            Every listing is packaged, signed, and served via a resumable tarball endpoint. Unlock
-            paid repos with a single on-chain payment — access persists forever.
-          </p>
-          <div className="flex flex-col gap-1.5 text-[11px] text-zinc-400 font-light">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> SHA-256 signed tarballs
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Semantic version pinning
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Works w/ git, npm, pip, cargo
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 mt-4">
-            <Link
-              href="/api-keys"
-              className="inline-flex items-center gap-1.5 text-[11px] text-blue-300 hover:text-blue-200 transition-colors"
-            >
-              <Terminal className="w-3 h-3" /> Get CLI token
-              <ArrowUpRight className="w-3 h-3" />
-            </Link>
-            <span className="text-zinc-700">·</span>
-            <Link
-              href="/docs/agent-protocol"
-              className="inline-flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-zinc-200 transition-colors"
-            >
-              <Code2 className="w-3 h-3" /> Read docs
-              <ArrowUpRight className="w-3 h-3" />
-            </Link>
-          </div>
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between border-b border-white/8 px-4 py-2">
-            <div className="relative flex gap-1">
-              {(['cli', 'git', 'curl'] as const).map((m) => {
-                const active = mode === m;
-                return (
-                  <motion.button
-                    key={m}
-                    onClick={() => setMode(m)}
-                    whileTap={{ scale: 0.95 }}
-                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className={`relative text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
-                      active ? 'text-blue-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="market-repos-cli-pill"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        aria-hidden="true"
-                        className="absolute inset-0 rounded"
-                        style={{
-                          background: 'rgba(6,182,212,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(6,182,212,0.35)',
-                        }}
-                      />
-                    )}
-                    <span className="relative">{m}</span>
-                  </motion.button>
-                );
-              })}
-            </div>
-            <button
-              onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
-            >
-              {copied ? (
-                <>
-                  <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Copied
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3 h-3" /> Copy
-                </>
-              )}
-            </button>
-          </div>
-          <pre
-            className="flex-1 text-[11.5px] leading-relaxed font-mono text-zinc-300 p-4 overflow-x-auto"
-            style={{ background: 'rgba(0,0,0,0.35)' }}
-          >
-            <code>{CLI_SNIPPETS[mode]}</code>
-          </pre>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function ReposMarketPage() {
@@ -1636,9 +1476,6 @@ function ReposMarketPageContent() {
           delta="CVE audited"
         />
       </div>
-
-      {/* CLI install panel */}
-      <RepoCliPanel />
 
       {/* Tabs */}
       <div
