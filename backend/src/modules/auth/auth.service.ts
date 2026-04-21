@@ -312,8 +312,12 @@ export class AuthService {
 
     // 2FA required — using TOTP (Authenticator app)
     if (user.twoFactorEnabled) {
+      // Single-use jti: verifyLogin2FA atomically deletes it on success,
+      // so a stolen/copied tempToken can only mint tokens once.
+      const jti = uuidv4();
+      await this.redis.set(`2fa_jti:${jti}`, user.id, 600);
       const tempToken = this.jwtService.sign(
-        { sub: user.id, scope: 'pending_2fa' },
+        { sub: user.id, scope: 'pending_2fa', jti },
         { expiresIn: '10m' },
       );
       return { twoFactorRequired: true, tempToken };
@@ -323,15 +327,27 @@ export class AuthService {
   }
 
   async verifyLogin2FA(tempToken: string, code: string): Promise<AuthTokens> {
-    let payload: { sub: string; scope: string };
+    let payload: { sub: string; scope: string; jti?: string };
     try {
-      payload = this.jwtService.verify<{ sub: string; scope: string }>(tempToken);
+      payload = this.jwtService.verify<{ sub: string; scope: string; jti?: string }>(tempToken);
     } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
     if (payload.scope !== 'pending_2fa') {
       throw new UnauthorizedException('Invalid token scope');
+    }
+
+    // Reject replay: the jti is burnt only on successful verification
+    // (see below). A missing/mismatched jti means this tempToken was
+    // already consumed or never issued by us.
+    if (!payload.jti) {
+      throw new UnauthorizedException('Invalid token');
+    }
+    const jtiKey = `2fa_jti:${payload.jti}`;
+    const jtiOwner = await this.redis.get(jtiKey);
+    if (!jtiOwner || jtiOwner !== payload.sub) {
+      throw new UnauthorizedException('Token has already been used');
     }
 
     // Get user and their TOTP secret
@@ -365,7 +381,9 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired verification code');
     }
 
-    // Clear attempts on success
+    // Burn the jti so the tempToken cannot be replayed, then clear
+    // brute-force counter.
+    await this.redis.del(jtiKey);
     await this.redis.del(attemptsKey);
     return this.generateTokens(payload.sub);
   }
