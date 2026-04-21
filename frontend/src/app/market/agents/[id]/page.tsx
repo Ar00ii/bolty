@@ -30,6 +30,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Markdown } from '@/components/ui/Markdown';
 import { ShareButton } from '@/components/ui/ShareButton';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
@@ -348,17 +349,12 @@ export default function AgentDetailPage() {
                   href={`/u/${listing.seller.username || listing.seller.id}`}
                   className="inline-flex items-center gap-2 hover:text-white transition-colors"
                 >
-                  {listing.seller.avatarUrl ? (
-                    <img
-                      src={listing.seller.avatarUrl}
-                      alt=""
-                      className="w-5 h-5 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-400">
-                      {(listing.seller.username || 'A').charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <UserAvatar
+                    src={listing.seller.avatarUrl}
+                    name={listing.seller.username}
+                    userId={listing.seller.id}
+                    size={20}
+                  />
                   <span>@{listing.seller.username || 'anonymous'}</span>
                 </Link>
                 <span className="text-zinc-700">·</span>
@@ -891,17 +887,12 @@ function ReviewsWidget({
             >
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2 text-xs text-zinc-300">
-                  {r.author.avatarUrl ? (
-                    <img
-                      src={r.author.avatarUrl}
-                      alt=""
-                      className="w-5 h-5 rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="w-5 h-5 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-[10px] text-zinc-400">
-                      {(r.author.username || 'A').charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <UserAvatar
+                    src={r.author.avatarUrl}
+                    name={r.author.username}
+                    userId={r.author.id}
+                    size={20}
+                  />
                   <span className="font-medium">{r.author.username || 'Anonymous'}</span>
                   <Stars value={r.rating} size={12} />
                 </div>
@@ -1001,29 +992,13 @@ function SellerCard({ seller }: { seller: MarketListing['seller'] }) {
         Seller
       </p>
       <div className="flex items-center gap-3">
-        {seller.avatarUrl ? (
-          <img
-            src={seller.avatarUrl}
-            alt=""
-            className="w-10 h-10 rounded-full object-cover"
-            style={{
-              boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
-            }}
-          />
-        ) : (
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-sm text-zinc-200"
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
-              boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
-            }}
-          >
-            {(seller.username || 'A').charAt(0).toUpperCase()}
-          </div>
-        )}
+        <UserAvatar
+          src={seller.avatarUrl}
+          name={seller.username}
+          userId={seller.id}
+          size={40}
+          ring
+        />
         <div className="min-w-0">
           <p className="text-sm font-medium text-white truncate">
             @{seller.username || 'anonymous'}

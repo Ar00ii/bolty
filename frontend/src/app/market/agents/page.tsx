@@ -37,6 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -1410,19 +1411,12 @@ function AgentCard({
               {listing.title}
             </h3>
             <div className="flex items-center gap-1.5 mt-0.5">
-              {listing.seller.avatarUrl ? (
-                <img
-                  src={listing.seller.avatarUrl}
-                  alt=""
-                  className="w-3.5 h-3.5 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-3.5 h-3.5 rounded-full bg-bolty-500/20 flex items-center justify-center">
-                  <span className="text-[7px] font-light text-bolty-400">
-                    {(listing.seller.username || 'A').charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              )}
+              <UserAvatar
+                src={listing.seller.avatarUrl}
+                name={listing.seller.username}
+                userId={listing.seller.id}
+                size={14}
+              />
               <span className="text-[11px] text-zinc-500">
                 @{listing.seller.username || 'anon'}
               </span>
