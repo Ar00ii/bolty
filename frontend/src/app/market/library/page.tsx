@@ -7,6 +7,7 @@ import {
   Download,
   ExternalLink,
   GitBranch,
+  Heart,
   Library,
   Package,
   Play,
@@ -19,11 +20,12 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
-import { api, API_URL } from '@/lib/api/client';
+import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
@@ -111,15 +113,47 @@ function formatBytes(b: number) {
   return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+interface SavedListing {
+  id: string;
+  title: string;
+  description: string;
+  type: ListingType;
+  price: number;
+  currency: string;
+  tags: string[];
+  status: string;
+  seller: { id: string; username: string | null; avatarUrl: string | null };
+  reviewAverage?: number | null;
+  reviewCount?: number;
+}
+
 export default function LibraryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <LibraryPageContent />
+    </Suspense>
+  );
+}
+
+function LibraryPageContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialView =
+    searchParams.get('tab') === 'saved' ? ('saved' as const) : ('owned' as const);
+  const [view, setView] = useState<'owned' | 'saved'>(initialView);
   const [items, setItems] = useState<LibraryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<TypeFilter>('ALL');
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
+
+  // Saved listings (favorites) — hydrated from localStorage + per-id fetch.
+  const { ids: favIds, remove: removeFav } = useFavorites();
+  const [savedListings, setSavedListings] = useState<SavedListing[]>([]);
+  const [savedMissing, setSavedMissing] = useState<string[]>([]);
+  const [savedLoading, setSavedLoading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -139,6 +173,46 @@ export default function LibraryPage() {
       }
     })();
   }, [isAuthenticated, isLoading, router]);
+
+  // Lazy-load the saved listings only when the Saved tab is active.
+  useEffect(() => {
+    if (view !== 'saved') return;
+    let cancelled = false;
+    (async () => {
+      setSavedLoading(true);
+      const found: SavedListing[] = [];
+      const gone: string[] = [];
+      await Promise.all(
+        favIds.map(async (id) => {
+          try {
+            const l = await api.get<SavedListing>(`/market/${id}`);
+            if (l && l.status !== 'REMOVED') found.push(l);
+            else gone.push(id);
+          } catch (err) {
+            if (err instanceof ApiError && err.status === 404) gone.push(id);
+          }
+        }),
+      );
+      if (cancelled) return;
+      const order = new Map(favIds.map((id, i) => [id, i]));
+      found.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+      setSavedListings(found);
+      setSavedMissing(gone);
+      setSavedLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [view, favIds]);
+
+  // Keep the URL in sync so links deep-link to the right tab.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (view === 'saved') url.searchParams.set('tab', 'saved');
+    else url.searchParams.delete('tab');
+    window.history.replaceState({}, '', url.toString());
+  }, [view]);
 
   const q = query.trim().toLowerCase();
   const visible = useMemo(
@@ -224,7 +298,9 @@ export default function LibraryPage() {
                 Your library
               </h1>
               <p className="text-[12.5px] text-zinc-500 font-light mt-1">
-                Everything you own — agents, bots, scripts and repos — one click away.
+                {view === 'owned'
+                  ? 'Everything you own — agents, bots, scripts and repos — one click away.'
+                  : 'Listings you saved for later. Kept in this browser.'}
               </p>
             </div>
             <Link
@@ -241,122 +317,446 @@ export default function LibraryPage() {
               Browse marketplace
             </Link>
           </div>
+
+          {/* Owned / Saved tabs */}
+          <div
+            className="mt-5 inline-flex items-center gap-0.5 rounded-lg p-0.5"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            <SectionTab
+              label="Owned"
+              icon={Library}
+              count={items.length}
+              active={view === 'owned'}
+              onClick={() => setView('owned')}
+              accent="#836EF9"
+            />
+            <SectionTab
+              label="Saved"
+              icon={Heart}
+              count={favIds.length}
+              active={view === 'saved'}
+              onClick={() => setView('saved')}
+              accent="#EC4899"
+            />
+          </div>
         </div>
       </header>
 
-      {/* Stats strip */}
-      <section className="px-6 md:px-10 mb-4">
-        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
-          <StatTile
-            label="Items owned"
-            value={formatNumber(items.length)}
-            sub={`${thisMonth} this month`}
-            accent="#836EF9"
-          />
-          <StatTile
-            label="Total spent"
-            value={`${formatEth(totalSpent)} ETH`}
-            sub="across all orders"
-            accent="#EC4899"
-          />
-          <StatTile
-            label="Downloads"
-            value={formatNumber(downloadable)}
-            sub="files ready"
-            accent="#22c55e"
-          />
-          <StatTile
-            label="Live agents"
-            value={formatNumber(liveAgents)}
-            sub="interactive"
-            accent="#06B6D4"
-          />
+      {view === 'owned' ? (
+        <>
+          {/* Stats strip */}
+          <section className="px-6 md:px-10 mb-4">
+            <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
+              <StatTile
+                label="Items owned"
+                value={formatNumber(items.length)}
+                sub={`${thisMonth} this month`}
+                accent="#836EF9"
+              />
+              <StatTile
+                label="Total spent"
+                value={`${formatEth(totalSpent)} ETH`}
+                sub="across all orders"
+                accent="#EC4899"
+              />
+              <StatTile
+                label="Downloads"
+                value={formatNumber(downloadable)}
+                sub="files ready"
+                accent="#22c55e"
+              />
+              <StatTile
+                label="Live agents"
+                value={formatNumber(liveAgents)}
+                sub="interactive"
+                accent="#06B6D4"
+              />
+            </div>
+          </section>
+
+          {items.length === 0 ? (
+            <section className="px-6 md:px-10">
+              <div className="mx-auto max-w-[1400px]">
+                <EmptyState />
+              </div>
+            </section>
+          ) : (
+            <>
+              {/* Filters */}
+              <section className="px-6 md:px-10 mb-3">
+                <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+                  <div
+                    className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
+                    style={{
+                      background: 'rgba(0,0,0,0.4)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                    }}
+                  >
+                    <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+                    <input
+                      ref={searchRef}
+                      type="text"
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Search your library…"
+                      className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+                    />
+                    {query ? (
+                      <button
+                        onClick={() => setQuery('')}
+                        aria-label="Clear search"
+                        className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    ) : (
+                      <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                        /
+                      </kbd>
+                    )}
+                  </div>
+
+                  <div
+                    className="flex items-center gap-0.5 rounded-lg p-0.5 ml-auto"
+                    style={{
+                      background: 'rgba(0,0,0,0.4)',
+                      boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                    }}
+                  >
+                    <FilterChip
+                      label="All"
+                      count={items.length}
+                      active={filter === 'ALL'}
+                      onClick={() => setFilter('ALL')}
+                    />
+                    {(['AI_AGENT', 'BOT', 'SCRIPT', 'REPO'] as const).map((t) => {
+                      const c = counts[t] || 0;
+                      if (c === 0) return null;
+                      return (
+                        <FilterChip
+                          key={t}
+                          label={TYPE_LABEL[t]}
+                          count={c}
+                          active={filter === t}
+                          onClick={() => setFilter(t)}
+                          accent={TYPE_ACCENT[t]}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
+
+              {/* Table */}
+              <section className="px-6 md:px-10">
+                <div className="mx-auto max-w-[1400px]">
+                  <LibraryTable items={visible} query={query} />
+                </div>
+              </section>
+            </>
+          )}
+        </>
+      ) : (
+        <SavedSection
+          listings={savedListings}
+          missing={savedMissing}
+          loading={savedLoading}
+          query={query}
+          setQuery={setQuery}
+          searchRef={searchRef}
+          onRemove={removeFav}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Owned / Saved tab ───────────────────────────────────────────────────
+
+function SectionTab({
+  label,
+  icon: Icon,
+  count,
+  active,
+  onClick,
+  accent,
+}: {
+  label: string;
+  icon: LucideIcon;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+  accent: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12.5px] font-light transition"
+      style={{
+        color: active ? '#ffffff' : '#a1a1aa',
+        background: active ? `${accent}22` : 'transparent',
+        boxShadow: active ? `inset 0 0 0 1px ${accent}5a` : 'none',
+      }}
+    >
+      <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+      {label}
+      <span
+        className="text-[10.5px] font-mono tabular-nums"
+        style={{ color: active ? `${accent}ee` : '#71717a' }}
+      >
+        {count}
+      </span>
+    </button>
+  );
+}
+
+// ── Saved section ───────────────────────────────────────────────────────
+
+function SavedSection({
+  listings,
+  missing,
+  loading,
+  query,
+  setQuery,
+  searchRef,
+  onRemove,
+}: {
+  listings: SavedListing[];
+  missing: string[];
+  loading: boolean;
+  query: string;
+  setQuery: (v: string) => void;
+  searchRef: React.RefObject<HTMLInputElement>;
+  onRemove: (id: string) => void;
+}) {
+  const q = query.trim().toLowerCase();
+  const visible = useMemo(() => {
+    if (!q) return listings;
+    return listings.filter((l) => {
+      const haystack = [l.title, l.description, l.seller.username ?? '', ...(l.tags || [])]
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [listings, q]);
+
+  if (loading && listings.length === 0) {
+    return (
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div
+            className="rounded-xl px-6 py-20 text-center text-sm text-zinc-500 font-light"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            Loading your saved listings…
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (listings.length === 0) {
+    return (
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div
+            className="relative rounded-2xl overflow-hidden p-14 text-center"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 h-px"
+              style={{
+                background:
+                  'linear-gradient(90deg, transparent 0%, rgba(236,72,153,0.5) 50%, transparent 100%)',
+              }}
+            />
+            <div
+              className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(236,72,153,0.22) 0%, rgba(236,72,153,0.06) 100%)',
+                border: '1px solid rgba(236,72,153,0.3)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(236,72,153,0.35)',
+              }}
+            >
+              <Heart className="w-5 h-5 text-[#f9a8d4]" strokeWidth={1.5} />
+            </div>
+            <h2 className="relative text-[15px] font-normal text-white mb-1.5">
+              Nothing saved yet
+            </h2>
+            <p className="relative text-[12px] text-zinc-500 mb-6 max-w-md mx-auto font-light">
+              Hit the heart on any listing to keep it here for later. Saved items live in this
+              browser.
+            </p>
+            <Link
+              href="/market"
+              className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                boxShadow:
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+              }}
+            >
+              <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
+              Browse marketplace
+            </Link>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
+          <div
+            className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
+            style={{
+              background: 'rgba(0,0,0,0.4)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+            <input
+              ref={searchRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search saved listings…"
+              className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
+            />
+            {query ? (
+              <button
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            ) : (
+              <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
+                /
+              </kbd>
+            )}
+          </div>
+
+          {missing.length > 0 && (
+            <button
+              onClick={() => missing.forEach(onRemove)}
+              className="text-[11px] text-yellow-300 hover:text-yellow-100 underline underline-offset-2"
+            >
+              Clean up {missing.length} unavailable
+            </button>
+          )}
         </div>
       </section>
 
-      {/* Empty state */}
-      {items.length === 0 ? (
-        <section className="px-6 md:px-10">
-          <div className="mx-auto max-w-[1400px]">
-            <EmptyState />
-          </div>
-        </section>
-      ) : (
-        <>
-          {/* Filters */}
-          <section className="px-6 md:px-10 mb-3">
-            <div className="mx-auto max-w-[1400px] flex items-center gap-2 flex-wrap">
-              <div
-                className="flex items-center gap-1 flex-1 min-w-[220px] max-w-md px-3 py-1.5 rounded-lg"
-                style={{
-                  background: 'rgba(0,0,0,0.4)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-                }}
-              >
-                <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
-                <input
-                  ref={searchRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search your library…"
-                  className="flex-1 bg-transparent border-none outline-none text-[12.5px] font-light text-white placeholder-zinc-600"
-                />
-                {query ? (
+      <section className="px-6 md:px-10">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {visible.map((l) => {
+              const Icon = TYPE_ICON[l.type] ?? Package;
+              const accent = TYPE_ACCENT[l.type];
+              return (
+                <div
+                  key={l.id}
+                  className="group relative rounded-xl transition-all overflow-hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 24px -14px rgba(0,0,0,0.55)',
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-70"
+                    style={{
+                      background: `linear-gradient(90deg, transparent 0%, ${accent} 50%, transparent 100%)`,
+                    }}
+                  />
+                  <Link href={`/market/agents/${l.id}`} className="relative block p-5">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+                        style={{
+                          background: `linear-gradient(135deg, ${accent}22 0%, ${accent}08 100%)`,
+                          border: `1px solid ${accent}40`,
+                          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 0 16px -4px ${accent}30`,
+                        }}
+                      >
+                        <Icon className="w-4 h-4" style={{ color: accent }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.14em] text-zinc-500 font-medium mb-1">
+                          {TYPE_LABEL[l.type]}
+                        </p>
+                        <p className="text-[13px] font-normal text-white truncate tracking-[0.005em]">
+                          {l.title}
+                        </p>
+                        <p className="text-[11px] text-zinc-500 mt-0.5 truncate">
+                          @{l.seller.username || 'anonymous'}
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0 pr-8">
+                        <p className="text-[13px] font-medium text-[#b4a7ff] tracking-[0.005em]">
+                          {l.price === 0 ? 'Free' : `${l.price} ${l.currency}`}
+                        </p>
+                        {l.reviewAverage != null && (
+                          <p className="text-[11px] text-zinc-500 mt-1 inline-flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            {l.reviewAverage.toFixed(1)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-[12px] text-zinc-400 font-normal line-clamp-2 leading-relaxed">
+                      {l.description}
+                    </p>
+                  </Link>
                   <button
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search"
-                    className="w-5 h-5 rounded flex items-center justify-center text-zinc-500 hover:text-zinc-200"
+                    onClick={() => onRemove(l.id)}
+                    aria-label="Remove from saved"
+                    className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-pink-300 hover:text-pink-200 hover:bg-pink-500/10 transition-colors z-10"
+                    style={{
+                      background: 'rgba(236,72,153,0.08)',
+                      border: '1px solid rgba(236,72,153,0.22)',
+                    }}
                   >
-                    <X className="w-3 h-3" />
+                    <Heart className="w-3.5 h-3.5 fill-pink-400 text-pink-400" />
                   </button>
-                ) : (
-                  <kbd className="hidden sm:inline-flex items-center justify-center text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-white/5 border border-white/10">
-                    /
-                  </kbd>
-                )}
-              </div>
-
-              <div
-                className="flex items-center gap-0.5 rounded-lg p-0.5 ml-auto"
-                style={{
-                  background: 'rgba(0,0,0,0.4)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-                }}
-              >
-                <FilterChip
-                  label="All"
-                  count={items.length}
-                  active={filter === 'ALL'}
-                  onClick={() => setFilter('ALL')}
-                />
-                {(['AI_AGENT', 'BOT', 'SCRIPT', 'REPO'] as const).map((t) => {
-                  const c = counts[t] || 0;
-                  if (c === 0) return null;
-                  return (
-                    <FilterChip
-                      key={t}
-                      label={TYPE_LABEL[t]}
-                      count={c}
-                      active={filter === t}
-                      onClick={() => setFilter(t)}
-                      accent={TYPE_ACCENT[t]}
-                    />
-                  );
-                })}
-              </div>
+                </div>
+              );
+            })}
+          </div>
+          {visible.length === 0 && (
+            <div
+              className="mt-3 rounded-xl px-6 py-12 text-center text-sm text-zinc-500 font-light"
+              style={{
+                background: 'linear-gradient(180deg, rgba(20,20,26,0.6), rgba(10,10,14,0.6))',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+              }}
+            >
+              No matches for “{query}”.
             </div>
-          </section>
-
-          {/* Table */}
-          <section className="px-6 md:px-10">
-            <div className="mx-auto max-w-[1400px]">
-              <LibraryTable items={visible} query={query} />
-            </div>
-          </section>
-        </>
-      )}
-    </div>
+          )}
+        </div>
+      </section>
+    </>
   );
 }
 

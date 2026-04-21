@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function GlobalError({
   error,
@@ -12,6 +12,21 @@ export default function GlobalError({
   useEffect(() => {
     console.error('Global Error:', error);
   }, [error]);
+
+  // A chunk of the marketplace / agent pages relies on desktop-only
+  // layout primitives (wide grids, CodeMirror, web3 modals). When the
+  // page crashes on a phone viewport the user gets the scary "Bolty hit
+  // a snag" screen — replace it with a clear "desktop only" message so
+  // people don't think the site is broken.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
 
   return (
     <html>
@@ -67,7 +82,7 @@ export default function GlobalError({
                 margin: 0,
               }}
             >
-              Critical error
+              {isMobile ? 'Heads up' : 'Critical error'}
             </p>
             <h1
               style={{
@@ -80,7 +95,7 @@ export default function GlobalError({
                 color: 'transparent',
               }}
             >
-              Bolty hit a snag
+              {isMobile ? 'Best on desktop' : 'Bolty hit a snag'}
             </h1>
             <p
               style={{
@@ -91,8 +106,9 @@ export default function GlobalError({
                 margin: '0 0 1.5rem',
               }}
             >
-              The app couldn&apos;t render this page. Refresh to try again — if it keeps failing,
-              let us know.
+              {isMobile
+                ? 'This section of Bolty is optimised for desktop. Open it from a laptop or desktop browser for the full experience.'
+                : "The app couldn't render this page. Refresh to try again — if it keeps failing, let us know."}
             </p>
             <button
               onClick={() => reset()}
@@ -110,7 +126,7 @@ export default function GlobalError({
                 transition: 'background 120ms',
               }}
             >
-              Refresh
+              {isMobile ? 'Try again' : 'Refresh'}
             </button>
           </div>
         </div>

@@ -71,7 +71,6 @@ export const NAV: NavSection[] = [
     section: 'My work',
     items: [
       { label: 'Library', icon: Library, href: '/market/library' },
-      { label: 'Saved', icon: Heart, href: '/market/favorites' },
       { label: 'Orders', icon: ShoppingBag, href: '/orders' },
     ],
   },

@@ -310,6 +310,17 @@ export class MarketController {
     return this.marketService.getMyLibrary(userId);
   }
 
+  /**
+   * Seller-scoped feed used by /market/agents → "My agents" tab so freshly
+   * published drafts appear even while they're still in PENDING_REVIEW.
+   * The public GET /market feed only returns ACTIVE listings, so without
+   * this endpoint sellers couldn't see their own pending work.
+   */
+  @Get('my-listings')
+  getMyListings(@CurrentUser('id') userId: string) {
+    return this.marketService.getMyListings(userId);
+  }
+
   @Public()
   @Get('sellers/:username')
   getSellerProfile(@Param('username') username: string) {

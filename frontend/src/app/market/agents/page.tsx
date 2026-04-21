@@ -4428,8 +4428,8 @@ function AgentsPageContent() {
     if (!isAuthenticated || !user) return;
     setMyLoading(true);
     try {
-      const data = await api.get<{ data: MarketListing[] }>('/market');
-      setMyListings(data.data.filter((l) => l.seller.id === user.id));
+      const data = await api.get<{ data: MarketListing[] }>('/market/my-listings');
+      setMyListings(data.data);
     } catch {
       setError('Failed to load your listings');
     } finally {
