@@ -1,11 +1,12 @@
 'use client';
 
-import { Bell, Search } from 'lucide-react';
+import { Bell, Menu, Search, X } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 
 import { MarketTicker } from '@/components/layout/MarketTicker';
+import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
@@ -47,6 +48,7 @@ function buildCrumbs(pathname: string): Crumb[] {
 
 export function PowerNavbar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { user, logout, isAuthenticated } = useAuth();
   const { count: unreadCount } = useNotificationsPoll(isAuthenticated);
@@ -55,6 +57,27 @@ export function PowerNavbar() {
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  // Mobile/tablet drawer — sidebar is hidden below lg, so this is the only
+  // way to reach the main nav on smaller viewports.
+  const [navDrawerOpen, setNavDrawerOpen] = useState(false);
+
+  // Close drawer whenever the route changes so tapping a link feels right.
+  useEffect(() => {
+    setNavDrawerOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when drawer is open.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (navDrawerOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [navDrawerOpen]);
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -90,6 +113,24 @@ export function PowerNavbar() {
           fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
         }}
       >
+        {/* Mobile/tablet hamburger — sidebar is hidden below lg */}
+        <button
+          type="button"
+          onClick={() => setNavDrawerOpen(true)}
+          className="lg:hidden grid place-items-center rounded-lg transition-colors shrink-0"
+          style={{
+            width: '34px',
+            height: '34px',
+            color: '#a1a1aa',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid #1f1f23',
+          }}
+          aria-label="Open menu"
+          aria-expanded={navDrawerOpen}
+        >
+          <Menu className="w-[16px] h-[16px]" strokeWidth={1.75} />
+        </button>
+
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-2 text-[13px] min-w-0 shrink">
           {crumbs.map((c, i) => {
@@ -443,6 +484,131 @@ export function PowerNavbar() {
         )}
       </header>
       <MarketTicker />
+
+      {/* Mobile/tablet navigation drawer */}
+      {navDrawerOpen && (
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            onClick={() => setNavDrawerOpen(false)}
+            className="lg:hidden fixed inset-0 z-40"
+            style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(2px)' }}
+          />
+          <aside
+            className="lg:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col"
+            style={{
+              width: '86%',
+              maxWidth: '320px',
+              height: '100dvh',
+              background: '#0c0c0f',
+              borderRight: '1px solid #1f1f23',
+              fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+            }}
+          >
+            <div
+              className="flex items-center justify-between px-4 h-[56px] shrink-0"
+              style={{ borderBottom: '1px solid #1f1f23' }}
+            >
+              <Link
+                href="/"
+                onClick={() => setNavDrawerOpen(false)}
+                className="flex items-center gap-2.5 min-w-0"
+              >
+                <div className="w-8 h-8 grid place-items-center rounded-lg overflow-hidden shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
+                </div>
+                <span
+                  className="text-[15px] font-semibold truncate"
+                  style={{
+                    background: 'linear-gradient(90deg,#ffffff 0%,#e8e2ff 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  BoltyNetwork
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => setNavDrawerOpen(false)}
+                aria-label="Close menu"
+                className="grid place-items-center rounded-lg transition-colors"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  color: '#a1a1aa',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid #1f1f23',
+                }}
+              >
+                <X className="w-[15px] h-[15px]" strokeWidth={1.75} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-2 py-3">
+              {NAV.map((sect) => (
+                <div key={sect.section} className="mt-4 first:mt-0">
+                  <div
+                    className="font-mono text-[10px] uppercase px-3 pb-1.5"
+                    style={{ color: '#52525b', letterSpacing: '0.12em' }}
+                  >
+                    {sect.section}
+                  </div>
+                  {sect.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isItemActive(
+                      pathname,
+                      searchParams ?? new URLSearchParams(),
+                      item.href,
+                    );
+                    return (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        onClick={() => setNavDrawerOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors"
+                        style={{
+                          color: active ? '#e4e4e7' : '#a1a1aa',
+                          background: active ? 'rgba(131,110,249,0.10)' : 'transparent',
+                          fontSize: '14px',
+                          fontWeight: 300,
+                        }}
+                      >
+                        <Icon
+                          className="w-[15px] h-[15px] shrink-0"
+                          style={{ color: active ? '#a594ff' : '#71717a' }}
+                          strokeWidth={1.75}
+                        />
+                        <span className="flex-1 truncate">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            {!isAuthenticated && (
+              <div className="p-3" style={{ borderTop: '1px solid #1f1f23' }}>
+                <Link
+                  href="/auth"
+                  onClick={() => setNavDrawerOpen(false)}
+                  className="block text-center rounded-md py-2.5 text-[13px] transition-colors"
+                  style={{
+                    background: 'rgba(131,110,249,0.15)',
+                    border: '1px solid rgba(131,110,249,0.3)',
+                    color: '#e4e4e7',
+                  }}
+                >
+                  Sign in
+                </Link>
+              </div>
+            )}
+          </aside>
+        </>
+      )}
     </div>
   );
 }
