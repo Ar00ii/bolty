@@ -141,7 +141,7 @@ export class MarketService {
   async scanContent(
     title: string,
     description: string,
-  ): Promise<{ safe: boolean; reason: string }> {
+  ): Promise<{ safe: boolean; reason: string; scanned: boolean }> {
     const basePrompt = `You are a content safety moderator for a developer marketplace.
 Analyze the following listing and determine if it is safe and legitimate.
 
@@ -164,6 +164,19 @@ Description: ${description.slice(0, 1000)}
 
 Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence explanation"}`;
 
+    // If the API key isn't configured, skip the scan entirely and publish
+    // as-is. Blocking every listing behind an unreachable scanner was the
+    // root cause of "my agent never shows up" — the sensible failure mode
+    // here is to mark the row as unscanned and let admin moderation catch
+    // anything genuinely bad.
+    const apiKey = this.config.get<string>('ANTHROPIC_API_KEY') || '';
+    if (!apiKey) {
+      this.logger.warn(
+        'ANTHROPIC_API_KEY missing — publishing listing without content scan',
+      );
+      return { safe: true, reason: 'Scan skipped (scanner not configured)', scanned: false };
+    }
+
     try {
       // ── Tier 1: Haiku — fast scan ──────────────────────────────────────────
       const haikuRes = await this.anthropic.messages.create({
@@ -175,7 +188,7 @@ Respond with ONLY a JSON object: {"safe": true|false, "reason": "one sentence ex
       const haikuResult = this.parseJson(haikuText);
 
       if (haikuResult?.safe) {
-        return { safe: true, reason: haikuResult.reason };
+        return { safe: true, reason: haikuResult.reason, scanned: true };
       }
 
       // ── Tier 2: Sonnet — deep analysis when suspicious ─────────────────────
@@ -194,12 +207,19 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       });
       const sonnetText = (sonnetRes.content[0] as { type: string; text: string }).text ?? '';
       const sonnetResult = this.parseJson(sonnetText);
-      if (sonnetResult) return sonnetResult;
+      if (sonnetResult) {
+        return { ...sonnetResult, scanned: true };
+      }
     } catch (err) {
-      this.logger.error('Content scan failed', err);
+      // Scanner outage (rate limit, network, bad key): fail OPEN for
+      // availability. We'd rather publish a listing the admin has to
+      // take down than silently hide every listing the platform
+      // generates — the latter feels like the site is broken.
+      this.logger.error('Content scan failed — publishing without scan', err);
+      return { safe: true, reason: 'Scan unavailable', scanned: false };
     }
-    // Default to requiring manual review on scan error
-    return { safe: false, reason: 'Scan service unavailable — manual review required' };
+    // Parse failure on Sonnet — treat as needing review.
+    return { safe: false, reason: 'Manual review required', scanned: true };
   }
 
   async createListing(sellerId: string, dto: CreateListingDto) {
@@ -351,6 +371,26 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const withReviews = await this.attachReviewStats(rawListings);
     const data = await this.attachActivityStats(withReviews);
     return { data, total, page, pages: Math.ceil(total / take) };
+  }
+
+  /**
+   * Seller-scoped listing feed — returns every listing the caller owns,
+   * regardless of status (ACTIVE, PENDING_REVIEW, …), so the "My agents"
+   * tab can show freshly-published drafts that didn't clear the scan
+   * yet. Hides REMOVED rows so soft-deleted listings don't clutter the UI.
+   */
+  async getMyListings(sellerId: string) {
+    const rows = await this.prisma.marketListing.findMany({
+      where: { sellerId, status: { not: 'REMOVED' } },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        seller: { select: { id: true, username: true, avatarUrl: true } },
+        repository: { select: { id: true, name: true, githubUrl: true, language: true } },
+      },
+    });
+    const withReviews = await this.attachReviewStats(rows);
+    const data = await this.attachActivityStats(withReviews);
+    return { data, total: data.length, page: 1, pages: 1 };
   }
 
   async getMarketPulse(limit = 15) {

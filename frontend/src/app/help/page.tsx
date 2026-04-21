@@ -305,19 +305,6 @@ export default function HelpPage() {
                 Guides, FAQs and direct channels to reach the team.
               </p>
             </div>
-            <Link
-              href="mailto:support@bolty.run"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
-              }}
-            >
-              <Mail className="w-3.5 h-3.5" strokeWidth={1.75} />
-              Contact support
-            </Link>
           </div>
         </div>
       </header>
