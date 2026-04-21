@@ -50,10 +50,6 @@ export const metadata: Metadata = {
   creator: 'Bolty',
   publisher: 'Bolty',
   category: 'technology',
-  icons: {
-    icon: '/icon',
-    apple: '/apple-icon',
-  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -102,7 +98,7 @@ const jsonLd = {
   name: 'Bolty',
   alternateName: 'BoltyNetwork',
   url: BASE_URL,
-  logo: `${BASE_URL}/icon`,
+  logo: `${BASE_URL}/icon.png`,
   description:
     'Bolty is the AI developer platform for publishing code, deploying AI agents, and earning from your work.',
   sameAs: ['https://twitter.com/boltynetwork', 'https://github.com/boltynetwork'],
