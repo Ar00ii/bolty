@@ -158,6 +158,13 @@ export class UsersController {
   }
 
   @Public()
+  @Get('community')
+  getCommunity(@Query('limit') limit?: string) {
+    const parsed = limit ? parseInt(limit, 10) : 6;
+    return this.usersService.getCommunityShowcase(Number.isFinite(parsed) ? parsed : 6);
+  }
+
+  @Public()
   @Get('avatars/:key')
   serveAvatar(@Param('key') key: string, @Res() res: Response) {
     if (!/^[0-9a-f-]{36}$/.test(key)) {
