@@ -322,10 +322,79 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       twitterUrl?: string;
     },
   ) {
-    const isPrivate = githubRepoData.private === true;
     const isLocked = githubRepoData.isLocked === true;
 
-    // Private repos must be locked with a price
+    // ── GitHub ownership verification ─────────────────────────────────────
+    // Never trust the client's copy of id/full_name/stars/private — that's
+    // how a user publishes someone else's repo under their own account.
+    // Pull the authoritative repo metadata from the GitHub API using the
+    // caller's OAuth token and require that they are the owner (or a
+    // repo admin). Mass-assignable client fields are then overwritten.
+    const ownerRecord = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { githubToken: true, githubLogin: true },
+    });
+    const token = decryptToken(ownerRecord?.githubToken) ?? undefined;
+    if (!token) {
+      throw new ForbiddenException('Reconnect GitHub to publish this repository');
+    }
+    if (!/^[\w.-]+\/[\w.-]+$/.test(githubRepoData.full_name)) {
+      throw new BadRequestException('Invalid repository full name');
+    }
+    interface GithubRepoPayload {
+      id: number;
+      name: string;
+      full_name: string;
+      description: string | null;
+      language: string | null;
+      stargazers_count: number;
+      forks_count: number;
+      html_url: string;
+      clone_url: string;
+      topics: string[] | null;
+      private: boolean;
+      owner: { login: string };
+      permissions?: { admin?: boolean };
+    }
+    let authoritative: GithubRepoPayload;
+    try {
+      const resp = await axios.get<GithubRepoPayload>(
+        `https://api.github.com/repos/${githubRepoData.full_name}`,
+        {
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'Bolty-Platform/1.0',
+            Authorization: `Bearer ${token}`,
+          },
+          timeout: 10_000,
+          validateStatus: () => true,
+        },
+      );
+      if (resp.status === 404) {
+        throw new NotFoundException('Repository not found on GitHub');
+      }
+      if (resp.status === 401 || resp.status === 403) {
+        throw new ForbiddenException('GitHub token lacks permission for this repository');
+      }
+      if (resp.status !== 200 || !resp.data?.id) {
+        throw new BadRequestException('Could not fetch repository metadata from GitHub');
+      }
+      authoritative = resp.data;
+    } catch (err) {
+      if (err instanceof NotFoundException || err instanceof ForbiddenException) throw err;
+      if (err instanceof BadRequestException) throw err;
+      this.logger.error(`GitHub verify failed: ${err instanceof Error ? err.message : err}`);
+      throw new BadRequestException('Could not verify repository ownership with GitHub');
+    }
+
+    const isOwner =
+      authoritative.owner.login.toLowerCase() === (ownerRecord?.githubLogin || '').toLowerCase();
+    const isAdmin = authoritative.permissions?.admin === true;
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('You do not own this repository');
+    }
+    const isPrivate = authoritative.private;
+
     if (isPrivate && !isLocked) {
       throw new BadRequestException(
         'Private repositories must be published as locked with a price',
@@ -337,37 +406,47 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     // Validate URLs — only for public (non-private) repos since private clone URLs need auth
     if (!isPrivate) {
-      if (!isSafeUrl(githubRepoData.html_url) || !isSafeUrl(githubRepoData.clone_url)) {
+      if (!isSafeUrl(authoritative.html_url) || !isSafeUrl(authoritative.clone_url)) {
         throw new BadRequestException('Invalid repository URLs');
       }
-    } else if (!isSafeUrl(githubRepoData.html_url)) {
+    } else if (!isSafeUrl(authoritative.html_url)) {
       throw new BadRequestException('Invalid repository URL');
     }
 
-    // AI content security scan
+    // AI content security scan (use authoritative name/desc/topics)
     const scan = await this.scanRepoContent(
-      githubRepoData.name,
-      githubRepoData.description || '',
-      githubRepoData.topics || [],
+      authoritative.name,
+      authoritative.description || '',
+      authoritative.topics || [],
     );
     if (!scan.safe) {
-      this.logger.warn(`Repo ${githubRepoData.name} rejected by AI scanner: ${scan.reason}`);
+      this.logger.warn(`Repo ${authoritative.name} rejected by AI scanner: ${scan.reason}`);
       throw new ForbiddenException(`Repository rejected by security scanner: ${scan.reason}`);
     }
 
+    // Block cross-user hijack: if another Bolty account already claimed
+    // this GitHub repo id, only that owner may update it.
+    const existing = await this.prisma.repository.findUnique({
+      where: { githubRepoId: String(authoritative.id) },
+      select: { userId: true },
+    });
+    if (existing && existing.userId !== userId) {
+      throw new ForbiddenException('This repository is already published under another account');
+    }
+
     return this.prisma.repository.upsert({
-      where: { githubRepoId: String(githubRepoData.id) },
+      where: { githubRepoId: String(authoritative.id) },
       create: {
-        githubRepoId: String(githubRepoData.id),
-        name: githubRepoData.name.slice(0, 100),
-        fullName: githubRepoData.full_name.slice(0, 200),
-        description: githubRepoData.description?.slice(0, 1000),
-        language: githubRepoData.language?.slice(0, 50),
-        stars: githubRepoData.stargazers_count,
-        forks: githubRepoData.forks_count,
-        githubUrl: githubRepoData.html_url,
-        cloneUrl: githubRepoData.clone_url,
-        topics: githubRepoData.topics || [],
+        githubRepoId: String(authoritative.id),
+        name: authoritative.name.slice(0, 100),
+        fullName: authoritative.full_name.slice(0, 200),
+        description: authoritative.description?.slice(0, 1000) || null,
+        language: authoritative.language?.slice(0, 50) || null,
+        stars: authoritative.stargazers_count,
+        forks: authoritative.forks_count,
+        githubUrl: authoritative.html_url,
+        cloneUrl: authoritative.clone_url,
+        topics: authoritative.topics || [],
         isPrivate,
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
@@ -377,9 +456,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         userId,
       },
       update: {
-        stars: githubRepoData.stargazers_count,
-        forks: githubRepoData.forks_count,
-        description: githubRepoData.description?.slice(0, 1000),
+        stars: authoritative.stargazers_count,
+        forks: authoritative.forks_count,
+        description: authoritative.description?.slice(0, 1000) || null,
         isLocked,
         lockedPriceUsd: isLocked ? githubRepoData.lockedPriceUsd : null,
         logoUrl: githubRepoData.logoUrl?.slice(0, 500) || null,
