@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
 
 interface TickerAgent {
@@ -230,22 +231,12 @@ function TickerEntry({ item }: { item: TickerItem }) {
           <Flame className="w-2.5 h-2.5" strokeWidth={2.5} />
           Top sold
         </span>
-        {item.sellerAvatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.sellerAvatar}
-            alt=""
-            className="w-4 h-4 rounded-full object-cover"
-            style={{ border: '1px solid rgba(255,255,255,0.12)' }}
-          />
-        ) : (
-          <span
-            className="w-4 h-4 rounded-full grid place-items-center font-mono text-[8px] text-white"
-            style={{ background: 'linear-gradient(135deg,#ec4899,#836EF9)' }}
-          >
-            {(item.sellerUsername || '?')[0]?.toUpperCase()}
-          </span>
-        )}
+        <UserAvatar
+          src={item.sellerAvatar}
+          name={item.sellerUsername}
+          userId={item.sellerUsername || item.title}
+          size={16}
+        />
         <span style={{ color: '#e4e4e7' }} className="truncate max-w-[160px]">
           {item.title}
         </span>
@@ -293,22 +284,12 @@ function TickerEntry({ item }: { item: TickerItem }) {
         <Crown className="w-2.5 h-2.5" strokeWidth={2.5} />
         Top dev
       </span>
-      {item.avatarUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.avatarUrl}
-          alt=""
-          className="w-4 h-4 rounded-full object-cover"
-          style={{ border: `1px solid ${rank.color}` }}
-        />
-      ) : (
-        <span
-          className="w-4 h-4 rounded-full grid place-items-center font-mono text-[8px] text-white"
-          style={{ background: 'linear-gradient(135deg,#ec4899,#836EF9)' }}
-        >
-          {(item.username || '?')[0]?.toUpperCase()}
-        </span>
-      )}
+      <UserAvatar
+        src={item.avatarUrl}
+        name={item.username}
+        userId={item.username || item.href}
+        size={16}
+      />
       <span style={{ color: '#e4e4e7' }} className="truncate max-w-[140px]">
         @{item.username || 'anon'}
       </span>

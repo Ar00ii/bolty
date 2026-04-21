@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import React from 'react';
 
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { User } from '@/lib/auth/AuthProvider';
 
 interface ProfileSidebarProps {
@@ -18,49 +19,25 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
       {/* User Info Card */}
       <div className="profile-card">
         <div className="flex flex-col items-center gap-4">
-          {user?.avatarUrl ? (
+          <div className="relative">
+            <div
+              className="absolute -inset-1 rounded-full opacity-70"
+              style={{
+                background:
+                  'radial-gradient(circle at center, rgba(131,110,249,0.45) 0%, transparent 70%)',
+                filter: 'blur(8px)',
+              }}
+            />
             <div className="relative">
-              <div
-                className="absolute -inset-1 rounded-full opacity-70"
-                style={{
-                  background:
-                    'radial-gradient(circle at center, rgba(131,110,249,0.45) 0%, transparent 70%)',
-                  filter: 'blur(8px)',
-                }}
-              />
-              <img
-                src={user.avatarUrl}
-                alt={user.displayName || user.username || 'User'}
-                className="relative w-20 h-20 rounded-full object-cover"
-                style={{
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 2px rgba(131,110,249,0.35), 0 0 24px -4px rgba(131,110,249,0.5)',
-                }}
+              <UserAvatar
+                src={user?.avatarUrl}
+                name={user?.displayName || user?.username}
+                userId={user?.id}
+                size={80}
+                ring
               />
             </div>
-          ) : (
-            <div className="relative">
-              <div
-                className="absolute -inset-1 rounded-full opacity-70"
-                style={{
-                  background:
-                    'radial-gradient(circle at center, rgba(131,110,249,0.45) 0%, transparent 70%)',
-                  filter: 'blur(8px)',
-                }}
-              />
-              <div
-                className="relative w-20 h-20 rounded-full flex items-center justify-center text-2xl font-light text-white"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.6) 0%, rgba(6,182,212,0.55) 100%)',
-                  boxShadow:
-                    'inset 0 0 0 1px rgba(255,255,255,0.12), inset 0 1px 0 rgba(255,255,255,0.16), 0 0 24px -4px rgba(131,110,249,0.5)',
-                }}
-              >
-                {(user?.displayName || user?.username || 'U')[0]?.toUpperCase()}
-              </div>
-            </div>
-          )}
+          </div>
           <div className="text-center">
             <p className="text-base font-light text-white tracking-[-0.005em]">
               {user?.displayName || user?.username || 'User'}

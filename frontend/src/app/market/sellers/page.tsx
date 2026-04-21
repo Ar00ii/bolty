@@ -6,6 +6,7 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GradientText } from '@/components/ui/GradientText';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
@@ -22,26 +23,16 @@ interface TopSeller {
   reviewCount: number;
 }
 
-function Avatar({ url, username }: { url: string | null; username: string | null }) {
-  if (url) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return (
-      <img
-        src={url}
-        alt={username || 'seller'}
-        className="w-14 h-14 rounded-full object-cover border border-white/10"
-      />
-    );
-  }
-  const initial = (username || '?').charAt(0).toUpperCase();
-  return (
-    <div
-      className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-light text-white border border-white/10"
-      style={{ background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)' }}
-    >
-      {initial}
-    </div>
-  );
+function Avatar({
+  url,
+  username,
+  userId,
+}: {
+  url: string | null;
+  username: string | null;
+  userId?: string | null;
+}) {
+  return <UserAvatar src={url} name={username} userId={userId} size={56} />;
 }
 
 type SellerSort = 'sales' | 'rating' | 'listings';
@@ -371,7 +362,7 @@ export default function TopSellersPage() {
                     style={{ background: 'rgba(131,110,249,0.25)' }}
                   />
                   <div className="relative flex items-start gap-4">
-                    <Avatar url={s.avatarUrl} username={s.username} />
+                    <Avatar url={s.avatarUrl} username={s.username} userId={s.id} />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-[13px] font-normal text-white truncate tracking-[0.005em]">

@@ -8,6 +8,7 @@ import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { MarketTicker } from '@/components/layout/MarketTicker';
 import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
 import { getReputationRank } from '@/components/ui/reputation-badge';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
 
@@ -89,14 +90,6 @@ export function PowerNavbar() {
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, [profileOpen]);
-
-  const initials =
-    (user?.displayName || user?.username || 'U')
-      .split(/\s+/)
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase() || 'U';
 
   const userRank = user ? getReputationRank(user.reputationPoints ?? 0) : null;
 
@@ -287,32 +280,12 @@ export function PowerNavbar() {
               onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
               aria-label="Account menu"
             >
-              {user?.avatarUrl ? (
-                <span
-                  className="grid place-items-center rounded-full overflow-hidden"
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                </span>
-              ) : (
-                <span
-                  className="grid place-items-center rounded-full font-mono text-white"
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    background: 'linear-gradient(135deg, #ec4899, #836EF9)',
-                    fontSize: '10.5px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  {initials}
-                </span>
-              )}
+              <UserAvatar
+                src={user?.avatarUrl}
+                name={user?.displayName || user?.username}
+                userId={user?.id}
+                size={28}
+              />
               {userRank ? (
                 <span
                   className="absolute grid place-items-center rounded-full"
@@ -368,36 +341,20 @@ export function PowerNavbar() {
                       'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0) 100%)',
                   }}
                 >
-                  {user?.avatarUrl ? (
-                    <span
-                      className="grid place-items-center rounded-full overflow-hidden flex-shrink-0"
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        border: userRank
-                          ? `1.5px solid ${userRank.color}`
-                          : '1px solid rgba(255,255,255,0.12)',
-                      }}
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                    </span>
-                  ) : (
-                    <span
-                      className="grid place-items-center rounded-full font-mono text-white flex-shrink-0"
-                      style={{
-                        width: '40px',
-                        height: '40px',
-                        background: 'linear-gradient(135deg, #ec4899, #836EF9)',
-                        fontSize: '13px',
-                        border: userRank
-                          ? `1.5px solid ${userRank.color}`
-                          : '1px solid rgba(255,255,255,0.12)',
-                      }}
-                    >
-                      {initials}
-                    </span>
-                  )}
+                  <div
+                    className="flex-shrink-0 rounded-full"
+                    style={{
+                      padding: '1px',
+                      background: userRank ? userRank.color : 'rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    <UserAvatar
+                      src={user?.avatarUrl}
+                      name={user?.displayName || user?.username}
+                      userId={user?.id}
+                      size={40}
+                    />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p
                       className="text-[13px] leading-tight truncate"

@@ -18,6 +18,7 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { getReputationRank, RANK_TIERS } from '@/components/ui/reputation-badge';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
@@ -705,20 +706,18 @@ function LeaderboardRow({
 
         <div className="min-w-0 flex items-center gap-2.5">
           <div
-            className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden"
+            className="flex-shrink-0 rounded-full"
             style={{
-              background: `${entry.rankColor}18`,
-              boxShadow: `inset 0 0 0 1px ${entry.rankColor}40`,
+              padding: '1px',
+              background: `${entry.rankColor}40`,
             }}
           >
-            {entry.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={entry.avatarUrl} alt="" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-[11px] font-light" style={{ color: entry.rankColor }}>
-                {(entry.displayName || entry.username || 'U')[0].toUpperCase()}
-              </span>
-            )}
+            <UserAvatar
+              src={entry.avatarUrl}
+              name={entry.displayName || entry.username}
+              userId={entry.id || entry.username}
+              size={28}
+            />
           </div>
           <div className="min-w-0">
             <div className="text-[13px] font-normal text-white truncate">

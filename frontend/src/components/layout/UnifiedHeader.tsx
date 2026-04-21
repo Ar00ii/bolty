@@ -24,6 +24,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 const NAV_LINKS = [
@@ -72,8 +73,6 @@ export function UnifiedHeader() {
       };
     }
   }, [mobileMenuOpen]);
-
-  const initial = (user?.displayName || user?.username || 'u')[0]?.toUpperCase() || 'U';
 
   return (
     <>
@@ -199,25 +198,12 @@ export function UnifiedHeader() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 px-1.5 py-1 rounded-lg hover:bg-white/[0.04] transition-colors"
                 >
-                  {user?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={user.avatarUrl}
-                      alt="profile"
-                      className="w-7 h-7 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[#b4a7ff] text-[11px] font-medium"
-                      style={{
-                        background:
-                          'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                        border: '1px solid rgba(131,110,249,0.3)',
-                      }}
-                    >
-                      {initial}
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={user?.avatarUrl}
+                    name={user?.displayName || user?.username}
+                    userId={user?.id}
+                    size={28}
+                  />
                   <ChevronDown
                     className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${
                       profileOpen ? 'rotate-180' : ''
@@ -403,25 +389,12 @@ export function UnifiedHeader() {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    {user?.avatarUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={user.avatarUrl}
-                        alt="profile"
-                        className="w-11 h-11 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div
-                        className="w-11 h-11 rounded-full flex items-center justify-center text-[#b4a7ff] text-[15px] font-medium"
-                        style={{
-                          background:
-                            'linear-gradient(135deg, rgba(131,110,249,0.24) 0%, rgba(131,110,249,0.06) 100%)',
-                          border: '1px solid rgba(131,110,249,0.3)',
-                        }}
-                      >
-                        {initial}
-                      </div>
-                    )}
+                    <UserAvatar
+                      src={user?.avatarUrl}
+                      name={user?.displayName || user?.username}
+                      userId={user?.id}
+                      size={44}
+                    />
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-light text-white truncate">
                         {user?.displayName || user?.username}

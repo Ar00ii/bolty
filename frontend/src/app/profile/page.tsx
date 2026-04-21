@@ -37,6 +37,7 @@ const AvatarCropperModal = dynamicImport(
 );
 import { GradientText } from '@/components/ui/GradientText';
 import { getReputationRank } from '@/components/ui/reputation-badge';
+import { UserAvatar as UserAvatarComponent } from '@/components/ui/UserAvatar';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { WalletProviderIcon, walletProviderLabel } from '@/components/ui/WalletIcons';
 import { useStepUp } from '@/lib/auth/useStepUp';
@@ -327,28 +328,22 @@ function Avatar({
   src,
   name,
   size = 'md',
+  userId,
 }: {
   src?: string | null;
   name?: string | null;
   size?: 'sm' | 'md' | 'lg';
+  userId?: string | null;
 }) {
-  const cls =
-    size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-10 h-10 text-sm';
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt=""
-        className={`${cls} rounded-full border border-[var(--border)] flex-shrink-0`}
-      />
-    );
-  }
+  const px = size === 'sm' ? 32 : size === 'lg' ? 56 : 40;
   return (
-    <div
-      className={`${cls} rounded-full bg-bolty-500/15 border border-bolty-500/25 flex items-center justify-center text-bolty-400 font-light flex-shrink-0`}
-    >
-      {(name || 'U')[0]?.toUpperCase()}
-    </div>
+    <UserAvatarComponent
+      src={src}
+      name={name}
+      userId={userId}
+      size={px}
+      className="flex-shrink-0"
+    />
   );
 }
 
@@ -1546,6 +1541,7 @@ export default function ProfilePage() {
                     <Avatar
                       src={user?.avatarUrl}
                       name={user?.displayName || user?.username}
+                      userId={user?.id}
                       size="lg"
                     />
                     {(() => {
@@ -2180,7 +2176,12 @@ export default function ProfilePage() {
                         key={u.id}
                         className={`flex items-center gap-3 px-4 py-3 hover:bg-white/3 transition-colors ${i > 0 ? 'border-t border-[var(--border)]' : ''}`}
                       >
-                        <Avatar src={u.avatarUrl} name={u.displayName || u.username} size="sm" />
+                        <Avatar
+                          src={u.avatarUrl}
+                          name={u.displayName || u.username}
+                          userId={u.id}
+                          size="sm"
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-light text-[var(--text)] truncate">
                             {u.displayName || u.username}
@@ -2237,6 +2238,7 @@ export default function ProfilePage() {
                               <Avatar
                                 src={req.from.avatarUrl}
                                 name={req.from.displayName || req.from.username}
+                                userId={req.from.id}
                                 size="sm"
                               />
                               <div className="flex-1 min-w-0">
@@ -2294,6 +2296,7 @@ export default function ProfilePage() {
                               <Avatar
                                 src={req.to.avatarUrl}
                                 name={req.to.displayName || req.to.username}
+                                userId={req.to.id}
                                 size="sm"
                               />
                               <div className="flex-1 min-w-0">
@@ -2348,6 +2351,7 @@ export default function ProfilePage() {
                               <Avatar
                                 src={f.friend.avatarUrl}
                                 name={f.friend.displayName || f.friend.username}
+                                userId={f.friend.id}
                                 size="sm"
                               />
                               <div className="flex-1 min-w-0">
