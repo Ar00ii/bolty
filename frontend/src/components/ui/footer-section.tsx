@@ -115,12 +115,31 @@ export function Footer() {
         </div>
 
         <div
-          className="mt-8 pt-6 border-t flex items-center justify-between"
+          className="mt-8 pt-6 border-t flex flex-col md:flex-row items-center md:justify-between gap-3"
           style={{ borderColor: 'var(--border)' }}
         >
           <p className="text-xs text-zinc-600">
             &copy; {new Date().getFullYear()} Bolty Network. All rights reserved.
           </p>
+          <a
+            href="https://base.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest px-2.5 py-1 rounded-full transition-colors"
+            style={{
+              color: '#60a5fa',
+              background: 'rgba(96,165,250,0.08)',
+              border: '1px solid rgba(96,165,250,0.25)',
+            }}
+            aria-label="Powered by Base network"
+          >
+            <span
+              aria-hidden="true"
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: '#60a5fa', boxShadow: '0 0 6px #60a5fa' }}
+            />
+            Powered by Base network
+          </a>
           <div className="flex items-center gap-4">
             <a
               href="https://x.com/boltynetwork"

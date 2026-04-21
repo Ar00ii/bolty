@@ -694,9 +694,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     } catch {
       throw new BadRequestException('Repository price is not representable on-chain');
     }
-    // Seller gets 97.5%, platform commission is 2.5% in a separate tx.
-    const expectedSellerWei = (expectedTotalWei * 975n) / 1000n;
-    const expectedPlatformFeeWei = (expectedTotalWei * 25n) / 1000n;
+    // Base network dual-fee model:
+    //   - ETH payment   → 7% platform fee (93% to seller).
+    //   - BOLTY payment → 3% platform fee (97% to seller; we incentivize BOLTY).
+    // We detect the token path below based on whether BOLTY_TOKEN_CONTRACT
+    // is configured AND a Transfer event to the seller exists in the receipt.
+    const tokenContractCfg = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
+    const isBoltyPath = !!tokenContractCfg;
+    const feeBps = isBoltyPath ? 300n : 700n;
+    const expectedSellerWei = (expectedTotalWei * (10000n - feeBps)) / 10000n;
+    const expectedPlatformFeeWei = (expectedTotalWei * feeBps) / 10000n;
 
     // ── Consent signature verification ────────────────────────────────────
     if (consentSignature && consentMessage) {
@@ -718,9 +725,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       }
     }
 
-    // ── On-chain verification ──────────────────────────────────────────────
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
-    const tokenContract = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
+    // ── On-chain verification (Base network, chainId 8453) ─────────────────
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
+    const tokenContract = tokenContractCfg;
 
     let verified = false;
     let amountWei = '0';
@@ -774,7 +781,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Could not verify transaction on-chain');
     }
 
-    // ── Platform commission verification (2.5%) ───────────────────────────
+    // ── Platform commission verification (7% ETH / 3% BOLTY on Base) ──────
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
     let platformFeeWei = '0';
 

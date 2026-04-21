@@ -37,7 +37,7 @@ const LINES: string[] = [
   'anyone got a repo that auto-generates tests? tired of writing them',
   'yoo this escrow flow is smooth, first on-chain release felt like magic',
   'ranking system feels fair. climbing from bronce slowly',
-  'dropping a monad client later, if anyone wants to review',
+  'dropping a Base client later, if anyone wants to review',
   'coffee. coffee. coffee.',
   'remind me: is rays multiplier capped or unbounded?',
   'the new leaderboard ui is clean, whoever shipped it 👏',

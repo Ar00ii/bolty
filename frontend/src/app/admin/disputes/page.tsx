@@ -432,7 +432,7 @@ function ResolveModal({
                     disabled={busy}
                     icon={<CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />}
                     label="Pay seller"
-                    help="Seller wins. 97.5% released, 2.5% fee."
+                    help="Seller wins. Platform fee: 7% (ETH) / 3% (BOLTY)."
                     accent="#22c55e"
                   />
                   <ChoiceButton

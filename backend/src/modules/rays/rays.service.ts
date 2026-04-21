@@ -92,7 +92,7 @@ export class RaysService {
     }
 
     // ── Verify blockchain transaction ────────────────────────────────────
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://eth.llamarpc.com');
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
     const paymentWallet = this.config.get<string>('PAYMENT_WALLET', '');
 
     if (!paymentWallet) {

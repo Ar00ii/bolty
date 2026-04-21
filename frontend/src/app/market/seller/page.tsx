@@ -259,7 +259,7 @@ export default function SellerDashboardPage() {
               <Kpi
                 label="Revenue (30d)"
                 value={`${totals.revenueLast30.toFixed(2)}`}
-                suffix="SOL"
+                suffix="ETH"
                 icon={DollarSign}
                 accent="#836EF9"
               />
