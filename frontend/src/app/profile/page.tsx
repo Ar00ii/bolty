@@ -877,9 +877,12 @@ export default function ProfilePage() {
 
   const handleDeleteAPIKey = async (id: string) => {
     try {
-      await api.delete(`/market/api-keys/${id}`);
+      await stepUp.runWithStepUp((twoFactorCode) =>
+        api.delete(`/market/api-keys/${id}`, { twoFactorCode }),
+      );
       setApiKeys(apiKeys.filter((k) => k.id !== id));
     } catch (err) {
+      if (err instanceof Error && err.message === 'Cancelled') return;
       console.error('Failed to delete API key:', err);
     }
   };
