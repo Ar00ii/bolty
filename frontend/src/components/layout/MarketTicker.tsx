@@ -1,6 +1,6 @@
 'use client';
 
-import { Crown, Flame, TrendingUp } from 'lucide-react';
+import { Crown, DollarSign, Flame, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -11,6 +11,8 @@ interface TickerAgent {
   id: string;
   title: string;
   sales: number;
+  earnings: number;
+  currency: string;
   sellerUsername: string | null;
   sellerAvatar: string | null;
 }
@@ -22,6 +24,7 @@ interface TickerDev {
   avatarUrl: string | null;
   reputationPoints: number;
   totalSales: number;
+  totalEarnings: number;
 }
 
 interface TickerData {
@@ -143,6 +146,8 @@ type TickerItem =
       href: string;
       title: string;
       sales: number;
+      earnings: number;
+      currency: string;
       sellerUsername: string | null;
       sellerAvatar: string | null;
     }
@@ -155,6 +160,7 @@ type TickerItem =
       avatarUrl: string | null;
       reputationPoints: number;
       totalSales: number;
+      totalEarnings: number;
     };
 
 function useTickerItems(data: TickerData): TickerItem[] {
@@ -172,6 +178,8 @@ function useTickerItems(data: TickerData): TickerItem[] {
         href: `/market/agents/${a.id}`,
         title: a.title,
         sales: a.sales,
+        earnings: a.earnings,
+        currency: a.currency,
         sellerUsername: a.sellerUsername,
         sellerAvatar: a.sellerAvatar,
       });
@@ -187,10 +195,18 @@ function useTickerItems(data: TickerData): TickerItem[] {
         avatarUrl: d.avatarUrl,
         reputationPoints: d.reputationPoints,
         totalSales: d.totalSales,
+        totalEarnings: d.totalEarnings,
       });
     }
   }
   return items;
+}
+
+function formatEarnings(amount: number, currency: string = 'MON'): string {
+  if (!amount) return `0 ${currency}`;
+  const fixed =
+    amount >= 1000 ? amount.toFixed(0) : amount >= 1 ? amount.toFixed(2) : amount.toFixed(4);
+  return `${fixed} ${currency}`;
 }
 
 function TickerEntry({ item }: { item: TickerItem }) {
@@ -243,6 +259,15 @@ function TickerEntry({ item }: { item: TickerItem }) {
           <TrendingUp className="w-2.5 h-2.5" strokeWidth={2.5} />
           {item.sales} sales
         </span>
+        {item.earnings > 0 && (
+          <span
+            style={{ color: '#22c55e', fontSize: 10.5 }}
+            className="font-mono inline-flex items-center gap-1"
+          >
+            <DollarSign className="w-2.5 h-2.5" strokeWidth={2.5} />
+            {formatEarnings(item.earnings, item.currency)}
+          </span>
+        )}
       </Link>
     );
   }
@@ -294,6 +319,15 @@ function TickerEntry({ item }: { item: TickerItem }) {
         <RankIcon className="w-2.5 h-2.5" strokeWidth={2.5} />
         {item.reputationPoints.toLocaleString()} rays
       </span>
+      {item.totalEarnings > 0 && (
+        <span
+          style={{ color: '#22c55e', fontSize: 10.5 }}
+          className="font-mono inline-flex items-center gap-1"
+        >
+          <DollarSign className="w-2.5 h-2.5" strokeWidth={2.5} />
+          {formatEarnings(item.totalEarnings)}
+        </span>
+      )}
     </Link>
   );
 }

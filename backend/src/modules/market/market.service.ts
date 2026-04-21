@@ -1393,33 +1393,37 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       orderBy: { _count: { listingId: 'desc' } },
       take: limit,
     });
-    if (sales.length === 0) return [];
 
-    const listings = await this.prisma.marketListing.findMany({
-      where: {
-        id: { in: sales.map((s) => s.listingId) },
-        status: 'ACTIVE',
+    const listingSelect = {
+      id: true,
+      title: true,
+      price: true,
+      currency: true,
+      type: true,
+      tags: true,
+      boostedUntil: true,
+      createdAt: true,
+      seller: {
+        select: { id: true, username: true, avatarUrl: true, reputationPoints: true },
       },
-      select: {
-        id: true,
-        title: true,
-        price: true,
-        currency: true,
-        type: true,
-        tags: true,
-        boostedUntil: true,
-        seller: {
-          select: { id: true, username: true, avatarUrl: true, reputationPoints: true },
-        },
-      },
-    });
+    } as const;
+
+    // 1) Listings with purchases — ranked by sales count.
     const salesByListing = new Map(sales.map((s) => [s.listingId, s._count._all]));
-    const byId = new Map(listings.map((l) => [l.id, l]));
+    const soldListings =
+      sales.length === 0
+        ? []
+        : await this.prisma.marketListing.findMany({
+            where: { id: { in: sales.map((s) => s.listingId) }, status: 'ACTIVE' },
+            select: listingSelect,
+          });
+    const soldById = new Map(soldListings.map((l) => [l.id, l]));
 
-    return sales
-      .map((s) => {
-        const l = byId.get(s.listingId);
-        if (!l) return null;
+    const resultsWithSales = sales
+      .map((s) => soldById.get(s.listingId))
+      .filter((l): l is NonNullable<typeof l> => !!l)
+      .map((l) => {
+        const salesCount = salesByListing.get(l.id) || 0;
         return {
           id: l.id,
           title: l.title,
@@ -1427,20 +1431,55 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           currency: l.currency,
           type: l.type,
           tags: l.tags,
-          sales: salesByListing.get(l.id) || 0,
+          sales: salesCount,
+          earnings: Number((l.price * salesCount).toFixed(4)),
           boosted: l.boostedUntil ? l.boostedUntil.getTime() > Date.now() : false,
           sellerId: l.seller.id,
           sellerUsername: l.seller.username,
           sellerAvatar: l.seller.avatarUrl,
           sellerReputation: l.seller.reputationPoints,
         };
-      })
-      .filter((a): a is NonNullable<typeof a> => a !== null);
+      });
+
+    // 2) If we don't have `limit` yet, backfill with top active listings
+    //    ordered by boost (active first), then recency. This keeps the
+    //    ticker populated even before the marketplace has sales history.
+    const deficit = limit - resultsWithSales.length;
+    if (deficit > 0) {
+      const filler = await this.prisma.marketListing.findMany({
+        where: {
+          status: 'ACTIVE',
+          id: { notIn: resultsWithSales.map((r) => r.id) },
+        },
+        orderBy: [{ boostedUntil: 'desc' }, { createdAt: 'desc' }],
+        take: deficit,
+        select: listingSelect,
+      });
+      for (const l of filler) {
+        resultsWithSales.push({
+          id: l.id,
+          title: l.title,
+          price: l.price,
+          currency: l.currency,
+          type: l.type,
+          tags: l.tags,
+          sales: 0,
+          earnings: 0,
+          boosted: l.boostedUntil ? l.boostedUntil.getTime() > Date.now() : false,
+          sellerId: l.seller.id,
+          sellerUsername: l.seller.username,
+          sellerAvatar: l.seller.avatarUrl,
+          sellerReputation: l.seller.reputationPoints,
+        });
+      }
+    }
+
+    return resultsWithSales;
   }
 
   async getTopDevelopers(limit = 10) {
     const devs = await this.prisma.user.findMany({
-      where: { isBanned: false, isBot: false, reputationPoints: { gt: 0 } },
+      where: { isBanned: false, isBot: false },
       orderBy: [{ reputationPoints: 'desc' }, { createdAt: 'asc' }],
       take: limit,
       select: {
@@ -1454,12 +1493,18 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     });
     if (devs.length === 0) return [];
 
-    const salesGroup = await this.prisma.marketPurchase.groupBy({
-      by: ['sellerId'],
+    // Pull sale records with their listing price so we can both count sales
+    // and sum earnings per seller in one round trip.
+    const purchases = await this.prisma.marketPurchase.findMany({
       where: { sellerId: { in: devs.map((d) => d.id) } },
-      _count: { _all: true },
+      select: { sellerId: true, listing: { select: { price: true } } },
     });
-    const salesById = new Map(salesGroup.map((s) => [s.sellerId, s._count._all]));
+    const salesById = new Map<string, number>();
+    const earningsById = new Map<string, number>();
+    for (const p of purchases) {
+      salesById.set(p.sellerId, (salesById.get(p.sellerId) || 0) + 1);
+      earningsById.set(p.sellerId, (earningsById.get(p.sellerId) || 0) + (p.listing?.price ?? 0));
+    }
 
     return devs.map((d) => ({
       id: d.id,
@@ -1469,6 +1514,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       reputationPoints: d.reputationPoints,
       bio: d.bio,
       totalSales: salesById.get(d.id) || 0,
+      totalEarnings: Number((earningsById.get(d.id) || 0).toFixed(4)),
     }));
   }
 
