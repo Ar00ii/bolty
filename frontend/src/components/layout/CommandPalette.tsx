@@ -118,10 +118,10 @@ const NAV_COMMANDS: NavCommand[] = [
     kind: 'nav',
     id: 'nav:saved',
     title: 'Saved listings',
-    hint: 'Your wishlist',
-    href: '/market/favorites',
+    hint: 'Library → Saved',
+    href: '/market/library?tab=saved',
     icon: Heart,
-    keywords: 'saved favorites wishlist hearts',
+    keywords: 'saved favorites wishlist hearts library',
   },
   {
     kind: 'nav',

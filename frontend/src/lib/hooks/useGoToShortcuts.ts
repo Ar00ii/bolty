@@ -10,7 +10,7 @@ const ROUTES: Record<string, string> = {
   o: '/orders',
   n: '/notifications',
   s: '/market/seller',
-  f: '/market/favorites',
+  f: '/market/library?tab=saved',
   p: '/profile',
 };
 
