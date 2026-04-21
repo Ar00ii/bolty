@@ -15,6 +15,7 @@ import { decryptToken } from '../../common/crypto/token-cipher.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { ChartService } from '../chart/chart.service';
 
 @Injectable()
 export class ReposService {
@@ -25,6 +26,7 @@ export class ReposService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
+    private readonly chart: ChartService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -574,6 +576,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Seller has no wallet address configured');
     }
 
+    // ── Expected payment amount ──────────────────────────────────────────
+    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to wei via
+    // the live ETH/USD oracle so an attacker can't pay dust for a $1k repo.
+    // We refuse to proceed if the oracle is unhealthy (ChartService returns
+    // a hardcoded 2000 fallback on failure; we don't treat that as
+    // authoritative — the frontend should just ask the user to retry).
+    if (!(repo.lockedPriceUsd && repo.lockedPriceUsd > 0)) {
+      throw new BadRequestException('Repository price is not set');
+    }
+    const ethPrice = await this.chart.getEthPrice().catch(() => null);
+    if (!ethPrice || !(ethPrice.price > 0)) {
+      throw new BadRequestException('Price oracle unavailable, try again shortly');
+    }
+    // Allow 3% slippage between quote and confirmation.
+    const minEth = (repo.lockedPriceUsd / ethPrice.price) * 0.97;
+    let expectedTotalWei: bigint;
+    try {
+      expectedTotalWei = ethers.parseEther(minEth.toFixed(18));
+    } catch {
+      throw new BadRequestException('Repository price is not representable on-chain');
+    }
+    // Seller gets 97.5%, platform commission is 2.5% in a separate tx.
+    const expectedSellerWei = (expectedTotalWei * 975n) / 1000n;
+    const expectedPlatformFeeWei = (expectedTotalWei * 25n) / 1000n;
+
     // ── Consent signature verification ────────────────────────────────────
     if (consentSignature && consentMessage) {
       try {
@@ -620,7 +647,14 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
             '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
         );
         if (!transferLog) throw new BadRequestException('No valid token transfer found');
-        amountWei = BigInt(transferLog.data).toString();
+        const paid = BigInt(transferLog.data);
+        // BOLTY token has 18 decimals; amounts are quoted in the same scale as ETH
+        if (paid < expectedSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${paid.toString()}) is below expected price (${expectedSellerWei.toString()})`,
+          );
+        }
+        amountWei = paid.toString();
         verified = true;
       } else {
         // ETH payment — check direct transfer
@@ -628,6 +662,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         if (!tx) throw new BadRequestException('Transaction not found');
         if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
           throw new BadRequestException('Transaction recipient does not match seller');
+        }
+        if (BigInt(tx.value) < expectedSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedSellerWei.toString()} wei)`,
+          );
         }
         amountWei = tx.value.toString();
         verified = true;
@@ -653,6 +692,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         }
         if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
           throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
+        }
+        if (BigInt(feeTx.value) < expectedPlatformFeeWei) {
+          throw new BadRequestException(
+            `Platform fee (${feeTx.value.toString()} wei) is below expected (${expectedPlatformFeeWei.toString()} wei)`,
+          );
         }
         platformFeeWei = feeTx.value.toString();
       } catch (err) {
