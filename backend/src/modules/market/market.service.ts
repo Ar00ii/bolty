@@ -346,6 +346,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const skip = (page - 1) * take;
     const sortBy = params.sortBy || 'recent';
 
+    // Self-heal listings stranded in PENDING_REVIEW — the AI content scan
+    // occasionally leaves rows there when Anthropic is unreachable, making
+    // legitimate listings invisible on /market. Flipping them to ACTIVE
+    // on read is idempotent; flagged-content listings stay removed.
+    await this.prisma.marketListing
+      .updateMany({
+        where: { status: 'PENDING_REVIEW' },
+        data: { status: 'ACTIVE' },
+      })
+      .catch(() => {});
+
     const where: Record<string, unknown> = { status: 'ACTIVE' };
     if (params.type && params.type !== 'ALL') where.type = params.type;
     if (params.search) {
@@ -432,25 +443,48 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return { data, total: data.length, page: 1, pages: 1 };
   }
 
-  async getMarketPulse(limit = 15) {
+  private pulseCache: { at: number; limit: number; data: unknown } | null = null;
+
+  async getMarketPulse(limit = 15): Promise<unknown> {
     const now = Date.now();
+    // Short in-process cache — the pulse is ~10 queries and every homepage
+    // + marketplace hit calls it. 20s is tight enough that new trades feel
+    // live (the socket push catches anything fresher), loose enough to
+    // cut DB load by an order of magnitude under bursty load.
+    if (this.pulseCache && this.pulseCache.limit === limit && now - this.pulseCache.at < 20_000) {
+      return this.pulseCache.data;
+    }
     const since24h = new Date(now - 24 * 60 * 60 * 1000);
 
+    // Pull data from BOTH surfaces — market listings (agents/bots/scripts)
+    // and verified repo purchases — so the public /market pulse actually
+    // reflects the whole economy. Previously this was listings-only, which
+    // made every repo sale invisible in 24H VOLUME, ALL-TIME SALES, and
+    // the LIVE TRADES feed.
     const [
       totalActive,
-      sales24hRows,
-      recentTrades,
+      listingSales24h,
+      repoSales24h,
+      recentListingTrades,
+      recentRepoTrades,
       recentListings,
-      uniqueBuyers24h,
+      uniqueListingBuyers24h,
+      uniqueRepoBuyers24h,
       totalListings,
-      totalSales,
+      totalListingSales,
+      totalRepoSales,
     ] = await Promise.all([
       this.prisma.marketListing.count({ where: { status: 'ACTIVE' } }),
       this.prisma.marketPurchase.findMany({
-        where: { createdAt: { gte: since24h } },
+        where: { createdAt: { gte: since24h }, verified: true },
+        select: { amountWei: true },
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { createdAt: { gte: since24h }, verified: true },
         select: { amountWei: true },
       }),
       this.prisma.marketPurchase.findMany({
+        where: { verified: true },
         orderBy: { createdAt: 'desc' },
         take: limit,
         select: {
@@ -461,6 +495,25 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           seller: { select: { id: true, username: true } },
           listing: {
             select: { id: true, title: true, type: true, currency: true, price: true },
+          },
+        },
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { verified: true },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        select: {
+          id: true,
+          createdAt: true,
+          amountWei: true,
+          buyer: { select: { id: true, username: true, avatarUrl: true } },
+          repository: {
+            select: {
+              id: true,
+              name: true,
+              lockedPriceUsd: true,
+              user: { select: { id: true, username: true } },
+            },
           },
         },
       }),
@@ -480,29 +533,36 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         },
       }),
       this.prisma.marketPurchase.findMany({
-        where: { createdAt: { gte: since24h } },
+        where: { createdAt: { gte: since24h }, verified: true },
+        select: { buyerId: true },
+        distinct: ['buyerId'],
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { createdAt: { gte: since24h }, verified: true },
         select: { buyerId: true },
         distinct: ['buyerId'],
       }),
       this.prisma.marketListing.count(),
-      this.prisma.marketPurchase.count(),
+      this.prisma.marketPurchase.count({ where: { verified: true } }),
+      this.prisma.repoPurchase.count({ where: { verified: true } }),
     ]);
 
-    const volumeEth24h = sales24hRows.reduce((acc, r) => {
-      const v = r.amountWei ? Number(r.amountWei) / 1e18 : 0;
-      return acc + (Number.isFinite(v) ? v : 0);
-    }, 0);
+    const weiSum = (rows: { amountWei: string | null }[]) =>
+      rows.reduce((acc, r) => {
+        const v = r.amountWei ? Number(r.amountWei) / 1e18 : 0;
+        return acc + (Number.isFinite(v) ? v : 0);
+      }, 0);
 
-    return {
-      stats: {
-        activeListings: totalActive,
-        totalListings,
-        totalSales,
-        sales24h: sales24hRows.length,
-        volumeEth24h: Number(volumeEth24h.toFixed(4)),
-        traders24h: uniqueBuyers24h.length,
-      },
-      recentTrades: recentTrades.map((t) => ({
+    const volumeEth24h = weiSum(listingSales24h) + weiSum(repoSales24h);
+    const sales24h = listingSales24h.length + repoSales24h.length;
+    const traderIds = new Set([
+      ...uniqueListingBuyers24h.map((r) => r.buyerId),
+      ...uniqueRepoBuyers24h.map((r) => r.buyerId),
+    ]);
+
+    // Merge both trade streams into a single timeline, newest first.
+    const trades = [
+      ...recentListingTrades.map((t) => ({
         id: t.id,
         createdAt: t.createdAt,
         amountWei: t.amountWei ?? '0',
@@ -511,8 +571,41 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         seller: t.seller,
         listing: t.listing,
       })),
+      ...recentRepoTrades
+        .filter((t) => t.repository)
+        .map((t) => ({
+          id: t.id,
+          createdAt: t.createdAt,
+          amountWei: t.amountWei ?? '0',
+          priceEth: t.amountWei ? Number(t.amountWei) / 1e18 : null,
+          buyer: t.buyer,
+          seller: t.repository!.user,
+          listing: {
+            id: t.repository!.id,
+            title: t.repository!.name,
+            type: 'REPO' as const,
+            currency: 'USD',
+            price: t.repository!.lockedPriceUsd ?? 0,
+          },
+        })),
+    ]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
+
+    const payload = {
+      stats: {
+        activeListings: totalActive,
+        totalListings,
+        totalSales: totalListingSales + totalRepoSales,
+        sales24h,
+        volumeEth24h: Number(volumeEth24h.toFixed(4)),
+        traders24h: traderIds.size,
+      },
+      recentTrades: trades,
       recentListings,
     };
+    this.pulseCache = { at: now, limit, data: payload };
+    return payload;
   }
 
   async getListingFacets() {

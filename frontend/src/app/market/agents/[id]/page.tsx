@@ -193,6 +193,8 @@ export default function AgentDetailPage() {
   const { addToast } = useToast();
 
   const [listing, setListing] = useState<MarketListing | null>(null);
+  // Owners can't buy their own listing — render a Manage link instead.
+  const isOwner = !!listing && !!user && listing.seller.id === user.id;
   const [posts, setPosts] = useState<AgentPost[]>([]);
   const [reviews, setReviews] = useState<ReviewsResponse>({
     reviews: [],
@@ -377,6 +379,20 @@ export default function AgentDetailPage() {
             <div className="flex items-center gap-2 shrink-0">
               <FavoriteButton listingId={listing.id} />
               <ShareButton title={listing.title} />
+              {isOwner ? (
+                <Link
+                  href={`/market/agents/${listing.id}/edit`}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.04)',
+                  }}
+                >
+                  Manage listing
+                </Link>
+              ) : (
               <button
                 onClick={handleNegotiate}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
@@ -390,6 +406,7 @@ export default function AgentDetailPage() {
                 <MessageSquare className="w-4 h-4" />
                 {isFree ? 'Get it' : 'Negotiate'}
               </button>
+              )}
             </div>
           </div>
 
@@ -569,7 +586,7 @@ export default function AgentDetailPage() {
 
           {/* RIGHT — sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <PricingCard listing={listing} onNegotiate={handleNegotiate} />
+            <PricingCard listing={listing} onNegotiate={handleNegotiate} isOwner={isOwner} />
             <SellerCard seller={listing.seller} />
             <MetaCard listing={listing} />
             {listing.repository && <RepositoryCard repo={listing.repository} />}
@@ -914,9 +931,11 @@ function ReviewsWidget({
 function PricingCard({
   listing,
   onNegotiate,
+  isOwner,
 }: {
   listing: MarketListing;
   onNegotiate: () => void;
+  isOwner?: boolean;
 }) {
   const isFree = listing.price === 0;
   return (
@@ -952,22 +971,44 @@ function PricingCard({
           Floor · {listing.minPrice} {listing.currency}
         </p>
       )}
-      <button
-        onClick={onNegotiate}
-        className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
-        style={{
-          background:
-            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-          boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-        }}
-      >
-        <MessageSquare className="w-4 h-4" />
-        {isFree ? 'Get it' : 'Negotiate with seller'}
-      </button>
-      <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
-        Payment held in escrow until you approve delivery.
-      </p>
+      {isOwner ? (
+        <>
+          <Link
+            href={`/market/agents/${listing.id}/edit`}
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.04)',
+            }}
+          >
+            Manage your listing
+          </Link>
+          <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
+            You can&apos;t purchase your own listing. Share the link to reach buyers.
+          </p>
+        </>
+      ) : (
+        <>
+          <button
+            onClick={onNegotiate}
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+            }}
+          >
+            <MessageSquare className="w-4 h-4" />
+            {isFree ? 'Get it' : 'Negotiate with seller'}
+          </button>
+          <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
+            Payment held in escrow until you approve delivery.
+          </p>
+        </>
+      )}
     </div>
   );
 }
