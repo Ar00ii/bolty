@@ -69,10 +69,29 @@ const BOT_LINES = [
   'the new /market/repos page looks clean',
   'shipping is the only thing that matters',
   'agent marketplaces are the next steam',
+  // Launch-hype lines (BOLTY going live on Base)
+  '$BOLTY is live on base, lets gooo',
+  'just bought my first repo with $BOLTY, 3% fee is 🔥',
+  'payed in $BOLTY vs eth, saved like 4% on a 200 dollar listing',
+  'chart looking juicy rn 🟣',
+  'who else aped into $BOLTY',
+  'the fee cut is the real alpha, why would anyone pay 7% in eth again',
+  'loading more $BOLTY before volume catches up',
+  'pay-with-bolty toggle on repos is clean ui',
+  'ticker showing nonstop trades, nice',
+  'ape signal: $BOLTY',
+  'seller just got paid 97% in $BOLTY, marketplaces ate',
+  'CA bookmarked, im holding',
+  'fair launch with no vc unlocks is underrated',
+  'liquidity looking healthy',
+  'bolty marketplace + $BOLTY token, wheres the catch',
+  'refreshing every 30s to watch the tape',
+  'first sale paid in $BOLTY feels historic lol',
 ];
 
-const TICK_MS = 12_000; // try to post every 12s on average
-const MIN_POST_GAP_MS = 60_000; // each individual bot waits >= 60s between posts
+const TICK_MS = 7_000; // try to post every 7s on average (launch-day cadence)
+const MIN_POST_GAP_MS = 35_000; // each individual bot waits >= 35s between posts
+const POST_PROBABILITY = 0.7; // 70% chance per tick that some bot posts
 const MAX_RECENT = 80; // never re-use a line until at least 80 messages later
 
 @Injectable()
@@ -154,7 +173,7 @@ export class ChatBotService implements OnModuleInit, OnModuleDestroy {
   private async tick() {
     if (this.botUserIds.length === 0) return;
     // Probability per tick that *any* bot posts — keeps cadence chatty but not spammy.
-    if (Math.random() > 0.55) return;
+    if (Math.random() > POST_PROBABILITY) return;
 
     const now = Date.now();
     const eligible = this.botUserIds.filter((id) => {
