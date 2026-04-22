@@ -635,10 +635,15 @@ function NegotiationModal({
   listing,
   onClose,
   userId,
+  initialNegotiationId,
 }: {
   listing: MarketListing;
   onClose: () => void;
   userId: string;
+  /** When set (seller opening via notification or deep-link), GET the
+   *  existing negotiation by id instead of POSTing a new one — sellers
+   *  can't POST /negotiate on their own listing (403). */
+  initialNegotiationId?: string | null;
 }) {
   const [neg, setNeg] = useState<Negotiation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -665,10 +670,14 @@ function NegotiationModal({
     totalUsd: number;
   } | null>(null);
 
-  // Start negotiation + setup WebSocket
+  // Start negotiation + setup WebSocket. If we were opened from a
+  // notification or deep link we load the exact negotiation by id
+  // (sellers can't POST /negotiate on their own listing).
   useEffect(() => {
-    api
-      .post<Negotiation>(`/market/${listing.id}/negotiate`, {})
+    const loader = initialNegotiationId
+      ? api.get<Negotiation>(`/market/negotiations/${initialNegotiationId}`)
+      : api.post<Negotiation>(`/market/${listing.id}/negotiate`, {});
+    loader
       .then((n) => {
         setNeg(n);
         // Connect WebSocket once we have the negotiation id
@@ -4548,6 +4557,7 @@ function AgentsPageContent() {
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
+  const [initialNegId, setInitialNegId] = useState<string | null>(null);
   const [mobileBlock, setMobileBlock] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
@@ -4590,15 +4600,21 @@ function AgentsPageContent() {
     }
   }, [searchParams, isAuthenticated]);
 
-  // Open negotiation modal when detail page redirects with ?negotiate=id
+  // Open negotiation modal when a deep link lands here with
+  // ?negotiate=<listingId> (and optionally &negId=<negId> so sellers
+  // opening from a notification see the exact existing negotiation).
   useEffect(() => {
     const negotiateId = searchParams.get('negotiate');
+    const negIdParam = searchParams.get('negId');
     if (!negotiateId || !isAuthenticated) return;
     let cancelled = false;
     (async () => {
       try {
         const data = await api.get<MarketListing>(`/market/${negotiateId}`);
-        if (!cancelled) setNegotiatingListing(data);
+        if (!cancelled) {
+          setInitialNegId(negIdParam);
+          setNegotiatingListing(data);
+        }
       } catch {
         /* listing missing — ignore */
       }
@@ -4905,8 +4921,12 @@ function AgentsPageContent() {
       {negotiatingListing && user && (
         <NegotiationModal
           listing={negotiatingListing}
-          onClose={() => setNegotiatingListing(null)}
+          onClose={() => {
+            setNegotiatingListing(null);
+            setInitialNegId(null);
+          }}
           userId={user.id}
+          initialNegotiationId={initialNegId}
         />
       )}
       {mobileBlock && (

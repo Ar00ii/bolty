@@ -386,7 +386,7 @@ export default function ReposPage() {
         }
       }
 
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
       setError('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to publish');
@@ -409,7 +409,7 @@ export default function ReposPage() {
     if (!isAuthenticated) return;
     try {
       await api.post(`/repos/${repoId}/vote`, { value });
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
     } catch {
       setError('Vote failed');
     }
@@ -507,7 +507,7 @@ export default function ReposPage() {
       setError('');
       if (result.success && result.downloadUrl)
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied')) setError('Payment cancelled');

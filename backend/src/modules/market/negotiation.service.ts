@@ -13,6 +13,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { isSafeUrl, sanitizeAiPrompt } from '../../common/sanitize/sanitize.util';
 import { DmService } from '../dm/dm.service';
 import { EmailService } from '../email/email.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 import { AgentSandboxService, SandboxContext } from './agent-sandbox.service';
 import { NegotiationsGateway } from './negotiations.gateway';
@@ -73,6 +74,7 @@ export class NegotiationService {
     private readonly dmService: DmService,
     private readonly sandbox: AgentSandboxService,
     private readonly gateway: NegotiationsGateway,
+    private readonly notifications: NotificationsService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -114,10 +116,208 @@ export class NegotiationService {
       include: this.negotiationInclude(),
     });
 
+    // Notify the seller the moment a negotiation is opened so they can
+    // jump in (or switch to human mode). Web notif is emergent via the
+    // notifications socket; email is best-effort.
+    this.notifyNegotiationStarted(neg.id).catch((err) =>
+      this.logger.warn(`neg start notify failed: ${(err as Error).message}`),
+    );
+
     // Fire-and-forget: seller agent greets, then buyer agent responds, then loop
     void this.kickOffAiAiLoop(neg.id);
 
     return neg;
+  }
+
+  /**
+   * Emergent notification + email to the seller when a buyer opens a
+   * negotiation. Meta carries the listingId and negId so the frontend
+   * can deep-link to the exact modal.
+   */
+  private async notifyNegotiationStarted(negId: string) {
+    const neg = await this.prisma.agentNegotiation.findUnique({
+      where: { id: negId },
+      include: {
+        listing: {
+          select: {
+            id: true,
+            title: true,
+            sellerId: true,
+            seller: {
+              select: {
+                email: true,
+                username: true,
+                notificationPreference: { select: { emailOrderUpdates: true } },
+              },
+            },
+          },
+        },
+        buyer: { select: { username: true } },
+      },
+    });
+    if (!neg) return;
+    const buyerHandle = neg.buyer?.username || 'a buyer';
+    const url = `/market/agents?negotiate=${neg.listingId}&negId=${neg.id}`;
+    await this.notifications.create({
+      userId: neg.listing.sellerId,
+      type: 'MARKET_NEGOTIATION_MESSAGE',
+      title: `@${buyerHandle} opened a negotiation on "${neg.listing.title}"`,
+      body: 'Your agent is replying automatically. Take over anytime.',
+      url,
+      meta: {
+        kind: 'negotiation_started',
+        listingId: neg.listingId,
+        negotiationId: neg.id,
+        counterparty: buyerHandle,
+        listingTitle: neg.listing.title,
+      },
+    });
+    const sellerEmail = neg.listing.seller?.email;
+    const optIn = neg.listing.seller?.notificationPreference?.emailOrderUpdates !== false;
+    if (sellerEmail && optIn) {
+      this.emailService
+        .sendNegotiationEvent(sellerEmail, {
+          kind: 'started',
+          recipient: 'seller',
+          counterparty: buyerHandle,
+          listingTitle: neg.listing.title,
+          url,
+        })
+        .catch(() => {});
+    }
+  }
+
+  /**
+   * Notify both parties when a negotiation closes (AGREED / REJECTED /
+   * EXPIRED). Emits web notifs + emails to both.
+   */
+  private async notifyNegotiationEnded(
+    negId: string,
+    kind: 'agreed' | 'rejected' | 'expired',
+    agreedPrice?: number | null,
+  ) {
+    try {
+      const neg = await this.prisma.agentNegotiation.findUnique({
+        where: { id: negId },
+        include: {
+          listing: {
+            select: {
+              id: true,
+              title: true,
+              currency: true,
+              sellerId: true,
+              seller: {
+                select: {
+                  email: true,
+                  username: true,
+                  notificationPreference: { select: { emailOrderUpdates: true } },
+                },
+              },
+            },
+          },
+          buyer: {
+            select: {
+              email: true,
+              username: true,
+              notificationPreference: { select: { emailOrderUpdates: true } },
+            },
+          },
+        },
+      });
+      if (!neg) return;
+      const url = `/market/agents?negotiate=${neg.listingId}&negId=${neg.id}`;
+      const currency = neg.listing.currency || 'ETH';
+      const priceLabel =
+        kind === 'agreed' && agreedPrice ? `${agreedPrice} ${currency}` : null;
+
+      const titleFor = (role: 'buyer' | 'seller') => {
+        const t = neg.listing.title;
+        if (kind === 'agreed') return `Deal closed · "${t}" · ${priceLabel}`;
+        if (kind === 'rejected')
+          return role === 'seller'
+            ? `Negotiation rejected · "${t}"`
+            : `Seller rejected your offer on "${t}"`;
+        return `Negotiation expired · "${t}"`;
+      };
+      const bodyFor = (role: 'buyer' | 'seller') => {
+        if (kind === 'agreed') {
+          return role === 'buyer'
+            ? 'Your agents reached an agreement. Complete payment to release escrow.'
+            : 'The buyer can now pay. Escrow will release when they confirm delivery.';
+        }
+        if (kind === 'rejected') return 'Open the chat to see the final exchange.';
+        return 'The negotiation timed out without agreement.';
+      };
+
+      await Promise.all([
+        this.notifications.create({
+          userId: neg.listing.sellerId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          title: titleFor('seller'),
+          body: bodyFor('seller'),
+          url,
+          meta: {
+            kind: `negotiation_${kind}`,
+            listingId: neg.listingId,
+            negotiationId: neg.id,
+            counterparty: neg.buyer?.username || '',
+            listingTitle: neg.listing.title,
+            agreedPrice: agreedPrice ?? null,
+            currency,
+          },
+        }),
+        this.notifications.create({
+          userId: neg.buyerId,
+          type: 'MARKET_NEGOTIATION_MESSAGE',
+          title: titleFor('buyer'),
+          body: bodyFor('buyer'),
+          url,
+          meta: {
+            kind: `negotiation_${kind}`,
+            listingId: neg.listingId,
+            negotiationId: neg.id,
+            counterparty: neg.listing.seller?.username || '',
+            listingTitle: neg.listing.title,
+            agreedPrice: agreedPrice ?? null,
+            currency,
+          },
+        }),
+      ]);
+
+      const sellerEmail = neg.listing.seller?.email;
+      const sellerOptIn =
+        neg.listing.seller?.notificationPreference?.emailOrderUpdates !== false;
+      const buyerEmail = neg.buyer?.email;
+      const buyerOptIn =
+        neg.buyer?.notificationPreference?.emailOrderUpdates !== false;
+
+      if (sellerEmail && sellerOptIn) {
+        this.emailService
+          .sendNegotiationEvent(sellerEmail, {
+            kind,
+            recipient: 'seller',
+            counterparty: neg.buyer?.username || 'buyer',
+            listingTitle: neg.listing.title,
+            priceLabel,
+            url,
+          })
+          .catch(() => {});
+      }
+      if (buyerEmail && buyerOptIn) {
+        this.emailService
+          .sendNegotiationEvent(buyerEmail, {
+            kind,
+            recipient: 'buyer',
+            counterparty: neg.listing.seller?.username || 'seller',
+            listingTitle: neg.listing.title,
+            priceLabel,
+            url,
+          })
+          .catch(() => {});
+      }
+    } catch (err) {
+      this.logger.warn(`neg end notify failed for ${negId}: ${(err as Error).message}`);
+    }
   }
 
   // ── Get negotiations ───────────────────────────────────────────────────────
@@ -238,6 +438,7 @@ export class NegotiationService {
     });
 
     this.gateway.emitStatusChange(id, { status: 'AGREED', agreedPrice });
+    this.notifyNegotiationEnded(id, 'agreed', agreedPrice).catch(() => {});
 
     const isSeller = userId === neg.listing.sellerId;
     if (isSeller) {
@@ -267,6 +468,7 @@ export class NegotiationService {
     });
 
     this.gateway.emitStatusChange(id, { status: 'REJECTED' });
+    this.notifyNegotiationEnded(id, 'rejected').catch(() => {});
 
     return { id, status: 'REJECTED' };
   }
@@ -356,10 +558,11 @@ export class NegotiationService {
       this.gateway.emitAgentTyping(negId, 'seller_agent');
       await this.sleep(TURN_DELAY_MS);
 
-      const greeting = await this.sellerAgentGreet(neg);
-      if (!greeting) {
-        return;
-      }
+      // Always produce a seller greeting. If webhook / sandbox / LLM all
+      // fail we drop in a canned listing-aware reply so the chat is
+      // never empty — previously the modal showed a blank body.
+      const greeting =
+        (await this.sellerAgentGreet(neg)) ?? this.fallbackSellerGreeting(neg);
 
       const greetMsg = await this.prisma.negotiationMessage.create({
         data: {
@@ -432,6 +635,7 @@ export class NegotiationService {
           data: { status: 'AGREED', agreedPrice },
         });
         this.gateway.emitStatusChange(negId, { status: 'AGREED', agreedPrice });
+        this.notifyNegotiationEnded(negId, 'agreed', agreedPrice).catch(() => {});
         return;
       }
       if (buyerReply.action === 'reject') {
@@ -440,6 +644,7 @@ export class NegotiationService {
           data: { status: 'REJECTED' },
         });
         this.gateway.emitStatusChange(negId, { status: 'REJECTED' });
+        this.notifyNegotiationEnded(negId, 'rejected').catch(() => {});
         return;
       }
 
@@ -508,6 +713,7 @@ export class NegotiationService {
       data: { status: 'EXPIRED' },
     });
     this.gateway.emitStatusChange(negId, { status: 'EXPIRED' });
+    this.notifyNegotiationEnded(negId, 'expired').catch(() => {});
     this.logger.log(`Negotiation ${negId} expired after ${MAX_TURNS} turns`);
   }
 
@@ -578,6 +784,23 @@ export class NegotiationService {
         proposedPrice: m.proposedPrice,
         timestamp: m.createdAt,
       })),
+    };
+  }
+
+  /**
+   * Last-resort seller greeting when webhook, sandbox and LLM all fail.
+   * Returns a listing-aware "here's my price" so the buyer has something
+   * to respond to instead of a silent chat.
+   */
+  private fallbackSellerGreeting(neg: NegotiationType): AgentResponse {
+    const price = neg.listing.price;
+    const currency = neg.listing.currency || 'ETH';
+    const floor = neg.listing.minPrice ?? null;
+    const floorNote = floor ? ` My floor is ${floor} ${currency}.` : '';
+    return {
+      reply: `Hey — thanks for opening a negotiation on "${neg.listing.title}". The list price is ${price} ${currency}.${floorNote} What are you thinking?`,
+      proposedPrice: price,
+      action: 'counter',
     };
   }
 
@@ -904,6 +1127,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         data: { status: 'AGREED', agreedPrice },
       });
       this.gateway.emitStatusChange(negId, { status: 'AGREED', agreedPrice });
+      this.notifyNegotiationEnded(negId, 'agreed', agreedPrice).catch(() => {});
       try {
         const seller = await this.prisma.user.findUnique({
           where: { id: neg.listing.sellerId },
@@ -935,6 +1159,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         data: { status: 'REJECTED' },
       });
       this.gateway.emitStatusChange(negId, { status: 'REJECTED' });
+      this.notifyNegotiationEnded(negId, 'rejected').catch(() => {});
     }
   }
 
