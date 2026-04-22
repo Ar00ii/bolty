@@ -202,6 +202,11 @@ model Repository {
   purchases      RepoPurchase[]
   collaborators  RepoCollaborator[]
 
+  @@index([userId])
+  @@index([language])
+  @@index([createdAt])
+  @@index([downloadCount])
+  @@index([stars])
   @@map("repositories")
 }
 
@@ -329,6 +334,7 @@ model Vote {
   value        VoteValue
 
   @@unique([userId, repositoryId])
+  @@index([repositoryId])
   @@map("votes")
 }
 
@@ -475,6 +481,7 @@ model MarketListing {
 
   @@index([sellerId, status])
   @@index([status, createdAt])
+  @@index([type, status])
   @@index([boostedUntil])
   @@map("market_listings")
 }

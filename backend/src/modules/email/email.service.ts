@@ -630,4 +630,85 @@ export class EmailService {
 
     await this.send(to, subject, html, text);
   }
+
+  // ── Negotiation lifecycle (started / agreed / rejected / expired) ──────
+
+  async sendNegotiationEvent(
+    to: string,
+    data: {
+      kind: 'started' | 'agreed' | 'rejected' | 'expired';
+      recipient: 'buyer' | 'seller';
+      counterparty: string;
+      listingTitle: string;
+      priceLabel?: string | null;
+      url: string;
+    },
+  ): Promise<void> {
+    const openUrl = `${this.appUrl}${data.url}`;
+    const headline =
+      data.kind === 'started'
+        ? data.recipient === 'seller'
+          ? 'New negotiation'
+          : 'Negotiation opened'
+        : data.kind === 'agreed'
+          ? 'Deal closed'
+          : data.kind === 'rejected'
+            ? 'Negotiation rejected'
+            : 'Negotiation expired';
+
+    const subject =
+      data.kind === 'agreed'
+        ? `Deal closed — ${data.listingTitle}${data.priceLabel ? ` · ${data.priceLabel}` : ''}`
+        : data.kind === 'started'
+          ? `${data.recipient === 'seller' ? `@${data.counterparty} wants to buy` : 'Your agent is negotiating'} "${data.listingTitle}"`
+          : `${headline} — ${data.listingTitle}`;
+
+    const intro =
+      data.kind === 'started'
+        ? data.recipient === 'seller'
+          ? `@${data.counterparty} opened a negotiation on your listing. Your agent is replying automatically — take over at any time to negotiate manually.`
+          : 'Your buyer agent is negotiating with the seller automatically. You can take over at any time to finalize manually.'
+        : data.kind === 'agreed'
+          ? data.recipient === 'buyer'
+            ? `You reached a deal with @${data.counterparty} at ${data.priceLabel}. Complete payment to release escrow and get the listing.`
+            : `You reached a deal with @${data.counterparty} at ${data.priceLabel}. The buyer will complete payment shortly.`
+          : data.kind === 'rejected'
+            ? 'The negotiation ended without a deal. Open the chat to see the final exchange.'
+            : 'The negotiation timed out without an agreement.';
+
+    const html = this.shell(
+      subject,
+      intro.slice(0, 140),
+      bodyWrap(`
+      <h1 style="margin:0 0 8px;font-size:24px;font-weight:700;color:#09090b;letter-spacing:-0.5px;">${headline}</h1>
+      <p style="margin:0 0 20px;color:#71717a;font-size:15px;line-height:1.6;">${intro}</p>
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:24px;">
+        <tr>
+          <td style="background:#fafafa;border:1px solid #e4e4e7;border-radius:12px;padding:18px 22px;">
+            <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">LISTING</p>
+            <p style="margin:0 0 12px;font-size:16px;font-weight:700;color:#09090b;">${data.listingTitle}</p>
+            ${
+              data.priceLabel
+                ? `<p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;letter-spacing:0.04em;">AGREED PRICE</p>
+                   <p style="margin:0;font-size:22px;font-weight:800;color:#16a34a;font-family:'Courier New',monospace;">${data.priceLabel}</p>`
+                : ''
+            }
+          </td>
+        </tr>
+      </table>
+      <p style="margin:0 0 20px;">
+        <a href="${openUrl}" style="display:inline-block;background:#836ef9;color:#ffffff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;">Open the negotiation</a>
+      </p>
+    `),
+    );
+
+    const text =
+      `${headline}\n\n` +
+      `${intro}\n` +
+      `Listing: ${data.listingTitle}\n` +
+      (data.priceLabel ? `Price: ${data.priceLabel}\n` : '') +
+      `\nOpen: ${openUrl}`;
+
+    await this.send(to, subject, html, text);
+  }
 }

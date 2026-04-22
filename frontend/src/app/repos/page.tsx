@@ -222,12 +222,12 @@ export default function ReposPage() {
     totalUsd: number;
   } | null>(null);
 
-  const fetchRepos = useCallback(async () => {
+  const fetchRepos = useCallback(async (searchVal: string, langVal: string, sortVal: string) => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ sortBy });
-      if (search) params.set('search', search);
-      if (language && language !== 'All') params.set('language', language);
+      const params = new URLSearchParams({ sortBy: sortVal });
+      if (searchVal) params.set('search', searchVal);
+      if (langVal && langVal !== 'All') params.set('language', langVal);
       const data = await api.get<{ data: Repository[] }>(`/repos?${params}`);
       setRepos(data.data);
     } catch {
@@ -235,11 +235,19 @@ export default function ReposPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, language, sortBy]);
+  }, []);
+
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    fetchRepos();
-  }, [fetchRepos]);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      fetchRepos(search, language, sortBy);
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [search, language, sortBy, fetchRepos]);
 
   const deleteRepo = async (repoId: string) => {
     setDeletingId(repoId);
@@ -378,7 +386,7 @@ export default function ReposPage() {
         }
       }
 
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
       setError('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to publish');
@@ -401,7 +409,7 @@ export default function ReposPage() {
     if (!isAuthenticated) return;
     try {
       await api.post(`/repos/${repoId}/vote`, { value });
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
     } catch {
       setError('Vote failed');
     }
@@ -499,7 +507,7 @@ export default function ReposPage() {
       setError('');
       if (result.success && result.downloadUrl)
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
-      await fetchRepos();
+      await fetchRepos(search, language, sortBy);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied')) setError('Payment cancelled');
@@ -1262,8 +1270,10 @@ export default function ReposPage() {
 
       {/* Repos Grid */}
       {loading ? (
-        <div className="text-center py-20">
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-bolty-400 animate-spin mx-auto" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-52 rounded-2xl" />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
