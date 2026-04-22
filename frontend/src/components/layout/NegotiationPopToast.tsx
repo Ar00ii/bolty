@@ -89,9 +89,16 @@ export function NegotiationPopToast() {
 
     socket.on('notification:new', (n: IncomingNotification) => {
       if (n.type !== 'MARKET_NEGOTIATION_MESSAGE') return;
-      const meta = n.meta as { kind?: unknown } | null;
+      const meta = n.meta as { kind?: unknown; negotiationId?: string } | null;
       const kind = metaKindToToastKind(meta?.kind);
       if (!kind) return;
+      // Suppress the pop-toast when the user already has the negotiation
+      // modal open — they're watching the conversation live and don't
+      // need an overlay telling them what they just saw.
+      if (typeof document !== 'undefined' && meta?.negotiationId) {
+        const open = document.body.getAttribute('data-neg-open');
+        if (open && open === meta.negotiationId) return;
+      }
       const m = n.meta as {
         counterparty?: string;
         agreedPrice?: number | null;
