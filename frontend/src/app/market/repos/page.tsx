@@ -1434,19 +1434,31 @@ function ReposMarketPageContent() {
   }));
 
   return (
-    <div className="page-container py-8 relative" style={{ background: '#000' }}>
-      {/* Top action row */}
-      <div className="flex items-center justify-end mb-5 sm:mb-6">
+    <div className="mk-agents-page">
+      {/* Header + CTA — mirrors /market/agents for consistent chrome. */}
+      <div className="mk-agents-head">
+        <div>
+          <div className="mk-breadcrumb">
+            <Link href="/market" className="mk-breadcrumb__link">
+              Market
+            </Link>
+            <span className="mk-breadcrumb__sep">/</span>
+            <span>Repos</span>
+          </div>
+          <h1 className="mk-agents-title">Repos</h1>
+        </div>
         {isAuthenticated && (
-          <ShimmerButton
+          <button
+            type="button"
             onClick={() => {
               switchTab('mine');
               loadGhRepos();
             }}
-            className="text-white text-sm px-5 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg transition-all inline-flex items-center gap-2"
+            className="mk-wizard__primary mk-agents-head__cta"
           >
-            <Plus className="w-4 h-4" /> Publish Repo
-          </ShimmerButton>
+            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+            Publish repo
+          </button>
         )}
       </div>
 
@@ -1482,47 +1494,24 @@ function ReposMarketPageContent() {
         />
       </div>
 
-      {/* Tabs */}
-      <div
-        className="inline-flex items-center gap-0.5 p-1 rounded-lg mb-6"
-        style={{
-          background: 'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-        }}
-      >
+      {/* Tabs — shared .mk-agents-tabs styling with /market/agents. */}
+      <div className="mk-agents-tabs">
         {(
           [
-            ['market', 'Marketplace', <Globe key="g" className="w-3.5 h-3.5" />],
-            ['mine', 'My Repos', <GitBranch key="b" className="w-3.5 h-3.5" />],
+            ['market', 'Marketplace'],
+            ['mine', 'My repos'],
           ] as const
-        ).map(([id, label, icon]) => {
+        ).map(([id, label]) => {
           const active = activeTab === id;
           return (
-            <motion.button
+            <button
               key={id}
+              type="button"
               onClick={() => switchTab(id)}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-              className={`relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-[12.5px] font-light tracking-[0.005em] transition-colors ${
-                active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-              }`}
+              className={`mk-agents-tab ${active ? 'mk-agents-tab--active' : ''}`}
             >
-              {active && (
-                <motion.span
-                  layoutId="market-repos-tab-pill"
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                  className="absolute inset-0 rounded-md"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                  }}
-                />
-              )}
-              <span className="relative z-10 inline-flex">{icon}</span>
-              <span className="relative z-10">{label}</span>
-            </motion.button>
+              {label}
+            </button>
           );
         })}
       </div>
