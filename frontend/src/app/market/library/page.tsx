@@ -28,7 +28,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
-import { getCached, setCached } from '@/lib/cache/pageCache';
+import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 type TypeFilter = 'ALL' | ListingType;
@@ -174,10 +174,14 @@ function LibraryPageContent() {
     // the price column + Total spent card), so serialising them added
     // ~150-300 ms on every Library load for no reason.
     let cancelled = false;
-    // Only show the spinner on first visit. If we have cached items we
-    // already rendered them from the useState initializer — refetch
-    // silently and swap on arrival.
     const hasCache = items.length > 0;
+    const { fresh } = getCachedWithStatus('library:items');
+    // Fresh cache (<30s) → no network. First visit → spinner + fetch.
+    // Stale cache → render cached instantly, refetch silently.
+    if (hasCache && fresh) {
+      setLoading(false);
+      return;
+    }
     (async () => {
       if (!hasCache) setLoading(true);
       try {
