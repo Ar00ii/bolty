@@ -1674,18 +1674,36 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       );
     }
 
-    // Reputation: award the seller for a confirmed sale. FIRST_SALE lifetime
-    // bonus if this is their first verified purchase.
+    // Reputation: award BOTH seller and buyer for a confirmed sale.
+    // Sellers get LISTING_SOLD / FIRST_SALE; buyers get LISTING_PURCHASED /
+    // FIRST_PURCHASE. First-* bonuses fire once across listings + repos.
     try {
-      const priorSales = await this.prisma.marketPurchase.count({
-        where: { sellerId: listing.sellerId, verified: true, id: { not: purchase.id } },
-      });
-      const reason = priorSales === 0 ? 'FIRST_SALE' : 'LISTING_SOLD';
+      const [priorSales, priorMarketBuys, priorRepoBuys] = await Promise.all([
+        this.prisma.marketPurchase.count({
+          where: { sellerId: listing.sellerId, verified: true, id: { not: purchase.id } },
+        }),
+        this.prisma.marketPurchase.count({
+          where: { buyerId, verified: true, id: { not: purchase.id } },
+        }),
+        this.prisma.repoPurchase.count({ where: { buyerId, verified: true } }),
+      ]);
+
+      const sellerReason = priorSales === 0 ? 'FIRST_SALE' : 'LISTING_SOLD';
       this.reputation
-        .awardPoints(listing.sellerId, reason, purchase.id, listing.title)
+        .awardPoints(listing.sellerId, sellerReason, purchase.id, listing.title)
         .catch((err) =>
           this.logger.warn(
-            `Reputation award failed for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+            `Seller rays award failed for sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+
+      const buyerReason =
+        priorMarketBuys + priorRepoBuys === 0 ? 'FIRST_PURCHASE' : 'LISTING_PURCHASED';
+      this.reputation
+        .awardPoints(buyerId, buyerReason, purchase.id, listing.title)
+        .catch((err) =>
+          this.logger.warn(
+            `Buyer rays award failed for purchase ${purchase.id}: ${err instanceof Error ? err.message : err}`,
           ),
         );
     } catch (err) {
