@@ -222,12 +222,18 @@ export default function ReposPage() {
     totalUsd: number;
   } | null>(null);
 
-  const fetchRepos = useCallback(async (searchVal: string, langVal: string, sortVal: string) => {
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  const fetchRepos = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ sortBy: sortVal });
-      if (searchVal) params.set('search', searchVal);
-      if (langVal && langVal !== 'All') params.set('language', langVal);
+      const params = new URLSearchParams({ sortBy });
+      if (debouncedSearch) params.set('search', debouncedSearch);
+      if (language && language !== 'All') params.set('language', language);
       const data = await api.get<{ data: Repository[] }>(`/repos?${params}`);
       setRepos(data.data);
     } catch {
@@ -235,19 +241,11 @@ export default function ReposPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  }, [debouncedSearch, language, sortBy]);
 
   useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      fetchRepos(search, language, sortBy);
-    }, 300);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [search, language, sortBy, fetchRepos]);
+    fetchRepos();
+  }, [fetchRepos]);
 
   const deleteRepo = async (repoId: string) => {
     setDeletingId(repoId);
@@ -386,7 +384,8 @@ export default function ReposPage() {
         }
       }
 
-      await fetchRepos(search, language, sortBy);
+      api.invalidate('/repos');
+      await fetchRepos();
       setError('');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Failed to publish');
@@ -409,7 +408,8 @@ export default function ReposPage() {
     if (!isAuthenticated) return;
     try {
       await api.post(`/repos/${repoId}/vote`, { value });
-      await fetchRepos(search, language, sortBy);
+      api.invalidate('/repos');
+      await fetchRepos();
     } catch {
       setError('Vote failed');
     }
@@ -507,7 +507,8 @@ export default function ReposPage() {
       setError('');
       if (result.success && result.downloadUrl)
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
-      await fetchRepos(search, language, sortBy);
+      api.invalidate('/repos');
+      await fetchRepos();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes('rejected') || msg.includes('denied')) setError('Payment cancelled');

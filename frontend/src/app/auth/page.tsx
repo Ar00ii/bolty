@@ -547,6 +547,34 @@ function AuthPage() {
         }}
       />
 
+      {/* Right-side logo — sits in the purple glow, desktop only */}
+      <div className="absolute inset-y-0 right-0 w-1/2 hidden lg:flex items-center justify-center pointer-events-none z-0">
+        <div className="relative flex items-center justify-center">
+          {/* Ambient glow behind logo */}
+          <div
+            className="absolute w-80 h-80 rounded-full"
+            style={{
+              background: 'radial-gradient(circle, rgba(131,110,249,0.22) 0%, transparent 70%)',
+              filter: 'blur(48px)',
+            }}
+          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/LogoNew.png"
+            alt="Bolty"
+            className="relative w-40 h-40 object-contain"
+            style={{
+              mixBlendMode: 'screen',
+              filter: 'drop-shadow(0 0 40px rgba(131,110,249,0.6))',
+              WebkitMaskImage:
+                'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
+              maskImage:
+                'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
+            }}
+          />
+        </div>
+      </div>
+
       {/* Main container */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

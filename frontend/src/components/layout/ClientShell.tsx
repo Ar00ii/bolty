@@ -13,6 +13,7 @@ import { RouteProgress } from '@/components/layout/RouteProgress';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
 import { StandardSidebar } from '@/components/layout/StandardSidebar';
 import { UnifiedHeader } from '@/components/layout/UnifiedHeader';
+import { api } from '@/lib/api/client';
 import { useGoToShortcuts } from '@/lib/hooks/useGoToShortcuts';
 
 export function ClientShell({ children }: { children: React.ReactNode }) {
@@ -29,6 +30,11 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
   }, [pathname]);
+
+  useEffect(() => {
+    if (!useAppShell) return;
+    api.prefetch(['/repos?sortBy=recent', '/market?', '/market/my-listings']);
+  }, [useAppShell]);
 
   if (useAppShell) {
     return (

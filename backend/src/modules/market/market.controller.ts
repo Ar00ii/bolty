@@ -442,6 +442,12 @@ export class MarketController {
     return this.marketService.createListing(userId, payload);
   }
 
+  @Post(':id/claim-free')
+  @HttpCode(HttpStatus.CREATED)
+  claimFreeListing(@Param('id') id: string, @CurrentUser('id') buyerId: string) {
+    return this.marketService.claimFreeListing(id, buyerId);
+  }
+
   @Post(':id/purchase')
   @HttpCode(HttpStatus.CREATED)
   purchaseListing(
