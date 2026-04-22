@@ -1552,6 +1552,153 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     };
   }
 
+  /**
+   * Generic recovery for listing purchases — the user pastes only the
+   * txHash and we figure out which seller + which listing it was for
+   * by looking at the tx recipient on-chain. Matches the ergonomics of
+   * the repo-recovery flow so /inventory's widget can serve both.
+   */
+  async recoverListingPurchaseByTx(buyerId: string, txHash: string) {
+    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+      throw new BadRequestException('Invalid transaction hash');
+    }
+
+    // Short-circuit: if we already have a row for this txHash, return it.
+    const existing = await this.prisma.marketPurchase.findUnique({
+      where: { txHash },
+    });
+    if (existing) {
+      if (existing.buyerId !== buyerId) {
+        throw new ForbiddenException('Transaction belongs to a different buyer');
+      }
+      return { success: true, alreadyPurchased: true, purchase: existing };
+    }
+
+    // Pull the tx from any working Base RPC.
+    const configured = this.config.get<string>('ETH_RPC_URL', '');
+    const candidates = [
+      configured,
+      'https://mainnet.base.org',
+      'https://base.publicnode.com',
+      'https://base.llamarpc.com',
+    ].filter((url, i, arr) => url && arr.indexOf(url) === i);
+    let tx: ethers.TransactionResponse | null = null;
+    let lastErr: string | null = null;
+    for (const rpc of candidates) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpc);
+        const t = await provider.getTransaction(txHash);
+        if (t) {
+          tx = t;
+          break;
+        }
+      } catch (err) {
+        lastErr = `${rpc}: ${err instanceof Error ? err.message : String(err)}`;
+      }
+    }
+    if (!tx || !tx.to) {
+      throw new BadRequestException(
+        `Could not fetch transaction from Base RPC. ${lastErr ?? ''}`.trim(),
+      );
+    }
+
+    // Resolve the seller from tx.to (either the seller wallet directly
+    // or the escrow contract; in the escrow case we need the negotiation
+    // or the listing id to disambiguate — we ask the user to use the
+    // per-listing endpoint instead).
+    const sellerByWallet = await this.prisma.user.findFirst({
+      where: {
+        walletAddress: { equals: tx.to.toLowerCase(), mode: 'insensitive' },
+      },
+      select: { id: true, username: true },
+    });
+    if (!sellerByWallet) {
+      throw new BadRequestException(
+        'Could not match the tx recipient to a Bolty seller wallet. If it went through escrow, open /orders and retry from there.',
+      );
+    }
+
+    const paidWei = BigInt(tx.value);
+    const listings = await this.prisma.marketListing.findMany({
+      where: {
+        sellerId: sellerByWallet.id,
+        status: { not: 'REMOVED' },
+      },
+      select: { id: true, price: true, title: true },
+    });
+    if (listings.length === 0) {
+      throw new BadRequestException(
+        `@${sellerByWallet.username ?? 'seller'} has no active listings.`,
+      );
+    }
+
+    // If the buyer has an AGREED negotiation with this seller, prefer
+    // that listing — price has been pinned by agents and matches the tx.
+    const agreed = await this.prisma.agentNegotiation.findFirst({
+      where: {
+        buyerId,
+        status: 'AGREED',
+        listing: { sellerId: sellerByWallet.id },
+      },
+      orderBy: { updatedAt: 'desc' },
+      select: { listingId: true, id: true, agreedPrice: true },
+    });
+    if (agreed) {
+      return this.recoverListingPurchase(buyerId, agreed.listingId, txHash, agreed.id);
+    }
+
+    // Otherwise try to match by paid amount within 5% slippage.
+    const matching = listings.filter((l) => {
+      try {
+        const expected = ethers.parseEther(l.price.toString());
+        const min = (expected * 95n) / 100n;
+        return paidWei >= min;
+      } catch {
+        return false;
+      }
+    });
+    if (matching.length === 1) {
+      return this.recoverListingPurchase(buyerId, matching[0].id, txHash);
+    }
+    if (matching.length === 0) {
+      throw new BadRequestException(
+        `Paid ${(Number(paidWei) / 1e18).toFixed(6)} ETH but none of @${sellerByWallet.username ?? 'seller'}'s listings match that price.`,
+      );
+    }
+    throw new BadRequestException(
+      `Multiple listings from @${sellerByWallet.username ?? 'seller'} match this amount. Open the specific listing and retry purchase from there.`,
+    );
+  }
+
+  /**
+   * Recovery for listing purchases whose on-chain payment confirmed but
+   * the /market/:id/purchase call never landed. Scoped to the buyer via
+   * the existing duplicate-tx guard.
+   */
+  async recoverListingPurchase(
+    buyerId: string,
+    listingId: string,
+    txHash: string,
+    negotiationId?: string,
+  ) {
+    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+      throw new BadRequestException('Invalid transaction hash');
+    }
+    // If we already have a row for this txHash we're done — return it.
+    const existing = await this.prisma.marketPurchase.findUnique({
+      where: { txHash },
+    });
+    if (existing) {
+      if (existing.buyerId !== buyerId) {
+        throw new ForbiddenException('Transaction belongs to a different buyer');
+      }
+      return { success: true, alreadyPurchased: true, purchase: existing };
+    }
+    // Kick the normal flow with a dummy amountWei ('0'); the verify
+    // path reads the true amount from the receipt.
+    return this.purchaseListing(listingId, buyerId, txHash, '0', negotiationId);
+  }
+
   async purchaseListing(
     listingId: string,
     buyerId: string,
@@ -1641,15 +1788,41 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     let platformFeeWei = '0';
 
     try {
-      const provider = new ethers.JsonRpcProvider(rpcUrl);
-      // Fetch receipt + tx in parallel — these are independent RPC round-trips
-      // and batching them halves the purchase-verification latency.
-      const [receipt, tx] = await Promise.all([
-        provider.getTransactionReceipt(txHash),
-        provider.getTransaction(txHash),
-      ]);
+      // Base RPC candidate list: configured one first, then public
+      // endpoints. Using a single RPC used to silently fail when
+      // ETH_RPC_URL was misconfigured or rate-limited, surfacing as
+      // "cannot verify transaction" even though the tx was fine.
+      const candidates = [
+        rpcUrl,
+        'https://mainnet.base.org',
+        'https://base.publicnode.com',
+        'https://base.llamarpc.com',
+      ].filter((url, i, arr) => url && arr.indexOf(url) === i);
+      let receipt: ethers.TransactionReceipt | null = null;
+      let tx: ethers.TransactionResponse | null = null;
+      let lastErr: string | null = null;
+      for (const candidate of candidates) {
+        try {
+          const provider = new ethers.JsonRpcProvider(candidate);
+          const [r, t] = await Promise.all([
+            provider.getTransactionReceipt(txHash),
+            provider.getTransaction(txHash),
+          ]);
+          if (r && t) {
+            receipt = r;
+            tx = t;
+            break;
+          }
+          if (!lastErr)
+            lastErr = `RPC ${candidate}: receipt=${r ? 'ok' : 'null'} tx=${t ? 'ok' : 'null'}`;
+        } catch (err) {
+          lastErr = `RPC ${candidate}: ${err instanceof Error ? err.message : String(err)}`;
+        }
+      }
       if (!receipt || receipt.status !== 1) {
-        throw new BadRequestException('Transaction failed or not found');
+        throw new BadRequestException(
+          `Transaction failed or not found. ${lastErr ? `Last RPC error: ${lastErr}` : ''}`,
+        );
       }
       if (!tx) throw new BadRequestException('Transaction not found');
 
@@ -1682,9 +1855,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         // Verify platform commission (legacy only — escrow handles split automatically)
         if (platformWallet && platformFeeTxHash) {
           try {
+            const feeProvider = new ethers.JsonRpcProvider(candidates[0]);
             const [feeReceipt, feeTx] = await Promise.all([
-              provider.getTransactionReceipt(platformFeeTxHash),
-              provider.getTransaction(platformFeeTxHash),
+              feeProvider.getTransactionReceipt(platformFeeTxHash),
+              feeProvider.getTransaction(platformFeeTxHash),
             ]);
             if (!feeReceipt || feeReceipt.status !== 1) {
               throw new BadRequestException('Platform fee transaction failed or not found');

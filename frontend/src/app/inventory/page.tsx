@@ -592,13 +592,35 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
     setBusy(true);
     setMsg(null);
     try {
+      // Try the repo-recovery path first. If the tx was actually for a
+      // market listing (agent / bot / script) the repo endpoint returns
+      // a 400 — we then try the listing recovery using the same hash.
+      // Seller username is only useful for the repo path.
       const body: { txHash: string; sellerUsername?: string } = { txHash: txTrim };
       if (seller.trim()) body.sellerUsername = seller.trim().replace(/^@/, '');
-      const result = await api.post<{
-        success: boolean;
-        downloadUrl?: string;
-      }>('/repos/recover-purchase', body);
-      if (result.success) {
+
+      let result: { success?: boolean; downloadUrl?: string } | null = null;
+      try {
+        result = await api.post('/repos/recover-purchase', body);
+      } catch (repoErr) {
+        // Fall back to the listing-purchase recovery. We can't guess
+        // the listingId from the hash, so we ask the backend to scan
+        // recent listings bought by this user that match the tx.
+        try {
+          result = await api.post('/market/recover-purchase', { txHash: txTrim });
+        } catch (listingErr) {
+          // Surface whichever error was the most actionable.
+          const msgTxt =
+            listingErr instanceof ApiError
+              ? listingErr.message
+              : repoErr instanceof ApiError
+                ? repoErr.message
+                : 'Recovery failed. Try again.';
+          throw new Error(msgTxt);
+        }
+      }
+
+      if (result?.success) {
         setMsg({ kind: 'ok', text: 'Recovered! Refreshing your inventory…' });
         if (result.downloadUrl) {
           window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
@@ -614,7 +636,7 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
     } catch (err) {
       setMsg({
         kind: 'err',
-        text: err instanceof ApiError ? err.message : 'Recovery failed. Try again.',
+        text: err instanceof Error ? err.message : 'Recovery failed. Try again.',
       });
     } finally {
       setBusy(false);

@@ -463,6 +463,43 @@ export class MarketController {
     );
   }
 
+  /**
+   * Recovery for listing purchases whose on-chain payment landed but
+   * /market/:id/purchase never returned success. Requires the buyer's
+   * JWT + listingId + txHash; re-runs the same verification pipeline.
+   */
+  @Post(':id/recover-purchase')
+  @HttpCode(HttpStatus.OK)
+  recoverListingPurchase(
+    @Param('id') id: string,
+    @CurrentUser('id') buyerId: string,
+    @Body() body: { txHash?: string; negotiationId?: string },
+  ) {
+    if (!body.txHash?.trim()) throw new BadRequestException('txHash required');
+    return this.marketService.recoverListingPurchase(
+      buyerId,
+      id,
+      body.txHash.trim(),
+      body.negotiationId,
+    );
+  }
+
+  /**
+   * Listing-agnostic recovery: given only a txHash, look up the seller
+   * on-chain and match the paid amount to one of their listings. Used
+   * by the /inventory recovery widget when the user doesn't know which
+   * listing the tx was for.
+   */
+  @Post('recover-purchase')
+  @HttpCode(HttpStatus.OK)
+  recoverListingPurchaseByTx(
+    @CurrentUser('id') buyerId: string,
+    @Body() body: { txHash?: string },
+  ) {
+    if (!body.txHash?.trim()) throw new BadRequestException('txHash required');
+    return this.marketService.recoverListingPurchaseByTx(buyerId, body.txHash.trim());
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteListing(@Param('id') id: string, @CurrentUser('id') userId: string) {
