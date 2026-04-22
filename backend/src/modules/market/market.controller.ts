@@ -321,6 +321,17 @@ export class MarketController {
     return this.marketService.getMyListings(userId);
   }
 
+  /**
+   * Unified inventory endpoint: everything the user has published (repos +
+   * listings) plus everything they've bought (repo purchases + market
+   * purchases) plus their recent reputation events. Powers the /inventory
+   * page.
+   */
+  @Get('my-inventory')
+  getMyInventory(@CurrentUser('id') userId: string) {
+    return this.marketService.getMyInventory(userId);
+  }
+
   @Public()
   @Get('sellers/:username')
   getSellerProfile(@Param('username') username: string) {

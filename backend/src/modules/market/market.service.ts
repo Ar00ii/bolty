@@ -899,6 +899,175 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       .filter((s): s is NonNullable<typeof s> => s !== null);
   }
 
+  /**
+   * Unified "inventory" view for a logged-in user: everything they have
+   * published (repos + market listings) and everything they've bought
+   * (repo purchases + market purchases). For purchases we surface the
+   * seller and the blockchain tx hash so the buyer can prove the
+   * purchase on Basescan. For published items we also attach the rays
+   * earned from reputation events tied to each resource, so sellers can
+   * see "+75 rays" next to the sale that triggered them.
+   */
+  async getMyInventory(userId: string) {
+    const [
+      publishedRepos,
+      publishedListings,
+      repoPurchases,
+      marketPurchases,
+      reputationEvents,
+    ] = await Promise.all([
+      this.prisma.repository.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+        select: {
+          id: true,
+          name: true,
+          fullName: true,
+          description: true,
+          language: true,
+          stars: true,
+          forks: true,
+          downloadCount: true,
+          githubUrl: true,
+          topics: true,
+          logoUrl: true,
+          isPrivate: true,
+          isLocked: true,
+          lockedPriceUsd: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.marketListing.findMany({
+        where: { sellerId: userId, status: { not: 'REMOVED' } },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+        select: {
+          id: true,
+          title: true,
+          type: true,
+          price: true,
+          currency: true,
+          tags: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      this.prisma.repoPurchase.findMany({
+        where: { buyerId: userId },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+        include: {
+          repository: {
+            select: {
+              id: true,
+              name: true,
+              fullName: true,
+              githubUrl: true,
+              logoUrl: true,
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  displayName: true,
+                  avatarUrl: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.marketPurchase.findMany({
+        where: { buyerId: userId },
+        orderBy: { createdAt: 'desc' },
+        take: 200,
+        include: {
+          listing: {
+            select: {
+              id: true,
+              title: true,
+              type: true,
+              price: true,
+              currency: true,
+            },
+          },
+          seller: {
+            select: {
+              id: true,
+              username: true,
+              displayName: true,
+              avatarUrl: true,
+            },
+          },
+        },
+      }),
+      this.prisma.reputationEvent.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
+        select: {
+          id: true,
+          createdAt: true,
+          points: true,
+          reason: true,
+          resourceId: true,
+          note: true,
+        },
+      }),
+    ]);
+
+    // Map rays → resourceId so each published item / sold item can show
+    // the rays it generated.
+    const raysByResource = new Map<string, number>();
+    for (const ev of reputationEvents) {
+      if (!ev.resourceId) continue;
+      raysByResource.set(ev.resourceId, (raysByResource.get(ev.resourceId) || 0) + ev.points);
+    }
+
+    return {
+      published: {
+        repos: publishedRepos.map((r) => ({
+          ...r,
+          raysEarned: raysByResource.get(r.id) || 0,
+        })),
+        listings: publishedListings.map((l) => ({
+          ...l,
+          raysEarned: raysByResource.get(l.id) || 0,
+        })),
+      },
+      purchased: {
+        repos: repoPurchases
+          .filter((rp) => rp.repository)
+          .map((rp) => ({
+            id: rp.id,
+            purchasedAt: rp.createdAt,
+            txHash: rp.txHash,
+            amountWei: rp.amountWei,
+            verified: rp.verified,
+            repository: rp.repository,
+            seller: rp.repository!.user,
+          })),
+        listings: marketPurchases
+          .filter((mp) => mp.listing)
+          .map((mp) => ({
+            id: mp.id,
+            purchasedAt: mp.createdAt,
+            txHash: mp.txHash,
+            amountWei: mp.amountWei,
+            verified: mp.verified,
+            status: mp.status,
+            escrowStatus: mp.escrowStatus,
+            listing: mp.listing,
+            seller: mp.seller,
+          })),
+      },
+      rays: {
+        total: reputationEvents.reduce((sum, ev) => sum + ev.points, 0),
+        recentEvents: reputationEvents.slice(0, 25),
+      },
+    };
+  }
+
   async getMyLibrary(buyerId: string) {
     const [purchases, repoPurchases] = await Promise.all([
       this.prisma.marketPurchase.findMany({

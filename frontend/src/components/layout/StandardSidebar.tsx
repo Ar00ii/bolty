@@ -16,6 +16,7 @@ import {
   LifeBuoy,
   MessageCircle,
   MessageSquare,
+  Package,
   Search,
   Settings,
   ShoppingBag,
@@ -70,6 +71,8 @@ export const NAV: NavSection[] = [
   {
     section: 'My work',
     items: [
+      { label: 'Inventory', icon: Package, href: '/inventory' },
+      { label: 'Favorites', icon: Heart, href: '/favorites' },
       { label: 'Library', icon: Library, href: '/market/library' },
       { label: 'Orders', icon: ShoppingBag, href: '/orders' },
     ],
