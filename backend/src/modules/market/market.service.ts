@@ -974,8 +974,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         return {
           orderId: rp.id,
           purchasedAt: rp.createdAt,
-          status: 'COMPLETED',
+          status: rp.verified ? 'COMPLETED' : 'PENDING_DELIVERY',
           escrowStatus: 'NONE',
+          verified: rp.verified,
           myRating: null as number | null,
           listing: {
             id: r.id,

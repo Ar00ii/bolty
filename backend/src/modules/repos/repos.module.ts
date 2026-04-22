@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { ChartModule } from '../chart/chart.module';
@@ -10,13 +10,7 @@ import { ReposController } from './repos.controller';
 import { ReposService } from './repos.service';
 
 @Module({
-  imports: [
-    ConfigModule,
-    ReputationModule,
-    ChartModule,
-    EmailModule,
-    forwardRef(() => MarketModule),
-  ],
+  imports: [ConfigModule, ReputationModule, ChartModule, EmailModule, MarketModule],
   providers: [ReposService],
   controllers: [ReposController],
 })

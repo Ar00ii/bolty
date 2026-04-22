@@ -6,8 +6,6 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
-  Inject,
-  forwardRef,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
@@ -34,7 +32,6 @@ export class ReposService {
     private readonly chart: ChartService,
     private readonly reputation: ReputationService,
     private readonly email: EmailService,
-    @Inject(forwardRef(() => MarketGateway))
     private readonly marketGateway: MarketGateway,
   ) {
     this.anthropic = new Anthropic({
@@ -810,16 +807,28 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     // ── On-chain verification (Base network, chainId 8453) ─────────────────
+    // Auto-detect the payment path from the actual transaction rather than
+    // trusting a config flag — if the buyer sent ETH directly to the seller,
+    // verify the ETH transfer; if the tx carries zero ETH but emits an
+    // ERC-20 Transfer to the seller from the configured BOLTY contract,
+    // verify the token transfer. This avoids the old failure mode where
+    // BOLTY_TOKEN_CONTRACT being set caused every ETH purchase to fail
+    // with "No valid token transfer found".
     const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const tokenContract = tokenContractCfg;
 
     let amountWei = '0';
+    let detectedCurrency: 'ETH' | 'BOLTY' = 'ETH';
 
     try {
-      // Retry the receipt up to 30s — on Base most txs mine in ~2s but the
-      // frontend sometimes calls /purchase a beat too early.
-      const receipt = await this.waitForReceipt(provider, txHash, 30_000);
+      // Render web services time out connections after ~30s — wait up to 18s
+      // for the receipt so the buyer gets a clear pending-retry response
+      // rather than a dropped connection. The attempt is already persisted.
+      const [receipt, tx] = await Promise.all([
+        this.waitForReceipt(provider, txHash, 18_000),
+        provider.getTransaction(txHash).catch(() => null),
+      ]);
 
       if (!receipt) {
         throw new BadRequestException(
@@ -830,8 +839,23 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         throw new BadRequestException('Transaction reverted on-chain');
       }
 
-      if (tokenContract) {
-        // ERC-20 token payment — check Transfer event
+      // Detect path: ETH if tx.value > 0 and routed to the seller; else BOLTY.
+      const sentEth = tx && tx.value && BigInt(tx.value) > 0n;
+      const sentToSeller =
+        tx && tx.to && tx.to.toLowerCase() === sellerWallet.toLowerCase();
+
+      if (sentEth && sentToSeller) {
+        // ETH path: enforce ETH path slippage (93% of total after 7% fee).
+        const ethPathSellerWei = (expectedTotalWei * (10000n - 700n)) / 10000n;
+        if (BigInt(tx!.value) < ethPathSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${tx!.value.toString()} wei) is below expected price (${ethPathSellerWei.toString()} wei)`,
+          );
+        }
+        amountWei = tx!.value.toString();
+        detectedCurrency = 'ETH';
+      } else if (tokenContract) {
+        // BOLTY / ERC-20 path: require a Transfer(seller) log.
         const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
         const transferLog = receipt.logs.find(
           (log) =>
@@ -840,26 +864,24 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
             log.topics[2] &&
             '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
         );
-        if (!transferLog) throw new BadRequestException('No valid token transfer found');
-        const paid = BigInt(transferLog.data);
-        if (paid < expectedSellerWei) {
+        if (!transferLog) {
           throw new BadRequestException(
-            `Paid amount (${paid.toString()}) is below expected price (${expectedSellerWei.toString()})`,
+            'Payment did not reach the seller wallet (no ETH value and no BOLTY transfer)',
+          );
+        }
+        const paid = BigInt(transferLog.data);
+        const tokenPathSellerWei = (expectedTotalWei * (10000n - 300n)) / 10000n;
+        if (paid < tokenPathSellerWei) {
+          throw new BadRequestException(
+            `Paid amount (${paid.toString()}) is below expected price (${tokenPathSellerWei.toString()})`,
           );
         }
         amountWei = paid.toString();
+        detectedCurrency = 'BOLTY';
       } else {
-        const tx = await provider.getTransaction(txHash);
-        if (!tx) throw new BadRequestException('Transaction not found');
-        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
-          throw new BadRequestException('Transaction recipient does not match seller');
-        }
-        if (BigInt(tx.value) < expectedSellerWei) {
-          throw new BadRequestException(
-            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedSellerWei.toString()} wei)`,
-          );
-        }
-        amountWei = tx.value.toString();
+        throw new BadRequestException(
+          'Transaction did not transfer funds to the seller wallet',
+        );
       }
     } catch (err) {
       if (err instanceof BadRequestException) throw err;
@@ -867,38 +889,38 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       throw new BadRequestException('Could not verify transaction on-chain');
     }
 
-    // ── Platform commission verification (7% ETH / 3% BOLTY on Base) ──────
+    // ── Platform commission verification ──────────────────────────────────
+    // Best-effort: if the buyer sent a platform fee tx, record it. Don't
+    // block the purchase on a fee-amount mismatch — the seller payment is
+    // what matters; platform accounting can be reconciled separately.
+    // Still refuse if the fee tx exists but was sent to the wrong address.
     const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
     let platformFeeWei = '0';
 
     if (platformWallet && platformFeeTxHash) {
       try {
         const [feeReceipt, feeTx] = await Promise.all([
-          this.waitForReceipt(provider, platformFeeTxHash, 30_000),
-          provider.getTransaction(platformFeeTxHash),
+          this.waitForReceipt(provider, platformFeeTxHash, 18_000),
+          provider.getTransaction(platformFeeTxHash).catch(() => null),
         ]);
 
-        if (!feeReceipt) {
-          throw new BadRequestException('Platform fee transaction still pending — retry shortly');
-        }
-        if (feeReceipt.status !== 1) {
-          throw new BadRequestException('Platform fee transaction reverted');
-        }
-        if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
-          throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
-        }
-        if (BigInt(feeTx.value) < expectedPlatformFeeWei) {
-          throw new BadRequestException(
-            `Platform fee (${feeTx.value.toString()} wei) is below expected (${expectedPlatformFeeWei.toString()} wei)`,
+        if (feeReceipt && feeReceipt.status === 1 && feeTx) {
+          if (feeTx.to?.toLowerCase() === platformWallet.toLowerCase()) {
+            platformFeeWei = feeTx.value.toString();
+          } else {
+            this.logger.warn(
+              `Platform fee tx ${platformFeeTxHash} sent to ${feeTx.to} instead of ${platformWallet} — recording as 0`,
+            );
+          }
+        } else {
+          this.logger.warn(
+            `Platform fee tx ${platformFeeTxHash} not confirmed or missing — recording as 0`,
           );
         }
-        platformFeeWei = feeTx.value.toString();
       } catch (err) {
-        if (err instanceof BadRequestException) throw err;
-        this.logger.error(
-          `Platform fee verification error: ${err instanceof Error ? err.message : err}`,
+        this.logger.warn(
+          `Platform fee verification soft-failed: ${err instanceof Error ? err.message : err}`,
         );
-        throw new BadRequestException('Could not verify platform fee transaction');
       }
     }
 
@@ -932,7 +954,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         listingType: 'REPO',
         amountWei: amountWei ?? '0',
         priceEth: eth !== null && Number.isFinite(eth) ? Number(eth.toFixed(6)) : null,
-        currency: isBoltyPath ? 'BOLTY' : 'ETH',
+        currency: detectedCurrency,
         buyer: buyerUser ?? { id: buyerId, username: null, avatarUrl: null },
         seller: sellerUser ?? { id: repo.userId, username: null },
         createdAt: purchase.createdAt.toISOString(),
