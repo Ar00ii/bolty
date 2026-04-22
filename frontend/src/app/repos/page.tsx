@@ -168,6 +168,7 @@ export default function ReposPage() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const [lockModal, setLockModal] = useState<{ repo: GitHubRepo } | null>(null);
+  const [publishStep, setPublishStep] = useState<1 | 2 | 3>(1);
   const [lockPrice, setLockPrice] = useState('');
   const [lockType, setLockType] = useState<'public' | 'locked'>('public');
 
@@ -325,6 +326,7 @@ export default function ReposPage() {
 
   const openLockModal = (repo: GitHubRepo) => {
     setLockModal({ repo });
+    setPublishStep(1);
     setLockType('public');
     setLockPrice('');
     setPubLogoUrl('');
@@ -745,7 +747,31 @@ export default function ReposPage() {
               </button>
             </div>
 
-            {/* Visibility */}
+            {/* Step indicator — mirrors the agent-publish wizard so users get
+                the same pacing / visual language across publishes. */}
+            <div className="mk-wizard__steps" style={{ marginBottom: 20 }}>
+              {([1, 2, 3] as const).map((n) => {
+                const labels: Record<1 | 2 | 3, string> = {
+                  1: 'Access',
+                  2: 'Branding',
+                  3: 'Review',
+                };
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setPublishStep(n)}
+                    className={`mk-wizard__step ${publishStep === n ? 'mk-wizard__step--active' : ''} ${publishStep > n ? 'mk-wizard__step--done' : ''}`}
+                  >
+                    <span className="mk-wizard__step-n">{n}</span>
+                    <span className="mk-wizard__step-label">{labels[n]}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ── STEP 1: Access ───────────────────────────────────────────── */}
+            {publishStep === 1 && <>
             <label className="mk-wizard__section-title">Visibility</label>
             <div className="space-y-2 mb-5">
               <button
@@ -810,9 +836,11 @@ export default function ReposPage() {
                 </div>
               </div>
             )}
+            </>}
 
-            {/* Branding section */}
-            <div className="border-t border-white/06 pt-5 mb-5">
+            {/* ── STEP 2: Branding ─────────────────────────────────────────── */}
+            {publishStep === 2 && (
+            <div className="mb-5">
               <p className="text-xs font-mono text-zinc-500 mb-3">Branding (optional)</p>
               <div className="space-y-3">
                 {/* Logo drag-and-drop upload */}
@@ -920,9 +948,39 @@ export default function ReposPage() {
                 </div>
               </div>
             </div>
+            )}
 
-            {/* Collaborators section */}
-            <div className="border-t border-white/06 pt-5 mb-5">
+            {/* ── STEP 3: Collaborators + Review ──────────────────────────── */}
+            {publishStep === 3 && <>
+            <div className="mb-5 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <p className="text-xs font-mono text-zinc-500 mb-2">Summary</p>
+              <div className="space-y-1 text-xs text-zinc-300 font-light">
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Repository</span>
+                  <span className="text-white truncate ml-2 font-mono">{lockModal.repo.full_name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Access</span>
+                  <span className="text-white">
+                    {lockType === 'locked' ? `Locked · $${lockPrice || '0.00'}` : 'Public · free'}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Logo</span>
+                  <span className="text-white">{pubLogoUrl ? 'uploaded' : '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Website</span>
+                  <span className="text-white truncate ml-2">{pubWebsiteUrl || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-zinc-500">Twitter / X</span>
+                  <span className="text-white truncate ml-2">{pubTwitterUrl || '—'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-5">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-xs font-mono text-zinc-500">Collaborators (optional)</p>
                 <button
@@ -1159,18 +1217,42 @@ export default function ReposPage() {
                 </div>
               )}
             </div>
+            </>}
 
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
-                onClick={() => setLockModal(null)}
+                onClick={() => {
+                  if (publishStep > 1) setPublishStep(((publishStep - 1) as 1 | 2 | 3));
+                  else setLockModal(null);
+                }}
                 className="mk-wizard__secondary"
               >
-                Cancel
+                {publishStep > 1 ? 'Back' : 'Cancel'}
               </button>
-              <button type="button" onClick={confirmPublish} className="mk-wizard__primary">
-                Publish repository
-              </button>
+              {publishStep < 3 ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (publishStep === 1 && lockType === 'locked') {
+                      const p = parseFloat(lockPrice);
+                      if (!p || p <= 0) {
+                        setError('Enter a valid price in USD');
+                        return;
+                      }
+                      setError('');
+                    }
+                    setPublishStep(((publishStep + 1) as 1 | 2 | 3));
+                  }}
+                  className="mk-wizard__primary"
+                >
+                  Next
+                </button>
+              ) : (
+                <button type="button" onClick={confirmPublish} className="mk-wizard__primary">
+                  Publish repository
+                </button>
+              )}
             </div>
           </div>
         </div>

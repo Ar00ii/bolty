@@ -153,20 +153,6 @@ function LibraryPageContent() {
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
 
-  // Pull the live ETH/USD oracle so USD-quoted prices (repo lockedPriceUsd)
-  // can be shown alongside their ETH equivalent in the price column.
-  useEffect(() => {
-    let cancelled = false;
-    api
-      .get<{ price?: number }>('/chart/eth-price')
-      .then((r) => {
-        if (!cancelled && r?.price && r.price > 0) setEthUsd(r.price);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   // Saved listings (favorites) — hydrated from localStorage + per-id fetch.
   const { ids: favIds, remove: removeFav } = useFavorites();
@@ -180,17 +166,30 @@ function LibraryPageContent() {
       return;
     }
     if (!isAuthenticated) return;
+    // Fetch the ETH/USD oracle + the library feed in parallel. They're
+    // both used on the first paint (oracle drives the USD conversion in
+    // the price column + Total spent card), so serialising them added
+    // ~150-300 ms on every Library load for no reason.
+    let cancelled = false;
     (async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const data = await api.get<LibraryItem[]>('/market/library');
+        const [oracle, data] = await Promise.all([
+          api
+            .get<{ price?: number }>('/chart/eth-price')
+            .catch(() => null as { price?: number } | null),
+          api.get<LibraryItem[]>('/market/library').catch(() => [] as LibraryItem[]),
+        ]);
+        if (cancelled) return;
+        if (oracle?.price && oracle.price > 0) setEthUsd(oracle.price);
         setItems(data || []);
-      } catch {
-        // ignore
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, isLoading, router]);
 
   // Lazy-load the saved listings only when the Saved tab is active.
