@@ -20,7 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { getCached, setCached } from '@/lib/cache/pageCache';
+import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 
 interface PublishedRepo {
@@ -176,6 +176,11 @@ export default function InventoryPage() {
 
   const load = useCallback(async () => {
     setError(null);
+    const { fresh } = getCachedWithStatus('inventory:data');
+    if (fresh) {
+      setLoading(false);
+      return;
+    }
     try {
       const result = await api.get<InventoryData>('/market/my-inventory');
       setData(result);

@@ -22,7 +22,7 @@ import { io, type Socket } from 'socket.io-client';
 
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, WS_URL } from '@/lib/api/client';
-import { getCached, setCached } from '@/lib/cache/pageCache';
+import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -189,9 +189,18 @@ function MarketScreener() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      // Skip the loading spinner when we already have cached data —
-      // swap to fresh silently so the page never blinks on back-navigation.
       const hasCache = listings.length > 0 || pulse !== null;
+      // For the default (unfiltered) view, skip the network if cache
+      // is fresh (<30s). Filtered searches always hit so the user sees
+      // their filter applied.
+      const isDefaultView = !search && typeFilter === 'ALL' && sort === 'recent';
+      if (isDefaultView && hasCache) {
+        const { fresh } = getCachedWithStatus('market:listings');
+        if (fresh) {
+          setLoading(false);
+          return;
+        }
+      }
       if (!hasCache) setLoading(true);
       try {
         const qs = new URLSearchParams({ page: '1' });

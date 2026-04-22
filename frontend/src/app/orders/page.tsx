@@ -31,7 +31,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
-import { getCached, setCached } from '@/lib/cache/pageCache';
+import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
@@ -234,6 +234,14 @@ export default function OrdersPage() {
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
+    // If the cached snapshot is still fresh (<30s) don't hit the
+    // network at all — this is the "instant" feel on quick back-
+    // navigation. The refetch kicks in only after the data ages out.
+    const { fresh } = getCachedWithStatus('orders:buyer');
+    if (fresh) {
+      setLoading(false);
+      return;
+    }
     try {
       const [buyOrders, sellOrders, sellerStats, negs] = await Promise.all([
         api.get<Order[]>('/orders').catch(() => null),

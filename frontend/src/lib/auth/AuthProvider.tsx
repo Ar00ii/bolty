@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 
 import { api } from '@/lib/api/client';
-import { resetCache } from '@/lib/cache/pageCache';
+import { prefetch, resetCache } from '@/lib/cache/pageCache';
 import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 export interface User {
@@ -126,6 +126,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  // Warm-prefetch common landing pages in the background once we know
+  // the user is authenticated. Runs on browser-idle so it never
+  // competes with the current page's own fetches for CPU / network.
+  // Result lands in the pageCache; next navigation hits it instantly.
+  useEffect(() => {
+    if (!user) return;
+    if (typeof window === 'undefined') return;
+    type IdleRic = typeof window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    const w = window as IdleRic;
+    const idle = (fn: () => void) => {
+      if (w.requestIdleCallback) w.requestIdleCallback(fn, { timeout: 2_500 });
+      else setTimeout(fn, 800);
+    };
+    idle(() => {
+      void prefetch('market:listings', () =>
+        api
+          .get<{ data: unknown[] }>('/market?page=1&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      void prefetch('market:pulse', () => api.get('/market/pulse?limit=20'));
+      void prefetch('orders:buyer', () => api.get('/orders'));
+      void prefetch('orders:seller', () => api.get('/orders/selling'));
+      void prefetch('inventory:data', () => api.get('/market/my-inventory'));
+      void prefetch('library:items', () => api.get('/market/library'));
+    });
+  }, [user]);
 
   return (
     <AuthContext.Provider

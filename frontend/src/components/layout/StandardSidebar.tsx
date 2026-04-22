@@ -27,7 +27,41 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { prefetch } from '@/lib/cache/pageCache';
+
+// Kick off API fetches for the most likely-visited pages the moment
+// the user's cursor touches the sidebar row. The prefetch module
+// dedupes in-flight calls and skips if fresh (<30s), so repeated
+// hover doesn't spam the network.
+function prefetchForHref(href: string) {
+  const base = href.split('?')[0];
+  switch (base) {
+    case '/market':
+      void prefetch('market:listings', () =>
+        api
+          .get<{ data: unknown[] }>('/market?page=1&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      void prefetch('market:pulse', () => api.get('/market/pulse?limit=20'));
+      break;
+    case '/orders':
+      void prefetch('orders:buyer', () => api.get('/orders'));
+      void prefetch('orders:seller', () => api.get('/orders/selling'));
+      void prefetch('orders:stats', () => api.get('/orders/seller/stats'));
+      void prefetch('orders:negotiations', () => api.get('/market/negotiations'));
+      break;
+    case '/inventory':
+      void prefetch('inventory:data', () => api.get('/market/my-inventory'));
+      break;
+    case '/market/library':
+      void prefetch('library:items', () => api.get('/market/library'));
+      break;
+    default:
+      break;
+  }
+}
 
 interface NavChild {
   label: string;
@@ -334,6 +368,9 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     if (iconEl) iconEl.style.color = '#a594ff';
     const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
     if (kbdEl) kbdEl.style.opacity = '1';
+    // Prefetch API data for the most common destinations so by the time
+    // the user actually clicks, the page renders from cache instantly.
+    prefetchForHref(item.href);
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
