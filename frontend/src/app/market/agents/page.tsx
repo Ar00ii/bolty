@@ -4548,8 +4548,26 @@ function AgentsPageContent() {
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
+  const [mobileBlock, setMobileBlock] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
+
+  // Mobile gate for the 6-step deploy wizard — the UI was designed for
+  // desktop only (sandbox testing, file picker, long forms). Detect via
+  // viewport width so tablets in landscape keep working.
+  const isMobile = () => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 767px)').matches;
+  };
+
+  const attemptDeploy = () => {
+    if (isMobile()) {
+      setMobileBlock(true);
+      return;
+    }
+    switchTab('mine');
+    setShowCreate(true);
+  };
 
   // Sync tab to URL
   useEffect(() => {
@@ -4558,10 +4576,15 @@ function AgentsPageContent() {
     else setActiveTab('market');
   }, [searchParams]);
 
-  // Open deploy form when other pages redirect with ?new=1
+  // Open deploy form when other pages redirect with ?new=1 — unless the
+  // user is on mobile, in which case we show the desktop-only notice.
   useEffect(() => {
     if (!isAuthenticated) return;
     if (searchParams.get('new') === '1') {
+      if (isMobile()) {
+        setMobileBlock(true);
+        return;
+      }
       setActiveTab('mine');
       setShowCreate(true);
     }
@@ -4644,10 +4667,7 @@ function AgentsPageContent() {
         {isAuthenticated && (
           <button
             type="button"
-            onClick={() => {
-              switchTab('mine');
-              setShowCreate(true);
-            }}
+            onClick={attemptDeploy}
             className="mk-wizard__primary mk-agents-head__cta"
           >
             <Plus className="w-3.5 h-3.5" strokeWidth={2} />
@@ -4855,7 +4875,7 @@ function AgentsPageContent() {
                     {!showCreate && (
                       <button
                         type="button"
-                        onClick={() => setShowCreate(true)}
+                        onClick={attemptDeploy}
                         className="mk-wizard__primary inline-flex mt-3 max-w-fit"
                         style={{ height: 32, padding: '0 12px', fontSize: 12 }}
                       >
@@ -4888,6 +4908,55 @@ function AgentsPageContent() {
           onClose={() => setNegotiatingListing(null)}
           userId={user.id}
         />
+      )}
+      {mobileBlock && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[60] flex items-center justify-center px-4"
+          style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setMobileBlock(false);
+          }}
+        >
+          <div
+            className="w-full max-w-sm rounded-xl p-6 text-center"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)',
+            }}
+          >
+            <div
+              className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3"
+              style={{
+                background: 'rgba(131,110,249,0.15)',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+              }}
+            >
+              <Plus className="w-5 h-5 text-[#b4a7ff]" />
+            </div>
+            <h3 className="text-base font-light text-white mb-2">
+              Deploy from desktop
+            </h3>
+            <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
+              The agent deploy wizard needs a wider screen for sandbox testing,
+              file uploads and the review step. Open Bolty on a desktop or
+              laptop to deploy your agent.
+            </p>
+            <button
+              type="button"
+              onClick={() => setMobileBlock(false)}
+              className="px-4 py-2 rounded-md text-[12.5px] text-white"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
