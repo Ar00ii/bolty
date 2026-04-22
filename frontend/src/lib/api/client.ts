@@ -23,6 +23,8 @@ export class ApiError extends Error {
 class ApiClient {
   private baseUrl: string;
   private isRefreshing = false;
+  private readonly responseCache = new Map<string, { data: unknown; expiresAt: number }>();
+  private readonly CACHE_TTL = 60_000;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -185,8 +187,38 @@ class ApiClient {
   }
 
   get<T>(path: string, options?: RequestOptions): Promise<T> {
-    return this.request<T>('GET', path, undefined, options);
+    const entry = this.responseCache.get(path);
+    if (entry && Date.now() < entry.expiresAt) {
+      return Promise.resolve(entry.data as T);
+    }
+    return this.request<T>('GET', path, undefined, options).then((data) => {
+      this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
+      return data;
+    });
   }
+
+  // Silently pre-populate the cache for a list of paths (no progress bar).
+  prefetch(paths: string[]): void {
+    for (const path of paths) {
+      if (this.responseCache.has(path)) continue;
+      this.doFetch('GET', path)
+        .then((res) => (res.ok ? (res.json() as Promise<unknown>) : Promise.resolve(null)))
+        .then((data) => {
+          if (data != null) {
+            this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
+          }
+        })
+        .catch(() => {});
+    }
+  }
+
+  // Invalidate all cached entries whose key starts with pathPrefix.
+  invalidate(pathPrefix: string): void {
+    Array.from(this.responseCache.keys()).forEach((key) => {
+      if (key.startsWith(pathPrefix)) this.responseCache.delete(key);
+    });
+  }
+
   post<T>(path: string, body: unknown, options?: RequestOptions): Promise<T> {
     return this.request<T>('POST', path, body, options);
   }
