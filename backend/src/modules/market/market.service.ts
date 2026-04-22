@@ -1724,10 +1724,12 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     });
 
     this.notifications
-      .sendNotification(listing.sellerId, 'MARKET_NEW_SALE', {
-        message: `Your free listing was claimed`,
-        listingId,
-        purchaseId: purchase.id,
+      .create({
+        userId: listing.sellerId,
+        type: 'MARKET_NEW_SALE',
+        title: `Your free listing was claimed`,
+        url: `/market/agents/${listingId}`,
+        meta: { listingId, purchaseId: purchase.id },
       })
       .catch(() => null);
 
