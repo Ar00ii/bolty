@@ -39,33 +39,70 @@ export class ReposService {
     });
   }
 
+  /** Ordered list of Base RPCs we try before giving up. The configured
+   *  one goes first; public Base endpoints follow so a bad ETH_RPC_URL
+   *  on Render doesn't break every purchase. */
+  private baseRpcCandidates(): string[] {
+    const configured = this.config.get<string>('ETH_RPC_URL', '');
+    return [
+      configured,
+      'https://mainnet.base.org',
+      'https://base.publicnode.com',
+      'https://base.llamarpc.com',
+    ].filter((url, i, arr) => url && arr.indexOf(url) === i);
+  }
+
   /**
    * Poll for a tx receipt, handling the common case where the buyer's wallet
    * has broadcast the tx but the Base RPC hasn't indexed it yet (receipt =
-   * null). Waits up to `timeoutMs` before giving up. Fixes the "failed to
-   * verify transaction" false-positive when the purchase API runs faster
-   * than the block is mined.
+   * null). Waits up to `timeoutMs` before giving up. Fails over across the
+   * RPC candidate list on each retry so one laggy endpoint doesn't take
+   * the whole purchase flow down.
    */
   private async waitForReceipt(
-    provider: ethers.JsonRpcProvider,
+    _provider: ethers.JsonRpcProvider,
     txHash: string,
     timeoutMs = 30_000,
   ): Promise<ethers.TransactionReceipt | null> {
     const deadline = Date.now() + timeoutMs;
     let delay = 1500;
-    // First shot — most txs mined within ~2s on Base, so no sleep on attempt 0.
-    // eslint-disable-next-line no-constant-condition
+    const candidates = this.baseRpcCandidates();
+    let idx = 0;
     while (true) {
+      const rpcUrl = candidates[idx % candidates.length];
       try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
         const receipt = await provider.getTransactionReceipt(txHash);
         if (receipt) return receipt;
       } catch (err) {
-        this.logger.warn(`receipt fetch err for ${txHash}: ${err instanceof Error ? err.message : err}`);
+        this.logger.warn(
+          `receipt fetch ${rpcUrl} for ${txHash}: ${err instanceof Error ? err.message : err}`,
+        );
       }
       if (Date.now() >= deadline) return null;
       await new Promise((r) => setTimeout(r, delay));
       delay = Math.min(delay * 1.5, 5000);
+      idx++;
     }
+  }
+
+  /** Fetch a Base tx across the RPC candidate list until one returns it.
+   *  Returns null when every candidate times out or errors. */
+  private async fetchBaseTx(
+    txHash: string,
+  ): Promise<ethers.TransactionResponse | null> {
+    for (const rpcUrl of this.baseRpcCandidates()) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const tx = await provider.getTransaction(txHash);
+        if (tx) return tx;
+      } catch (err) {
+        this.logger.warn(
+          `getTransaction ${rpcUrl} for ${txHash}: ${err instanceof Error ? err.message : err}`,
+        );
+      }
+    }
+    return null;
   }
 
   /** Parse JSON from Claude response text */
@@ -747,16 +784,48 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       return this.purchaseRepository(buyerId, existingRow.repositoryId, txHash);
     }
 
-    // Fetch the tx from chain so we know the recipient + value.
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
-    const [tx, receipt] = await Promise.all([
-      provider.getTransaction(txHash).catch(() => null),
-      provider.getTransactionReceipt(txHash).catch(() => null),
-    ]);
+    // Fetch the tx from chain so we know the recipient + value. The
+    // previous build silently fell back to null on any RPC glitch and
+    // surfaced a misleading "Transaction not found on Base" — even for
+    // txs that plainly exist on Basescan. Try each candidate RPC in
+    // sequence and surface the last error so we can debug when it fails.
+    const configuredRpc = this.config.get<string>('ETH_RPC_URL', '');
+    const candidateRpcs = [
+      configuredRpc,
+      'https://mainnet.base.org',
+      'https://base.publicnode.com',
+      'https://base.llamarpc.com',
+    ].filter((url, i, arr) => url && arr.indexOf(url) === i);
+
+    let tx: ethers.TransactionResponse | null = null;
+    let receipt: ethers.TransactionReceipt | null = null;
+    let lastError: string | null = null;
+    for (const rpcUrl of candidateRpcs) {
+      try {
+        const provider = new ethers.JsonRpcProvider(rpcUrl);
+        const [t, r] = await Promise.all([
+          provider.getTransaction(txHash),
+          provider.getTransactionReceipt(txHash),
+        ]);
+        if (t && r) {
+          tx = t;
+          receipt = r;
+          break;
+        }
+        if (!lastError) {
+          lastError = `RPC ${rpcUrl}: tx=${t ? 'ok' : 'null'} receipt=${r ? 'ok' : 'null'}`;
+        }
+      } catch (err) {
+        lastError = `RPC ${rpcUrl}: ${err instanceof Error ? err.message : String(err)}`;
+        this.logger.warn(`recover-purchase RPC ${rpcUrl} failed: ${lastError}`);
+      }
+    }
     if (!tx || !receipt) {
+      this.logger.error(
+        `recover-purchase: no RPC returned tx+receipt for ${txHash}. Last error: ${lastError}`,
+      );
       throw new BadRequestException(
-        'Transaction not found on Base — double-check the hash and that the tx is mined',
+        `Could not fetch transaction from Base RPC. Last error: ${lastError ?? 'unknown'}. Make sure the hash is exactly the 0x… string from Basescan.`,
       );
     }
     if (receipt.status !== 1) {
@@ -985,9 +1054,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // verify the token transfer. This avoids the old failure mode where
     // BOLTY_TOKEN_CONTRACT being set caused every ETH purchase to fail
     // with "No valid token transfer found".
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
     const tokenContract = tokenContractCfg;
+    // Build an untyped provider handle for waitForReceipt's first argument
+    // (it now ignores it and uses the RPC candidate list internally).
+    const provider = new ethers.JsonRpcProvider(this.baseRpcCandidates()[0]);
 
     let amountWei = '0';
     let detectedCurrency: 'ETH' | 'BOLTY' = 'ETH';
@@ -998,7 +1068,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       // rather than a dropped connection. The attempt is already persisted.
       const [receipt, tx] = await Promise.all([
         this.waitForReceipt(provider, txHash, 18_000),
-        provider.getTransaction(txHash).catch(() => null),
+        this.fetchBaseTx(txHash),
       ]);
 
       if (!receipt) {
@@ -1072,7 +1142,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       try {
         const [feeReceipt, feeTx] = await Promise.all([
           this.waitForReceipt(provider, platformFeeTxHash, 18_000),
-          provider.getTransaction(platformFeeTxHash).catch(() => null),
+          this.fetchBaseTx(platformFeeTxHash),
         ]);
 
         if (feeReceipt && feeReceipt.status === 1 && feeTx) {
