@@ -22,6 +22,7 @@ import { io, type Socket } from 'socket.io-client';
 
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, WS_URL } from '@/lib/api/client';
+import { getCached, setCached } from '@/lib/cache/pageCache';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -167,8 +168,12 @@ function MarketScreener() {
   const [search, setSearch] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
   const [sort, setSort] = useState<SortKey>('trending');
-  const [listings, setListings] = useState<MarketListing[]>([]);
-  const [pulse, setPulse] = useState<Pulse | null>(null);
+  const [listings, setListings] = useState<MarketListing[]>(
+    () => getCached<MarketListing[]>('market:listings') ?? [],
+  );
+  const [pulse, setPulse] = useState<Pulse | null>(
+    () => getCached<Pulse>('market:pulse') ?? null,
+  );
   const [loading, setLoading] = useState(true);
 
   // Rows that should flash green (listingId → timestamp)
@@ -184,7 +189,10 @@ function MarketScreener() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      setLoading(true);
+      // Skip the loading spinner when we already have cached data —
+      // swap to fresh silently so the page never blinks on back-navigation.
+      const hasCache = listings.length > 0 || pulse !== null;
+      if (!hasCache) setLoading(true);
       try {
         const qs = new URLSearchParams({ page: '1' });
         qs.set('sortBy', sort === 'volume' ? 'trending' : sort);
@@ -204,6 +212,12 @@ function MarketScreener() {
         setListings(data);
         setPulse(pulseRes);
         setLiveTrades(pulseRes?.recentTrades || []);
+        // Only cache the default (unfiltered) view — filtered searches
+        // would pollute and evict the baseline we want to restore fast.
+        if (!search && typeFilter === 'ALL' && sort === 'recent') {
+          setCached('market:listings', data);
+          setCached('market:pulse', pulseRes);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

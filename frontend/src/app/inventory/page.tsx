@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { getCached, setCached } from '@/lib/cache/pageCache';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 
 interface PublishedRepo {
@@ -166,17 +167,19 @@ export default function InventoryPage() {
   const { isAuthenticated, isLoading } = useRequireAuth({
     message: 'Create an account or sign in to see your inventory.',
   });
-  const [data, setData] = useState<InventoryData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<InventoryData | null>(
+    () => getCached<InventoryData>('inventory:data') ?? null,
+  );
+  const [loading, setLoading] = useState(() => !getCached('inventory:data'));
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('published');
 
   const load = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
       const result = await api.get<InventoryData>('/market/my-inventory');
       setData(result);
+      setCached('inventory:data', result);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load inventory');
     } finally {

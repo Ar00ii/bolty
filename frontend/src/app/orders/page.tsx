@@ -31,6 +31,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
+import { getCached, setCached } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
@@ -215,15 +216,24 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
-  const [buyerOrders, setBuyerOrders] = useState<Order[]>([]);
-  const [sellerOrders, setSellerOrders] = useState<Order[]>([]);
-  const [negotiations, setNegotiations] = useState<NegotiationRow[]>([]);
-  const [stats, setStats] = useState<SellerStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Seed from the session cache so returning to /orders shows the last
+  // known state instantly while we refetch in the background.
+  const [buyerOrders, setBuyerOrders] = useState<Order[]>(
+    () => getCached<Order[]>('orders:buyer') ?? [],
+  );
+  const [sellerOrders, setSellerOrders] = useState<Order[]>(
+    () => getCached<Order[]>('orders:seller') ?? [],
+  );
+  const [negotiations, setNegotiations] = useState<NegotiationRow[]>(
+    () => getCached<NegotiationRow[]>('orders:negotiations') ?? [],
+  );
+  const [stats, setStats] = useState<SellerStats | null>(
+    () => getCached<SellerStats>('orders:stats') ?? null,
+  );
+  const [loading, setLoading] = useState(() => !getCached<Order[]>('orders:buyer'));
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
     try {
       const [buyOrders, sellOrders, sellerStats, negs] = await Promise.all([
         api.get<Order[]>('/orders').catch(() => null),
@@ -231,10 +241,22 @@ export default function OrdersPage() {
         api.get<SellerStats>('/orders/seller/stats').catch(() => null),
         api.get<NegotiationRow[]>('/market/negotiations').catch(() => null),
       ]);
-      if (buyOrders) setBuyerOrders(buyOrders);
-      if (sellOrders) setSellerOrders(sellOrders);
-      if (sellerStats) setStats(sellerStats);
-      if (negs) setNegotiations(negs);
+      if (buyOrders) {
+        setBuyerOrders(buyOrders);
+        setCached('orders:buyer', buyOrders);
+      }
+      if (sellOrders) {
+        setSellerOrders(sellOrders);
+        setCached('orders:seller', sellOrders);
+      }
+      if (sellerStats) {
+        setStats(sellerStats);
+        setCached('orders:stats', sellerStats);
+      }
+      if (negs) {
+        setNegotiations(negs);
+        setCached('orders:negotiations', negs);
+      }
     } finally {
       setLoading(false);
     }

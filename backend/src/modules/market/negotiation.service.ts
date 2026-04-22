@@ -59,8 +59,9 @@ interface NegotiationType {
 // Max back-and-forth turns before the negotiation auto-expires
 const MAX_TURNS = 15;
 
-// Delay between AI agent turns (ms) — gives the "typing" feel
-const TURN_DELAY_MS = 1500;
+// Delay between AI agent turns (ms) — tight enough to feel instant
+// while still giving the chat a visible "typing" beat.
+const TURN_DELAY_MS = 500;
 
 @Injectable()
 export class NegotiationService {

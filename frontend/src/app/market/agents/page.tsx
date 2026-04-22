@@ -1014,65 +1014,18 @@ function NegotiationModal({
           </button>
         </div>
 
-        {/* AI mode banner */}
+        {/* AI mode banner — no take-over button; negotiation is always
+            AI vs AI and the human intervention is clicking Accept deal
+            when the agents land on a price. */}
         {isAiMode && neg?.status === 'ACTIVE' && (
           <div
-            className="px-4 py-2.5 border-b shrink-0 flex items-center justify-between gap-3"
+            className="px-4 py-2.5 border-b shrink-0 flex items-center gap-2"
             style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}
           >
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-bolty-400 shrink-0" strokeWidth={1.5} />
-              <p className="text-bolty-400 text-xs font-mono">
-                AI agents negotiating automatically
-              </p>
-            </div>
-            {!iHaveRequestedSwitch && !switchPending && (
-              <button
-                onClick={requestHumanSwitch}
-                disabled={requestingSwitch}
-                className="text-xs font-mono text-zinc-500 hover:text-zinc-300 border rounded-lg px-2.5 py-1 transition-all shrink-0 disabled:opacity-40"
-                style={{ borderColor: 'rgba(255,255,255,0.08)' }}
-              >
-                {requestingSwitch ? '...' : 'take over'}
-              </button>
-            )}
-            {iHaveRequestedSwitch && (
-              <span className="text-xs font-mono text-zinc-500 shrink-0">
-                waiting for other party...
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Human switch request — Pokemon trade dialog */}
-        {otherRequestedSwitch && neg?.status === 'ACTIVE' && (
-          <div
-            className="mx-4 mt-3 rounded-xl px-4 py-3 shrink-0 flex items-center justify-between gap-3"
-            style={{
-              border: '1px solid rgba(250,204,21,0.25)',
-              background: 'rgba(250,204,21,0.05)',
-            }}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Users className="w-3.5 h-3.5 text-yellow-400 shrink-0" strokeWidth={1.5} />
-              <p className="text-yellow-300 text-xs font-mono truncate">
-                Other party wants to negotiate manually
-              </p>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <button
-                onClick={acceptHumanSwitch}
-                disabled={requestingSwitch}
-                className="text-xs font-mono px-3 py-1 rounded-lg transition-all disabled:opacity-40"
-                style={{
-                  background: 'rgba(250,204,21,0.15)',
-                  border: '1px solid rgba(250,204,21,0.3)',
-                  color: '#fde68a',
-                }}
-              >
-                {requestingSwitch ? '...' : 'accept'}
-              </button>
-            </div>
+            <Zap className="w-3.5 h-3.5 text-bolty-400 shrink-0" strokeWidth={1.5} />
+            <p className="text-bolty-400 text-xs font-mono">
+              AI agents negotiating · approve the final price below
+            </p>
           </div>
         )}
 
@@ -1153,64 +1106,57 @@ function NegotiationModal({
             </div>
           )}
 
-          {/* AGREED — pay or confirm */}
+          {/* AGREED — one-click Accept deal. Buyer path runs the MetaMask
+              tx + escrow funding; seller path just confirms so the deal
+              is locked on their side. Both are labelled "Accept deal"
+              for a consistent mental model. */}
           {neg?.status === 'AGREED' && !paid && (
             <div className="text-center py-2">
               <div
-                className="rounded-2xl px-5 py-4"
+                className="rounded-2xl px-5 py-5"
                 style={{
-                  border: '1px solid rgba(34,197,94,0.3)',
-                  background: 'rgba(34,197,94,0.04)',
+                  border: '1px solid rgba(34,197,94,0.4)',
+                  background:
+                    'linear-gradient(180deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))',
+                  boxShadow: '0 0 40px -12px rgba(34,197,94,0.35)',
                 }}
               >
-                <p className="text-green-400 font-mono text-xs font-light mb-1">✓ DEAL AGREED</p>
+                <p className="text-green-400 font-mono text-[10px] uppercase tracking-[0.18em] font-medium mb-1">
+                  Deal reached
+                </p>
                 {neg.agreedPrice != null && (
-                  <p className="text-green-300 font-mono text-2xl font-light mb-3">
-                    ⬡ {neg.agreedPrice}{' '}
-                    <span className="text-base font-light text-green-500">
+                  <p className="text-white font-light text-3xl mb-1 tracking-[-0.01em]">
+                    {neg.agreedPrice}{' '}
+                    <span className="text-base text-zinc-400 font-light">
                       {neg.listing?.currency}
                     </span>
                   </p>
                 )}
-                {isSeller ? (
-                  <div className="space-y-2">
-                    <p className="text-zinc-500 text-xs font-mono">
-                      Your agent agreed this price. Confirm to open DM with buyer.
-                    </p>
-                    <button
-                      onClick={accept}
-                      disabled={sending}
-                      className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all"
-                      style={{
-                        background: 'rgba(34,197,94,0.15)',
-                        border: '1px solid rgba(34,197,94,0.4)',
-                        color: '#4ade80',
-                      }}
-                    >
-                      {sending ? 'confirming...' : 'confirm deal + open DM chat'}
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-zinc-500 text-xs font-mono">
-                      Pay with MetaMask to complete the purchase.
-                    </p>
-                    <button
-                      onClick={payWithEth}
-                      disabled={paying}
-                      className="w-full text-xs font-mono font-light py-2.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
-                      style={{
-                        background: 'linear-gradient(135deg,#836EF9,#6b4fe0)',
-                        border: '1px solid rgba(131,110,249,0.4)',
-                        color: 'white',
-                      }}
-                    >
-                      {paying
-                        ? 'awaiting MetaMask...'
-                        : `⬡ pay ${neg.agreedPrice} ${neg.listing?.currency}`}
-                    </button>
-                  </div>
-                )}
+                <p className="text-zinc-500 text-[11px] font-mono mb-4">
+                  {isSeller
+                    ? 'Lock the deal — buyer will pay next.'
+                    : 'Accept to release payment via MetaMask. Escrow delivers on confirmation.'}
+                </p>
+                <button
+                  onClick={isSeller ? accept : payWithEth}
+                  disabled={isSeller ? sending : paying}
+                  className="w-full text-[13px] font-light py-3 px-4 rounded-xl disabled:opacity-40 transition-all hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(34,197,94,0.35) 0%, rgba(34,197,94,0.12) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(34,197,94,0.6), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(34,197,94,0.55)',
+                    color: 'white',
+                  }}
+                >
+                  {isSeller
+                    ? sending
+                      ? 'Locking deal…'
+                      : `Accept deal at ${neg.agreedPrice} ${neg.listing?.currency}`
+                    : paying
+                      ? 'Waiting for MetaMask…'
+                      : `Accept & pay ${neg.agreedPrice} ${neg.listing?.currency}`}
+                </button>
               </div>
             </div>
           )}

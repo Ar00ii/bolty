@@ -28,6 +28,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
+import { getCached, setCached } from '@/lib/cache/pageCache';
 
 type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 type TypeFilter = 'ALL' | ListingType;
@@ -149,7 +150,9 @@ function LibraryPageContent() {
   const initialView =
     searchParams.get('tab') === 'saved' ? ('saved' as const) : ('owned' as const);
   const [view, setView] = useState<'owned' | 'saved'>(initialView);
-  const [items, setItems] = useState<LibraryItem[]>([]);
+  const [items, setItems] = useState<LibraryItem[]>(
+    () => getCached<LibraryItem[]>('library:items') ?? [],
+  );
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<TypeFilter>('ALL');
   const [query, setQuery] = useState('');
@@ -171,8 +174,12 @@ function LibraryPageContent() {
     // the price column + Total spent card), so serialising them added
     // ~150-300 ms on every Library load for no reason.
     let cancelled = false;
+    // Only show the spinner on first visit. If we have cached items we
+    // already rendered them from the useState initializer — refetch
+    // silently and swap on arrival.
+    const hasCache = items.length > 0;
     (async () => {
-      setLoading(true);
+      if (!hasCache) setLoading(true);
       try {
         const [oracle, data] = await Promise.all([
           api
@@ -183,6 +190,7 @@ function LibraryPageContent() {
         if (cancelled) return;
         if (oracle?.price && oracle.price > 0) setEthUsd(oracle.price);
         setItems(data || []);
+        setCached('library:items', data || []);
       } finally {
         if (!cancelled) setLoading(false);
       }
