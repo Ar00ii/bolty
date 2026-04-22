@@ -20,6 +20,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 
 interface PublishedRepo {
   id: string;
@@ -160,8 +161,11 @@ function shortTx(tx: string): string {
 }
 
 export default function InventoryPage() {
-  const { isAuthenticated } = useAuth();
+  useAuth(); // keeps the subscription live; gate delegated to useRequireAuth
   const router = useRouter();
+  const { isAuthenticated, isLoading } = useRequireAuth({
+    message: 'Create an account or sign in to see your inventory.',
+  });
   const [data, setData] = useState<InventoryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -181,12 +185,9 @@ export default function InventoryPage() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-      return;
-    }
+    if (isLoading || !isAuthenticated) return;
     void load();
-  }, [isAuthenticated, load, router]);
+  }, [isAuthenticated, isLoading, load]);
 
   const totals = useMemo(() => {
     if (!data) return { published: 0, purchased: 0, rays: 0 };

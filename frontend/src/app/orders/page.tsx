@@ -30,6 +30,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
@@ -205,6 +206,9 @@ function downloadOrdersCsv(orders: Order[], kind: 'buying' | 'selling') {
 
 export default function OrdersPage() {
   const { user } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useRequireAuth({
+    message: 'Sign in or register to view your orders.',
+  });
   const router = useRouter();
   const [tab, setTab] = useState<'buying' | 'selling' | 'negotiations'>('buying');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -240,13 +244,10 @@ export default function OrdersPage() {
     fetchOrders();
   }, [fetchOrders]);
 
-  if (!user) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center flex-col gap-3">
-        <ShoppingBag className="w-10 h-10 text-zinc-600" strokeWidth={1} />
-        <p className="text-zinc-500 font-light">Sign in to view your orders</p>
-      </div>
-    );
+  if (authLoading || !isAuthenticated || !user) {
+    // useRequireAuth is already redirecting with a toast; render nothing
+    // so we don't flash protected chrome to an unauthenticated visitor.
+    return null;
   }
 
   const baseOrders = tab === 'selling' ? sellerOrders : buyerOrders;

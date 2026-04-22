@@ -25,6 +25,7 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
@@ -139,7 +140,10 @@ export default function LibraryPage() {
 }
 
 function LibraryPageContent() {
-  const { isAuthenticated, isLoading } = useAuth();
+  useAuth();
+  const { isAuthenticated, isLoading } = useRequireAuth({
+    message: 'Sign in or register to view your library.',
+  });
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialView =
@@ -161,11 +165,7 @@ function LibraryPageContent() {
   const [savedLoading, setSavedLoading] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/auth');
-      return;
-    }
-    if (!isAuthenticated) return;
+    if (isLoading || !isAuthenticated) return;
     // Fetch the ETH/USD oracle + the library feed in parallel. They're
     // both used on the first paint (oracle drives the USD conversion in
     // the price column + Total spent card), so serialising them added
