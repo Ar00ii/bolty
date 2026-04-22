@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { invalidateUserCache } from '../auth/strategies/jwt.strategy';
+import { ReputationService } from '../reputation/reputation.service';
 
 interface UpdateProfileData {
   username?: string;
@@ -16,7 +17,12 @@ interface UpdateProfileData {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(UsersService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly reputation: ReputationService,
+  ) {}
 
   async findById(id: string) {
     const user = await this.prisma.user.findUnique({
@@ -117,6 +123,12 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, data: UpdateProfileData) {
+    // Check the previous state so we only award PROFILE_COMPLETED once.
+    const prior = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileSetup: true },
+    });
+
     const updated = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -144,6 +156,17 @@ export class UsersService {
       },
     });
     invalidateUserCache(userId);
+
+    if (!prior?.profileSetup) {
+      this.reputation
+        .awardPoints(userId, 'PROFILE_COMPLETED', userId, 'Profile setup')
+        .catch((err) =>
+          this.logger.warn(
+            `PROFILE_COMPLETED award failed for ${userId}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+    }
+
     return updated;
   }
 

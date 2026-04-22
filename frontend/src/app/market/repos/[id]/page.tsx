@@ -28,6 +28,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { useFavoriteRepos } from '@/lib/hooks/useFavorites';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
@@ -492,6 +493,7 @@ export default function RepoDetailPage() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              <FavoriteButton repoId={repo.id} />
               <ShareButton title={repo.name} />
               <a
                 href={repo.githubUrl}
@@ -1040,5 +1042,35 @@ function LinksCard({ repo }: { repo: RepositoryDetail }) {
         )}
       </ul>
     </div>
+  );
+}
+
+function FavoriteButton({ repoId }: { repoId: string }) {
+  const { has, toggle } = useFavoriteRepos();
+  const saved = has(repoId);
+  return (
+    <button
+      type="button"
+      onClick={() => toggle(repoId)}
+      title={saved ? 'Remove from favorites' : 'Save to favorites'}
+      aria-pressed={saved}
+      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12.5px] transition-all hover:brightness-110"
+      style={{
+        background: saved
+          ? 'linear-gradient(180deg, rgba(236,72,153,0.22) 0%, rgba(236,72,153,0.08) 100%)'
+          : 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
+        color: saved ? '#f9a8d4' : '#d4d4d8',
+        boxShadow: saved
+          ? 'inset 0 0 0 1px rgba(236,72,153,0.5), inset 0 1px 0 rgba(255,255,255,0.06)'
+          : 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+      }}
+    >
+      <Star
+        className="w-3.5 h-3.5"
+        fill={saved ? '#EC4899' : 'none'}
+        stroke={saved ? '#EC4899' : 'currentColor'}
+      />
+      {saved ? 'Saved' : 'Save'}
+    </button>
   );
 }

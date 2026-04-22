@@ -621,12 +621,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (count === 1) await this.redis.expire(rateKey, 3600); // 1 hour
     if (count > 50) throw new ForbiddenException('Vote rate limit exceeded');
 
-    // Upsert vote (one vote per user per repo)
-    return this.prisma.vote.upsert({
+    // Check the prior vote so we only award rays when the vote flips TO 'UP'
+    // — not on every re-upvote or on downvotes.
+    const priorVote = await this.prisma.vote.findUnique({
+      where: { userId_repositoryId: { userId, repositoryId } },
+      select: { value: true },
+    });
+
+    const result = await this.prisma.vote.upsert({
       where: { userId_repositoryId: { userId, repositoryId } },
       create: { userId, repositoryId, value },
       update: { value },
     });
+
+    // Award the repo owner rays on each new distinct upvote.
+    if (value === 'UP' && priorVote?.value !== 'UP') {
+      this.reputation
+        .awardPoints(repo.userId, 'REPO_UPVOTE_RECEIVED', repositoryId, repo.name)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for upvote on repo ${repositoryId}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+    }
+
+    return result;
   }
 
   async removeVote(userId: string, repositoryId: string) {
@@ -1105,7 +1124,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       });
       if (exists) throw new ConflictException('User is already a collaborator');
 
-      return this.prisma.repoCollaborator.create({
+      const collaborator = await this.prisma.repoCollaborator.create({
         data: {
           repositoryId: repoId,
           userId: data.targetUserId,
@@ -1126,6 +1145,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           },
         },
       });
+
+      // Reward the collaborator for being added to a repo.
+      this.reputation
+        .awardPoints(data.targetUserId, 'COLLABORATOR_ADDED', repoId, repo.name)
+        .catch((err) =>
+          this.logger.warn(
+            `Reputation award failed for collaborator ${data.targetUserId}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+
+      return collaborator;
     }
 
     // Non-user collaborator (AI_AGENT or PROGRAM)
