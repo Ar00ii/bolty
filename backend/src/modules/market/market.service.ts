@@ -11,6 +11,7 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { RedisService } from '../../common/redis/redis.service';
 import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -47,6 +48,7 @@ export class MarketService {
     private readonly gateway: MarketGateway,
     private readonly reputation: ReputationService,
     private readonly email: EmailService,
+    private readonly redis: RedisService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -61,8 +63,15 @@ export class MarketService {
   ): Promise<Map<string, { sales24h: number; volumeEth24h: number }>> {
     const result = new Map<string, { sales24h: number; volumeEth24h: number }>();
     if (listingIds.length === 0) return result;
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+    const cacheKey = `market:24hstats:${listingIds.sort().join(',')}`;
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      const parsed = JSON.parse(cached) as [string, { sales24h: number; volumeEth24h: number }][];
+      return new Map(parsed);
+    }
+
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const rows = await this.prisma.marketPurchase.findMany({
       where: { listingId: { in: listingIds }, createdAt: { gte: since } },
       select: { listingId: true, amountWei: true },
@@ -76,15 +85,24 @@ export class MarketService {
         volumeEth24h: prev.volumeEth24h + (Number.isFinite(amount) ? amount : 0),
       });
     }
+
+    await this.redis.set(cacheKey, JSON.stringify([...result]), 300).catch(() => null);
     return result;
   }
 
   private async compute7dSparklines(listingIds: string[]): Promise<Map<string, number[]>> {
     const result = new Map<string, number[]>();
     if (listingIds.length === 0) return result;
+
+    const cacheKey = `market:sparklines:${listingIds.sort().join(',')}`;
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      const parsed = JSON.parse(cached) as [string, number[]][];
+      return new Map(parsed);
+    }
+
     const now = Date.now();
     const since = new Date(now - 7 * 24 * 60 * 60 * 1000);
-
     const rows = await this.prisma.marketPurchase.findMany({
       where: { listingId: { in: listingIds }, createdAt: { gte: since } },
       select: { listingId: true, createdAt: true },
@@ -101,6 +119,8 @@ export class MarketService {
       const arr = result.get(row.listingId);
       if (arr) arr[idx] += 1;
     }
+
+    await this.redis.set(cacheKey, JSON.stringify([...result]), 300).catch(() => null);
     return result;
   }
 
@@ -659,13 +679,27 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   private async attachReviewStats<T extends { id: string }>(listings: T[]) {
     if (listings.length === 0) return listings;
-    const stats = await this.prisma.marketReview.groupBy({
-      by: ['listingId'],
-      where: { listingId: { in: listings.map((l) => l.id) } },
-      _avg: { rating: true },
-      _count: { _all: true },
-    });
-    const byId = new Map(stats.map((s) => [s.listingId, s]));
+
+    const ids = listings.map((l) => l.id);
+    const cacheKey = `market:reviews:${ids.sort().join(',')}`;
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+
+    let byId: Map<string, { _avg: { rating: number | null }; _count: { _all: number } }>;
+    if (cached) {
+      byId = new Map(
+        JSON.parse(cached) as [string, { _avg: { rating: number | null }; _count: { _all: number } }][],
+      );
+    } else {
+      const stats = await this.prisma.marketReview.groupBy({
+        by: ['listingId'],
+        where: { listingId: { in: ids } },
+        _avg: { rating: true },
+        _count: { _all: true },
+      });
+      byId = new Map(stats.map((s) => [s.listingId, s]));
+      await this.redis.set(cacheKey, JSON.stringify([...byId]), 600).catch(() => null);
+    }
+
     return listings.map((l) => {
       const s = byId.get(l.id);
       return {
