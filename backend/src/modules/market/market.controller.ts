@@ -509,8 +509,16 @@ export class MarketController {
   // ── Negotiations ───────────────────────────────────────────────────────────
 
   @Post(':listingId/negotiate')
-  startNegotiation(@Param('listingId') listingId: string, @CurrentUser('id') buyerId: string) {
-    return this.negotiationService.startNegotiation(buyerId, listingId);
+  startNegotiation(
+    @Param('listingId') listingId: string,
+    @CurrentUser('id') buyerId: string,
+    @Body() body: { buyerAgentListingId?: string } = {},
+  ) {
+    return this.negotiationService.startNegotiation(
+      buyerId,
+      listingId,
+      body.buyerAgentListingId,
+    );
   }
 
   @Post('negotiations/:id/message')
@@ -532,6 +540,27 @@ export class MarketController {
   @HttpCode(HttpStatus.OK)
   rejectDeal(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.negotiationService.rejectDeal(id, userId);
+  }
+
+  /**
+   * Counter-offer: the user declined the current AGREED price and
+   * sends a new proposal. Flips the negotiation back to ACTIVE, posts
+   * the message + price on behalf of the user's role, and kicks the
+   * AI loop back on for the counterparty to respond.
+   */
+  @Post('negotiations/:id/counter')
+  @HttpCode(HttpStatus.OK)
+  counterOffer(
+    @Param('id') id: string,
+    @CurrentUser('id') userId: string,
+    @Body() body: { content?: string; proposedPrice?: number },
+  ) {
+    return this.negotiationService.counterOffer(
+      id,
+      userId,
+      body.content?.trim() || 'Not quite — how about this instead?',
+      body.proposedPrice,
+    );
   }
 
   /**
