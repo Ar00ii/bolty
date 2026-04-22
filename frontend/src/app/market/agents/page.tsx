@@ -699,6 +699,12 @@ function NegotiationModal({
     loader
       .then((n) => {
         setNeg(n);
+        // Tell NegotiationPopToast which negotiation this viewport is
+        // currently showing so it can suppress duplicate top-left toasts
+        // for events that are already visible in the chat.
+        if (typeof document !== 'undefined') {
+          document.body.setAttribute('data-neg-open', n.id);
+        }
         pollTimer = setInterval(async () => {
           try {
             const fresh = await api.get<Negotiation>(`/market/negotiations/${n.id}`);
@@ -805,6 +811,9 @@ function NegotiationModal({
       if (pollTimer) clearInterval(pollTimer);
       socketRef.current?.disconnect();
       socketRef.current = null;
+      if (typeof document !== 'undefined') {
+        document.body.removeAttribute('data-neg-open');
+      }
     };
   }, [listing.id, initialNegotiationId, buyerAgentListingId]);
 
@@ -1047,7 +1056,7 @@ function NegotiationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 overflow-y-auto"
       style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)' }}
     >
       <div

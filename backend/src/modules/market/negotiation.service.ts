@@ -434,10 +434,20 @@ export class NegotiationService {
 
     this.gateway.emitNewMessage(id, saved);
 
-    // Emergent pop-toast for the counterparty. The NegotiationPopToast
-    // already handles `negotiation_message` meta.kind — we just need
-    // to fire it so the other side sees the chat glow at the top-left
-    // of their viewport no matter what page they're on.
+    // Kick the opposite agent to respond immediately. Without this
+    // human messages just sat in the chat and the other agent never
+    // acknowledged them — the AI loop was not listening for human
+    // interjections. Run in fire-and-forget so we can still return
+    // the updated negotiation right away.
+    if (neg.mode !== 'HUMAN' && neg.status === 'ACTIVE') {
+      if (isBuyer) {
+        void this.runSellerTurn(id);
+      } else {
+        void this.runBuyerTurn(id);
+      }
+    }
+
+    // Emergent pop-toast for the counterparty.
     const counterpartyId =
       isBuyer ? neg.listing.sellerId : neg.buyerId;
     const senderUser = await this.prisma.user
@@ -1102,13 +1112,23 @@ Respond ONLY with JSON: {"reply": "your intro"}`;
       const minPrice = neg.listing.minPrice;
       const floorRule =
         minPrice != null ? `- NEVER accept below ${minPrice} ${neg.listing.currency}.` : '';
+      // Let the seller agent weight seller-side human interjections.
+      const recentHumanMsg = [...(neg.messages ?? [])]
+        .reverse()
+        .find((m) => m.fromRole === 'seller');
+      const steeringLine = recentHumanMsg
+        ? `IMPORTANT: The seller just typed: "${recentHumanMsg.content}". Weight their guidance heavily.`
+        : '';
+      const turnCount = neg.turnCount ?? 0;
       const prompt = `You are an AI sales agent for "${neg.listing.title}" (asking: ${neg.listing.price} ${neg.listing.currency}${minPrice != null ? `, minimum: ${minPrice} ${neg.listing.currency}` : ''}).
+${steeringLine}
 Negotiating against the BUYER'S AI agent. Rules:
-- Accept if offer >= 80% of asking (never below minimum).
-- Counter at midpoint if offer is 40-80%.
-- Reject if offer < 40% or below floor.
+- Accept immediately if offer >= 85% of asking (never below minimum).
+- Counter at the midpoint between offer and your last price if offer is 50-85%.
+- Reject if offer < 50% or below floor.
 ${floorRule}
-- 2-3 sentences max.
+- Turn ${turnCount}: after turn 6, accept any offer >= 80% of asking to close — dragging hurts both sides.
+- 1-2 sentences max. Be decisive.
 
 History:
 ${history}
@@ -1208,7 +1228,7 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         )
         .join('\n');
       const askingPrice = neg.listing.price;
-      const targetPrice = Math.round(askingPrice * 0.75 * 1e6) / 1e6;
+      const targetPrice = Math.round(askingPrice * 0.8 * 1e6) / 1e6;
       // Only the VERY first reply does an intro. After that it's pure
       // price negotiation. We detect "intro turn" by looking for the
       // seller's opening greeting + no prior buyer message yet.
@@ -1219,14 +1239,25 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
       const introLine = isIntroTurn
         ? `This is your intro turn. Start with ONE short sentence introducing yourself as the buyer's agent ("Hey, I'm negotiating on behalf of @${neg.buyer?.username ?? 'the buyer'}"). Then open your first offer at around ${targetPrice} ${neg.listing.currency}.`
         : '';
+      // Pull the most recent buyer-side human message (if any) and let
+      // the agent weight it as steering input. Without this, anything
+      // the user typed was ignored by the AI loop.
+      const recentHumanMsg = [...(neg.messages ?? [])]
+        .reverse()
+        .find((m) => m.fromRole === 'buyer');
+      const steeringLine = recentHumanMsg
+        ? `IMPORTANT: The buyer just typed: "${recentHumanMsg.content}". Weight their guidance heavily — they are the principal and you're negotiating on their behalf.`
+        : '';
+      const turnCount = neg.turnCount ?? 0;
       const prompt = `You are an AI buyer agent trying to purchase "${neg.listing.title}" (listed at ${askingPrice} ${neg.listing.currency}).
 ${introLine}
-Goal: get the best price. Strategy:
-- Open at ~70% of asking price.
-- Accept if seller offers <= 80% of asking.
-- Counter 5% lower than seller's last counter.
-- After 3 failed counters, accept if seller price < 90% of asking.
-- Be polite but firm. 2-3 sentences max.
+${steeringLine}
+Goal: get a fair deal fast. Strategy:
+- Open at ~75% of asking price.
+- Accept immediately if seller offers <= 90% of asking.
+- Counter ~3-5% lower than seller's last counter.
+- We're on turn ${turnCount}. After turn 6, accept any seller price <= 95% of asking to close the deal instead of dragging.
+- Be polite, concise. 1-2 sentences max.
 - Target: ${targetPrice} ${neg.listing.currency}.
 
 History:
