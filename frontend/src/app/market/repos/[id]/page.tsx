@@ -144,6 +144,10 @@ export default function RepoDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [consent, setConsent] = useState<ConsentState | null>(null);
   const [copiedCmd, setCopiedCmd] = useState(false);
+  const [recoverOpen, setRecoverOpen] = useState(false);
+  const [recoverTx, setRecoverTx] = useState('');
+  const [recoverBusy, setRecoverBusy] = useState(false);
+  const [recoverMsg, setRecoverMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -316,6 +320,47 @@ export default function RepoDetailPage() {
     navigator.clipboard.writeText(`npm install ${repo.name.toLowerCase()}`);
     setCopiedCmd(true);
     setTimeout(() => setCopiedCmd(false), 2000);
+  };
+
+  // Recover a stuck payment: the buyer already paid on-chain but the
+  // original /purchase call failed (or was made before the verification
+  // fix deployed). Re-run verification against the existing tx hash —
+  // no new payment is required.
+  const submitRecover = async () => {
+    if (!repo) return;
+    const tx = recoverTx.trim();
+    if (!/^0x[0-9a-fA-F]{64}$/.test(tx)) {
+      setRecoverMsg('Invalid tx hash — paste the 0x… hash from your wallet activity');
+      return;
+    }
+    setRecoverBusy(true);
+    setRecoverMsg(null);
+    try {
+      const result = await api.post<{ success: boolean; downloadUrl?: string }>(
+        `/repos/${repo.id}/verify`,
+        { txHash: tx },
+      );
+      if (result.success) {
+        setRecoverMsg('Verified. Opening your download…');
+        if (result.downloadUrl) {
+          window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+        }
+        await load();
+        setTimeout(() => {
+          setRecoverOpen(false);
+          setRecoverTx('');
+          setRecoverMsg(null);
+        }, 1500);
+      }
+    } catch (err) {
+      setRecoverMsg(
+        err instanceof ApiError
+          ? err.message
+          : 'Verification failed. Try again in a moment.',
+      );
+    } finally {
+      setRecoverBusy(false);
+    }
   };
 
   if (loading) {
@@ -567,6 +612,7 @@ export default function RepoDetailPage() {
               repo={repo}
               onDownload={download}
               onUnlock={startUnlock}
+              onRecover={() => setRecoverOpen(true)}
               onVote={vote}
               onCopy={copyInstall}
               copied={copiedCmd}
@@ -592,6 +638,73 @@ export default function RepoDetailPage() {
           onConsent={executePurchase}
           onCancel={() => setConsent(null)}
         />
+      )}
+      {recoverOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !recoverBusy) setRecoverOpen(false);
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-xl p-6"
+            style={{
+              background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)',
+            }}
+          >
+            <h3 className="text-base font-light text-white mb-2">Verify an existing payment</h3>
+            <p className="text-xs text-zinc-400 font-light leading-relaxed mb-4">
+              Paste the transaction hash of the payment you already sent on Base. We&apos;ll
+              re-run on-chain verification against the seller&apos;s wallet — no new payment
+              is required.
+            </p>
+            <input
+              type="text"
+              value={recoverTx}
+              onChange={(e) => setRecoverTx(e.target.value)}
+              placeholder="0x…"
+              disabled={recoverBusy}
+              className="w-full px-3 py-2 rounded-lg text-[12px] font-mono text-white placeholder:text-zinc-600 focus:outline-none"
+              style={{
+                background: 'rgba(255,255,255,0.04)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              }}
+            />
+            {recoverMsg && (
+              <p className="mt-3 text-[11.5px] font-light text-[#b4a7ff]">{recoverMsg}</p>
+            )}
+            <div className="mt-5 flex items-center justify-end gap-2">
+              <button
+                onClick={() => {
+                  if (recoverBusy) return;
+                  setRecoverOpen(false);
+                  setRecoverTx('');
+                  setRecoverMsg(null);
+                }}
+                disabled={recoverBusy}
+                className="px-3 py-1.5 rounded-md text-[12px] text-zinc-400 hover:text-white disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitRecover}
+                disabled={recoverBusy || !recoverTx.trim()}
+                className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                }}
+              >
+                {recoverBusy ? 'Verifying…' : 'Verify'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {walletPicker}
     </div>
@@ -635,6 +748,7 @@ function ActionsCard({
   repo,
   onDownload,
   onUnlock,
+  onRecover,
   onVote,
   onCopy,
   copied,
@@ -644,6 +758,7 @@ function ActionsCard({
   repo: RepositoryDetail;
   onDownload: () => void;
   onUnlock: () => void;
+  onRecover: () => void;
   onVote: (v: 'UP' | 'DOWN') => void;
   onCopy: () => void;
   copied: boolean;
@@ -682,19 +797,27 @@ function ActionsCard({
       )}
 
       {locked ? (
-        <button
-          onClick={onUnlock}
-          className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-            boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-          }}
-        >
-          <Lock className="w-4 h-4" />
-          Unlock with MetaMask
-        </button>
+        <>
+          <button
+            onClick={onUnlock}
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+            }}
+          >
+            <Lock className="w-4 h-4" />
+            Unlock with MetaMask
+          </button>
+          <button
+            onClick={onRecover}
+            className="w-full mt-2 text-[11px] text-zinc-500 hover:text-zinc-300 underline decoration-dotted underline-offset-2"
+          >
+            Already paid? Verify your transaction
+          </button>
+        </>
       ) : (
         <button
           onClick={onDownload}
