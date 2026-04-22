@@ -378,12 +378,7 @@ export class ReposController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteRepo(
-    @Param('id') repoId: string,
-    @CurrentUser('id') userId: string,
-    @Body() body: { twoFactorCode?: string } = {},
-  ) {
-    await this.stepUp.assert(userId, body.twoFactorCode);
+  async deleteRepo(@Param('id') repoId: string, @CurrentUser('id') userId: string) {
     return this.reposService.deleteRepository(userId, repoId);
   }
 
