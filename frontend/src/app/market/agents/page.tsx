@@ -36,6 +36,7 @@ import { io, Socket } from 'socket.io-client';
 
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
+import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
@@ -690,9 +691,31 @@ function NegotiationModal({
           `/market/${listing.id}/negotiate`,
           buyerAgentListingId ? { buyerAgentListingId } : {},
         );
+    // Polling fallback — if the socket misses the first few emits (e.g.
+    // connect race or transient drop) we still catch up by refetching
+    // the negotiation every 3 seconds while it's ACTIVE. The socket
+    // listener is the primary, this is defence in depth.
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
     loader
       .then((n) => {
         setNeg(n);
+        pollTimer = setInterval(async () => {
+          try {
+            const fresh = await api.get<Negotiation>(`/market/negotiations/${n.id}`);
+            setNeg((prev) => {
+              if (!prev) return fresh;
+              // Merge: keep any local optimistic state; overwrite messages
+              // and status from server.
+              return { ...prev, ...fresh, messages: fresh.messages };
+            });
+            if (fresh.status !== 'ACTIVE' && pollTimer) {
+              clearInterval(pollTimer);
+              pollTimer = null;
+            }
+          } catch {
+            /* ignore — socket will catch up */
+          }
+        }, 3000);
         // Connect WebSocket once we have the negotiation id
         const socket = io(`${SOCKET_URL}/negotiations`, {
           withCredentials: true,
@@ -779,10 +802,11 @@ function NegotiationModal({
       .finally(() => setLoading(false));
 
     return () => {
+      if (pollTimer) clearInterval(pollTimer);
       socketRef.current?.disconnect();
       socketRef.current = null;
     };
-  }, [listing.id]);
+  }, [listing.id, initialNegotiationId, buyerAgentListingId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -1121,6 +1145,26 @@ function NegotiationModal({
             <div className="text-center py-12">
               <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-[#836ef9] animate-spin mx-auto mb-3" />
               <p className="text-zinc-400 text-xs font-light">Opening the negotiation…</p>
+            </div>
+          )}
+
+          {!loading && neg && neg.messages.length === 0 && neg.status === 'ACTIVE' && (
+            <div
+              className="flex flex-col items-center justify-center text-center py-10"
+            >
+              <div className="flex gap-1 mb-3">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="w-2 h-2 rounded-full bg-[#b4a7ff] animate-bounce"
+                    style={{ animationDelay: `${i * 0.14}s` }}
+                  />
+                ))}
+              </div>
+              <p className="text-[13px] text-white font-light">Agents are connecting…</p>
+              <p className="text-[11.5px] text-zinc-500 font-light mt-1">
+                First message lands in a moment.
+              </p>
             </div>
           )}
 
@@ -4700,6 +4744,10 @@ function AgentsPageContent() {
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
   const [initialNegId, setInitialNegId] = useState<string | null>(null);
   const [asAgentId, setAsAgentId] = useState<string | null>(null);
+  // Listing we're about to negotiate on, held in the agent picker.
+  // When the user confirms, we promote it to `negotiatingListing` which
+  // opens the chat modal with the chosen agent id.
+  const [pendingNegListing, setPendingNegListing] = useState<MarketListing | null>(null);
   const [mobileBlock, setMobileBlock] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
@@ -4971,7 +5019,7 @@ function AgentsPageContent() {
                   <AgentCard
                     listing={l}
                     isAuthenticated={isAuthenticated}
-                    onNegotiate={() => setNegotiatingListing(l)}
+                    onNegotiate={() => setPendingNegListing(l)}
                   />
                 </motion.div>
               ))}
@@ -5059,6 +5107,24 @@ function AgentsPageContent() {
             </div>
           )}
         </>
+      )}
+
+      {/* Agent picker — every Negotiate click goes through this first so
+          the buyer chooses which of their own agents negotiates. */}
+      {pendingNegListing && user && (
+        <AgentPickerModal
+          listingTitle={pendingNegListing.title}
+          listingPrice={pendingNegListing.price}
+          listingCurrency={pendingNegListing.currency}
+          onCancel={() => setPendingNegListing(null)}
+          onConfirm={(agentId) => {
+            const picked = pendingNegListing;
+            setPendingNegListing(null);
+            setAsAgentId(agentId);
+            setInitialNegId(null);
+            setNegotiatingListing(picked);
+          }}
+        />
       )}
 
       {/* Negotiation modal */}
