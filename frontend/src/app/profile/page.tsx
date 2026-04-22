@@ -36,7 +36,7 @@ const AvatarCropperModal = dynamicImport(
   { ssr: false },
 );
 import { GradientText } from '@/components/ui/GradientText';
-import { getReputationRank } from '@/components/ui/reputation-badge';
+import { getReputationRank, RANK_TIERS } from '@/components/ui/reputation-badge';
 import { UserAvatar as UserAvatarComponent } from '@/components/ui/UserAvatar';
 import { VerificationCodeModal } from '@/components/ui/VerificationCodeModal';
 import { WalletProviderIcon, walletProviderLabel } from '@/components/ui/WalletIcons';
@@ -1524,6 +1524,7 @@ export default function ProfilePage() {
           GENERAL
       ════════════════════════════════════════════ */}
           {tab === 'general' && (
+            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 items-start">
             <div className="profile-content-card">
               <SectionHeader
                 title="General Information"
@@ -1716,6 +1717,10 @@ export default function ProfilePage() {
 
                 <SaveButton loading={genSaving} />
               </form>
+            </div>
+            <RankProgressPanel
+              points={(user as { reputationPoints?: number } | null)?.reputationPoints ?? 0}
+            />
             </div>
           )}
 
@@ -3123,5 +3128,134 @@ export default function ProfilePage() {
         }
       />
     </div>
+  );
+}
+
+/**
+ * Sidebar panel on the General tab showing the user's rank, total rays,
+ * a gradient progress bar to the next threshold, and the full ranked
+ * ladder so they can see where the next tier starts.
+ */
+function RankProgressPanel({ points }: { points: number }) {
+  const current = getReputationRank(points);
+  const CurrentIcon = current.icon;
+  const nextTier = RANK_TIERS[current.tier + 1];
+  const nextPoints = nextTier ? nextTier.threshold : null;
+  const span = nextPoints ? nextPoints - current.threshold : 0;
+  const progress =
+    nextPoints && span > 0
+      ? Math.min(100, Math.max(0, ((points - current.threshold) / span) * 100))
+      : 100;
+
+  return (
+    <aside
+      className="rounded-xl p-5 sticky top-20"
+      style={{
+        background: 'linear-gradient(180deg, rgba(20,20,26,0.7), rgba(10,10,14,0.7))',
+        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
+    >
+      <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.22em] text-zinc-500 mb-3">
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ background: current.color, boxShadow: `0 0 6px ${current.color}` }}
+        />
+        Rank progress
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div
+          className="w-12 h-12 rounded-xl flex items-center justify-center"
+          style={{
+            background: `${current.color}18`,
+            boxShadow: `inset 0 0 0 1px ${current.color}55`,
+          }}
+        >
+          <CurrentIcon className="w-5 h-5" style={{ color: current.color }} strokeWidth={1.75} />
+        </div>
+        <div className="min-w-0">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-zinc-500">
+            {nextTier ? 'Current rank' : 'Max rank'}
+          </div>
+          <div className="text-lg font-light text-white">{current.label}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex items-baseline justify-between">
+        <span className="font-mono tabular-nums text-xl text-white">
+          {points.toLocaleString()}
+        </span>
+        <span className="text-[11px] text-zinc-500 font-light">rays total</span>
+      </div>
+
+      <div className="mt-2">
+        <div
+          className="h-2 rounded-full overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
+        >
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${progress}%`,
+              background:
+                'linear-gradient(90deg, #06B6D4 0%, #836EF9 50%, #EC4899 100%)',
+              boxShadow: '0 0 10px rgba(131,110,249,0.5)',
+            }}
+          />
+        </div>
+        {nextTier ? (
+          <div className="mt-1.5 flex items-center justify-between text-[11px] font-light text-zinc-500">
+            <span className="text-zinc-400">{Math.floor(progress)}% to {nextTier.label}</span>
+            <span className="font-mono tabular-nums">
+              {(nextTier.threshold - points).toLocaleString()} rays to go
+            </span>
+          </div>
+        ) : (
+          <div className="mt-1.5 text-[11px] font-light text-[#fbbf24]">
+            You&apos;ve hit the top of the ladder.
+          </div>
+        )}
+      </div>
+
+      <div className="mt-5 border-t border-white/[0.06] pt-3 space-y-1">
+        {RANK_TIERS.map((tier, i) => {
+          const TierIcon = tier.icon;
+          const reached = points >= tier.threshold;
+          const isCurrent = i === current.tier;
+          return (
+            <div
+              key={tier.rank}
+              className="flex items-center gap-2.5 py-1"
+              style={{ opacity: reached ? 1 : 0.4 }}
+            >
+              <div
+                className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: isCurrent ? `${tier.color}22` : 'rgba(255,255,255,0.03)',
+                  boxShadow: isCurrent
+                    ? `inset 0 0 0 1px ${tier.color}`
+                    : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }}
+              >
+                <TierIcon
+                  className="w-3 h-3"
+                  style={{ color: reached ? tier.color : '#52525b' }}
+                  strokeWidth={2}
+                />
+              </div>
+              <span
+                className="text-[11.5px] font-light flex-1"
+                style={{ color: isCurrent ? '#ffffff' : reached ? '#d4d4d8' : '#71717a' }}
+              >
+                {tier.label}
+              </span>
+              <span className="text-[10.5px] font-mono tabular-nums text-zinc-500">
+                {tier.threshold.toLocaleString()}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </aside>
   );
 }

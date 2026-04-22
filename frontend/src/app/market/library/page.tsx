@@ -36,6 +36,8 @@ interface LibraryItem {
   purchasedAt: string;
   status: string;
   escrowStatus: string;
+  amountWei?: string;
+  txHash?: string;
   myRating: number | null;
   listing: {
     id: string;
@@ -147,8 +149,24 @@ function LibraryPageContent() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<TypeFilter>('ALL');
   const [query, setQuery] = useState('');
+  const [ethUsd, setEthUsd] = useState<number | null>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
+
+  // Pull the live ETH/USD oracle so USD-quoted prices (repo lockedPriceUsd)
+  // can be shown alongside their ETH equivalent in the price column.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .get<{ price?: number }>('/chart/eth-price')
+      .then((r) => {
+        if (!cancelled && r?.price && r.price > 0) setEthUsd(r.price);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Saved listings (favorites) — hydrated from localStorage + per-id fetch.
   const { ids: favIds, remove: removeFav } = useFavorites();
@@ -245,14 +263,25 @@ function LibraryPageContent() {
     return c;
   }, [items]);
 
-  const totalSpent = useMemo(
-    () =>
-      items.reduce((sum, i) => {
-        if (!i.listing) return sum;
-        return sum + (Number.isFinite(i.listing.price) ? i.listing.price : 0);
-      }, 0),
-    [items],
-  );
+  // Actual ETH spent on-chain, summed from the stored amountWei on each
+  // purchase. Using listing.price was wrong because repo prices are quoted
+  // in USD (so "Total spent: 2.900 ETH" came out of treating $2.90 as
+  // 2.9 ETH). amountWei is the ground-truth paid amount in wei regardless
+  // of currency label.
+  const totalSpent = useMemo(() => {
+    let totalWei = BigInt(0);
+    for (const i of items) {
+      if (!i.amountWei) continue;
+      try {
+        totalWei += BigInt(i.amountWei);
+      } catch {
+        /* skip bad rows */
+      }
+    }
+    return Number(totalWei) / 1e18;
+  }, [items]);
+
+  const totalSpentUsd = ethUsd && totalSpent > 0 ? totalSpent * ethUsd : null;
 
   const downloadable = useMemo(() => items.filter((i) => i.listing?.fileKey).length, [items]);
 
@@ -361,7 +390,11 @@ function LibraryPageContent() {
               <StatTile
                 label="Total spent"
                 value={`${formatEth(totalSpent)} ETH`}
-                sub="across all orders"
+                sub={
+                  totalSpentUsd != null
+                    ? `≈ $${totalSpentUsd.toFixed(2)} · across all orders`
+                    : 'across all orders'
+                }
                 accent="#EC4899"
               />
               <StatTile
@@ -455,7 +488,7 @@ function LibraryPageContent() {
               {/* Table */}
               <section className="px-6 md:px-10">
                 <div className="mx-auto max-w-[1400px]">
-                  <LibraryTable items={visible} query={query} />
+                  <LibraryTable items={visible} query={query} ethUsd={ethUsd} />
                 </div>
               </section>
             </>
@@ -836,7 +869,15 @@ function FilterChip({
   );
 }
 
-function LibraryTable({ items, query }: { items: LibraryItem[]; query: string }) {
+function LibraryTable({
+  items,
+  query,
+  ethUsd,
+}: {
+  items: LibraryItem[];
+  query: string;
+  ethUsd: number | null;
+}) {
   if (items.length === 0) {
     return (
       <div
@@ -874,14 +915,75 @@ function LibraryTable({ items, query }: { items: LibraryItem[]; query: string })
       <ul>
         {items.map((item, i) => {
           if (!item.listing) return null;
-          return <LibraryRow key={item.orderId} item={item} index={i} />;
+          return <LibraryRow key={item.orderId} item={item} index={i} ethUsd={ethUsd} />;
         })}
       </ul>
     </div>
   );
 }
 
-function LibraryRow({ item, index }: { item: LibraryItem; index: number }) {
+/** Price cell: prefers actual paid ETH from amountWei, falls back to the
+ *  listing sticker. Always shows both ETH and USD so buyers can sanity-check
+ *  the on-chain amount against the quoted fiat price. */
+function PriceCell({ item, ethUsd }: { item: LibraryItem; ethUsd: number | null }) {
+  const l = item.listing;
+  if (!l) return <div className="text-right text-zinc-600 text-[12px]">—</div>;
+
+  let eth: number | null = null;
+  if (item.amountWei) {
+    try {
+      const asNum = Number(BigInt(item.amountWei)) / 1e18;
+      if (Number.isFinite(asNum) && asNum > 0) eth = asNum;
+    } catch {
+      /* skip */
+    }
+  }
+  // Derive the fiat equivalent. If the sticker was in USD (repos) use it
+  // directly; otherwise convert paid ETH via the oracle.
+  let usd: number | null = null;
+  if (l.currency === 'USD' && Number.isFinite(l.price)) {
+    usd = l.price;
+  } else if (eth != null && ethUsd) {
+    usd = eth * ethUsd;
+  } else if (ethUsd && l.currency === 'ETH' && Number.isFinite(l.price)) {
+    usd = l.price * ethUsd;
+  }
+  // If no on-chain amount (legacy rows), fall back to the sticker ETH.
+  if (eth == null && l.currency === 'ETH' && Number.isFinite(l.price)) {
+    eth = l.price;
+  } else if (eth == null && l.currency === 'USD' && ethUsd && l.price > 0) {
+    eth = l.price / ethUsd;
+  }
+
+  if (l.price === 0 && eth === 0) {
+    return <div className="text-right text-emerald-400 text-[12px] font-light">Free</div>;
+  }
+
+  return (
+    <div className="text-right">
+      <div className="font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
+        {eth != null ? formatEth(eth) : '—'}
+        <span className="text-zinc-600 ml-1 text-[10px]">ETH</span>
+      </div>
+      {usd != null && (
+        <div className="font-mono tabular-nums text-[10px] text-zinc-500 mt-0.5">
+          ${usd < 1 ? usd.toFixed(4) : usd.toFixed(2)}{' '}
+          <span className="text-zinc-700">USD</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LibraryRow({
+  item,
+  index,
+  ethUsd,
+}: {
+  item: LibraryItem;
+  index: number;
+  ethUsd: number | null;
+}) {
   const l = item.listing!;
   const Icon = TYPE_ICON[l.type] ?? Package;
   const accent = TYPE_ACCENT[l.type];
@@ -938,10 +1040,7 @@ function LibraryRow({ item, index }: { item: LibraryItem; index: number }) {
           </span>
         </div>
 
-        <div className="text-right font-mono tabular-nums text-[12.5px] text-[#b4a7ff]">
-          {formatEth(l.price)}
-          <span className="text-zinc-600 ml-1 text-[10px]">{l.currency}</span>
-        </div>
+        <PriceCell item={item} ethUsd={ethUsd} />
 
         <div className="text-right text-[11.5px] font-light">
           {item.myRating !== null ? (

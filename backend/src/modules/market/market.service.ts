@@ -1130,6 +1130,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       purchasedAt: p.createdAt,
       status: p.status,
       escrowStatus: p.escrowStatus,
+      // Actual paid amount on-chain (wei). The `listing.price` is just
+      // the sticker quote; the buyer may have negotiated down. Use this
+      // field for "total spent" rollups in the UI.
+      amountWei: p.amountWei ?? '0',
+      txHash: p.txHash,
       listing: p.listing,
       myRating: p.listing ? (reviewMap.get(p.listing.id) ?? null) : null,
     }));
@@ -1146,6 +1151,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           status: rp.verified ? 'COMPLETED' : 'PENDING_DELIVERY',
           escrowStatus: 'NONE',
           verified: rp.verified,
+          amountWei: rp.amountWei ?? '0',
+          txHash: rp.txHash,
           myRating: null as number | null,
           listing: {
             id: r.id,
