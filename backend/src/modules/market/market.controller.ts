@@ -438,7 +438,6 @@ export class MarketController {
     if (body.agentEndpoint && !isSafeUrl(body.agentEndpoint)) {
       throw new BadRequestException('Invalid or unsafe agent endpoint URL');
     }
-    await this.stepUp.assert(userId, body.twoFactorCode);
     const { twoFactorCode: _drop, ...payload } = body;
     return this.marketService.createListing(userId, payload);
   }
@@ -466,12 +465,7 @@ export class MarketController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteListing(
-    @Param('id') id: string,
-    @CurrentUser('id') userId: string,
-    @Body() body: DeleteListingBody = {},
-  ) {
-    await this.stepUp.assert(userId, body.twoFactorCode);
+  async deleteListing(@Param('id') id: string, @CurrentUser('id') userId: string) {
     await this.marketService.deleteListing(id, userId);
   }
 
