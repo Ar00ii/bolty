@@ -27,6 +27,7 @@ import {
   CheckCircle2,
   Star,
   Search,
+  XCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -972,136 +973,227 @@ function NegotiationModal({
   const iHaveRequestedSwitch = neg?.humanSwitchRequestedBy === userId;
   const otherRequestedSwitch = switchPending && switchPending.requestedBy !== userId;
 
+  const statusPill: { label: string; color: string } = (() => {
+    const s = neg?.status;
+    if (s === 'AGREED') return { label: 'Deal reached', color: '#22c55e' };
+    if (s === 'REJECTED') return { label: 'Rejected', color: '#ef4444' };
+    if (s === 'EXPIRED') return { label: 'Expired', color: '#f59e0b' };
+    return { label: 'Negotiating', color: '#836ef9' };
+  })();
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}
+      style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)' }}
     >
       <div
-        className="w-full max-w-lg flex flex-col"
+        className="w-full max-w-xl flex flex-col overflow-hidden relative"
         style={{
-          maxHeight: '88vh',
-          background: '#07070f',
-          border: '1px solid rgba(131,110,249,0.3)',
-          borderRadius: 20,
-          boxShadow: '0 0 60px rgba(131,110,249,0.12)',
+          maxHeight: '90vh',
+          background: 'linear-gradient(180deg, rgba(20,20,28,0.96) 0%, rgba(10,10,16,0.96) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px -10px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
+          borderRadius: 22,
         }}
       >
+        {/* Gradient corner glow */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-8 -left-8 w-40 h-40 rounded-full"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(131,110,249,0.25) 0%, transparent 70%)',
+            filter: 'blur(14px)',
+          }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -bottom-10 -right-10 w-48 h-48 rounded-full"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%)',
+            filter: 'blur(16px)',
+          }}
+        />
+
         {/* Header */}
         <div
-          className="flex items-center justify-between px-4 py-3 border-b shrink-0"
-          style={{ borderColor: 'rgba(131,110,249,0.15)' }}
+          className="flex items-center gap-3 px-5 py-4 shrink-0 relative"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-bolty-400 animate-pulse shrink-0" />
-            <span className="text-bolty-400 font-mono text-xs font-light shrink-0">
-              negotiate://
-            </span>
-            <span className="text-zinc-300 text-xs font-mono truncate">{listing.title}</span>
-            {neg && (
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background:
+                'linear-gradient(135deg, rgba(131,110,249,0.3), rgba(6,182,212,0.25))',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            <Zap className="w-5 h-5 text-white" strokeWidth={1.6} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-[13.5px] text-white font-light truncate tracking-[-0.005em]">
+                {listing.title}
+              </p>
               <span
-                className={`text-xs font-mono font-light ml-1 shrink-0 ${neg.status === 'AGREED' ? 'text-green-400' : neg.status === 'REJECTED' ? 'text-red-400' : neg.status === 'EXPIRED' ? 'text-zinc-500' : 'text-bolty-400'}`}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium uppercase tracking-[0.12em]"
+                style={{
+                  color: statusPill.color,
+                  background: `${statusPill.color}1a`,
+                  boxShadow: `inset 0 0 0 1px ${statusPill.color}55`,
+                }}
               >
-                [{neg.status.toLowerCase()}]
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    background: statusPill.color,
+                    boxShadow: `0 0 6px ${statusPill.color}`,
+                  }}
+                />
+                {statusPill.label}
               </span>
+            </div>
+            {neg?.status === 'ACTIVE' && (
+              <p className="text-[11px] text-zinc-500 font-light mt-0.5">
+                AI agents negotiating live · you can chime in anytime
+              </p>
+            )}
+            {listing.minPrice != null && (
+              <p className="text-[11px] text-zinc-500 font-light mt-0.5">
+                Seller floor · {listing.minPrice} {listing.currency}
+              </p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-300 font-mono text-xs ml-2 shrink-0 transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-colors shrink-0"
+            aria-label="Close"
           >
-            [×]
+            <X className="w-4 h-4" strokeWidth={1.8} />
           </button>
         </div>
 
-        {/* AI mode banner — no take-over button; negotiation is always
-            AI vs AI and the human intervention is clicking Accept deal
-            when the agents land on a price. */}
-        {isAiMode && neg?.status === 'ACTIVE' && (
-          <div
-            className="px-4 py-2.5 border-b shrink-0 flex items-center gap-2"
-            style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.05)' }}
-          >
-            <Zap className="w-3.5 h-3.5 text-bolty-400 shrink-0" strokeWidth={1.5} />
-            <p className="text-bolty-400 text-xs font-mono">
-              AI agents negotiating · approve the final price below
-            </p>
-          </div>
-        )}
-
-        {/* Floor price info */}
-        {listing.minPrice != null && (
-          <div
-            className="px-4 py-1.5 shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-          >
-            <p className="text-zinc-600 text-xs font-mono">
-              floor price: {listing.minPrice} {listing.currency} — agents won&apos;t go below this
-            </p>
-          </div>
-        )}
-
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 min-h-0 relative z-10">
           {loading && (
             <div className="text-center py-12">
-              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-bolty-400 animate-spin mx-auto mb-3" />
-              <p className="text-bolty-400 text-xs font-mono animate-pulse">
-                initializing negotiation protocol...
-              </p>
+              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-[#836ef9] animate-spin mx-auto mb-3" />
+              <p className="text-zinc-400 text-xs font-light">Opening the negotiation…</p>
             </div>
           )}
 
           {neg?.messages.map((msg) => {
-            const isMine = msg.fromRole === 'buyer' && !isSeller;
+            const myRole = isSeller ? 'seller' : 'buyer';
+            const isMine = msg.fromRole === myRole;
             const isAgent = msg.fromRole === 'seller_agent' || msg.fromRole === 'buyer_agent';
-            const isSellerRole = msg.fromRole === 'seller' || msg.fromRole === 'seller_agent';
+            const isMyAgent =
+              (isSeller && msg.fromRole === 'seller_agent') ||
+              (!isSeller && msg.fromRole === 'buyer_agent');
+            const alignRight = isMine || isMyAgent;
+            const bubbleLabel = isMine
+              ? 'You'
+              : isMyAgent
+                ? 'Your agent'
+                : isAgent
+                  ? 'Agent'
+                  : 'Counterparty';
+            const bubbleAccent = alignRight ? '#836ef9' : '#06B6D4';
             return (
-              <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                <div
-                  className={`max-w-[75%] rounded-2xl border px-3 py-2.5 text-xs font-mono ${ROLE_COLORS[msg.fromRole] || ROLE_COLORS.seller}`}
-                  style={{ boxShadow: isAgent ? '0 0 16px rgba(131,110,249,0.08)' : undefined }}
-                >
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    {isAgent && <Zap className="w-2.5 h-2.5 text-bolty-400" strokeWidth={2} />}
-                    <span className="text-zinc-500 text-[10px] uppercase tracking-wider">
-                      {ROLE_LABELS[msg.fromRole]}
-                    </span>
+              <div
+                key={msg.id}
+                className={`flex items-end gap-2 ${alignRight ? 'justify-end' : 'justify-start'}`}
+                style={{ animation: 'negMsgIn 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both' }}
+              >
+                {!alignRight && (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      background: `${bubbleAccent}1f`,
+                      boxShadow: `inset 0 0 0 1px ${bubbleAccent}55`,
+                    }}
+                  >
+                    <Zap className="w-3.5 h-3.5" style={{ color: bubbleAccent }} strokeWidth={2} />
                   </div>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                  {msg.proposedPrice != null && (
-                    <div className="mt-2 pt-2 border-t border-current/15 font-light text-bolty-300">
-                      ⬡ {msg.proposedPrice} {neg.listing?.currency}
-                    </div>
-                  )}
+                )}
+                <div className="max-w-[78%]">
+                  <p
+                    className="text-[10px] font-light text-zinc-500 mb-1 px-1"
+                    style={{ textAlign: alignRight ? 'right' : 'left' }}
+                  >
+                    {bubbleLabel}
+                  </p>
+                  <div
+                    className="px-3.5 py-2.5 text-[13px] leading-[1.45] text-white"
+                    style={{
+                      background: alignRight
+                        ? 'linear-gradient(180deg, rgba(131,110,249,0.28), rgba(131,110,249,0.12))'
+                        : 'linear-gradient(180deg, rgba(6,182,212,0.22), rgba(6,182,212,0.08))',
+                      boxShadow: `inset 0 0 0 1px ${bubbleAccent}55, 0 1px 0 rgba(255,255,255,0.04)`,
+                      borderRadius: alignRight
+                        ? '18px 18px 4px 18px'
+                        : '18px 18px 18px 4px',
+                      fontWeight: 300,
+                    }}
+                  >
+                    <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                    {msg.proposedPrice != null && (
+                      <div
+                        className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-mono"
+                        style={{
+                          background: `${bubbleAccent}33`,
+                          boxShadow: `inset 0 0 0 1px ${bubbleAccent}80`,
+                          color: '#ffffff',
+                        }}
+                      >
+                        {msg.proposedPrice} {neg.listing?.currency}
+                      </div>
+                    )}
+                  </div>
                 </div>
+                {alignRight && (
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      background: `${bubbleAccent}1f`,
+                      boxShadow: `inset 0 0 0 1px ${bubbleAccent}55`,
+                    }}
+                  >
+                    <Zap className="w-3.5 h-3.5" style={{ color: bubbleAccent }} strokeWidth={2} />
+                  </div>
+                )}
               </div>
             );
           })}
 
           {/* Typing indicator */}
           {agentTyping && (
-            <div className="flex justify-start">
+            <div className="flex justify-start items-end gap-2">
               <div
-                className="rounded-2xl border px-3 py-2.5 flex items-center gap-2"
+                className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
                 style={{
-                  borderColor: 'rgba(131,110,249,0.2)',
-                  background: 'rgba(131,110,249,0.06)',
+                  background: 'rgba(6,182,212,0.18)',
+                  boxShadow: 'inset 0 0 0 1px rgba(6,182,212,0.45)',
                 }}
               >
-                <Zap className="w-3 h-3 text-bolty-400" strokeWidth={2} />
-                <span className="text-xs font-mono text-bolty-400/80">
-                  {agentTyping === 'seller_agent' ? 'seller' : 'buyer'} agent thinking
-                </span>
-                <span className="flex gap-0.5">
-                  {[0, 1, 2].map((i) => (
-                    <span
-                      key={i}
-                      className="w-1 h-1 rounded-full bg-bolty-400 animate-bounce"
-                      style={{ animationDelay: `${i * 0.15}s` }}
-                    />
-                  ))}
-                </span>
+                <Zap className="w-3.5 h-3.5 text-cyan-300" strokeWidth={2} />
+              </div>
+              <div
+                className="px-3.5 py-2.5 flex items-center gap-1.5"
+                style={{
+                  background:
+                    'linear-gradient(180deg, rgba(6,182,212,0.18), rgba(6,182,212,0.06))',
+                  boxShadow: 'inset 0 0 0 1px rgba(6,182,212,0.35)',
+                  borderRadius: '18px 18px 18px 4px',
+                }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="w-1.5 h-1.5 rounded-full bg-cyan-300 animate-bounce"
+                    style={{ animationDelay: `${i * 0.12}s` }}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -1210,119 +1302,111 @@ function NegotiationModal({
 
           {neg?.status === 'REJECTED' && (
             <div className="text-center py-2">
-              <div className="inline-block border border-red-400/25 bg-red-400/4 rounded-xl px-4 py-3">
-                <p className="text-red-400 font-mono text-xs font-light">✗ NEGOTIATION REJECTED</p>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                style={{
+                  background: 'rgba(239,68,68,0.08)',
+                  boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.35)',
+                  color: '#fca5a5',
+                }}
+              >
+                <XCircle className="w-4 h-4" strokeWidth={1.8} />
+                <span className="text-[13px] font-light">Negotiation rejected</span>
               </div>
             </div>
           )}
 
           {neg?.status === 'EXPIRED' && (
             <div className="text-center py-2">
-              <div className="inline-block border border-zinc-700/50 bg-zinc-800/20 rounded-xl px-4 py-3">
-                <p className="text-zinc-500 font-mono text-xs">
-                  Negotiation expired after max turns — no deal reached.
-                </p>
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl"
+                style={{
+                  background: 'rgba(245,158,11,0.08)',
+                  boxShadow: 'inset 0 0 0 1px rgba(245,158,11,0.35)',
+                  color: '#fcd34d',
+                }}
+              >
+                <span className="text-[13px] font-light">Negotiation expired — no deal reached.</span>
               </div>
             </div>
           )}
 
           <div ref={bottomRef} />
         </div>
-        {error && <p className="px-4 text-red-400 text-xs font-mono py-1 shrink-0">{error}</p>}
-
-        {/* HUMAN mode footer — only visible when both parties agreed to manual negotiation */}
-        {neg?.status === 'ACTIVE' && neg.mode === 'HUMAN' && (
-          <div
-            className="border-t px-4 py-3 space-y-2 shrink-0"
-            style={{ borderColor: 'rgba(131,110,249,0.2)' }}
+        {error && (
+          <p
+            className="px-5 py-2 text-[12px] font-light shrink-0"
+            style={{ color: '#fca5a5', background: 'rgba(239,68,68,0.06)' }}
           >
-            <div className="flex items-center gap-1.5 mb-1">
-              <Users className="w-3 h-3 text-zinc-500" strokeWidth={1.5} />
-              <span className="text-zinc-600 text-[10px] font-mono uppercase tracking-wider">
-                manual negotiation
-              </span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
-                placeholder="type your message..."
-                className="flex-1 text-xs px-3 py-2 rounded-xl font-mono transition-all"
+            {error}
+          </p>
+        )}
+
+        {/* Composer — always visible during an active negotiation. Humans
+            can chime in any time; the AI agents keep running in parallel. */}
+        {neg?.status === 'ACTIVE' && (
+          <div
+            className="px-4 py-3 shrink-0 relative z-10"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            <div className="flex items-center gap-2">
+              <div
+                className="flex-1 flex items-center rounded-xl px-3 py-2"
                 style={{
-                  background: 'rgba(131,110,249,0.05)',
-                  border: '1px solid rgba(131,110,249,0.2)',
-                  color: '#e4e4e7',
-                  outline: 'none',
+                  background: 'rgba(255,255,255,0.04)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
                 }}
-                disabled={sending}
-              />
-              <input
-                type="number"
-                value={offerPrice}
-                onChange={(e) => setOfferPrice(e.target.value)}
-                placeholder={`offer (${listing.currency})`}
-                className="w-28 text-xs px-3 py-2 rounded-xl font-mono transition-all"
-                style={{
-                  background: 'rgba(131,110,249,0.05)',
-                  border: '1px solid rgba(131,110,249,0.2)',
-                  color: '#e4e4e7',
-                  outline: 'none',
-                }}
-                min="0"
-                step="0.001"
-                disabled={sending}
-              />
-            </div>
-            <div className="flex gap-2 justify-between items-center">
-              <div className="flex gap-2">
-                <button
-                  onClick={accept}
+              >
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && send()}
+                  placeholder="Type a message to nudge your agent…"
+                  className="flex-1 bg-transparent text-[13px] text-white placeholder:text-zinc-600 outline-none font-light"
                   disabled={sending}
-                  className="text-green-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-green-400/10"
-                  style={{
-                    border: '1px solid rgba(34,197,94,0.3)',
-                    background: 'rgba(34,197,94,0.05)',
-                  }}
-                >
-                  accept deal
-                </button>
-                <button
-                  onClick={reject}
+                />
+                <input
+                  type="number"
+                  value={offerPrice}
+                  onChange={(e) => setOfferPrice(e.target.value)}
+                  placeholder={`offer ${listing.currency}`}
+                  className="w-20 text-right bg-transparent text-[12px] text-white placeholder:text-zinc-600 outline-none font-mono"
+                  min="0"
+                  step="0.000001"
                   disabled={sending}
-                  className="text-red-400 text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all hover:bg-red-400/10"
-                  style={{
-                    border: '1px solid rgba(239,68,68,0.25)',
-                    background: 'rgba(239,68,68,0.04)',
-                  }}
-                >
-                  reject
-                </button>
+                />
               </div>
               <button
                 onClick={send}
                 disabled={sending || !message.trim()}
-                className="flex items-center gap-1.5 text-xs font-mono font-light py-1.5 px-4 rounded-xl disabled:opacity-40 transition-all hover:opacity-90"
+                className="w-10 h-10 rounded-xl flex items-center justify-center disabled:opacity-40 transition-all hover:brightness-110"
                 style={{
                   background:
-                    'linear-gradient(135deg,rgba(131,110,249,0.3),rgba(131,110,249,0.15))',
-                  border: '1px solid rgba(131,110,249,0.4)',
-                  color: '#c4b5fd',
+                    'linear-gradient(180deg, rgba(131,110,249,0.45), rgba(131,110,249,0.18))',
+                  boxShadow:
+                    'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 22px -4px rgba(131,110,249,0.55)',
                 }}
+                aria-label="Send"
               >
-                {sending ? (
-                  '...'
-                ) : (
-                  <>
-                    <Send className="w-3 h-3" strokeWidth={2} /> send
-                  </>
-                )}
+                <Send className="w-4 h-4 text-white" strokeWidth={1.8} />
               </button>
             </div>
           </div>
         )}
       </div>
+      <style jsx>{`
+        @keyframes negMsgIn {
+          0% {
+            opacity: 0;
+            transform: translate3d(0, 8px, 0) scale(0.98);
+          }
+          100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+        }
+      `}</style>
       {consentData && neg && (
         <PaymentConsentModal
           listingTitle={listing.title}

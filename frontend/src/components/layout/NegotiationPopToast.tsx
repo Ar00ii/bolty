@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface Toast {
   id: string;
-  kind: 'started' | 'agreed' | 'rejected' | 'expired';
+  kind: 'started' | 'agreed' | 'rejected' | 'expired' | 'message';
   title: string;
   body: string;
   url: string;
@@ -35,6 +35,7 @@ function metaKindToToastKind(kind?: unknown): Toast['kind'] | null {
   if (kind === 'negotiation_agreed') return 'agreed';
   if (kind === 'negotiation_rejected') return 'rejected';
   if (kind === 'negotiation_expired') return 'expired';
+  if (kind === 'negotiation_message') return 'message';
   return null;
 }
 
@@ -158,7 +159,9 @@ function ToastCard({
         ? '#ef4444'
         : kind === 'expired'
           ? '#f59e0b'
-          : '#836ef9';
+          : kind === 'message'
+            ? '#06B6D4'
+            : '#836ef9';
   const Icon =
     kind === 'agreed' ? CheckCircle2 : kind === 'rejected' ? XCircle : MessageSquare;
   const label =
@@ -168,7 +171,9 @@ function ToastCard({
         ? 'Deal closed'
         : kind === 'rejected'
           ? 'Offer rejected'
-          : 'Negotiation expired';
+          : kind === 'expired'
+            ? 'Negotiation expired'
+            : 'New message';
 
   return (
     <div
@@ -232,7 +237,7 @@ function ToastCard({
                 {priceLabel}
               </div>
             )}
-            {counterparty && kind === 'started' && (
+            {counterparty && (kind === 'started' || kind === 'message') && (
               <p className="text-[11px] text-zinc-500 font-mono mt-1">@{counterparty}</p>
             )}
           </div>
