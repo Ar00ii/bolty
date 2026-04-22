@@ -1699,6 +1699,41 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return this.purchaseListing(listingId, buyerId, txHash, '0', negotiationId);
   }
 
+  async claimFreeListing(listingId: string, buyerId: string) {
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      include: { seller: { select: { id: true } } },
+    });
+    if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
+    if (listing.sellerId === buyerId) throw new ForbiddenException('Cannot claim your own listing');
+    if (listing.price !== 0) throw new BadRequestException('Listing is not free');
+
+    const existing = await this.prisma.marketPurchase.findFirst({ where: { listingId, buyerId } });
+    if (existing) return { success: true, alreadyPurchased: true, purchase: existing };
+
+    const purchase = await this.prisma.marketPurchase.create({
+      data: {
+        txHash: `free_${listingId}_${buyerId}_${Date.now()}`,
+        amountWei: '0',
+        verified: true,
+        buyerId,
+        sellerId: listing.sellerId,
+        listingId,
+        status: 'COMPLETED',
+      },
+    });
+
+    this.notifications
+      .sendNotification(listing.sellerId, 'MARKET_NEW_SALE', {
+        message: `Your free listing was claimed`,
+        listingId,
+        purchaseId: purchase.id,
+      })
+      .catch(() => null);
+
+    return { success: true, purchase };
+  }
+
   async purchaseListing(
     listingId: string,
     buyerId: string,

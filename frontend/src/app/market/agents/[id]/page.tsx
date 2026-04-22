@@ -13,8 +13,10 @@ import {
   Heart,
   Loader2,
   LucideIcon,
+  Lock,
   MessageSquare,
   Package,
+  ShoppingBag,
   Play,
   Send,
   Shield,
@@ -28,8 +30,8 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
@@ -37,6 +39,9 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 import { useToast } from '@/lib/hooks/useToast';
+import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
+import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -204,7 +209,14 @@ export default function AgentDetailPage() {
   });
   const [related, setRelated] = useState<RelatedListing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAgentPicker, setShowAgentPicker] = useState(false);
+  const { pickWallet, pickerElement: buyWalletPicker } = useWalletPicker();
+  const [buyConsentData, setBuyConsentData] = useState<{
+    sellerWallet: string; buyerAddress: string; sellerWei: bigint;
+    platformWei: bigint; totalWei: bigint; amountWei: string; totalUsd: number;
+  } | null>(null);
+  const [buyPaying, setBuyPaying] = useState(false);
+  const [buyError, setBuyError] = useState('');
+  const [buySuccess, setBuySuccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const { record: recordRecent } = useRecentlyViewed();
 
@@ -246,36 +258,81 @@ export default function AgentDetailPage() {
     load();
   }, [load]);
 
-  const handleNegotiate = () => {
-    if (!isAuthenticated) {
-      router.push('/auth');
+  const handleBuy = async () => {
+    if (!isAuthenticated) { router.push('/auth'); return; }
+    if (!listing) return;
+    if (listing.seller.id === user?.id) {
+      addToast("That's your own listing.", 'info');
       return;
     }
-    if (listing && user && listing.seller.id === user.id) {
-      addToast("That's your own listing — buyers are the ones who start negotiations.", 'info');
-      return;
-    }
-    if (listing && listing.status !== 'ACTIVE') {
+    if (listing.status !== 'ACTIVE') {
       addToast('This listing is not active. The seller may have paused it.', 'warning');
       return;
     }
-    if (listing && !listing.agentEndpoint && !listing.fileKey) {
-      addToast(
-        "Seller hasn't wired a live agent — using Bolty's auto-negotiator instead.",
-        'info',
-      );
+    setBuyError('');
+    setBuySuccess(false);
+    if (listing.price === 0) {
+      setBuyPaying(true);
+      try {
+        await api.post(`/market/${listing.id}/claim-free`, {});
+        setBuySuccess(true);
+      } catch (err: unknown) {
+        setBuyError(err instanceof ApiError ? err.message : 'Claim failed');
+      } finally {
+        setBuyPaying(false);
+      }
+      return;
     }
-    // Show the agent picker first so the buyer chooses which of their
-    // own agents negotiates on their behalf (or the default auto-negotiator).
-    setShowAgentPicker(true);
+    setBuyPaying(true);
+    try {
+      const ethereum = getMetaMaskProvider();
+      if (!ethereum) { setBuyError('MetaMask not found'); return; }
+      const sellerData = await api.get<{ seller?: { walletAddress?: string } }>(`/market/${listing.id}`);
+      const sellerWallet = sellerData?.seller?.walletAddress;
+      if (!sellerWallet) { setBuyError('Seller has no wallet linked'); return; }
+      let ethPrice = 2000;
+      try { const p = await api.get<{ price?: number }>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch { /* fallback */ }
+      const totalWei = BigInt(Math.ceil(listing.price * 1e18));
+      const sellerWei = (totalWei * BigInt(930)) / BigInt(1000);
+      const platformWei = totalWei - sellerWei;
+      const buyerAddress = await pickWallet();
+      setBuyConsentData({ sellerWallet, buyerAddress, sellerWei, platformWei, totalWei, amountWei: totalWei.toString(), totalUsd: listing.price * ethPrice });
+    } catch (err: unknown) {
+      const msg = (err as Error)?.message || String(err);
+      setBuyError(msg.includes('rejected') ? 'Payment cancelled' : 'Failed: ' + msg.slice(0, 80));
+    } finally {
+      setBuyPaying(false);
+    }
   };
 
-  const confirmAgentPick = (agentId: string | null) => {
-    setShowAgentPicker(false);
-    if (!listing) return;
-    const qs = new URLSearchParams({ negotiate: listing.id });
-    if (agentId) qs.set('asAgent', agentId);
-    router.push(`/market/agents?${qs.toString()}`);
+  const executeBuy = async (signature: string, consentMessage: string, paymentMethod: 'ETH' | 'BOLTY' = 'ETH') => {
+    if (!buyConsentData || !listing) return;
+    const { sellerWallet, buyerAddress, totalWei, amountWei } = buyConsentData;
+    const feeBps = paymentMethod === 'BOLTY' ? 300 : 700;
+    const platformWei = (totalWei * BigInt(feeBps)) / BigInt(10000);
+    const sellerWei = totalWei - platformWei;
+    setBuyConsentData(null);
+    const ethereum = getMetaMaskProvider();
+    if (!ethereum) { setBuyError('MetaMask not found'); return; }
+    try {
+      if (isEscrowEnabled()) {
+        const orderId = crypto.randomUUID();
+        const txHash = await escrowDeposit(orderId, sellerWallet, totalWei);
+        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, consentSignature: signature, consentMessage, escrowContract: getEscrowAddress() });
+      } else {
+        const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+        const txHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }] })) as string;
+        let platformFeeTxHash: string | undefined;
+        if (platformWallet) {
+          platformFeeTxHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }] })) as string;
+        }
+        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, platformFeeTxHash, consentSignature: signature, consentMessage });
+      }
+      setBuySuccess(true);
+    } catch (err: unknown) {
+      const msg = (err as Error)?.message || String(err);
+      setBuyError(msg.includes('rejected') ? 'Payment cancelled' : err instanceof ApiError ? err.message : 'Payment failed: ' + msg.slice(0, 80));
+    }
   };
 
   if (loading) {
@@ -402,9 +459,11 @@ export default function AgentDetailPage() {
                   Manage listing
                 </Link>
               ) : (
+              <>
               <button
-                onClick={handleNegotiate}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+                onClick={handleBuy}
+                disabled={buyPaying}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
@@ -412,9 +471,18 @@ export default function AgentDetailPage() {
                     'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
                 }}
               >
-                <MessageSquare className="w-4 h-4" />
-                {isFree ? 'Get it' : 'Negotiate'}
+                <ShoppingBag className="w-4 h-4" />
+                {isFree ? 'Get free' : 'Buy now'}
               </button>
+              <span
+                title="AI-to-AI negotiation coming soon"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-light select-none cursor-not-allowed"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#52525b' }}
+              >
+                <Lock className="w-3 h-3" />
+                Negotiate · soon
+              </span>
+              </>
               )}
             </div>
           </div>
@@ -595,21 +663,56 @@ export default function AgentDetailPage() {
 
           {/* RIGHT — sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <PricingCard listing={listing} onNegotiate={handleNegotiate} isOwner={isOwner} />
+            <PricingCard listing={listing} onBuy={handleBuy} isOwner={isOwner} buyPaying={buyPaying} />
             <SellerCard seller={listing.seller} />
             <MetaCard listing={listing} />
             {listing.repository && <RepositoryCard repo={listing.repository} />}
           </aside>
         </div>
       </div>
-      {showAgentPicker && listing && (
-        <AgentPickerModal
+      {buyWalletPicker}
+      {buyPaying && !buyConsentData && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#836EF9] animate-spin" />
+        </div>
+      )}
+      {buyConsentData && listing && (
+        <PaymentConsentModal
           listingTitle={listing.title}
-          listingPrice={listing.price}
-          listingCurrency={listing.currency}
-          onCancel={() => setShowAgentPicker(false)}
-          onConfirm={confirmAgentPick}
+          sellerAddress={buyConsentData.sellerWallet}
+          sellerAmountETH={(Number(buyConsentData.sellerWei) / 1e18).toFixed(6)}
+          platformFeeETH={(Number(buyConsentData.platformWei) / 1e18).toFixed(6)}
+          totalETH={(Number(buyConsentData.totalWei) / 1e18).toFixed(6)}
+          totalUsd={buyConsentData.totalUsd.toFixed(2)}
+          buyerAddress={buyConsentData.buyerAddress}
+          onConsent={executeBuy}
+          onCancel={() => { setBuyConsentData(null); }}
         />
+      )}
+      {buyError && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
+            <p className="text-red-400 text-sm mb-4">{buyError}</p>
+            <button type="button" onClick={() => setBuyError('')} className="px-4 py-2 rounded-md text-[12.5px] text-white" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>Close</button>
+          </div>
+        </div>
+      )}
+      {buySuccess && listing && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
+          <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
+            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}>
+              <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
+            </div>
+            <h3 className="text-base font-light text-white mb-2">{listing.price === 0 ? 'Claimed!' : 'Payment sent!'}</h3>
+            <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
+              <span className="text-white">{listing.title}</span> has been added to your orders.
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Link href="/orders" className="px-4 py-2 rounded-md text-[12.5px] text-white" style={{ background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)' }}>View Orders</Link>
+              <button type="button" onClick={() => setBuySuccess(false)} className="px-4 py-2 rounded-md text-[12.5px] text-zinc-400 hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>Continue</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -948,12 +1051,14 @@ function ReviewsWidget({
 
 function PricingCard({
   listing,
-  onNegotiate,
+  onBuy,
   isOwner,
+  buyPaying,
 }: {
   listing: MarketListing;
-  onNegotiate: () => void;
+  onBuy: () => void;
   isOwner?: boolean;
+  buyPaying?: boolean;
 }) {
   const isFree = listing.price === 0;
   return (
@@ -1010,8 +1115,9 @@ function PricingCard({
       ) : (
         <>
           <button
-            onClick={onNegotiate}
-            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            onClick={onBuy}
+            disabled={buyPaying}
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{
               background:
                 'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
@@ -1019,9 +1125,16 @@ function PricingCard({
                 'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
             }}
           >
-            <MessageSquare className="w-4 h-4" />
-            {isFree ? 'Get it' : 'Negotiate with seller'}
+            <ShoppingBag className="w-4 h-4" />
+            {isFree ? 'Get free' : 'Buy now'}
           </button>
+          <div
+            className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[11.5px] font-light select-none cursor-not-allowed"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', color: '#3f3f46' }}
+          >
+            <Lock className="w-3 h-3" />
+            Negotiate · coming soon
+          </div>
           <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
             Payment held in escrow until you approve delivery.
           </p>
