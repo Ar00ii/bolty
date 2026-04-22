@@ -116,13 +116,16 @@ type Tab = 'published' | 'purchased' | 'rays';
 const REASON_LABEL: Record<string, string> = {
   REPO_PUBLISHED: 'Published a repository',
   REPO_SOLD: 'Sold a repository',
+  REPO_PURCHASED: 'Bought a repository',
   REPO_UPVOTE_RECEIVED: 'Upvote received',
   LISTING_PUBLISHED: 'Published a listing',
   AI_AGENT_PUBLISHED: 'Published an AI agent',
   LISTING_SOLD: 'Sold a listing',
+  LISTING_PURCHASED: 'Bought a listing',
   PROFILE_COMPLETED: 'Profile completed',
   SERVICE_COMPLETED: 'Service completed',
   FIRST_SALE: 'First sale bonus',
+  FIRST_PURCHASE: 'First purchase bonus',
   COLLABORATOR_ADDED: 'Added as collaborator',
 };
 

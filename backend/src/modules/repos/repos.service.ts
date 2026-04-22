@@ -1206,24 +1206,48 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       );
     }
 
-    // Reputation: award the seller for a confirmed repo sale. FIRST_SALE
-    // lifetime bonus if this is their very first verified sale across any
-    // surface (market listings + repo purchases counted together).
+    // Reputation: award BOTH seller and buyer for a confirmed repo sale.
+    // Sellers get REPO_SOLD / FIRST_SALE; buyers get REPO_PURCHASED /
+    // FIRST_PURCHASE. FIRST_* bonuses fire once per user across all
+    // surfaces (market listings + repo purchases counted together).
     try {
-      const [priorMarketSales, priorRepoSales] = await Promise.all([
+      const [
+        priorMarketSales,
+        priorRepoSales,
+        priorMarketBuys,
+        priorRepoBuys,
+      ] = await Promise.all([
         this.prisma.marketPurchase.count({
           where: { sellerId: repo.userId, verified: true },
         }),
         this.prisma.repoPurchase.count({
           where: { verified: true, repository: { userId: repo.userId }, id: { not: purchase.id } },
         }),
+        this.prisma.marketPurchase.count({
+          where: { buyerId, verified: true },
+        }),
+        this.prisma.repoPurchase.count({
+          where: { buyerId, verified: true, id: { not: purchase.id } },
+        }),
       ]);
-      const reason = priorMarketSales + priorRepoSales === 0 ? 'FIRST_SALE' : 'REPO_SOLD';
+
+      const sellerReason =
+        priorMarketSales + priorRepoSales === 0 ? 'FIRST_SALE' : 'REPO_SOLD';
       this.reputation
-        .awardPoints(repo.userId, reason, purchase.id, repo.name)
+        .awardPoints(repo.userId, sellerReason, purchase.id, repo.name)
         .catch((err) =>
           this.logger.warn(
-            `Reputation award failed for repo sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+            `Seller rays award failed for repo sale ${purchase.id}: ${err instanceof Error ? err.message : err}`,
+          ),
+        );
+
+      const buyerReason =
+        priorMarketBuys + priorRepoBuys === 0 ? 'FIRST_PURCHASE' : 'REPO_PURCHASED';
+      this.reputation
+        .awardPoints(buyerId, buyerReason, purchase.id, repo.name)
+        .catch((err) =>
+          this.logger.warn(
+            `Buyer rays award failed for repo purchase ${purchase.id}: ${err instanceof Error ? err.message : err}`,
           ),
         );
     } catch (err) {
