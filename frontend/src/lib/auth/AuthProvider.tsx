@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
 
 import { api } from '@/lib/api/client';
+import { resetCache } from '@/lib/cache/pageCache';
 import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
 export interface User {
@@ -116,6 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setUser(null);
       writeHint(null);
+      // Drop any cached per-user page data so the next account doesn't
+      // flash the previous user's orders / inventory on first render.
+      resetCache();
     }
   }, []);
 
