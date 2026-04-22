@@ -28,6 +28,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
@@ -203,6 +204,7 @@ export default function AgentDetailPage() {
   });
   const [related, setRelated] = useState<RelatedListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAgentPicker, setShowAgentPicker] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const { record: recordRecent } = useRecentlyViewed();
 
@@ -257,16 +259,23 @@ export default function AgentDetailPage() {
       addToast('This listing is not active. The seller may have paused it.', 'warning');
       return;
     }
-    // Agents without a live endpoint or uploaded file fall back to a Claude
-    // auto-negotiator on the backend, so we still let the chat open but warn
-    // the buyer up-front so they know it's the fallback flow.
     if (listing && !listing.agentEndpoint && !listing.fileKey) {
       addToast(
         "Seller hasn't wired a live agent — using Bolty's auto-negotiator instead.",
         'info',
       );
     }
-    router.push(`/market/agents?negotiate=${id}`);
+    // Show the agent picker first so the buyer chooses which of their
+    // own agents negotiates on their behalf (or the default auto-negotiator).
+    setShowAgentPicker(true);
+  };
+
+  const confirmAgentPick = (agentId: string | null) => {
+    setShowAgentPicker(false);
+    if (!listing) return;
+    const qs = new URLSearchParams({ negotiate: listing.id });
+    if (agentId) qs.set('asAgent', agentId);
+    router.push(`/market/agents?${qs.toString()}`);
   };
 
   if (loading) {
@@ -593,6 +602,15 @@ export default function AgentDetailPage() {
           </aside>
         </div>
       </div>
+      {showAgentPicker && listing && (
+        <AgentPickerModal
+          listingTitle={listing.title}
+          listingPrice={listing.price}
+          listingCurrency={listing.currency}
+          onCancel={() => setShowAgentPicker(false)}
+          onConfirm={confirmAgentPick}
+        />
+      )}
     </div>
   );
 }

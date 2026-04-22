@@ -85,7 +85,11 @@ export class NegotiationService {
 
   // ── Start or resume a negotiation ─────────────────────────────────────────
 
-  async startNegotiation(buyerId: string, listingId: string) {
+  async startNegotiation(
+    buyerId: string,
+    listingId: string,
+    buyerAgentListingId?: string,
+  ) {
     const listing = await this.prisma.marketListing.findUnique({
       where: { id: listingId },
       select: {
@@ -106,6 +110,25 @@ export class NegotiationService {
     if (listing.sellerId === buyerId)
       throw new ForbiddenException('Cannot negotiate on your own listing');
 
+    // Validate the buyer actually owns the agent they claim to
+    // delegate to. Silently drop an invalid pick rather than 400
+    // since the UX flow can fall back to the default agent.
+    let validatedBuyerAgentId: string | null = null;
+    if (buyerAgentListingId) {
+      const owned = await this.prisma.marketListing.findUnique({
+        where: { id: buyerAgentListingId },
+        select: { id: true, sellerId: true, type: true, status: true },
+      });
+      if (
+        owned &&
+        owned.sellerId === buyerId &&
+        owned.type === 'AI_AGENT' &&
+        owned.status !== 'REMOVED'
+      ) {
+        validatedBuyerAgentId = owned.id;
+      }
+    }
+
     // Return existing active negotiation if one exists
     const existing = await this.prisma.agentNegotiation.findFirst({
       where: { listingId, buyerId, status: 'ACTIVE' },
@@ -114,7 +137,11 @@ export class NegotiationService {
     if (existing) return existing;
 
     const neg = await this.prisma.agentNegotiation.create({
-      data: { listingId, buyerId },
+      data: {
+        listingId,
+        buyerId,
+        buyerAgentListingId: validatedBuyerAgentId,
+      },
       include: this.negotiationInclude(),
     });
 
@@ -502,6 +529,59 @@ export class NegotiationService {
     return { id, status: 'REJECTED' };
   }
 
+  /**
+   * Counter-offer — the user declined the AGREED price and proposes a
+   * new one. Flips status back to ACTIVE, clears agreedPrice, posts
+   * the message as the user's role, and restarts the AI loop so the
+   * counterparty's agent responds.
+   */
+  async counterOffer(
+    id: string,
+    userId: string,
+    content: string,
+    proposedPrice?: number,
+  ) {
+    const neg = await this.prisma.agentNegotiation.findUnique({
+      where: { id },
+      include: { listing: { select: { sellerId: true, price: true, currency: true } } },
+    });
+    if (!neg) throw new NotFoundException();
+    if (neg.buyerId !== userId && neg.listing.sellerId !== userId)
+      throw new ForbiddenException();
+    if (neg.status !== 'AGREED' && neg.status !== 'ACTIVE') {
+      throw new BadRequestException('Can only counter while negotiating or at an agreed price');
+    }
+
+    const isBuyer = userId === neg.buyerId;
+    const safePrice = proposedPrice && proposedPrice > 0 ? proposedPrice : undefined;
+
+    // Re-open the deal + log the counter message in one go.
+    await this.prisma.agentNegotiation.update({
+      where: { id },
+      data: { status: 'ACTIVE', agreedPrice: null },
+    });
+    const msg = await this.prisma.negotiationMessage.create({
+      data: {
+        negotiationId: id,
+        fromRole: isBuyer ? 'buyer' : 'seller',
+        content: sanitizeAiPrompt(content.slice(0, 1000)),
+        proposedPrice: safePrice ?? null,
+      },
+    });
+    this.gateway.emitNewMessage(id, msg);
+    this.gateway.emitStatusChange(id, { status: 'ACTIVE' });
+
+    // Kick the counterparty agent so the human doesn't have to wait
+    // for the next AI-AI tick.
+    if (isBuyer) {
+      void this.runSellerTurn(id);
+    } else {
+      void this.runBuyerTurn(id);
+    }
+
+    return this.getNegotiation(id, userId);
+  }
+
   // ── Human-mode switch (Pokemon trade handshake) ───────────────────────────
 
   /**
@@ -748,8 +828,8 @@ export class NegotiationService {
 
   // ── Fetch negotiation for AI use ──────────────────────────────────────────
 
-  private fetchNegForAi(negId: string) {
-    return this.prisma.agentNegotiation.findUnique({
+  private async fetchNegForAi(negId: string) {
+    const neg = await this.prisma.agentNegotiation.findUnique({
       where: { id: negId },
       include: {
         listing: {
@@ -770,6 +850,25 @@ export class NegotiationService {
         messages: { orderBy: { createdAt: 'asc' } },
       },
     });
+    if (!neg) return null;
+    // If the buyer delegated to one of their own agent listings, pull
+    // that listing's endpoint/sandbox and overlay it on the buyer
+    // object so callBuyerAgent can pick it up without a second fetch.
+    if (neg.buyerAgentListingId) {
+      const buyerAgent = await this.prisma.marketListing.findUnique({
+        where: { id: neg.buyerAgentListingId },
+        select: {
+          agentEndpoint: true,
+          fileKey: true,
+          fileName: true,
+          fileMimeType: true,
+        },
+      });
+      if (buyerAgent) {
+        (neg as unknown as Record<string, unknown>).buyerAgent = buyerAgent;
+      }
+    }
+    return neg;
   }
 
   // ── Seller agent ──────────────────────────────────────────────────────────
@@ -878,14 +977,39 @@ export class NegotiationService {
     sellerMessage: string,
     sellerProposedPrice?: number,
   ): Promise<AgentResponse | null> {
+    // Buyer can delegate to one of their own agent listings. The
+    // overlaid buyerAgent field (set by fetchNegForAi) holds that
+    // listing's endpoint/sandbox — prefer it over the profile-level
+    // fallback so users get the agent they actually picked.
+    const delegated = (neg as unknown as {
+      buyerAgent?: {
+        agentEndpoint?: string | null;
+        fileKey?: string | null;
+        fileName?: string | null;
+        fileMimeType?: string | null;
+      };
+    }).buyerAgent;
+    const ctx = this.buildSandboxContext(
+      neg,
+      'negotiation.message',
+      sellerMessage,
+      sellerProposedPrice,
+    );
+    if (delegated?.agentEndpoint && isSafeUrl(delegated.agentEndpoint)) {
+      const result = await this.callWebhook(delegated.agentEndpoint, ctx);
+      if (result) return result;
+    }
+    if (delegated?.fileKey && delegated?.fileName) {
+      const result = await this.sandbox.run(
+        delegated.fileKey,
+        delegated.fileName,
+        delegated.fileMimeType ?? '',
+        ctx,
+      );
+      if (result) return result;
+    }
     const buyerEndpoint = neg.buyer?.agentEndpoint;
     if (buyerEndpoint && isSafeUrl(buyerEndpoint)) {
-      const ctx = this.buildSandboxContext(
-        neg,
-        'negotiation.message',
-        sellerMessage,
-        sellerProposedPrice,
-      );
       const result = await this.callWebhook(buyerEndpoint, ctx);
       if (result) return result;
     }
@@ -945,8 +1069,8 @@ export class NegotiationService {
           ? ` (minimum: ${listing.minPrice} ${listing.currency})`
           : '';
       const prompt = `You are an AI sales agent for "${listing.title}" listed at ${listing.price} ${listing.currency}${floorNote}.
-A buyer's AI agent just opened a negotiation. Greet them, mention the product, state the asking price. Be friendly and concise (2-3 sentences).
-Respond ONLY with JSON: {"reply": "your greeting"}`;
+A buyer's AI agent just opened a negotiation. Start with a SHORT intro: say hello, briefly present what "${listing.title}" does in one sentence, then say the asking price. Friendly, concise, 2-3 sentences max. Do NOT yet offer a discount or counter.
+Respond ONLY with JSON: {"reply": "your intro"}`;
       const res = await this.anthropic.messages.create({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 256,
@@ -1085,7 +1209,18 @@ Respond ONLY with JSON: {"reply": "...", "proposedPrice": number_or_null, "actio
         .join('\n');
       const askingPrice = neg.listing.price;
       const targetPrice = Math.round(askingPrice * 0.75 * 1e6) / 1e6;
+      // Only the VERY first reply does an intro. After that it's pure
+      // price negotiation. We detect "intro turn" by looking for the
+      // seller's opening greeting + no prior buyer message yet.
+      const priorBuyerMsgs = (neg.messages ?? []).filter(
+        (m) => m.fromRole === 'buyer' || m.fromRole === 'buyer_agent',
+      );
+      const isIntroTurn = priorBuyerMsgs.length === 0;
+      const introLine = isIntroTurn
+        ? `This is your intro turn. Start with ONE short sentence introducing yourself as the buyer's agent ("Hey, I'm negotiating on behalf of @${neg.buyer?.username ?? 'the buyer'}"). Then open your first offer at around ${targetPrice} ${neg.listing.currency}.`
+        : '';
       const prompt = `You are an AI buyer agent trying to purchase "${neg.listing.title}" (listed at ${askingPrice} ${neg.listing.currency}).
+${introLine}
 Goal: get the best price. Strategy:
 - Open at ~70% of asking price.
 - Accept if seller offers <= 80% of asking.

@@ -554,6 +554,11 @@ model AgentNegotiation {
   humanSwitchRequestedBy String? // userId who requested human mode
   humanSwitchAcceptedBy  String[] // userIds who accepted the switch
 
+  // Optional listing id of the AGENT the buyer picked to negotiate on
+  // their behalf. When set, we call that listing's agentEndpoint /
+  // sandbox instead of the buyer's profile-level agentEndpoint.
+  buyerAgentListingId String?
+
   @@index([buyerId])
   @@index([listingId, status])
   @@map("agent_negotiations")

@@ -637,6 +637,7 @@ function NegotiationModal({
   onClose,
   userId,
   initialNegotiationId,
+  buyerAgentListingId,
 }: {
   listing: MarketListing;
   onClose: () => void;
@@ -645,6 +646,10 @@ function NegotiationModal({
    *  existing negotiation by id instead of POSTing a new one — sellers
    *  can't POST /negotiate on their own listing (403). */
   initialNegotiationId?: string | null;
+  /** Buyer-side agent delegation. Persisted on the negotiation row so
+   *  the AI loop calls this agent instead of the buyer's profile-level
+   *  endpoint for every buyer turn. */
+  buyerAgentListingId?: string | null;
 }) {
   const [neg, setNeg] = useState<Negotiation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -653,6 +658,10 @@ function NegotiationModal({
   const [paid, setPaid] = useState(false);
   const [message, setMessage] = useState('');
   const [offerPrice, setOfferPrice] = useState('');
+  const [showCounter, setShowCounter] = useState(false);
+  const [counterPrice, setCounterPrice] = useState('');
+  const [counterMsg, setCounterMsg] = useState('');
+  const [countering, setCountering] = useState(false);
   const [error, setError] = useState('');
   const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
   const [agentTyping, setAgentTyping] = useState<'buyer_agent' | 'seller_agent' | null>(null);
@@ -677,7 +686,10 @@ function NegotiationModal({
   useEffect(() => {
     const loader = initialNegotiationId
       ? api.get<Negotiation>(`/market/negotiations/${initialNegotiationId}`)
-      : api.post<Negotiation>(`/market/${listing.id}/negotiate`, {});
+      : api.post<Negotiation>(
+          `/market/${listing.id}/negotiate`,
+          buyerAgentListingId ? { buyerAgentListingId } : {},
+        );
     loader
       .then((n) => {
         setNeg(n);
@@ -775,6 +787,34 @@ function NegotiationModal({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [neg?.messages.length, agentTyping]);
+
+  const submitCounter = async () => {
+    if (!neg) return;
+    const price = parseFloat(counterPrice);
+    if (!price || price <= 0) {
+      setError('Enter a valid counter price');
+      return;
+    }
+    setCountering(true);
+    setError('');
+    try {
+      const updated = await api.post<Negotiation>(
+        `/market/negotiations/${neg.id}/counter`,
+        {
+          proposedPrice: price,
+          content: counterMsg.trim() || undefined,
+        },
+      );
+      setNeg(updated);
+      setShowCounter(false);
+      setCounterMsg('');
+      setCounterPrice('');
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Counter failed');
+    } finally {
+      setCountering(false);
+    }
+  };
 
   const send = async () => {
     if (!neg || !message.trim()) return;
@@ -1249,6 +1289,76 @@ function NegotiationModal({
                     : paying
                       ? 'Waiting for MetaMask…'
                       : `Accept & pay ${neg.agreedPrice} ${neg.listing?.currency}`}
+                </button>
+                <button
+                  onClick={() => setShowCounter(true)}
+                  disabled={sending || paying}
+                  className="w-full mt-2 text-[12px] font-light py-2 rounded-lg transition-all hover:text-white text-zinc-400 disabled:opacity-30"
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                  }}
+                >
+                  Counter with a different offer
+                </button>
+              </div>
+            </div>
+          )}
+
+          {neg?.status === 'AGREED' && showCounter && !paid && (
+            <div
+              className="rounded-2xl p-4 space-y-3"
+              style={{
+                background: 'linear-gradient(180deg, rgba(131,110,249,0.08), rgba(6,182,212,0.04))',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+              }}
+            >
+              <p className="text-[12px] text-zinc-400 font-light">
+                Your counter will reopen the negotiation. The other agent responds
+                immediately.
+              </p>
+              <input
+                type="number"
+                value={counterPrice}
+                onChange={(e) => setCounterPrice(e.target.value)}
+                placeholder={`New price in ${neg.listing?.currency}`}
+                min="0"
+                step="0.000001"
+                className="w-full rounded-lg px-3 py-2 text-[13px] text-white bg-black/20 placeholder:text-zinc-600 outline-none"
+                style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)' }}
+                disabled={countering}
+              />
+              <input
+                type="text"
+                value={counterMsg}
+                onChange={(e) => setCounterMsg(e.target.value)}
+                placeholder="Message to the seller (optional)"
+                className="w-full rounded-lg px-3 py-2 text-[13px] text-white bg-black/20 placeholder:text-zinc-600 outline-none"
+                style={{ boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)' }}
+                disabled={countering}
+              />
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCounter(false)}
+                  disabled={countering}
+                  className="text-[12px] text-zinc-400 hover:text-white px-3 py-2 disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={submitCounter}
+                  disabled={countering || !counterPrice}
+                  className="text-[12.5px] text-white px-4 py-2 rounded-lg disabled:opacity-50 hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.45), rgba(131,110,249,0.18))',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  }}
+                >
+                  {countering ? 'Sending…' : 'Send counter'}
                 </button>
               </div>
             </div>
@@ -4589,6 +4699,7 @@ function AgentsPageContent() {
   const [showCreate, setShowCreate] = useState(false);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
   const [initialNegId, setInitialNegId] = useState<string | null>(null);
+  const [asAgentId, setAsAgentId] = useState<string | null>(null);
   const [mobileBlock, setMobileBlock] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   useKeyboardFocus(searchRef);
@@ -4637,6 +4748,7 @@ function AgentsPageContent() {
   useEffect(() => {
     const negotiateId = searchParams.get('negotiate');
     const negIdParam = searchParams.get('negId');
+    const asAgentParam = searchParams.get('asAgent');
     if (!negotiateId || !isAuthenticated) return;
     let cancelled = false;
     (async () => {
@@ -4644,6 +4756,7 @@ function AgentsPageContent() {
         const data = await api.get<MarketListing>(`/market/${negotiateId}`);
         if (!cancelled) {
           setInitialNegId(negIdParam);
+          setAsAgentId(asAgentParam);
           setNegotiatingListing(data);
         }
       } catch {
@@ -4955,9 +5068,11 @@ function AgentsPageContent() {
           onClose={() => {
             setNegotiatingListing(null);
             setInitialNegId(null);
+            setAsAgentId(null);
           }}
           userId={user.id}
           initialNegotiationId={initialNegId}
+          buyerAgentListingId={asAgentId}
         />
       )}
       {mobileBlock && (
