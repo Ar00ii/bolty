@@ -259,7 +259,9 @@ export default function InventoryPage() {
 
       <div className="mt-5">
         {tab === 'published' && <PublishedTab published={data.published} />}
-        {tab === 'purchased' && <PurchasedTab purchased={data.purchased} />}
+        {tab === 'purchased' && (
+          <PurchasedTab purchased={data.purchased} onRecovered={() => void load()} />
+        )}
         {tab === 'rays' && <RaysTab events={data.rays.recentEvents} total={data.rays.total} />}
       </div>
     </div>
@@ -405,7 +407,22 @@ function PublishedTab({ published }: { published: InventoryData['published'] }) 
   );
 }
 
-function PurchasedTab({ purchased }: { purchased: InventoryData['purchased'] }) {
+function PurchasedTab({
+  purchased,
+  onRecovered,
+}: {
+  purchased: InventoryData['purchased'];
+  onRecovered: () => void;
+}) {
+  return (
+    <>
+      <RecoverPaymentCard onRecovered={onRecovered} />
+      <PurchasedTabBody purchased={purchased} />
+    </>
+  );
+}
+
+function PurchasedTabBody({ purchased }: { purchased: InventoryData['purchased'] }) {
   if (purchased.repos.length === 0 && purchased.listings.length === 0) {
     return (
       <EmptyState
@@ -544,6 +561,156 @@ function PurchaseRow({
         </div>
       </div>
     </li>
+  );
+}
+
+function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [tx, setTx] = useState('');
+  const [seller, setSeller] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ kind: 'ok' | 'err'; text: string } | null>(null);
+
+  const submit = async () => {
+    const txTrim = tx.trim();
+    if (!/^0x[0-9a-fA-F]{64}$/.test(txTrim)) {
+      setMsg({ kind: 'err', text: 'Invalid tx hash — paste the full 0x… from MetaMask.' });
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    try {
+      const body: { txHash: string; sellerUsername?: string } = { txHash: txTrim };
+      if (seller.trim()) body.sellerUsername = seller.trim().replace(/^@/, '');
+      const result = await api.post<{
+        success: boolean;
+        downloadUrl?: string;
+      }>('/repos/recover-purchase', body);
+      if (result.success) {
+        setMsg({ kind: 'ok', text: 'Recovered! Refreshing your inventory…' });
+        if (result.downloadUrl) {
+          window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
+        }
+        setTimeout(() => {
+          setTx('');
+          setSeller('');
+          setMsg(null);
+          setOpen(false);
+          onRecovered();
+        }, 1400);
+      }
+    } catch (err) {
+      setMsg({
+        kind: 'err',
+        text: err instanceof ApiError ? err.message : 'Recovery failed. Try again.',
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div
+      className="mb-5 rounded-xl p-4"
+      style={{
+        background: 'linear-gradient(180deg, rgba(131,110,249,0.08), rgba(10,10,14,0.5))',
+        boxShadow: '0 0 0 1px rgba(131,110,249,0.3)',
+      }}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
+          style={{
+            background: 'rgba(131,110,249,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+          }}
+        >
+          <Shield className="w-4 h-4 text-[#b4a7ff]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-[13px] font-light text-white">Missing a purchase?</h3>
+          <p className="text-[11.5px] text-zinc-400 font-light mt-0.5">
+            Paid on-chain but the repo didn&apos;t appear? Paste the transaction hash
+            from MetaMask. We&apos;ll find the repo automatically.
+          </p>
+          {!open && (
+            <button
+              onClick={() => setOpen(true)}
+              className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white transition-all hover:brightness-110"
+              style={{
+                background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+              }}
+            >
+              Recover stuck payment
+            </button>
+          )}
+          {open && (
+            <div className="mt-3 space-y-2">
+              <input
+                type="text"
+                value={tx}
+                onChange={(e) => setTx(e.target.value)}
+                placeholder="0x… transaction hash (required)"
+                disabled={busy}
+                className="w-full px-3 py-2 rounded-lg text-[12px] font-mono text-white placeholder:text-zinc-600 focus:outline-none"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                }}
+              />
+              <input
+                type="text"
+                value={seller}
+                onChange={(e) => setSeller(e.target.value)}
+                placeholder="@seller username (optional, speeds up match)"
+                disabled={busy}
+                className="w-full px-3 py-2 rounded-lg text-[12px] text-white placeholder:text-zinc-600 focus:outline-none"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                }}
+              />
+              {msg && (
+                <p
+                  className="text-[11.5px] font-light"
+                  style={{ color: msg.kind === 'ok' ? '#86efac' : '#fca5a5' }}
+                >
+                  {msg.text}
+                </p>
+              )}
+              <div className="flex items-center justify-end gap-2 pt-1">
+                <button
+                  onClick={() => {
+                    if (busy) return;
+                    setOpen(false);
+                    setTx('');
+                    setSeller('');
+                    setMsg(null);
+                  }}
+                  disabled={busy}
+                  className="px-3 py-1.5 rounded-md text-[12px] text-zinc-400 hover:text-white disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submit}
+                  disabled={busy || !tx.trim()}
+                  className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
+                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                  }}
+                >
+                  {busy ? 'Verifying…' : 'Recover'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
