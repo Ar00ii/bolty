@@ -254,6 +254,33 @@ export class ReposController {
     return this.reposService.checkPurchased(userId, repoId);
   }
 
+  /**
+   * Retry on-chain verification for a pending repo purchase. The buyer
+   * provides the txHash of the payment they already made on-chain; we
+   * re-run the receipt/transfer checks against the existing pending row.
+   * No new payment is required. This is the escape hatch for users whose
+   * first /purchase call failed due to RPC lag or a transient verification
+   * error — their ETH is already with the seller, we just need to mark
+   * the DB row verified so the buyer's library / orders / download work.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
+  @Post(':id/verify')
+  verifyPending(
+    @Param('id') repoId: string,
+    @Body() dto: PurchaseRepoDto,
+    @CurrentUser('id') buyerId: string,
+  ) {
+    return this.reposService.purchaseRepository(
+      buyerId,
+      repoId,
+      dto.txHash,
+      dto.platformFeeTxHash,
+      dto.consentSignature,
+      dto.consentMessage,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 3600000 } })
   @Post(':id/download')
