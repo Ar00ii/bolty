@@ -105,6 +105,33 @@ export class ReposService {
     return null;
   }
 
+  /**
+   * Load every wallet address the buyer has proven ownership of — the
+   * primary walletAddress on their User row, plus any linked UserWallet
+   * entries. Returned as a lowercased Set for case-insensitive comparison
+   * against on-chain values. Used to enforce that the tx payer IS the
+   * authenticated buyer, closing the txHash-replay attack where an
+   * attacker would submit someone else's on-chain payment.
+   */
+  private async buyerWallets(buyerId: string): Promise<Set<string>> {
+    const [user, wallets] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: buyerId },
+        select: { walletAddress: true },
+      }),
+      this.prisma.userWallet.findMany({
+        where: { userId: buyerId },
+        select: { address: true },
+      }),
+    ]);
+    const set = new Set<string>();
+    if (user?.walletAddress) set.add(user.walletAddress.toLowerCase());
+    for (const w of wallets) {
+      if (w.address) set.add(w.address.toLowerCase());
+    }
+    return set;
+  }
+
   /** Parse JSON from Claude response text */
   private parseJson(text: string): { safe: boolean; reason: string } | null {
     const match = text.match(/\{[\s\S]*\}/);
@@ -860,7 +887,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           ? { username: { equals: sellerUsername.replace(/^@/, ''), mode: 'insensitive' } }
           : {}),
       },
-      select: { id: true, username: true },
+      select: { id: true, username: true, walletAddress: true },
     });
     if (sellerCandidates.length === 0) {
       throw new BadRequestException(
@@ -903,25 +930,45 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     // Multiple candidates — disambiguate with the paid amount against the
-    // live oracle. We accept any repo whose expected ETH price (± 10%) is
-    // within the paid amount. If still ambiguous, throw with the list.
+    // live oracle. Use the same slippage band the downstream purchase
+    // flow enforces (ETH 93% seller / BOLTY 97% seller minus 5% oracle
+    // drift) instead of the previous loose 85% band, so the selected
+    // repo always also passes `purchaseRepository` verification.
     const ethPrice = await this.chart.getEthPrice().catch(() => null);
+    const sellerWalletsLc = new Set(
+      sellerCandidates
+        .map((s) => s.walletAddress)
+        .filter((w): w is string => !!w)
+        .map((w) => w.toLowerCase()),
+    );
+    const boltyContract = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
     let paidWei: bigint = 0n;
+    let isBoltyPath = false;
     if (tx.value && BigInt(tx.value) > 0n) {
       paidWei = BigInt(tx.value);
-    } else {
-      // BOLTY path: sum the amounts from matching Transfer logs.
+    } else if (boltyContract) {
+      isBoltyPath = true;
+      // BOLTY path: only count Transfer logs emitted by the configured
+      // BOLTY contract whose `to` topic is one of the seller candidate
+      // wallets. This prevents unrelated ERC-20 transfers in the same tx
+      // from inflating `paidWei` during disambiguation.
       for (const log of receipt.logs) {
-        if (log.topics[0] === TRANSFER_TOPIC && log.topics[2]) {
-          paidWei += BigInt(log.data);
-        }
+        if (log.address.toLowerCase() !== boltyContract.toLowerCase()) continue;
+        if (log.topics[0] !== TRANSFER_TOPIC) continue;
+        if (!log.topics[2]) continue;
+        const to = '0x' + log.topics[2].slice(26).toLowerCase();
+        if (!sellerWalletsLc.has(to)) continue;
+        paidWei += BigInt(log.data);
       }
     }
     if (ethPrice && ethPrice.price > 0) {
+      const feeBps = isBoltyPath ? 300n : 700n;
       const matching = candidates.filter((r) => {
         const expectedEth = (r.lockedPriceUsd ?? 0) / ethPrice.price;
-        const expectedWei = BigInt(Math.floor(expectedEth * 0.85 * 1e18));
-        return paidWei >= expectedWei;
+        // oracle drift window (5%) × fee split
+        const expectedTotal = BigInt(Math.floor(expectedEth * 0.95 * 1e18));
+        const expectedSeller = (expectedTotal * (10000n - feeBps)) / 10000n;
+        return paidWei >= expectedSeller;
       });
       if (matching.length === 1) {
         return this.purchaseRepository(buyerId, matching[0].id, txHash);
@@ -1080,12 +1127,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         throw new BadRequestException('Transaction reverted on-chain');
       }
 
+      // ── Payer identity check ──────────────────────────────────────────
+      // Require the on-chain payer to be a wallet the authenticated buyer
+      // has proven ownership of (primary walletAddress OR a linked
+      // UserWallet). Without this, anyone watching Basescan could submit
+      // someone else's tx hash to /purchase or /recover-purchase and
+      // claim a verified row against the victim's payment.
+      const buyerOwnedWallets = await this.buyerWallets(buyerId);
+      if (buyerOwnedWallets.size === 0) {
+        throw new ForbiddenException(
+          'Link a wallet to your account before purchasing — we need to verify the payer',
+        );
+      }
+
       // Detect path: ETH if tx.value > 0 and routed to the seller; else BOLTY.
       const sentEth = tx && tx.value && BigInt(tx.value) > 0n;
       const sentToSeller =
         tx && tx.to && tx.to.toLowerCase() === sellerWallet.toLowerCase();
 
       if (sentEth && sentToSeller) {
+        const payer = tx?.from?.toLowerCase();
+        if (!payer || !buyerOwnedWallets.has(payer)) {
+          throw new ForbiddenException(
+            'Transaction was signed by a wallet that is not linked to your account',
+          );
+        }
         // ETH path: enforce ETH path slippage (93% of total after 7% fee).
         const ethPathSellerWei = (expectedTotalWei * (10000n - 700n)) / 10000n;
         if (BigInt(tx!.value) < ethPathSellerWei) {
@@ -1096,16 +1162,33 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         amountWei = tx!.value.toString();
         detectedCurrency = 'ETH';
       } else if (tokenContract) {
-        // BOLTY / ERC-20 path: require a Transfer(seller) log.
+        // BOLTY / ERC-20 path: require a Transfer(sender -> seller) log
+        // whose `from` topic is a wallet owned by the authenticated buyer.
         const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-        const transferLog = receipt.logs.find(
-          (log) =>
-            log.address.toLowerCase() === tokenContract.toLowerCase() &&
-            log.topics[0] === TRANSFER_TOPIC &&
-            log.topics[2] &&
-            '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
-        );
+        const transferLog = receipt.logs.find((log) => {
+          if (log.address.toLowerCase() !== tokenContract.toLowerCase()) return false;
+          if (log.topics[0] !== TRANSFER_TOPIC) return false;
+          if (!log.topics[1] || !log.topics[2]) return false;
+          const logTo = '0x' + log.topics[2].slice(26).toLowerCase();
+          if (logTo !== sellerWallet.toLowerCase()) return false;
+          const logFrom = '0x' + log.topics[1].slice(26).toLowerCase();
+          return buyerOwnedWallets.has(logFrom);
+        });
         if (!transferLog) {
+          // Distinguish "no transfer at all" from "transfer but wrong payer"
+          // so buyers get an actionable error.
+          const anyTransferToSeller = receipt.logs.find(
+            (log) =>
+              log.address.toLowerCase() === tokenContract.toLowerCase() &&
+              log.topics[0] === TRANSFER_TOPIC &&
+              log.topics[2] &&
+              '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
+          );
+          if (anyTransferToSeller) {
+            throw new ForbiddenException(
+              'BOLTY transfer was sent from a wallet that is not linked to your account',
+            );
+          }
           throw new BadRequestException(
             'Payment did not reach the seller wallet (no ETH value and no BOLTY transfer)',
           );
