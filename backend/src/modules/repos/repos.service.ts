@@ -713,6 +713,158 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   // ── Purchase (locked repos) ────────────────────────────────────────────────
 
+  /**
+   * Recovery flow for buyers whose payment landed on-chain but no
+   * repoPurchase row ever materialised (pre-fix builds, RPC drop, etc).
+   * Given just the buyer's tx hash, we fetch the tx, read the recipient
+   * address, find the seller it belongs to, narrow to their locked repos
+   * that match the paid amount (with the same 5% slippage the regular
+   * purchase flow uses), and call `purchaseRepository` with the resolved
+   * repoId — so the normal verification + broadcast + rays pipeline runs.
+   *
+   * If `sellerUsername` is provided, we scope the search to that user's
+   * repos to handle the case where a seller has several locked repos at
+   * similar prices.
+   */
+  async recoverPurchaseByTxHash(
+    buyerId: string,
+    txHash: string,
+    sellerUsername?: string,
+  ) {
+    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+      throw new BadRequestException('Invalid transaction hash');
+    }
+
+    // First: if we already have a row for this txHash, just re-run verify.
+    const existingRow = await this.prisma.repoPurchase.findUnique({
+      where: { txHash },
+      select: { repositoryId: true, buyerId: true },
+    });
+    if (existingRow) {
+      if (existingRow.buyerId !== buyerId) {
+        throw new ForbiddenException('This transaction belongs to another buyer');
+      }
+      return this.purchaseRepository(buyerId, existingRow.repositoryId, txHash);
+    }
+
+    // Fetch the tx from chain so we know the recipient + value.
+    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const [tx, receipt] = await Promise.all([
+      provider.getTransaction(txHash).catch(() => null),
+      provider.getTransactionReceipt(txHash).catch(() => null),
+    ]);
+    if (!tx || !receipt) {
+      throw new BadRequestException(
+        'Transaction not found on Base — double-check the hash and that the tx is mined',
+      );
+    }
+    if (receipt.status !== 1) {
+      throw new BadRequestException('Transaction reverted on-chain');
+    }
+
+    // Determine the recipient wallet: ETH = tx.to, BOLTY = Transfer log `to`.
+    const recipients = new Set<string>();
+    if (tx.to && tx.value && BigInt(tx.value) > 0n) {
+      recipients.add(tx.to.toLowerCase());
+    }
+    const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+    for (const log of receipt.logs) {
+      if (log.topics[0] === TRANSFER_TOPIC && log.topics[2]) {
+        recipients.add('0x' + log.topics[2].slice(26).toLowerCase());
+      }
+    }
+    if (recipients.size === 0) {
+      throw new BadRequestException(
+        'This transaction does not transfer ETH or BOLTY to any address — cannot match it to a repo',
+      );
+    }
+
+    // Find seller users with those wallets.
+    const sellerCandidates = await this.prisma.user.findMany({
+      where: {
+        walletAddress: {
+          in: Array.from(recipients).map((r) => r.toLowerCase()),
+          mode: 'insensitive',
+        },
+        ...(sellerUsername
+          ? { username: { equals: sellerUsername.replace(/^@/, ''), mode: 'insensitive' } }
+          : {}),
+      },
+      select: { id: true, username: true },
+    });
+    if (sellerCandidates.length === 0) {
+      throw new BadRequestException(
+        sellerUsername
+          ? `@${sellerUsername} has no wallet matching this transaction. Make sure the username is correct.`
+          : 'No seller wallet on Bolty matches this transaction. Pass the seller username to help match.',
+      );
+    }
+
+    // For each candidate seller, list their locked repos the buyer does
+    // not already own a verified purchase of.
+    const sellerIds = sellerCandidates.map((s) => s.id);
+    const lockedRepos = await this.prisma.repository.findMany({
+      where: {
+        userId: { in: sellerIds },
+        isLocked: true,
+        lockedPriceUsd: { gt: 0 },
+      },
+      select: { id: true, name: true, lockedPriceUsd: true, userId: true },
+    });
+
+    const existingVerified = await this.prisma.repoPurchase.findMany({
+      where: {
+        buyerId,
+        verified: true,
+        repositoryId: { in: lockedRepos.map((r) => r.id) },
+      },
+      select: { repositoryId: true },
+    });
+    const ownedRepoIds = new Set(existingVerified.map((p) => p.repositoryId));
+    const candidates = lockedRepos.filter((r) => !ownedRepoIds.has(r.id));
+
+    if (candidates.length === 0) {
+      throw new BadRequestException(
+        'No matching locked repo found for this seller. If this looks wrong, ask the seller to confirm their wallet address on /profile.',
+      );
+    }
+    if (candidates.length === 1) {
+      return this.purchaseRepository(buyerId, candidates[0].id, txHash);
+    }
+
+    // Multiple candidates — disambiguate with the paid amount against the
+    // live oracle. We accept any repo whose expected ETH price (± 10%) is
+    // within the paid amount. If still ambiguous, throw with the list.
+    const ethPrice = await this.chart.getEthPrice().catch(() => null);
+    let paidWei: bigint = 0n;
+    if (tx.value && BigInt(tx.value) > 0n) {
+      paidWei = BigInt(tx.value);
+    } else {
+      // BOLTY path: sum the amounts from matching Transfer logs.
+      for (const log of receipt.logs) {
+        if (log.topics[0] === TRANSFER_TOPIC && log.topics[2]) {
+          paidWei += BigInt(log.data);
+        }
+      }
+    }
+    if (ethPrice && ethPrice.price > 0) {
+      const matching = candidates.filter((r) => {
+        const expectedEth = (r.lockedPriceUsd ?? 0) / ethPrice.price;
+        const expectedWei = BigInt(Math.floor(expectedEth * 0.85 * 1e18));
+        return paidWei >= expectedWei;
+      });
+      if (matching.length === 1) {
+        return this.purchaseRepository(buyerId, matching[0].id, txHash);
+      }
+    }
+    throw new BadRequestException(
+      `Multiple locked repos matched. Candidates: ${candidates
+        .map((c) => c.name)
+        .join(', ')}. Run /repos/:id/verify directly on the exact repo.`,
+    );
+  }
+
   async purchaseRepository(
     buyerId: string,
     repoId: string,

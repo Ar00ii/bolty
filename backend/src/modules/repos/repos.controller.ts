@@ -135,6 +135,16 @@ class PurchaseRepoDto {
   consentMessage?: string;
 }
 
+class RecoverPurchaseDto {
+  @IsString()
+  @IsNotEmpty()
+  txHash!: string;
+
+  @IsString()
+  @IsOptional()
+  sellerUsername?: string;
+}
+
 class VoteDto {
   @IsString()
   @IsIn(['UP', 'DOWN'])
@@ -246,6 +256,19 @@ export class ReposController {
       dto.consentSignature,
       dto.consentMessage,
     );
+  }
+
+  /**
+   * Universal recovery endpoint for buyers whose on-chain payment never
+   * landed a verified repoPurchase row. Accepts a txHash (and optionally
+   * the seller's username) and auto-detects which locked repo the
+   * payment was for, then runs the normal verify pipeline.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
+  @Post('recover-purchase')
+  recoverPurchase(@Body() dto: RecoverPurchaseDto, @CurrentUser('id') buyerId: string) {
+    return this.reposService.recoverPurchaseByTxHash(buyerId, dto.txHash, dto.sellerUsername);
   }
 
   @UseGuards(JwtAuthGuard)
