@@ -383,12 +383,10 @@ export class NegotiationService {
     if (neg.buyerId !== senderId && neg.listing.sellerId !== senderId)
       throw new ForbiddenException();
 
-    // In AI_AI mode humans cannot type manually
-    if (neg.mode === 'AI_AI') {
-      throw new BadRequestException(
-        'This negotiation is in AI-vs-AI mode. Request a switch to human mode first.',
-      );
-    }
+    // Humans can chip in at any time — even during an active AI-vs-AI
+    // loop. This is how a buyer or seller steers the deal without
+    // stopping the agents. The message just lands in the stream; it's
+    // up to the UI to render it as a human bubble.
 
     const isBuyer = senderId === neg.buyerId;
     const safeContent = sanitizeAiPrompt(content.trim().slice(0, 1000));
@@ -407,6 +405,35 @@ export class NegotiationService {
     });
 
     this.gateway.emitNewMessage(id, saved);
+
+    // Emergent pop-toast for the counterparty. The NegotiationPopToast
+    // already handles `negotiation_message` meta.kind — we just need
+    // to fire it so the other side sees the chat glow at the top-left
+    // of their viewport no matter what page they're on.
+    const counterpartyId =
+      isBuyer ? neg.listing.sellerId : neg.buyerId;
+    const senderUser = await this.prisma.user
+      .findUnique({ where: { id: senderId }, select: { username: true } })
+      .catch(() => null);
+    const url = `/market/agents?negotiate=${neg.listing.id}&negId=${neg.id}`;
+    this.notifications
+      .create({
+        userId: counterpartyId,
+        type: 'MARKET_NEGOTIATION_MESSAGE',
+        title: `@${senderUser?.username ?? 'user'} sent a message`,
+        body: safeContent.length > 140 ? safeContent.slice(0, 140) + '…' : safeContent,
+        url,
+        meta: {
+          kind: 'negotiation_message',
+          listingId: neg.listing.id,
+          negotiationId: neg.id,
+          counterparty: senderUser?.username ?? '',
+          listingTitle: neg.listing.title,
+        },
+      })
+      .catch((err) =>
+        this.logger.warn(`neg human-message notify failed: ${(err as Error).message}`),
+      );
 
     return this.getNegotiation(id, senderId);
   }
