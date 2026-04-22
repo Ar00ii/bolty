@@ -989,7 +989,8 @@ function NegotiationModal({
       <div
         className="w-full max-w-xl flex flex-col overflow-hidden relative"
         style={{
-          maxHeight: '90vh',
+          height: 'min(90vh, 680px)',
+          minHeight: 520,
           background: 'linear-gradient(180deg, rgba(20,20,28,0.96) 0%, rgba(10,10,16,0.96) 100%)',
           boxShadow:
             '0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px -10px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
