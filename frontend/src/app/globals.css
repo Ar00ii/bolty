@@ -4184,7 +4184,7 @@ aside button[data-active='true']::after {
 
 /* Mobile polish — apply narrower padding + stack rules + smaller
    typography on sub-640px screens so the new app-style pages don't
-   overflow a 375px viewport. */
+   overflow a 375px viewport. v2 */
 @media (max-width: 640px) {
   .mk-app-page {
     padding: 16px 14px 32px;
