@@ -21,6 +21,7 @@ import {
   Settings,
   ShoppingBag,
   Trophy,
+  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -100,6 +101,7 @@ export const NAV: NavSection[] = [
         ],
       },
       { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
+      { label: '$BOLTY', icon: Zap, href: '/bolty', badge: 'Live' },
     ],
   },
   {

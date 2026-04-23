@@ -26,6 +26,7 @@ import { ReposModule } from './modules/repos/repos.module';
 import { ReputationModule } from './modules/reputation/reputation.module';
 import { ServicesModule } from './modules/services/services.module';
 import { SocialModule } from './modules/social/social.module';
+import { TokenModule } from './modules/token/token.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -74,6 +75,7 @@ import { UsersModule } from './modules/users/users.module';
     OrdersModule,
     ReputationModule,
     ServicesModule,
+    TokenModule,
   ],
   providers: [
     // Global CSRF protection guard (double-submit cookie pattern).
