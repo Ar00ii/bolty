@@ -286,13 +286,34 @@ export class MarketController {
       'Content-Disposition',
       `attachment; filename="${(meta.fileName || key).replace(/"/g, '_')}"`,
     );
-    res.setHeader('Content-Type', meta.fileMimeType || 'application/octet-stream');
+    // nosniff + neutral MIME stops browsers from rendering uploaded text
+    // payloads as HTML/JS on the API origin.
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    const unsafeServed = /^(text\/html|application\/xhtml\+xml|text\/xml|application\/xml|image\/svg\+xml)/i;
+    const serveType =
+      meta.fileMimeType && !unsafeServed.test(meta.fileMimeType)
+        ? meta.fileMimeType
+        : 'application/octet-stream';
+    res.setHeader('Content-Type', serveType);
     res.sendFile(filePath);
   }
 
   @Get('negotiations')
   getMyNegotiations(@CurrentUser('id') userId: string) {
     return this.negotiationService.getMyNegotiations(userId);
+  }
+
+  /**
+   * Ownership check used by the listing detail page to hide the Buy
+   * button (and swap it for "Open in Inventory") BEFORE the user clicks
+   * and opens MetaMask. Without this the user can pay twice for an
+   * item they already own — the backend rejects on the second purchase
+   * but the ETH has already left their wallet.
+   */
+  @Get(':id/purchased')
+  checkPurchased(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.marketService.getPurchaseStatus(id, userId);
   }
 
   @Get('negotiations/:id')
@@ -402,10 +423,36 @@ export class MarketController {
           return;
         }
 
-        // Reject SVG file extensions even if MIME type is misclassified
+        // Reject renderable extensions regardless of declared MIME —
+        // browsers sniff HTML/XHTML even when Content-Type says otherwise.
         const ext = path.extname(file.originalname).toLowerCase();
-        if (ext === '.svg') {
-          cb(new BadRequestException('SVG files are not allowed (security risk)'), false);
+        const blockedExts = new Set([
+          '.svg',
+          '.html',
+          '.htm',
+          '.xhtml',
+          '.xml',
+          '.xsl',
+          '.xslt',
+        ]);
+        if (blockedExts.has(ext)) {
+          cb(
+            new BadRequestException(`File extension not allowed: ${ext} (security risk)`),
+            false,
+          );
+          return;
+        }
+
+        // Reject renderable MIME types that slip through text/* — these
+        // execute inline scripts when the browser ignores attachment.
+        const mt = file.mimetype.toLowerCase();
+        if (
+          mt === 'text/html' ||
+          mt === 'application/xhtml+xml' ||
+          mt === 'text/xml' ||
+          mt === 'application/xml'
+        ) {
+          cb(new BadRequestException(`File type not allowed: ${file.mimetype}`), false);
           return;
         }
 
@@ -449,6 +496,7 @@ export class MarketController {
   }
 
   @Post(':id/purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.CREATED)
   purchaseListing(
     @Param('id') id: string,
@@ -475,6 +523,7 @@ export class MarketController {
    * JWT + listingId + txHash; re-runs the same verification pipeline.
    */
   @Post(':id/recover-purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.OK)
   recoverListingPurchase(
     @Param('id') id: string,
@@ -497,6 +546,7 @@ export class MarketController {
    * listing the tx was for.
    */
   @Post('recover-purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.OK)
   recoverListingPurchaseByTx(
     @CurrentUser('id') buyerId: string,
@@ -520,6 +570,14 @@ export class MarketController {
     @CurrentUser('id') buyerId: string,
     @Body() body: { buyerAgentListingId?: string } = {},
   ) {
+    // AI-vs-AI negotiation is feature-flagged off until we re-enable it.
+    // The frontend already renders "Coming soon" — this is the backend
+    // guard so a stale client can't still create orphan negotiations.
+    if (process.env.NEGOTIATION_ENABLED !== '1') {
+      throw new BadRequestException(
+        'Agent-to-agent negotiation is launching soon.',
+      );
+    }
     return this.negotiationService.startNegotiation(
       buyerId,
       listingId,

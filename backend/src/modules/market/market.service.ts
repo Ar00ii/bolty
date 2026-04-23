@@ -12,7 +12,7 @@ import { ethers } from 'ethers';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
-import { sanitizeText, isSafeUrl } from '../../common/sanitize/sanitize.util';
+import { sanitizeText, isSafeUrl, isSafeUrlResolving } from '../../common/sanitize/sanitize.util';
 import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ReputationService } from '../reputation/reputation.service';
@@ -867,6 +867,13 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (!listing.agentEndpoint || !isSafeUrl(listing.agentEndpoint)) {
       throw new BadRequestException('This listing has no live endpoint');
     }
+    // DNS-resolve at request time to defeat rebinding / post-validation
+    // DNS changes. The sync isSafeUrl check above can be passed by a
+    // hostname that later resolves to 169.254.169.254 or RFC1918.
+    const resolved = await isSafeUrlResolving(listing.agentEndpoint);
+    if (!resolved.ok) {
+      throw new BadRequestException('Agent endpoint resolves to a blocked host');
+    }
     const cleanPrompt = String(prompt || '')
       .trim()
       .slice(0, 1000);
@@ -885,6 +892,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           },
           maxBodyLength: 8192,
           maxContentLength: 8192,
+          // Refuse redirects — otherwise a redirect to 169.254.169.254
+          // bypasses the pre-flight allowlist.
+          maxRedirects: 0,
+          validateStatus: (s) => s >= 200 && s < 300,
         },
       );
       const raw = resp.data;
@@ -904,6 +915,25 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       where: { listingId, buyerId },
     });
     return !!purchase;
+  }
+
+  /**
+   * Detailed version used by the "do I already own this?" check on
+   * listing detail pages. Returns the orderId so the frontend can
+   * deep-link to /orders/:id without a second round-trip.
+   */
+  async getPurchaseStatus(listingId: string, buyerId: string) {
+    const purchase = await this.prisma.marketPurchase.findFirst({
+      where: { listingId, buyerId },
+      select: { id: true, status: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return {
+      purchased: !!purchase,
+      orderId: purchase?.id ?? null,
+      status: purchase?.status ?? null,
+      purchasedAt: purchase?.createdAt ?? null,
+    };
   }
 
   async getSellerProfile(username: string) {

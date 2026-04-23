@@ -23,11 +23,11 @@ export class ApiError extends Error {
 class ApiClient {
   private baseUrl: string;
   private isRefreshing = false;
-  private readonly responseCache = new Map<string, { data: unknown; expiresAt: number }>();
-  private readonly CACHE_TTL = 60_000;
   // In-flight dedup — if two callers request the same path concurrently,
   // the second one piggybacks on the first promise instead of sending a
-  // duplicate request to the server.
+  // duplicate request to the server. This is the ONLY caching layer here;
+  // all time-based caching lives in lib/cache/pageCache so one source of
+  // truth decides when to refetch.
   private readonly inflight = new Map<string, Promise<unknown>>();
 
   constructor(baseUrl: string) {
@@ -191,46 +191,32 @@ class ApiClient {
   }
 
   get<T>(path: string, options?: RequestOptions): Promise<T> {
-    const entry = this.responseCache.get(path);
-    if (entry && Date.now() < entry.expiresAt) {
-      return Promise.resolve(entry.data as T);
-    }
-    // Return existing in-flight promise if one is already pending for this path.
+    // We dropped the 60s response cache that sat here — it collided
+    // with the page-level pageCache and caused stale data to flash
+    // back in after filter changes. In-flight dedup still applies so
+    // two callers for the same path in the same tick share the call.
     const existing = this.inflight.get(path);
     if (existing) return existing as Promise<T>;
 
-    const promise = this.request<T>('GET', path, undefined, options)
-      .then((data) => {
-        this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
-        return data;
-      })
-      .finally(() => {
-        this.inflight.delete(path);
-      });
+    const promise = this.request<T>('GET', path, undefined, options).finally(() => {
+      this.inflight.delete(path);
+    });
     this.inflight.set(path, promise as Promise<unknown>);
     return promise;
   }
 
-  // Silently pre-populate the cache for a list of paths (no progress bar).
+  // Fire-and-forget prefetch — just kicks the fetch, result is thrown
+  // away. Page-level caches catch the response via their own `get`.
   prefetch(paths: string[]): void {
     for (const path of paths) {
-      if (this.responseCache.has(path)) continue;
-      this.doFetch('GET', path)
-        .then((res) => (res.ok ? (res.json() as Promise<unknown>) : Promise.resolve(null)))
-        .then((data) => {
-          if (data != null) {
-            this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
-          }
-        })
-        .catch(() => {});
+      this.get(path).catch(() => {});
     }
   }
 
-  // Invalidate all cached entries whose key starts with pathPrefix.
-  invalidate(pathPrefix: string): void {
-    Array.from(this.responseCache.keys()).forEach((key) => {
-      if (key.startsWith(pathPrefix)) this.responseCache.delete(key);
-    });
+  // Kept as a no-op stub for any remaining callers — the response
+  // cache it used to invalidate no longer exists.
+  invalidate(_pathPrefix: string): void {
+    /* deliberate no-op: see pageCache.invalidateCached for the real knob */
   }
 
   post<T>(path: string, body: unknown, options?: RequestOptions): Promise<T> {

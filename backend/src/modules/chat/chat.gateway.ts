@@ -127,6 +127,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         recent.map((m) => ({
           id: m.id,
           content: m.content,
+          channel: m.channel,
+          imageUrl: m.imageUrl,
+          likeCount: m.likeCount,
           userId: m.userId,
           username: m.user.username,
           avatarUrl: m.user.avatarUrl,
@@ -153,7 +156,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { content: string },
+    @MessageBody() data: { content: string; channel?: string; imageUrl?: string | null },
   ) {
     if (!client.userId) {
       throw new WsException('Unauthorized');
@@ -165,17 +168,47 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     try {
-      const message = await this.chatService.validateAndSave(client.userId, data.content);
+      const message = await this.chatService.validateAndSave(client.userId, data.content, {
+        channel: data.channel,
+        imageUrl: data.imageUrl ?? null,
+      });
 
-      // Broadcast to all connected clients
+      // Broadcast to all connected clients — payload carries channel so
+      // subscribed timelines filter client-side.
       this.server.emit('newMessage', {
         id: message.id,
         content: message.content,
+        channel: message.channel,
+        imageUrl: message.imageUrl,
+        likeCount: message.likeCount,
         userId: message.userId,
         username: message.user.username,
         avatarUrl: message.user.avatarUrl,
         reputationPoints: message.user.reputationPoints,
         createdAt: message.createdAt,
+      });
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      client.emit('error', { message: error.message });
+    }
+  }
+
+  @SubscribeMessage('toggleLike')
+  async handleLike(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() data: { messageId: string },
+  ) {
+    if (!client.userId) throw new WsException('Unauthorized');
+    if (!data?.messageId) return;
+    try {
+      const res = await this.chatService.toggleLike(data.messageId, client.userId);
+      // Broadcast count update to everyone viewing the feed; include
+      // `likedBy` so the toggling client can reconcile its own state.
+      this.server.emit('likeUpdate', {
+        messageId: data.messageId,
+        likeCount: res.likeCount,
+        likedBy: client.userId,
+        liked: res.liked,
       });
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error(String(err));
