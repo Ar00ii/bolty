@@ -16,7 +16,8 @@ import {
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { BoltyLogo } from '@/components/ui/BoltyLogo';
+import { BoltySwapCard } from '@/components/token/BoltySwapCard';
+import { BoltyTradesFeed } from '@/components/token/BoltyTradesFeed';
 import { GradientText } from '@/components/ui/GradientText';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api } from '@/lib/api/client';
@@ -39,10 +40,15 @@ interface TokenStats {
   pairUrl: string | null;
   dexId: string | null;
   flaunchUrl: string;
+  ethPriceUsd: number | null;
   updatedAt: string;
 }
 
 const BOLTY_CONTRACT = '0xA383e85a626171edCB2727AEcAED4Fc5e27E42a7';
+// Short enough to feel live without hammering the upstream API — the
+// backend caches DexScreener for 60s so hitting this from every tab
+// every few seconds is cheap.
+const STATS_REFRESH_MS = 4000;
 
 function shortAddr(addr: string): string {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
@@ -79,15 +85,19 @@ export default function BoltyTokenPage() {
         if (!cancelled) {
           setStats(data);
           setLoading(false);
+          // Cache ETH/USD on window so the swap widget can price ETH
+          // without duplicating the fetch.
+          if (data.ethPriceUsd != null) {
+            (window as unknown as { __BOLTY_ETH_USD?: number }).__BOLTY_ETH_USD =
+              data.ethPriceUsd;
+          }
         }
       } catch {
         if (!cancelled) setLoading(false);
       }
     };
     load();
-    // Refresh every 30s while the tab is open — backend caches for 60s,
-    // but staggered client refreshes keep the visible price "alive".
-    const t = setInterval(load, 30_000);
+    const t = setInterval(load, STATS_REFRESH_MS);
     return () => {
       cancelled = true;
       clearInterval(t);
@@ -112,13 +122,17 @@ export default function BoltyTokenPage() {
 
   const flaunchUrl =
     stats?.flaunchUrl ?? `https://flaunch.gg/base/coin/${BOLTY_CONTRACT}`;
-  const dexscreenerEmbed = stats?.pairAddress
-    ? `https://dexscreener.com/base/${stats.pairAddress}?embed=1&theme=dark&trades=0&info=0`
+  // GeckoTerminal renders reliably in an iframe and auto-refreshes —
+  // swaps out the DexScreener iframe that was showing the broken-image
+  // placeholder for this token.
+  const chartSrc = stats?.pairAddress
+    ? `https://www.geckoterminal.com/base/pools/${stats.pairAddress}?embed=1&info=0&swaps=0&grayscale=0&light_chart=0&chart_type=price&resolution=1m&trades=1`
     : null;
+
+  const mcap = stats?.marketCapUsd ?? stats?.fdvUsd ?? null;
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-black text-white">
-      {/* Ambient radial glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-70"
@@ -128,7 +142,7 @@ export default function BoltyTokenPage() {
         }}
       />
 
-      <div className="relative mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+      <div className="relative mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:py-10">
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <motion.header
           initial={{ opacity: 0, y: 8 }}
@@ -155,29 +169,29 @@ export default function BoltyTokenPage() {
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div
-                className="flex h-16 w-16 items-center justify-center rounded-2xl"
+                className="relative flex h-16 w-16 items-center justify-center rounded-2xl"
                 style={{
                   background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.25), rgba(6,182,212,0.18))',
+                    'linear-gradient(135deg, rgba(131,110,249,0.18), rgba(6,182,212,0.12))',
                   boxShadow:
                     'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 40px -10px #836EF9',
                 }}
               >
-                {stats?.imageUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img
-                    src={stats.imageUrl}
-                    alt="BOLTY"
-                    className="h-14 w-14 rounded-xl object-cover"
-                  />
-                ) : (
-                  <BoltyLogo size={56} />
-                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/LogoNew.png"
+                  alt="Bolty"
+                  className="h-12 w-12 rounded-xl object-contain"
+                />
               </div>
               <div>
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/50">
                   <Zap className="h-3.5 w-3.5 text-[#836EF9]" />
                   <span>Bolty Token</span>
+                  <span className="ml-1 inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-[1px] text-[9px] uppercase text-emerald-300">
+                    <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
+                    Live
+                  </span>
                 </div>
                 <h1 className="mt-1 text-3xl font-light tracking-tight sm:text-4xl">
                   <GradientText gradient="purple">$BOLTY</GradientText>
@@ -205,19 +219,15 @@ export default function BoltyTokenPage() {
             </div>
           </div>
 
-          {/* Price row */}
+          {/* Headline: Market cap is now the big number */}
           <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-[auto_1fr] sm:items-end">
             <div>
               <div className="text-[11px] uppercase tracking-[0.22em] text-white/40">
-                Price
+                Market cap
               </div>
               <div className="mt-1 flex items-baseline gap-3">
                 <div className="text-4xl font-light tracking-tight sm:text-5xl">
-                  {loading
-                    ? '…'
-                    : stats?.priceUsd != null
-                      ? formatUsd(stats.priceUsd, 4)
-                      : '—'}
+                  {loading ? '…' : formatUsd(mcap, 0)}
                 </div>
                 <div
                   className={`flex items-center gap-1 text-sm font-normal ${priceChangeColor}`}
@@ -230,6 +240,12 @@ export default function BoltyTokenPage() {
                   {formatPct(stats?.priceChange24h)}
                   <span className="text-white/30">24h</span>
                 </div>
+              </div>
+              <div className="mt-1 text-[12px] text-white/40">
+                Price{' '}
+                <span className="tabular-nums text-white/70">
+                  {stats?.priceUsd != null ? formatUsd(stats.priceUsd, 6) : '—'}
+                </span>
               </div>
             </div>
 
@@ -282,7 +298,7 @@ export default function BoltyTokenPage() {
         <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatTile
             label="Market cap"
-            value={formatUsd(stats?.marketCapUsd ?? stats?.fdvUsd, 0)}
+            value={formatUsd(mcap, 0)}
             accent="#836EF9"
           />
           <StatTile
@@ -302,46 +318,79 @@ export default function BoltyTokenPage() {
           />
         </section>
 
-        {/* ── Chart ────────────────────────────────────────────────────── */}
-        <section
-          className="relative mt-5 overflow-hidden rounded-3xl"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-          }}
-        >
-          <div className="flex items-center justify-between px-5 pb-2 pt-4">
-            <h2 className="text-sm font-normal tracking-wide text-white/70">
-              Chart
-            </h2>
-            {stats?.pairUrl && (
-              <a
-                href={stats.pairUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-white/50 transition hover:text-white"
-              >
-                Open on DexScreener
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+        {/* ── Chart + Swap panel ───────────────────────────────────────── */}
+        <section className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_340px]">
+          <div
+            className="relative overflow-hidden rounded-3xl"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            <div className="flex items-center justify-between px-5 pb-2 pt-4">
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-normal tracking-wide text-white/70">
+                  Chart
+                </h2>
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-[1px] text-[10px] text-white/50">
+                  <span className="h-1 w-1 animate-pulse rounded-full bg-[#06B6D4]" />
+                  Real-time · 1m
+                </span>
+              </div>
+              {stats?.pairUrl && (
+                <a
+                  href={stats.pairUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] text-white/50 transition hover:text-white"
+                >
+                  Open on DexScreener
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+            <div className="h-[500px] w-full">
+              {chartSrc ? (
+                <iframe
+                  src={chartSrc}
+                  className="h-full w-full border-0"
+                  title="BOLTY price chart"
+                  loading="lazy"
+                  allow="clipboard-write"
+                />
+              ) : (
+                <ChartPlaceholder flaunchUrl={flaunchUrl} />
+              )}
+            </div>
           </div>
-          <div className="h-[420px] w-full">
-            {dexscreenerEmbed ? (
-              <iframe
-                src={dexscreenerEmbed}
-                className="h-full w-full border-0"
-                title="BOLTY price chart"
-                loading="lazy"
-              />
-            ) : (
-              <ChartPlaceholder flaunchUrl={flaunchUrl} />
-            )}
+
+          <div className="flex flex-col gap-3">
+            <BoltySwapCard priceUsd={stats?.priceUsd ?? null} />
+            <div
+              className="rounded-2xl p-3 text-[11px] font-light text-white/60"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-[#836EF9]" />
+                Swaps route through Flaunch &amp; Uniswap V4 on Base. Your
+                MetaMask wallet stays in control — Bolty never touches your
+                keys.
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* ── Coming soon: AI Agent Launchpad ──────────────────────────── */}
+        {/* ── Live trades ──────────────────────────────────────────────── */}
+        <section className="mt-5">
+          <BoltyTradesFeed />
+        </section>
+
+        {/* ── Coming soon card ─────────────────────────────────────────── */}
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
