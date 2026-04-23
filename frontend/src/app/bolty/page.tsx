@@ -123,7 +123,7 @@ export default function BoltyTokenPage() {
   const mcap = stats?.marketCapUsd ?? stats?.fdvUsd ?? null;
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-[#07070A] text-white">
+    <div className="mk-app-page relative min-h-[calc(100vh-4rem)] bg-[#07070A] text-white" style={{ maxWidth: 'none', padding: 0 }}>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"

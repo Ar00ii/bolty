@@ -38,7 +38,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
 
   if (useAppShell) {
     return (
-      <div className="mk-scope min-h-screen" style={{ background: '#09090b' }}>
+      <div className="mk-scope mk-app min-h-screen" style={{ background: '#09090b' }}>
         <RouteProgress />
         <CommandPalette />
         <ShortcutsModal />

@@ -4154,9 +4154,12 @@ aside button[data-active='true']::after {
    for data, and purple only on primary CTAs + active states.
    ─────────────────────────────────────────────────────────────────── */
 
+/* `.mk-app` is applied at the ClientShell root so its tokens are
+   available across the dashboard. It only sets CSS variables +
+   typography enforcement — no padding/max-width here so it won't
+   break layouts with their own container rules. Page containers that
+   want the default product-shell padding opt in via `.mk-app-page`. */
 .mk-app {
-  /* Design tokens scoped to this page. Anything outside .mk-app is
-     unaffected, so we can ship this safely. */
   --app-bg: #07070a;
   --app-surface: #0f0f15;
   --app-surface-hover: #13131a;
@@ -4172,7 +4175,9 @@ aside button[data-active='true']::after {
   --app-err: #ef4444;
   --app-radius: 10px;
   --app-radius-sm: 6px;
-  padding: 24px 28px 40px !important;
+}
+.mk-app-page {
+  padding: 24px 28px 40px;
   max-width: 1280px;
   margin: 0 auto;
 }
@@ -4185,27 +4190,55 @@ aside button[data-active='true']::after {
     BlinkMacSystemFont,
     sans-serif !important;
 }
-/* Override the project's global `* { font-weight: 300 }` so text inside
-   the app-styled page lands at the proper product weight. Elements that
-   need something else (titles, numbers) have their own rule below. */
-.mk-app,
-.mk-app p,
-.mk-app span,
-.mk-app div,
-.mk-app button,
-.mk-app select,
-.mk-app input,
-.mk-app a,
-.mk-app h1,
-.mk-app h2,
-.mk-app h3 {
+/* Override the project's global `* { font-weight: 300 }` only within
+   elements that opt in via .mk-app-page (and all mk-* components). This
+   keeps legacy pages untouched until each one is explicitly migrated. */
+.mk-app-page,
+.mk-app-page p,
+.mk-app-page span,
+.mk-app-page div,
+.mk-app-page button,
+.mk-app-page select,
+.mk-app-page input,
+.mk-app-page textarea,
+.mk-app-page a,
+.mk-app-page h1,
+.mk-app-page h2,
+.mk-app-page h3,
+.mk-app-page h4 {
   font-weight: 500;
 }
-.mk-app .mk-hero__sub,
-.mk-app .mk-card__desc,
-.mk-app .mk-card__seller,
-.mk-app .mk-hero__crumbs {
-  font-weight: 500;
+
+/* Compat layer — tame the ugliest Tailwind utility usages inside
+   pages that opt into .mk-app-page WITHOUT having to rewrite their
+   markup. Anything outside .mk-app-page keeps its current styling. */
+.mk-app-page .font-light {
+  font-weight: 500 !important;
+}
+.mk-app-page .font-normal {
+  font-weight: 500 !important;
+}
+.mk-app-page .font-medium {
+  font-weight: 600 !important;
+}
+.mk-app-page .font-semibold {
+  font-weight: 600 !important;
+}
+.mk-app-page .font-bold {
+  font-weight: 700 !important;
+}
+.mk-app-page .rounded-2xl {
+  border-radius: var(--app-radius) !important;
+}
+.mk-app-page .rounded-xl {
+  border-radius: var(--app-radius) !important;
+}
+/* Title styles across pages — catch the big headings most apps use
+   so migrated pages get the hero typography without rewriting JSX. */
+.mk-app-page h1,
+.mk-app-page .text-4xl,
+.mk-app-page .text-3xl {
+  letter-spacing: -0.015em;
 }
 .mk-app .mk-num {
   font-variant-numeric: tabular-nums;
