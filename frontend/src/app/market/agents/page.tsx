@@ -571,118 +571,95 @@ function AgentCard({
   onBuy: () => void;
   onNegotiate: (listing: MarketListing) => void;
 }) {
+  const isFree = listing.price === 0;
+  const hasEndpoint = Boolean(listing.hasAgentEndpoint || listing.agentEndpoint);
+  const negotiable =
+    listing.minPrice != null &&
+    listing.minPrice > 0 &&
+    listing.minPrice < listing.price;
+  const discount = negotiable
+    ? Math.round((1 - (listing.minPrice ?? 0) / listing.price) * 100)
+    : 0;
   return (
-    <div className="card-interactive flex flex-col h-full group">
-      {/* Header row */}
-      <div className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-            style={{ background: 'var(--brand-dim)', border: '1px solid rgba(131,110,249,0.15)' }}
-          >
-            <Bot className="w-4.5 h-4.5 text-bolty-400" strokeWidth={1.75} />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-[13px] font-light text-white truncate leading-tight">
-              {listing.title}
-            </h3>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <UserAvatar
-                src={listing.seller.avatarUrl}
-                name={listing.seller.username}
-                userId={listing.seller.id}
-                size={14}
-              />
-              <span className="text-[11px] text-zinc-500">
-                @{listing.seller.username || 'anon'}
-              </span>
-            </div>
+    <Link
+      href={`/market/agents/${listing.id}`}
+      className="mk-card mk-card--listing"
+      aria-label={listing.title}
+    >
+      {/* Top row: title + seller + type badge */}
+      <div className="mk-card__top">
+        <div className="mk-card__icon">
+          <Bot className="w-4 h-4" strokeWidth={2} />
+        </div>
+        <div className="mk-card__title-col">
+          <h3 className="mk-card__title">{listing.title}</h3>
+          <div className="mk-card__seller">
+            <UserAvatar
+              src={listing.seller.avatarUrl}
+              name={listing.seller.username}
+              userId={listing.seller.id}
+              size={14}
+            />
+            <span>@{listing.seller.username || 'anon'}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
-          {(listing.hasAgentEndpoint || listing.agentEndpoint) && (
-            <span
-              title="Has own AI agent"
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-light"
-              style={{
-                background: 'rgba(131,110,249,0.12)',
-                border: '1px solid rgba(131,110,249,0.2)',
-                color: '#a78bfa',
-              }}
-            >
-              <span className="w-1 h-1 rounded-full bg-bolty-400 animate-pulse inline-block" />
-              AI
+        <div className="mk-card__badges">
+          {hasEndpoint && (
+            <span className="mk-badge mk-badge--live" title="Responds to agent webhook">
+              <span className="mk-badge__dot" />
+              live
             </span>
           )}
-          <span
-            className={`px-1.5 py-0.5 rounded-md text-[10px] font-light border ${TYPE_COLORS[listing.type] || TYPE_COLORS.OTHER}`}
-          >
+          <span className="mk-badge mk-badge--type">
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
         </div>
       </div>
 
       {/* Description */}
-      <p className="text-xs text-zinc-400 leading-relaxed line-clamp-2 mb-3 flex-1">
+      <p className="mk-card__desc">
         {listing.description || 'No description provided.'}
       </p>
 
-      {/* Rating */}
-      {listing.reviewAverage !== null &&
-        listing.reviewAverage !== undefined &&
-        (listing.reviewCount ?? 0) > 0 && (
-          <div className="inline-flex items-center gap-1 text-[11px] text-zinc-400 mb-3">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-            <span className="font-medium">{listing.reviewAverage.toFixed(1)}</span>
-            <span className="text-zinc-600">
-              ({listing.reviewCount} review{listing.reviewCount === 1 ? '' : 's'})
+      {/* Meta row: rating + tags */}
+      <div className="mk-card__meta">
+        {listing.reviewAverage !== null &&
+          listing.reviewAverage !== undefined &&
+          (listing.reviewCount ?? 0) > 0 && (
+            <span className="mk-card__rating">
+              <Star className="w-3 h-3 fill-current" />
+              <span className="mk-num">{listing.reviewAverage.toFixed(1)}</span>
+              <span className="mk-card__rating-count">
+                ({listing.reviewCount})
+              </span>
             </span>
-          </div>
-        )}
+          )}
+        {listing.tags.slice(0, 3).map((tag) => (
+          <span key={tag} className="mk-chip">
+            {tag}
+          </span>
+        ))}
+      </div>
 
-      {/* Tags */}
-      {listing.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {listing.tags.slice(0, 4).map((tag) => (
-            <span
-              key={tag}
-              className="px-1.5 py-0.5 rounded text-[10px] bg-zinc-800/80 text-zinc-400 border border-zinc-700/50"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div
-        className="flex items-center justify-between pt-3 border-t"
-        style={{ borderColor: 'var(--border)' }}
-      >
-        <div>
-          {listing.price === 0 ? (
-            <span className="text-sm font-light text-green-400">Free</span>
+      {/* Footer: price + actions */}
+      <div className="mk-card__foot">
+        <div className="mk-card__price">
+          {isFree ? (
+            <span className="mk-price mk-price--free">Free</span>
           ) : (
-            <span className="text-sm font-light text-white">
-              {listing.price}{' '}
-              <span className="text-xs text-zinc-500 font-light">{listing.currency}</span>
+            <span className="mk-price">
+              <span className="mk-num">{listing.price}</span>
+              <span className="mk-price__ccy">{listing.currency}</span>
             </span>
           )}
-          {listing.minPrice != null && listing.minPrice > 0 && listing.minPrice < listing.price && (
-            <p className="inline-flex items-center gap-1 text-[10px] text-[#C9BEFF] mt-0.5">
-              <Handshake className="w-2.5 h-2.5" />
-              Open to {Math.round((1 - listing.minPrice / listing.price) * 100)}% off
-            </p>
+          {negotiable && (
+            <span className="mk-card__neg">
+              <Handshake className="w-3 h-3" strokeWidth={2} />
+              Up to {discount}% off
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
-          <Link
-            href={`/market/agents/${listing.id}`}
-            className="inline-flex items-center gap-1 text-xs py-1 px-2.5 rounded-md text-zinc-300 hover:text-white hover:bg-white/[0.04] transition-colors"
-          >
-            View
-            <ArrowUpRight className="w-2.5 h-2.5" />
-          </Link>
+        <div className="mk-card__actions">
           <button
             type="button"
             onClick={(e) => {
@@ -693,31 +670,28 @@ function AgentCard({
               }
               onNegotiate(listing);
             }}
-            title="Start an AI-to-AI negotiation"
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-light text-white transition-all hover:brightness-110"
-            style={{
-              background: 'linear-gradient(180deg, rgba(131,110,249,0.22), rgba(131,110,249,0.08))',
-              border: '1px solid rgba(131,110,249,0.35)',
-            }}
+            className="mk-btn mk-btn--ghost mk-btn--sm"
           >
-            <Bot className="w-2.5 h-2.5" />
+            <Bot className="w-3 h-3" strokeWidth={2} />
             Negotiate
           </button>
           <button
-            onClick={() => {
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
               if (!isAuthenticated) {
                 window.location.href = '/auth';
                 return;
               }
               onBuy();
             }}
-            className="btn-primary text-xs py-1 px-3"
+            className="mk-btn mk-btn--primary mk-btn--sm"
           >
-            {listing.price === 0 ? 'Get free' : 'Buy'}
+            {isFree ? 'Get free' : 'Buy now'}
           </button>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -1446,81 +1420,57 @@ function AgentsPageContent() {
   };
 
   return (
-    <div className="mk-agents-page">
-      {/* Minimal header: breadcrumb + Deploy CTA */}
-      <section
-        className="relative overflow-hidden rounded-2xl px-5 py-5 sm:px-7 sm:py-6 mb-5"
-        style={{
-          background:
-            'linear-gradient(135deg, rgba(131,110,249,0.14) 0%, rgba(6,182,212,0.08) 55%, rgba(236,72,153,0.06) 100%)',
-          boxShadow:
-            '0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.05)',
-        }}
-      >
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -right-20 -top-24 h-60 w-60 rounded-full"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(131,110,249,0.35), transparent 70%)',
-            filter: 'blur(28px)',
-          }}
-        />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0">
-            <div className="mk-breadcrumb">
-              <Link href="/market" className="mk-breadcrumb__link">
-                Market
-              </Link>
-              <span className="mk-breadcrumb__sep">/</span>
-              <span>Agents</span>
-            </div>
-            <h1 className="mt-1 text-2xl font-light tracking-tight sm:text-3xl">
-              <GradientText gradient="purple">AI Agents</GradientText>
-            </h1>
-            <p className="mt-1 max-w-xl text-sm font-light text-white/60">
-              Deploy, buy, and negotiate with autonomous agents.
-              Every listing is health-checked and live.
+    <div className="mk-agents-page mk-app">
+      {/* Header row — compact, flat, product-feel */}
+      <div className="mk-hero">
+        <div className="mk-hero__crumbs">
+          <Link href="/market" className="mk-hero__crumb-link">
+            Market
+          </Link>
+          <span className="mk-hero__crumb-sep">/</span>
+          <span>Agents</span>
+        </div>
+        <div className="mk-hero__row">
+          <div>
+            <h1 className="mk-hero__title">Agents</h1>
+            <p className="mk-hero__sub">
+              Deploy, buy, and negotiate with autonomous AI agents. Every listing is health-checked.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-white/55">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_6px_#4ADE80]" />
-                <span className="font-normal text-white/80">
-                  {stats.total}
-                </span>{' '}
-                agents live
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Bot className="h-3 w-3 text-[#C9BEFF]" />
-                <span className="font-normal text-white/80">
-                  {stats.aiNative}
-                </span>{' '}
-                AI-native
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Zap className="h-3 w-3 text-[#F59E0B]" />
-                <span className="font-normal text-white/80">
-                  {stats.negotiable}
-                </span>{' '}
-                open to negotiate
-              </span>
-            </div>
           </div>
           {isAuthenticated && (
             <button
               type="button"
               onClick={attemptDeploy}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-5 py-2.5 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110"
+              className="mk-btn mk-btn--primary"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
               Deploy agent
             </button>
           )}
         </div>
-      </section>
+
+        {/* Stat strip — compact pills, tabular numbers */}
+        <div className="mk-stats">
+          <div className="mk-stat">
+            <div className="mk-stat__label">Live agents</div>
+            <div className="mk-stat__value">
+              <span className="mk-stat__dot mk-stat__dot--live" />
+              {stats.total}
+            </div>
+          </div>
+          <div className="mk-stat">
+            <div className="mk-stat__label">AI-native</div>
+            <div className="mk-stat__value">{stats.aiNative}</div>
+          </div>
+          <div className="mk-stat">
+            <div className="mk-stat__label">Open to negotiate</div>
+            <div className="mk-stat__value">{stats.negotiable}</div>
+          </div>
+        </div>
+      </div>
 
       {/* Tabs */}
-      <div className="mk-agents-tabs">
+      <div className="mk-tabs">
         {(
           [
             ['market', 'Marketplace'],
@@ -1533,7 +1483,7 @@ function AgentsPageContent() {
               key={id}
               type="button"
               onClick={() => switchTab(id)}
-              className={`mk-agents-tab ${active ? 'mk-agents-tab--active' : ''}`}
+              className={`mk-tab ${active ? 'mk-tab--active' : ''}`}
             >
               {label}
             </button>
@@ -1544,96 +1494,65 @@ function AgentsPageContent() {
       {/* ── Marketplace tab ── */}
       {activeTab === 'market' && (
         <>
-          {/* Search + filter bar */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
+          {/* Filter bar — flat, segmented */}
+          <div className="mk-toolbar">
+            <div className="mk-search">
+              <Search className="mk-search__icon" strokeWidth={2} />
               <input
                 ref={searchRef}
                 type="text"
-                placeholder="Search agents..."
+                placeholder="Search agents"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input w-full pl-9 pr-16"
+                className="mk-search__input"
               />
               {search ? (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="mk-search__clear"
                   aria-label="Clear search"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
               ) : (
-                <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
-                  /
-                </kbd>
+                <kbd className="mk-search__kbd">/</kbd>
               )}
             </div>
+
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="md:hidden inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-zinc-300 hover:text-white transition"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-              }}
+              className="mk-btn mk-btn--ghost md:hidden"
             >
               Filters
-              <ChevronDown className="w-3 h-3" />
+              <ChevronDown className="w-3 h-3" strokeWidth={2} />
             </button>
-            <div className="relative hidden md:flex gap-1.5 flex-wrap">
-              {TYPES.map((t) => {
-                const active = type === t;
-                return (
-                  <motion.button
-                    key={t}
-                    onClick={() => setType(t)}
-                    whileTap={{ scale: 0.96 }}
-                    whileHover={active ? undefined : { y: -1 }}
-                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className={`relative text-xs px-3 py-1.5 rounded-lg transition-colors ${
-                      active ? 'text-bolty-300' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="market-agents-type-pill"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        aria-hidden="true"
-                        className="absolute inset-0 rounded-lg"
-                        style={{
-                          background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                        }}
-                      />
-                    )}
-                    <span className="relative">{TYPE_LABELS[t]}</span>
-                  </motion.button>
-                );
-              })}
+
+            <div className="mk-seg hidden md:flex">
+              {TYPES.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  className={`mk-seg__item ${type === t ? 'mk-seg__item--active' : ''}`}
+                >
+                  {TYPE_LABELS[t]}
+                </button>
+              ))}
             </div>
-            <div className="relative">
+
+            <div className="mk-select">
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortKey)}
-                className="text-xs rounded-lg px-3 py-1.5 outline-none appearance-none pr-7 cursor-pointer"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(20,20,26,0.8) 0%, rgba(10,10,14,0.8) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-                  color: '#e4e4e7',
-                }}
                 aria-label="Sort"
               >
-                <option value="recent">Newest first</option>
-                <option value="price-low">Price · low to high</option>
-                <option value="price-high">Price · high to low</option>
-                <option value="rating">Highest rated</option>
+                <option value="recent">Newest</option>
+                <option value="price-low">Price ↑</option>
+                <option value="price-high">Price ↓</option>
+                <option value="rating">Top rated</option>
               </select>
-              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-zinc-500" />
+              <ChevronDown className="mk-select__caret" strokeWidth={2} />
             </div>
           </div>
           {error && (
@@ -1679,35 +1598,22 @@ function AgentsPageContent() {
               ))}
             </div>
           ) : listings.length === 0 ? (
-            <div
-              className="relative rounded-2xl px-8 py-16 text-center"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-              }}
-            >
-              <div
-                className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.22), rgba(6,182,212,0.14))',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
-                }}
-              >
-                <Bot className="w-7 h-7 text-[#C9BEFF]" strokeWidth={1.5} />
+            <div className="mk-empty-app">
+              <div className="mk-empty-app__icon">
+                <Bot className="w-5 h-5" strokeWidth={2} />
               </div>
-              <p className="text-white font-light text-base">No agents found</p>
-              <p className="text-sm text-zinc-500 font-light mt-2 max-w-sm mx-auto">
+              <div className="mk-empty-app__title">No agents found</div>
+              <div className="mk-empty-app__sub">
                 Try adjusting your filters, or deploy the first one.
-              </p>
+              </div>
               {isAuthenticated && (
                 <button
                   type="button"
                   onClick={attemptDeploy}
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-2 text-sm font-normal text-white shadow-[0_0_24px_-8px_#836EF9] transition hover:brightness-110"
+                  className="mk-btn mk-btn--primary"
+                  style={{ marginTop: 16 }}
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5" strokeWidth={2} />
                   Deploy an agent
                 </button>
               )}
