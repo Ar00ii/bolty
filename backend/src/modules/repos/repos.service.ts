@@ -593,6 +593,15 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const skip = (page - 1) * Math.min(limit, 50);
     const take = Math.min(limit, 50);
 
+    // 30s Redis cache keyed on all params (skip for search — too many combos).
+    const repoCacheKey = !search
+      ? `repos:list:${language ?? ''}:${sortBy}:${page}:${take}`
+      : null;
+    if (repoCacheKey) {
+      const hit = await this.redis.get(repoCacheKey).catch(() => null);
+      if (hit) return JSON.parse(hit) as Awaited<ReturnType<typeof this.listRepositories>>;
+    }
+
     const where: Record<string, unknown> = {
       // Show public repos OR locked repos (private locked repos are visible but content is hidden)
       OR: [{ isPrivate: false }, { isLocked: true }],
@@ -660,10 +669,14 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       reposWithVotes.sort((a, b) => b.score - a.score);
     }
 
-    return {
+    const result = {
       data: reposWithVotes,
       meta: { total, page, limit: take, pages: Math.ceil(total / take) },
     };
+    if (repoCacheKey) {
+      this.redis.set(repoCacheKey, JSON.stringify(result), 30).catch(() => null);
+    }
+    return result;
   }
 
   // ── Voting ────────────────────────────────────────────────────────────────

@@ -25,6 +25,10 @@ class ApiClient {
   private isRefreshing = false;
   private readonly responseCache = new Map<string, { data: unknown; expiresAt: number }>();
   private readonly CACHE_TTL = 60_000;
+  // In-flight dedup — if two callers request the same path concurrently,
+  // the second one piggybacks on the first promise instead of sending a
+  // duplicate request to the server.
+  private readonly inflight = new Map<string, Promise<unknown>>();
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -191,10 +195,20 @@ class ApiClient {
     if (entry && Date.now() < entry.expiresAt) {
       return Promise.resolve(entry.data as T);
     }
-    return this.request<T>('GET', path, undefined, options).then((data) => {
-      this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
-      return data;
-    });
+    // Return existing in-flight promise if one is already pending for this path.
+    const existing = this.inflight.get(path);
+    if (existing) return existing as Promise<T>;
+
+    const promise = this.request<T>('GET', path, undefined, options)
+      .then((data) => {
+        this.responseCache.set(path, { data, expiresAt: Date.now() + this.CACHE_TTL });
+        return data;
+      })
+      .finally(() => {
+        this.inflight.delete(path);
+      });
+    this.inflight.set(path, promise as Promise<unknown>);
+    return promise;
   }
 
   // Silently pre-populate the cache for a list of paths (no progress bar).

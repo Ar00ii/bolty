@@ -391,32 +391,24 @@ export class OrdersService {
 
   /** Stats for seller dashboard */
   async getSellerStats(userId: string) {
-    const [
-      marketTotal,
-      pending,
-      inProgress,
-      delivered,
-      marketCompleted,
-      disputed,
-      repoCompleted,
-    ] = await Promise.all([
-      this.prisma.marketPurchase.count({ where: { sellerId: userId } }),
-      this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'PENDING_DELIVERY' } }),
-      this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'IN_PROGRESS' } }),
-      this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'DELIVERED' } }),
-      this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'COMPLETED' } }),
-      this.prisma.marketPurchase.count({ where: { sellerId: userId, status: 'DISPUTED' } }),
-      this.prisma.repoPurchase.count({
-        where: { verified: true, repository: { userId } },
+    // One groupBy instead of 6 sequential count() calls — single round-trip.
+    const [statusGroups, repoCompleted] = await Promise.all([
+      this.prisma.marketPurchase.groupBy({
+        by: ['status'],
+        where: { sellerId: userId },
+        _count: { _all: true },
       }),
+      this.prisma.repoPurchase.count({ where: { verified: true, repository: { userId } } }),
     ]);
+    const byStatus = new Map(statusGroups.map((g) => [g.status, g._count._all]));
+    const marketTotal = statusGroups.reduce((sum, g) => sum + g._count._all, 0);
     return {
       total: marketTotal + repoCompleted,
-      pending,
-      inProgress,
-      delivered,
-      completed: marketCompleted + repoCompleted,
-      disputed,
+      pending: byStatus.get('PENDING_DELIVERY') ?? 0,
+      inProgress: byStatus.get('IN_PROGRESS') ?? 0,
+      delivered: byStatus.get('DELIVERED') ?? 0,
+      completed: (byStatus.get('COMPLETED') ?? 0) + repoCompleted,
+      disputed: byStatus.get('DISPUTED') ?? 0,
     };
   }
 }

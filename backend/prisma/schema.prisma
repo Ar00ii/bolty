@@ -103,6 +103,7 @@ model User {
   listingBoosts          ListingBoost[]
   linkedWallets          UserWallet[]
 
+  @@index([isBanned])
   @@map("users")
 }
 
@@ -663,6 +664,7 @@ model Friendship {
 
   @@unique([senderId, receiverId])
   @@index([receiverId])
+  @@index([status])
   @@map("friendships")
 }
 

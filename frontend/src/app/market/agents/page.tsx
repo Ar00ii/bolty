@@ -706,6 +706,8 @@ function NegotiationModal({
         if (typeof document !== 'undefined') {
           document.body.setAttribute('data-neg-open', n.id);
         }
+        // 10s fallback — WebSocket is the primary delivery mechanism;
+        // this only catches messages lost during a transient connect race.
         pollTimer = setInterval(async () => {
           try {
             const fresh = await api.get<Negotiation>(`/market/negotiations/${n.id}`);
@@ -722,7 +724,7 @@ function NegotiationModal({
           } catch {
             /* ignore — socket will catch up */
           }
-        }, 3000);
+        }, 10_000);
         // Connect WebSocket once we have the negotiation id
         const socket = io(`${SOCKET_URL}/negotiations`, {
           withCredentials: true,
