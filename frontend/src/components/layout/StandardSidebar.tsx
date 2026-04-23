@@ -47,6 +47,32 @@ function prefetchForHref(href: string) {
       );
       void prefetch('market:pulse', () => api.get('/market/pulse?limit=20'));
       break;
+    case '/market/agents':
+      void prefetch('market:agents:type=AI_AGENT&sortBy=recent', () =>
+        api
+          .get<{ data: unknown[] }>('/market?type=AI_AGENT&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      break;
+    case '/market/repos':
+      void prefetch('market:repos:sortBy=recent', () =>
+        api
+          .get<{ data: unknown[] }>('/market?type=REPO&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      break;
+    case '/feed':
+      void prefetch('chat:general', () =>
+        api.get('/chat/messages?limit=50&channel=general'),
+      );
+      break;
+    case '/dm':
+      void prefetch('dm:negotiations', () => api.get('/market/negotiations'));
+      break;
+    case '/bolty':
+      void prefetch('token:bolty', () => api.get('/token/bolty'));
+      void prefetch('token:bolty:trades', () => api.get('/token/bolty/trades'));
+      break;
     case '/orders':
       void prefetch('orders:buyer', () => api.get('/orders'));
       void prefetch('orders:seller', () => api.get('/orders/selling'));
@@ -58,6 +84,14 @@ function prefetchForHref(href: string) {
       break;
     case '/market/library':
       void prefetch('library:items', () => api.get('/market/library'));
+      break;
+    case '/notifications':
+      void prefetch('notifications:list', () => api.get('/notifications'));
+      break;
+    case '/reputation/leaderboard':
+      void prefetch('reputation:leaderboard', () =>
+        api.get('/reputation/leaderboard?limit=50'),
+      );
       break;
     default:
       break;

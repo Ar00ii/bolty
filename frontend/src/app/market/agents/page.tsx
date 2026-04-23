@@ -47,6 +47,10 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import {
+  getCachedWithStatus,
+  setCached as setCachedEntry,
+} from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
@@ -1253,19 +1257,31 @@ function AgentsPageContent() {
   }, [type, debouncedSearch, sort, activeTab, router]);
 
   const fetchListings = useCallback(async () => {
-    setLoading(true);
+    const params = new URLSearchParams();
+    if (type !== 'ALL') params.set('type', type);
+    if (debouncedSearch) params.set('search', debouncedSearch);
+    if (sort) params.set('sortBy', sort);
+    const cacheKey = `market:agents:${params.toString()}`;
+    // Stale-while-revalidate: seed from cache so the grid paints
+    // instantly on back-nav, then refetch in the background.
+    const cached = getCachedWithStatus<MarketListing[]>(cacheKey);
+    if (cached.data) {
+      setListings(cached.data);
+      setLoading(false);
+      if (cached.fresh) return; // skip refetch; data is < 30s old
+    } else {
+      setLoading(true);
+    }
     setError('');
     try {
-      const params = new URLSearchParams();
-      if (type !== 'ALL') params.set('type', type);
-      if (debouncedSearch) params.set('search', debouncedSearch);
-      if (sort) params.set('sortBy', sort);
-      const data = await api.get<{ data: MarketListing[] } | MarketListing[]>(`/market?${params}`);
+      const data = await api.get<{ data: MarketListing[] } | MarketListing[]>(
+        `/market?${params}`,
+      );
       // Tolerate both shapes: legacy {data: []} envelope and the raw
-      // array we sometimes get back. Surface the actual server message
-      // in dev/prod so we stop seeing the opaque "Failed to load".
+      // array we sometimes get back.
       const rows = Array.isArray(data) ? data : (data?.data ?? []);
       setListings(rows);
+      setCachedEntry(cacheKey, rows);
     } catch (err) {
       // 401 → session expired, bounce to login and preserve the URL
       // so they come back here after auth.
@@ -1273,12 +1289,16 @@ function AgentsPageContent() {
         router.push(`/auth/login?redirect=${encodeURIComponent('/market/agents')}`);
         return;
       }
-      const msg =
-        err instanceof ApiError
-          ? `Couldn't load listings: ${err.message}`
-          : 'Network error — check your connection and try again.';
-      setError(msg);
-      setListings([]);
+      // If we had cached data leave it on screen; only flash the empty
+      // state + error when we have nothing to show.
+      if (!cached.data) {
+        const msg =
+          err instanceof ApiError
+            ? `Couldn't load listings: ${err.message}`
+            : 'Network error — check your connection and try again.';
+        setError(msg);
+        setListings([]);
+      }
     } finally {
       setLoading(false);
     }
