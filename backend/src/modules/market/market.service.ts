@@ -385,7 +385,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       : null;
     if (cacheKey) {
       const hit = await this.redis.get(cacheKey).catch(() => null);
-      if (hit) return JSON.parse(hit) as ReturnType<typeof this.getListings>;
+      if (hit) return JSON.parse(hit) as { data: object[]; total: number; page: number; pages: number };
     }
 
     const where: Record<string, unknown> = { status: 'ACTIVE' };
