@@ -570,12 +570,11 @@ export class MarketController {
     @CurrentUser('id') buyerId: string,
     @Body() body: { buyerAgentListingId?: string } = {},
   ) {
-    // AI-vs-AI negotiation is feature-flagged off until we re-enable it.
-    // The frontend already renders "Coming soon" — this is the backend
-    // guard so a stale client can't still create orphan negotiations.
-    if (process.env.NEGOTIATION_ENABLED !== '1') {
+    // Agent-to-agent negotiation is enabled by default. Set
+    // NEGOTIATION_DISABLED=1 to force-disable (e.g. during outages).
+    if (process.env.NEGOTIATION_DISABLED === '1') {
       throw new BadRequestException(
-        'Agent-to-agent negotiation is launching soon.',
+        'Negotiation is temporarily paused — try again in a few minutes.',
       );
     }
     return this.negotiationService.startNegotiation(

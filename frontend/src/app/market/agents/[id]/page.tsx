@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
@@ -223,6 +224,8 @@ export default function AgentDetailPage() {
   const [buyError, setBuyError] = useState('');
   const [buySuccess, setBuySuccess] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [showAgentPicker, setShowAgentPicker] = useState(false);
+  const [startingNegotiation, setStartingNegotiation] = useState(false);
   const { record: recordRecent } = useRecentlyViewed();
 
   const loadReviews = useCallback(async () => {
@@ -354,6 +357,43 @@ export default function AgentDetailPage() {
       setBuyError(msg.includes('rejected') ? 'Payment cancelled' : err instanceof ApiError ? err.message : 'Payment failed: ' + msg.slice(0, 80));
     }
   };
+
+  const handleNegotiateClick = useCallback(() => {
+    if (!user) {
+      router.push(`/auth/login?redirect=${encodeURIComponent(`/market/agents/${listing?.id ?? ''}`)}`);
+      return;
+    }
+    if (listing && listing.seller.id === user.id) {
+      addToast('That\'s your own listing.', 'info');
+      return;
+    }
+    setShowAgentPicker(true);
+  }, [user, listing, router, addToast]);
+
+  const startNegotiation = useCallback(
+    async (agentListingId: string | null) => {
+      if (!listing) return;
+      setShowAgentPicker(false);
+      setStartingNegotiation(true);
+      try {
+        const res = await api.post<{ id: string }>(
+          `/market/${listing.id}/negotiate`,
+          agentListingId ? { buyerAgentListingId: agentListingId } : {},
+        );
+        if (res?.id) {
+          router.push(`/negotiations/${res.id}`);
+          return;
+        }
+        addToast('Failed to start negotiation', 'error');
+      } catch (err) {
+        const msg = err instanceof ApiError ? err.message : 'Failed to start negotiation';
+        addToast(msg, 'error');
+      } finally {
+        setStartingNegotiation(false);
+      }
+    },
+    [listing, router, addToast],
+  );
 
   if (loading) {
     return (
@@ -508,14 +548,24 @@ export default function AgentDetailPage() {
                 <ShoppingBag className="w-4 h-4" />
                 {isFree ? 'Get free' : 'Buy now'}
               </button>
-              <span
-                title="AI-to-AI negotiation coming soon"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-light select-none cursor-not-allowed"
-                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#52525b' }}
+              <button
+                type="button"
+                onClick={handleNegotiateClick}
+                disabled={startingNegotiation}
+                title="Start an AI-to-AI negotiation"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-light text-white transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(131,110,249,0.22), rgba(131,110,249,0.08))',
+                  border: '1px solid rgba(131,110,249,0.35)',
+                }}
               >
-                <Lock className="w-3 h-3" />
-                Negotiate · soon
-              </span>
+                {startingNegotiation ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Bot className="w-3 h-3" />
+                )}
+                Negotiate
+              </button>
               </>
               )}
             </div>
@@ -700,6 +750,8 @@ export default function AgentDetailPage() {
             <PricingCard
               listing={listing}
               onBuy={handleBuy}
+              onNegotiate={handleNegotiateClick}
+              negotiating={startingNegotiation}
               isOwner={isOwner}
               buyPaying={buyPaying}
               alreadyOwned={alreadyOwned}
@@ -754,6 +806,17 @@ export default function AgentDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Agent picker — fires when the user clicks Negotiate */}
+      {showAgentPicker && listing && (
+        <AgentPickerModal
+          listingTitle={listing.title}
+          listingPrice={listing.price}
+          listingCurrency={listing.currency}
+          onCancel={() => setShowAgentPicker(false)}
+          onConfirm={(agentId) => void startNegotiation(agentId)}
+        />
       )}
     </div>
   );
@@ -1093,6 +1156,8 @@ function ReviewsWidget({
 function PricingCard({
   listing,
   onBuy,
+  onNegotiate,
+  negotiating,
   isOwner,
   buyPaying,
   alreadyOwned,
@@ -1100,6 +1165,8 @@ function PricingCard({
 }: {
   listing: MarketListing;
   onBuy: () => void;
+  onNegotiate?: () => void;
+  negotiating?: boolean;
   isOwner?: boolean;
   buyPaying?: boolean;
   alreadyOwned?: boolean;
@@ -1192,13 +1259,23 @@ function PricingCard({
             <ShoppingBag className="w-4 h-4" />
             {isFree ? 'Get free' : 'Buy now'}
           </button>
-          <div
-            className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[11.5px] font-light select-none cursor-not-allowed"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', color: '#3f3f46' }}
+          <button
+            type="button"
+            onClick={onNegotiate}
+            disabled={negotiating || !onNegotiate}
+            className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-light text-white transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{
+              background: 'linear-gradient(180deg, rgba(131,110,249,0.18), rgba(131,110,249,0.06))',
+              border: '1px solid rgba(131,110,249,0.35)',
+            }}
           >
-            <Lock className="w-3 h-3" />
-            Negotiate · coming soon
-          </div>
+            {negotiating ? (
+              <Loader2 className="w-3 h-3 animate-spin" />
+            ) : (
+              <Bot className="w-3 h-3" />
+            )}
+            Negotiate
+          </button>
           <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
             Payment held in escrow until you approve delivery.
           </p>

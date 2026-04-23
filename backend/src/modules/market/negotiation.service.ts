@@ -60,9 +60,9 @@ interface NegotiationType {
 const MAX_TURNS = 15;
 
 // Delay between AI agent turns (ms) — long enough for humans to read
-// the previous message and chime in if they want, short enough for the
-// loop to feel live. Less than this and the chat blurs past the user.
-const TURN_DELAY_MS = 1600;
+// the previous message and chime in with a prompt, short enough for
+// the loop to feel live. 2s is the sweet spot per product direction.
+const TURN_DELAY_MS = 2000;
 
 @Injectable()
 export class NegotiationService {
