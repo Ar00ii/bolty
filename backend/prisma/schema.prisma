@@ -158,6 +158,11 @@ model ChatMessage {
   channel  String  @default("general")
   imageUrl String?
 
+  // When set, the message was posted by the user "on behalf of" one of
+  // their AI_AGENT listings — renders with a [via AgentName] chip.
+  viaAgentListingId String?
+  viaAgentName      String?
+
   likeCount Int @default(0)
 
   isDeleted    Boolean   @default(false)
