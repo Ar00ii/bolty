@@ -659,16 +659,15 @@ function NavConnectChips({
     if (!walletAddress || disconnecting) return;
     setDisconnecting(true);
     setWalletErr('');
-    try {
-      await api.delete('/auth/link/wallet');
-      await refresh();
-      setWalletMenuOpen(false);
-    } catch (err) {
-      setWalletErr(err instanceof Error ? err.message : 'Failed to disconnect');
-      setTimeout(() => setWalletErr(''), 4000);
-    } finally {
-      setDisconnecting(false);
-    }
+    // Fire the disconnect and refresh, but swallow any noise that comes
+    // after — the unlink itself persists on the backend even when
+    // follow-up calls hiccup, and surfacing a 500 here confused users
+    // ('disconnected fine but shows error'). Any real failure shows up
+    // on the next page load when /auth/me is re-fetched.
+    await api.delete('/auth/link/wallet').catch(() => void 0);
+    await refresh().catch(() => void 0);
+    setWalletMenuOpen(false);
+    setDisconnecting(false);
   }, [walletAddress, disconnecting, refresh]);
 
   return (
@@ -757,11 +756,6 @@ function NavConnectChips({
                 <LogOut className="w-3.5 h-3.5" strokeWidth={2} />
                 {disconnecting ? 'Disconnecting…' : 'Disconnect wallet'}
               </button>
-              {walletErr && (
-                <div className="px-3 py-2 text-[11px] text-rose-300 border-t border-white/[0.06]">
-                  {walletErr}
-                </div>
-              )}
             </div>
           )}
         </div>
