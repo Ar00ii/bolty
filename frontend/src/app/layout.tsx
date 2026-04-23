@@ -125,6 +125,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-theme="dark" className={inter.variable}>
       <head>
+        {/* Explicit viewport meta as a belt-and-suspenders backup to the
+            `export const viewport` above — some deploy pipelines strip or
+            reorder the auto-injected tag, and without it mobile browsers
+            render at ~980px and scale down. */}
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
+        />
         {/* Non-blocking Geist + Geist Mono. The `media="print"` trick lets the
              browser fetch the stylesheet in the background without blocking
              the initial paint; the onLoad handler promotes it to `all` once
