@@ -4240,6 +4240,26 @@ aside button[data-active='true']::after {
 .mk-app-page .text-3xl {
   letter-spacing: -0.015em;
 }
+
+/* Sidebar typography — raise all copy inside the app shell sidebar
+   to the new product weight so it matches migrated pages. Targets
+   nav items, section headers, user chips — everything that was
+   showing as font-weight: 300 via the global * rule. */
+.mk-sidebar,
+.mk-sidebar * {
+  font-weight: 500 !important;
+}
+.mk-sidebar .font-light,
+.mk-sidebar .font-normal {
+  font-weight: 500 !important;
+}
+.mk-sidebar .font-medium,
+.mk-sidebar .font-semibold {
+  font-weight: 600 !important;
+}
+.mk-sidebar .font-bold {
+  font-weight: 700 !important;
+}
 .mk-app .mk-num {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
