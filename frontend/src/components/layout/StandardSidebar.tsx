@@ -172,37 +172,30 @@ export function StandardSidebar() {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
-      {/* Workspace switcher */}
+      {/* Workspace switcher — matches the landing header logo */}
       <Link
         href="/"
-        className="grid items-center text-left h-12 px-[14px] gap-[10px] transition-colors hover:bg-white/[0.02]"
-        style={{
-          gridTemplateColumns: '38px 1fr 16px',
-          borderBottom: '1px solid #1f1f23',
-        }}
+        className="flex items-center gap-2 text-left h-14 px-[14px] transition-colors hover:bg-white/[0.02]"
+        style={{ borderBottom: '1px solid #1f1f23' }}
       >
-        <div className="w-[38px] h-[38px] grid place-items-center rounded-lg overflow-hidden">
+        <div className="w-[36px] h-[36px] grid place-items-center rounded-lg overflow-hidden shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
-        <div className="min-w-0 flex items-center">
-          <span
-            className="truncate"
-            style={{
-              fontFamily: 'Inter, system-ui, sans-serif',
-              fontSize: '15px',
-              fontWeight: 700,
-              letterSpacing: '-0.25px',
-              background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            BoltyNetwork
-          </span>
-        </div>
-        <span />
+        <span
+          className="text-xl truncate"
+          style={{
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 700,
+            letterSpacing: '-0.3px',
+            background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+          }}
+        >
+          BoltyNetwork
+        </span>
       </Link>
 
       {/* Search trigger */}
