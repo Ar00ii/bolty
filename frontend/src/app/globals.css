@@ -4309,20 +4309,23 @@ aside button[data-active='true']::after {
 
 /* Sidebar typography — raise nav items, section headers and chips to
    the new product weight. No !important so inline styles with their
-   own fontWeight (the BoltyNetwork logo is 700 inline) still win. */
-.mk-sidebar,
-.mk-sidebar * {
+   own fontWeight (the BoltyNetwork logo is 700 inline) still win.
+   NOTE: className is .mk-app-sidebar, NOT .mk-sidebar, because the
+   legacy .mk-sidebar in this file forces display:flex + 232px width
+   and would break mobile hiding. */
+.mk-app-sidebar,
+.mk-app-sidebar * {
   font-weight: 500;
 }
-.mk-sidebar .font-light,
-.mk-sidebar .font-normal {
+.mk-app-sidebar .font-light,
+.mk-app-sidebar .font-normal {
   font-weight: 500;
 }
-.mk-sidebar .font-medium,
-.mk-sidebar .font-semibold {
+.mk-app-sidebar .font-medium,
+.mk-app-sidebar .font-semibold {
   font-weight: 600;
 }
-.mk-sidebar .font-bold {
+.mk-app-sidebar .font-bold {
   font-weight: 700;
 }
 .mk-app .mk-num {

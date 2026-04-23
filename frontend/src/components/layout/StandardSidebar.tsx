@@ -165,7 +165,7 @@ export function StandardSidebar() {
 
   return (
     <aside
-      className="mk-sidebar hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[264px] shrink-0"
+      className="mk-app-sidebar hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[264px] shrink-0"
       style={{
         background: '#0c0c0f',
         borderRight: '1px solid #1f1f23',
