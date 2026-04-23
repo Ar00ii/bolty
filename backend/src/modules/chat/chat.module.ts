@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { MulterModule } from '@nestjs/platform-express';
 
 import { AuthModule } from '../auth/auth.module';
 
@@ -8,7 +9,7 @@ import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, MulterModule.register()],
   providers: [ChatGateway, ChatService, ChatBotService],
   controllers: [ChatController],
 })

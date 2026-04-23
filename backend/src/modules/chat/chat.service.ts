@@ -39,7 +39,7 @@ export class ChatService {
   async validateAndSave(
     userId: string,
     content: string,
-    options: { channel?: string; imageUrl?: string | null } = {},
+    options: { channel?: string; imageUrl?: string | null; viaAgentListingId?: string | null } = {},
   ) {
     // ── Input validation ──────────────────────────────────────────────────
     if (!content || typeof content !== 'string') {
@@ -53,6 +53,26 @@ export class ChatService {
 
     const channel = normalizeChannel(options.channel);
     const imageUrl = typeof options.imageUrl === 'string' ? options.imageUrl.slice(0, 500) : null;
+
+    // If the user claims to post "via" an agent listing, verify they own
+    // it and store the agent's title for the UI chip.
+    let viaAgentListingId: string | null = null;
+    let viaAgentName: string | null = null;
+    if (options.viaAgentListingId) {
+      const listing = await this.prisma.marketListing.findFirst({
+        where: {
+          id: options.viaAgentListingId,
+          sellerId: userId,
+          type: 'AI_AGENT',
+        },
+        select: { id: true, title: true },
+      });
+      if (!listing) {
+        throw new ForbiddenException('That agent listing is not yours or not an AI agent');
+      }
+      viaAgentListingId = listing.id;
+      viaAgentName = listing.title.slice(0, 80);
+    }
 
     // ── Flood control ─────────────────────────────────────────────────────
     const floodKey = `chat_flood:${userId}`;
@@ -91,6 +111,8 @@ export class ChatService {
         userId,
         channel,
         imageUrl,
+        viaAgentListingId,
+        viaAgentName,
       },
       include: {
         user: {

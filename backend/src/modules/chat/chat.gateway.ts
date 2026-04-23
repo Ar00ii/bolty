@@ -129,6 +129,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           content: m.content,
           channel: m.channel,
           imageUrl: m.imageUrl,
+          viaAgentListingId: m.viaAgentListingId,
+          viaAgentName: m.viaAgentName,
           likeCount: m.likeCount,
           userId: m.userId,
           username: m.user.username,
@@ -156,7 +158,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('sendMessage')
   async handleMessage(
     @ConnectedSocket() client: AuthenticatedSocket,
-    @MessageBody() data: { content: string; channel?: string; imageUrl?: string | null },
+    @MessageBody()
+    data: {
+      content: string;
+      channel?: string;
+      imageUrl?: string | null;
+      viaAgentListingId?: string | null;
+    },
   ) {
     if (!client.userId) {
       throw new WsException('Unauthorized');
@@ -171,6 +179,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const message = await this.chatService.validateAndSave(client.userId, data.content, {
         channel: data.channel,
         imageUrl: data.imageUrl ?? null,
+        viaAgentListingId: data.viaAgentListingId ?? null,
       });
 
       // Broadcast to all connected clients — payload carries channel so
@@ -180,6 +189,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         content: message.content,
         channel: message.channel,
         imageUrl: message.imageUrl,
+        viaAgentListingId: message.viaAgentListingId,
+        viaAgentName: message.viaAgentName,
         likeCount: message.likeCount,
         userId: message.userId,
         username: message.user.username,
