@@ -95,38 +95,58 @@ export function BoltyCandleChart() {
     };
   }, []);
 
-  const loadCandles = useCallback(async () => {
-    try {
-      const data = await api.get<Candle[]>(
-        `/token/bolty/ohlcv?timeframe=${timeframe.tf}&aggregate=${timeframe.agg}&limit=300`,
-      );
-      const series = seriesRef.current;
-      if (!series) return;
-      if (!data || data.length === 0) {
-        series.setData([]);
-        setStatus('empty');
-        return;
+  const hasDataRef = useRef(false);
+
+  const loadCandles = useCallback(
+    async (opts: { initial?: boolean } = {}) => {
+      const isInitial = opts.initial ?? false;
+      try {
+        const data = await api.get<Candle[]>(
+          `/token/bolty/ohlcv?timeframe=${timeframe.tf}&aggregate=${timeframe.agg}&limit=300`,
+        );
+        const series = seriesRef.current;
+        if (!series) return;
+        if (!data || data.length === 0) {
+          // On a refresh with an empty response (rate-limit, flaky
+          // upstream, cache miss racing with an upstream purge), keep
+          // the candles we already have — only show the empty state
+          // if we've literally never had data.
+          if (!hasDataRef.current) {
+            series.setData([]);
+            setStatus('empty');
+          }
+          return;
+        }
+        series.setData(
+          data.map((c) => ({
+            time: c.t as Time,
+            open: c.o,
+            high: c.h,
+            low: c.l,
+            close: c.c,
+          })),
+        );
+        hasDataRef.current = true;
+        // Only fit on the initial load (or on timeframe switch). Fitting
+        // on every refresh resets the user's pan/zoom — ugly.
+        if (isInitial) chartRef.current?.timeScale().fitContent();
+        setStatus('ready');
+      } catch {
+        // Ignore transient fetch errors on refresh — keep the chart.
+        if (!hasDataRef.current) setStatus('error');
       }
-      series.setData(
-        data.map((c) => ({
-          time: c.t as Time,
-          open: c.o,
-          high: c.h,
-          low: c.l,
-          close: c.c,
-        })),
-      );
-      chartRef.current?.timeScale().fitContent();
-      setStatus('ready');
-    } catch {
-      setStatus('error');
-    }
-  }, [timeframe]);
+    },
+    [timeframe],
+  );
 
   // Reload on timeframe change + live refresh while the tab is visible.
   useEffect(() => {
+    // New timeframe invalidates the prior candle set, so reset the
+    // "have data" flag — that way if the first fetch on the new
+    // timeframe comes back empty we can still show the overlay.
+    hasDataRef.current = false;
     setStatus('loading');
-    void loadCandles();
+    void loadCandles({ initial: true });
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') void loadCandles();
     }, REFRESH_MS);
