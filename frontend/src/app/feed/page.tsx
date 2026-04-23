@@ -105,11 +105,16 @@ export default function FeedPage() {
 
   const socketRef = useRef<Socket | null>(null);
   const channelRef = useRef(channel);
+  const userIdRef = useRef<string | undefined>(undefined);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Keep the live-channel read by the socket handler fresh without
-  // tearing down the connection on every switch.
+  // Keep refs fresh so the single socket effect doesn't need to
+  // reconnect when auth resolves or channel switches.
+  useEffect(() => {
+    userIdRef.current = user?.id;
+  }, [user?.id]);
+
   useEffect(() => {
     channelRef.current = channel;
   }, [channel]);
@@ -120,10 +125,10 @@ export default function FeedPage() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  // Load agents once the user is authed — needed for the composer's
-  // "Connect an agent" picker.
+  // Load agents — used by the composer's "Connect an agent" picker.
+  // No auth gate: if the viewer is anon the request 401s harmlessly and
+  // the picker stays empty.
   useEffect(() => {
-    if (!isAuthenticated) return;
     (async () => {
       try {
         const rows = await api.get<AgentListing[]>('/chat/my-agents');
@@ -132,7 +137,7 @@ export default function FeedPage() {
         /* no-op */
       }
     })();
-  }, [isAuthenticated]);
+  }, []);
 
   // Fetch the current channel's timeline. Serve cached first, then
   // revalidate in the background.
@@ -157,15 +162,19 @@ export default function FeedPage() {
     [],
   );
 
+  // Kick the fetch off the moment the page mounts so the first paint
+  // shows messages as fast as the network allows — we don't wait for
+  // auth to resolve. The ApiClient auto-refreshes on 401 so an expired
+  // token still returns data within the same effect tick.
   useEffect(() => {
-    if (!isAuthenticated) return;
     void loadChannel(channel);
-  }, [channel, isAuthenticated, loadChannel]);
+  }, [channel, loadChannel]);
 
   // Connect ONCE to the socket. Channel-awareness reads channelRef so
-  // switching channels no longer tears down the socket.
+  // switching channels no longer tears down the socket. We don't wait
+  // on the auth hook to resolve — the gateway rejects anon sockets
+  // server-side and we retry on reconnect as cookies arrive.
   useEffect(() => {
-    if (!isAuthenticated) return;
     const socket = io(`${WS_URL}/chat`, {
       withCredentials: true,
       transports: ['websocket'],
@@ -197,7 +206,7 @@ export default function FeedPage() {
                     ...m,
                     likeCount: payload.likeCount,
                     likedByMe:
-                      payload.likedBy === user?.id ? payload.liked : m.likedByMe,
+                      payload.likedBy === userIdRef.current ? payload.liked : m.likedByMe,
                   }
                 : m,
             );
@@ -215,7 +224,7 @@ export default function FeedPage() {
     return () => {
       socket.disconnect();
     };
-  }, [isAuthenticated, user?.id]);
+  }, []);
 
   const messages = messagesByChannel[channel] ?? [];
   const loading = channelLoading[channel] ?? !messagesByChannel[channel];
@@ -328,14 +337,9 @@ export default function FeedPage() {
     [],
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
-        <Loader2 className="h-5 w-5 animate-spin text-[#836EF9]" />
-      </div>
-    );
-  }
-
+  // Don't block the whole page on auth resolution. The shell (channels
+  // rail, composer, timeline header) renders immediately; the timeline
+  // itself shows a shimmer while messages arrive.
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-[#07070A] text-white">
       <div
@@ -753,22 +757,34 @@ export default function FeedPage() {
 function LoadingSkeletons() {
   return (
     <div className="flex flex-col gap-3">
-      {[0, 1, 2].map((i) => (
+      {[0, 1, 2, 3].map((i) => (
         <div
           key={i}
           className="relative overflow-hidden rounded-2xl p-4"
           style={{
             background:
-              'linear-gradient(180deg, rgba(20,20,26,0.4) 0%, rgba(10,10,14,0.4) 100%)',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.04)',
+              'linear-gradient(180deg, rgba(20,20,26,0.5) 0%, rgba(10,10,14,0.5) 100%)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.05)',
           }}
         >
-          <div className="flex gap-3">
-            <div className="h-10 w-10 animate-pulse rounded-full bg-white/5" />
+          {/* Shimmer sweep across the whole row */}
+          <div
+            className="pointer-events-none absolute inset-0 animate-shimmer"
+            style={{
+              background:
+                'linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.06) 50%, transparent 75%)',
+              backgroundSize: '200% 100%',
+            }}
+          />
+          <div className="relative flex gap-3">
+            <div className="h-10 w-10 rounded-full bg-white/[0.06]" />
             <div className="flex-1 space-y-2">
-              <div className="h-3 w-28 animate-pulse rounded bg-white/5" />
-              <div className="h-3 w-full animate-pulse rounded bg-white/5" />
-              <div className="h-3 w-3/4 animate-pulse rounded bg-white/5" />
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-24 rounded bg-white/[0.06]" />
+                <div className="h-2 w-10 rounded bg-white/[0.04]" />
+              </div>
+              <div className="h-3 w-full rounded bg-white/[0.06]" />
+              <div className="h-3 w-3/4 rounded bg-white/[0.05]" />
             </div>
           </div>
         </div>
