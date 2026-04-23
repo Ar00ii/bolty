@@ -1,26 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import {
-  ArrowUpRight,
-  Copy,
-  Droplets,
-  ExternalLink,
-  Rocket,
-  Shield,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
-import Link from 'next/link';
+import { Copy, ExternalLink, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { BoltyCandleChart } from '@/components/token/BoltyCandleChart';
 import { BoltySwapCard } from '@/components/token/BoltySwapCard';
 import { BoltyTradesFeed } from '@/components/token/BoltyTradesFeed';
 import { FlaunchLogo } from '@/components/token/FlaunchLogo';
-import { PoweredByFlaunchBadge } from '@/components/token/PoweredByFlaunchBadge';
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 
@@ -166,7 +153,6 @@ export default function BoltyTokenPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <PoweredByFlaunchBadge logoSize={26} />
             <a
               href={flaunchUrl}
               target="_blank"
@@ -276,76 +262,6 @@ export default function BoltyTokenPage() {
           <BoltyTradesFeed />
         </section>
 
-        {/* ── Coming soon: agent launchpad ─────────────────────────────── */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="relative mt-4 overflow-hidden rounded-2xl p-5 sm:p-7"
-          style={{
-            background:
-              'linear-gradient(135deg, rgba(131,110,249,0.14) 0%, rgba(201,255,65,0.06) 55%, rgba(236,72,153,0.08) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
-          }}
-        >
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(131,110,249,0.32), transparent 70%)',
-              filter: 'blur(20px)',
-            }}
-          />
-
-          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div className="max-w-xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#836EF9]/40 bg-[#836EF9]/10 px-3 py-1 text-[10.5px] uppercase tracking-[0.24em] text-[#C9BEFF]">
-                <Sparkles className="h-3 w-3" />
-                Coming soon
-              </div>
-              <h3 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
-                Launch your own AI agents on{' '}
-                <span className="inline-flex items-center gap-2 align-middle">
-                  <FlaunchLogo size={36} />
-                  <GradientText gradient="purple">Flaunch</GradientText>
-                </span>
-              </h3>
-              <p className="mt-2 text-sm font-light text-white/70">
-                We&apos;re building the first AI-agent launchpad on top of Flaunch.
-                Publish your agent, attach a fair-launch coin, and let the
-                community price its intelligence — all in one click.
-              </p>
-              <ul className="mt-4 grid grid-cols-1 gap-2 text-xs text-white/60 sm:grid-cols-2">
-                <Bullet icon={Rocket}>One-click fair launch per agent</Bullet>
-                <Bullet icon={Shield}>Escrow &amp; reputation baked in</Bullet>
-                <Bullet icon={Droplets}>Automatic Uniswap V4 liquidity</Bullet>
-                <Bullet icon={Zap}>Revenue-share to agent creators</Bullet>
-              </ul>
-            </div>
-
-            <div className="flex flex-col gap-2 sm:w-56">
-              <Link
-                href="/market/seller/publish"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-2.5 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110"
-              >
-                Publish an agent
-                <ArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-              <a
-                href="https://flaunch.gg"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-light text-white/80 transition hover:border-white/30 hover:text-white"
-              >
-                <FlaunchLogo size={20} />
-                Learn about Flaunch
-                <ExternalLink className="h-3.5 w-3.5" />
-              </a>
-            </div>
-          </div>
-        </motion.section>
       </div>
     </div>
   );
@@ -383,20 +299,5 @@ function PriceDelta({ label, value }: { label: string; value: number | null }) {
         {formatPct(value)}
       </span>
     </div>
-  );
-}
-
-function Bullet({
-  icon: Icon,
-  children,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="flex items-start gap-2">
-      <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#C9BEFF]" />
-      <span>{children}</span>
-    </li>
   );
 }
