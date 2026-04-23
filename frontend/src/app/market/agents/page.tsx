@@ -4871,10 +4871,19 @@ function AgentsPageContent() {
       const params = new URLSearchParams();
       if (type !== 'ALL') params.set('type', type);
       if (search) params.set('search', search);
-      const data = await api.get<{ data: MarketListing[] }>(`/market?${params}`);
-      setListings(data.data);
-    } catch {
-      setError('Failed to load listings');
+      const data = await api.get<{ data: MarketListing[] } | MarketListing[]>(`/market?${params}`);
+      // Tolerate both shapes: legacy {data: []} envelope and the raw
+      // array we sometimes get back. Surface the actual server message
+      // in dev/prod so we stop seeing the opaque "Failed to load".
+      const rows = Array.isArray(data) ? data : (data?.data ?? []);
+      setListings(rows);
+    } catch (err) {
+      const msg =
+        err instanceof ApiError
+          ? `Couldn't load listings: ${err.message}`
+          : 'Network error — check your connection and try again.';
+      setError(msg);
+      setListings([]);
     } finally {
       setLoading(false);
     }
@@ -4986,28 +4995,73 @@ function AgentsPageContent() {
   return (
     <div className="mk-agents-page">
       {/* Minimal header: breadcrumb + Deploy CTA */}
-      <div className="mk-agents-head">
-        <div>
-          <div className="mk-breadcrumb">
-            <Link href="/market" className="mk-breadcrumb__link">
-              Market
-            </Link>
-            <span className="mk-breadcrumb__sep">/</span>
-            <span>Agents</span>
+      <section
+        className="relative overflow-hidden rounded-2xl px-5 py-5 sm:px-7 sm:py-6 mb-5"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.14) 0%, rgba(6,182,212,0.08) 55%, rgba(236,72,153,0.06) 100%)',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.07), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
+      >
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -right-20 -top-24 h-60 w-60 rounded-full"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(131,110,249,0.35), transparent 70%)',
+            filter: 'blur(28px)',
+          }}
+        />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <div className="mk-breadcrumb">
+              <Link href="/market" className="mk-breadcrumb__link">
+                Market
+              </Link>
+              <span className="mk-breadcrumb__sep">/</span>
+              <span>Agents</span>
+            </div>
+            <h1 className="mt-1 text-2xl font-light tracking-tight sm:text-3xl">
+              <GradientText gradient="purple">AI Agents</GradientText>
+            </h1>
+            <p className="mt-1 max-w-xl text-sm font-light text-white/60">
+              Deploy, buy, and negotiate with autonomous agents.
+              Every listing is health-checked and live.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-white/55">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_6px_#4ADE80]" />
+                <span className="font-normal text-white/80">
+                  {listings.length}
+                </span>{' '}
+                agents live
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Bot className="h-3 w-3 text-[#C9BEFF]" />
+                <span className="font-normal text-white/80">
+                  {listings.filter((l) => l.type === 'AI_AGENT').length}
+                </span>{' '}
+                AI-native
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Zap className="h-3 w-3 text-[#F59E0B]" />
+                Negotiation enabled
+              </span>
+            </div>
           </div>
-          <h1 className="mk-agents-title">Agents</h1>
+          {isAuthenticated && (
+            <button
+              type="button"
+              onClick={attemptDeploy}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-5 py-2.5 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110"
+            >
+              <Plus className="h-4 w-4" />
+              Deploy agent
+            </button>
+          )}
         </div>
-        {isAuthenticated && (
-          <button
-            type="button"
-            onClick={attemptDeploy}
-            className="mk-wizard__primary mk-agents-head__cta"
-          >
-            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-            Deploy agent
-          </button>
-        )}
-      </div>
+      </section>
 
       {/* Tabs */}
       <div className="mk-agents-tabs">
@@ -5094,7 +5148,25 @@ function AgentsPageContent() {
               })}
             </div>
           </div>
-          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {error && (
+            <div
+              className="mb-4 flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm"
+              style={{
+                background: 'rgba(244,63,94,0.10)',
+                boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
+                color: '#FDA4AF',
+              }}
+            >
+              <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/30 text-[10px] font-mono">!</span>
+              <span className="flex-1 font-light">{error}</span>
+              <button
+                onClick={() => fetchListings()}
+                className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[11px] text-rose-100 transition hover:bg-rose-500/30"
+              >
+                Retry
+              </button>
+            </div>
+          )}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -5103,29 +5175,37 @@ function AgentsPageContent() {
             </div>
           ) : listings.length === 0 ? (
             <div
-              className="relative rounded-2xl px-8 py-16 text-center overflow-hidden"
+              className="relative rounded-2xl px-8 py-16 text-center"
               style={{
-                border: '1px dashed rgba(255,255,255,0.1)',
-                background: 'rgba(0,0,0,0.3)',
+                background:
+                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
+                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
               }}
             >
-              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-white/10" />
-              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-white/10" />
-              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-white/10" />
-              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-white/10" />
               <div
-                className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
+                className="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center"
                 style={{
-                  background: 'rgba(131,110,249,0.08)',
-                  border: '1px solid rgba(131,110,249,0.2)',
+                  background:
+                    'linear-gradient(135deg, rgba(131,110,249,0.22), rgba(6,182,212,0.14))',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
                 }}
               >
-                <Bot className="w-7 h-7 text-purple-300" strokeWidth={1.5} />
+                <Bot className="w-7 h-7 text-[#C9BEFF]" strokeWidth={1.5} />
               </div>
               <p className="text-white font-light text-base">No agents found</p>
               <p className="text-sm text-zinc-500 font-light mt-2 max-w-sm mx-auto">
-                Try adjusting your filters or check back soon — new agents deploy every day.
+                Try adjusting your filters, or deploy the first one.
               </p>
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  onClick={attemptDeploy}
+                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-2 text-sm font-normal text-white shadow-[0_0_24px_-8px_#836EF9] transition hover:brightness-110"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Deploy an agent
+                </button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
