@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import React from 'react';
 
@@ -23,6 +23,18 @@ const inter = Inter({
 });
 
 const BASE_URL = 'https://boltynetwork.xyz';
+
+// Responsive viewport — without this, mobile browsers render the page
+// at the virtual 980px layout width and scale it down, which is why
+// the dashboard looked catastrophically broken on phones even with
+// correct responsive CSS.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: '#07070a',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
