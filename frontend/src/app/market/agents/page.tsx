@@ -4777,7 +4777,6 @@ function AgentsPageContent() {
   const [type, setType] = useState('AI_AGENT');
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
-  const [showCreate, setShowCreate] = useState(false);
   const [negotiatingListing, setNegotiatingListing] = useState<MarketListing | null>(null);
   const [initialNegId, setInitialNegId] = useState<string | null>(null);
   const [asAgentId, setAsAgentId] = useState<string | null>(null);
@@ -4833,8 +4832,9 @@ function AgentsPageContent() {
         setMobileBlock(true);
         return;
       }
-      setActiveTab('mine');
-      setShowCreate(true);
+      // Legacy deep-links that used ?new=1 to pop the inline wizard
+      // now redirect to the dedicated /publish page.
+      router.replace('/market/agents/publish');
     }
   }, [searchParams, isAuthenticated]);
 
@@ -5245,34 +5245,20 @@ function AgentsPageContent() {
               </Link>
             </div>
           ) : (
-            <div className={showCreate ? 'mk-agents-split' : ''}>
-              {/* Left column: deploy form */}
-              {showCreate && (
-                <aside className="mk-agents-split__form">
-                  <CreateListingForm
-                    onCreated={(l) => {
-                      setMyListings((p) => [l, ...p]);
-                      setShowCreate(false);
-                    }}
-                    onCancel={() => setShowCreate(false)}
-                  />
-                </aside>
-              )}
-
-              {/* Right column: listings */}
-              <section className="mk-agents-split__list">
+            <div>
+              <section>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-[12.5px] text-zinc-500">
                     {myListings.length} agent{myListings.length !== 1 ? 's' : ''} published
                   </p>
                   <button
                     type="button"
-                    onClick={() => setShowCreate((p) => !p)}
-                    className={showCreate ? 'mk-wizard__secondary' : 'mk-wizard__primary'}
+                    onClick={attemptDeploy}
+                    className="mk-wizard__primary"
                     style={{ flex: '0 0 auto', height: 32, padding: '0 12px', fontSize: 12 }}
                   >
                     <Plus className="w-3 h-3 inline mr-1" />
-                    {showCreate ? 'Close form' : 'Deploy new'}
+                    Deploy new
                   </button>
                 </div>
 
@@ -5286,17 +5272,15 @@ function AgentsPageContent() {
                   <div className="mk-empty">
                     <Bot className="w-8 h-8 text-zinc-700 mx-auto mb-3" strokeWidth={1.25} />
                     <p className="mk-empty__text">No agents deployed yet</p>
-                    {!showCreate && (
-                      <button
-                        type="button"
-                        onClick={attemptDeploy}
-                        className="mk-wizard__primary inline-flex mt-3 max-w-fit"
-                        style={{ height: 32, padding: '0 12px', fontSize: 12 }}
-                      >
-                        <Plus className="w-3 h-3 inline mr-1" />
-                        Deploy your first agent
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={attemptDeploy}
+                      className="mk-wizard__primary inline-flex mt-3 max-w-fit"
+                      style={{ height: 32, padding: '0 12px', fontSize: 12 }}
+                    >
+                      <Plus className="w-3 h-3 inline mr-1" />
+                      Deploy your first agent
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-3">
