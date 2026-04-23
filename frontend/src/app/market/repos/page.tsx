@@ -1434,7 +1434,7 @@ function ReposMarketPageContent() {
   }));
 
   return (
-    <div className="mk-agents-page">
+    <div className="mk-agents-page mk-app-page">
       {/* Header + CTA — mirrors /market/agents for consistent chrome. */}
       <div className="mk-agents-head">
         <div>

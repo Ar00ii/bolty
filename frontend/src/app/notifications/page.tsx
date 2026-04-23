@@ -145,7 +145,7 @@ export default function NotificationsPage() {
   }, [typeCounts]);
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
       <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
         <div className="mx-auto max-w-[1200px]">
           <div className="flex items-baseline justify-between gap-4 flex-wrap">

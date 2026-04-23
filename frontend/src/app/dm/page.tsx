@@ -421,7 +421,7 @@ function DmPageInner() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]">
+    <div className="mk-app-page max-w-7xl mx-auto px-4 py-6 pt-10 h-[calc(100vh-4rem)]" style={{ maxWidth: '1280px' }}>
       <div className="flex gap-4 h-full">
         {/* Mobile backdrop */}
         {sidebarOpen && (

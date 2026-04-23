@@ -233,7 +233,7 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-8">
+    <div className="mk-app-page mx-auto max-w-6xl px-4 sm:px-6 py-8" style={{ maxWidth: '72rem' }}>
       <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.22em] text-zinc-500 mb-3">
         <Package className="w-3.5 h-3.5 text-[#b4a7ff]" />
         <span>Bolty inventory</span>

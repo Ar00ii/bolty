@@ -1420,7 +1420,7 @@ function AgentsPageContent() {
   };
 
   return (
-    <div className="mk-agents-page mk-app">
+    <div className="mk-agents-page mk-app-page">
       {/* Header row — compact, flat, product-feel */}
       <div className="mk-hero">
         <div className="mk-hero__crumbs">

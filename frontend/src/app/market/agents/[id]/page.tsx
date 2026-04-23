@@ -426,7 +426,7 @@ export default function AgentDetailPage() {
   const isFree = listing.price === 0;
 
   return (
-    <div className="min-h-screen" style={{ background: '#000' }}>
+    <div className="mk-app-page min-h-screen" style={{ background: '#000', maxWidth: 'none', padding: 0 }}>
       {/* ── Breadcrumb ─────────────────────────────────────────────────────── */}
       <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-black/70">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-2 text-xs text-zinc-500 overflow-x-auto">
