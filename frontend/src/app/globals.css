@@ -4319,10 +4319,13 @@ aside button[data-active='true']::after {
 /* Toolbar */
 .mk-app .mk-toolbar {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
+}
+.mk-app .mk-toolbar > * {
+  height: 34px;
 }
 .mk-app .mk-search {
   position: relative;
@@ -4389,15 +4392,16 @@ aside button[data-active='true']::after {
 /* Segmented control */
 .mk-app .mk-seg {
   display: inline-flex;
-  padding: 2px;
+  align-items: center;
+  padding: 3px;
   background: var(--app-surface);
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   gap: 2px;
 }
 .mk-app .mk-seg__item {
-  padding: 5px 12px;
-  font-size: 12px;
+  padding: 6px 14px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--app-text-mute);
   background: transparent;
@@ -4407,7 +4411,7 @@ aside button[data-active='true']::after {
   transition:
     color 120ms ease,
     background 120ms ease;
-  text-transform: capitalize;
+  white-space: nowrap;
 }
 .mk-app .mk-seg__item:hover {
   color: var(--app-text-dim);
@@ -4666,6 +4670,26 @@ aside button[data-active='true']::after {
 .mk-app .mk-card__actions {
   display: flex;
   gap: 6px;
+}
+
+/* Responsive helpers — win over my other selectors (higher specificity
+   via `.mk-app` parent) so the mobile/desktop switch is deterministic. */
+.mk-app .mk-only-mobile {
+  display: inline-flex;
+}
+.mk-app .mk-only-desktop {
+  display: none;
+}
+@media (min-width: 768px) {
+  .mk-app .mk-only-mobile {
+    display: none !important;
+  }
+  .mk-app .mk-only-desktop {
+    display: inline-flex !important;
+  }
+  .mk-app .mk-seg.mk-only-desktop {
+    display: inline-flex !important;
+  }
 }
 
 .mk-app .mk-empty-app {

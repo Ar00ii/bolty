@@ -443,11 +443,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // Strip the raw webhook URL from the public payload — leak the
     // boolean presence only. The URL is only returned on the owner's
     // /market/my-listings response and on GET /market/:id for the
-    // listing owner.
+    // listing owner. Defensive — a bad row shape shouldn't break the
+    // whole list.
     const data = merged.map((l) => {
+      if (!l || typeof l !== 'object') return l;
       const row = l as Record<string, unknown>;
-      const { agentEndpoint, ...rest } = row;
-      return { ...rest, hasAgentEndpoint: Boolean(agentEndpoint) };
+      const endpoint = row.agentEndpoint;
+      const copy = { ...row } as Record<string, unknown>;
+      delete copy.agentEndpoint;
+      copy.hasAgentEndpoint = Boolean(endpoint);
+      return copy;
     });
     const result = { data, total, page, pages: Math.ceil(total / take) };
     if (cacheKey) {

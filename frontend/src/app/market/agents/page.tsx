@@ -130,11 +130,11 @@ interface SecurityScan {
 
 const TYPES = ['ALL', 'AI_AGENT', 'BOT', 'SCRIPT', 'OTHER'];
 const TYPE_LABELS: Record<string, string> = {
-  ALL: 'all',
-  AI_AGENT: 'ai agent',
-  BOT: 'bot',
-  SCRIPT: 'script',
-  OTHER: 'other',
+  ALL: 'All',
+  AI_AGENT: 'AI Agent',
+  BOT: 'Bot',
+  SCRIPT: 'Script',
+  OTHER: 'Other',
 };
 const TYPE_COLORS: Record<string, string> = {
   BOT: 'text-bolty-400/80 border-bolty-400/25 bg-bolty-400/5',
@@ -1522,13 +1522,13 @@ function AgentsPageContent() {
             <button
               type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="mk-btn mk-btn--ghost md:hidden"
+              className="mk-btn mk-btn--ghost mk-only-mobile"
             >
               Filters
               <ChevronDown className="w-3 h-3" strokeWidth={2} />
             </button>
 
-            <div className="mk-seg hidden md:flex">
+            <div className="mk-seg mk-only-desktop">
               {TYPES.map((t) => (
                 <button
                   key={t}
