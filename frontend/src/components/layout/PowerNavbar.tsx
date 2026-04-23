@@ -1,16 +1,18 @@
 'use client';
 
-import { Bell, Menu, Search, X } from 'lucide-react';
+import { Bell, Github, Menu, Search, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import React, { useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
 
 import { MarketTicker } from '@/components/layout/MarketTicker';
 import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
-import { useAuth } from '@/lib/auth/AuthProvider';
+import { API_URL, api } from '@/lib/api/client';
+import { type User, useAuth } from '@/lib/auth/AuthProvider';
 import { useNotificationsPoll } from '@/lib/hooks/useNotifications';
+import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helpers
@@ -51,7 +53,7 @@ export function PowerNavbar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, refresh } = useAuth();
   const { count: unreadCount } = useNotificationsPoll(isAuthenticated);
 
   const crumbs = useMemo(() => buildCrumbs(pathname), [pathname]);
@@ -207,6 +209,9 @@ export function PowerNavbar() {
             </kbd>
           </span>
         </button>
+
+        {/* Wallet + GitHub quick-connect chips */}
+        {isAuthenticated && <NavConnectChips user={user} refresh={refresh} />}
 
         {/* Notification bell (signed-in only) */}
         {isAuthenticated && (
@@ -567,6 +572,189 @@ export function PowerNavbar() {
             )}
           </aside>
         </>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wallet + GitHub quick-connect chips shown in the navbar
+// ─────────────────────────────────────────────────────────────────────────────
+
+function NavConnectChips({
+  user,
+  refresh,
+}: {
+  user: User | null;
+  refresh: () => Promise<void>;
+}) {
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletErr, setWalletErr] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const walletAddress = user?.walletAddress ?? null;
+  const githubLogin = user?.githubLogin ?? null;
+  const githubAvatar = user?.avatarUrl ?? null;
+
+  const handleLinkWallet = useCallback(async () => {
+    setWalletLoading(true);
+    setWalletErr('');
+    try {
+      const eth = getMetaMaskProvider();
+      if (!eth) {
+        setWalletErr('MetaMask not detected');
+        return;
+      }
+      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
+      const address = accounts[0];
+      if (!address) return;
+      const { nonce, message } = await api.post<{ nonce: string; message: string }>(
+        '/auth/link/wallet/nonce',
+        { address },
+      );
+      const signature = (await eth.request({
+        method: 'personal_sign',
+        params: [message, address],
+      })) as string;
+      await api.post('/auth/link/wallet', { address, signature, nonce });
+      await refresh();
+    } catch (err) {
+      setWalletErr(err instanceof Error ? err.message : 'Connection failed');
+      setTimeout(() => setWalletErr(''), 4000);
+    } finally {
+      setWalletLoading(false);
+    }
+  }, [refresh]);
+
+  const handleLinkGitHub = useCallback(() => {
+    window.location.href = `${API_URL}/auth/github`;
+  }, []);
+
+  const handleCopyAddress = useCallback(() => {
+    if (!walletAddress) return;
+    navigator.clipboard.writeText(walletAddress).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [walletAddress]);
+
+  return (
+    <div className="hidden lg:flex items-center gap-1.5">
+      {/* ── Wallet chip ───────────────────────────────── */}
+      {walletAddress ? (
+        <button
+          type="button"
+          onClick={handleCopyAddress}
+          title={copied ? 'Copied!' : walletAddress}
+          className="flex items-center gap-1.5 rounded-lg transition-colors"
+          style={{
+            padding: '5px 9px',
+            background: '#0c0c0f',
+            border: '1px solid #1f1f23',
+            fontSize: '11.5px',
+            color: '#a1a1aa',
+            fontFamily: 'monospace',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = '#2a2a30';
+            e.currentTarget.style.color = '#e4e4e7';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = '#1f1f23';
+            e.currentTarget.style.color = '#a1a1aa';
+          }}
+        >
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: '#22c55e',
+              flexShrink: 0,
+              display: 'inline-block',
+            }}
+          />
+          {copied ? 'Copied!' : `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleLinkWallet}
+          disabled={walletLoading}
+          title={walletErr || 'Connect MetaMask wallet'}
+          className="flex items-center gap-1.5 rounded-lg transition-colors"
+          style={{
+            padding: '5px 9px',
+            background: 'rgba(131,110,249,0.07)',
+            border: `1px solid ${walletErr ? 'rgba(239,68,68,0.4)' : 'rgba(131,110,249,0.22)'}`,
+            fontSize: '11.5px',
+            color: walletErr ? '#f87171' : '#a594ff',
+            opacity: walletLoading ? 0.7 : 1,
+          }}
+          onMouseEnter={(e) => {
+            if (!walletErr)
+              e.currentTarget.style.background = 'rgba(131,110,249,0.14)';
+          }}
+          onMouseLeave={(e) => {
+            if (!walletErr)
+              e.currentTarget.style.background = 'rgba(131,110,249,0.07)';
+          }}
+        >
+          <Wallet className="w-[12px] h-[12px] shrink-0" strokeWidth={1.75} />
+          {walletLoading ? 'Connecting…' : walletErr ? walletErr : 'Connect Wallet'}
+        </button>
+      )}
+
+      {/* ── GitHub chip ───────────────────────────────── */}
+      {githubLogin ? (
+        <div
+          className="flex items-center gap-1.5 rounded-lg"
+          style={{
+            padding: '5px 9px',
+            background: '#0c0c0f',
+            border: '1px solid #1f1f23',
+            fontSize: '11.5px',
+            color: '#a1a1aa',
+          }}
+        >
+          {githubAvatar ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={githubAvatar}
+              alt={githubLogin}
+              style={{ width: 14, height: 14, borderRadius: '50%', flexShrink: 0 }}
+            />
+          ) : (
+            <Github className="w-[12px] h-[12px] shrink-0" strokeWidth={1.75} />
+          )}
+          <span>@{githubLogin}</span>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleLinkGitHub}
+          className="flex items-center gap-1.5 rounded-lg transition-colors"
+          style={{
+            padding: '5px 9px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid #1f1f23',
+            fontSize: '11.5px',
+            color: '#71717a',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#e4e4e7';
+            e.currentTarget.style.borderColor = '#2a2a30';
+            e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#71717a';
+            e.currentTarget.style.borderColor = '#1f1f23';
+            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+          }}
+        >
+          <Github className="w-[12px] h-[12px] shrink-0" strokeWidth={1.75} />
+          Link GitHub
+        </button>
       )}
     </div>
   );
