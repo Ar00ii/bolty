@@ -20,6 +20,7 @@ import { BoltyCandleChart } from '@/components/token/BoltyCandleChart';
 import { BoltySwapCard } from '@/components/token/BoltySwapCard';
 import { BoltyTradesFeed } from '@/components/token/BoltyTradesFeed';
 import { FlaunchLogo } from '@/components/token/FlaunchLogo';
+import { PoweredByFlaunchBadge } from '@/components/token/PoweredByFlaunchBadge';
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 
@@ -172,52 +173,26 @@ export default function BoltyTokenPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <a
-              href="https://flaunch.gg"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-normal transition"
-              style={{
-                background: 'rgba(201,255,65,0.06)',
-                border: '1px solid rgba(201,255,65,0.18)',
-                color: '#E6F7B4',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(201,255,65,0.12)';
-                e.currentTarget.style.borderColor = 'rgba(201,255,65,0.35)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(201,255,65,0.06)';
-                e.currentTarget.style.borderColor = 'rgba(201,255,65,0.18)';
-              }}
-            >
-              <FlaunchLogo size={14} />
-              <span className="text-[10px] uppercase tracking-[0.14em] text-white/55">
-                Powered by
-              </span>
-              <span className="font-semibold" style={{ color: '#C9FF41' }}>
-                Flaunch
-              </span>
-            </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <PoweredByFlaunchBadge logoSize={26} />
             <a
               href={flaunchUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-[12px] font-normal text-white transition"
+              className="group inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-normal text-white transition"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(131,110,249,0.95) 0%, rgba(107,79,232,0.85) 100%)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 22px -10px rgba(131,110,249,0.65)',
+                  'inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 26px -10px rgba(131,110,249,0.65)',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.1)')}
+              onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.08)')}
               onMouseLeave={(e) => (e.currentTarget.style.filter = 'brightness(1)')}
             >
-              <Rocket className="h-3.5 w-3.5" />
-              Trade on
-              <FlaunchLogo size={14} monochrome />
-              <ExternalLink className="h-3 w-3 opacity-75" />
+              <span className="text-white/80">Trade on</span>
+              <FlaunchLogo size={28} />
+              <span className="font-semibold tracking-tight">Flaunch</span>
+              <ExternalLink className="h-3.5 w-3.5 opacity-70 transition group-hover:opacity-100" />
             </a>
           </div>
         </motion.header>
@@ -297,32 +272,10 @@ export default function BoltyTokenPage() {
             }}
           >
             <BoltyCandleChart />
-            <div className="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-black/50 px-2 py-[2px] text-[10px] text-white/40 backdrop-blur">
-              <FlaunchLogo size={10} />
-              Flaunch · Uniswap V4 · Base
-            </div>
           </div>
 
           <div className="flex flex-col gap-3">
             <BoltySwapCard priceUsd={stats?.priceUsd ?? null} />
-            <div
-              className="rounded-2xl px-3 py-2.5 text-[11px] font-light text-white/60"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.55) 0%, rgba(10,10,14,0.55) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-              }}
-            >
-              <div className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-[#836EF9]" />
-                Swaps route through{' '}
-                <span className="inline-flex items-center gap-1">
-                  <FlaunchLogo size={10} />
-                  <span className="text-white/80">Flaunch</span>
-                </span>{' '}
-                &amp; Uniswap V4. Your wallet stays in control.
-              </div>
-            </div>
           </div>
         </section>
 
@@ -363,7 +316,7 @@ export default function BoltyTokenPage() {
               <h3 className="mt-3 text-2xl font-light tracking-tight sm:text-3xl">
                 Launch your own AI agents on{' '}
                 <span className="inline-flex items-center gap-2 align-middle">
-                  <FlaunchLogo size={26} />
+                  <FlaunchLogo size={36} />
                   <GradientText gradient="purple">Flaunch</GradientText>
                 </span>
               </h3>
@@ -394,7 +347,7 @@ export default function BoltyTokenPage() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 px-4 py-2.5 text-sm font-light text-white/80 transition hover:border-white/30 hover:text-white"
               >
-                <FlaunchLogo size={14} />
+                <FlaunchLogo size={20} />
                 Learn about Flaunch
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
