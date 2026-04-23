@@ -198,17 +198,22 @@ export function StandardSidebar() {
         </span>
       </Link>
 
-      {/* Search trigger */}
+      {/* Search trigger — click or ⌘K to open the palette */}
       <button
         type="button"
-        className="mx-3 mt-3 mb-2 flex items-center gap-2 px-[10px] py-[7px] rounded-lg text-[12.5px] transition-colors"
+        onClick={() => window.dispatchEvent(new CustomEvent('bolty:open-command'))}
+        className="mx-3 mt-3 mb-2 flex items-center gap-2 px-[10px] py-[7px] rounded-lg text-[12.5px] transition-colors cursor-text"
         style={{
           background: '#09090b',
-          border: '1px solid #1f1f23',
-          color: '#ffffff',
+          border: '1px solid rgba(255,255,255,0.08)',
+          color: '#a1a1aa',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#2a2a30')}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#1f1f23')}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)')
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')
+        }
       >
         <Search className="w-3 h-3 shrink-0" strokeWidth={2} />
         <span className="flex-1 text-left">Jump to…</span>
@@ -216,8 +221,8 @@ export function StandardSidebar() {
           className="font-mono text-[10px] px-[5px] py-[2px] rounded"
           style={{
             background: '#18181b',
-            border: '1px solid #2a2a30',
-            color: '#ffffff',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#a1a1aa',
           }}
         >
           ⌘K

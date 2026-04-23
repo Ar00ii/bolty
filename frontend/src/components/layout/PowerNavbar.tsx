@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Github, Menu, Search, Wallet, X } from 'lucide-react';
+import { Bell, Copy, Github, LogOut, Menu, Search, Wallet, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react';
@@ -160,28 +160,30 @@ export function PowerNavbar() {
 
         <div className="flex-1" />
 
-        {/* Command search */}
+        {/* Command search — click or ⌘K to open the palette */}
         <button
           type="button"
-          className="hidden md:flex items-center gap-[10px] rounded-lg transition-colors"
+          onClick={() => window.dispatchEvent(new CustomEvent('bolty:open-command'))}
+          className="hidden md:flex items-center gap-[10px] rounded-lg transition-colors cursor-text"
           style={{
             width: '360px',
             maxWidth: '36vw',
-            padding: '7px 10px',
-            background: '#0c0c0f',
-            border: '1px solid #1f1f23',
-            color: '#ffffff',
-            fontSize: '12.5px',
+            padding: '8px 12px',
+            background: '#0f0f15',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#a1a1aa',
+            fontSize: '13px',
+            fontWeight: 500,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#2a2a30';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#1f1f23';
+            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
           }}
         >
-          <Search className="w-[13px] h-[13px] shrink-0" strokeWidth={2} />
-          <span className="flex-1 text-left truncate">Search agents, repos, addresses, tx…</span>
+          <Search className="w-[14px] h-[14px] shrink-0" strokeWidth={2} />
+          <span className="flex-1 text-left truncate">Search agents, repos, wallets…</span>
           <span className="flex gap-[3px] shrink-0">
             <kbd
               className="font-mono rounded"
@@ -189,8 +191,8 @@ export function PowerNavbar() {
                 fontSize: '10px',
                 padding: '1px 5px',
                 background: '#18181b',
-                border: '1px solid #2a2a30',
-                color: '#ffffff',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#a1a1aa',
               }}
             >
               ⌘
@@ -201,8 +203,8 @@ export function PowerNavbar() {
                 fontSize: '10px',
                 padding: '1px 5px',
                 background: '#18181b',
-                border: '1px solid #2a2a30',
-                color: '#ffffff',
+                border: '1px solid rgba(255,255,255,0.08)',
+                color: '#a1a1aa',
               }}
             >
               K
@@ -591,10 +593,25 @@ function NavConnectChips({
   const [walletLoading, setWalletLoading] = useState(false);
   const [walletErr, setWalletErr] = useState('');
   const [copied, setCopied] = useState(false);
+  const [walletMenuOpen, setWalletMenuOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const walletMenuRef = useRef<HTMLDivElement>(null);
 
   const walletAddress = user?.walletAddress ?? null;
   const githubLogin = user?.githubLogin ?? null;
   const githubAvatar = user?.avatarUrl ?? null;
+
+  // Close wallet menu on outside click
+  useEffect(() => {
+    if (!walletMenuOpen) return;
+    const close = (e: MouseEvent) => {
+      if (walletMenuRef.current && !walletMenuRef.current.contains(e.target as Node)) {
+        setWalletMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [walletMenuOpen]);
 
   const handleLinkWallet = useCallback(async () => {
     setWalletLoading(true);
@@ -638,44 +655,116 @@ function NavConnectChips({
     });
   }, [walletAddress]);
 
+  const handleDisconnectWallet = useCallback(async () => {
+    if (!walletAddress || disconnecting) return;
+    setDisconnecting(true);
+    setWalletErr('');
+    try {
+      await api.delete('/auth/link/wallet');
+      await refresh();
+      setWalletMenuOpen(false);
+    } catch (err) {
+      setWalletErr(err instanceof Error ? err.message : 'Failed to disconnect');
+      setTimeout(() => setWalletErr(''), 4000);
+    } finally {
+      setDisconnecting(false);
+    }
+  }, [walletAddress, disconnecting, refresh]);
+
   return (
     <div className="hidden lg:flex items-center gap-1.5">
       {/* ── Wallet chip ───────────────────────────────── */}
       {walletAddress ? (
-        <button
-          type="button"
-          onClick={handleCopyAddress}
-          title={copied ? 'Copied!' : walletAddress}
-          className="flex items-center gap-1.5 rounded-lg transition-colors"
-          style={{
-            padding: '5px 9px',
-            background: '#0c0c0f',
-            border: '1px solid #1f1f23',
-            fontSize: '11.5px',
-            color: '#a1a1aa',
-            fontFamily: 'monospace',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = '#2a2a30';
-            e.currentTarget.style.color = '#e4e4e7';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = '#1f1f23';
-            e.currentTarget.style.color = '#a1a1aa';
-          }}
-        >
-          <span
+        <div ref={walletMenuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setWalletMenuOpen((v) => !v)}
+            title={walletAddress}
+            className="flex items-center gap-1.5 rounded-lg transition-colors"
             style={{
-              width: 7,
-              height: 7,
-              borderRadius: '50%',
-              background: '#22c55e',
-              flexShrink: 0,
-              display: 'inline-block',
+              padding: '5px 9px',
+              background: '#0c0c0f',
+              border: '1px solid #1f1f23',
+              fontSize: '11.5px',
+              color: '#a1a1aa',
+              fontFamily: 'monospace',
             }}
-          />
-          {copied ? 'Copied!' : `${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`}
-        </button>
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#2a2a30';
+              e.currentTarget.style.color = '#e4e4e7';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#1f1f23';
+              e.currentTarget.style.color = '#a1a1aa';
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: '50%',
+                background: '#22c55e',
+                flexShrink: 0,
+                display: 'inline-block',
+              }}
+            />
+            {`${walletAddress.slice(0, 6)}…${walletAddress.slice(-4)}`}
+          </button>
+          {walletMenuOpen && (
+            <div
+              className="absolute right-0 top-full mt-1.5 z-50 overflow-hidden"
+              style={{
+                minWidth: 220,
+                background: '#0f0f15',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 10,
+                boxShadow: '0 10px 30px -10px rgba(0,0,0,0.6)',
+              }}
+            >
+              <div
+                className="px-3 py-2 text-[11px] font-mono"
+                style={{
+                  color: '#a1a1aa',
+                  borderBottom: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                {walletAddress.slice(0, 10)}…{walletAddress.slice(-8)}
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyAddress}
+                className="w-full flex items-center gap-2 px-3 py-2 text-[12.5px] text-zinc-300 hover:bg-white/[0.04] hover:text-white transition-colors"
+              >
+                <Copy className="w-3.5 h-3.5" strokeWidth={2} />
+                {copied ? 'Copied!' : 'Copy address'}
+              </button>
+              <button
+                type="button"
+                onClick={handleDisconnectWallet}
+                disabled={disconnecting}
+                className="w-full flex items-center gap-2 px-3 py-2 text-[12.5px] transition-colors disabled:opacity-50"
+                style={{
+                  color: '#fca5a5',
+                  borderTop: '1px solid rgba(255,255,255,0.06)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(244,63,94,0.08)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
+              >
+                <LogOut className="w-3.5 h-3.5" strokeWidth={2} />
+                {disconnecting ? 'Disconnecting…' : 'Disconnect wallet'}
+              </button>
+              {walletErr && (
+                <div className="px-3 py-2 text-[11px] text-rose-300 border-t border-white/[0.06]">
+                  {walletErr}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       ) : (
         <button
           type="button"
