@@ -36,6 +36,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
@@ -1598,10 +1599,12 @@ function AgentCard({
   listing,
   isAuthenticated,
   onBuy,
+  onNegotiate,
 }: {
   listing: MarketListing;
   isAuthenticated: boolean;
   onBuy: () => void;
+  onNegotiate: (listing: MarketListing) => void;
 }) {
   return (
     <div className="card-interactive flex flex-col h-full group">
@@ -1710,18 +1713,26 @@ function AgentCard({
           <Link href={`/market/agents/${listing.id}`} className="btn-ghost text-xs py-1 px-2.5">
             View
           </Link>
-          <span
-            title="AI-to-AI negotiation coming soon"
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-light select-none cursor-not-allowed"
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              if (!isAuthenticated) {
+                window.location.href = '/auth';
+                return;
+              }
+              onNegotiate(listing);
+            }}
+            title="Start an AI-to-AI negotiation"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-light text-white transition-all hover:brightness-110"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: '#52525b',
+              background: 'linear-gradient(180deg, rgba(131,110,249,0.22), rgba(131,110,249,0.08))',
+              border: '1px solid rgba(131,110,249,0.35)',
             }}
           >
-            <Lock className="w-2.5 h-2.5" />
+            <Bot className="w-2.5 h-2.5" />
             Negotiate
-          </span>
+          </button>
           <button
             onClick={() => {
               if (!isAuthenticated) {
@@ -4761,6 +4772,8 @@ function AgentsPageContent() {
   const [myListings, setMyListings] = useState<MarketListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [myLoading, setMyLoading] = useState(false);
+  const [negotiateTarget, setNegotiateTarget] = useState<MarketListing | null>(null);
+  const [negotiateStarting, setNegotiateStarting] = useState(false);
   const [type, setType] = useState('AI_AGENT');
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
@@ -4801,8 +4814,7 @@ function AgentsPageContent() {
       setMobileBlock(true);
       return;
     }
-    switchTab('mine');
-    setShowCreate(true);
+    router.push('/market/agents/publish');
   };
 
   // Sync tab to URL
@@ -5133,6 +5145,7 @@ function AgentsPageContent() {
                     listing={l}
                     isAuthenticated={isAuthenticated}
                     onBuy={() => handleBuy(l)}
+                    onNegotiate={(listing) => setNegotiateTarget(listing)}
                   />
                 </motion.div>
               ))}
@@ -5350,6 +5363,34 @@ function AgentsPageContent() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Agent picker — opens when a buyer hits Negotiate on a card */}
+      {negotiateTarget && (
+        <AgentPickerModal
+          listingTitle={negotiateTarget.title}
+          listingPrice={negotiateTarget.price}
+          listingCurrency={negotiateTarget.currency}
+          onCancel={() => setNegotiateTarget(null)}
+          onConfirm={async (agentId) => {
+            if (!negotiateTarget || negotiateStarting) return;
+            setNegotiateStarting(true);
+            try {
+              const res = await api.post<{ id: string }>(
+                `/market/${negotiateTarget.id}/negotiate`,
+                agentId ? { buyerAgentListingId: agentId } : {},
+              );
+              if (res?.id) {
+                router.push(`/negotiations/${res.id}`);
+              }
+            } catch (err) {
+              alert(err instanceof ApiError ? err.message : 'Failed to start negotiation');
+            } finally {
+              setNegotiateStarting(false);
+              setNegotiateTarget(null);
+            }
+          }}
+        />
       )}
     </div>
   );
