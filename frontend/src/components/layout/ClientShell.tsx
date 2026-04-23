@@ -7,6 +7,7 @@ import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { LiveToastBridge } from '@/components/layout/LiveToastBridge';
+import { MobileTabBar } from '@/components/layout/MobileTabBar';
 import { NegotiationPopToast } from '@/components/layout/NegotiationPopToast';
 import { PowerNavbar } from '@/components/layout/PowerNavbar';
 import { RouteProgress } from '@/components/layout/RouteProgress';
@@ -58,6 +59,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
             </main>
           </div>
         </div>
+        <MobileTabBar />
       </div>
     );
   }
