@@ -4181,6 +4181,72 @@ aside button[data-active='true']::after {
   max-width: 1280px;
   margin: 0 auto;
 }
+
+/* Mobile polish — apply narrower padding + stack rules + smaller
+   typography on sub-640px screens so the new app-style pages don't
+   overflow a 375px viewport. */
+@media (max-width: 640px) {
+  .mk-app-page {
+    padding: 16px 14px 32px;
+  }
+  .mk-app .mk-hero__title {
+    font-size: 22px;
+  }
+  .mk-app .mk-hero__sub {
+    font-size: 12.5px;
+  }
+  .mk-app .mk-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    max-width: 100%;
+  }
+  .mk-app .mk-stat {
+    min-width: 0 !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--app-border);
+    padding: 10px 14px;
+  }
+  .mk-app .mk-stat:nth-child(odd) {
+    border-right: 1px solid var(--app-border) !important;
+  }
+  .mk-app .mk-stat:nth-last-child(-n + 2) {
+    border-bottom: none;
+  }
+  .mk-app .mk-stat__value {
+    font-size: 18px;
+  }
+  .mk-app .mk-toolbar {
+    gap: 8px;
+  }
+  .mk-app .mk-toolbar > .mk-search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+  .mk-app .mk-toolbar > .mk-select {
+    flex: 1 1 0;
+  }
+  .mk-app .mk-select select {
+    width: 100%;
+  }
+  .mk-app .mk-tab {
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+  .mk-app .mk-card {
+    padding: 14px;
+  }
+  .mk-app .mk-card__title {
+    font-size: 13.5px;
+  }
+  .mk-app .mk-card__actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+  .mk-app .mk-btn {
+    padding: 0 12px;
+  }
+}
 .mk-app,
 .mk-app * {
   font-family:
