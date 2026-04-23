@@ -187,11 +187,12 @@ export function StandardSidebar() {
         </div>
         <div className="min-w-0 flex items-center">
           <span
-            className="text-xl truncate"
+            className="truncate"
             style={{
               fontFamily: 'Inter, system-ui, sans-serif',
+              fontSize: '15px',
               fontWeight: 700,
-              letterSpacing: '-0.3px',
+              letterSpacing: '-0.25px',
               background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
