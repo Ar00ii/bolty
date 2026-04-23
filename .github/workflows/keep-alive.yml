@@ -1,0 +1,35 @@
+name: Keep backend warm
+
+# Free alternative to an uptime pinger: GitHub Actions fires a cheap
+# cached GET at the Render backend every 5 minutes so the container
+# never falls below the 15-minute inactivity window that triggers a
+# cold suspend on the Starter plan. Targets the /market/pulse endpoint
+# because it's already edge-cached (20s s-maxage) so the origin only
+# feels 3 real requests an hour — enough to stay warm without hammering
+# the DB.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # every 5 minutes
+  workflow_dispatch: {} # allow manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GET /api/v1/market/pulse
+        run: |
+          set -euo pipefail
+          for i in 1 2 3; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" \
+              --max-time 30 \
+              "https://bolty-backend.onrender.com/api/v1/market/pulse?limit=1" || true)
+            echo "Attempt $i → HTTP $code"
+            if [ "$code" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          # Don't fail the job — a single bad ping shouldn't red-light
+          # the workflow. The next schedule will retry.
+          echo "Backend unreachable after 3 tries; will try again in 5 min."

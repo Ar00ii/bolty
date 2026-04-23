@@ -2670,252 +2670,6 @@ aside button[data-active='true']::after {
 
 /* -- Sidebar ------------------------------------------------ */
 
-.mk-sidebar {
-  position: sticky;
-  top: 0;
-  flex: 0 0 232px;
-  width: 232px;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 12px 10px;
-  border-right: 1px solid var(--mk-surface-3);
-  background: #000;
-  z-index: 10;
-}
-
-.mk-sidebar__user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 6px 4px 6px;
-  margin-bottom: 10px;
-  height: 34px;
-}
-
-.mk-sidebar__user--compact {
-  margin: 0;
-  padding: 0 6px;
-  height: 32px;
-}
-
-.mk-sidebar__avatar {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2e2e2e, #1a1a1a);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--mk-text);
-  overflow: hidden;
-  border: 1px solid var(--mk-surface-3);
-}
-
-.mk-sidebar__avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.mk-sidebar__avatar--sm {
-  width: 20px;
-  height: 20px;
-  flex-basis: 20px;
-  font-size: 10px;
-}
-
-.mk-sidebar__name {
-  font-size: 13px;
-  color: var(--mk-text);
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.mk-sidebar__name--muted {
-  color: var(--mk-text-secondary);
-  font-weight: 400;
-}
-
-/* Outline badge variant (Hobby / Pro / Seller) */
-.mk-scope .mk-badge--outline {
-  background: transparent;
-  color: var(--mk-text-secondary);
-  border: 1px solid var(--mk-surface-3);
-  padding: 1px 6px;
-  font-size: 10px;
-  line-height: 14px;
-  border-radius: 4px;
-  letter-spacing: 0.01em;
-}
-
-/* Small icon-only round button in sidebar/topbar */
-.mk-icon-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  color: var(--mk-text-secondary);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  transition:
-    background 120ms ease,
-    color 120ms ease;
-}
-
-.mk-icon-btn:hover {
-  background: var(--mk-surface-2);
-  color: var(--mk-text);
-}
-
-.mk-icon-btn__dot {
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--mk-link);
-  border: 1px solid #000;
-}
-
-/* Sidebar search */
-.mk-sidebar__search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 30px;
-  margin: 0 0 10px 0;
-  padding: 0 8px;
-  border-radius: 6px;
-  background: var(--mk-surface-1);
-  border: 1px solid var(--mk-surface-3);
-}
-
-.mk-sidebar__search input {
-  flex: 1;
-  height: 100%;
-  padding: 0 6px;
-  border: 0;
-  background: transparent;
-  color: var(--mk-text);
-  font-size: 13px;
-  outline: none;
-}
-
-.mk-sidebar__search input::placeholder {
-  color: var(--mk-text-muted);
-}
-
-.mk-sidebar__search-icon {
-  color: var(--mk-text-muted);
-  flex-shrink: 0;
-}
-
-.mk-scope .mk-kbd--sm {
-  height: 18px;
-  min-width: 18px;
-  padding: 0 5px;
-  font-size: 10.5px;
-  line-height: 16px;
-  border-radius: 4px;
-  font-family: 'Geist Mono', 'SF Mono', Menlo, Consolas, monospace;
-}
-
-/* Sidebar nav lists */
-.mk-sidebar__nav {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 2px 0;
-}
-
-.mk-nav {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.mk-nav-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 30px;
-  padding: 0 8px;
-  border-radius: 6px;
-  color: var(--mk-text-secondary);
-  font-size: 13px;
-  font-weight: 400;
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    background 120ms ease,
-    color 120ms ease;
-}
-
-.mk-nav-row:hover {
-  background: var(--mk-surface-2);
-  color: var(--mk-text);
-}
-
-.mk-nav-row--active {
-  background: var(--mk-surface-2);
-  color: var(--mk-text);
-}
-
-.mk-nav-row__icon {
-  flex-shrink: 0;
-  color: currentColor;
-  opacity: 0.9;
-}
-
-.mk-nav-row__label {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.mk-nav-row__chevron {
-  color: var(--mk-text-muted);
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.mk-sidebar__divider {
-  height: 1px;
-  background: var(--mk-surface-3);
-  margin: 8px 4px;
-}
-
-.mk-sidebar__group-label {
-  padding: 2px 10px 4px;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--mk-text-3, #71717a);
-  font-weight: 500;
-  opacity: 0.65;
-}
-
-.mk-sidebar__footer {
-  padding-top: 8px;
-  border-top: 1px solid var(--mk-surface-3);
-}
 
 /* -- Sidebar more/settings popover ------------------------- */
 
@@ -3540,11 +3294,6 @@ aside button[data-active='true']::after {
   cursor: pointer;
 }
 
-/* Scope-local opt-out for the global .sticky override when used as mk-shell is fixed to black */
-.mk-scope .mk-sidebar,
-.mk-scope .mk-topbar {
-  background-color: #000 !important;
-}
 
 /* ============================================================
    Subtle Bolty-purple accents
@@ -3605,17 +3354,6 @@ aside button[data-active='true']::after {
   font-weight: 400;
 }
 
-/* Sidebar username — very soft purple tint (keeps brand presence) */
-.mk-scope .mk-sidebar__name {
-  color: var(--mk-text) !important;
-}
-.mk-scope .mk-sidebar__user:not(.mk-sidebar__user--compact) .mk-sidebar__name {
-  background: linear-gradient(92deg, #ffffff 0%, #d6ccff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent !important;
-}
 
 /* Scope picker label reads as a soft brand line */
 .mk-scope .mk-scope-picker__label {
@@ -4893,5 +4631,77 @@ aside button[data-active='true']::after {
   }
   50% {
     opacity: 0.5;
+  }
+}
+
+/* ─ Mobile bottom tab bar ────────────────────────────────────────────── */
+.mk-mobile-tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  background: rgba(7, 7, 10, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: env(safe-area-inset-bottom);
+  height: calc(58px + env(safe-area-inset-bottom));
+}
+.mk-mobile-tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 4px;
+  color: #71717a;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition: color 150ms ease;
+  min-width: 0;
+}
+.mk-mobile-tab:active {
+  color: #e4e4e7;
+}
+.mk-mobile-tab--active {
+  color: #c9beff;
+}
+.mk-mobile-tab--active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 28px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: #836ef9;
+  box-shadow: 0 0 10px #836ef9;
+}
+.mk-mobile-tab {
+  position: relative;
+}
+.mk-mobile-tab__icon {
+  width: 20px;
+  height: 20px;
+}
+.mk-mobile-tab__label {
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Add bottom breathing room on app-shell pages so content isn't hidden
+   behind the fixed tab bar on phones. */
+@media (max-width: 1023px) {
+  .mk-app-page {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }
 }
