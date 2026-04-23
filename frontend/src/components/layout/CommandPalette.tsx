@@ -198,8 +198,15 @@ export function CommandPalette() {
         setOpen(false);
       }
     };
+    // Custom event so search buttons (navbar + sidebar triggers) can
+    // open the palette without relying on the keyboard shortcut.
+    const openHandler = () => setOpen(true);
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener('bolty:open-command', openHandler);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      window.removeEventListener('bolty:open-command', openHandler);
+    };
   }, [open]);
 
   useEffect(() => {
