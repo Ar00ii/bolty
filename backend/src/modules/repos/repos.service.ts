@@ -599,7 +599,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       : null;
     if (repoCacheKey) {
       const hit = await this.redis.get(repoCacheKey).catch(() => null);
-      if (hit) return JSON.parse(hit) as Awaited<ReturnType<typeof this.listRepositories>>;
+      if (hit) return JSON.parse(hit) as { data: object[]; meta: { total: number; page: number; limit: number; pages: number } };
     }
 
     const where: Record<string, unknown> = {
