@@ -114,7 +114,7 @@ export const NAV: NavSection[] = [
   {
     section: 'Community',
     items: [
-      { label: 'Chat', icon: MessageSquare, href: '/chat' },
+      { label: 'Feed', icon: MessageSquare, href: '/feed' },
       { label: 'Messages', icon: MessageCircle, href: '/dm' },
       { label: 'Notifications', icon: Bell, href: '/notifications' },
     ],

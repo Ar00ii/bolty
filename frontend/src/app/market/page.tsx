@@ -20,6 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
+import { CommunityFeedStrip } from '@/components/feed/CommunityFeedStrip';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, WS_URL } from '@/lib/api/client';
 import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
@@ -428,6 +429,13 @@ function MarketScreener() {
           </div>
         </div>
       </header>
+
+      {/* Live community strip — last posts from #marketplace feed */}
+      <section className="px-6 md:px-10 mb-3">
+        <div className="mx-auto max-w-[1400px]">
+          <CommunityFeedStrip />
+        </div>
+      </section>
 
       {/* Stats strip */}
       <section className="px-6 md:px-10 mb-4">

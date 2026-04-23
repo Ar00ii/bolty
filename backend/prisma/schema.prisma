@@ -74,6 +74,7 @@ model User {
 
   // Relations
   messages               ChatMessage[]
+  chatMessageLikes       ChatMessageLike[]
   repositories           Repository[]
   votes                  Vote[]
   reports                Report[]
@@ -152,15 +153,41 @@ model ChatMessage {
   userId  String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Feed channel — "general" is the legacy global room. Each channel is
+  // an isolated timeline; the composer picks one before posting.
+  channel  String  @default("general")
+  imageUrl String?
+
+  likeCount Int @default(0)
+
   isDeleted    Boolean   @default(false)
   deletedAt    DateTime?
   deleteReason String?
 
   reports Report[]
+  likes   ChatMessageLike[]
 
   @@index([userId, createdAt])
   @@index([isDeleted, createdAt])
+  @@index([channel, isDeleted, createdAt])
   @@map("chat_messages")
+}
+
+/// Lightweight "like" — one row per (user, message). Denormalized into
+/// ChatMessage.likeCount so the timeline doesn't need a join per post.
+model ChatMessageLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  messageId String
+  message   ChatMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId])
+  @@index([userId])
+  @@map("chat_message_likes")
 }
 
 // ─── Repositories ────────────────────────────────────────────────────────────
