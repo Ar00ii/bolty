@@ -40,6 +40,10 @@ interface CreateListingDto {
 export class MarketService {
   private readonly logger = new Logger(MarketService.name);
   private readonly anthropic: Anthropic;
+  // Per-process throttle for the PENDING_REVIEW self-heal write.
+  // Runs at most once per 5 min across this instance — Redis handles
+  // cross-instance dedup when needed. Avoids a DB write on every page load.
+  private selfHealAt = 0;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -366,16 +370,23 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     const skip = (page - 1) * take;
     const sortBy = params.sortBy || 'recent';
 
-    // Self-heal listings stranded in PENDING_REVIEW — the AI content scan
-    // occasionally leaves rows there when Anthropic is unreachable, making
-    // legitimate listings invisible on /market. Flipping them to ACTIVE
-    // on read is idempotent; flagged-content listings stay removed.
-    await this.prisma.marketListing
-      .updateMany({
-        where: { status: 'PENDING_REVIEW' },
-        data: { status: 'ACTIVE' },
-      })
-      .catch(() => {});
+    // Self-heal listings stranded in PENDING_REVIEW — throttled to once per
+    // 5 min per process so it doesn't fire a DB write on every page load.
+    if (Date.now() - this.selfHealAt > 300_000) {
+      this.selfHealAt = Date.now();
+      this.prisma.marketListing
+        .updateMany({ where: { status: 'PENDING_REVIEW' }, data: { status: 'ACTIVE' } })
+        .catch(() => {});
+    }
+
+    // Build Redis cache key from all params (skip for search queries — too many combos).
+    const cacheKey = !params.search
+      ? `market:listings:${params.type ?? 'ALL'}:${params.sortBy ?? 'recent'}:${page}:${params.minPrice ?? ''}:${params.maxPrice ?? ''}:${(params.tags ?? []).join(',')}`
+      : null;
+    if (cacheKey) {
+      const hit = await this.redis.get(cacheKey).catch(() => null);
+      if (hit) return JSON.parse(hit) as ReturnType<typeof this.getListings>;
+    }
 
     const where: Record<string, unknown> = { status: 'ACTIVE' };
     if (params.type && params.type !== 'ALL') where.type = params.type;
@@ -429,7 +440,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.computeActivityMap(rawListings.map((l) => l.id)),
     ]);
     const data = this.mergeActivityStats(withReviews, activityMap);
-    return { data, total, page, pages: Math.ceil(total / take) };
+    const result = { data, total, page, pages: Math.ceil(total / take) };
+    if (cacheKey) {
+      this.redis.set(cacheKey, JSON.stringify(result), 30).catch(() => null);
+    }
+    return result;
   }
 
   /**
@@ -439,16 +454,14 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
    * yet. Hides REMOVED rows so soft-deleted listings don't clutter the UI.
    */
   async getMyListings(sellerId: string) {
-    // Self-heal any legacy PENDING_REVIEW rows this seller owns. The content
-    // scan occasionally flagged benign listings (e.g. when Anthropic was
-    // unreachable and parseJson fell through to the manual-review branch),
-    // leaving them invisible to buyers and to the seller in the public feed.
-    // Flipping them to ACTIVE on read is idempotent and gets sellers unstuck
-    // without a separate admin step.
-    await this.prisma.marketListing.updateMany({
-      where: { sellerId, status: 'PENDING_REVIEW' },
-      data: { status: 'ACTIVE' },
-    });
+    // Self-heal any legacy PENDING_REVIEW rows this seller owns — fires at
+    // most once per 5 min (reuses the same process-level throttle as getListings).
+    if (Date.now() - this.selfHealAt > 300_000) {
+      this.selfHealAt = Date.now();
+      this.prisma.marketListing
+        .updateMany({ where: { sellerId, status: 'PENDING_REVIEW' }, data: { status: 'ACTIVE' } })
+        .catch(() => {});
+    }
 
     const rows = await this.prisma.marketListing.findMany({
       where: { sellerId, status: { not: 'REMOVED' } },
@@ -463,17 +476,13 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return { data, total: data.length, page: 1, pages: 1 };
   }
 
-  private pulseCache: { at: number; limit: number; data: unknown } | null = null;
-
   async getMarketPulse(limit = 15): Promise<unknown> {
     const now = Date.now();
-    // Short in-process cache — the pulse is ~10 queries and every homepage
-    // + marketplace hit calls it. 20s is tight enough that new trades feel
-    // live (the socket push catches anything fresher), loose enough to
-    // cut DB load by an order of magnitude under bursty load.
-    if (this.pulseCache && this.pulseCache.limit === limit && now - this.pulseCache.at < 20_000) {
-      return this.pulseCache.data;
-    }
+    // Redis-backed cache — works across all Render instances. 20s TTL keeps
+    // the homepage feeling live while cutting DB load by an order of magnitude.
+    const pulseCacheKey = `market:pulse:${limit}`;
+    const cached = await this.redis.get(pulseCacheKey).catch(() => null);
+    if (cached) return JSON.parse(cached) as unknown;
     const since24h = new Date(now - 24 * 60 * 60 * 1000);
 
     // Pull data from BOTH surfaces — market listings (agents/bots/scripts)
@@ -624,7 +633,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       recentTrades: trades,
       recentListings,
     };
-    this.pulseCache = { at: now, limit, data: payload };
+    await this.redis.set(pulseCacheKey, JSON.stringify(payload), 20).catch(() => null);
     return payload;
   }
 

@@ -364,6 +364,8 @@ function MarketScreener() {
   // Clear stale flashes
   useEffect(() => {
     if (flash.size === 0) return;
+    // Check at 1600ms — just past the 1500ms flash duration — so we fire
+    // only once per flash event instead of 3 times.
     const t = setInterval(() => {
       const now = Date.now();
       setFlash((prev) => {
@@ -377,7 +379,7 @@ function MarketScreener() {
         });
         return changed ? next : prev;
       });
-    }, 500);
+    }, 1600);
     return () => clearInterval(t);
   }, [flash.size]);
 
