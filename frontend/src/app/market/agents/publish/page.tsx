@@ -69,8 +69,8 @@ const EMPTY: FormState = {
   protocol: 'webhook',
   agentEndpoint: '',
   uploadedFile: null,
-  model: 'gpt-4o-mini',
-  framework: 'custom',
+  model: '',
+  framework: '',
   contextLength: '128k',
   avgLatency: '~1s',
   license: 'MIT',
@@ -92,17 +92,8 @@ const CATEGORIES = [
   { id: 'security', label: 'Security' },
 ];
 
-const MODELS = [
-  'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo',
-  'claude-opus-4', 'claude-sonnet-4', 'claude-haiku-4',
-  'gemini-2.0-pro', 'gemini-2.0-flash',
-  'llama-3.3-70b', 'llama-3.3-8b',
-  'mistral-large', 'mixtral-8x22b',
-  'deepseek-v3', 'qwen-2.5-72b',
-  'custom',
-];
-
-const FRAMEWORKS = ['custom', 'langchain', 'llamaindex', 'autogen', 'crewai', 'pydantic-ai', 'vercel-ai-sdk', 'openai-sdk', 'anthropic-sdk'];
+// Free-text inputs — sellers type whatever model / framework their
+// agent is built on instead of picking from a hardcoded list.
 const LICENSES = ['MIT', 'Apache-2.0', 'GPL-3.0', 'BSD-3', 'Proprietary', 'Other'];
 const CONTEXT_LENGTHS = ['4k', '8k', '16k', '32k', '128k', '200k', '1M', '2M'];
 
@@ -565,27 +556,21 @@ export default function PublishAgentPage() {
               description="Help developers understand what's under the hood."
             >
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <Field label="Base model">
-                  <select
+                <Field label="Base model" hint="Free text — whatever powers your agent.">
+                  <input
                     value={form.model}
-                    onChange={(e) => set('model', e.target.value)}
+                    onChange={(e) => set('model', e.target.value.slice(0, 60))}
+                    placeholder="e.g. custom, fine-tuned, multi-model"
                     className="input-std"
-                  >
-                    {MODELS.map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
+                  />
                 </Field>
-                <Field label="Framework">
-                  <select
+                <Field label="Framework" hint="Optional — what your agent is built with.">
+                  <input
                     value={form.framework}
-                    onChange={(e) => set('framework', e.target.value)}
+                    onChange={(e) => set('framework', e.target.value.slice(0, 60))}
+                    placeholder="e.g. custom stack"
                     className="input-std"
-                  >
-                    {FRAMEWORKS.map((f) => (
-                      <option key={f} value={f}>{f}</option>
-                    ))}
-                  </select>
+                  />
                 </Field>
                 <Field label="Context length">
                   <select
