@@ -16,6 +16,7 @@
     "test:cov": "jest --coverage"
   },
   "dependencies": {
+    "@flaunch/sdk": "^0.9.20",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
@@ -39,7 +40,8 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^3.4.1",
     "three": "^0.183.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "viem": "^2.48.4"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.5",

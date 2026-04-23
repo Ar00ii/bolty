@@ -20,4 +20,17 @@ export class TokenController {
   getBolty() {
     return this.tokenService.getBoltyStats();
   }
+
+  /**
+   * Recent trade feed for the BOLTY page — last ~30 swaps with side,
+   * USD size, and tx hash. Served public so unauthed visitors see the
+   * live tape. Backend caches for 4s so hammering this endpoint from
+   * a client polling loop doesn't pierce GeckoTerminal's rate limit.
+   */
+  @Public()
+  @Throttle({ default: { limit: 180, ttl: 60000 } })
+  @Get('bolty/trades')
+  getBoltyTrades() {
+    return this.tokenService.getBoltyTrades();
+  }
 }
