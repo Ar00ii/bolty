@@ -15,6 +15,7 @@ export interface MarketListing {
   status: string;
   agentUrl?: string | null;
   agentEndpoint?: string | null;
+  hasAgentEndpoint?: boolean;
   fileKey?: string | null;
   fileName?: string | null;
   fileSize?: number | null;
