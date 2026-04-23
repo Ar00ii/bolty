@@ -295,6 +295,18 @@ export class MarketController {
     return this.negotiationService.getMyNegotiations(userId);
   }
 
+  /**
+   * Ownership check used by the listing detail page to hide the Buy
+   * button (and swap it for "Open in Inventory") BEFORE the user clicks
+   * and opens MetaMask. Without this the user can pay twice for an
+   * item they already own — the backend rejects on the second purchase
+   * but the ETH has already left their wallet.
+   */
+  @Get(':id/purchased')
+  checkPurchased(@Param('id') id: string, @CurrentUser('id') userId: string) {
+    return this.marketService.getPurchaseStatus(id, userId);
+  }
+
   @Get('negotiations/:id')
   getNegotiation(@Param('id') id: string, @CurrentUser('id') userId: string) {
     return this.negotiationService.getNegotiation(id, userId);
@@ -520,6 +532,14 @@ export class MarketController {
     @CurrentUser('id') buyerId: string,
     @Body() body: { buyerAgentListingId?: string } = {},
   ) {
+    // AI-vs-AI negotiation is feature-flagged off until we re-enable it.
+    // The frontend already renders "Coming soon" — this is the backend
+    // guard so a stale client can't still create orphan negotiations.
+    if (process.env.NEGOTIATION_ENABLED !== '1') {
+      throw new BadRequestException(
+        'Agent-to-agent negotiation is launching soon.',
+      );
+    }
     return this.negotiationService.startNegotiation(
       buyerId,
       listingId,

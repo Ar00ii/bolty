@@ -906,6 +906,25 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return !!purchase;
   }
 
+  /**
+   * Detailed version used by the "do I already own this?" check on
+   * listing detail pages. Returns the orderId so the frontend can
+   * deep-link to /orders/:id without a second round-trip.
+   */
+  async getPurchaseStatus(listingId: string, buyerId: string) {
+    const purchase = await this.prisma.marketPurchase.findFirst({
+      where: { listingId, buyerId },
+      select: { id: true, status: true, createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return {
+      purchased: !!purchase,
+      orderId: purchase?.id ?? null,
+      status: purchase?.status ?? null,
+      purchasedAt: purchase?.createdAt ?? null,
+    };
+  }
+
   async getSellerProfile(username: string) {
     const seller = await this.prisma.user.findFirst({
       where: { username },

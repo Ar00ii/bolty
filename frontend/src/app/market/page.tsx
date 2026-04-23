@@ -189,19 +189,28 @@ function MarketScreener() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const hasCache = listings.length > 0 || pulse !== null;
-      // For the default (unfiltered) view, skip the network if cache
-      // is fresh (<30s). Filtered searches always hit so the user sees
-      // their filter applied.
       const isDefaultView = !search && typeFilter === 'ALL' && sort === 'recent';
-      if (isDefaultView && hasCache) {
-        const { fresh } = getCachedWithStatus('market:listings');
-        if (fresh) {
-          setLoading(false);
-          return;
-        }
+      // Cache key per filter so each filter gets its own fresh-cache
+      // window. Previously we seeded from the default cache key for
+      // EVERY filter, showing the wrong list on filter change.
+      const cacheKey = isDefaultView
+        ? 'market:listings'
+        : `market:listings:${sort}:${typeFilter}:${search.trim().toLowerCase()}`;
+
+      // If we have a fresh entry for THIS filter, use it + skip fetch.
+      const { data: cachedForFilter, fresh } =
+        getCachedWithStatus<MarketListing[]>(cacheKey);
+      if (cachedForFilter) {
+        setListings(cachedForFilter);
+        setLoading(false);
+        if (fresh) return;
+      } else {
+        // No cache for this filter → blank the list + show spinner so
+        // the user doesn't stare at the previous filter's results.
+        setListings([]);
+        setLoading(true);
       }
-      if (!hasCache) setLoading(true);
+
       try {
         const qs = new URLSearchParams({ page: '1' });
         qs.set('sortBy', sort === 'volume' ? 'trending' : sort);
@@ -221,12 +230,8 @@ function MarketScreener() {
         setListings(data);
         setPulse(pulseRes);
         setLiveTrades(pulseRes?.recentTrades || []);
-        // Only cache the default (unfiltered) view — filtered searches
-        // would pollute and evict the baseline we want to restore fast.
-        if (!search && typeFilter === 'ALL' && sort === 'recent') {
-          setCached('market:listings', data);
-          setCached('market:pulse', pulseRes);
-        }
+        setCached(cacheKey, data);
+        setCached('market:pulse', pulseRes);
       } finally {
         if (!cancelled) setLoading(false);
       }

@@ -1012,11 +1012,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (repo.userId === buyerId)
       throw new ForbiddenException('Cannot purchase your own repository');
 
-    // Check if already purchased
+    // Check if already purchased. Blocks BOTH verified rows (completed
+    // purchase) and unverified ones (pending payment) to prevent the
+    // double-pay scenario where a buyer with a stuck pending row sends
+    // a second on-chain tx and loses the ETH.
     const existing = await this.prisma.repoPurchase.findFirst({
-      where: { buyerId, repositoryId: repoId, verified: true },
+      where: { buyerId, repositoryId: repoId, txHash: { not: txHash } },
+      select: { id: true, verified: true, txHash: true },
     });
-    if (existing) throw new ConflictException('Already purchased');
+    if (existing) {
+      throw new ConflictException(
+        existing.verified
+          ? 'Already purchased — check your inventory'
+          : 'You already have a pending payment on this repo. Use /inventory → Recover to resolve it.',
+      );
+    }
 
     const sellerWallet = repo.user.walletAddress;
     if (!sellerWallet) {

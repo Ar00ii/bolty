@@ -199,8 +199,13 @@ export default function AgentDetailPage() {
   const { addToast } = useToast();
 
   const [listing, setListing] = useState<MarketListing | null>(null);
+  const [ownership, setOwnership] = useState<{
+    purchased: boolean;
+    orderId: string | null;
+  } | null>(null);
   // Owners can't buy their own listing — render a Manage link instead.
   const isOwner = !!listing && !!user && listing.seller.id === user.id;
+  const alreadyOwned = ownership?.purchased === true && !isOwner;
   const [posts, setPosts] = useState<AgentPost[]>([]);
   const [reviews, setReviews] = useState<ReviewsResponse>({
     reviews: [],
@@ -240,19 +245,26 @@ export default function AgentDetailPage() {
           seller: data.seller?.username ?? null,
         });
       }
-      const [postsData, relatedData] = await Promise.all([
+      const ownershipPromise = isAuthenticated
+        ? api
+            .get<{ purchased: boolean; orderId: string | null }>(`/market/${id}/purchased`)
+            .catch(() => ({ purchased: false, orderId: null }))
+        : Promise.resolve({ purchased: false, orderId: null });
+      const [postsData, relatedData, , ownershipData] = await Promise.all([
         api.get<AgentPost[]>(`/market/${id}/posts`).catch(() => [] as AgentPost[]),
         api.get<RelatedListing[]>(`/market/${id}/related`).catch(() => [] as RelatedListing[]),
         loadReviews().catch(() => {}),
+        ownershipPromise,
       ]);
       setPosts(postsData || []);
       setRelated(relatedData || []);
+      setOwnership(ownershipData);
     } catch (err) {
       if (err instanceof ApiError) setNotFound(true);
     } finally {
       setLoading(false);
     }
-  }, [id, loadReviews, recordRecent]);
+  }, [id, loadReviews, recordRecent, isAuthenticated]);
 
   useEffect(() => {
     load();
@@ -263,6 +275,14 @@ export default function AgentDetailPage() {
     if (!listing) return;
     if (listing.seller.id === user?.id) {
       addToast("That's your own listing.", 'info');
+      return;
+    }
+    // Hard guard against double-pay: if we already own this listing,
+    // skip the MetaMask flow entirely and hop to the order page. The
+    // backend rejects too, but by then the ETH has already left the
+    // buyer's wallet on the second tx.
+    if (ownership?.purchased && ownership.orderId) {
+      router.push(`/orders/${ownership.orderId}`);
       return;
     }
     if (listing.status !== 'ACTIVE') {
@@ -457,6 +477,20 @@ export default function AgentDetailPage() {
                   }}
                 >
                   Manage listing
+                </Link>
+              ) : alreadyOwned ? (
+                <Link
+                  href={ownership?.orderId ? `/orders/${ownership.orderId}` : '/inventory'}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(34,197,94,0.32) 0%, rgba(34,197,94,0.10) 100%)',
+                    boxShadow:
+                      'inset 0 0 0 1px rgba(34,197,94,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(34,197,94,0.4)',
+                  }}
+                >
+                  <ShoppingBag className="w-4 h-4" />
+                  Open in inventory
                 </Link>
               ) : (
               <>
@@ -663,7 +697,14 @@ export default function AgentDetailPage() {
 
           {/* RIGHT — sidebar */}
           <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-            <PricingCard listing={listing} onBuy={handleBuy} isOwner={isOwner} buyPaying={buyPaying} />
+            <PricingCard
+              listing={listing}
+              onBuy={handleBuy}
+              isOwner={isOwner}
+              buyPaying={buyPaying}
+              alreadyOwned={alreadyOwned}
+              ownedOrderId={ownership?.orderId ?? null}
+            />
             <SellerCard seller={listing.seller} />
             <MetaCard listing={listing} />
             {listing.repository && <RepositoryCard repo={listing.repository} />}
@@ -1054,11 +1095,15 @@ function PricingCard({
   onBuy,
   isOwner,
   buyPaying,
+  alreadyOwned,
+  ownedOrderId,
 }: {
   listing: MarketListing;
   onBuy: () => void;
   isOwner?: boolean;
   buyPaying?: boolean;
+  alreadyOwned?: boolean;
+  ownedOrderId?: string | null;
 }) {
   const isFree = listing.price === 0;
   return (
@@ -1110,6 +1155,25 @@ function PricingCard({
           </Link>
           <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
             You can&apos;t purchase your own listing. Share the link to reach buyers.
+          </p>
+        </>
+      ) : alreadyOwned ? (
+        <>
+          <Link
+            href={ownedOrderId ? `/orders/${ownedOrderId}` : '/inventory'}
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(34,197,94,0.32) 0%, rgba(34,197,94,0.10) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(34,197,94,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(34,197,94,0.4)',
+            }}
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Open in inventory
+          </Link>
+          <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
+            You already bought this — no need to pay again.
           </p>
         </>
       ) : (
