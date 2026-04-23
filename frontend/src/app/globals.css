@@ -4241,24 +4241,23 @@ aside button[data-active='true']::after {
   letter-spacing: -0.015em;
 }
 
-/* Sidebar typography — raise all copy inside the app shell sidebar
-   to the new product weight so it matches migrated pages. Targets
-   nav items, section headers, user chips — everything that was
-   showing as font-weight: 300 via the global * rule. */
+/* Sidebar typography — raise nav items, section headers and chips to
+   the new product weight. No !important so inline styles with their
+   own fontWeight (the BoltyNetwork logo is 700 inline) still win. */
 .mk-sidebar,
 .mk-sidebar * {
-  font-weight: 500 !important;
+  font-weight: 500;
 }
 .mk-sidebar .font-light,
 .mk-sidebar .font-normal {
-  font-weight: 500 !important;
+  font-weight: 500;
 }
 .mk-sidebar .font-medium,
 .mk-sidebar .font-semibold {
-  font-weight: 600 !important;
+  font-weight: 600;
 }
 .mk-sidebar .font-bold {
-  font-weight: 700 !important;
+  font-weight: 700;
 }
 .mk-app .mk-num {
   font-variant-numeric: tabular-nums;
