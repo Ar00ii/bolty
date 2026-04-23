@@ -439,7 +439,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       this.attachReviewStats(rawListings),
       this.computeActivityMap(rawListings.map((l) => l.id)),
     ]);
-    const data = this.mergeActivityStats(withReviews, activityMap);
+    const merged = this.mergeActivityStats(withReviews, activityMap);
+    // Strip the raw webhook URL from the public payload — leak the
+    // boolean presence only. The URL is only returned on the owner's
+    // /market/my-listings response and on GET /market/:id for the
+    // listing owner.
+    const data = merged.map((l) => {
+      const row = l as Record<string, unknown>;
+      const { agentEndpoint, ...rest } = row;
+      return { ...rest, hasAgentEndpoint: Boolean(agentEndpoint) };
+    });
     const result = { data, total, page, pages: Math.ceil(total / take) };
     if (cacheKey) {
       this.redis.set(cacheKey, JSON.stringify(result), 30).catch(() => null);
