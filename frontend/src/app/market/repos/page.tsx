@@ -11,6 +11,7 @@ import {
   Download,
   ArrowUp,
   ArrowDown,
+  ChevronDown,
   Trash2,
   Plus,
   Users,
@@ -1435,67 +1436,62 @@ function ReposMarketPageContent() {
 
   return (
     <div className="mk-agents-page mk-app-page">
-      {/* Header + CTA — mirrors /market/agents for consistent chrome. */}
-      <div className="mk-agents-head">
-        <div>
-          <div className="mk-breadcrumb">
-            <Link href="/market" className="mk-breadcrumb__link">
-              Market
-            </Link>
-            <span className="mk-breadcrumb__sep">/</span>
-            <span>Repos</span>
-          </div>
-          <h1 className="mk-agents-title">Repos</h1>
+      {/* Header — same compact shape as /market/agents */}
+      <div className="mk-hero">
+        <div className="mk-hero__crumbs">
+          <Link href="/market" className="mk-hero__crumb-link">
+            Market
+          </Link>
+          <span className="mk-hero__crumb-sep">/</span>
+          <span>Repos</span>
         </div>
-        {isAuthenticated && (
-          <button
-            type="button"
-            onClick={() => {
-              switchTab('mine');
-              loadGhRepos();
-            }}
-            className="mk-wizard__primary mk-agents-head__cta"
-          >
-            <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-            Publish repo
-          </button>
-        )}
+        <div className="mk-hero__row">
+          <div>
+            <h1 className="mk-hero__title">Repos</h1>
+            <p className="mk-hero__sub">
+              Discover, vote on, and download community code repositories. Publish your own and monetize access with built-in escrow.
+            </p>
+          </div>
+          {isAuthenticated && (
+            <button
+              type="button"
+              onClick={() => {
+                switchTab('mine');
+                loadGhRepos();
+              }}
+              className="mk-btn mk-btn--primary"
+            >
+              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+              Publish repo
+            </button>
+          )}
+        </div>
+
+        {/* Stats strip — segmented pills with tabular numbers */}
+        <div className="mk-stats">
+          <div className="mk-stat">
+            <div className="mk-stat__label">Listed</div>
+            <div className="mk-stat__value">{repos.length}</div>
+          </div>
+          <div className="mk-stat">
+            <div className="mk-stat__label">Paid</div>
+            <div className="mk-stat__value">{repos.filter((r) => r.isLocked).length}</div>
+          </div>
+          <div className="mk-stat">
+            <div className="mk-stat__label">Total stars</div>
+            <div className="mk-stat__value">
+              {repos.reduce((acc, r) => acc + (r.stars ?? 0), 0).toLocaleString()}
+            </div>
+          </div>
+          <div className="mk-stat">
+            <div className="mk-stat__label">Scanned</div>
+            <div className="mk-stat__value">100%</div>
+          </div>
+        </div>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-5 sm:mb-6 mt-5 sm:mt-6">
-        <RepoStat
-          icon={<GitBranch className="w-3.5 h-3.5" />}
-          label="Listed repos"
-          value={repos.length.toString()}
-          accent="#3B82F6"
-          delta={`${repos.filter((r) => r.isLocked).length} paid`}
-        />
-        <RepoStat
-          icon={<Star className="w-3.5 h-3.5" />}
-          label="Total stars"
-          value={repos.reduce((acc, r) => acc + (r.stars ?? 0), 0).toLocaleString()}
-          accent="#836EF9"
-          delta="community signal"
-        />
-        <RepoStat
-          icon={<Download className="w-3.5 h-3.5" />}
-          label="Downloads 24h"
-          value={(repos.length * 47).toLocaleString()}
-          accent="#06B6D4"
-          delta="+22% WoW"
-        />
-        <RepoStat
-          icon={<Shield className="w-3.5 h-3.5" />}
-          label="Scanned"
-          value="100%"
-          accent="#22c55e"
-          delta="CVE audited"
-        />
-      </div>
-
-      {/* Tabs — shared .mk-agents-tabs styling with /market/agents. */}
-      <div className="mk-agents-tabs">
+      {/* Tabs */}
+      <div className="mk-tabs">
         {(
           [
             ['market', 'Marketplace'],
@@ -1508,7 +1504,7 @@ function ReposMarketPageContent() {
               key={id}
               type="button"
               onClick={() => switchTab(id)}
-              className={`mk-agents-tab ${active ? 'mk-agents-tab--active' : ''}`}
+              className={`mk-tab ${active ? 'mk-tab--active' : ''}`}
             >
               {label}
             </button>
@@ -1519,109 +1515,121 @@ function ReposMarketPageContent() {
       {/* ── Marketplace tab ── */}
       {activeTab === 'market' && (
         <>
-          {/* Search + filters */}
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <div className="relative flex-1 min-w-[220px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+          {/* Toolbar — matches /market/agents */}
+          <div className="mk-toolbar">
+            <div className="mk-search">
+              <Search className="mk-search__icon" strokeWidth={2} />
               <input
                 ref={searchRef}
                 type="text"
-                placeholder="Search repositories..."
+                placeholder="Search repositories"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="input w-full pl-9 pr-16"
+                className="mk-search__input"
               />
               {search ? (
                 <button
                   onClick={() => setSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="mk-search__clear"
                   aria-label="Clear search"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5" strokeWidth={2} />
                 </button>
               ) : (
-                <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex items-center px-1.5 py-0.5 bg-zinc-800/60 rounded text-[10px] font-mono text-zinc-500 border border-zinc-700/60">
-                  /
-                </kbd>
+                <kbd className="mk-search__kbd">/</kbd>
               )}
             </div>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="input text-xs px-3 py-2 cursor-pointer"
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l} value={l === 'All' ? '' : l}>
-                  {l}
-                </option>
+
+            <div className="mk-select">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                aria-label="Language"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l} value={l === 'All' ? '' : l}>
+                    {l}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="mk-select__caret" strokeWidth={2} />
+            </div>
+
+            <div className="mk-seg mk-only-desktop">
+              {SORTS.map((s) => (
+                <button
+                  key={s.value}
+                  type="button"
+                  onClick={() => setSortBy(s.value as typeof sortBy)}
+                  className={`mk-seg__item ${sortBy === s.value ? 'mk-seg__item--active' : ''}`}
+                >
+                  {s.label}
+                </button>
               ))}
-            </select>
-            <div className="relative flex gap-1.5 flex-wrap">
-              {SORTS.map((s) => {
-                const active = sortBy === s.value;
-                return (
-                  <motion.button
-                    key={s.value}
-                    onClick={() => setSortBy(s.value as typeof sortBy)}
-                    whileTap={{ scale: 0.96 }}
-                    whileHover={active ? undefined : { y: -1 }}
-                    transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                    className={`relative text-xs px-3 py-1.5 rounded-lg transition-colors ${
-                      active ? 'text-bolty-300' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="market-repos-sort-pill"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        aria-hidden="true"
-                        className="absolute inset-0 rounded-lg"
-                        style={{
-                          background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
-                        }}
-                      />
-                    )}
-                    <span className="relative">{s.label}</span>
-                  </motion.button>
-                );
-              })}
+            </div>
+
+            <div className="mk-select mk-only-mobile">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                aria-label="Sort"
+              >
+                {SORTS.map((s) => (
+                  <option key={s.value} value={s.value}>
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="mk-select__caret" strokeWidth={2} />
             </div>
           </div>
-          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {error && (
+            <div
+              className="mb-4 flex items-start gap-2 rounded-xl px-3 py-2.5 text-sm"
+              style={{
+                background: 'rgba(244,63,94,0.10)',
+                boxShadow: 'inset 0 0 0 1px rgba(244,63,94,0.3)',
+                color: '#FDA4AF',
+              }}
+            >
+              <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500/30 text-[10px] font-mono">
+                !
+              </span>
+              <span className="flex-1 font-light">{error}</span>
+            </div>
+          )}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="skeleton h-56 rounded-xl" />
+                <div
+                  key={i}
+                  className="relative h-56 rounded-2xl overflow-hidden"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(20,20,26,0.5) 0%, rgba(10,10,14,0.5) 100%)',
+                    boxShadow: '0 0 0 1px rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 animate-shimmer"
+                    style={{
+                      background:
+                        'linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)',
+                      backgroundSize: '200% 100%',
+                    }}
+                  />
+                </div>
               ))}
             </div>
           ) : repos.length === 0 ? (
-            <div
-              className="relative rounded-2xl px-8 py-16 text-center overflow-hidden"
-              style={{
-                border: '1px dashed rgba(255,255,255,0.1)',
-                background: 'rgba(0,0,0,0.3)',
-              }}
-            >
-              <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-white/10" />
-              <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-white/10" />
-              <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-white/10" />
-              <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-white/10" />
-              <div
-                className="w-14 h-14 rounded-xl mx-auto mb-4 flex items-center justify-center"
-                style={{
-                  background: 'rgba(59,130,246,0.08)',
-                  border: '1px solid rgba(59,130,246,0.2)',
-                }}
-              >
-                <GitBranch className="w-7 h-7 text-blue-300" strokeWidth={1.5} />
+            <div className="mk-empty-app">
+              <div className="mk-empty-app__icon" style={{ background: 'rgba(59,130,246,0.15)', color: '#93c5fd' }}>
+                <GitBranch className="w-5 h-5" strokeWidth={2} />
               </div>
-              <p className="text-white font-light text-base">No repositories found</p>
-              <p className="text-sm text-zinc-500 font-light mt-2 max-w-sm mx-auto">
+              <div className="mk-empty-app__title">No repositories found</div>
+              <div className="mk-empty-app__sub">
                 Try tweaking the filters, or explore popular languages below.
-              </p>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1650,11 +1658,6 @@ function ReposMarketPageContent() {
             </div>
           )}
 
-          {/* About this section */}
-          <p className="mt-12 sm:mt-16 mb-2 text-center text-xs sm:text-[13px] text-zinc-500 font-light max-w-2xl mx-auto leading-relaxed">
-            Discover, vote on, and download community code repositories. Publish your own and
-            monetize access with built-in escrow.
-          </p>
         </>
       )}
 
