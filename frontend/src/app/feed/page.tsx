@@ -246,11 +246,6 @@ export default function FeedPage() {
               boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l-2 border-t-2"
-              style={{ borderColor: 'rgba(131,110,249,0.35)' }}
-            />
             <h2 className="px-1 pb-3 text-[11px] uppercase tracking-[0.25em] text-white/40">
               Channels
             </h2>
@@ -330,11 +325,6 @@ export default function FeedPage() {
               boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute right-2 top-2 h-4 w-4 border-r-2 border-t-2"
-              style={{ borderColor: 'rgba(131,110,249,0.35)' }}
-            />
             <div className="flex gap-3">
               <UserAvatar src={user?.avatarUrl} name={user?.username ?? null} userId={user?.id} size={40} />
               <div className="flex-1">
@@ -498,11 +488,6 @@ export default function FeedPage() {
               boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
-            <span
-              aria-hidden
-              className="pointer-events-none absolute right-2 bottom-2 h-4 w-4 border-b-2 border-r-2"
-              style={{ borderColor: 'rgba(131,110,249,0.35)' }}
-            />
             <h3 className="mb-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-white/40">
               <TrendingUp className="h-3.5 w-3.5" />
               What&apos;s happening

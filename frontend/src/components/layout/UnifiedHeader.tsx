@@ -23,6 +23,7 @@ import { usePathname } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react';
 
 import { BoltyPricePill } from '@/components/token/BoltyPricePill';
+import { PoweredByFlaunchBadge } from '@/components/token/PoweredByFlaunchBadge';
 import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
@@ -159,6 +160,7 @@ export function UnifiedHeader() {
           {/* Right: Auth/Profile */}
           <div className="flex items-center gap-2 md:gap-4">
             <BoltyPricePill compact />
+            <PoweredByFlaunchBadge compact />
             <a
               href="https://x.com/BoltyNetwork"
               target="_blank"

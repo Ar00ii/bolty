@@ -15,13 +15,23 @@ import { api } from '@/lib/api/client';
 interface TokenStats {
   priceUsd: number | null;
   priceChange24h: number | null;
+  marketCapUsd: number | null;
+  fdvUsd: number | null;
 }
 
-function formatPrice(n: number | null): string {
+/**
+ * Compact USD formatter — the navbar has no room for full numbers, so
+ * anything over $1K gets suffixed (K/M/B). Sub-dollar values fall back
+ * to 2–4 decimals.
+ */
+function formatMcap(n: number | null): string {
   if (n == null || !isFinite(n)) return '—';
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  if (n >= 1) return `$${n.toFixed(0)}`;
   if (n < 0.0001) return `$${n.toPrecision(2)}`;
-  if (n < 1) return `$${n.toFixed(4)}`;
-  return `$${n.toFixed(2)}`;
+  return `$${n.toFixed(4)}`;
 }
 
 export function BoltyPricePill({ compact = false }: { compact?: boolean }) {
@@ -38,14 +48,16 @@ export function BoltyPricePill({ compact = false }: { compact?: boolean }) {
       }
     };
     load();
-    const t = setInterval(load, 45_000);
+    // 15s so the market cap feels alive — backend caches DexScreener
+    // for 60s so this is cheap.
+    const t = setInterval(load, 15_000);
     return () => {
       cancelled = true;
       clearInterval(t);
     };
   }, []);
 
-  const price = stats?.priceUsd ?? null;
+  const mcap = stats?.marketCapUsd ?? stats?.fdvUsd ?? null;
   const change = stats?.priceChange24h ?? null;
   const positive = change != null && change >= 0;
   const accent = change == null ? '#a1a1aa' : positive ? '#4ADE80' : '#FB7185';
@@ -75,8 +87,9 @@ export function BoltyPricePill({ compact = false }: { compact?: boolean }) {
       <span className="font-medium tracking-tight" style={{ color: '#C9BEFF' }}>
         $BOLTY
       </span>
+      <span className="text-[9.5px] uppercase tracking-[0.18em] text-white/40">MC</span>
       <span className="tabular-nums" style={{ color: '#ffffff' }}>
-        {formatPrice(price)}
+        {formatMcap(mcap)}
       </span>
       {change != null && (
         <span

@@ -197,11 +197,6 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
           '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l-2 border-t-2"
-        style={{ borderColor: 'rgba(131,110,249,0.5)' }}
-      />
       <div className="flex items-center justify-between">
         <div className="text-[11px] uppercase tracking-[0.22em] text-white/50">Swap</div>
         <div className="flex items-center gap-1 rounded-lg bg-white/5 p-0.5 text-[11px]">

@@ -15,6 +15,8 @@ const CACHE_KEY = 'token:bolty:stats:v1';
 // Trades refresh more often — the UI promises a live feed.
 const TRADES_CACHE_TTL_SEC = 4;
 const TRADES_CACHE_KEY = 'token:bolty:trades:v1';
+const OHLCV_CACHE_TTL_SEC = 15;
+const OHLCV_CACHE_KEY = 'token:bolty:ohlcv:v1';
 
 /** Shape we expose to the frontend — curated from DexScreener pair data. */
 export interface TokenStats {
@@ -59,6 +61,15 @@ interface DexScreenerResponse {
   pairs?: DexScreenerPair[] | null;
 }
 
+export interface BoltyCandle {
+  t: number; // unix seconds
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+  v: number; // volume USD
+}
+
 export interface BoltyTrade {
   id: string;
   side: 'buy' | 'sell';
@@ -90,6 +101,15 @@ interface GeckoTerminalTradeAttrs {
 
 interface GeckoTerminalTradesResponse {
   data?: Array<{ id: string; type: string; attributes: GeckoTerminalTradeAttrs }>;
+}
+
+interface GeckoTerminalOhlcvResponse {
+  data?: {
+    attributes?: {
+      // rows shape: [timestamp, open, high, low, close, volume]
+      ohlcv_list?: Array<[number, number, number, number, number, number]>;
+    };
+  };
 }
 
 @Injectable()
@@ -165,6 +185,75 @@ export class TokenService {
       ethPriceUsd,
       updatedAt: new Date().toISOString(),
     };
+  }
+
+  /**
+   * OHLCV candles for the native chart. We fetch GeckoTerminal's
+   * minute aggregates directly (JSON) and let the client render
+   * them with lightweight-charts — our CSP blocks external iframes.
+   */
+  async getBoltyOhlcv(
+    timeframe: 'minute' | 'hour' | 'day' = 'minute',
+    aggregate = 1,
+    limit = 300,
+  ): Promise<BoltyCandle[]> {
+    const key = `${OHLCV_CACHE_KEY}:${timeframe}:${aggregate}:${limit}`;
+    const cached = await this.redis.get(key).catch(() => null);
+    if (cached) {
+      try {
+        return JSON.parse(cached) as BoltyCandle[];
+      } catch {
+        /* fall through */
+      }
+    }
+
+    const stats = await this.getBoltyStats();
+    if (!stats.pairAddress) return [];
+
+    const candles = await this.fetchOhlcv(
+      stats.pairAddress,
+      timeframe,
+      aggregate,
+      limit,
+    ).catch((err) => {
+      this.logger.warn(`OHLCV fetch failed: ${(err as Error).message}`);
+      return [] as BoltyCandle[];
+    });
+
+    await this.redis
+      .set(key, JSON.stringify(candles), OHLCV_CACHE_TTL_SEC)
+      .catch(() => void 0);
+    return candles;
+  }
+
+  private async fetchOhlcv(
+    pairAddress: string,
+    timeframe: string,
+    aggregate: number,
+    limit: number,
+  ): Promise<BoltyCandle[]> {
+    const url = `https://api.geckoterminal.com/api/v2/networks/base/pools/${pairAddress}/ohlcv/${timeframe}?aggregate=${aggregate}&limit=${Math.min(limit, 1000)}&currency=usd`;
+    const res = await axios.get<GeckoTerminalOhlcvResponse>(url, {
+      timeout: 6000,
+      headers: { Accept: 'application/json' },
+      validateStatus: (s) => s >= 200 && s < 300,
+      maxRedirects: 0,
+    });
+    const rows = res.data?.data?.attributes?.ohlcv_list ?? [];
+    // GeckoTerminal returns rows newest-first; lightweight-charts
+    // needs ascending by time, so we reverse here.
+    return rows
+      .map(
+        ([t, o, h, l, c, v]): BoltyCandle => ({
+          t,
+          o,
+          h,
+          l,
+          c,
+          v,
+        }),
+      )
+      .reverse();
   }
 
   /**
