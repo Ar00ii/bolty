@@ -286,7 +286,16 @@ export class MarketController {
       'Content-Disposition',
       `attachment; filename="${(meta.fileName || key).replace(/"/g, '_')}"`,
     );
-    res.setHeader('Content-Type', meta.fileMimeType || 'application/octet-stream');
+    // nosniff + neutral MIME stops browsers from rendering uploaded text
+    // payloads as HTML/JS on the API origin.
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    const unsafeServed = /^(text\/html|application\/xhtml\+xml|text\/xml|application\/xml|image\/svg\+xml)/i;
+    const serveType =
+      meta.fileMimeType && !unsafeServed.test(meta.fileMimeType)
+        ? meta.fileMimeType
+        : 'application/octet-stream';
+    res.setHeader('Content-Type', serveType);
     res.sendFile(filePath);
   }
 
@@ -414,10 +423,36 @@ export class MarketController {
           return;
         }
 
-        // Reject SVG file extensions even if MIME type is misclassified
+        // Reject renderable extensions regardless of declared MIME —
+        // browsers sniff HTML/XHTML even when Content-Type says otherwise.
         const ext = path.extname(file.originalname).toLowerCase();
-        if (ext === '.svg') {
-          cb(new BadRequestException('SVG files are not allowed (security risk)'), false);
+        const blockedExts = new Set([
+          '.svg',
+          '.html',
+          '.htm',
+          '.xhtml',
+          '.xml',
+          '.xsl',
+          '.xslt',
+        ]);
+        if (blockedExts.has(ext)) {
+          cb(
+            new BadRequestException(`File extension not allowed: ${ext} (security risk)`),
+            false,
+          );
+          return;
+        }
+
+        // Reject renderable MIME types that slip through text/* — these
+        // execute inline scripts when the browser ignores attachment.
+        const mt = file.mimetype.toLowerCase();
+        if (
+          mt === 'text/html' ||
+          mt === 'application/xhtml+xml' ||
+          mt === 'text/xml' ||
+          mt === 'application/xml'
+        ) {
+          cb(new BadRequestException(`File type not allowed: ${file.mimetype}`), false);
           return;
         }
 
@@ -461,6 +496,7 @@ export class MarketController {
   }
 
   @Post(':id/purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.CREATED)
   purchaseListing(
     @Param('id') id: string,
@@ -487,6 +523,7 @@ export class MarketController {
    * JWT + listingId + txHash; re-runs the same verification pipeline.
    */
   @Post(':id/recover-purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.OK)
   recoverListingPurchase(
     @Param('id') id: string,
@@ -509,6 +546,7 @@ export class MarketController {
    * listing the tx was for.
    */
   @Post('recover-purchase')
+  @Throttle({ default: { limit: 20, ttl: 3600000 } })
   @HttpCode(HttpStatus.OK)
   recoverListingPurchaseByTx(
     @CurrentUser('id') buyerId: string,

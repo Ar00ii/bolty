@@ -434,8 +434,10 @@ export class AuthController {
 
   // ── Logout ────────────────────────────────────────────────────────────────
 
+  // CSRF is enforced here — logout abuses an authenticated session, so a
+  // cross-site form POST could force-log out any user without this guard.
+  // The frontend calls /auth/logout via api.post which attaches the token.
   @UseGuards(JwtAuthGuard)
-  @SkipCsrf()
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(@CurrentUser('id') userId: string, @Res() res: Response) {
