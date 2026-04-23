@@ -158,15 +158,7 @@ export default function BoltyTokenPage() {
               />
             </div>
             <div>
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-white/40">
-                <Zap className="h-3 w-3 text-[#836EF9]" />
-                <span>BOLTY TOKEN</span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-[1px] text-[9px] text-emerald-300">
-                  <span className="h-1 w-1 animate-pulse rounded-full bg-emerald-400" />
-                  Live
-                </span>
-              </div>
-              <h1 className="mt-0.5 flex items-baseline gap-2 text-2xl font-light tracking-tight">
+              <h1 className="flex items-baseline gap-2 text-2xl font-light tracking-tight">
                 <GradientText gradient="purple">$BOLTY</GradientText>
                 <span className="text-sm text-white/30">/ Base</span>
               </h1>

@@ -101,7 +101,7 @@ export const NAV: NavSection[] = [
         ],
       },
       { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
-      { label: '$BOLTY', icon: Zap, href: '/bolty', badge: 'Live' },
+      { label: '$BOLTY', icon: Zap, href: '/bolty' },
     ],
   },
   {
@@ -165,7 +165,7 @@ export function StandardSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[264px] shrink-0"
+      className="mk-sidebar hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[264px] shrink-0"
       style={{
         background: '#0c0c0f',
         borderRight: '1px solid #1f1f23',
