@@ -7,8 +7,6 @@ import React, { useMemo, useRef, useState, useEffect, useCallback } from 'react'
 
 import { MarketTicker } from '@/components/layout/MarketTicker';
 import { NAV, isItemActive } from '@/components/layout/StandardSidebar';
-import { BoltyPricePill } from '@/components/token/BoltyPricePill';
-import { PoweredByFlaunchBadge } from '@/components/token/PoweredByFlaunchBadge';
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { API_URL, api } from '@/lib/api/client';
@@ -211,10 +209,6 @@ export function PowerNavbar() {
             </kbd>
           </span>
         </button>
-
-        {/* Live $BOLTY market-cap pill + Flaunch attribution badge */}
-        <BoltyPricePill compact />
-        <PoweredByFlaunchBadge compact />
 
         {/* Wallet + GitHub quick-connect chips */}
         {isAuthenticated && <NavConnectChips user={user} refresh={refresh} />}
