@@ -1,15 +1,15 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu } from 'lucide-react';
+import { Send, MessageSquare, Zap, Users, Clock, Eye, Search, X, Menu, Bot, ArrowUpRight, Handshake } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
-import { API_URL, WS_URL } from '@/lib/api/client';
+import { API_URL, WS_URL, api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 interface DMMessage {
@@ -42,6 +42,18 @@ interface AgentNegotiation {
   status: 'negotiating' | 'completed' | 'failed';
   bothViewing: boolean;
   messages: DMMessage[];
+}
+
+/** Rail entry representing a user's active or recent negotiation. */
+interface NegotiationRow {
+  id: string;
+  status: 'ACTIVE' | 'AGREED' | 'REJECTED' | 'EXPIRED';
+  agreedPrice?: number | null;
+  listing: { id: string; title: string; price: number; currency: string; sellerId: string };
+  buyer: { id: string; username: string | null };
+  updatedAt?: string;
+  createdAt?: string;
+  messages?: Array<{ createdAt: string }>;
 }
 
 function Avatar({
@@ -122,6 +134,7 @@ function DmPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [negotiations, setNegotiations] = useState<NegotiationRow[]>([]);
   const [activePeer, setActivePeer] = useState<Contact['user'] | null>(null);
   const [messages, setMessages] = useState<DMMessage[]>([]);
   const [input, setInput] = useState('');
@@ -142,25 +155,74 @@ function DmPageInner() {
   const activePeerRef = useRef<Contact['user'] | null>(null);
   const userIdRef = useRef<string | undefined>(undefined);
 
-  const CATEGORIES: { id: ContactCategory; label: string; icon: React.ReactNode }[] = [
-    { id: 'all', label: 'All', icon: <MessageSquare size={14} /> },
-    { id: 'friends', label: 'Friends', icon: <Users size={14} /> },
-    { id: 'agents', label: 'AI Agents', icon: <Zap size={14} /> },
-    { id: 'random', label: 'Randoms', icon: <Users size={14} /> },
-    { id: 'pending', label: 'Pending', icon: <Clock size={14} /> },
-  ];
+  const CATEGORIES = useMemo<{ id: ContactCategory; label: string; icon: React.ReactNode }[]>(
+    () => [
+      { id: 'all', label: 'All', icon: <MessageSquare size={14} /> },
+      { id: 'friends', label: 'Friends', icon: <Users size={14} /> },
+      { id: 'agents', label: 'AI Agents', icon: <Zap size={14} /> },
+      { id: 'random', label: 'Randoms', icon: <Users size={14} /> },
+      { id: 'pending', label: 'Pending', icon: <Clock size={14} /> },
+    ],
+    [],
+  );
 
-  const filteredContacts = contacts.filter((c) => {
-    if (activeCategory !== 'all' && c.type !== activeCategory) return false;
+  // Memoize filtered contacts to stop re-running the filter on every
+  // keystroke or socket emit — this is called on every render.
+  const filteredContacts = useMemo(() => {
     const q = contactQuery.trim().toLowerCase();
-    if (!q) return true;
-    const haystack = `${c.user.username || ''} ${c.lastMessage || ''}`.toLowerCase();
-    return haystack.includes(q);
-  });
+    return contacts.filter((c) => {
+      if (activeCategory !== 'all' && c.type !== activeCategory) return false;
+      if (!q) return true;
+      const haystack = `${c.user.username || ''} ${c.lastMessage || ''}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [contacts, activeCategory, contactQuery]);
+
+  // Split negotiations for the sidebar: active ones at the top, then
+  // recently-closed. Memoize so re-renders from typing don't re-sort.
+  const negotiationRows = useMemo(() => {
+    const rows = [...negotiations];
+    rows.sort((a, b) => {
+      const aActive = a.status === 'ACTIVE' ? 0 : 1;
+      const bActive = b.status === 'ACTIVE' ? 0 : 1;
+      if (aActive !== bActive) return aActive - bActive;
+      const at = a.updatedAt ?? a.createdAt ?? '';
+      const bt = b.updatedAt ?? b.createdAt ?? '';
+      return bt.localeCompare(at);
+    });
+    const q = contactQuery.trim().toLowerCase();
+    if (!q) return rows.slice(0, 12);
+    return rows
+      .filter((r) => r.listing.title.toLowerCase().includes(q))
+      .slice(0, 12);
+  }, [negotiations, contactQuery]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace('/auth');
   }, [isAuthenticated, isLoading, router]);
+
+  // Fetch negotiations for the sidebar — the user can jump to any of
+  // them from here and the full agent chat lives at /negotiations/:id.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const data = await api.get<NegotiationRow[]>('/market/negotiations');
+        if (!cancelled) setNegotiations(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setNegotiations([]);
+      }
+    };
+    load();
+    // Lightweight refresh every 30s so new deals / status flips
+    // surface without needing a full page reload.
+    const t = setInterval(load, 30000);
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     activePeerRef.current = activePeer;
@@ -531,6 +593,67 @@ function DmPageInner() {
               );
             })}
           </div>
+
+          {/* Negotiations rail — active + recent agent deals */}
+          {negotiationRows.length > 0 && (
+            <div className="px-2 pt-1">
+              <div className="flex items-center justify-between px-1 pb-1.5 text-[10px] uppercase tracking-[0.2em] text-white/40">
+                <span className="inline-flex items-center gap-1.5">
+                  <Handshake className="h-3 w-3 text-[#C9BEFF]" />
+                  Negotiations
+                </span>
+                <span className="text-white/30">{negotiationRows.length}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                {negotiationRows.map((n) => {
+                  const isBuyer = user?.id === n.buyer.id;
+                  const active = n.status === 'ACTIVE';
+                  const done = n.status === 'AGREED';
+                  const color = done
+                    ? '#4ADE80'
+                    : n.status === 'REJECTED' || n.status === 'EXPIRED'
+                      ? '#FB7185'
+                      : '#836EF9';
+                  return (
+                    <Link
+                      key={n.id}
+                      href={`/negotiations/${n.id}`}
+                      className="group flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition hover:bg-white/[0.04]"
+                    >
+                      <span
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                        style={{
+                          background: `${color}1a`,
+                          boxShadow: `inset 0 0 0 1px ${color}55`,
+                        }}
+                      >
+                        <Bot className="h-3.5 w-3.5" style={{ color }} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 text-[12.5px] font-light text-white/90">
+                          <span className="truncate">{n.listing.title}</span>
+                          {active && (
+                            <span className="ml-auto inline-flex items-center gap-0.5 text-[9px] uppercase tracking-widest text-[#C9BEFF]">
+                              <span className="h-1 w-1 animate-pulse rounded-full bg-[#836EF9]" />
+                              live
+                            </span>
+                          )}
+                        </div>
+                        <div className="truncate text-[10.5px] text-white/45">
+                          {isBuyer ? 'you buying' : 'your listing'} ·{' '}
+                          {n.status === 'AGREED' && n.agreedPrice != null
+                            ? `agreed ${n.agreedPrice} ${n.listing.currency}`
+                            : n.status.toLowerCase()}
+                        </div>
+                      </div>
+                      <ArrowUpRight className="h-3 w-3 shrink-0 text-white/30 transition group-hover:text-white/80" />
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="mx-2 my-2 h-px bg-white/5" />
+            </div>
+          )}
 
           {/* Contacts */}
           <div className="flex-1 overflow-y-auto space-y-1.5 pr-2">
