@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../../common/decorators/public.decorator';
@@ -32,5 +32,26 @@ export class TokenController {
   @Get('bolty/trades')
   getBoltyTrades() {
     return this.tokenService.getBoltyTrades();
+  }
+
+  /**
+   * OHLCV candles for the /bolty native chart. Timeframe + aggregate
+   * map to GeckoTerminal's pool-level OHLCV endpoint. Cached 15s so
+   * the client-side poll loop (every ~10s while the tab is visible)
+   * mostly hits Redis.
+   */
+  @Public()
+  @Throttle({ default: { limit: 120, ttl: 60000 } })
+  @Get('bolty/ohlcv')
+  getBoltyOhlcv(
+    @Query('timeframe') timeframe?: 'minute' | 'hour' | 'day',
+    @Query('aggregate') aggregate?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const tf: 'minute' | 'hour' | 'day' =
+      timeframe === 'hour' || timeframe === 'day' ? timeframe : 'minute';
+    const agg = Math.max(1, Math.min(Number(aggregate) || 1, 60));
+    const lim = Math.max(30, Math.min(Number(limit) || 300, 1000));
+    return this.tokenService.getBoltyOhlcv(tf, agg, lim);
   }
 }

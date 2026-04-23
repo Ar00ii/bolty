@@ -93,11 +93,6 @@ export function CommunityFeedStrip({ className = '' }: { className?: string }) {
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-2 top-2 h-3.5 w-3.5 border-l-2 border-t-2"
-        style={{ borderColor: 'rgba(131,110,249,0.35)' }}
-      />
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 shrink-0">
           <Hash className="h-3.5 w-3.5 text-[#06B6D4]" />

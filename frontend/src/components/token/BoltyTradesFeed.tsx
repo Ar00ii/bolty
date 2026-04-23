@@ -106,11 +106,6 @@ export function BoltyTradesFeed({ className = '' }: { className?: string }) {
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l-2 border-t-2"
-        style={{ borderColor: 'rgba(131,110,249,0.35)' }}
-      />
       <div className="flex items-center justify-between gap-3 border-b border-white/5 px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_#4ADE80]" />
