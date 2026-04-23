@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 
 import { AuthModule } from '../auth/auth.module';
 import { DmModule } from '../dm/dm.module';
@@ -6,6 +7,7 @@ import { EmailModule } from '../email/email.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ReputationModule } from '../reputation/reputation.module';
 
+import { AgentHealthService } from './agent-health.service';
 import { AgentPostsController } from './agent-posts.controller';
 import { AgentPostsService } from './agent-posts.service';
 import { AgentSandboxService } from './agent-sandbox.service';
@@ -18,7 +20,14 @@ import { NegotiationService } from './negotiation.service';
 import { NegotiationsGateway } from './negotiations.gateway';
 
 @Module({
-  imports: [AuthModule, EmailModule, DmModule, NotificationsModule, ReputationModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    AuthModule,
+    EmailModule,
+    DmModule,
+    NotificationsModule,
+    ReputationModule,
+  ],
   controllers: [AgentPostsController, MarketController],
   providers: [
     MarketService,
@@ -29,6 +38,7 @@ import { NegotiationsGateway } from './negotiations.gateway';
     AgentSandboxService,
     AgentScanService,
     ApiKeysService,
+    AgentHealthService,
   ],
   exports: [MarketGateway],
 })

@@ -711,4 +711,46 @@ export class EmailService {
 
     await this.send(to, subject, html, text);
   }
+
+  /**
+   * Agent-health alert sent when the periodic health-check flips a
+   * listing to inactive (kind: 'offline') and when it comes back
+   * (kind: 'recovered').
+   */
+  async sendAgentHealthAlert(
+    to: string,
+    data: { listingTitle: string; listingId: string; kind: 'offline' | 'recovered' },
+  ): Promise<void> {
+    const offline = data.kind === 'offline';
+    const subject = offline
+      ? `Your agent is offline — ${data.listingTitle}`
+      : `Your agent is back online — ${data.listingTitle}`;
+    const headline = offline ? 'Your agent stopped responding' : 'Your agent is live again';
+    const intro = offline
+      ? 'Our health-checker can no longer reach your agent\'s webhook. We\'ve paused the listing so nobody tries to buy an offline agent.'
+      : 'Your agent\'s webhook is responding again. The listing is back on the marketplace.';
+    const manageUrl = `${this.appUrl}/market/agents/${data.listingId}`;
+
+    const html = this.shell(
+      subject,
+      headline,
+      bodyWrap(`
+        <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#09090b;letter-spacing:-0.4px;">${headline}</h1>
+        <p style="margin:0 0 16px;color:#52525b;font-size:14.5px;line-height:1.6;">${intro}</p>
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:16px;">
+          <tr>
+            <td style="background:${offline ? '#fef2f2' : '#f0fdf4'};border:1px solid ${offline ? '#fecaca' : '#86efac'};border-radius:12px;padding:14px 18px;">
+              <p style="margin:0 0 4px;font-size:12px;color:#71717a;font-family:'Courier New',monospace;">LISTING</p>
+              <p style="margin:0;font-size:15px;font-weight:700;color:#09090b;">${data.listingTitle}</p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0 0 24px;">
+          <a href="${manageUrl}" style="display:inline-block;background:#836ef9;color:#ffffff;padding:12px 20px;border-radius:10px;font-weight:600;font-size:14px;text-decoration:none;">Manage listing</a>
+        </p>
+      `),
+    );
+    const text = `${headline}\n\n${intro}\nListing: ${data.listingTitle}\nManage: ${manageUrl}`;
+    await this.send(to, subject, html, text);
+  }
 }
