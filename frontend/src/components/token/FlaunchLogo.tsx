@@ -1,55 +1,33 @@
 import React from 'react';
 
 /**
- * Flaunch brand mark — stylized lowercase "ƒ" in a rounded square.
- * Keeps to Flaunch's palette (the "lime" they use on their own site).
- * Inline SVG so we don't ship another raster file and it scales
- * cleanly next to text at any size.
+ * Flaunch brand mark. Uses the PNG uploaded by the team under
+ * /public/flaunch-logo.png so we always render the real logo instead
+ * of a hand-drawn approximation. Consumers ignore the `monochrome`
+ * prop now — the PNG already ships with its own colorway and a
+ * transparent background so it works on dark surfaces.
  */
 export function FlaunchLogo({
   size = 16,
   className = '',
-  monochrome = false,
+  monochrome: _monochrome,
 }: {
   size?: number;
   className?: string;
   monochrome?: boolean;
 }) {
-  const id = React.useId();
-  const fillId = `${id}-fill`;
+  void _monochrome;
   return (
-    <svg
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src="/flaunch-logo.png"
+      alt="Flaunch"
       width={size}
       height={size}
-      viewBox="0 0 32 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-label="Flaunch"
-      role="img"
-    >
-      {!monochrome && (
-        <defs>
-          <linearGradient id={fillId} x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#C9FF41" />
-            <stop offset="100%" stopColor="#7DDA2C" />
-          </linearGradient>
-        </defs>
-      )}
-      <rect
-        x="0.5"
-        y="0.5"
-        width="31"
-        height="31"
-        rx="9"
-        fill={monochrome ? 'currentColor' : `url(#${fillId})`}
-      />
-      {/* stylized ƒ — straight vertical bar with crossbar and foot curl */}
-      <path
-        d="M20.6 9.8c-.3-.1-.8-.2-1.4-.2-1.9 0-3.1 1.3-3.1 3.7v1.5h-3.1v2.7h3.1v9.2h3.1V17.5h3.1v-2.7h-3.1v-1.3c0-1 .4-1.5 1.3-1.5.4 0 .7 0 1 .1l.1-2.3Z"
-        fill={monochrome ? 'rgba(0,0,0,0.85)' : '#0A0A0F'}
-      />
-    </svg>
+      className={`shrink-0 object-contain ${className}`}
+      style={{ width: size, height: size }}
+      draggable={false}
+    />
   );
 }
 
