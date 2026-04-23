@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Header, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 
 import { Public } from '../../common/decorators/public.decorator';
@@ -16,6 +16,7 @@ export class TokenController {
    */
   @Public()
   @Throttle({ default: { limit: 60, ttl: 60000 } })
+  @Header('Cache-Control', 'public, s-maxage=20, stale-while-revalidate=60')
   @Get('bolty')
   getBolty() {
     return this.tokenService.getBoltyStats();
@@ -29,6 +30,7 @@ export class TokenController {
    */
   @Public()
   @Throttle({ default: { limit: 180, ttl: 60000 } })
+  @Header('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=15')
   @Get('bolty/trades')
   getBoltyTrades() {
     return this.tokenService.getBoltyTrades();
@@ -42,6 +44,7 @@ export class TokenController {
    */
   @Public()
   @Throttle({ default: { limit: 120, ttl: 60000 } })
+  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=120')
   @Get('bolty/ohlcv')
   getBoltyOhlcv(
     @Query('timeframe') timeframe?: 'minute' | 'hour' | 'day',

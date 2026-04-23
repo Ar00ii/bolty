@@ -2,14 +2,53 @@
 
 import { motion } from 'framer-motion';
 import { Copy, ExternalLink, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { BoltyCandleChart } from '@/components/token/BoltyCandleChart';
-import { BoltySwapCard } from '@/components/token/BoltySwapCard';
-import { BoltyTradesFeed } from '@/components/token/BoltyTradesFeed';
 import { FlaunchLogo } from '@/components/token/FlaunchLogo';
 import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
+
+// Chart (lightweight-charts ~100KB), swap card (@flaunch/sdk + viem
+// ~150KB) and trades feed (axios polling) are all below the fold or
+// click-gated. Dynamic import keeps them out of the first JS bundle
+// so the hero + stats paint fast on cold navigations.
+const BoltyCandleChart = dynamic(
+  () =>
+    import('@/components/token/BoltyCandleChart').then((m) => ({
+      default: m.BoltyCandleChart,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full animate-pulse rounded-2xl bg-white/[0.03]" />
+    ),
+  },
+);
+const BoltySwapCard = dynamic(
+  () =>
+    import('@/components/token/BoltySwapCard').then((m) => ({
+      default: m.BoltySwapCard,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[420px] w-full animate-pulse rounded-2xl bg-white/[0.03]" />
+    ),
+  },
+);
+const BoltyTradesFeed = dynamic(
+  () =>
+    import('@/components/token/BoltyTradesFeed').then((m) => ({
+      default: m.BoltyTradesFeed,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-[300px] w-full animate-pulse rounded-2xl bg-white/[0.03]" />
+    ),
+  },
+);
 
 interface TokenStats {
   contract: string;

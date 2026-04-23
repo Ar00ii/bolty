@@ -11,6 +11,7 @@ import {
   Body,
   Param,
   Query,
+  Header,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -169,6 +170,9 @@ export class MarketController {
   // ── Listings ───────────────────────────────────────────────────────────────
 
   @Public()
+  // Public list — fine to serve from edge for 30s. Stale-while-revalidate
+  // keeps the UI snappy even when the origin is cold.
+  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
   @Get()
   getListings(
     @Query('type') type?: string,
@@ -212,6 +216,7 @@ export class MarketController {
   }
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=20, stale-while-revalidate=60')
   @Get('pulse')
   getPulse(@Query('limit') limit?: string) {
     const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 15;
@@ -220,6 +225,7 @@ export class MarketController {
   }
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
   @Get('top-sellers')
   getTopSellers(@Query('limit') limit?: string) {
     const parsed = limit && !Number.isNaN(Number(limit)) ? Number(limit) : 12;
@@ -228,12 +234,14 @@ export class MarketController {
   }
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=10, stale-while-revalidate=30')
   @Get('ticker')
   getTicker() {
     return this.marketService.getTickerSnapshot();
   }
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
   @Get('leaderboard')
   getLeaderboard() {
     return this.marketService.getLeaderboard();
