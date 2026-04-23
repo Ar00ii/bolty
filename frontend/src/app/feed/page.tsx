@@ -13,7 +13,6 @@ import {
   Sparkles,
   Users,
   X,
-  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -65,6 +64,19 @@ const QUICK_EMOJIS = [
 ];
 
 const MAX_LEN = 500;
+
+/**
+ * Normalize a server-supplied image path. Uploads come back as
+ * "/chat/images/<key>" so we can store them portably; this helper
+ * prefixes with the current API origin so <img> resolves correctly
+ * without persisting a full URL in the DB.
+ */
+function resolveImageUrl(src: string | null | undefined): string | undefined {
+  if (!src) return undefined;
+  if (/^https?:\/\//i.test(src)) return src;
+  if (src.startsWith('/')) return `${API_URL}${src}`;
+  return `${API_URL}/${src}`;
+}
 
 export default function FeedPage() {
   const router = useRouter();
@@ -131,7 +143,11 @@ export default function FeedPage() {
         const data = await api.get<FeedMessage[]>(
           `/chat/messages?limit=50&channel=${encodeURIComponent(ch)}`,
         );
-        setMessagesByChannel((prev) => ({ ...prev, [ch]: data }));
+        // Backend returns ascending (oldest-first) for legacy /chat
+        // compatibility. The Twitter-style feed needs newest-first, so
+        // flip here on load and rely on newMessage unshift to keep it
+        // that way as posts stream in.
+        setMessagesByChannel((prev) => ({ ...prev, [ch]: [...data].reverse() }));
       } catch {
         setMessagesByChannel((prev) => ({ ...prev, [ch]: prev[ch] ?? [] }));
       } finally {
@@ -282,11 +298,11 @@ export default function FeedPage() {
         '/chat/upload-image',
         form,
       );
-      // The server returns a relative path under /chat/images — prefix
-      // with the API origin so <img> resolves against the backend.
-      const origin = new URL(API_URL).origin;
+      // Keep the server-supplied path relative ("/chat/images/<key>")
+      // everywhere — renders prefix with API_URL at paint time via
+      // resolveImageUrl, so DB rows stay portable across API origins.
       setPendingImage({
-        url: res.url.startsWith('http') ? res.url : `${origin}${res.url}`,
+        url: res.url,
         name: res.fileName,
       });
     } catch (err) {
@@ -398,19 +414,10 @@ export default function FeedPage() {
               })}
             </nav>
 
-            <div className="mt-3 flex items-center justify-between border-t border-white/5 px-2 pt-3 text-[11px] text-white/45">
-              <span className="inline-flex items-center gap-1.5">
-                <Users className="h-3 w-3" />
-                <span className="font-normal text-white/75">{userCount}</span>
-                <span>online</span>
-              </span>
-              <Link
-                href="/bolty"
-                className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] px-1.5 py-0.5 transition hover:bg-white/[0.08] hover:text-white"
-              >
-                <Zap className="h-3 w-3 text-[#C9BEFF]" />
-                $BOLTY
-              </Link>
+            <div className="mt-3 flex items-center gap-1.5 border-t border-white/5 px-2 pt-3 text-[11px] text-white/45">
+              <Users className="h-3 w-3" />
+              <span className="font-normal text-white/75">{userCount}</span>
+              <span>online</span>
             </div>
           </div>
         </aside>
@@ -493,7 +500,7 @@ export default function FeedPage() {
                   <div className="relative mt-2 inline-block rounded-xl border border-white/10 bg-black/40 p-1">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={pendingImage.url}
+                      src={resolveImageUrl(pendingImage.url)}
                       alt={pendingImage.name}
                       className="max-h-40 rounded-lg object-cover"
                     />
@@ -649,7 +656,7 @@ export default function FeedPage() {
                           <div className="mt-2 overflow-hidden rounded-xl border border-white/5">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={m.imageUrl}
+                              src={resolveImageUrl(m.imageUrl)}
                               alt="attached"
                               className="max-h-96 w-full object-cover"
                               loading="lazy"
@@ -698,12 +705,6 @@ export default function FeedPage() {
                 <Link href="/market" className="block hover:text-white">
                   <span className="text-[11px] text-white/40">#marketplace</span>
                   <div className="font-normal">Browse live agents</div>
-                </Link>
-              </li>
-              <li>
-                <Link href="/bolty" className="block hover:text-white">
-                  <span className="text-[11px] text-white/40">#bolty</span>
-                  <div className="font-normal">$BOLTY token + chart</div>
                 </Link>
               </li>
               <li>
