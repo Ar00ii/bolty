@@ -339,7 +339,10 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
   let coinAddress: string = '';
   try {
     const resolved: any = await sdkAny.getPoolCreatedFromTx(txHash);
+    // SDK returns PoolCreatedEventData with .memecoin as the coin
+    // address. Other fallback names cover any future shape changes.
     coinAddress =
+      resolved?.memecoin ??
       resolved?.coinAddress ??
       resolved?.address ??
       resolved?.flaunch ??
