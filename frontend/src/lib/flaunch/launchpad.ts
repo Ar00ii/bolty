@@ -22,7 +22,12 @@
 import { parseEther } from 'viem';
 
 import { getPublicClient, getReadSdk, getReadWriteSdk } from './client';
-import { FLAUNCH_REVENUE_MANAGER, isRevenueManagerConfigured, PINATA_JWT } from './config';
+import {
+  FLAUNCH_REVENUE_MANAGER,
+  isRevenueManagerConfigured,
+  parseCreatorFromDescription,
+  PINATA_JWT,
+} from './config';
 import { LAUNCH_INITIAL_MARKET_CAP_USD } from './feature';
 import type {
   BuyInput,
@@ -375,7 +380,12 @@ async function hydrateCoin(
       holders: Number(info?.holders ?? 0),
       sparkline7d: [],
       description: meta?.description ?? null,
-      creatorUsername: fallback.creatorUsername,
+      // Prefer the cached username; fall back to parsing the
+      // `creator: @foo` marker embedded in the token description so
+      // viewers without local cache still see the real attribution.
+      creatorUsername:
+        fallback.creatorUsername ??
+        parseCreatorFromDescription(meta?.description ?? null),
       creatorAvatarUrl: fallback.creatorAvatarUrl,
       launchedAt: fallback.launchedAt,
     };
@@ -797,7 +807,13 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
       holders: 0,
       sparkline7d: [],
       description: meta?.description ?? null,
-      creatorUsername: cached?.creatorUsername ?? null,
+      // Creator lookup order: local cache → parseCreatorFromDescription
+      // (reads the `creator: @foo` marker we append in the footer).
+      // That marker keeps the attribution visible to every viewer, not
+      // just the browser that launched the token.
+      creatorUsername:
+        cached?.creatorUsername ??
+        parseCreatorFromDescription(meta?.description ?? null),
       creatorAvatarUrl: cached?.creatorAvatarUrl ?? null,
       launchedAt: cached?.launchedAt ?? new Date().toISOString(),
     });
