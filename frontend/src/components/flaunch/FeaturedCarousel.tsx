@@ -6,14 +6,22 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
+  Globe,
+  MessageCircle,
+  Pencil,
+  Send,
   TrendingDown,
   TrendingUp,
+  Twitter,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { useAuth } from '@/lib/auth/AuthProvider';
 import type { TokenInfo } from '@/lib/flaunch/types';
+
+import { EditTokenModal } from './EditTokenModal';
 
 /**
  * OpenSea-style hero carousel. Rotates through ~5 featured tokens,
@@ -74,6 +82,8 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (slides.length < MIN_COUNT + 1 || paused) return;
@@ -252,6 +262,37 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
         </AnimatePresence>
       </div>
 
+      {/* Social links + owner edit — bottom-right edge, above nav arrows.
+          Socials: one round pill per configured link. Edit pencil only
+          renders if the auth'd user is the token's creator. */}
+      <div className="absolute right-4 bottom-16 flex items-center gap-1.5 z-10">
+        <SocialCluster socials={current.socials} />
+        {user?.username &&
+          current.creatorUsername &&
+          user.username.toLowerCase() === current.creatorUsername.toLowerCase() && (
+            <button
+              type="button"
+              onClick={() => setEditOpen(true)}
+              aria-label="Edit token"
+              title="Edit banner, logo and links"
+              className="grid place-items-center w-8 h-8 rounded-full text-white/70 hover:text-white transition"
+              style={{
+                background: 'rgba(131,110,249,0.4)',
+                backdropFilter: 'blur(6px)',
+                border: '1px solid rgba(131,110,249,0.6)',
+              }}
+            >
+              <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
+            </button>
+          )}
+      </div>
+
+      <EditTokenModal
+        open={editOpen}
+        token={editOpen ? current : null}
+        onClose={() => setEditOpen(false)}
+      />
+
       {/* Navigation controls */}
       {slides.length > 1 && (
         <>
@@ -390,6 +431,49 @@ function StatCell({
         {value}
       </div>
     </div>
+  );
+}
+
+function SocialCluster({ socials }: { socials: TokenInfo['socials'] }) {
+  if (!socials) return null;
+  const items: Array<[string | null, React.ReactNode, string]> = [
+    [socials.websiteUrl, <Globe key="w" className="w-3.5 h-3.5" strokeWidth={2} />, 'Website'],
+    [socials.githubUrl, <GithubMark key="g" />, 'GitHub'],
+    [socials.twitterUrl, <Twitter key="t" className="w-3.5 h-3.5" strokeWidth={2} />, 'X / Twitter'],
+    [socials.telegramUrl, <Send key="tg" className="w-3.5 h-3.5" strokeWidth={2} />, 'Telegram'],
+    [socials.discordUrl, <MessageCircle key="d" className="w-3.5 h-3.5" strokeWidth={2} />, 'Discord'],
+  ];
+  const active = items.filter(([url]) => !!url);
+  if (active.length === 0) return null;
+  return (
+    <div className="flex items-center gap-1">
+      {active.map(([url, icon, label]) => (
+        <a
+          key={label}
+          href={url as string}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          title={label}
+          className="grid place-items-center w-8 h-8 rounded-full text-white/80 hover:text-white transition hover:brightness-125"
+          style={{
+            background: 'rgba(255,255,255,0.08)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+          }}
+        >
+          {icon}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function GithubMark() {
+  return (
+    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
+      <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.39v-1.34c-2.23.48-2.7-1.08-2.7-1.08-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.05 1.22.83 1.22.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.22 2.2.82A7.66 7.66 0 0 1 8 4.04c.68.01 1.37.1 2.01.28 1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.74.54 1.5v2.22c0 .22.15.47.55.39A8 8 0 0 0 8 0Z" />
+    </svg>
   );
 }
 
