@@ -14,9 +14,10 @@ export const BOLTY_PROTOCOL_FEE_PERCENT = 15;
 
 /** Starting market cap every token launches at (USD). Drives the
  *  flaunching fee (0.1% of this) that Flaunch charges creators up
- *  front on launch. Kept low so launch friction is minimal; tokens
- *  grow past $10k mcap quickly on any real volume. */
-export const LAUNCH_INITIAL_MARKET_CAP_USD = 5_000;
+ *  front on launch. Matches Flaunch's own launch pricing — starting
+ *  low keeps the user-facing cost in cents, and tokens with real
+ *  volume grow past $10k mcap fast (where our 15% swap cut kicks in). */
+export const LAUNCH_INITIAL_MARKET_CAP_USD = 1_000;
 
 /** Flaunch's protocol-level launch fee — 0.1% of starting mcap,
  *  paid in ETH at launch time. Exposed here so the wizard can
