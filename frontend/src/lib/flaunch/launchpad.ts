@@ -53,21 +53,46 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Build a plausible-looking sparkline seeded by the listingId so
+// reloads render the same shape. Values are relative price levels,
+// not absolute — the card normalizes min/max.
+function stubSparkline(seed: string, days = 7): number[] {
+  const out: number[] = [];
+  let v = 40;
+  for (let i = 0; i < days; i++) {
+    const n = (seed.charCodeAt((i + 3) % seed.length) % 17) - 8; // −8..+8
+    v = Math.max(1, v + n);
+    out.push(v);
+  }
+  return out;
+}
+
+function stubPriceChange(seed: string): number {
+  // Deterministic pseudo-random, skewed slightly positive (fresh memecoins).
+  const c = seed.charCodeAt(0) + seed.charCodeAt(seed.length - 1);
+  return ((c % 61) - 20) / 2; // −10% .. +20%
+}
+
 export async function launchToken(input: LaunchInput): Promise<LaunchResult> {
   // Simulate wallet signing + on-chain confirmation on Base
   await sleep(2200);
   const tokenAddress = fakeHex(input.listingId + ':token', 40);
   const token: TokenInfo = {
     listingId: input.listingId,
+    listingPath: input.listingPath,
     tokenAddress,
     name: input.name,
     symbol: input.symbol,
     imageUrl: input.imageUrl,
     flaunchUrl: `https://flaunch.gg/base/coin/${tokenAddress}`,
     priceEth: 0.00000012,
+    priceChange24hPercent: 0,
     marketCapEth: 1.2,
     volume24hEth: 0,
     holders: 1,
+    sparkline7d: [0, 0, 0, 0, 0, 0, 1],
+    creatorUsername: input.creatorUsername,
+    creatorAvatarUrl: input.creatorAvatarUrl,
     launchedAt: new Date().toISOString(),
   };
   const store = readStore();
@@ -88,9 +113,24 @@ export async function getTokenForListing(listingId: string): Promise<TokenInfo |
 
 export async function listLaunchedTokens(): Promise<TokenInfo[]> {
   await sleep(80);
-  return Object.values(readStore()).sort(
-    (a, b) => new Date(b.launchedAt).getTime() - new Date(a.launchedAt).getTime(),
-  );
+  // Synthesize plausible activity for tokens that have been live >60s so
+  // the grid doesn't look dead. Phase 2 pulls these numbers from the
+  // Flaunch subgraph and this block evaporates.
+  const now = Date.now();
+  return Object.values(readStore())
+    .map((t) => {
+      const ageSec = (now - new Date(t.launchedAt).getTime()) / 1000;
+      if (ageSec < 60) return t;
+      return {
+        ...t,
+        sparkline7d: t.sparkline7d?.length ? t.sparkline7d : stubSparkline(t.tokenAddress),
+        priceChange24hPercent:
+          t.priceChange24hPercent || stubPriceChange(t.tokenAddress),
+        volume24hEth: t.volume24hEth || Number((Math.random() * 3).toFixed(3)),
+        holders: t.holders > 1 ? t.holders : 2 + Math.floor(Math.random() * 40),
+      };
+    })
+    .sort((a, b) => new Date(b.launchedAt).getTime() - new Date(a.launchedAt).getTime());
 }
 
 export async function buyLaunchpadToken(input: BuyInput): Promise<TradeResult> {

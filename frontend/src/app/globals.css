@@ -4460,6 +4460,16 @@ aside button[data-active='true']::after {
   }
 }
 
+/* Skeleton shimmer — used by launchpad cards and any future skeletons. */
+@keyframes mk-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 /* ─ Card (flat, canonical) ─────────────────────────────────────────── */
 .mk-app .mk-card-flat {
   background: var(--app-surface);
