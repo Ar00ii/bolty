@@ -353,7 +353,6 @@ function ListingRow({
 }) {
   const Icon = iconFor(listing.type);
   const accent = accentFor(listing.type);
-  const disabled = listing.tokenLaunched;
   const isAgent = listing.type === 'AGENT' || listing.type === 'BOT';
   return (
     <div
@@ -404,39 +403,42 @@ function ListingRow({
         )}
       </div>
 
-      {!disabled && (
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => onLaunch('self')}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110"
-            style={{
-              background: '#000000',
-              border: '1px solid rgba(255,255,255,0.2)',
-            }}
-          >
-            <Rocket className="w-3.5 h-3.5" />
-            Launch (no agent)
-          </button>
-          <button
-            type="button"
-            onClick={() => onLaunch('agent')}
-            disabled={!isAgent}
-            title={
-              isAgent
-                ? 'Launch and auto-post the announcement to the community'
-                : 'Only available for AI agent listings'
-            }
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
-              border: '1px solid rgba(131,110,249,0.55)',
-            }}
-          >
-            <Rocket className="w-3.5 h-3.5" />
-            Launch with AI
-          </button>
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => onLaunch('self')}
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110"
+          style={{
+            background: '#000000',
+            border: '1px solid rgba(255,255,255,0.2)',
+          }}
+        >
+          <Rocket className="w-3.5 h-3.5" />
+          Launch (no agent)
+        </button>
+        <button
+          type="button"
+          onClick={() => onLaunch('agent')}
+          disabled={!isAgent}
+          title={
+            isAgent
+              ? 'Launch and auto-post the announcement to the community'
+              : 'Only available for AI agent listings'
+          }
+          className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
+            border: '1px solid rgba(131,110,249,0.55)',
+          }}
+        >
+          <Rocket className="w-3.5 h-3.5" />
+          Launch with AI
+        </button>
+      </div>
+      {listing.tokenLaunched && (
+        <div className="mt-2 text-[11px] text-zinc-500 font-light text-center">
+          This listing already has a token. Launching again mints a new one.
         </div>
       )}
     </div>
