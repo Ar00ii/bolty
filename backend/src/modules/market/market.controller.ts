@@ -33,6 +33,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { StepUpService } from '../auth/step-up.service';
 
+import { AgentHealthService } from './agent-health.service';
 import { AgentScanService } from './agent-scan.service';
 import { ApiKeysService } from './api-keys.service';
 import { MarketService } from './market.service';
@@ -116,6 +117,7 @@ export class MarketController {
     private readonly negotiationService: NegotiationService,
     private readonly agentScanService: AgentScanService,
     private readonly apiKeysService: ApiKeysService,
+    private readonly agentHealth: AgentHealthService,
     private readonly stepUp: StepUpService,
   ) {}
 
@@ -380,6 +382,16 @@ export class MarketController {
   @Get(':id/related')
   getRelated(@Param('id') id: string) {
     return this.marketService.getRelatedListings(id);
+  }
+
+  /** On-demand ping of an AI agent's webhook. Used by the launch
+   *  wizard to gate the "AI-launch" toggle and by the agent detail
+   *  page to hide buy/try buttons when the agent is offline. */
+  @Public()
+  @Throttle({ default: { limit: 12, ttl: 60_000 } })
+  @Get(':id/health')
+  checkListingHealth(@Param('id') id: string) {
+    return this.agentHealth.checkListing(id);
   }
 
   @Public()
