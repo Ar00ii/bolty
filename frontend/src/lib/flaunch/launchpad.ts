@@ -22,7 +22,7 @@
 import { parseEther } from 'viem';
 
 import { getPublicClient, getReadSdk, getReadWriteSdk } from './client';
-import { FLAUNCH_REVENUE_MANAGER, isRevenueManagerConfigured } from './config';
+import { FLAUNCH_REVENUE_MANAGER, isRevenueManagerConfigured, PINATA_JWT } from './config';
 import type {
   BuyInput,
   LaunchInput,
@@ -304,6 +304,10 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
       creator: account,
       creatorFeeAllocationPercent: Math.max(0, Math.min(100, input.creatorSharePercent)),
       revenueManagerInstanceAddress: FLAUNCH_REVENUE_MANAGER,
+      // Pin directly to IPFS via Pinata when a JWT is configured.
+      // The SDK only falls back to Flaunch's web2 upload API when
+      // pinataConfig is undefined — which has been 400'ing us.
+      ...(PINATA_JWT ? { pinataConfig: { jwt: PINATA_JWT } } : {}),
       metadata: {
         base64Image,
         description: input.description,
