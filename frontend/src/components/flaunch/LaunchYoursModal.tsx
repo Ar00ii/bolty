@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, GitBranch, Loader2, Package, Rocket, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -177,17 +178,17 @@ export function LaunchYoursModal({
   const pickerBody = !isAuthenticated ? (
     <NotAuthed onClose={onClose} />
   ) : loading ? (
-    <div className="py-10 grid place-items-center text-zinc-500 text-[12.5px] font-light">
-      <Loader2 className="w-4 h-4 animate-spin mb-2" />
+    <div className="py-16 grid place-items-center text-zinc-500 text-[12.5px] font-light">
+      <Loader2 className="w-5 h-5 animate-spin mb-2.5" />
       Loading your listings…
     </div>
   ) : error ? (
-    <div className="py-6 text-center">
+    <div className="py-8 text-center">
       <div className="text-[13px] text-red-300 font-light">{error}</div>
       <button
         type="button"
         onClick={load}
-        className="mt-3 px-3 py-1.5 rounded-md text-[12px] text-white transition"
+        className="mt-3 px-3 py-1.5 rounded-md text-[12px] text-white transition hover:brightness-110"
         style={{
           background: 'rgba(131,110,249,0.2)',
           boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
@@ -198,6 +199,32 @@ export function LaunchYoursModal({
     </div>
   ) : !listings?.length ? (
     <EmptyInventory onClose={onClose} />
+  ) : inline ? (
+    <motion.ul
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { staggerChildren: 0.04 } },
+      }}
+      className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[60vh] overflow-y-auto pr-1"
+    >
+      {listings.map((l) => (
+        <motion.li
+          key={l.id}
+          variants={{
+            hidden: { opacity: 0, y: 6 },
+            show: {
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.28, ease: [0.2, 0.8, 0.2, 1] },
+            },
+          }}
+        >
+          <ListingRow listing={l} onLaunch={() => pick(l)} />
+        </motion.li>
+      ))}
+    </motion.ul>
   ) : (
     <ul className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
       {listings.map((l) => (
@@ -237,19 +264,20 @@ export function LaunchYoursModal({
           wizard
         ) : (
           <>
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between mb-5">
               <div>
-                <div className="text-[14px] text-white font-light">
+                <div className="text-[17px] text-white font-light tracking-tight">
                   Launch a token
                 </div>
-                <div className="text-[11px] text-zinc-500 mt-0.5">
+                <div className="text-[12px] text-zinc-500 mt-1 font-light">
                   Pick one of your listings to mint a community token for.
+                  You can tweak everything on the next step.
                 </div>
               </div>
               <button
                 type="button"
                 onClick={closePicker}
-                className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition"
+                className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition shrink-0 ml-3"
                 style={{ background: 'rgba(255,255,255,0.03)' }}
                 aria-label="Close"
               >
@@ -293,16 +321,20 @@ function ListingRow({
 }) {
   const Icon = iconFor(listing.type);
   const accent = accentFor(listing.type);
+  const disabled = listing.tokenLaunched;
   return (
-    <div
-      className="flex items-center gap-3 rounded-lg p-2.5"
+    <button
+      type="button"
+      onClick={disabled ? undefined : onLaunch}
+      disabled={disabled}
+      className="group relative flex items-center gap-3 rounded-xl p-3 w-full text-left transition disabled:cursor-default enabled:hover:brightness-110"
       style={{
-        background: 'rgba(255,255,255,0.02)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+        background: 'rgba(255,255,255,0.025)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
       <div
-        className="w-9 h-9 rounded-lg overflow-hidden grid place-items-center shrink-0"
+        className="w-11 h-11 rounded-xl overflow-hidden grid place-items-center shrink-0"
         style={{
           background: `${accent}14`,
           boxShadow: `inset 0 0 0 1px ${accent}40`,
@@ -316,14 +348,19 @@ function ListingRow({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] text-white font-light truncate">{listing.title}</div>
-        <div className="text-[10.5px] uppercase tracking-[0.14em] mt-0.5" style={{ color: accent }}>
+        <div className="text-[13.5px] text-white font-medium truncate tracking-tight">
+          {listing.title}
+        </div>
+        <div
+          className="text-[10.5px] mt-0.5 font-medium"
+          style={{ color: accent }}
+        >
           {listing.typeLabel}
         </div>
       </div>
       {listing.tokenLaunched ? (
         <span
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] uppercase tracking-[0.12em] shrink-0"
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] shrink-0"
           style={{
             color: '#22c55e',
             background: 'rgba(34,197,94,0.1)',
@@ -331,24 +368,23 @@ function ListingRow({
           }}
         >
           <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-          Token live
+          Live
         </span>
       ) : (
-        <button
-          type="button"
-          onClick={onLaunch}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-light text-white transition hover:brightness-110 shrink-0"
+        <span
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-white shrink-0 transition"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-            boxShadow: '0 0 0 1px rgba(131,110,249,0.5)',
+              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
+            boxShadow:
+              '0 0 0 1px rgba(131,110,249,0.5), 0 4px 16px -8px rgba(131,110,249,0.6)',
           }}
         >
           <Rocket className="w-3 h-3" />
           Launch
-        </button>
+        </span>
       )}
-    </div>
+    </button>
   );
 }
 
