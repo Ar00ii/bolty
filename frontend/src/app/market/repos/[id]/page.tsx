@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
@@ -618,6 +619,15 @@ export default function RepoDetailPage() {
                 </p>
               )}
             </Section>
+
+            <TokenLaunchCard
+              listingId={repo.id}
+              listingTitle={repo.name}
+              listingDescription={repo.description ?? ''}
+              listingImageUrl={repo.logoUrl ?? null}
+              listingPath={`/market/repos/${repo.id}`}
+              isOwner={!!user && repo.user.id === user.id}
+            />
 
             <Section title={`Collaborators (${collaborators.length})`} icon={Users}>
               {collaborators.length === 0 ? (

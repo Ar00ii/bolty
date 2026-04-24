@@ -86,6 +86,13 @@ export async function getTokenForListing(listingId: string): Promise<TokenInfo |
   return readStore()[listingId] ?? null;
 }
 
+export async function listLaunchedTokens(): Promise<TokenInfo[]> {
+  await sleep(80);
+  return Object.values(readStore()).sort(
+    (a, b) => new Date(b.launchedAt).getTime() - new Date(a.launchedAt).getTime(),
+  );
+}
+
 export async function buyLaunchpadToken(input: BuyInput): Promise<TradeResult> {
   await sleep(1400);
   const eth = Number(input.ethAmount) || 0;
