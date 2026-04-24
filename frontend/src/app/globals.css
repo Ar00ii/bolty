@@ -13,6 +13,26 @@
   letter-spacing: -0.3px;
 }
 
+/* Better glyph rendering on dark surfaces — subtle but sharpens
+   everything a touch. */
+html,
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* iOS auto-zooms any input with a font-size under 16px. Force every
+   form control on narrow viewports to 16px so focus never snaps the
+   viewport in. Desktop keeps the compact sizes. */
+@media (max-width: 640px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Smooth scrolling with scroll margin for anchors */
 html {
   scroll-behavior: smooth;

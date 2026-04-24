@@ -5,6 +5,7 @@ import React, { Suspense, useEffect } from 'react';
 
 import { BackToTop } from '@/components/layout/BackToTop';
 import { CommandPalette } from '@/components/layout/CommandPalette';
+import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { LiveToastBridge } from '@/components/layout/LiveToastBridge';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
@@ -55,7 +56,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
               <PowerNavbar />
             </Suspense>
             <main id="main-content" tabIndex={-1} className="flex-1 relative focus:outline-none">
-              {children}
+              <ErrorBoundary label="app-shell">{children}</ErrorBoundary>
             </main>
           </div>
         </div>
@@ -82,7 +83,7 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
             tabIndex={-1}
             className="flex-1 relative min-h-screen focus:outline-none"
           >
-            {children}
+            <ErrorBoundary label="public">{children}</ErrorBoundary>
           </main>
         </div>
       </div>

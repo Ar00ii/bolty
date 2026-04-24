@@ -218,6 +218,21 @@ export default function NegotiationPage() {
       setTimeout(() => setError(null), 2500);
       return;
     }
+    const asking = negotiation.listing.price;
+    // Sanity checks that don't rely on a backend roundtrip:
+    //  1. A counter above asking makes no sense — the seller wouldn't
+    //     take less via negotiation than the buy button.
+    //  2. Below 1% of asking is almost certainly a typo.
+    if (price > asking) {
+      setError(`Counter can't exceed the asking price (${asking} ${negotiation.listing.currency})`);
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+    if (price < asking * 0.01) {
+      setError('That looks too low — double-check the amount');
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
     setActionBusy('counter');
     try {
       await api.post(`/market/negotiations/${negotiation.id}/counter`, {

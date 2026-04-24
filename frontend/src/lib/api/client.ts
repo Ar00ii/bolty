@@ -170,6 +170,22 @@ class ApiClient {
         window.dispatchEvent(new CustomEvent('bolty:progress-done'));
       }
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
+      // Global 401 hook: if a request still 401s after a refresh
+      // attempt, broadcast so the app can bounce to login from a
+      // single place instead of each page having its own check.
+      // Auth + wallet endpoints opt out so a wrong password doesn't
+      // redirect the user — they already know they failed to sign in.
+      if (
+        response.status === 401 &&
+        !skipRefresh &&
+        typeof window !== 'undefined'
+      ) {
+        window.dispatchEvent(
+          new CustomEvent('bolty:auth-expired', {
+            detail: { path },
+          }),
+        );
+      }
       throw new ApiError(
         this.parseError(error),
         response.status,
