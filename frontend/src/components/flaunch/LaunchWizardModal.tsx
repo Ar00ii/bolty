@@ -6,9 +6,13 @@ import {
   CheckCircle2,
   Copy,
   ExternalLink,
+  Globe,
   Loader2,
+  MessageCircle,
   Rocket,
+  Send,
   Sparkles,
+  Twitter,
 } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState } from 'react';
@@ -20,7 +24,7 @@ import {
   boltyAttributionFooter,
   isRevenueManagerConfigured,
 } from '@/lib/flaunch/config';
-import { launchToken } from '@/lib/flaunch/launchpad';
+import { launchToken, setTokenOverrides } from '@/lib/flaunch/launchpad';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
   EST_LAUNCH_GAS_USD,
@@ -81,6 +85,13 @@ export function LaunchWizardModal({
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(listingImageUrl);
   /** Wide-format banner for the launchpad carousel. Optional. */
   const [bannerDataUrl, setBannerDataUrl] = useState<string | null>(null);
+  // Optional social links — stored in the local override map after
+  // launch so they render on the carousel without a tx / IPFS pin.
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [githubUrl, setGithubUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
+  const [telegramUrl, setTelegramUrl] = useState('');
+  const [discordUrl, setDiscordUrl] = useState('');
   // Step 2 form
   const [creatorShare, setCreatorShare] = useState(80);
   const [premineEth, setPremineEth] = useState('0');
@@ -102,6 +113,11 @@ export function LaunchWizardModal({
     setPremineEth('0');
     setImageDataUrl(listingImageUrl);
     setBannerDataUrl(null);
+    setWebsiteUrl('');
+    setGithubUrl('');
+    setTwitterUrl('');
+    setTelegramUrl('');
+    setDiscordUrl('');
     setLaunchState('idle');
     setLaunchError(null);
     setResult(null);
@@ -148,6 +164,21 @@ export function LaunchWizardModal({
         creatorSharePercent: creatorShare,
         premineEth: premineEth || '0',
       });
+      // Persist social links as overrides keyed by the new token
+      // address — they render on the carousel / detail page.
+      const anySocial =
+        websiteUrl || githubUrl || twitterUrl || telegramUrl || discordUrl;
+      if (anySocial && res.tokenAddress) {
+        setTokenOverrides(res.tokenAddress, {
+          socials: {
+            websiteUrl: websiteUrl.trim() || null,
+            githubUrl: githubUrl.trim() || null,
+            twitterUrl: twitterUrl.trim() || null,
+            telegramUrl: telegramUrl.trim() || null,
+            discordUrl: discordUrl.trim() || null,
+          },
+        });
+      }
       setResult(res);
       setLaunchState('success');
       onLaunched(res);
@@ -192,6 +223,16 @@ export function LaunchWizardModal({
             onImage={setImageDataUrl}
             bannerUrl={bannerDataUrl}
             onBanner={setBannerDataUrl}
+            websiteUrl={websiteUrl}
+            onWebsiteUrl={setWebsiteUrl}
+            githubUrl={githubUrl}
+            onGithubUrl={setGithubUrl}
+            twitterUrl={twitterUrl}
+            onTwitterUrl={setTwitterUrl}
+            telegramUrl={telegramUrl}
+            onTelegramUrl={setTelegramUrl}
+            discordUrl={discordUrl}
+            onDiscordUrl={setDiscordUrl}
           />
         ) : step === 2 ? (
           <Step2Economics
@@ -362,6 +403,16 @@ function Step1Metadata({
   onImage,
   bannerUrl,
   onBanner,
+  websiteUrl,
+  onWebsiteUrl,
+  githubUrl,
+  onGithubUrl,
+  twitterUrl,
+  onTwitterUrl,
+  telegramUrl,
+  onTelegramUrl,
+  discordUrl,
+  onDiscordUrl,
 }: {
   name: string;
   symbol: string;
@@ -373,6 +424,16 @@ function Step1Metadata({
   onImage: (dataUrl: string | null) => void;
   bannerUrl: string | null;
   onBanner: (dataUrl: string | null) => void;
+  websiteUrl: string;
+  onWebsiteUrl: (v: string) => void;
+  githubUrl: string;
+  onGithubUrl: (v: string) => void;
+  twitterUrl: string;
+  onTwitterUrl: (v: string) => void;
+  telegramUrl: string;
+  onTelegramUrl: (v: string) => void;
+  discordUrl: string;
+  onDiscordUrl: (v: string) => void;
 }) {
   const fileRef = React.useRef<HTMLInputElement>(null);
   const bannerRef = React.useRef<HTMLInputElement>(null);
@@ -529,7 +590,83 @@ function Step1Metadata({
           />
         </button>
       </Field>
+
+      {/* Social links — all optional. Rendered as icon buttons in the
+          bottom-right of the carousel when the token goes live. */}
+      <Field label="Links" hint="All optional">
+        <div className="space-y-2">
+          <SocialInput
+            icon={<Globe className="w-3.5 h-3.5" />}
+            placeholder="https://your-site.com"
+            value={websiteUrl}
+            onChange={onWebsiteUrl}
+          />
+          <SocialInput
+            icon={<GithubMark16 />}
+            placeholder="https://github.com/you/repo"
+            value={githubUrl}
+            onChange={onGithubUrl}
+          />
+          <SocialInput
+            icon={<Twitter className="w-3.5 h-3.5" />}
+            placeholder="https://x.com/yourhandle"
+            value={twitterUrl}
+            onChange={onTwitterUrl}
+          />
+          <SocialInput
+            icon={<Send className="w-3.5 h-3.5" />}
+            placeholder="https://t.me/yourgroup"
+            value={telegramUrl}
+            onChange={onTelegramUrl}
+          />
+          <SocialInput
+            icon={<MessageCircle className="w-3.5 h-3.5" />}
+            placeholder="https://discord.gg/yourserver"
+            value={discordUrl}
+            onChange={onDiscordUrl}
+          />
+        </div>
+      </Field>
     </div>
+  );
+}
+
+function SocialInput({
+  icon,
+  placeholder,
+  value,
+  onChange,
+}: {
+  icon: React.ReactNode;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div
+      className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+      style={{
+        background: 'rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+      }}
+    >
+      <span className="text-zinc-500 shrink-0">{icon}</span>
+      <input
+        type="url"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="flex-1 bg-transparent border-none outline-none text-[12.5px] text-white placeholder-zinc-600 min-w-0 font-mono"
+      />
+    </div>
+  );
+}
+
+function GithubMark16() {
+  return (
+    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
+      <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.39v-1.34c-2.23.48-2.7-1.08-2.7-1.08-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.05 1.22.83 1.22.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.22 2.2.82A7.66 7.66 0 0 1 8 4.04c.68.01 1.37.1 2.01.28 1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.74.54 1.5v2.22c0 .22.15.47.55.39A8 8 0 0 0 8 0Z" />
+    </svg>
   );
 }
 
