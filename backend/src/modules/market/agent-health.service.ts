@@ -118,6 +118,36 @@ export class AgentHealthService {
     }
   }
 
+  /**
+   * One-shot health check against a single listing. Used by the on-
+   * demand HTTP endpoint so the UI can gate the "AI-launch" option on
+   * a fresh probe instead of waiting for the 10min cron.
+   */
+  async checkListing(listingId: string): Promise<{
+    healthy: boolean;
+    latencyMs: number;
+    reason?: string;
+  }> {
+    const listing = await this.prisma.marketListing.findUnique({
+      where: { id: listingId },
+      select: { type: true, agentEndpoint: true, status: true },
+    });
+    if (!listing) return { healthy: false, latencyMs: 0, reason: 'not_found' };
+    if (listing.type !== 'AI_AGENT') {
+      return { healthy: false, latencyMs: 0, reason: 'not_an_agent' };
+    }
+    if (!listing.agentEndpoint) {
+      return { healthy: false, latencyMs: 0, reason: 'no_endpoint' };
+    }
+    const start = Date.now();
+    const ok = await this.ping(listing.agentEndpoint);
+    return {
+      healthy: ok,
+      latencyMs: Date.now() - start,
+      reason: ok ? undefined : 'unreachable',
+    };
+  }
+
   private async ping(endpoint: string): Promise<boolean> {
     try {
       const safe = await isSafeUrlResolving(endpoint);

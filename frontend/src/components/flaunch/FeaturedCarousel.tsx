@@ -222,50 +222,52 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               <CopyCaButton address={current.tokenAddress} />
             </div>
 
-            <div
-              className="mt-5 inline-flex items-stretch rounded-xl overflow-hidden self-start"
-              style={{
-                background: 'rgba(10,10,14,0.75)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              <StatCell label="Price" value={formatUsd(current.priceUsd)} accent="#ffffff" />
-              <StatCell label="Mcap" value={formatUsd(current.marketCapUsd)} accent="#e4e4e7" />
-              <StatCell
-                label="24h Vol"
-                value={`${formatEth(current.volume24hEth)} ETH`}
-                accent="#e4e4e7"
-              />
-              <StatCell
-                label="Holders"
-                value={current.holders.toLocaleString()}
-                accent="#e4e4e7"
-                icon={<Users className="w-2.5 h-2.5 text-white/50" strokeWidth={2} />}
-              />
-              <StatCell
-                label="24h"
-                value={formatChange(current.priceChange24hPercent)}
-                accent={current.priceChange24hPercent >= 0 ? '#22c55e' : '#ef4444'}
-                icon={
-                  current.priceChange24hPercent >= 0 ? (
-                    <TrendingUp className="w-2.5 h-2.5" strokeWidth={2.2} />
-                  ) : (
-                    <TrendingDown className="w-2.5 h-2.5" strokeWidth={2.2} />
-                  )
-                }
-                last
-              />
+            <div className="mt-5 flex items-center gap-2.5 flex-wrap">
+              <div
+                className="inline-flex items-stretch rounded-xl overflow-hidden"
+                style={{
+                  background: 'rgba(10,10,14,0.75)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <StatCell label="Price" value={formatUsd(current.priceUsd)} accent="#ffffff" />
+                <StatCell label="Mcap" value={formatUsd(current.marketCapUsd)} accent="#e4e4e7" />
+                <StatCell
+                  label="24h Vol"
+                  value={`${formatEth(current.volume24hEth)} ETH`}
+                  accent="#e4e4e7"
+                />
+                <StatCell
+                  label="Holders"
+                  value={current.holders.toLocaleString()}
+                  accent="#e4e4e7"
+                  icon={<Users className="w-2.5 h-2.5 text-white/50" strokeWidth={2} />}
+                />
+                <StatCell
+                  label="24h"
+                  value={formatChange(current.priceChange24hPercent)}
+                  accent={current.priceChange24hPercent >= 0 ? '#22c55e' : '#ef4444'}
+                  icon={
+                    current.priceChange24hPercent >= 0 ? (
+                      <TrendingUp className="w-2.5 h-2.5" strokeWidth={2.2} />
+                    ) : (
+                      <TrendingDown className="w-2.5 h-2.5" strokeWidth={2.2} />
+                    )
+                  }
+                  last
+                />
+              </div>
+              <SocialCluster socials={current.socials} />
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* Social links + owner edit — bottom-right edge, above nav arrows.
-          Socials: one round pill per configured link. Edit pencil only
-          renders if the auth'd user is the token's creator. */}
+      {/* Owner edit — bottom-right edge, above nav arrows. Pencil only
+          renders if the auth'd user is the token's creator. Socials
+          moved to sit next to the stats strip for visibility. */}
       <div className="absolute right-4 bottom-16 flex items-center gap-1.5 z-10">
-        <SocialCluster socials={current.socials} />
         {user?.username &&
           current.creatorUsername &&
           user.username.toLowerCase() === current.creatorUsername.toLowerCase() && (
@@ -436,16 +438,23 @@ function StatCell({
 function SocialCluster({ socials }: { socials: TokenInfo['socials'] }) {
   if (!socials) return null;
   const items: Array<[string | null, React.ReactNode, string]> = [
-    [socials.websiteUrl, <Globe key="w" className="w-3.5 h-3.5" strokeWidth={2} />, 'Website'],
+    [socials.websiteUrl, <Globe key="w" className="w-4 h-4" strokeWidth={2} />, 'Website'],
     [socials.githubUrl, <GithubMark key="g" />, 'GitHub'],
-    [socials.twitterUrl, <Twitter key="t" className="w-3.5 h-3.5" strokeWidth={2} />, 'X / Twitter'],
-    [socials.telegramUrl, <Send key="tg" className="w-3.5 h-3.5" strokeWidth={2} />, 'Telegram'],
+    [socials.twitterUrl, <Twitter key="t" className="w-4 h-4" strokeWidth={2} />, 'X / Twitter'],
+    [socials.telegramUrl, <Send key="tg" className="w-4 h-4" strokeWidth={2} />, 'Telegram'],
     [socials.discordUrl, <DiscordMarkCluster key="d" />, 'Discord'],
   ];
   const active = items.filter(([url]) => !!url);
   if (active.length === 0) return null;
   return (
-    <div className="flex items-center gap-1">
+    <div
+      className="inline-flex items-center gap-1 p-1 rounded-xl"
+      style={{
+        background: 'rgba(10,10,14,0.75)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.12)',
+      }}
+    >
       {active.map(([url, icon, label]) => (
         <a
           key={label}
@@ -454,11 +463,10 @@ function SocialCluster({ socials }: { socials: TokenInfo['socials'] }) {
           rel="noopener noreferrer"
           aria-label={label}
           title={label}
-          className="grid place-items-center w-8 h-8 rounded-full text-white/80 hover:text-white transition hover:brightness-125"
+          className="grid place-items-center w-9 h-9 rounded-lg text-white/90 hover:text-white transition hover:brightness-125"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(255,255,255,0.18)',
+            background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.12)',
           }}
         >
           {icon}

@@ -216,6 +216,39 @@ export default function AgentDetailPage() {
   });
   const [related, setRelated] = useState<RelatedListing[]>([]);
   const [loading, setLoading] = useState(true);
+  // Realtime agent health — pinged on mount via the on-demand health
+  // endpoint so we can disable Buy/Try before the user wastes a click
+  // when the webhook is offline. The 10-minute cron also flips the
+  // listing to REMOVED but this covers the window between failures.
+  const [agentHealth, setAgentHealth] = useState<
+    { healthy: boolean; reason?: string } | 'checking' | null
+  >(null);
+  useEffect(() => {
+    if (!id || !listing || listing.type !== 'AI_AGENT') {
+      setAgentHealth(null);
+      return;
+    }
+    let cancelled = false;
+    setAgentHealth('checking');
+    api
+      .get<{ healthy: boolean; latencyMs: number; reason?: string }>(
+        `/market/${id}/health`,
+      )
+      .then((data) => {
+        if (!cancelled) setAgentHealth({ healthy: data.healthy, reason: data.reason });
+      })
+      .catch(() => {
+        if (!cancelled) setAgentHealth({ healthy: false, reason: 'check_failed' });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [id, listing]);
+  const agentOffline =
+    listing?.type === 'AI_AGENT' &&
+    agentHealth !== null &&
+    agentHealth !== 'checking' &&
+    !agentHealth.healthy;
   const { pickWallet, pickerElement: buyWalletPicker } = useWalletPicker();
   const [buyConsentData, setBuyConsentData] = useState<{
     sellerWallet: string; buyerAddress: string; sellerWei: bigint;
@@ -277,6 +310,10 @@ export default function AgentDetailPage() {
   const handleBuy = async () => {
     if (!isAuthenticated) { router.push('/auth'); return; }
     if (!listing) return;
+    if (agentOffline) {
+      addToast('This agent is offline — buying is paused until the webhook is back.', 'warning');
+      return;
+    }
     if (listing.seller.id === user?.id) {
       addToast("That's your own listing.", 'info');
       return;
@@ -444,6 +481,27 @@ export default function AgentDetailPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        {agentOffline && (
+          <div
+            className="mb-6 rounded-xl p-4 flex items-start gap-3"
+            style={{
+              background: 'rgba(239,68,68,0.06)',
+              boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+            }}
+          >
+            <span className="w-2 h-2 rounded-full bg-red-400 mt-1.5 shrink-0" />
+            <div className="flex-1">
+              <div className="text-[13px] text-red-200 font-medium">
+                This agent is currently offline
+              </div>
+              <div className="text-[11.5px] text-zinc-400 mt-0.5 font-light">
+                The webhook isn&apos;t responding to health pings, so buying
+                and trying the agent are paused until it&apos;s back. The
+                seller has been notified automatically.
+              </div>
+            </div>
+          </div>
+        )}
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
         <header className="mb-8 sm:mb-10">
           <div className="flex items-start gap-4 sm:gap-5 flex-wrap">
@@ -537,7 +595,8 @@ export default function AgentDetailPage() {
               <>
               <button
                 onClick={handleBuy}
-                disabled={buyPaying}
+                disabled={buyPaying || agentOffline}
+                title={agentOffline ? 'Agent is offline — buying paused' : undefined}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
                 style={{
                   background:
@@ -612,7 +671,23 @@ export default function AgentDetailPage() {
             />
 
             <Section title="Live demo" icon={Play}>
-              {listing.agentEndpoint ? (
+              {agentOffline ? (
+                <div
+                  className="rounded-xl p-6 text-center"
+                  style={{
+                    background: 'rgba(239,68,68,0.05)',
+                    boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)',
+                  }}
+                >
+                  <div className="text-[13px] text-red-300 font-medium">
+                    Agent is offline
+                  </div>
+                  <div className="text-[11.5px] text-zinc-400 mt-1 font-light">
+                    The webhook isn&apos;t responding. The seller has been
+                    notified — try again later.
+                  </div>
+                </div>
+              ) : listing.agentEndpoint ? (
                 <DemoWidget listingId={listing.id} />
               ) : (
                 <div

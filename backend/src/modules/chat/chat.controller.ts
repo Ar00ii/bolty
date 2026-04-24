@@ -62,6 +62,42 @@ export class ChatController {
     return { channels: FEED_CHANNELS };
   }
 
+  /**
+   * Post a launchpad announcement to the `agents` channel on behalf of
+   * the caller. Used by the launch wizard's "AI-launch" mode so the
+   * token's debut shows up in the community feed without the creator
+   * having to type anything. Body is auto-formatted from the payload.
+   */
+  @Post('announce-launch')
+  @HttpCode(HttpStatus.OK)
+  async announceLaunch(
+    @CurrentUser('id') userId: string,
+    @Body()
+    body: {
+      tokenAddress: string;
+      symbol: string;
+      name: string;
+      listingId?: string;
+    },
+  ) {
+    const addr = (body?.tokenAddress || '').trim();
+    if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) {
+      throw new ForbiddenException('Invalid token address');
+    }
+    const symbol = (body?.symbol || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+    const name = (body?.name || '').slice(0, 40);
+    const short = `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+    const content =
+      `🚀 New launch: ${name} ($${symbol}).\n` +
+      `Trade it on /launchpad/${addr}\n` +
+      `CA: ${short}`;
+    const message = await this.chatService.validateAndSave(userId, content, {
+      channel: 'agents',
+      viaAgentListingId: body?.listingId,
+    });
+    return message;
+  }
+
   @Get('messages')
   async getMessages(
     @CurrentUser('id') userId: string,

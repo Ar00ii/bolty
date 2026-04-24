@@ -101,10 +101,53 @@ export function LaunchWizardModal({
   // Step 2 form
   const [creatorShare, setCreatorShare] = useState(80);
   const [premineEth, setPremineEth] = useState('0');
+  // Launch mode: 'self' = user signs everything; 'agent' = also
+  // auto-posts a community announcement on success. When the listing
+  // is an AI_AGENT, we ping its webhook to decide whether to even
+  // offer this toggle.
+  const [launchMode, setLaunchMode] = useState<'self' | 'agent'>('self');
+  const [agentHealth, setAgentHealth] = useState<
+    | { healthy: boolean; latencyMs: number; reason?: string }
+    | 'checking'
+    | null
+  >(null);
   // Step 3 launch state
   const [launchState, setLaunchState] = useState<LaunchState>('idle');
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [result, setResult] = useState<LaunchResult | null>(null);
+
+  // Ping the agent's webhook once the wizard opens so the UI can
+  // surface agent-is-down early. Only for AI_AGENT listings.
+  React.useEffect(() => {
+    if (!open) return;
+    if (!listingPath.includes('/agents/')) {
+      setAgentHealth(null);
+      return;
+    }
+    let cancelled = false;
+    setAgentHealth('checking');
+    (async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/market/${listingId}/health`,
+          { credentials: 'include' },
+        );
+        if (!res.ok) throw new Error(String(res.status));
+        const data = (await res.json()) as {
+          healthy: boolean;
+          latencyMs: number;
+          reason?: string;
+        };
+        if (!cancelled) setAgentHealth(data);
+      } catch {
+        if (!cancelled)
+          setAgentHealth({ healthy: false, latencyMs: 0, reason: 'check_failed' });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, listingPath, listingId]);
 
   function reset() {
     setStep(1);
@@ -124,6 +167,7 @@ export function LaunchWizardModal({
     setTwitterUrl('');
     setTelegramUrl('');
     setDiscordUrl('');
+    setLaunchMode('self');
     setLaunchState('idle');
     setLaunchError(null);
     setResult(null);
@@ -201,6 +245,25 @@ export function LaunchWizardModal({
           },
         });
       }
+      // AI-launch mode: fire off a community announcement in the
+      // background. Non-blocking — if the announce endpoint fails we
+      // still treat the launch as successful since the coin is on-chain.
+      if (launchMode === 'agent' && res.tokenAddress) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/chat/announce-launch`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tokenAddress: res.tokenAddress,
+            symbol: symbol.trim().toUpperCase(),
+            name: name.trim(),
+            listingId,
+          }),
+        }).catch((err2) => {
+          // eslint-disable-next-line no-console
+          console.warn('[launchpad] announce failed', err2);
+        });
+      }
       setResult(res);
       setLaunchState('success');
       onLaunched(res);
@@ -250,6 +313,10 @@ export function LaunchWizardModal({
             premineEth={premineEth}
             onCreatorShare={setCreatorShare}
             onPremineEth={setPremineEth}
+            launchMode={launchMode}
+            onLaunchMode={setLaunchMode}
+            agentHealth={agentHealth}
+            isAgentListing={listingPath.includes('/agents/')}
           />
         ) : (
           <Step3Review
@@ -852,13 +919,29 @@ function Step2Economics({
   premineEth,
   onCreatorShare,
   onPremineEth,
+  launchMode,
+  onLaunchMode,
+  agentHealth,
+  isAgentListing,
 }: {
   creatorShare: number;
   premineEth: string;
   onCreatorShare: (v: number) => void;
   onPremineEth: (v: string) => void;
+  launchMode: 'self' | 'agent';
+  onLaunchMode: (v: 'self' | 'agent') => void;
+  agentHealth:
+    | { healthy: boolean; latencyMs: number; reason?: string }
+    | 'checking'
+    | null;
+  isAgentListing: boolean;
 }) {
   const communityShare = 100 - creatorShare;
+  const agentOption =
+    isAgentListing &&
+    agentHealth !== null &&
+    agentHealth !== 'checking' &&
+    agentHealth.healthy;
   return (
     <div className="space-y-4">
       <Field label="Fee split" hint="Immutable after launch">
@@ -903,6 +986,14 @@ function Step2Economics({
           <span className="text-[11.5px] text-zinc-500">ETH</span>
         </div>
       </Field>
+
+      <LaunchModeToggle
+        value={launchMode}
+        onChange={onLaunchMode}
+        agentOption={agentOption}
+        isAgentListing={isAgentListing}
+        agentHealth={agentHealth}
+      />
 
       <div
         className="rounded-lg p-3 text-[11.5px] font-light text-zinc-400 space-y-1"
@@ -1155,5 +1246,118 @@ function SuccessView({
         </button>
       </div>
     </div>
+  );
+}
+
+function LaunchModeToggle({
+  value,
+  onChange,
+  agentOption,
+  isAgentListing,
+  agentHealth,
+}: {
+  value: 'self' | 'agent';
+  onChange: (v: 'self' | 'agent') => void;
+  agentOption: boolean;
+  isAgentListing: boolean;
+  agentHealth:
+    | { healthy: boolean; latencyMs: number; reason?: string }
+    | 'checking'
+    | null;
+}) {
+  return (
+    <Field label="Launch mode">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <ModeOption
+          active={value === 'self'}
+          onClick={() => onChange('self')}
+          title="I'll launch it myself"
+          subtitle="You sign the transaction from your wallet. No extras."
+        />
+        <ModeOption
+          active={value === 'agent' && agentOption}
+          disabled={!agentOption}
+          onClick={() => agentOption && onChange('agent')}
+          title="Launch with AI agent"
+          subtitle={
+            !isAgentListing
+              ? 'Only available for AI agent listings.'
+              : agentHealth === 'checking'
+                ? 'Checking the agent’s webhook…'
+                : agentOption
+                  ? 'Also posts an announcement to the community feed with the token CA.'
+                  : 'Agent is offline. We can’t announce a launch until the webhook responds.'
+          }
+          badge={
+            isAgentListing
+              ? agentHealth === 'checking'
+                ? { label: 'checking', color: '#a1a1aa' }
+                : agentOption
+                  ? { label: 'online', color: '#22c55e' }
+                  : { label: 'offline', color: '#ef4444' }
+              : null
+          }
+        />
+      </div>
+    </Field>
+  );
+}
+
+function ModeOption({
+  active,
+  disabled,
+  onClick,
+  title,
+  subtitle,
+  badge,
+}: {
+  active: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+  title: string;
+  subtitle: string;
+  badge?: { label: string; color: string } | null;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className="text-left rounded-xl p-3.5 transition disabled:cursor-not-allowed"
+      style={{
+        background: active
+          ? 'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.08) 100%)'
+          : 'rgba(255,255,255,0.025)',
+        border: active
+          ? '1px solid rgba(131,110,249,0.55)'
+          : '1px solid rgba(255,255,255,0.07)',
+        opacity: disabled ? 0.55 : 1,
+      }}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[12.5px] text-white font-medium tracking-tight">
+          {title}
+        </div>
+        {badge && (
+          <span
+            className="inline-flex items-center gap-1 text-[9.5px] uppercase tracking-[0.14em] font-medium px-1.5 py-0.5 rounded-md"
+            style={{
+              color: badge.color,
+              background: 'rgba(255,255,255,0.04)',
+              boxShadow: `inset 0 0 0 1px ${badge.color}40`,
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: badge.color }}
+            />
+            {badge.label}
+          </span>
+        )}
+      </div>
+      <div className="mt-1 text-[11.5px] text-zinc-400 font-light leading-relaxed">
+        {subtitle}
+      </div>
+    </button>
   );
 }
