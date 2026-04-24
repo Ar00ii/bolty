@@ -219,29 +219,40 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               </p>
             )}
 
-            <div className="mt-4 flex items-center gap-4 flex-wrap">
-              <StatPill
-                label="Price"
-                value={formatUsd(current.priceUsd)}
-                accent="#ffffff"
-              />
-              <StatPill
-                label="Mcap"
-                value={formatUsd(current.marketCapUsd)}
-                accent="#e4e4e7"
-              />
-              <StatPill
+            <div
+              className="mt-5 inline-flex items-stretch rounded-xl overflow-hidden self-start"
+              style={{
+                background: 'rgba(10,10,14,0.75)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              <StatCell label="Price" value={formatUsd(current.priceUsd)} accent="#ffffff" />
+              <StatCell label="Mcap" value={formatUsd(current.marketCapUsd)} accent="#e4e4e7" />
+              <StatCell
                 label="24h Vol"
                 value={`${formatEth(current.volume24hEth)} ETH`}
                 accent="#e4e4e7"
               />
-              <StatPill
+              <StatCell
                 label="Holders"
                 value={current.holders.toLocaleString()}
                 accent="#e4e4e7"
-                icon={<Users className="w-2.5 h-2.5" strokeWidth={2} />}
+                icon={<Users className="w-2.5 h-2.5 text-white/50" strokeWidth={2} />}
               />
-              <ChangeChip change={current.priceChange24hPercent} />
+              <StatCell
+                label="24h"
+                value={formatChange(current.priceChange24hPercent)}
+                accent={current.priceChange24hPercent >= 0 ? '#22c55e' : '#ef4444'}
+                icon={
+                  current.priceChange24hPercent >= 0 ? (
+                    <TrendingUp className="w-2.5 h-2.5" strokeWidth={2.2} />
+                  ) : (
+                    <TrendingDown className="w-2.5 h-2.5" strokeWidth={2.2} />
+                  )
+                }
+                last
+              />
             </div>
           </motion.div>
         </AnimatePresence>
@@ -306,59 +317,41 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
   );
 }
 
-function StatPill({
+function formatChange(change: number): string {
+  const up = change >= 0;
+  return `${up ? '+' : '-'}${Math.abs(change).toFixed(2)}%`;
+}
+
+function StatCell({
   label,
   value,
   accent,
   icon,
+  last,
 }: {
   label: string;
   value: string;
   accent: string;
   icon?: React.ReactNode;
+  last?: boolean;
 }) {
   return (
-    <div>
-      <div className="text-[9.5px] uppercase tracking-[0.14em] text-white/40 font-medium">
+    <div
+      className="flex flex-col justify-center px-5 py-3 min-w-[96px]"
+      style={{
+        borderRight: last ? 'none' : '1px solid rgba(255,255,255,0.07)',
+      }}
+    >
+      <div className="text-[9.5px] uppercase tracking-[0.16em] text-white/45 font-medium">
         {label}
       </div>
       <div
-        className="mt-0.5 text-[14px] font-mono tabular-nums inline-flex items-center gap-1"
+        className="mt-1 text-[14px] font-mono tabular-nums inline-flex items-center gap-1 whitespace-nowrap"
         style={{ color: accent }}
       >
         {icon}
         {value}
       </div>
-    </div>
-  );
-}
-
-function ChangeChip({ change }: { change: number }) {
-  const up = change >= 0;
-  const abs = Math.abs(change);
-  return (
-    <div>
-      <div className="text-[9.5px] uppercase tracking-[0.14em] text-white/40 font-medium">
-        24h
-      </div>
-      <span
-        className="mt-0.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[12px] font-mono tabular-nums"
-        style={{
-          color: up ? '#22c55e' : '#ef4444',
-          background: up ? 'rgba(34,197,94,0.14)' : 'rgba(239,68,68,0.14)',
-          boxShadow: up
-            ? 'inset 0 0 0 1px rgba(34,197,94,0.35)'
-            : 'inset 0 0 0 1px rgba(239,68,68,0.35)',
-        }}
-      >
-        {up ? (
-          <TrendingUp className="w-3 h-3" strokeWidth={2.2} />
-        ) : (
-          <TrendingDown className="w-3 h-3" strokeWidth={2.2} />
-        )}
-        {up ? '+' : '-'}
-        {abs.toFixed(2)}%
-      </span>
     </div>
   );
 }

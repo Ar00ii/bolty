@@ -105,15 +105,15 @@ function LaunchpadPageContent() {
     refresh();
   }, [refresh]);
 
-  // Poll for updates every 10s so prices + new launches trickle in.
-  // Pauses when the tab is backgrounded to avoid hammering the RPC
-  // while the user isn't looking.
+  // Poll for updates every 5s so prices + new launches trickle in
+  // quickly enough to feel live. Pauses when the tab is backgrounded
+  // to avoid hammering the RPC while the user isn't looking.
   useEffect(() => {
     if (!FLAUNCH_LAUNCHPAD_ENABLED) return;
     let id: ReturnType<typeof setInterval> | null = null;
     function start() {
       if (id) return;
-      id = setInterval(refresh, 10_000);
+      id = setInterval(refresh, 5_000);
     }
     function stop() {
       if (id) {
