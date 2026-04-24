@@ -607,6 +607,7 @@ export default function AgentDetailPage() {
               listingTitle={listing.title}
               listingDescription={listing.description ?? ''}
               listingImageUrl={null}
+              listingPath={`/market/agents/${listing.id}`}
               isOwner={isOwner}
             />
 

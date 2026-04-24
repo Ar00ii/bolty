@@ -15,6 +15,9 @@ interface Props {
   listingTitle: string;
   listingDescription: string;
   listingImageUrl: string | null;
+  /** Path to the listing (e.g. /market/agents/abc or /market/repos/abc).
+   *  Used as the token's website link so buyers can discover the product. */
+  listingPath: string;
   isOwner: boolean;
 }
 
@@ -23,6 +26,7 @@ export function TokenLaunchCard({
   listingTitle,
   listingDescription,
   listingImageUrl,
+  listingPath,
   isOwner,
 }: Props) {
   const [token, setToken] = useState<TokenInfo | null>(null);
@@ -58,8 +62,8 @@ export function TokenLaunchCard({
   // Owner, no token → CTA
   const listingUrl =
     typeof window !== 'undefined'
-      ? `${window.location.origin}/market/agents/${listingId}`
-      : `https://bolty.network/market/agents/${listingId}`;
+      ? `${window.location.origin}${listingPath}`
+      : `https://bolty.network${listingPath}`;
 
   return (
     <>
