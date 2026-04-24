@@ -30,6 +30,8 @@ import type {
   LaunchResult,
   SellInput,
   TokenInfo,
+  TokenOverrides,
+  TokenSocials,
   TradeResult,
 } from './types';
 
@@ -43,6 +45,7 @@ import type {
 
 const STORE_KEY = 'flaunch:launchpad:stubbed-tokens';
 const MAP_KEY = 'flaunch:launchpad:listing-to-coin';
+const OVERRIDES_KEY = 'flaunch:launchpad:overrides';
 
 function readStore(): Record<string, TokenInfo> {
   if (typeof window === 'undefined') return {};
@@ -81,6 +84,64 @@ function readMap(): ListingMap {
 function writeMap(m: ListingMap) {
   if (typeof window === 'undefined') return;
   localStorage.setItem(MAP_KEY, JSON.stringify(m));
+}
+
+interface OverrideMap {
+  [tokenAddress: string]: TokenOverrides;
+}
+
+function readOverrides(): OverrideMap {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '{}') as OverrideMap;
+  } catch {
+    return {};
+  }
+}
+
+function writeOverrides(m: OverrideMap) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(m));
+}
+
+/**
+ * Patch the creator-editable fields for a token (banner, image, social
+ * links). Stored locally per tokenAddress; merged into the TokenInfo on
+ * read. No on-chain or IPFS state changes — this is display metadata.
+ */
+export function setTokenOverrides(tokenAddress: string, patch: TokenOverrides) {
+  const key = tokenAddress.toLowerCase();
+  const m = readOverrides();
+  const existing = m[key] || {};
+  m[key] = {
+    imageUrl: patch.imageUrl !== undefined ? patch.imageUrl : existing.imageUrl,
+    bannerUrl: patch.bannerUrl !== undefined ? patch.bannerUrl : existing.bannerUrl,
+    socials: { ...(existing.socials || {}), ...(patch.socials || {}) },
+  };
+  writeOverrides(m);
+}
+
+export function getTokenOverrides(tokenAddress: string): TokenOverrides {
+  return readOverrides()[tokenAddress.toLowerCase()] || {};
+}
+
+const EMPTY_SOCIALS: TokenSocials = {
+  websiteUrl: null,
+  githubUrl: null,
+  twitterUrl: null,
+  telegramUrl: null,
+  discordUrl: null,
+};
+
+function applyOverrides(t: TokenInfo): TokenInfo {
+  const o = getTokenOverrides(t.tokenAddress);
+  const baseSocials = t.socials || EMPTY_SOCIALS;
+  return {
+    ...t,
+    imageUrl: o.imageUrl !== undefined ? o.imageUrl : t.imageUrl,
+    bannerUrl: o.bannerUrl !== undefined ? o.bannerUrl : t.bannerUrl,
+    socials: { ...baseSocials, ...(o.socials || {}) },
+  };
 }
 
 function sleep(ms: number) {
@@ -331,6 +392,49 @@ async function hydrateCoin(
  * multipart/form-data, returns a gateway URL. Best-effort — callers
  * should treat a throw as "no banner" and continue.
  */
+/**
+ * Generic Pinata upload — takes any data URL and pins it to IPFS,
+ * returns a gateway URL. Used both for banners and token logos via
+ * `uploadDataUrlToPinata`.
+ */
+export async function uploadDataUrlToPinata(
+  dataUrl: string,
+  opts: { name: string; kind: 'banner' | 'logo' },
+): Promise<string | null> {
+  if (!PINATA_JWT) return null;
+  const [, b64 = ''] = dataUrl.split(',');
+  const mimeMatch = dataUrl.match(/^data:([^;]+);base64,/);
+  const mime = mimeMatch?.[1] ?? 'image/jpeg';
+  const byteStr = atob(b64);
+  const bytes = new Uint8Array(byteStr.length);
+  for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+  const blob = new Blob([bytes], { type: mime });
+  const file = new File(
+    [blob],
+    `${opts.name}.${mime.split('/')[1] || 'jpg'}`,
+    { type: mime },
+  );
+  const form = new FormData();
+  form.append('file', file);
+  form.append(
+    'pinataMetadata',
+    JSON.stringify({
+      name: opts.name,
+      keyvalues: { type: `bolty-${opts.kind}` },
+    }),
+  );
+  form.append('pinataOptions', JSON.stringify({ cidVersion: 1 }));
+  const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${PINATA_JWT}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Pinata upload failed: ${res.status}`);
+  const data = (await res.json()) as { IpfsHash?: string };
+  if (!data.IpfsHash) return null;
+  return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
+}
+
 async function uploadBannerToPinata(
   dataUrl: string,
   opts: { name: string },
@@ -561,7 +665,7 @@ export async function getTokenByAddress(address: string): Promise<TokenInfo | nu
     const cacheEntry = Object.values(map).find(
       (m) => m.coinAddress.toLowerCase() === lower,
     );
-    return hydrateCoin(address, {
+    const hydrated = await hydrateCoin(address, {
       listingId: cacheEntry
         ? Object.keys(map).find((k) => map[k].coinAddress.toLowerCase() === lower) ?? address
         : address,
@@ -571,6 +675,7 @@ export async function getTokenByAddress(address: string): Promise<TokenInfo | nu
       creatorAvatarUrl: cacheEntry?.creatorAvatarUrl ?? null,
       bannerUrl: cacheEntry?.bannerUrl ?? null,
     });
+    return hydrated ? applyOverrides(hydrated) : null;
   }
 
   // Stub mode — scan the stubbed store
@@ -578,7 +683,7 @@ export async function getTokenByAddress(address: string): Promise<TokenInfo | nu
   const found = Object.values(readStore()).find(
     (t) => t.tokenAddress.toLowerCase() === lower,
   );
-  return found ?? null;
+  return found ? applyOverrides(found) : null;
 }
 
 // ── listLaunchedTokens ────────────────────────────────────────────────
@@ -685,7 +790,10 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
 }
 
 export async function listLaunchedTokens(): Promise<TokenInfo[]> {
-  if (isRevenueManagerConfigured()) return realListLaunchedTokens();
+  if (isRevenueManagerConfigured()) {
+    const tokens = await realListLaunchedTokens();
+    return tokens.map(applyOverrides);
+  }
 
   // Stub path
   await sleep(80);
@@ -702,6 +810,7 @@ export async function listLaunchedTokens(): Promise<TokenInfo[]> {
         holders: t.holders > 1 ? t.holders : 2 + Math.floor(Math.random() * 40),
       };
     })
+    .map(applyOverrides)
     .sort((a, b) => new Date(b.launchedAt).getTime() - new Date(a.launchedAt).getTime());
 }
 

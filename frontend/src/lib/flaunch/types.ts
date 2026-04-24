@@ -38,6 +38,14 @@ export interface LaunchResult {
   launchedAt: string;
 }
 
+export interface TokenSocials {
+  websiteUrl: string | null;
+  githubUrl: string | null;
+  twitterUrl: string | null;
+  telegramUrl: string | null;
+  discordUrl: string | null;
+}
+
 export interface TokenInfo {
   listingId: string;
   /** Path back to the listing (/market/agents/… or /market/repos/…). */
@@ -70,6 +78,16 @@ export interface TokenInfo {
    *  wizard. Null when launched outside the wizard or pin is missing. */
   description: string | null;
   launchedAt: string;
+  /** Creator-editable social links. Omitted / undefined when never set;
+   *  the launchpad's read boundary fills a normalized object via
+   *  `applyOverrides` so UI can rely on `t.socials?.githubUrl` etc. */
+  socials?: TokenSocials;
+}
+
+export interface TokenOverrides {
+  imageUrl?: string | null;
+  bannerUrl?: string | null;
+  socials?: Partial<TokenSocials>;
 }
 
 export interface BuyInput {
