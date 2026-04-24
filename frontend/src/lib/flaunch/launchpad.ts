@@ -232,10 +232,11 @@ async function hydrateCoin(
 ): Promise<TokenInfo | null> {
   const sdk = getReadSdk() as any;
   try {
-    const [metaRes, infoRes, priceEthRes, mcapRes] = await Promise.allSettled([
+    const [metaRes, infoRes, priceEthRes, priceUsdRes, mcapRes] = await Promise.allSettled([
       sdk.getCoinMetadata(coinAddress),
       sdk.getCoinInfo(coinAddress),
       sdk.coinPriceInETH(coinAddress),
+      sdk.coinPriceInUSD({ coinAddress }),
       sdk.coinMarketCapInUSD({ coinAddress }),
     ]);
 
@@ -243,14 +244,17 @@ async function hydrateCoin(
     const info: any = infoRes.status === 'fulfilled' ? infoRes.value : {};
     const priceEthStr: string =
       priceEthRes.status === 'fulfilled' ? String(priceEthRes.value ?? '0') : '0';
-    // SDK returns price in ETH as an 18-decimal integer string; convert to float.
+    // SDK returns ETH price as 18-decimal integer string; convert to float.
     const priceEth = Number(priceEthStr) / 1e18 || 0;
-    const mcapUsdStr: string = mcapRes.status === 'fulfilled' ? String(mcapRes.value ?? '0') : '0';
-    const mcapUsd = Number(mcapUsdStr) || 0;
-    // Approximate mcap in ETH with a rough $3000/ETH fallback. The subgraph
-    // would give us a denominated value; this keeps the UI populated until
-    // we wire a price oracle.
-    const marketCapEth = mcapUsd / 3000;
+    const priceUsd =
+      priceUsdRes.status === 'fulfilled' ? Number(priceUsdRes.value ?? 0) || 0 : 0;
+    const marketCapUsd =
+      mcapRes.status === 'fulfilled' ? Number(mcapRes.value ?? 0) || 0 : 0;
+    // Keep marketCapEth around for any caller still on it — derive from USD
+    // mcap and the SDK-reported ETH/USD ratio (priceEth / priceUsd) rather
+    // than a hardcoded ETH price.
+    const ethUsd = priceUsd > 0 && priceEth > 0 ? priceUsd / priceEth : 2500;
+    const marketCapEth = ethUsd > 0 ? marketCapUsd / ethUsd : 0;
 
     return {
       listingId: fallback.listingId,
@@ -261,11 +265,14 @@ async function hydrateCoin(
       imageUrl: meta?.image ?? null,
       flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
       priceEth,
+      priceUsd,
       priceChange24hPercent: 0,
       marketCapEth,
+      marketCapUsd,
       volume24hEth: 0,
       holders: Number(info?.holders ?? 0),
       sparkline7d: [],
+      description: meta?.description ?? null,
       creatorUsername: fallback.creatorUsername,
       creatorAvatarUrl: fallback.creatorAvatarUrl,
       launchedAt: fallback.launchedAt,
@@ -386,11 +393,14 @@ async function stubLaunchToken(input: LaunchInput): Promise<LaunchResult> {
     imageUrl: input.imageUrl,
     flaunchUrl: `https://flaunch.gg/base/coin/${tokenAddress}`,
     priceEth: 0.00000012,
+    priceUsd: 0.0000003,
     priceChange24hPercent: 0,
     marketCapEth: 1.2,
+    marketCapUsd: 3000,
     volume24hEth: 0,
     holders: 1,
     sparkline7d: [0, 0, 0, 0, 0, 0, 1],
+    description: input.description,
     creatorUsername: input.creatorUsername,
     creatorAvatarUrl: input.creatorAvatarUrl,
     launchedAt: new Date().toISOString(),
@@ -510,11 +520,14 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
         imageUrl: meta?.image ?? null,
         flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
         priceEth: 0,
+        priceUsd: 0,
         priceChange24hPercent: 0,
         marketCapEth: 0,
+        marketCapUsd: 0,
         volume24hEth: 0,
         holders: 0,
         sparkline7d: [],
+        description: meta?.description ?? null,
         creatorUsername: cached?.creatorUsername ?? null,
         creatorAvatarUrl: cached?.creatorAvatarUrl ?? null,
         launchedAt: cached?.launchedAt ?? new Date().toISOString(),
