@@ -993,14 +993,6 @@ function Step2Economics({
         </div>
       </Field>
 
-      <LaunchModeToggle
-        value={launchMode}
-        onChange={onLaunchMode}
-        agentOption={agentOption}
-        isAgentListing={isAgentListing}
-        agentHealth={agentHealth}
-      />
-
       <div
         className="rounded-lg p-3 text-[11.5px] font-light text-zinc-400 space-y-1"
         style={{
