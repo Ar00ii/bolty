@@ -18,25 +18,49 @@ one-time setup needed for Phase 2 (real contracts, real ETH).
 | **Framing** | Community memecoins (not revenue claims / securities) |
 
 These live in `frontend/src/lib/flaunch/config.ts` and
-`frontend/src/lib/flaunch/feature.ts`. Change the fee or
-treasury there — don't hardcode anywhere else.
+`frontend/src/lib/flaunch/feature.ts` — the single source of truth.
 
 ## One-time setup
 
-### 1. Deploy the RevenueManager
+### 1. Deploy our RevenueManager
 
-Use the Flaunch dashboard — it has a dedicated UI for creating a
-RevenueManager, which is far safer than a custom deploy script
-(their dashboard composes the right factory calls and validates
-the result).
+RevenueManager deployment is **permissionless via the Flaunch SDK** —
+there's no UI, no Discord ticket, no whitelist. The base RevenueManager
+(`0x48af…8763` on Base) acts as the factory; calling `deployRevenueManager`
+mints your own instance from it.
 
-1. Go to <https://flaunch.gg/manage> (connect the deployer wallet
-   with ~0.001 ETH on Base).
-2. Create a new RevenueManager with:
-   - **Protocol recipient**: `0xc320f2f3608d5bd269c39bb6ea9084ed32131a76`
-   - **Protocol fee percent**: `15`
-3. Submit, wait for confirmation, copy the deployed **manager
-   address** from the success screen.
+We ship a ready-to-run script at `frontend/scripts/deploy-flaunch-revenue-manager.ts`
+that calls the exact SDK method with our treasury + 15% already filled in.
+
+```bash
+cd frontend
+# Deployer wallet needs ~0.001 ETH on Base for gas.
+# This key ONLY signs the deployment — it is NOT the treasury.
+# After deploy you can delete / forget this key.
+PRIVATE_KEY=0x<deployer-key> npx tsx scripts/deploy-flaunch-revenue-manager.ts
+```
+
+Expected output:
+
+```
+Deploying Flaunch RevenueManager on Base
+  Deployer       : 0x…
+  Treasury       : 0xc320f2f3608d5bd269c39bb6ea9084ed32131a76
+  Protocol fee % : 15
+  Deployer ETH   : 0.00xxxx
+
+→ Signing deployment tx…
+
+✓ RevenueManager deployed
+
+  Address: 0x…
+
+Set these env vars on Vercel (Production + Preview + Development):
+  NEXT_PUBLIC_FLAUNCH_REVENUE_MANAGER=0x…
+  NEXT_PUBLIC_FLAUNCH_LAUNCHPAD_ENABLED=true
+```
+
+The **Address** line is your dedicated RevenueManager. Copy it.
 
 ### 2. Wire the address into the frontend
 
@@ -59,7 +83,7 @@ exported functions to call `@flaunch/sdk`:
 
 | Current stub | Real SDK equivalent |
 |---|---|
-| `launchToken(input)` | `sdk.flaunchIPFSWithRevenueManager({ ...input, revenueManager: FLAUNCH_REVENUE_MANAGER })` |
+| `launchToken(input)` | `sdk.flaunchIPFSWithRevenueManager({ ...input, revenueManagerInstance: FLAUNCH_REVENUE_MANAGER })` |
 | `buyLaunchpadToken(input)` | `sdk.buyCoin({ coin, ethAmount, slippagePercent })` |
 | `sellLaunchpadToken(input)` | `sdk.sellCoin({ coin, tokenAmount, slippagePercent })` |
 | `getTokenForListing(id)` + `listLaunchedTokens()` | Query the Flaunch subgraph filtered by `revenueManager == FLAUNCH_REVENUE_MANAGER` |
@@ -83,13 +107,18 @@ SDK returns.
 
 ### 5. Claim protocol fees
 
-From the deployer wallet on <https://flaunch.gg/manage>:
+Protocol fees accrue inside the RevenueManager. Claim them via the
+SDK (there's no UI for this either). Sketch:
 
-1. Open your RevenueManager
-2. Click **Claim** — sends accrued fees to the treasury
+```ts
+await flaunchWrite.revenueManagerProtocolClaim({
+  revenueManagerInstance: FLAUNCH_REVENUE_MANAGER,
+});
+// → ETH is transferred to TREASURY (the protocolRecipient we set at deploy)
+```
 
-The wallet that called claim covers gas; fees themselves go to the
-`protocolRecipient` set in step 1.
+The wallet that calls claim pays gas; fees themselves go to the
+treasury.
 
 ## Rollback
 
@@ -105,11 +134,14 @@ keep trading on Flaunch — they're not "ours" to turn off.
 
 ## Notes
 
-- The RevenueManager is immutable once deployed; fee percent + recipient
-  cannot be edited. Deploy a new one and migrate if needed.
+- The RevenueManager is **immutable** once deployed; `protocolFeePercent`
+  and `protocolRecipient` cannot be edited. Deploy a new one and migrate
+  if needed.
 - Fair-launch mechanics (30 min fixed-price window, 0.25%-per-wallet
   max buy, no sell during window) are enforced by Flaunch's hooks and
   cannot be bypassed per-launch.
-- Subgraph queries should filter by `revenueManager` to only surface
+- Subgraph queries should filter by `revenueManager` so we only surface
   tokens launched through Bolty — other RevenueManagers share the
   Flaunch protocol but aren't ours.
+- The `PRIVATE_KEY` used for the deploy does NOT need to be the treasury
+  key. Any funded Base wallet works; you can delete it after deploy.
