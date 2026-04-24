@@ -33,5 +33,7 @@ export const FLAUNCH_FEE_FREE_THRESHOLD_USD = 10_000;
  *  show a honest "you pay" figure that matches the wallet prompt. */
 export const FLAUNCH_LAUNCH_FEE_PERCENT = 0.1;
 
-/** Rough estimate shown in the wizard — the user pays gas, same as Flaunch. */
-export const EST_LAUNCH_GAS_USD = 0.02;
+/** Rough estimate shown in the wizard — the user pays gas, same as
+ *  Flaunch. Matches what MetaMask quotes on Base mainnet at launch
+ *  time (observed ~$0.05 on recent launches). */
+export const EST_LAUNCH_GAS_USD = 0.05;
