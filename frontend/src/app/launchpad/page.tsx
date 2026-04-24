@@ -16,6 +16,7 @@ import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
+import { TokenDetailPanel } from '@/components/flaunch/TokenDetailPanel';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
 import { Badge, EmptyState, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -36,6 +37,7 @@ export default function LaunchpadPage() {
   const [section, setSection] = useState<SectionFilter>('ALL');
   const [search, setSearch] = useState('');
   const [launchOpen, setLaunchOpen] = useState(false);
+  const [detail, setDetail] = useState<TokenInfo | null>(null);
 
   const refresh = React.useCallback(() => {
     if (!FLAUNCH_LAUNCHPAD_ENABLED) {
@@ -250,7 +252,7 @@ export default function LaunchpadPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filtered.map((t, i) => (
-              <TokenCard key={t.tokenAddress} token={t} rank={i + 1} />
+              <TokenCard key={t.tokenAddress} token={t} rank={i + 1} onOpen={setDetail} />
             ))}
           </div>
         )}
@@ -259,6 +261,8 @@ export default function LaunchpadPage() {
       <FAQ />
 
       <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
+
+      <TokenDetailPanel token={detail} onClose={() => setDetail(null)} />
     </div>
   );
 }
@@ -344,14 +348,23 @@ function SortChips({
 
 // ── Token card ─────────────────────────────────────────────────────────
 
-function TokenCard({ token, rank }: { token: TokenInfo; rank: number }) {
+function TokenCard({
+  token,
+  rank,
+  onOpen,
+}: {
+  token: TokenInfo;
+  rank: number;
+  onOpen: (t: TokenInfo) => void;
+}) {
   const up = token.priceChange24hPercent >= 0;
   const changeAbs = Math.abs(token.priceChange24hPercent);
   const isAgent = token.listingPath.includes('/agents/');
   return (
-    <Link
-      href={token.listingPath}
-      className="group block rounded-xl p-3 transition hover:brightness-110"
+    <button
+      type="button"
+      onClick={() => onOpen(token)}
+      className="group block w-full text-left rounded-xl p-3 transition hover:brightness-110"
       style={{
         background:
           'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -463,7 +476,7 @@ function TokenCard({ token, rank }: { token: TokenInfo; rank: number }) {
           }
         />
       </div>
-    </Link>
+    </button>
   );
 }
 
