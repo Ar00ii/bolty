@@ -187,15 +187,13 @@ function LaunchpadPageContent() {
 
   return (
     <>
-      {/* Top banner carousel + leaderboard — edge-to-edge across the top
-          of the dashboard. No horizontal padding, no top padding: the
-          banner touches the sidebar edge on the left and the viewport
-          edge on the right. Zero gap so they read as one continuous
-          strip. OUTSIDE the mk-app-page wrapper because that shell caps
-          children at max-width: 1280px. */}
+      {/* Top banner carousel + leaderboard — nearly edge-to-edge with a
+          hairline margin on each side so the blocks don't fuse into
+          the sidebar / viewport edge. OUTSIDE the mk-app-page wrapper
+          because that shell caps children at max-width: 1280px. */}
       {hasAny && tokens && (
-        <div className="w-full font-light">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-0 items-stretch">
+        <div className="w-full font-light px-2 pt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-2 items-stretch">
             <FeaturedCarousel tokens={tokens} />
             <TokenLeaderboard tokens={tokens} />
           </div>
