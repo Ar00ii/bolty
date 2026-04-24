@@ -21,6 +21,15 @@ export const BOLTY_TREASURY_ADDRESS: `0x${string}` =
 export const FLAUNCH_REVENUE_MANAGER =
   (process.env.NEXT_PUBLIC_FLAUNCH_REVENUE_MANAGER as `0x${string}` | undefined) ?? null;
 
+/** Pinata JWT used to pin token metadata + images directly to IPFS,
+ *  bypassing Flaunch's web2 upload endpoint. When set, the SDK's
+ *  flaunchIPFSWithRevenueManager call uses `pinataConfig` and never
+ *  hits web2-api.flaunch.gg — which has been flaky on our origin.
+ *  Scoped key (pinFileToIPFS + pinJSONToIPFS only), so exposing it
+ *  in the client bundle only lets a bad actor burn our free-tier
+ *  upload quota — not access existing pins. */
+export const PINATA_JWT = process.env.NEXT_PUBLIC_PINATA_JWT ?? null;
+
 /** True when the env var is populated and looks like an address.
  *  Cheap client-side check — doesn't prove the contract exists on-chain. */
 export function isRevenueManagerConfigured(): boolean {
