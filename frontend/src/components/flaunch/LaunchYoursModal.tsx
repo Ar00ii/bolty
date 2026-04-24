@@ -178,20 +178,21 @@ export function LaunchYoursModal({
   const pickerBody = !isAuthenticated ? (
     <NotAuthed onClose={onClose} />
   ) : loading ? (
-    <div className="py-16 grid place-items-center text-zinc-500 text-[12.5px] font-light">
-      <Loader2 className="w-5 h-5 animate-spin mb-2.5" />
-      Loading your listings…
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <ListingSkeleton key={i} />
+      ))}
     </div>
   ) : error ? (
     <div className="py-8 text-center">
-      <div className="text-[13px] text-red-300 font-light">{error}</div>
+      <div className="text-[13.5px] text-red-300 font-medium">{error}</div>
       <button
         type="button"
         onClick={load}
-        className="mt-3 px-3 py-1.5 rounded-md text-[12px] text-white transition hover:brightness-110"
+        className="mt-3 px-4 py-2 rounded-xl text-[12.5px] text-white transition hover:brightness-110"
         style={{
-          background: 'rgba(131,110,249,0.2)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+          background: 'rgba(131,110,249,0.22)',
+          border: '1px solid rgba(131,110,249,0.5)',
         }}
       >
         Retry
@@ -264,12 +265,12 @@ export function LaunchYoursModal({
           wizard
         ) : (
           <>
-            <div className="flex items-start justify-between mb-5">
+            <div className="flex items-start justify-between mb-6">
               <div>
-                <div className="text-[17px] text-white font-light tracking-tight">
+                <div className="text-[18px] text-white font-medium tracking-tight">
                   Launch a token
                 </div>
-                <div className="text-[12px] text-zinc-500 mt-1 font-light">
+                <div className="text-[13px] text-zinc-400 mt-1 font-light">
                   Pick one of your listings to mint a community token for.
                   You can tweak everything on the next step.
                 </div>
@@ -312,6 +313,33 @@ export function LaunchYoursModal({
 
 // ── Sub-views ──────────────────────────────────────────────────────────
 
+function ListingSkeleton() {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-2xl p-4"
+      style={{
+        background: '#0a0a0c',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <div
+        className="w-12 h-12 rounded-xl shrink-0 animate-pulse"
+        style={{ background: 'rgba(255,255,255,0.04)' }}
+      />
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <div
+          className="h-3 w-2/3 rounded animate-pulse"
+          style={{ background: 'rgba(255,255,255,0.05)' }}
+        />
+        <div
+          className="h-2.5 w-1/4 rounded animate-pulse"
+          style={{ background: 'rgba(255,255,255,0.03)' }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function ListingRow({
   listing,
   onLaunch,
@@ -327,17 +355,17 @@ function ListingRow({
       type="button"
       onClick={disabled ? undefined : onLaunch}
       disabled={disabled}
-      className="group relative flex items-center gap-3 rounded-xl p-3 w-full text-left transition disabled:cursor-default enabled:hover:brightness-110"
+      className="group relative flex items-center gap-3 rounded-2xl p-4 w-full text-left transition disabled:cursor-default enabled:hover:brightness-110"
       style={{
-        background: 'rgba(255,255,255,0.025)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+        background: '#0a0a0c',
+        border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
       <div
-        className="w-11 h-11 rounded-xl overflow-hidden grid place-items-center shrink-0"
+        className="w-12 h-12 rounded-xl overflow-hidden grid place-items-center shrink-0"
         style={{
           background: `${accent}14`,
-          boxShadow: `inset 0 0 0 1px ${accent}40`,
+          border: `1px solid ${accent}40`,
         }}
       >
         {listing.imageUrl ? (
@@ -348,11 +376,11 @@ function ListingRow({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-[13.5px] text-white font-medium truncate tracking-tight">
+        <div className="text-[14px] text-white font-medium truncate tracking-tight">
           {listing.title}
         </div>
         <div
-          className="text-[10.5px] mt-0.5 font-medium"
+          className="text-[11px] mt-0.5 font-medium"
           style={{ color: accent }}
         >
           {listing.typeLabel}
@@ -360,11 +388,11 @@ function ListingRow({
       </div>
       {listing.tokenLaunched ? (
         <span
-          className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10.5px] shrink-0"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] shrink-0"
           style={{
             color: '#22c55e',
             background: 'rgba(34,197,94,0.1)',
-            boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.3)',
+            border: '1px solid rgba(34,197,94,0.3)',
           }}
         >
           <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
@@ -372,7 +400,7 @@ function ListingRow({
         </span>
       ) : (
         <span
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-white shrink-0 transition"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-white font-medium shrink-0 transition"
           style={{
             background:
               'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
