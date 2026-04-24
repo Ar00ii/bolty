@@ -305,7 +305,7 @@ function LaunchpadPageContent() {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Buscar tokens, tickers, creadores…"
+                  placeholder="Search tokens, tickers, creators…"
                   className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-500 min-w-0"
                 />
                 {search && (
@@ -314,7 +314,7 @@ function LaunchpadPageContent() {
                     onClick={() => setSearch('')}
                     className="text-zinc-500 hover:text-white text-[11px]"
                   >
-                    limpiar
+                    clear
                   </button>
                 )}
               </div>

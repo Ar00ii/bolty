@@ -14,6 +14,10 @@ export interface LaunchInput {
   symbol: string;
   description: string;
   imageUrl: string | null;
+  /** Optional wide banner data URL picked by the user in the wizard.
+   *  Uploaded to Pinata separately and shown as the carousel hero
+   *  background on the launchpad. */
+  bannerDataUrl: string | null;
   websiteUrl: string;
   /** Path to the listing so the launchpad can infer type + link back. */
   listingPath: string;
@@ -42,6 +46,9 @@ export interface TokenInfo {
   name: string;
   symbol: string;
   imageUrl: string | null;
+  /** Wide banner (creator-provided or null). Uploaded to Pinata at
+   *  launch and used as the FeaturedCarousel hero background. */
+  bannerUrl: string | null;
   flaunchUrl: string;
   /** Current spot price in ETH (per 1 token). */
   priceEth: number;

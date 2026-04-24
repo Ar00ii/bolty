@@ -104,7 +104,7 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
       {/* Rows */}
       {top.length === 0 ? (
         <div className="px-4 py-10 text-center text-[11.5px] text-zinc-500 font-light">
-          Aún no hay tokens lanzados.
+          No tokens launched yet.
         </div>
       ) : (
         <ul>
