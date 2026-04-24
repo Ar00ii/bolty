@@ -18,10 +18,12 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CreatorProfileModal } from '@/components/flaunch/CreatorProfileModal';
-import { CuratedRow } from '@/components/flaunch/CuratedRow';
+import { FeaturedCarousel } from '@/components/flaunch/FeaturedCarousel';
 import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
+import { TokenLeaderboard } from '@/components/flaunch/TokenLeaderboard';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
+import { TrendingGrid } from '@/components/flaunch/TrendingGrid';
 import { Badge, EmptyState, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
@@ -185,32 +187,15 @@ function LaunchpadPageContent() {
   const loading = tokens === null;
   const hasAny = (tokens?.length ?? 0) > 0;
 
-  // Curated rows — only shown in the unfiltered default view. When the
-  // user searches or tweaks sort / section, we hide them and just show
-  // the straight grid below.
+  // Featured / trending / leaderboard are hidden when the user is
+  // actively searching/filtering. Keeps the browse experience clean.
   const defaultView =
     !search.trim() && sort === 'recent' && section === 'ALL';
 
-  const topGainers = useMemo(() => {
-    if (!tokens) return [];
-    return [...tokens]
-      .filter((t) => t.priceChange24hPercent > 0)
-      .sort((a, b) => b.priceChange24hPercent - a.priceChange24hPercent)
-      .slice(0, 8);
-  }, [tokens]);
-
-  const topVolume = useMemo(() => {
-    if (!tokens) return [];
-    return [...tokens]
-      .filter((t) => t.volume24hEth > 0)
-      .sort((a, b) => b.volume24hEth - a.volume24hEth)
-      .slice(0, 8);
-  }, [tokens]);
-
   return (
     <div
-      className="mk-app-page mx-auto max-w-6xl px-4 sm:px-6 py-8"
-      style={{ maxWidth: '72rem' }}
+      className="mk-app-page mx-auto max-w-7xl px-4 sm:px-6 py-8"
+      style={{ maxWidth: '80rem' }}
     >
       <Hero
         crumbs={
@@ -294,151 +279,151 @@ function LaunchpadPageContent() {
         </div>
       )}
 
-      {defaultView && hasAny && (
-        <div className="mt-6 space-y-5">
-          {topGainers.length > 0 && (
-            <CuratedRow
-              title="Top gainers 24h"
-              icon={<TrendingUp className="w-3 h-3" strokeWidth={1.75} />}
-              accent="#22c55e"
-              tokens={topGainers}
-              onOpen={openToken}
-            />
+      {/* ── OpenSea-style 2-column layout ────────────────────────────── */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
+        {/* LEFT — featured + trending + filters + grid */}
+        <div className="min-w-0 space-y-6">
+          {defaultView && hasAny && tokens && (
+            <>
+              <FeaturedCarousel tokens={tokens} />
+              <TrendingGrid tokens={tokens} />
+            </>
           )}
-          {topVolume.length > 0 && (
-            <CuratedRow
-              title="Top volume 24h"
-              icon={<Rocket className="w-3 h-3" strokeWidth={1.75} />}
-              accent="#836EF9"
-              tokens={topVolume}
-              onOpen={openToken}
-            />
-          )}
-        </div>
-      )}
 
-      <HowItWorksStrip />
-
-      {/* Controls */}
-      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-2 flex-1 lg:max-w-md">
-          <div
-            className="flex items-center gap-2 flex-1 px-3 py-1.5 rounded-lg"
-            style={{
-              background: 'rgba(0,0,0,0.35)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search tokens, tickers, creators…"
-              className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-500 min-w-0"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="text-zinc-500 hover:text-white text-[11px]"
+          {/* Filters bar */}
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-2 flex-1 lg:max-w-md">
+              <div
+                className="flex items-center gap-2 flex-1 px-3 py-1.5 rounded-lg"
+                style={{
+                  background: 'rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
               >
-                clear
-              </button>
+                <Search className="w-3.5 h-3.5 text-zinc-500" strokeWidth={1.75} />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Buscar tokens, tickers, creadores…"
+                  className="flex-1 bg-transparent border-none outline-none text-[13px] font-light text-white placeholder-zinc-500 min-w-0"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch('')}
+                    className="text-zinc-500 hover:text-white text-[11px]"
+                  >
+                    limpiar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <SectionFilterTabs value={section} onChange={setSection} />
+              <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
+              <SortChips sort={sort} onChange={setSort} />
+            </div>
+          </div>
+
+          {/* Grid */}
+          <div>
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <TokenCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : !hasAny ? (
+              <EmptyState
+                icon={Rocket}
+                title="No tokens launched yet"
+                description={
+                  !FLAUNCH_LAUNCHPAD_ENABLED
+                    ? 'The launchpad is currently in private beta. Flip the feature flag to try it locally.'
+                    : isAuthenticated
+                      ? 'Be the first — pick one of your listings and mint its token.'
+                      : 'Sign in to launch a token for one of your listings and kick off the market.'
+                }
+                action={
+                  !FLAUNCH_LAUNCHPAD_ENABLED
+                    ? undefined
+                    : isAuthenticated
+                      ? { label: 'Launch yours', onClick: () => setLaunchOpen(true) }
+                      : { label: 'Sign in', href: '/auth' }
+                }
+              />
+            ) : filtered.length === 0 ? (
+              <div
+                className="rounded-xl px-6 py-10 text-center"
+                style={{
+                  background: 'rgba(255,255,255,0.02)',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+                }}
+              >
+                <div className="text-[13px] text-zinc-300 font-light">
+                  No matches
+                </div>
+                <div className="text-[11.5px] text-zinc-500 mt-1 font-light">
+                  Try a different search or clear the filters.
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('');
+                    setSection('ALL');
+                  }}
+                  className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[11.5px] text-zinc-300 hover:text-white transition"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+                  }}
+                >
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <motion.div
+                layout
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
+              >
+                <AnimatePresence initial={false}>
+                  {filtered.map((t, i) => (
+                    <motion.div
+                      key={t.tokenAddress}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 420,
+                        damping: 32,
+                      }}
+                    >
+                      <TokenCard
+                        token={t}
+                        rank={i + 1}
+                        onOpen={openToken}
+                        onCreatorClick={setCreator}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             )}
           </div>
+
+          <HowItWorksStrip />
+          <FAQ />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <SectionFilterTabs value={section} onChange={setSection} />
-          <div className="h-5 w-px bg-white/[0.08] hidden sm:block" />
-          <SortChips sort={sort} onChange={setSort} />
-        </div>
+        {/* RIGHT — sticky leaderboard sidebar */}
+        <aside className="lg:sticky lg:top-6 lg:self-start space-y-4">
+          {hasAny && tokens && <TokenLeaderboard tokens={tokens} />}
+        </aside>
       </div>
-
-      {/* Grid */}
-      <div className="mt-5">
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <TokenCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : !hasAny ? (
-          <EmptyState
-            icon={Rocket}
-            title="No tokens launched yet"
-            description={
-              !FLAUNCH_LAUNCHPAD_ENABLED
-                ? 'The launchpad is currently in private beta. Flip the feature flag to try it locally.'
-                : isAuthenticated
-                  ? 'Be the first — pick one of your listings and mint its token.'
-                  : 'Sign in to launch a token for one of your listings and kick off the market.'
-            }
-            action={
-              !FLAUNCH_LAUNCHPAD_ENABLED
-                ? undefined
-                : isAuthenticated
-                  ? { label: 'Launch yours', onClick: () => setLaunchOpen(true) }
-                  : { label: 'Sign in', href: '/auth' }
-            }
-          />
-        ) : filtered.length === 0 ? (
-          <div
-            className="rounded-xl px-6 py-10 text-center"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-            }}
-          >
-            <div className="text-[13px] text-zinc-300 font-light">No matches</div>
-            <div className="text-[11.5px] text-zinc-500 mt-1 font-light">
-              Try a different search or clear the filters.
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setSection('ALL');
-              }}
-              className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-[11.5px] text-zinc-300 hover:text-white transition"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-              }}
-            >
-              Clear filters
-            </button>
-          </div>
-        ) : (
-          <motion.div
-            layout
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-          >
-            <AnimatePresence initial={false}>
-              {filtered.map((t, i) => (
-                <motion.div
-                  key={t.tokenAddress}
-                  layout
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                >
-                  <TokenCard
-                    token={t}
-                    rank={i + 1}
-                    onOpen={openToken}
-                    onCreatorClick={setCreator}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </div>
-
-      <FAQ />
 
       <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
 
