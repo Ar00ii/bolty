@@ -14,13 +14,24 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-import { TokenPriceChart } from '@/components/flaunch/TokenPriceChart';
+import dynamic from 'next/dynamic';
+
 import {
   buyLaunchpadToken,
   getTokenByAddress,
   sellLaunchpadToken,
 } from '@/lib/flaunch/launchpad';
 import type { TokenInfo, TradeResult } from '@/lib/flaunch/types';
+
+// Dynamic import — lightweight-charts is ~100KB and only needed on
+// the detail page. Same pattern used on /bolty.
+const LaunchpadCandleChart = dynamic(
+  () =>
+    import('@/components/flaunch/LaunchpadCandleChart').then((m) => ({
+      default: m.LaunchpadCandleChart,
+    })),
+  { ssr: false },
+);
 
 type Mode = 'buy' | 'sell';
 
@@ -84,10 +95,6 @@ export default function TokenDetailPage() {
   const [token, setToken] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-  // Rolling USD price samples collected from polls. Seeded with the
-  // first fetch and appended on each subsequent refresh. Gives us a
-  // real chart even when DexScreener / subgraph aren't indexed yet.
-  const [priceSamples, setPriceSamples] = useState<number[]>([]);
 
   useEffect(() => {
     if (!address) return;
@@ -95,19 +102,15 @@ export default function TokenDetailPage() {
     setNotFound(false);
     getTokenByAddress(address)
       .then((t) => {
-        if (!t) {
-          setNotFound(true);
-        } else {
-          setToken(t);
-          if (t.priceUsd > 0) setPriceSamples([t.priceUsd]);
-        }
+        if (!t) setNotFound(true);
+        else setToken(t);
       })
       .finally(() => setLoading(false));
   }, [address]);
 
-  // Re-poll every 10s for live price/volume; pause when tab hidden.
-  // Each poll also pushes onto the rolling chart history (cap at 180
-  // points = 30 min of live data).
+  // Re-poll token metadata every 10s for header price/mcap refreshes.
+  // Pauses when tab is hidden. The chart component handles its own
+  // OHLCV polling internally.
   useEffect(() => {
     if (!address || notFound) return;
     let id: ReturnType<typeof setInterval> | null = null;
@@ -115,14 +118,7 @@ export default function TokenDetailPage() {
       if (id) return;
       id = setInterval(() => {
         getTokenByAddress(address).then((t) => {
-          if (!t) return;
-          setToken(t);
-          if (t.priceUsd > 0) {
-            setPriceSamples((s) => {
-              const next = [...s, t.priceUsd];
-              return next.length > 180 ? next.slice(-180) : next;
-            });
-          }
+          if (t) setToken(t);
         });
       }, 10_000);
     }
@@ -201,7 +197,7 @@ export default function TokenDetailPage() {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
         {/* LEFT — chart + stats + about */}
         <div className="space-y-5 min-w-0">
-          <ChartCard token={token} samples={priceSamples} />
+          <ChartCard token={token} />
           <StatsRow token={token} />
           <AboutCard token={token} />
           <LinksCard token={token} />
@@ -315,77 +311,10 @@ function CopyableAddr({ addr }: { addr: string }) {
 
 // ── Chart + stats ───────────────────────────────────────────────────
 
-function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) {
-  // Chart strategy — try in order until we find a pool:
-  //  1. GeckoTerminal (best iframe support)
-  //  2. DexScreener (fallback via their token→pair API)
-  //  3. Our own live-polled chart if nobody has indexed the pool yet
-  const [pool, setPool] = useState<{
-    status: 'loading' | 'found' | 'missing';
-    address: string | null;
-    source: 'gecko' | 'dex' | null;
-  }>({ status: 'loading', address: null, source: null });
-
-  useEffect(() => {
-    let cancelled = false;
-    async function resolve() {
-      // GeckoTerminal first — their iframe is the most reliable embed
-      try {
-        const r = await fetch(
-          `https://api.geckoterminal.com/api/v2/networks/base/tokens/${token.tokenAddress}/pools`,
-        );
-        if (r.ok) {
-          const data = await r.json();
-          const poolAddr = data?.data?.[0]?.attributes?.address;
-          if (poolAddr && !cancelled) {
-            setPool({ status: 'found', address: poolAddr, source: 'gecko' });
-            return;
-          }
-        }
-      } catch {
-        /* fall through */
-      }
-      // DexScreener fallback
-      try {
-        const r = await fetch(
-          `https://api.dexscreener.com/latest/dex/tokens/${token.tokenAddress}`,
-        );
-        if (r.ok) {
-          const data = await r.json();
-          const pairs: any[] = Array.isArray(data?.pairs) ? data.pairs : [];
-          const basePair = pairs.find((p) => p?.chainId === 'base') ?? pairs[0];
-          if (basePair?.pairAddress && !cancelled) {
-            setPool({ status: 'found', address: basePair.pairAddress, source: 'dex' });
-            return;
-          }
-        }
-      } catch {
-        /* fall through */
-      }
-      if (!cancelled) setPool({ status: 'missing', address: null, source: null });
-    }
-    resolve();
-    return () => {
-      cancelled = true;
-    };
-  }, [token.tokenAddress]);
-
-  const hasSamples = samples.length >= 2;
-  const showIframe = pool.status === 'found' && !!pool.address;
-
-  const iframeSrc = (() => {
-    if (!showIframe) return '';
-    if (pool.source === 'gecko') {
-      return `https://www.geckoterminal.com/base/pools/${pool.address}?embed=1&info=0&swaps=0`;
-    }
-    return `https://dexscreener.com/base/${pool.address}?embed=1&theme=dark&trades=0&info=0&chartStyle=1&chartType=usd&interval=15`;
-  })();
-
-  const openHref =
-    pool.source === 'gecko' && pool.address
-      ? `https://www.geckoterminal.com/base/pools/${pool.address}`
-      : `https://dexscreener.com/base/${pool.address ?? token.tokenAddress}`;
-
+function ChartCard({ token }: { token: TokenInfo }) {
+  // Use the same stack as /bolty — lightweight-charts + GeckoTerminal
+  // OHLCV. The component renders its own toolbar with timeframes and
+  // handles "no pool yet" + loading states internally.
   return (
     <div
       className="rounded-xl overflow-hidden"
@@ -394,89 +323,10 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
           'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
         boxShadow:
           'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
+        height: 520,
       }}
     >
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <h2 className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
-          {showIframe ? (
-            <>Price chart · {pool.source === 'gecko' ? 'GeckoTerminal' : 'DexScreener'}</>
-          ) : (
-            <>
-              <span className="relative inline-flex items-center justify-center w-2 h-2">
-                <span
-                  className="absolute inset-0 rounded-full animate-ping"
-                  style={{ background: '#22c55e' }}
-                />
-                <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-              </span>
-              Live price · last {samples.length} ticks
-            </>
-          )}
-        </h2>
-        <a
-          href={openHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-[10.5px] text-zinc-300 hover:text-white transition px-2 py-1 rounded-md"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          }}
-        >
-          Open <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
-        </a>
-      </div>
-
-      {showIframe ? (
-        <iframe
-          src={iframeSrc}
-          title={`${token.symbol} price chart`}
-          className="block w-full"
-          style={{ height: 520, border: 'none', background: 'transparent' }}
-          loading="lazy"
-        />
-      ) : pool.status === 'loading' ? (
-        <div className="px-4 pb-4">
-          <div
-            className="h-[260px] grid place-items-center"
-            style={{
-              background: 'rgba(255,255,255,0.015)',
-              borderRadius: 12,
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
-            }}
-          >
-            <div className="flex items-center gap-2 text-[12px] text-zinc-500 font-light">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Looking for pool…
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="px-4 pb-4" style={{ minHeight: 260 }}>
-          {hasSamples ? (
-            <TokenPriceChart data={samples} height={260} />
-          ) : (
-            <div
-              className="h-[260px] grid place-items-center text-center px-6"
-              style={{
-                background: 'rgba(255,255,255,0.015)',
-                borderRadius: 12,
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
-              }}
-            >
-              <div>
-                <div className="text-[12.5px] text-zinc-300 font-light">
-                  Waiting for first trade…
-                </div>
-                <div className="text-[10.5px] text-zinc-500 font-light mt-1 max-w-xs mx-auto">
-                  Full chart appears seconds after the first swap. Until then
-                  we show live RPC samples.
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <LaunchpadCandleChart tokenAddress={token.tokenAddress} />
     </div>
   );
 }
