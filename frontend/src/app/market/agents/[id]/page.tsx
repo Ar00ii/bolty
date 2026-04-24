@@ -30,6 +30,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
 import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
@@ -600,6 +601,14 @@ export default function AgentDetailPage() {
                 </p>
               )}
             </Section>
+
+            <TokenLaunchCard
+              listingId={listing.id}
+              listingTitle={listing.title}
+              listingDescription={listing.description ?? ''}
+              listingImageUrl={null}
+              isOwner={isOwner}
+            />
 
             <Section title="Live demo" icon={Play}>
               {listing.agentEndpoint ? (
