@@ -89,7 +89,7 @@ export function MarketTicker() {
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden hidden md:block"
+      className="mk-ticker relative overflow-hidden hidden md:block"
       style={{
         background: 'rgba(9,9,11,0.96)',
         borderBottom: '1px solid #1f1f23',

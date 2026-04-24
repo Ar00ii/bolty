@@ -4654,6 +4654,27 @@ aside button[data-active='true']::after {
   }
 }
 
+/* ─ Market ticker ─ lift typography to match the rest of the dashboard
+   without touching the marquee mechanics or fixed row height. */
+.mk-ticker,
+.mk-ticker * {
+  font-weight: 500;
+}
+.mk-ticker .font-light,
+.mk-ticker .font-normal {
+  font-weight: 500;
+}
+.mk-ticker .font-medium,
+.mk-ticker .font-semibold {
+  font-weight: 600;
+}
+.mk-ticker .font-mono {
+  /* Keep mono for numeric/tag chunks but beef it up a touch so it
+     reads at the same visual weight as the rest of the row. */
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
 /* ─ Mobile bottom tab bar ────────────────────────────────────────────── */
 .mk-mobile-tabbar {
   position: fixed;

@@ -398,75 +398,77 @@ function MarketScreener() {
   }, [listings, liveListings]);
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
-      <header className="px-6 pt-4 pb-4 md:px-10 md:pt-5">
+    <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
+      {/* Hero — matches /market/agents and /market/repos */}
+      <header className="px-6 pt-6 pb-3 md:px-10 md:pt-7">
         <div className="mx-auto max-w-[1400px]">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-200 uppercase tracking-[0.18em] mb-2">
-                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span>Bolty Screener</span>
+          <div className="mk-hero">
+            <div className="mk-hero__crumbs">
+              <span className="inline-flex items-center gap-1.5">
+                <TrendingUp className="w-3 h-3" strokeWidth={2} />
+                Bolty Screener
                 <LiveDot />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">
-                Marketplace
-              </h1>
+              </span>
             </div>
-            <Link
-              href="/market/seller/publish"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
-              }}
-            >
-              <Plus className="w-3.5 h-3.5" strokeWidth={1.75} />
-              Publish listing
-            </Link>
+            <div className="mk-hero__row">
+              <div>
+                <h1 className="mk-hero__title">Marketplace</h1>
+                <p className="mk-hero__sub">
+                  Everything for sale across Bolty — agents, repos, bots, scripts — priced live and ranked by 24-hour activity.
+                </p>
+              </div>
+              <Link
+                href="/market/agents/publish"
+                className="mk-btn mk-btn--primary"
+              >
+                <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+                Publish listing
+              </Link>
+            </div>
+
+            <div className="mk-stats">
+              <div className="mk-stat">
+                <div className="mk-stat__label">24h volume</div>
+                <div className="mk-stat__value">
+                  {formatEth(pulse?.stats.volumeEth24h || 0)}{' '}
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--app-text-mute)',
+                      fontWeight: 500,
+                    }}
+                  >
+                    ETH
+                  </span>
+                </div>
+              </div>
+              <div className="mk-stat">
+                <div className="mk-stat__label">24h sales</div>
+                <div className="mk-stat__value">
+                  {formatNumber(pulse?.stats.sales24h || 0)}
+                </div>
+              </div>
+              <div className="mk-stat">
+                <div className="mk-stat__label">Active listings</div>
+                <div className="mk-stat__value">
+                  {formatNumber(pulse?.stats.activeListings || 0)}
+                </div>
+              </div>
+              <div className="mk-stat">
+                <div className="mk-stat__label">All-time sales</div>
+                <div className="mk-stat__value">
+                  {formatNumber(pulse?.stats.totalSales || 0)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Live community strip — last posts from #marketplace feed */}
-      <section className="px-6 md:px-10 mb-3">
+      <section className="px-6 md:px-10 mb-3 mt-1">
         <div className="mx-auto max-w-[1400px]">
           <CommunityFeedStrip />
-        </div>
-      </section>
-
-      {/* Stats strip */}
-      <section className="px-6 md:px-10 mb-4">
-        <div className="mx-auto max-w-[1400px] grid grid-cols-2 md:grid-cols-4 gap-2">
-          <StatTile
-            label="24h volume"
-            value={`${formatEth(pulse?.stats.volumeEth24h || 0)} ETH`}
-            sub={`${pulse?.stats.sales24h ?? 0} sales`}
-            pulseKey={statPulse.volumeEth24h}
-            accent="#836EF9"
-          />
-          <StatTile
-            label="24h sales"
-            value={formatNumber(pulse?.stats.sales24h || 0)}
-            sub={`${pulse?.stats.traders24h ?? 0} traders`}
-            pulseKey={statPulse.sales24h}
-            accent="#22c55e"
-          />
-          <StatTile
-            label="Active listings"
-            value={formatNumber(pulse?.stats.activeListings || 0)}
-            sub={`${pulse?.stats.totalListings ?? 0} total`}
-            pulseKey={statPulse.activeListings}
-            accent="#06B6D4"
-          />
-          <StatTile
-            label="All-time sales"
-            value={formatNumber(pulse?.stats.totalSales || 0)}
-            sub="since launch"
-            accent="#EC4899"
-          />
         </div>
       </section>
 
