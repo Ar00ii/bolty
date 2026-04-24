@@ -2,11 +2,9 @@
 
 import {
   ArrowUpRight,
-  Bot,
   Clock,
   Download,
   ExternalLink,
-  GitBranch,
   Heart,
   Library,
   Package,
@@ -16,7 +14,6 @@ import {
   Star,
   TrendingUp,
   X,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -29,8 +26,13 @@ import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
+import {
+  LISTING_TYPE_ACCENT as TYPE_ACCENT,
+  LISTING_TYPE_ICON as TYPE_ICON,
+  LISTING_TYPE_LABEL as TYPE_LABEL,
+  type ListingType,
+} from '@/lib/listing/types';
 
-type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 type TypeFilter = 'ALL' | ListingType;
 
 interface LibraryItem {
@@ -59,30 +61,6 @@ interface LibraryItem {
     repositoryId?: string;
   } | null;
 }
-
-const TYPE_ICON: Record<ListingType, LucideIcon> = {
-  REPO: GitBranch,
-  BOT: Bot,
-  AI_AGENT: Bot,
-  SCRIPT: Zap,
-  OTHER: Package,
-};
-
-const TYPE_LABEL: Record<ListingType, string> = {
-  REPO: 'Repo',
-  BOT: 'Bot',
-  AI_AGENT: 'Agent',
-  SCRIPT: 'Script',
-  OTHER: 'Other',
-};
-
-const TYPE_ACCENT: Record<ListingType, string> = {
-  REPO: '#06B6D4',
-  BOT: '#836EF9',
-  AI_AGENT: '#836EF9',
-  SCRIPT: '#EC4899',
-  OTHER: '#94a3b8',
-};
 
 function timeAgo(d: string | Date) {
   const diff = Date.now() - new Date(d).getTime();

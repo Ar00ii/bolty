@@ -23,6 +23,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { api } from '@/lib/api/client';
 import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
+import { listingIcon } from '@/lib/listing/types';
 
 interface NavCommand {
   kind: 'nav';
@@ -46,18 +47,7 @@ interface ListingCommand {
 
 type Command = NavCommand | ListingCommand;
 
-const LISTING_TYPE_ICON: Record<string, LucideIcon> = {
-  AI_AGENT: Bot,
-  BOT: Bot,
-  SCRIPT: Sparkles,
-  REPO: GitBranch,
-  OTHER: Package,
-};
-
-function iconForType(type: string | undefined): LucideIcon {
-  if (!type) return Package;
-  return LISTING_TYPE_ICON[type.toUpperCase()] ?? Package;
-}
+const iconForType = listingIcon;
 
 const NAV_COMMANDS: NavCommand[] = [
   {
