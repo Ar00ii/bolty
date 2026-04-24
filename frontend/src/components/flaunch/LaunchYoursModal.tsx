@@ -180,11 +180,15 @@ export function LaunchYoursModal({
     window.dispatchEvent(new CustomEvent('launchpad:refresh'));
   }
 
-  // Filter listings based on the chosen mode. Self mode shows
-  // everything; agent mode only shows AI_AGENT / BOT listings.
+  // Filter listings based on the chosen mode. The two modes are
+  // mutually exclusive: self mode is for non-agent items (repos,
+  // scripts, "other"); agent mode is for AI_AGENT / BOT listings.
+  // This is why picking "Launch (no AI)" should never surface an
+  // agent — nothing in the self path touches AI at all.
   const visibleListings = listings?.filter((l) => {
-    if (mode !== 'agent') return true;
-    return l.type === 'AGENT' || l.type === 'BOT';
+    const isAgent = l.type === 'AGENT' || l.type === 'BOT';
+    if (mode === 'agent') return isAgent;
+    return !isAgent;
   });
 
   const pickerBody = !isAuthenticated ? (
@@ -223,12 +227,12 @@ export function LaunchYoursModal({
       <div className="text-[14px] text-white font-medium">
         {mode === 'agent'
           ? 'No AI agent listings yet'
-          : 'No listings to launch from yet'}
+          : 'No non-agent listings to launch from'}
       </div>
       <div className="text-[12px] text-zinc-400 mt-1 font-light">
         {mode === 'agent'
           ? 'Launching with AI requires an AI agent listing.'
-          : ''}
+          : 'Plain launch is for repos / scripts. For AI agent listings, go back and pick "Launch with AI".'}
       </div>
     </div>
   ) : inline ? (

@@ -390,7 +390,7 @@ function AboutCard({ token }: { token: TokenInfo }) {
         About
       </h2>
       <p className="text-[13px] text-zinc-300 font-light leading-relaxed whitespace-pre-wrap">
-        {token.description}
+        {(token.description ?? '').replace(/\ncreator:\s*@[a-zA-Z0-9_-]{1,40}/g, '').trim()}
       </p>
     </section>
   );

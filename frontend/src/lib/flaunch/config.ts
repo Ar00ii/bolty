@@ -40,9 +40,32 @@ export function isRevenueManagerConfigured(): boolean {
 }
 
 /** Appended to every launched token's description so the Flaunch
- *  coin page links back to the source listing + Bolty. Prevents
- *  the token becoming disembodied once someone trades it outside
- *  bolty.network. */
-export function boltyAttributionFooter(listingUrl: string): string {
-  return `\n\nLaunched on the Bolty Network launchpad — ${listingUrl}`;
+ *  coin page links back to the source listing + Bolty. Also embeds
+ *  the creator username in a parseable marker (`creator: @foo`) so
+ *  any consumer — including other users' browsers that don't have
+ *  our local cache — can recover who launched it.
+ *
+ *  Keep the marker format stable: `creator: @username`. The listing
+ *  page reads it with a regex, so don't break the exact casing. */
+export function boltyAttributionFooter(
+  listingUrl: string,
+  creatorUsername?: string | null,
+): string {
+  const creator =
+    creatorUsername && /^[a-zA-Z0-9_-]{1,40}$/.test(creatorUsername)
+      ? `\ncreator: @${creatorUsername}`
+      : '';
+  return `\n\nLaunched on the Bolty Network launchpad — ${listingUrl}${creator}`;
+}
+
+/** Parses the `creator: @foo` marker back out of a token description
+ *  so the launchpad list can render the real username even when the
+ *  viewer has no local cache of the launch. Returns null if the
+ *  marker isn't present. */
+export function parseCreatorFromDescription(
+  description: string | null | undefined,
+): string | null {
+  if (!description) return null;
+  const m = description.match(/creator:\s*@([a-zA-Z0-9_-]{1,40})/);
+  return m ? m[1] : null;
 }

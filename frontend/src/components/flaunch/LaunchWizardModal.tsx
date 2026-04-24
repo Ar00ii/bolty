@@ -222,7 +222,9 @@ export function LaunchWizardModal({
         listingId,
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
-        description: description.trim() + boltyAttributionFooter(listingUrl),
+        description:
+          description.trim() +
+          boltyAttributionFooter(listingUrl, user?.username ?? null),
         imageUrl: imageDataUrl,
         bannerDataUrl,
         websiteUrl: listingUrl,
