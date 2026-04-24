@@ -234,7 +234,21 @@ function LaunchpadPageContent() {
               <Rocket className="w-3.5 h-3.5" />
               Launch yours
             </button>
-          ) : null
+          ) : (
+            <Link
+              href="/auth"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110 shrink-0"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                boxShadow:
+                  '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+              }}
+            >
+              <Rocket className="w-3.5 h-3.5" />
+              Sign in to launch
+            </Link>
+          )
         }
       >
         <StatStrip>
@@ -347,16 +361,18 @@ function LaunchpadPageContent() {
             icon={Rocket}
             title="No tokens launched yet"
             description={
-              FLAUNCH_LAUNCHPAD_ENABLED
-                ? 'Be the first — pick one of your listings and mint its token.'
-                : 'The launchpad is currently in private beta. Flip the feature flag to try it locally.'
+              !FLAUNCH_LAUNCHPAD_ENABLED
+                ? 'The launchpad is currently in private beta. Flip the feature flag to try it locally.'
+                : isAuthenticated
+                  ? 'Be the first — pick one of your listings and mint its token.'
+                  : 'Sign in to launch a token for one of your listings and kick off the market.'
             }
             action={
-              FLAUNCH_LAUNCHPAD_ENABLED && isAuthenticated
-                ? { label: 'Launch yours', onClick: () => setLaunchOpen(true) }
-                : FLAUNCH_LAUNCHPAD_ENABLED
-                  ? { label: 'Browse marketplace', href: '/market' }
-                  : undefined
+              !FLAUNCH_LAUNCHPAD_ENABLED
+                ? undefined
+                : isAuthenticated
+                  ? { label: 'Launch yours', onClick: () => setLaunchOpen(true) }
+                  : { label: 'Sign in', href: '/auth' }
             }
           />
         ) : filtered.length === 0 ? (
