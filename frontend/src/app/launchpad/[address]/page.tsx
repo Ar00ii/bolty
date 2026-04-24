@@ -316,14 +316,44 @@ function CopyableAddr({ addr }: { addr: string }) {
 // ── Chart + stats ───────────────────────────────────────────────────
 
 function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) {
-  // Third-party iframes (DexScreener, GeckoTerminal) are blocked from
-  // embedding on other domains via X-Frame-Options. We render our own
-  // live price chart from rolling SDK polls + link out for the deep
-  // chart with candlesticks / trade history.
-  const hasData = samples.length >= 2;
+  // DexScreener allows iframing, but only from the pair-address URL
+  // (token URL redirects and breaks the iframe sandbox). Resolve via
+  // their public API, then embed the pair URL directly. If no pair is
+  // indexed yet (fresh launch, no first trade), fall through to our
+  // own live-polled chart.
+  const [pair, setPair] = useState<{
+    status: 'loading' | 'found' | 'missing';
+    address: string | null;
+  }>({ status: 'loading', address: null });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`https://api.dexscreener.com/latest/dex/tokens/${token.tokenAddress}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: any) => {
+        if (cancelled) return;
+        const pairs: any[] = Array.isArray(data?.pairs) ? data.pairs : [];
+        const basePair = pairs.find((p) => p?.chainId === 'base') ?? pairs[0];
+        if (basePair?.pairAddress) {
+          setPair({ status: 'found', address: basePair.pairAddress });
+        } else {
+          setPair({ status: 'missing', address: null });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPair({ status: 'missing', address: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [token.tokenAddress]);
+
+  const hasSamples = samples.length >= 2;
+  const showIframe = pair.status === 'found' && pair.address;
+
   return (
     <div
-      className="rounded-xl p-4"
+      className="rounded-xl overflow-hidden"
       style={{
         background:
           'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -331,76 +361,87 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
           'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h2 className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
-          <span className="relative inline-flex items-center justify-center w-2 h-2">
-            <span
-              className="absolute inset-0 rounded-full animate-ping"
-              style={{ background: '#22c55e' }}
-            />
-            <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-          </span>
-          Live price · last {samples.length} ticks
+          {showIframe ? (
+            <>Price chart</>
+          ) : (
+            <>
+              <span className="relative inline-flex items-center justify-center w-2 h-2">
+                <span
+                  className="absolute inset-0 rounded-full animate-ping"
+                  style={{ background: '#22c55e' }}
+                />
+                <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+              </span>
+              Live price · last {samples.length} ticks
+            </>
+          )}
         </h2>
-        <div className="flex items-center gap-1.5">
-          <a
-            href={`https://dexscreener.com/base/${token.tokenAddress}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10.5px] text-zinc-300 hover:text-white transition px-2 py-1 rounded-md"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-            }}
-          >
-            DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
-          </a>
-          <a
-            href={`https://www.geckoterminal.com/base/tokens/${token.tokenAddress}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-[10.5px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-md"
-            style={{
-              background: 'rgba(255,255,255,0.03)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-            }}
-          >
-            GeckoTerminal <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
-          </a>
-        </div>
+        <a
+          href={`https://dexscreener.com/base/${pair.address ?? token.tokenAddress}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[10.5px] text-zinc-300 hover:text-white transition px-2 py-1 rounded-md"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          }}
+        >
+          DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+        </a>
       </div>
-      <div style={{ minHeight: 260 }}>
-        {hasData ? (
-          <TokenPriceChart data={samples} height={260} />
-        ) : (
+
+      {showIframe ? (
+        <iframe
+          src={`https://dexscreener.com/base/${pair.address}?embed=1&theme=dark&trades=0&info=0&chartStyle=1&chartType=usd&interval=15`}
+          title={`${token.symbol} price chart`}
+          className="block w-full"
+          style={{ height: 520, border: 'none', background: 'transparent' }}
+          loading="lazy"
+        />
+      ) : pair.status === 'loading' ? (
+        <div className="px-4 pb-4">
           <div
-            className="h-[260px] grid place-items-center text-center px-6"
+            className="h-[260px] grid place-items-center"
             style={{
               background: 'rgba(255,255,255,0.015)',
               borderRadius: 12,
               boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
             }}
           >
-            <div>
-              <div className="text-[12.5px] text-zinc-300 font-light">
-                Collecting live price data…
-              </div>
-              <div className="text-[10.5px] text-zinc-500 font-light mt-1">
-                The chart fills in as we poll. For candlesticks + trade history, open{' '}
-                <a
-                  href={`https://dexscreener.com/base/${token.tokenAddress}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#b4a7ff] hover:underline"
-                >
-                  DexScreener
-                </a>
-                .
-              </div>
+            <div className="flex items-center gap-2 text-[12px] text-zinc-500 font-light">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Loading chart…
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="px-4 pb-4" style={{ minHeight: 260 }}>
+          {hasSamples ? (
+            <TokenPriceChart data={samples} height={260} />
+          ) : (
+            <div
+              className="h-[260px] grid place-items-center text-center px-6"
+              style={{
+                background: 'rgba(255,255,255,0.015)',
+                borderRadius: 12,
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+              }}
+            >
+              <div>
+                <div className="text-[12.5px] text-zinc-300 font-light">
+                  Waiting for first trade…
+                </div>
+                <div className="text-[10.5px] text-zinc-500 font-light mt-1 max-w-xs mx-auto">
+                  DexScreener indexes new pools seconds after the first swap.
+                  Until then we show live price samples from direct RPC.
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
