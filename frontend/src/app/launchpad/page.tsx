@@ -202,15 +202,17 @@ function LaunchpadPageContent() {
 
       {/* Inline launch form — replaces the previous modal. Shown only
           when the user clicks "Launch yours" above. Narrow container
-          so it doesn't span the whole page. */}
+          so it doesn't span the whole page, centered under the banners. */}
       {launchOpen && (
-        <div className="w-full px-2 pt-4">
+        <div className="w-full px-2 pt-5">
           <div
-            className="mx-auto max-w-xl rounded-2xl p-5"
+            className="mx-auto max-w-[640px] rounded-2xl p-6 md:p-7"
             style={{
-              background: 'rgba(10,10,14,0.75)',
+              background:
+                'linear-gradient(180deg, rgba(16,16,22,0.85) 0%, rgba(10,10,14,0.85) 100%)',
               border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(10px)',
+              backdropFilter: 'blur(12px)',
+              boxShadow: '0 20px 60px -30px rgba(131,110,249,0.35)',
             }}
           >
             <LaunchYoursModal

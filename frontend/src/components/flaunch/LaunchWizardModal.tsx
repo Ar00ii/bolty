@@ -201,7 +201,7 @@ export function LaunchWizardModal({
         <StepIndicator step={step} launchState={launchState} />
       )}
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-5 space-y-4">
         {launchState === 'success' && result ? (
           <SuccessView result={result} symbol={symbol} onClose={handleClose} />
         ) : step === 1 ? (
@@ -247,12 +247,12 @@ export function LaunchWizardModal({
       </div>
 
       {launchState !== 'success' && (
-        <div className="mt-5 pt-4 flex items-center justify-between gap-2 border-t border-white/[0.06]">
+        <div className="mt-6 pt-4 flex items-center justify-between gap-2 border-t border-white/[0.06]">
           <button
             type="button"
             onClick={step === 1 ? handleClose : () => setStep((s) => (s - 1) as Step)}
             disabled={launchState === 'signing' || launchState === 'pending'}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] text-zinc-400 hover:text-white disabled:opacity-40 transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] text-zinc-400 hover:text-white disabled:opacity-40 transition"
           >
             {step === 1 ? 'Cancel' : (<><ArrowLeft className="w-3.5 h-3.5" /> Back</>)}
           </button>
@@ -262,12 +262,12 @@ export function LaunchWizardModal({
               type="button"
               onClick={() => setStep((s) => (s + 1) as Step)}
               disabled={step === 1 ? !canContinueFrom1 : !canContinueFrom2}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition disabled:opacity-40 hover:brightness-110"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                  'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                  '0 0 0 1px rgba(131,110,249,0.5), 0 4px 20px -8px rgba(131,110,249,0.7)',
               }}
             >
               Continue
@@ -277,12 +277,12 @@ export function LaunchWizardModal({
               type="button"
               onClick={handleLaunch}
               disabled={launchState === 'signing' || launchState === 'pending'}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition disabled:opacity-70"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition disabled:opacity-70 hover:brightness-110"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.65) 0%, rgba(131,110,249,0.45) 100%)',
+                  'linear-gradient(180deg, rgba(131,110,249,0.7) 0%, rgba(131,110,249,0.48) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.55), 0 0 24px -8px rgba(131,110,249,0.7)',
+                  '0 0 0 1px rgba(131,110,249,0.55), 0 4px 24px -8px rgba(131,110,249,0.8)',
               }}
             >
               {launchState === 'signing' || launchState === 'pending' ? (
@@ -306,23 +306,24 @@ export function LaunchWizardModal({
   if (inline) {
     return (
       <div className="relative">
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-5">
           <div>
-            <div className="text-[14px] text-white font-light">
+            <div className="text-[17px] text-white font-light tracking-tight">
               {launchState === 'success'
                 ? 'Token launched'
-                : 'Launch a token for this listing'}
+                : 'Launch a token'}
             </div>
             {launchState !== 'success' && (
-              <div className="text-[11px] text-zinc-500 mt-0.5">
-                Powered by Flaunch · Base
+              <div className="text-[12px] text-zinc-500 mt-1 font-light">
+                Pre-filled from your listing. Tweak anything that should
+                differ on-chain. Powered by Flaunch on Base.
               </div>
             )}
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition"
+            className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition shrink-0 ml-3"
             style={{ background: 'rgba(255,255,255,0.03)' }}
             aria-label="Close"
           >
@@ -370,28 +371,28 @@ function StepIndicator({
     [3, 'Launch'],
   ];
   return (
-    <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em]">
+    <div className="flex items-center gap-3 text-[11.5px] font-medium tracking-tight">
       {labels.map(([n, label], i) => {
         const active = step === n;
-        const done = step > n || (launchState !== 'idle' && n === 3);
+        const done = step > n || (launchState !== 'idle' && n === 3 && launchState === 'success');
         return (
           <React.Fragment key={n}>
             <span
-              className="inline-flex items-center gap-1.5"
+              className="inline-flex items-center gap-2 transition-colors"
               style={{
-                color: active ? '#ffffff' : done ? '#a78bfa' : '#52525b',
+                color: active ? '#ffffff' : done ? '#b4a7ff' : '#71717a',
               }}
             >
               <span
-                className="w-5 h-5 rounded-full grid place-items-center font-mono text-[10px]"
+                className="w-5 h-5 rounded-full grid place-items-center font-mono text-[10.5px] transition"
                 style={{
                   background: active
-                    ? 'rgba(131,110,249,0.2)'
+                    ? 'rgba(131,110,249,0.22)'
                     : done
-                      ? 'rgba(131,110,249,0.08)'
+                      ? 'rgba(131,110,249,0.1)'
                       : 'rgba(255,255,255,0.03)',
                   boxShadow: active
-                    ? 'inset 0 0 0 1px rgba(131,110,249,0.5)'
+                    ? 'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 0 3px rgba(131,110,249,0.08)'
                     : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
                 }}
               >
@@ -400,7 +401,12 @@ function StepIndicator({
               {label}
             </span>
             {i < labels.length - 1 && (
-              <span className="flex-1 h-px bg-white/[0.06]" />
+              <span
+                className="flex-1 h-px transition-colors"
+                style={{
+                  background: done ? 'rgba(131,110,249,0.35)' : 'rgba(255,255,255,0.06)',
+                }}
+              />
             )}
           </React.Fragment>
         );
@@ -420,10 +426,14 @@ function Field({
 }) {
   return (
     <label className="block">
-      <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-[12px] text-zinc-300 font-medium">{label}</span>
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+          {label}
+        </span>
         {hint && (
-          <span className="text-[11px] text-zinc-500 font-light">{hint}</span>
+          <span className="text-[11px] text-zinc-500 font-light tabular-nums">
+            {hint}
+          </span>
         )}
       </div>
       {children}
@@ -432,10 +442,16 @@ function Field({
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-lg text-[13px] text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#836EF9]/40 transition';
+  'w-full px-3.5 py-2.5 rounded-lg text-[13.5px] text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/40 transition';
 const inputStyle = {
-  background: 'rgba(255,255,255,0.04)',
-  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.035)',
+  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
+};
+
+const sectionCls = 'rounded-xl p-4 space-y-3.5';
+const sectionStyle = {
+  background: 'rgba(255,255,255,0.02)',
+  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
 };
 
 function Step1Metadata({
@@ -526,170 +542,212 @@ function Step1Metadata({
     setCropTarget(null);
   }
 
+  const hasAnySocial = !!(
+    websiteUrl || githubUrl || twitterUrl || telegramUrl || discordUrl
+  );
+
   return (
-    <div className="space-y-3">
-      <p className="text-[12px] text-zinc-400 font-light">
-        Pre-filled from your listing. Tweak anything that should differ on-chain.
-      </p>
-      <div className="grid grid-cols-[72px_1fr] gap-3">
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          aria-label="Upload token image"
-          className="group relative w-[72px] h-[72px] rounded-xl overflow-hidden transition hover:brightness-110"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          }}
-        >
-          {imageUrl ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="" className="w-full h-full object-cover" />
-              <span
-                className="absolute inset-x-0 bottom-0 text-center text-[9px] uppercase tracking-[0.14em] py-1 font-medium text-white opacity-0 group-hover:opacity-100 transition"
-                style={{ background: 'rgba(0,0,0,0.55)' }}
-              >
-                Change
-              </span>
-            </>
-          ) : (
-            <div className="w-full h-full grid place-items-center text-zinc-500 text-[9.5px] font-medium uppercase tracking-[0.14em]">
-              Upload
-            </div>
-          )}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/png,image/jpeg,image/jpg,image/webp"
-            className="hidden"
-            onChange={(e) => pickFile(e.target.files?.[0] ?? null, { target: 'image', maxMb: 2 })}
-          />
-        </button>
-        <div className="space-y-2">
-          <Field label="Token name">
+    <div className="space-y-4">
+      {/* ── Identity card: logo + name + ticker side by side ─────────── */}
+      <div className={sectionCls} style={sectionStyle}>
+        <div className="grid grid-cols-[84px_1fr] gap-4 items-start">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            aria-label="Upload token logo"
+            className="group relative w-[84px] h-[84px] rounded-xl overflow-hidden transition"
+            style={{
+              background: 'rgba(255,255,255,0.035)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            {imageUrl ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                <span
+                  className="absolute inset-0 grid place-items-center text-[10.5px] text-white opacity-0 group-hover:opacity-100 transition"
+                  style={{ background: 'rgba(0,0,0,0.5)' }}
+                >
+                  Change
+                </span>
+              </>
+            ) : (
+              <div className="w-full h-full grid place-items-center">
+                <div className="flex flex-col items-center gap-0.5 text-zinc-500">
+                  <ImageUpIcon />
+                  <span className="text-[10px] font-medium">Logo</span>
+                </div>
+              </div>
+            )}
             <input
-              value={name}
-              onChange={(e) => onName(e.target.value.slice(0, 32))}
-              className={inputCls}
-              style={inputStyle}
-              placeholder="Trading Bot"
-              maxLength={32}
+              ref={fileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              className="hidden"
+              onChange={(e) =>
+                pickFile(e.target.files?.[0] ?? null, { target: 'image', maxMb: 2 })
+              }
             />
-          </Field>
-          <Field label="Ticker" hint="2–8 chars · A-Z, 0-9">
-            <input
-              value={symbol}
-              onChange={(e) => onSymbol(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))}
-              className={inputCls + ' font-mono tracking-wider'}
-              style={inputStyle}
-              placeholder="TBOT"
-              maxLength={8}
-            />
-          </Field>
+          </button>
+          <div className="space-y-3">
+            <Field label="Token name">
+              <input
+                value={name}
+                onChange={(e) => onName(e.target.value.slice(0, 32))}
+                className={inputCls}
+                style={inputStyle}
+                placeholder="Trading Bot"
+                maxLength={32}
+              />
+            </Field>
+            <Field label="Ticker" hint="2–8 chars · A–Z, 0–9">
+              <input
+                value={symbol}
+                onChange={(e) =>
+                  onSymbol(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))
+                }
+                className={inputCls + ' font-mono tracking-wider'}
+                style={inputStyle}
+                placeholder="TBOT"
+                maxLength={8}
+              />
+            </Field>
+          </div>
         </div>
       </div>
+
       {error && (
         <div
-          className="rounded-md px-2 py-1.5 text-[11px] text-red-300"
+          className="rounded-lg px-3 py-2 text-[11.5px] text-red-300 flex items-center gap-2"
           style={{
             background: 'rgba(239,68,68,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)',
           }}
         >
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
           {error}
         </div>
       )}
-      <Field label="Description" hint={`${description.length}/280`}>
-        <textarea
-          value={description}
-          onChange={(e) => onDescription(e.target.value.slice(0, 280))}
-          rows={3}
-          className={inputCls + ' resize-none'}
-          style={inputStyle}
-          placeholder="Short pitch for the token page."
-          maxLength={280}
-        />
-      </Field>
 
-      {/* Banner — wide-format image used as the launchpad carousel
-          background. Optional; falls back to the square image. */}
-      <Field label="Banner" hint="Wide · 1200×400 recommended · optional">
-        <button
-          type="button"
-          onClick={() => bannerRef.current?.click()}
-          aria-label="Upload banner"
-          className="group relative block w-full rounded-xl overflow-hidden transition hover:brightness-110"
-          style={{
-            aspectRatio: '3 / 1',
-            background: 'rgba(255,255,255,0.04)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-          }}
-        >
-          {bannerUrl ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
-              <span
-                className="absolute inset-x-0 bottom-0 text-center text-[10px] uppercase tracking-[0.14em] py-1.5 font-medium text-white opacity-0 group-hover:opacity-100 transition"
-                style={{ background: 'rgba(0,0,0,0.6)' }}
-              >
-                Change banner
-              </span>
-            </>
-          ) : (
-            <div className="absolute inset-0 grid place-items-center text-zinc-500 text-[11px] font-medium uppercase tracking-[0.14em]">
-              Upload banner
-            </div>
-          )}
-          <input
-            ref={bannerRef}
-            type="file"
-            accept="image/png,image/jpeg,image/jpg,image/webp"
-            className="hidden"
-            onChange={(e) =>
-              pickFile(e.target.files?.[0] ?? null, { target: 'banner', maxMb: 4 })
-            }
+      {/* ── Description card ─────────────────────────────────────────── */}
+      <div className={sectionCls} style={sectionStyle}>
+        <Field label="Description" hint={`${description.length}/280`}>
+          <textarea
+            value={description}
+            onChange={(e) => onDescription(e.target.value.slice(0, 280))}
+            rows={3}
+            className={inputCls + ' resize-none leading-relaxed'}
+            style={inputStyle}
+            placeholder="A short pitch — what is this token for? Why should anyone hold it?"
+            maxLength={280}
           />
-        </button>
-      </Field>
+        </Field>
+      </div>
 
-      {/* Social links — all optional. Rendered as icon buttons in the
-          bottom-right of the carousel when the token goes live. */}
-      <Field label="Links" hint="All optional">
+      {/* ── Banner card ──────────────────────────────────────────────── */}
+      <div className={sectionCls} style={sectionStyle}>
+        <Field label="Banner" hint="Wide 3:1 · shown on the launchpad carousel">
+          <button
+            type="button"
+            onClick={() => bannerRef.current?.click()}
+            aria-label="Upload banner"
+            className="group relative block w-full rounded-xl overflow-hidden transition hover:brightness-110"
+            style={{
+              aspectRatio: '3 / 1',
+              background: 'rgba(255,255,255,0.03)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            {bannerUrl ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
+                <span
+                  className="absolute inset-0 grid place-items-center text-[11px] text-white opacity-0 group-hover:opacity-100 transition"
+                  style={{ background: 'rgba(0,0,0,0.5)' }}
+                >
+                  Change banner
+                </span>
+              </>
+            ) : (
+              <div className="absolute inset-0 grid place-items-center">
+                <div className="flex flex-col items-center gap-1 text-zinc-500">
+                  <ImageUpIcon />
+                  <span className="text-[11.5px] font-medium">Upload banner</span>
+                  <span className="text-[10px] font-light">
+                    PNG or JPG · 1200×400 recommended
+                  </span>
+                </div>
+              </div>
+            )}
+            <input
+              ref={bannerRef}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              className="hidden"
+              onChange={(e) =>
+                pickFile(e.target.files?.[0] ?? null, { target: 'banner', maxMb: 4 })
+              }
+            />
+          </button>
+        </Field>
+      </div>
+
+      {/* ── Links card ───────────────────────────────────────────────── */}
+      <div className={sectionCls} style={sectionStyle}>
+        <div className="flex items-baseline justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+              Links
+            </span>
+            {hasAnySocial && (
+              <span
+                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-mono tabular-nums text-[#b4a7ff]"
+                style={{
+                  background: 'rgba(131,110,249,0.14)',
+                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                }}
+              >
+                {[websiteUrl, githubUrl, twitterUrl, telegramUrl, discordUrl].filter(Boolean).length}
+              </span>
+            )}
+          </div>
+          <span className="text-[11px] text-zinc-500 font-light">All optional</span>
+        </div>
         <div className="space-y-2">
           <SocialInput
-            icon={<Globe className="w-3.5 h-3.5" />}
-            placeholder="https://your-site.com"
+            icon={<Globe className="w-4 h-4" />}
+            placeholder="Website — https://your-site.com"
             value={websiteUrl}
             onChange={onWebsiteUrl}
           />
           <SocialInput
             icon={<GithubMark16 />}
-            placeholder="https://github.com/you/repo"
+            placeholder="GitHub — https://github.com/you/repo"
             value={githubUrl}
             onChange={onGithubUrl}
           />
           <SocialInput
-            icon={<Twitter className="w-3.5 h-3.5" />}
-            placeholder="https://x.com/yourhandle"
+            icon={<Twitter className="w-4 h-4" />}
+            placeholder="X — https://x.com/yourhandle"
             value={twitterUrl}
             onChange={onTwitterUrl}
           />
           <SocialInput
-            icon={<Send className="w-3.5 h-3.5" />}
-            placeholder="https://t.me/yourgroup"
+            icon={<Send className="w-4 h-4" />}
+            placeholder="Telegram — https://t.me/yourgroup"
             value={telegramUrl}
             onChange={onTelegramUrl}
           />
           <SocialInput
             icon={<DiscordMark />}
-            placeholder="https://discord.gg/yourserver"
+            placeholder="Discord — https://discord.gg/yourserver"
             value={discordUrl}
             onChange={onDiscordUrl}
           />
         </div>
-      </Field>
+      </div>
 
       <ImageCropModal
         open={!!cropSource}
@@ -699,6 +757,16 @@ function Step1Metadata({
         onSave={onCropSave}
       />
     </div>
+  );
+}
+
+function ImageUpIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 16l5-5 4 4 3-3 6 6" />
+      <circle cx="9" cy="10" r="1.3" fill="currentColor" stroke="none" />
+    </svg>
   );
 }
 
@@ -715,19 +783,24 @@ function SocialInput({
 }) {
   return (
     <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+      className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition focus-within:ring-2 focus-within:ring-[#836EF9]/40"
       style={{
-        background: 'rgba(255,255,255,0.04)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.035)',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
       }}
     >
-      <span className="text-zinc-500 shrink-0">{icon}</span>
+      <span
+        className="shrink-0"
+        style={{ color: value ? '#b4a7ff' : '#71717a' }}
+      >
+        {icon}
+      </span>
       <input
         type="url"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-transparent border-none outline-none text-[12.5px] text-white placeholder-zinc-600 min-w-0 font-mono"
+        className="flex-1 bg-transparent border-none outline-none text-[13px] text-white placeholder-zinc-600 min-w-0"
       />
     </div>
   );
