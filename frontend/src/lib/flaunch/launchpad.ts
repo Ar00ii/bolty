@@ -172,23 +172,29 @@ async function renderTickerImage(symbol: string): Promise<string> {
 async function imageUrlToBase64(url: string | null, symbol: string): Promise<string> {
   if (typeof window === 'undefined') return renderTickerImage(symbol);
   if (url) {
-    try {
-      const res = await fetch(url, { mode: 'cors' });
-      if (res.ok) {
-        const blob = await res.blob();
-        const b64 = await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const result = String(reader.result || '');
-            resolve(result.split(',')[1] || '');
-          };
-          reader.onerror = () => resolve('');
-          reader.readAsDataURL(blob);
-        });
-        if (b64.length > 2000) return b64; // sanity: reject tiny images
+    // Data URL (user upload) → already have the base64, skip fetch.
+    if (url.startsWith('data:')) {
+      const b64 = url.split(',')[1] || '';
+      if (b64.length > 500) return b64;
+    } else {
+      try {
+        const res = await fetch(url, { mode: 'cors' });
+        if (res.ok) {
+          const blob = await res.blob();
+          const b64 = await new Promise<string>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const result = String(reader.result || '');
+              resolve(result.split(',')[1] || '');
+            };
+            reader.onerror = () => resolve('');
+            reader.readAsDataURL(blob);
+          });
+          if (b64.length > 500) return b64;
+        }
+      } catch {
+        /* fall through to canvas */
       }
-    } catch {
-      /* fall through to canvas */
     }
   }
   return renderTickerImage(symbol);
