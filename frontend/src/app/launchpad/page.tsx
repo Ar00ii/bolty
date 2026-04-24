@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
 import { Badge, EmptyState, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -34,14 +35,29 @@ export default function LaunchpadPage() {
   const [sort, setSort] = useState<Sort>('recent');
   const [section, setSection] = useState<SectionFilter>('ALL');
   const [search, setSearch] = useState('');
+  const [launchOpen, setLaunchOpen] = useState(false);
 
-  useEffect(() => {
+  const refresh = React.useCallback(() => {
     if (!FLAUNCH_LAUNCHPAD_ENABLED) {
       setTokens([]);
       return;
     }
     listLaunchedTokens().then(setTokens);
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  // The picker modal fires this when a launch succeeds so the grid
+  // picks up the new coin without requiring a full reload.
+  useEffect(() => {
+    function onRefresh() {
+      refresh();
+    }
+    window.addEventListener('launchpad:refresh', onRefresh);
+    return () => window.removeEventListener('launchpad:refresh', onRefresh);
+  }, [refresh]);
 
   const filtered = useMemo(() => {
     if (!tokens) return [];
@@ -106,8 +122,9 @@ export default function LaunchpadPage() {
         subtitle="Every agent, bot and repo on Bolty can mint its own token — fair-launched on Base via Flaunch. Creators keep the majority of swap fees forever."
         cta={
           isAuthenticated ? (
-            <Link
-              href="/inventory"
+            <button
+              type="button"
+              onClick={() => setLaunchOpen(true)}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110 shrink-0"
               style={{
                 background:
@@ -118,7 +135,7 @@ export default function LaunchpadPage() {
             >
               <Rocket className="w-3.5 h-3.5" />
               Launch yours
-            </Link>
+            </button>
           ) : null
         }
       >
@@ -192,13 +209,15 @@ export default function LaunchpadPage() {
             title="No tokens launched yet"
             description={
               FLAUNCH_LAUNCHPAD_ENABLED
-                ? 'Be the first — open any listing you own and hit Launch token.'
+                ? 'Be the first — pick one of your listings and mint its token.'
                 : 'The launchpad is currently in private beta. Flip the feature flag to try it locally.'
             }
             action={
-              FLAUNCH_LAUNCHPAD_ENABLED
-                ? { label: 'Browse marketplace', href: '/market' }
-                : undefined
+              FLAUNCH_LAUNCHPAD_ENABLED && isAuthenticated
+                ? { label: 'Launch yours', onClick: () => setLaunchOpen(true) }
+                : FLAUNCH_LAUNCHPAD_ENABLED
+                  ? { label: 'Browse marketplace', href: '/market' }
+                  : undefined
             }
           />
         ) : filtered.length === 0 ? (
@@ -238,6 +257,8 @@ export default function LaunchpadPage() {
       </div>
 
       <FAQ />
+
+      <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
     </div>
   );
 }
