@@ -170,9 +170,12 @@ export class MarketController {
   // ── Listings ───────────────────────────────────────────────────────────────
 
   @Public()
-  // Public list — fine to serve from edge for 30s. Stale-while-revalidate
-  // keeps the UI snappy even when the origin is cold.
-  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  // Public list — serve from edge for 5 min, and keep stale-while-
+  // revalidate at 10 min so a GH Actions cache-warm cron that runs
+  // every 5 min keeps users on warm responses while a background
+  // revalidation tops up the edge. 30s was too tight: a cron that
+  // misses a run by 5s would drop every user onto a cold origin.
+  @Header('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
   @Get()
   getListings(
     @Query('type') type?: string,

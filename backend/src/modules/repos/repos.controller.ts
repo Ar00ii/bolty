@@ -188,7 +188,11 @@ export class ReposController {
   ) {}
 
   @Public()
-  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  // 5 min edge cache, 10 min stale-while-revalidate — paired with a
+  // GH Actions cron (see .github/workflows/warm-cache.yml) that hits
+  // the common default views every 5 min so real users always land
+  // on a warm edge response.
+  @Header('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600')
   @Get()
   listRepos(@Query() query: ListReposQuery) {
     return this.reposService.listRepositories(query);

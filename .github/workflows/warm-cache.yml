@@ -1,0 +1,52 @@
+name: Warm listing cache
+
+# Hit the default-view listing endpoints every 5 minutes so the
+# Render edge cache (s-maxage=300) is always primed when real users
+# arrive. Without this the first visit after 5 min of inactivity
+# forces a cold origin + DB query (~2-5s on the free Render plan),
+# which was the "every listing takes 5s" symptom users reported.
+#
+# The keep-alive.yml workflow still hits /market/pulse every 5 min
+# to prevent the container from suspending; this one adds listing
+# warmth on top. Both jobs are cheap — each URL hits a small
+# already-cached Redis/edge response.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *' # every 5 minutes (GH Actions min granularity)
+  workflow_dispatch: {}
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prime edge cache for default listing views
+        run: |
+          set -uo pipefail
+          BASE='https://bolty-backend.onrender.com/api/v1'
+          # URLs that match what the frontend requests on first mount
+          # for /market, /market/agents, /market/repos. If you add a
+          # new high-traffic default view, add it here.
+          urls=(
+            "$BASE/market?page=1&sortBy=trending"
+            "$BASE/market?page=1&sortBy=recent"
+            "$BASE/market?page=1&sortBy=recent&type=AI_AGENT"
+            "$BASE/market?page=1&sortBy=recent&type=BOT"
+            "$BASE/market?page=1&sortBy=recent&type=SCRIPT"
+            "$BASE/market?page=1&sortBy=recent&type=REPO"
+            "$BASE/repos?sortBy=recent"
+            "$BASE/repos?sortBy=votes"
+            "$BASE/market/pulse?limit=20"
+            "$BASE/market/ticker"
+            "$BASE/market/top-sellers?limit=12"
+          )
+          for url in "${urls[@]}"; do
+            code=$(curl -sS -o /dev/null -w "%{http_code}" \
+              --max-time 25 \
+              -H 'Accept: application/json' \
+              "$url" || echo "000")
+            echo "$code  $url"
+          done
+          # Never fail the job — a single slow revalidation shouldn't
+          # red-light the workflow. Next run will retry.
+          exit 0
