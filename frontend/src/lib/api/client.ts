@@ -20,6 +20,10 @@ export class ApiError extends Error {
   }
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 class ApiClient {
   private baseUrl: string;
   private isRefreshing = false;
@@ -81,6 +85,43 @@ class ApiClient {
     }
   }
 
+  // Retry GETs on transient 5xx / network errors so a Render redeploy
+  // (old container down, new one still booting) doesn't flash "Could
+  // not load" at the user. Mutations are never retried — a POST that
+  // maybe-succeeded must bubble the error so callers decide.
+  private async doFetchWithRetry(
+    method: string,
+    path: string,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<Response> {
+    const canRetry = method.toUpperCase() === 'GET';
+    const delays = [500, 1500];
+    const maxAttempts = canRetry ? delays.length + 1 : 1;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const res = await this.doFetch(method, path, body, options);
+        const transient = res.status === 502 || res.status === 503 || res.status === 504;
+        if (transient && canRetry && attempt < maxAttempts - 1) {
+          await sleep(delays[attempt]!);
+          continue;
+        }
+        return res;
+      } catch (err) {
+        lastErr = err;
+        // status 0 = network error (backend unreachable mid-deploy)
+        const isNetwork = err instanceof ApiError && err.status === 0;
+        if (isNetwork && canRetry && attempt < maxAttempts - 1) {
+          await sleep(delays[attempt]!);
+          continue;
+        }
+        throw err;
+      }
+    }
+    throw lastErr;
+  }
+
   private parseError(error: unknown): string {
     const raw = (error as { message?: unknown }).message;
     if (Array.isArray(raw)) return String(raw[0] || 'Request failed');
@@ -135,7 +176,7 @@ class ApiClient {
     }
     let response: Response;
     try {
-      response = await this.doFetch(method, path, body, options);
+      response = await this.doFetchWithRetry(method, path, body, options);
     } catch (err) {
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('bolty:progress-done'));
