@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { CuratedRow } from '@/components/flaunch/CuratedRow';
 import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
 import { TokenDetailPanel } from '@/components/flaunch/TokenDetailPanel';
@@ -132,6 +133,28 @@ export default function LaunchpadPage() {
   const loading = tokens === null;
   const hasAny = (tokens?.length ?? 0) > 0;
 
+  // Curated rows — only shown in the unfiltered default view. When the
+  // user searches or tweaks sort / section, we hide them and just show
+  // the straight grid below.
+  const defaultView =
+    !search.trim() && sort === 'recent' && section === 'ALL';
+
+  const topGainers = useMemo(() => {
+    if (!tokens) return [];
+    return [...tokens]
+      .filter((t) => t.priceChange24hPercent > 0)
+      .sort((a, b) => b.priceChange24hPercent - a.priceChange24hPercent)
+      .slice(0, 8);
+  }, [tokens]);
+
+  const topVolume = useMemo(() => {
+    if (!tokens) return [];
+    return [...tokens]
+      .filter((t) => t.volume24hEth > 0)
+      .sort((a, b) => b.volume24hEth - a.volume24hEth)
+      .slice(0, 8);
+  }, [tokens]);
+
   return (
     <div
       className="mk-app-page mx-auto max-w-6xl px-4 sm:px-6 py-8"
@@ -190,6 +213,29 @@ export default function LaunchpadPage() {
       {tokens && tokens.length > 0 && (
         <div className="mt-5">
           <JustLaunchedTicker tokens={tokens} onOpen={setDetail} />
+        </div>
+      )}
+
+      {defaultView && hasAny && (
+        <div className="mt-6 space-y-5">
+          {topGainers.length > 0 && (
+            <CuratedRow
+              title="Top gainers 24h"
+              icon={<TrendingUp className="w-3 h-3" strokeWidth={1.75} />}
+              accent="#22c55e"
+              tokens={topGainers}
+              onOpen={setDetail}
+            />
+          )}
+          {topVolume.length > 0 && (
+            <CuratedRow
+              title="Top volume 24h"
+              icon={<Rocket className="w-3 h-3" strokeWidth={1.75} />}
+              accent="#836EF9"
+              tokens={topVolume}
+              onOpen={setDetail}
+            />
+          )}
         </div>
       )}
 
