@@ -91,7 +91,6 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
   if (slides.length === 0) return null;
 
   const current = slides[active];
-  const previews = slides.filter((_, i) => i !== active).slice(0, 3);
 
   return (
     <section
@@ -150,7 +149,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-6 p-6 lg:p-10 min-h-[520px]">
+      <div className="relative flex p-6 lg:p-10 min-h-[520px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.tokenAddress + ':content'}
@@ -245,21 +244,6 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               <ChangeChip change={current.priceChange24hPercent} />
             </div>
           </motion.div>
-
-          {/* Right-side previews */}
-          {previews.length > 0 && (
-            <motion.div
-              key="previews"
-              className="hidden lg:flex flex-col gap-2 items-end self-end"
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35 }}
-            >
-              {previews.map((t) => (
-                <PreviewThumb key={t.tokenAddress} token={t} />
-              ))}
-            </motion.div>
-          )}
         </AnimatePresence>
       </div>
 
@@ -379,41 +363,3 @@ function ChangeChip({ change }: { change: number }) {
   );
 }
 
-function PreviewThumb({ token }: { token: TokenInfo }) {
-  return (
-    <Link
-      href={`/launchpad/${token.tokenAddress}`}
-      className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl min-w-[220px] hover:brightness-110 transition"
-      style={{
-        background: 'rgba(0,0,0,0.45)',
-        backdropFilter: 'blur(6px)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
-      }}
-    >
-      <div
-        className="w-8 h-8 rounded-lg overflow-hidden shrink-0"
-        style={{
-          background: 'rgba(131,110,249,0.12)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
-        }}
-      >
-        {token.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={token.imageUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full grid place-items-center text-[9px] text-white/70 font-mono">
-            ${token.symbol.charAt(0)}
-          </div>
-        )}
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[12px] text-white/90 font-light truncate">
-          {token.name}
-        </div>
-        <div className="text-[10px] text-white/50 font-mono truncate">
-          {formatUsd(token.marketCapUsd)}
-        </div>
-      </div>
-    </Link>
-  );
-}
