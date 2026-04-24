@@ -170,14 +170,17 @@ class ApiClient {
         window.dispatchEvent(new CustomEvent('bolty:progress-done'));
       }
       const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      // Global 401 hook: if a request still 401s after a refresh
-      // attempt, broadcast so the app can bounce to login from a
-      // single place instead of each page having its own check.
-      // Auth + wallet endpoints opt out so a wrong password doesn't
-      // redirect the user — they already know they failed to sign in.
+      // Global 401 hook: broadcast so the app can react from a single
+      // place instead of each page wiring its own check. Skip:
+      //  - auth/*: a wrong password shouldn't redirect the user, and
+      //    /auth/me 401s are the normal signal for an anon visitor —
+      //    we don't want to force those into the login screen.
+      //  - any endpoint already in skipRefresh (covers auth flows).
+      const isAuthCheck = path === '/auth/me' || path.startsWith('/auth/');
       if (
         response.status === 401 &&
         !skipRefresh &&
+        !isAuthCheck &&
         typeof window !== 'undefined'
       ) {
         window.dispatchEvent(
