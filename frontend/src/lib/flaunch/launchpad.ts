@@ -219,6 +219,34 @@ function extractListingId(listingPath: string | null): string | null {
   return m ? m[1] : null;
 }
 
+/**
+ * Fallback: read ERC20 name + symbol directly from the coin contract.
+ * Flaunch coins are standard ERC20s, so when the IPFS metadata gateway
+ * is slow / down / truncating (we've seen getCoinMetadata return empty
+ * objects in the wild), this keeps our UI from rendering "Unknown".
+ */
+async function readErc20NameSymbol(
+  coinAddress: string,
+): Promise<{ name: string | null; symbol: string | null }> {
+  try {
+    const publicClient = getPublicClient();
+    const abi = [
+      { inputs: [], name: 'name', outputs: [{ type: 'string' }], stateMutability: 'view', type: 'function' },
+      { inputs: [], name: 'symbol', outputs: [{ type: 'string' }], stateMutability: 'view', type: 'function' },
+    ] as const;
+    const [nameRes, symbolRes] = await Promise.allSettled([
+      publicClient.readContract({ address: coinAddress as `0x${string}`, abi, functionName: 'name' }),
+      publicClient.readContract({ address: coinAddress as `0x${string}`, abi, functionName: 'symbol' }),
+    ]);
+    return {
+      name: nameRes.status === 'fulfilled' ? String(nameRes.value || '') || null : null,
+      symbol: symbolRes.status === 'fulfilled' ? String(symbolRes.value || '') || null : null,
+    };
+  } catch {
+    return { name: null, symbol: null };
+  }
+}
+
 /** Hydrate a coin address into our TokenInfo shape with live on-chain data. */
 async function hydrateCoin(
   coinAddress: string,
@@ -241,6 +269,16 @@ async function hydrateCoin(
     ]);
 
     const meta: any = metaRes.status === 'fulfilled' ? metaRes.value : {};
+    // Fall back to the ERC20 contract directly when IPFS metadata is
+    // empty / broken. This is cheap (one multicall) and fixes the
+    // "Unknown" / "$???" display that users hit on fresh launches.
+    let resolvedName: string = meta?.name ?? '';
+    let resolvedSymbol: string = meta?.symbol ?? '';
+    if (!resolvedName || !resolvedSymbol) {
+      const onChain = await readErc20NameSymbol(coinAddress);
+      if (!resolvedName && onChain.name) resolvedName = onChain.name;
+      if (!resolvedSymbol && onChain.symbol) resolvedSymbol = onChain.symbol;
+    }
     const info: any = infoRes.status === 'fulfilled' ? infoRes.value : {};
     const priceEthStr: string =
       priceEthRes.status === 'fulfilled' ? String(priceEthRes.value ?? '0') : '0';
@@ -260,8 +298,8 @@ async function hydrateCoin(
       listingId: fallback.listingId,
       listingPath: fallback.listingPath,
       tokenAddress: coinAddress,
-      name: meta?.name ?? 'Unknown',
-      symbol: meta?.symbol ?? '???',
+      name: resolvedName || 'Unknown',
+      symbol: resolvedSymbol || '???',
       imageUrl: meta?.image ?? null,
       flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
       priceEth,
@@ -487,56 +525,95 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
     }) => Promise<Array<{ flaunch: `0x${string}`; tokenId: bigint }>>;
     getCoinMetadataFromTokenIds: (items: Array<{ flaunch: `0x${string}`; tokenId: bigint }>) => Promise<any[]>;
   };
+  const map = readMap();
+
+  // Fallback snapshot: every coin we launched through our wizard is
+  // cached locally. If the on-chain / metadata path fails, at least
+  // this user's own launches still render instead of disappearing.
+  const fromCache = (): TokenInfo[] =>
+    Object.entries(map).map(([listingId, entry]) => ({
+      listingId,
+      listingPath: entry.listingPath,
+      tokenAddress: entry.coinAddress,
+      name: 'Loading…',
+      symbol: '…',
+      imageUrl: null,
+      flaunchUrl: `https://flaunch.gg/base/coin/${entry.coinAddress}`,
+      priceEth: 0,
+      priceUsd: 0,
+      priceChange24hPercent: 0,
+      marketCapEth: 0,
+      marketCapUsd: 0,
+      volume24hEth: 0,
+      holders: 0,
+      sparkline7d: [],
+      description: null,
+      creatorUsername: entry.creatorUsername,
+      creatorAvatarUrl: entry.creatorAvatarUrl,
+      launchedAt: entry.launchedAt,
+    }));
+
+  let raw: Array<{ flaunch: `0x${string}`; tokenId: bigint }> = [];
   try {
-    const raw = await sdk.revenueManagerAllTokensInManager({
-      revenueManagerAddress: FLAUNCH_REVENUE_MANAGER as string,
-      sortByDesc: true,
-    });
-    if (!raw?.length) return [];
-
-    const metas = await sdk.getCoinMetadataFromTokenIds(raw);
-    const map = readMap();
-
-    // Build a list merging on-chain metadata with our local mapping for
-    // creator attribution + listingPath fallback.
-    const tokens: TokenInfo[] = [];
-    for (let i = 0; i < metas.length; i++) {
-      const meta: any = metas[i];
-      const coinAddress: string = meta?.coinAddress ?? meta?.address ?? '';
-      if (!coinAddress) continue;
-
-      // Prefer the explicit listing URL baked into metadata when we launched.
-      const websiteUrl: string | undefined = meta?.external_link ?? meta?.website_url;
-      const pathFromMeta = parseListingPath(websiteUrl);
-      const listingId = extractListingId(pathFromMeta);
-      const cached = listingId ? map[listingId] : undefined;
-
-      tokens.push({
-        listingId: listingId ?? coinAddress,
-        listingPath: pathFromMeta ?? cached?.listingPath ?? '/launchpad',
-        tokenAddress: coinAddress,
-        name: meta?.name ?? 'Unknown',
-        symbol: meta?.symbol ?? '???',
-        imageUrl: meta?.image ?? null,
-        flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
-        priceEth: 0,
-        priceUsd: 0,
-        priceChange24hPercent: 0,
-        marketCapEth: 0,
-        marketCapUsd: 0,
-        volume24hEth: 0,
-        holders: 0,
-        sparkline7d: [],
-        description: meta?.description ?? null,
-        creatorUsername: cached?.creatorUsername ?? null,
-        creatorAvatarUrl: cached?.creatorAvatarUrl ?? null,
-        launchedAt: cached?.launchedAt ?? new Date().toISOString(),
-      });
-    }
-    return tokens;
-  } catch {
-    return [];
+    raw =
+      (await sdk.revenueManagerAllTokensInManager({
+        revenueManagerAddress: FLAUNCH_REVENUE_MANAGER as string,
+        sortByDesc: true,
+      })) ?? [];
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[flaunch] revenueManagerAllTokensInManager failed, falling back to cache', err);
+    return fromCache();
   }
+  if (!raw.length) return fromCache();
+
+  let metas: any[] = [];
+  try {
+    metas = await sdk.getCoinMetadataFromTokenIds(raw);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.warn('[flaunch] getCoinMetadataFromTokenIds failed, degrading to minimal data', err);
+    metas = [];
+  }
+
+  const tokens: TokenInfo[] = [];
+  for (let i = 0; i < Math.max(raw.length, metas.length); i++) {
+    const meta: any = metas[i] ?? {};
+    const coinAddress: string = meta?.coinAddress ?? meta?.address ?? '';
+    if (!coinAddress) continue;
+
+    const websiteUrl: string | undefined = meta?.external_link ?? meta?.website_url;
+    const pathFromMeta = parseListingPath(websiteUrl);
+    const listingId = extractListingId(pathFromMeta);
+    const cached = listingId ? map[listingId] : undefined;
+
+    tokens.push({
+      listingId: listingId ?? coinAddress,
+      listingPath: pathFromMeta ?? cached?.listingPath ?? '/launchpad',
+      tokenAddress: coinAddress,
+      name: meta?.name || 'Unknown',
+      symbol: meta?.symbol || '???',
+      imageUrl: meta?.image ?? null,
+      flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
+      priceEth: 0,
+      priceUsd: 0,
+      priceChange24hPercent: 0,
+      marketCapEth: 0,
+      marketCapUsd: 0,
+      volume24hEth: 0,
+      holders: 0,
+      sparkline7d: [],
+      description: meta?.description ?? null,
+      creatorUsername: cached?.creatorUsername ?? null,
+      creatorAvatarUrl: cached?.creatorAvatarUrl ?? null,
+      launchedAt: cached?.launchedAt ?? new Date().toISOString(),
+    });
+  }
+
+  // If on-chain gave us nothing usable, still show the local cache so
+  // the user's own just-launched coin doesn't vanish on refresh.
+  if (tokens.length === 0) return fromCache();
+  return tokens;
 }
 
 export async function listLaunchedTokens(): Promise<TokenInfo[]> {

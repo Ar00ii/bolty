@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+import { TokenPriceChart } from '@/components/flaunch/TokenPriceChart';
 import {
   buyLaunchpadToken,
   getTokenByAddress,
@@ -83,6 +84,10 @@ export default function TokenDetailPage() {
   const [token, setToken] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  // Rolling USD price samples collected from polls. Seeded with the
+  // first fetch and appended on each subsequent refresh. Gives us a
+  // real chart even when DexScreener / subgraph aren't indexed yet.
+  const [priceSamples, setPriceSamples] = useState<number[]>([]);
 
   useEffect(() => {
     if (!address) return;
@@ -94,12 +99,15 @@ export default function TokenDetailPage() {
           setNotFound(true);
         } else {
           setToken(t);
+          if (t.priceUsd > 0) setPriceSamples([t.priceUsd]);
         }
       })
       .finally(() => setLoading(false));
   }, [address]);
 
-  // Re-poll every 10s for live price/volume; pause when tab hidden
+  // Re-poll every 10s for live price/volume; pause when tab hidden.
+  // Each poll also pushes onto the rolling chart history (cap at 180
+  // points = 30 min of live data).
   useEffect(() => {
     if (!address || notFound) return;
     let id: ReturnType<typeof setInterval> | null = null;
@@ -107,7 +115,14 @@ export default function TokenDetailPage() {
       if (id) return;
       id = setInterval(() => {
         getTokenByAddress(address).then((t) => {
-          if (t) setToken(t);
+          if (!t) return;
+          setToken(t);
+          if (t.priceUsd > 0) {
+            setPriceSamples((s) => {
+              const next = [...s, t.priceUsd];
+              return next.length > 180 ? next.slice(-180) : next;
+            });
+          }
         });
       }, 10_000);
     }
@@ -186,7 +201,7 @@ export default function TokenDetailPage() {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
         {/* LEFT — chart + stats + about */}
         <div className="space-y-5 min-w-0">
-          <ChartCard token={token} />
+          <ChartCard token={token} samples={priceSamples} />
           <StatsRow token={token} />
           <AboutCard token={token} />
           <LinksCard token={token} />
@@ -300,16 +315,15 @@ function CopyableAddr({ addr }: { addr: string }) {
 
 // ── Chart + stats ───────────────────────────────────────────────────
 
-function ChartCard({ token }: { token: TokenInfo }) {
-  // DexScreener auto-resolves the token address to its primary pair on
-  // Base and renders an OHLC chart with timeframes + volume bars. Free,
-  // no API key, much better than what we'd render ourselves. New tokens
-  // appear in DexScreener within a few minutes of their first trade —
-  // the iframe shows a "no pair" state in the meantime, which is fine.
-  const src = `https://dexscreener.com/base/${token.tokenAddress}?embed=1&theme=dark&trades=0&info=0`;
+function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) {
+  // Third-party iframes (DexScreener, GeckoTerminal) are blocked from
+  // embedding on other domains via X-Frame-Options. We render our own
+  // live price chart from rolling SDK polls + link out for the deep
+  // chart with candlesticks / trade history.
+  const hasData = samples.length >= 2;
   return (
     <div
-      className="rounded-xl overflow-hidden"
+      className="rounded-xl p-4"
       style={{
         background:
           'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -317,26 +331,76 @@ function ChartCard({ token }: { token: TokenInfo }) {
           'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <h2 className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
-          Price chart
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
+          <span className="relative inline-flex items-center justify-center w-2 h-2">
+            <span
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{ background: '#22c55e' }}
+            />
+            <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
+          </span>
+          Live price · last {samples.length} ticks
         </h2>
-        <a
-          href={`https://dexscreener.com/base/${token.tokenAddress}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[10.5px] text-zinc-500 hover:text-white transition inline-flex items-center gap-1 font-mono"
-        >
-          DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
-        </a>
+        <div className="flex items-center gap-1.5">
+          <a
+            href={`https://dexscreener.com/base/${token.tokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10.5px] text-zinc-300 hover:text-white transition px-2 py-1 rounded-md"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+            }}
+          >
+            DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+          </a>
+          <a
+            href={`https://www.geckoterminal.com/base/tokens/${token.tokenAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-[10.5px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-md"
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            GeckoTerminal <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+          </a>
+        </div>
       </div>
-      <iframe
-        src={src}
-        title={`${token.symbol} chart on DexScreener`}
-        className="block w-full"
-        style={{ height: 480, border: 'none', background: 'transparent' }}
-        loading="lazy"
-      />
+      <div style={{ minHeight: 260 }}>
+        {hasData ? (
+          <TokenPriceChart data={samples} height={260} />
+        ) : (
+          <div
+            className="h-[260px] grid place-items-center text-center px-6"
+            style={{
+              background: 'rgba(255,255,255,0.015)',
+              borderRadius: 12,
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.04)',
+            }}
+          >
+            <div>
+              <div className="text-[12.5px] text-zinc-300 font-light">
+                Collecting live price data…
+              </div>
+              <div className="text-[10.5px] text-zinc-500 font-light mt-1">
+                The chart fills in as we poll. For candlesticks + trade history, open{' '}
+                <a
+                  href={`https://dexscreener.com/base/${token.tokenAddress}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#b4a7ff] hover:underline"
+                >
+                  DexScreener
+                </a>
+                .
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
