@@ -101,7 +101,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
       style={{
         background: '#0a0a0e',
         boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-        minHeight: 340,
+        minHeight: 520,
       }}
     >
       {/* Background image */}
@@ -150,7 +150,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-6 p-6 lg:p-8 min-h-[340px]">
+      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-6 p-6 lg:p-10 min-h-[520px]">
         <AnimatePresence mode="wait">
           <motion.div
             key={current.tokenAddress + ':content'}

@@ -22,7 +22,6 @@ import { FeaturedCarousel } from '@/components/flaunch/FeaturedCarousel';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
 import { TokenLeaderboard } from '@/components/flaunch/TokenLeaderboard';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
-import { TrendingGrid } from '@/components/flaunch/TrendingGrid';
 import { EmptyState } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
@@ -186,70 +185,58 @@ function LaunchpadPageContent() {
   const loading = tokens === null;
   const hasAny = (tokens?.length ?? 0) > 0;
 
-  // Featured / trending / leaderboard are hidden when the user is
-  // actively searching/filtering. Keeps the browse experience clean.
-  const defaultView =
-    !search.trim() && sort === 'recent' && section === 'ALL';
-
   return (
-    <div
-      className="mk-app-page mx-auto max-w-7xl px-4 sm:px-6 py-8"
-      style={{ maxWidth: '80rem' }}
-    >
-      {/* Compact top bar — just a small launch button since the carousel
-          and leaderboard below speak for themselves. No hero, no stats
-          strip, no ticker — the page starts with the banners. */}
-      {FLAUNCH_LAUNCHPAD_ENABLED && (
-        <div className="flex items-center justify-end">
-          {isAuthenticated ? (
-            <button
-              type="button"
-              onClick={() => setLaunchOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
-              }}
-            >
-              <Rocket className="w-3 h-3" />
-              Launch yours
-            </button>
-          ) : (
-            <Link
-              href="/auth"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-                boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
-              }}
-            >
-              <Rocket className="w-3 h-3" />
-              Sign in to launch
-            </Link>
-          )}
-        </div>
-      )}
-
-      {/* Top banner carousel + leaderboard side-by-side at the very
-          top. Carousel takes almost full width; leaderboard keeps a
-          280-300px sidebar. Below this, the page flows normally. */}
+    <div className="mk-app-page">
+      {/* Top banner carousel + leaderboard — full-bleed across the top
+          of the dashboard. The carousel dominates the row, leaderboard
+          sits on the right. No hero, no stats strip, no trending row. */}
       {hasAny && tokens && (
-        <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
-          <FeaturedCarousel tokens={tokens} />
-          <TokenLeaderboard tokens={tokens} />
+        <div className="w-full px-4 sm:px-6 lg:px-10 pt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-stretch">
+            <FeaturedCarousel tokens={tokens} />
+            <TokenLeaderboard tokens={tokens} />
+          </div>
         </div>
       )}
 
-      {/* ── Browse area (trending + filters + grid) ──────────────────── */}
-      <div className="mt-8">
-        {/* LEFT column was previously mixed with the sidebar. Now that the
-            leaderboard moved up top, this is a single wide column below. */}
+      {/* ── Browse area (filters + grid) ─────────────────────────────── */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8" style={{ maxWidth: '80rem' }}>
+        {/* Launch CTA + filters bar */}
         <div className="min-w-0 space-y-6">
-          {defaultView && hasAny && tokens && <TrendingGrid tokens={tokens} />}
+          {FLAUNCH_LAUNCHPAD_ENABLED && (
+            <div className="flex items-center justify-end">
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setLaunchOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                  }}
+                >
+                  <Rocket className="w-3 h-3" />
+                  Launch yours
+                </button>
+              ) : (
+                <Link
+                  href="/auth"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
+                  style={{
+                    background:
+                      'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                    boxShadow:
+                      '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                  }}
+                >
+                  <Rocket className="w-3 h-3" />
+                  Sign in to launch
+                </Link>
+              )}
+            </div>
+          )}
 
           {/* Filters bar */}
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
