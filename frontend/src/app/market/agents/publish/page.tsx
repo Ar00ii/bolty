@@ -101,7 +101,13 @@ export default function PublishAgentPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Draft persistence — the publish form is long enough that losing
+  // it to an accidental refresh felt painful. Seed from localStorage
+  // on mount, then autosave the form on every change. Cleared after a
+  // successful publish.
+  const DRAFT_KEY = 'bolty:publish-agent-draft:v1';
   const [form, setForm] = useState<FormState>(EMPTY);
+  const [draftRestored, setDraftRestored] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [uploading, setUploading] = useState(false);
   const [testingEndpoint, setTestingEndpoint] = useState(false);
@@ -116,6 +122,47 @@ export default function PublishAgentPage() {
       router.replace(`/auth/login?redirect=${encodeURIComponent('/market/agents/publish')}`);
     }
   }, [isAuthenticated, isLoading, router]);
+
+  // Restore draft on mount — only once. Broken/out-of-shape payloads
+  // are ignored instead of crashing the form.
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as Partial<FormState>;
+      if (parsed && typeof parsed === 'object' && (parsed.title || parsed.description)) {
+        setForm((prev) => ({ ...prev, ...parsed }));
+        setDraftRestored(true);
+        setTimeout(() => setDraftRestored(false), 5000);
+      }
+    } catch {
+      /* ignore corrupt draft */
+    }
+  }, []);
+
+  // Autosave — debounced so we're not touching localStorage on every
+  // keystroke. Skips the pristine EMPTY state.
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (form.title.trim() === '' && form.description.trim() === '') return;
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+      } catch {
+        /* storage full / disabled — not fatal */
+      }
+    }, 400);
+    return () => clearTimeout(t);
+  }, [form]);
+
+  const clearDraft = React.useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -239,6 +286,7 @@ export default function PublishAgentPage() {
 
       const res = await api.post<{ id: string }>('/market', payload);
       if (res?.id) {
+        clearDraft();
         router.push(`/market/agents/${res.id}`);
         return;
       }
@@ -279,6 +327,30 @@ export default function PublishAgentPage() {
           <ChevronRight className="h-3 w-3 text-white/30" />
           <span className="text-white/80">Deploy new</span>
         </div>
+
+        {draftRestored && (
+          <div
+            className="mb-4 flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs"
+            style={{
+              background: 'rgba(131,110,249,0.08)',
+              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+              color: '#C9BEFF',
+            }}
+          >
+            <span>Draft restored from your last session.</span>
+            <button
+              type="button"
+              onClick={() => {
+                setForm(EMPTY);
+                clearDraft();
+                setDraftRestored(false);
+              }}
+              className="text-[11px] text-white/60 transition hover:text-white"
+            >
+              Start fresh
+            </button>
+          </div>
+        )}
 
         {/* Hero */}
         <motion.header
