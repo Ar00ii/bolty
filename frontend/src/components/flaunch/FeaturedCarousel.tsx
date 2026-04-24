@@ -95,7 +95,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 
   return (
     <section
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       style={{
