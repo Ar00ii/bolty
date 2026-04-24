@@ -511,11 +511,11 @@ function Field({
   return (
     <label className="block">
       <div className="flex items-baseline justify-between mb-2">
-        <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+        <span className="text-[13px] text-white font-medium tracking-tight">
           {label}
         </span>
         {hint && (
-          <span className="text-[11px] text-zinc-500 font-light tabular-nums">
+          <span className="text-[11.5px] text-zinc-400 font-light tabular-nums">
             {hint}
           </span>
         )}
@@ -525,17 +525,20 @@ function Field({
   );
 }
 
+// Pure black inputs with soft rounded corners and a clean white border
+// on focus. Typography scale lifted so the small helper text stays
+// readable — no more cramped tracked uppercase.
 const inputCls =
-  'w-full px-3.5 py-2.5 rounded-lg text-[13.5px] text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/40 transition';
+  'w-full px-4 py-3 rounded-2xl text-[14px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all';
 const inputStyle = {
-  background: 'rgba(255,255,255,0.035)',
-  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
+  background: '#000000',
+  border: '1px solid rgba(255,255,255,0.12)',
 };
 
-const sectionCls = 'rounded-xl p-4 space-y-3.5';
+const sectionCls = 'rounded-2xl p-5 space-y-4';
 const sectionStyle = {
-  background: 'rgba(255,255,255,0.02)',
-  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
+  background: '#0a0a0c',
+  border: '1px solid rgba(255,255,255,0.08)',
 };
 
 function Step1Metadata({
@@ -633,7 +636,7 @@ function Step1Metadata({
       {/* ── LEFT: visual identity (logo + banner) ────────────────────── */}
       <motion.div variants={item} className="space-y-4">
         <div className={sectionCls} style={sectionStyle}>
-          <div className="text-[12.5px] text-zinc-200 font-medium tracking-tight mb-3">
+          <div className="text-[13px] text-white font-medium tracking-tight mb-3">
             Logo
           </div>
           <button
@@ -642,8 +645,8 @@ function Step1Metadata({
             aria-label="Upload token logo"
             className="group relative w-full aspect-square rounded-2xl overflow-hidden transition hover:brightness-110"
             style={{
-              background: 'rgba(255,255,255,0.03)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              background: '#000000',
+              border: '1px dashed rgba(255,255,255,0.18)',
             }}
           >
             {imageUrl ? (
@@ -682,20 +685,20 @@ function Step1Metadata({
 
         <div className={sectionCls} style={sectionStyle}>
           <div className="flex items-baseline justify-between mb-3">
-            <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+            <span className="text-[13px] text-white font-medium tracking-tight">
               Banner
             </span>
-            <span className="text-[11px] text-zinc-500 font-light">Wide 3:1</span>
+            <span className="text-[11.5px] text-zinc-400 font-light">Wide 3:1</span>
           </div>
           <button
             type="button"
             onClick={() => bannerRef.current?.click()}
             aria-label="Upload banner"
-            className="group relative block w-full rounded-xl overflow-hidden transition hover:brightness-110"
+            className="group relative block w-full rounded-2xl overflow-hidden transition hover:brightness-110"
             style={{
               aspectRatio: '3 / 1',
-              background: 'rgba(255,255,255,0.03)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+              background: '#000000',
+              border: '1px dashed rgba(255,255,255,0.18)',
             }}
           >
             {bannerUrl ? (
@@ -793,7 +796,7 @@ function Step1Metadata({
         <div className={sectionCls} style={sectionStyle}>
           <div className="flex items-baseline justify-between mb-3">
             <div className="flex items-center gap-2">
-              <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+              <span className="text-[13px] text-white font-medium tracking-tight">
                 Links
               </span>
               {socialCount > 0 && (
@@ -875,10 +878,10 @@ function SocialInput({
 }) {
   return (
     <div
-      className="flex items-center gap-2.5 px-3 py-2 rounded-lg transition focus-within:ring-2 focus-within:ring-[#836EF9]/40"
+      className="flex items-center gap-3 px-4 py-3 rounded-2xl transition focus-within:ring-2 focus-within:ring-[#836EF9]/50"
       style={{
-        background: 'rgba(255,255,255,0.035)',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.07)',
+        background: '#000000',
+        border: '1px solid rgba(255,255,255,0.12)',
       }}
     >
       <span
@@ -892,7 +895,7 @@ function SocialInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="flex-1 bg-transparent border-none outline-none text-[13px] text-white placeholder-zinc-600 min-w-0"
+        className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-white placeholder-zinc-600 min-w-0"
       />
     </div>
   );

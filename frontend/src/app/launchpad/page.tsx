@@ -105,15 +105,16 @@ function LaunchpadPageContent() {
     refresh();
   }, [refresh]);
 
-  // Poll for updates every 5s so prices + new launches trickle in
-  // quickly enough to feel live. Pauses when the tab is backgrounded
-  // to avoid hammering the RPC while the user isn't looking.
+  // Poll for updates every 1.5s so price + holder counts feel live.
+  // Pauses when the tab is backgrounded to avoid hammering the RPC
+  // while the user isn't looking. The SDK read paths are cheap reads
+  // so the cadence is safe.
   useEffect(() => {
     if (!FLAUNCH_LAUNCHPAD_ENABLED) return;
     let id: ReturnType<typeof setInterval> | null = null;
     function start() {
       if (id) return;
-      id = setInterval(refresh, 5_000);
+      id = setInterval(refresh, 1_500);
     }
     function stop() {
       if (id) {
@@ -199,7 +200,7 @@ function LaunchpadPageContent() {
             className={
               launchOpen
                 ? 'grid grid-cols-1 gap-2 items-stretch'
-                : 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-2 items-stretch'
+                : 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_500px] gap-3 items-stretch'
             }
           >
             <FeaturedCarousel tokens={tokens} />
@@ -224,13 +225,11 @@ function LaunchpadPageContent() {
             className="w-full px-2 pt-5 pb-10"
           >
             <div
-              className="mx-auto max-w-[1100px] rounded-2xl p-6 md:p-8"
+              className="mx-auto max-w-[1100px] rounded-3xl p-6 md:p-8"
               style={{
-                background:
-                  'linear-gradient(180deg, rgba(16,16,22,0.9) 0%, rgba(10,10,14,0.9) 100%)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                backdropFilter: 'blur(14px)',
-                boxShadow: '0 30px 80px -30px rgba(131,110,249,0.4)',
+                background: '#000000',
+                border: '1px solid rgba(255,255,255,0.1)',
+                boxShadow: '0 30px 80px -30px rgba(131,110,249,0.35)',
               }}
             >
               <LaunchYoursModal
@@ -409,8 +408,7 @@ function LaunchpadPageContent() {
             )}
           </div>
 
-          <HowItWorksStrip />
-          <FAQ />
+          <LaunchpadDocsFooter />
         </div>
       </div>
       )}
@@ -736,125 +734,89 @@ function Cell({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-// ── How it works + FAQ ────────────────────────────────────────────────
+// ── Docs + Powered-by footer ─────────────────────────────────────────
+//
+// Replaces the old HowItWorks strip + FAQ accordion with a compact
+// two-column docs row: on the left a short Bolty launchpad explainer,
+// on the right a "Powered by Flaunch" card with a link to their SDK
+// docs so builders can dig deeper without the FAQ clutter.
 
-function HowItWorksStrip() {
+function LaunchpadDocsFooter() {
   return (
-    <div
-      className="mt-6 rounded-xl p-4 flex items-start gap-3"
-      style={{
-        background:
-          'linear-gradient(135deg, rgba(131,110,249,0.08) 0%, rgba(6,182,212,0.05) 100%)',
-        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.2)',
-      }}
-    >
+    <section className="mt-10 mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
       <div
-        className="w-9 h-9 rounded-lg grid place-items-center shrink-0"
+        className="rounded-2xl p-5"
         style={{
-          background: 'rgba(131,110,249,0.18)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+          background: '#050507',
+          border: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        <Info className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.75} />
-      </div>
-      <div className="min-w-0 flex-1 space-y-1 text-[12px] text-zinc-300 font-light">
-        <div className="text-[12.5px] text-white">How it works</div>
-        <p>
-          Any listing owner can launch a token from their listing page. Flaunch handles the
-          fair-launch, liquidity pool, and progressive bid-wall on Base.
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-medium mb-2">
+          <Info className="w-3.5 h-3.5" strokeWidth={1.75} />
+          Bolty launchpad
+        </div>
+        <p className="text-[13px] text-white/85 font-light leading-relaxed">
+          Any listing owner can mint a community token from their agent
+          or repo. Every swap routes a <span className="text-white font-medium">1% protocol fee</span>;
+          Bolty takes <span className="text-white font-medium">{BOLTY_PROTOCOL_FEE_PERCENT}%</span> of
+          that and the rest splits between the creator and the token&apos;s
+          community treasury. Fair-launch first 30 min, then a Uniswap v4
+          pool on Base with a progressive bid-wall.
         </p>
-        <p>
-          Every swap routes a <span className="text-white">1%</span> protocol fee; Bolty takes{' '}
-          <span className="text-white">{BOLTY_PROTOCOL_FEE_PERCENT}%</span> of that and the rest
-          splits between the creator and the token&apos;s community treasury.
-        </p>
+        <Link
+          href="/launchpad"
+          className="mt-3 inline-flex items-center gap-1.5 text-[11.5px] text-[#b4a7ff] hover:text-white transition font-medium"
+        >
+          Read the launchpad docs <ExternalLink className="w-3 h-3" />
+        </Link>
       </div>
-      <Link
-        href="https://docs.flaunch.gg"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-md shrink-0 self-start"
-        style={{ background: 'rgba(255,255,255,0.04)' }}
+      <div
+        className="rounded-2xl p-5"
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, #050507 100%)',
+          border: '1px solid rgba(131,110,249,0.3)',
+        }}
       >
-        Flaunch docs <ExternalLink className="w-3 h-3" />
-      </Link>
-    </div>
-  );
-}
-
-const FAQ_ITEMS: Array<{ q: string; a: React.ReactNode }> = [
-  {
-    q: 'Who can launch a token?',
-    a: 'Any listing owner on Bolty — agents, bots, scripts or repos. Open the listing page and click "Launch token". The fee split, ticker and supply become permanent once on-chain.',
-  },
-  {
-    q: 'What do I pay to launch?',
-    a: 'Base gas only (typically under $0.05) plus an optional premine in ETH if you want to seed your own stack. Bolty does not sponsor launches.',
-  },
-  {
-    q: 'How do fees work?',
-    a: (
-      <>
-        Flaunch charges a 1% fee on every swap. Of that 1%, Bolty takes{' '}
-        <span className="text-white">{BOLTY_PROTOCOL_FEE_PERCENT}%</span> for running the
-        launchpad, and the remainder splits between you and your token&apos;s community
-        treasury according to the slider you set at launch.
-      </>
-    ),
-  },
-  {
-    q: "What's the fair-launch period?",
-    a: 'The first 30 minutes use a fixed-price format. Max buy per wallet is 0.25% of supply, and tokens bought during this window can\'t be sold until it ends — this prevents snipers.',
-  },
-  {
-    q: 'Where does trading happen?',
-    a: 'All secondary trading runs on a Uniswap v4 pool on Base, with Flaunch\'s Progressive Bid Wall providing a rising price floor as volume accumulates.',
-  },
-  {
-    q: 'Is this a security?',
-    a: 'These are community memecoins tied to marketplace items. The utility is the buyback/bid-wall mechanic, not a claim on Bolty or the creator\'s revenue. We do not offer financial or legal advice; do your own research.',
-  },
-];
-
-function FAQ() {
-  const [open, setOpen] = useState<number | null>(0);
-  return (
-    <section className="mt-10 mb-4">
-      <h2 className="text-[11px] uppercase tracking-[0.18em] text-zinc-400 font-medium mb-3">
-        Frequently asked
-      </h2>
-      <div className="space-y-1.5">
-        {FAQ_ITEMS.map((item, i) => {
-          const isOpen = open === i;
-          return (
-            <div
-              key={i}
-              className="rounded-lg overflow-hidden"
-              style={{
-                background: 'rgba(255,255,255,0.02)',
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setOpen(isOpen ? null : i)}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-white/[0.02]"
-              >
-                <span className="text-[13px] text-white font-light">{item.q}</span>
-                <ChevronDown
-                  className="w-4 h-4 text-zinc-500 transition"
-                  style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}
-                  strokeWidth={1.75}
-                />
-              </button>
-              {isOpen && (
-                <div className="px-4 pb-4 text-[12px] text-zinc-400 font-light leading-relaxed">
-                  {item.a}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[#b4a7ff] font-medium mb-2">
+          <Sparkles className="w-3.5 h-3.5" strokeWidth={1.75} />
+          Powered by Flaunch
+        </div>
+        <p className="text-[13px] text-white/85 font-light leading-relaxed">
+          Launches run through the{' '}
+          <span className="font-mono text-white">@flaunch/sdk</span> on
+          Base chain 8453 — IPFS-pinned metadata, fair-launch, auto LP
+          seeding, and the progressive bid-wall mechanic. Open the SDK
+          docs to integrate your own agent-powered launch flow.
+        </p>
+        <div className="mt-3 flex items-center gap-2 flex-wrap">
+          <Link
+            href="https://docs.flaunch.gg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] text-white font-medium transition hover:brightness-125"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.35) 100%)',
+              boxShadow:
+                'inset 0 0 0 1px rgba(131,110,249,0.55), 0 4px 20px -8px rgba(131,110,249,0.7)',
+            }}
+          >
+            Flaunch docs <ExternalLink className="w-3 h-3" />
+          </Link>
+          <Link
+            href="https://github.com/flayerlabs/flaunchgg-sdk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] text-zinc-300 transition hover:text-white"
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            SDK on GitHub <ExternalLink className="w-3 h-3" />
+          </Link>
+        </div>
       </div>
     </section>
   );
