@@ -1,6 +1,6 @@
 'use client';
 
-import { Crown, TrendingDown, TrendingUp } from 'lucide-react';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
@@ -58,15 +58,12 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
         boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
-      {/* Header — "Tokens" label on the left, timeframe tabs on the right */}
+      {/* Header — just the timeframe tabs. Label dropped because the
+           list itself already makes it obvious these are tokens. */}
       <div
-        className="flex items-center justify-between px-3 py-2.5"
+        className="flex items-center justify-end px-3 py-2.5"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
-        <div className="inline-flex items-center gap-1.5 text-[12px] font-light text-white">
-          <Crown className="w-3.5 h-3.5 text-[#fbbf24]" strokeWidth={1.75} />
-          Tokens
-        </div>
         <div
           className="inline-flex items-center gap-0.5 p-0.5 rounded-md"
           style={{

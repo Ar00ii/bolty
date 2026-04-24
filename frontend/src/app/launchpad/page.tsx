@@ -19,12 +19,11 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CreatorProfileModal } from '@/components/flaunch/CreatorProfileModal';
 import { FeaturedCarousel } from '@/components/flaunch/FeaturedCarousel';
-import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
 import { TokenLeaderboard } from '@/components/flaunch/TokenLeaderboard';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
 import { TrendingGrid } from '@/components/flaunch/TrendingGrid';
-import { Badge, EmptyState, Hero, Stat, StatStrip } from '@/components/ui/app';
+import { EmptyState } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
@@ -197,26 +196,16 @@ function LaunchpadPageContent() {
       className="mk-app-page mx-auto max-w-7xl px-4 sm:px-6 py-8"
       style={{ maxWidth: '80rem' }}
     >
-      <Hero
-        crumbs={
-          <>
-            <span>Launchpad</span>
-            {!FLAUNCH_LAUNCHPAD_ENABLED && (
-              <>
-                <span className="mk-hero__crumb-sep">/</span>
-                <Badge variant="warn">Beta — flag gated</Badge>
-              </>
-            )}
-          </>
-        }
-        title="Launchpad"
-        subtitle="Every agent, bot and repo on Bolty can mint its own token — fair-launched on Base via Flaunch. Creators keep the majority of swap fees forever."
-        cta={
-          isAuthenticated ? (
+      {/* Compact top bar — just a small launch button since the carousel
+          and leaderboard below speak for themselves. No hero, no stats
+          strip, no ticker — the page starts with the banners. */}
+      {FLAUNCH_LAUNCHPAD_ENABLED && (
+        <div className="flex items-center justify-end">
+          {isAuthenticated ? (
             <button
               type="button"
               onClick={() => setLaunchOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110 shrink-0"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
@@ -224,13 +213,13 @@ function LaunchpadPageContent() {
                   '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
               }}
             >
-              <Rocket className="w-3.5 h-3.5" />
+              <Rocket className="w-3 h-3" />
               Launch yours
             </button>
           ) : (
             <Link
               href="/auth"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110 shrink-0"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
@@ -238,57 +227,29 @@ function LaunchpadPageContent() {
                   '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
               }}
             >
-              <Rocket className="w-3.5 h-3.5" />
+              <Rocket className="w-3 h-3" />
               Sign in to launch
             </Link>
-          )
-        }
-      >
-        <StatStrip>
-          <Stat label="Tokens launched" value={<CountUp value={totals.count} />} />
-          <Stat
-            label="24h volume"
-            value={
-              <span className="font-mono">
-                <CountUp value={totals.volume} format={(v) => formatEth(v)} /> ETH
-              </span>
-            }
-          />
-          <Stat
-            label="Total mcap"
-            value={
-              <span className="font-mono">
-                <CountUp value={totals.mcap} format={(v) => formatEth(v)} /> ETH
-              </span>
-            }
-          />
-          <Stat
-            label="Holders"
-            value={
-              <span className="font-mono">
-                <CountUp value={totals.holders} />
-              </span>
-            }
-          />
-        </StatStrip>
-      </Hero>
-
-      {tokens && tokens.length > 0 && (
-        <div className="mt-5">
-          <JustLaunchedTicker tokens={tokens} onOpen={openToken} />
+          )}
         </div>
       )}
 
-      {/* ── OpenSea-style 2-column layout ────────────────────────────── */}
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_340px] gap-6">
-        {/* LEFT — featured + trending + filters + grid */}
+      {/* Top banner carousel + leaderboard side-by-side at the very
+          top. Carousel takes almost full width; leaderboard keeps a
+          280-300px sidebar. Below this, the page flows normally. */}
+      {hasAny && tokens && (
+        <div className="mt-4 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
+          <FeaturedCarousel tokens={tokens} />
+          <TokenLeaderboard tokens={tokens} />
+        </div>
+      )}
+
+      {/* ── Browse area (trending + filters + grid) ──────────────────── */}
+      <div className="mt-8">
+        {/* LEFT column was previously mixed with the sidebar. Now that the
+            leaderboard moved up top, this is a single wide column below. */}
         <div className="min-w-0 space-y-6">
-          {defaultView && hasAny && tokens && (
-            <>
-              <FeaturedCarousel tokens={tokens} />
-              <TrendingGrid tokens={tokens} />
-            </>
-          )}
+          {defaultView && hasAny && tokens && <TrendingGrid tokens={tokens} />}
 
           {/* Filters bar */}
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -418,11 +379,6 @@ function LaunchpadPageContent() {
           <HowItWorksStrip />
           <FAQ />
         </div>
-
-        {/* RIGHT — sticky leaderboard sidebar */}
-        <aside className="lg:sticky lg:top-6 lg:self-start space-y-4">
-          {hasAny && tokens && <TokenLeaderboard tokens={tokens} />}
-        </aside>
       </div>
 
       <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
