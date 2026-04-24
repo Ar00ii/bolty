@@ -12,5 +12,16 @@ export const FLAUNCH_LAUNCHPAD_ENABLED =
  *  Must match the protocolFeePercent set on-chain. */
 export const BOLTY_PROTOCOL_FEE_PERCENT = 15;
 
+/** Starting market cap every token launches at (USD). Drives the
+ *  flaunching fee (0.1% of this) that Flaunch charges creators up
+ *  front on launch. Kept low so launch friction is minimal; tokens
+ *  grow past $10k mcap quickly on any real volume. */
+export const LAUNCH_INITIAL_MARKET_CAP_USD = 5_000;
+
+/** Flaunch's protocol-level launch fee — 0.1% of starting mcap,
+ *  paid in ETH at launch time. Exposed here so the wizard can
+ *  show a honest "you pay" figure that matches the wallet prompt. */
+export const FLAUNCH_LAUNCH_FEE_PERCENT = 0.1;
+
 /** Rough estimate shown in the wizard — the user pays gas, same as Flaunch. */
 export const EST_LAUNCH_GAS_USD = 0.02;
