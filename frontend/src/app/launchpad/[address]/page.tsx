@@ -121,7 +121,7 @@ export default function TokenDetailPage() {
         getTokenByAddress(address).then((t) => {
           if (t) setToken(t);
         });
-      }, 10_000);
+      }, 1_500);
     }
     function stop() {
       if (id) {

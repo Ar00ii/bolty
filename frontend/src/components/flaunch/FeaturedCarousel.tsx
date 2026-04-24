@@ -224,13 +224,23 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 
             <div className="mt-5 flex items-center gap-2.5 flex-wrap">
               <div
-                className="inline-flex items-stretch rounded-xl overflow-hidden"
+                className="inline-flex items-stretch rounded-xl overflow-hidden relative"
                 style={{
                   background: 'rgba(10,10,14,0.75)',
                   backdropFilter: 'blur(10px)',
                   border: '1px solid rgba(255,255,255,0.08)',
                 }}
               >
+                <span
+                  className="absolute top-1 right-2 flex items-center gap-1 text-[8.5px] uppercase tracking-[0.14em] text-emerald-400 font-medium"
+                  style={{ pointerEvents: 'none' }}
+                >
+                  <span className="relative flex h-1 w-1">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-1 w-1 bg-emerald-400" />
+                  </span>
+                  live
+                </span>
                 <StatCell label="Price" value={formatUsd(current.priceUsd)} accent="#ffffff" />
                 <StatCell label="Mcap" value={formatUsd(current.marketCapUsd)} accent="#e4e4e7" />
                 <StatCell

@@ -52,23 +52,31 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
 
   return (
     <div
-      className="h-full overflow-hidden rounded-xl"
+      className="h-full overflow-hidden rounded-xl flex flex-col"
       style={{
-        background: '#0a0a0e',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#050507',
+        border: '1px solid rgba(255,255,255,0.1)',
       }}
     >
-      {/* Header — just the timeframe tabs. Label dropped because the
-           list itself already makes it obvious these are tokens. */}
+      {/* Header — bigger title + timeframe tabs. */}
       <div
-        className="flex items-center justify-end px-3 py-2.5"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
       >
+        <div className="flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+          </span>
+          <span className="text-[13px] text-white font-medium tracking-tight">
+            Top tokens
+          </span>
+        </div>
         <div
-          className="inline-flex items-center gap-0.5 p-0.5 rounded-md"
+          className="inline-flex items-center gap-0.5 p-0.5 rounded-lg"
           style={{
             background: 'rgba(255,255,255,0.04)',
-            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.07)',
           }}
         >
           {(['1d', '7d', '30d'] as const).map((t) => (
@@ -76,10 +84,10 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
               key={t}
               type="button"
               onClick={() => setTf(t)}
-              className="px-2 py-0.5 text-[10.5px] rounded font-mono transition"
+              className="px-2.5 py-1 text-[11px] rounded-md font-mono transition"
               style={{
                 color: tf === t ? '#ffffff' : '#a1a1aa',
-                background: tf === t ? 'rgba(131,110,249,0.2)' : 'transparent',
+                background: tf === t ? 'rgba(131,110,249,0.22)' : 'transparent',
               }}
             >
               {t}
@@ -90,21 +98,21 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
 
       {/* Columns header */}
       <div
-        className="grid grid-cols-[20px_minmax(0,1fr)_minmax(0,auto)] items-center gap-2 px-3 py-1.5 text-[9.5px] uppercase tracking-[0.14em] text-zinc-500 font-medium"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+        className="grid grid-cols-[28px_minmax(0,1fr)_minmax(0,auto)] items-center gap-3 px-4 py-2 text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
-        <span />
+        <span>#</span>
         <span>Token</span>
         <span className="text-right">Mcap</span>
       </div>
 
       {/* Rows */}
       {top.length === 0 ? (
-        <div className="px-4 py-10 text-center text-[11.5px] text-zinc-500 font-light">
+        <div className="px-4 py-12 text-center text-[12.5px] text-zinc-500 font-light">
           No tokens launched yet.
         </div>
       ) : (
-        <ul>
+        <ul className="flex-1">
           {top.map((t, i) => (
             <li key={t.tokenAddress}>
               <LeaderboardRow token={t} rank={i + 1} timeframe={tf} />
@@ -136,21 +144,21 @@ function LeaderboardRow({
   return (
     <Link
       href={`/launchpad/${token.tokenAddress}`}
-      className="grid grid-cols-[20px_minmax(0,1fr)_minmax(0,auto)] items-center gap-2 px-3 py-2 transition hover:bg-white/[0.02]"
+      className="grid grid-cols-[28px_minmax(0,1fr)_minmax(0,auto)] items-center gap-3 px-4 py-3 transition hover:bg-white/[0.03]"
       style={{
-        borderBottom: '1px solid rgba(255,255,255,0.03)',
-        background: isTop ? 'rgba(251,191,36,0.03)' : 'transparent',
+        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        background: isTop ? 'rgba(251,191,36,0.04)' : 'transparent',
       }}
     >
       <span
-        className="text-[10.5px] font-mono tabular-nums text-right"
-        style={{ color: isTop ? '#fbbf24' : '#52525b' }}
+        className="text-[12px] font-mono tabular-nums"
+        style={{ color: isTop ? '#fbbf24' : '#71717a' }}
       >
         {rank}
       </span>
-      <div className="flex items-center gap-2.5 min-w-0">
+      <div className="flex items-center gap-3 min-w-0">
         <div
-          className="w-7 h-7 rounded-full overflow-hidden shrink-0"
+          className="w-9 h-9 rounded-full overflow-hidden shrink-0"
           style={{
             background: 'rgba(131,110,249,0.1)',
             boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
@@ -160,24 +168,26 @@ function LeaderboardRow({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={token.imageUrl} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full grid place-items-center text-[8px] text-[#b4a7ff] font-mono">
+            <div className="w-full h-full grid place-items-center text-[10px] text-[#b4a7ff] font-mono">
               ${token.symbol.charAt(0)}
             </div>
           )}
         </div>
         <div className="min-w-0">
-          <div className="text-[12px] text-white font-light truncate">{token.name}</div>
-          <div className="text-[9.5px] font-mono text-zinc-500 truncate">
+          <div className="text-[14px] text-white font-medium tracking-tight truncate">
+            {token.name}
+          </div>
+          <div className="text-[11px] font-mono text-zinc-500 truncate">
             ${token.symbol}
           </div>
         </div>
       </div>
       <div className="text-right">
-        <div className="text-[11.5px] text-white font-mono tabular-nums">
+        <div className="text-[13px] text-white font-mono tabular-nums">
           {formatUsd(token.marketCapUsd)}
         </div>
         <div
-          className="mt-0.5 inline-flex items-center gap-0.5 text-[9.5px] font-mono tabular-nums"
+          className="mt-0.5 inline-flex items-center gap-0.5 text-[10.5px] font-mono tabular-nums"
           style={{
             color:
               timeframe !== '1d' ? '#71717a' : up ? '#22c55e' : '#ef4444',
@@ -185,9 +195,9 @@ function LeaderboardRow({
         >
           {timeframe === '1d' &&
             (up ? (
-              <TrendingUp className="w-2 h-2" strokeWidth={2.5} />
+              <TrendingUp className="w-2.5 h-2.5" strokeWidth={2.5} />
             ) : (
-              <TrendingDown className="w-2 h-2" strokeWidth={2.5} />
+              <TrendingDown className="w-2.5 h-2.5" strokeWidth={2.5} />
             ))}
           {changeLabel}
         </div>
