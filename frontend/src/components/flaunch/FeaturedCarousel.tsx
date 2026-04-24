@@ -95,12 +95,12 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 
   return (
     <section
-      className="relative overflow-hidden"
+      className="relative overflow-hidden rounded-xl"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       style={{
         background: '#0a0a0e',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+        border: '1px solid rgba(255,255,255,0.08)',
         minHeight: 520,
       }}
     >
