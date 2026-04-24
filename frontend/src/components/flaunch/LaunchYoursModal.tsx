@@ -323,7 +323,29 @@ export function LaunchYoursModal({
               </svg>
             </button>
           </div>
-          <ModeChooser onPick={setMode} />
+          <ModeChooser
+            onPick={(m) => {
+              setMode(m);
+              // Self mode doesn't need a listing — go straight to the
+              // wizard with a blank template. User fills everything
+              // themselves. No picker, no filter, nothing.
+              if (m === 'self') {
+                const id = `self-${Date.now().toString(36)}-${Math.random()
+                  .toString(36)
+                  .slice(2, 8)}`;
+                setSelected({
+                  id,
+                  title: '',
+                  description: '',
+                  imageUrl: null,
+                  path: '/launchpad',
+                  type: 'OTHER',
+                  typeLabel: 'Token',
+                  tokenLaunched: false,
+                });
+              }
+            }}
+          />
         </div>
       );
     }
