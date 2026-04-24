@@ -217,15 +217,10 @@ export function StandardSidebar() {
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
         <span
-          className="text-xl truncate"
+          className="text-xl font-light text-white truncate"
           style={{
             fontFamily: "'Inter', sans-serif",
-            fontWeight: 700,
-            letterSpacing: '-0.3px',
-            background: 'linear-gradient(90deg, #ffffff 0%, #e8e2ff 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
+            letterSpacing: '-0.01em',
           }}
         >
           BoltyNetwork
