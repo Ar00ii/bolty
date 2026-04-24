@@ -80,8 +80,15 @@ export function ShortcutsModal() {
         setOpen(false);
       }
     };
+    // Programmatic open — triggered by the "? Shortcuts" button in
+    // PowerNavbar so mobile / mouse-only users can find the modal too.
+    const openHandler = () => setOpen(true);
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener('bolty:open-shortcuts', openHandler);
+    return () => {
+      window.removeEventListener('keydown', handler);
+      window.removeEventListener('bolty:open-shortcuts', openHandler);
+    };
   }, [open]);
 
   useEffect(() => {

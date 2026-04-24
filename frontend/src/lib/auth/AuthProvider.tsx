@@ -127,6 +127,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUser();
   }, [fetchUser]);
 
+  // Global 401 listener — ApiClient emits `bolty:auth-expired` when a
+  // request still fails auth after the refresh attempt. Drops the user
+  // and bounces to login, preserving the current URL so the user lands
+  // back where they were after signing in again.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handler = () => {
+      setUser(null);
+      writeHint(null);
+      resetCache();
+      const here = window.location.pathname + window.location.search;
+      const isAuthRoute = here.startsWith('/auth');
+      if (!isAuthRoute) {
+        window.location.href = `/auth/login?redirect=${encodeURIComponent(here)}`;
+      }
+    };
+    window.addEventListener('bolty:auth-expired', handler);
+    return () => window.removeEventListener('bolty:auth-expired', handler);
+  }, []);
+
   // Warm-prefetch common landing pages in the background once we know
   // the user is authenticated. Runs on browser-idle so it never
   // competes with the current page's own fetches for CPU / network.
