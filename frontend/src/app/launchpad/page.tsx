@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
+import { CreatorProfileModal } from '@/components/flaunch/CreatorProfileModal';
 import { CuratedRow } from '@/components/flaunch/CuratedRow';
 import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
@@ -69,6 +70,7 @@ function LaunchpadPageContent() {
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [launchOpen, setLaunchOpen] = useState(false);
   const [detail, setDetail] = useState<TokenInfo | null>(null);
+  const [creator, setCreator] = useState<string | null>(null);
 
   // Mirror filter state to the URL so /launchpad?sort=gainers is
   // shareable + survives a reload. `replace` (not `push`) avoids
@@ -399,7 +401,12 @@ function LaunchpadPageContent() {
                   exit={{ opacity: 0, y: 8 }}
                   transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                 >
-                  <TokenCard token={t} rank={i + 1} onOpen={setDetail} />
+                  <TokenCard
+                    token={t}
+                    rank={i + 1}
+                    onOpen={setDetail}
+                    onCreatorClick={setCreator}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -412,6 +419,14 @@ function LaunchpadPageContent() {
       <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
 
       <TokenDetailPanel token={detail} onClose={() => setDetail(null)} />
+
+      <CreatorProfileModal
+        open={!!creator}
+        username={creator}
+        allTokens={tokens ?? []}
+        onClose={() => setCreator(null)}
+        onOpenToken={setDetail}
+      />
     </div>
   );
 }
@@ -501,10 +516,12 @@ function TokenCard({
   token,
   rank,
   onOpen,
+  onCreatorClick,
 }: {
   token: TokenInfo;
   rank: number;
   onOpen: (t: TokenInfo) => void;
+  onCreatorClick?: (username: string) => void;
 }) {
   const up = token.priceChange24hPercent >= 0;
   const changeAbs = Math.abs(token.priceChange24hPercent);
@@ -588,7 +605,20 @@ function TokenCard({
           </div>
           <div className="text-[11px] font-mono tabular-nums text-zinc-500 truncate">
             ${token.symbol} · by{' '}
-            <span className="text-zinc-400">@{token.creatorUsername ?? 'anon'}</span>
+            {token.creatorUsername && onCreatorClick ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreatorClick(token.creatorUsername as string);
+                }}
+                className="text-zinc-400 hover:text-white transition"
+              >
+                @{token.creatorUsername}
+              </button>
+            ) : (
+              <span className="text-zinc-400">@{token.creatorUsername ?? 'anon'}</span>
+            )}
           </div>
         </div>
       </div>
