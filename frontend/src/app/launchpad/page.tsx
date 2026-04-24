@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpRight,
   ChevronDown,
@@ -13,7 +14,8 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import React, { useEffect, useMemo, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import { CuratedRow } from '@/components/flaunch/CuratedRow';
 import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
@@ -32,14 +34,54 @@ import type { TokenInfo } from '@/lib/flaunch/types';
 type Sort = 'recent' | 'volume' | 'mcap' | 'gainers';
 type SectionFilter = 'ALL' | 'AGENTS' | 'REPOS';
 
+function isSort(v: string | null): v is Sort {
+  return v === 'recent' || v === 'volume' || v === 'mcap' || v === 'gainers';
+}
+function isSection(v: string | null): v is SectionFilter {
+  return v === 'ALL' || v === 'AGENTS' || v === 'REPOS';
+}
+
 export default function LaunchpadPage() {
+  // useSearchParams forces the page onto the client-rendered path;
+  // Suspense boundary keeps the build output sane.
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: '#000' }} />}>
+      <LaunchpadPageContent />
+    </Suspense>
+  );
+}
+
+function LaunchpadPageContent() {
   const { isAuthenticated } = useAuth();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [tokens, setTokens] = useState<TokenInfo[] | null>(null);
-  const [sort, setSort] = useState<Sort>('recent');
-  const [section, setSection] = useState<SectionFilter>('ALL');
-  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<Sort>(() => {
+    const s = searchParams.get('sort');
+    return isSort(s) ? s : 'recent';
+  });
+  const [section, setSection] = useState<SectionFilter>(() => {
+    const s = searchParams.get('section');
+    return isSection(s) ? s : 'ALL';
+  });
+  const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [launchOpen, setLaunchOpen] = useState(false);
   const [detail, setDetail] = useState<TokenInfo | null>(null);
+
+  // Mirror filter state to the URL so /launchpad?sort=gainers is
+  // shareable + survives a reload. `replace` (not `push`) avoids
+  // polluting browser history on every keystroke.
+  useEffect(() => {
+    const p = new URLSearchParams();
+    if (sort !== 'recent') p.set('sort', sort);
+    if (section !== 'ALL') p.set('section', section);
+    if (search.trim()) p.set('q', search.trim());
+    const qs = p.toString();
+    const next = qs ? `${pathname}?${qs}` : pathname;
+    router.replace(next, { scroll: false });
+  }, [sort, section, search, pathname, router]);
 
   const refresh = React.useCallback(() => {
     if (!FLAUNCH_LAUNCHPAD_ENABLED) {
@@ -194,18 +236,30 @@ export default function LaunchpadPage() {
         }
       >
         <StatStrip>
-          <Stat label="Tokens launched" value={totals.count.toLocaleString()} />
+          <Stat label="Tokens launched" value={<CountUp value={totals.count} />} />
           <Stat
             label="24h volume"
-            value={<span className="font-mono">{formatEth(totals.volume)} ETH</span>}
+            value={
+              <span className="font-mono">
+                <CountUp value={totals.volume} format={(v) => formatEth(v)} /> ETH
+              </span>
+            }
           />
           <Stat
             label="Total mcap"
-            value={<span className="font-mono">{formatEth(totals.mcap)} ETH</span>}
+            value={
+              <span className="font-mono">
+                <CountUp value={totals.mcap} format={(v) => formatEth(v)} /> ETH
+              </span>
+            }
           />
           <Stat
             label="Holders"
-            value={<span className="font-mono">{totals.holders.toLocaleString()}</span>}
+            value={
+              <span className="font-mono">
+                <CountUp value={totals.holders} />
+              </span>
+            }
           />
         </StatStrip>
       </Hero>
@@ -331,11 +385,25 @@ export default function LaunchpadPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {filtered.map((t, i) => (
-              <TokenCard key={t.tokenAddress} token={t} rank={i + 1} onOpen={setDetail} />
-            ))}
-          </div>
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+          >
+            <AnimatePresence initial={false}>
+              {filtered.map((t, i) => (
+                <motion.div
+                  key={t.tokenAddress}
+                  layout
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                >
+                  <TokenCard token={t} rank={i + 1} onOpen={setDetail} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </div>
 
@@ -774,4 +842,46 @@ function formatEth(n: number): string {
   if (n >= 0.01) return n.toFixed(4);
   if (n >= 0.0001) return n.toFixed(6);
   return n.toExponential(2);
+}
+
+/**
+ * Animated count-up. Plain rAF + easeOutCubic, no framer-motion
+ * dependency so it stays fast on server-rendered stats. Call-site
+ * picks the formatter so it works for integers + floats.
+ */
+function CountUp({
+  value,
+  format = (v) => Math.floor(v).toLocaleString(),
+  duration = 900,
+}: {
+  value: number;
+  format?: (v: number) => string;
+  duration?: number;
+}) {
+  const [display, setDisplay] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    const start = performance.now();
+    const startValue = from.current;
+    const change = value - startValue;
+    if (Math.abs(change) < 1e-9) {
+      from.current = value;
+      setDisplay(value);
+      return;
+    }
+    let raf = 0;
+    function step(now: number) {
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = startValue + change * eased;
+      setDisplay(current);
+      from.current = current;
+      if (t < 1) raf = requestAnimationFrame(step);
+      else from.current = value;
+    }
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value, duration]);
+  return <>{format(display)}</>;
 }
