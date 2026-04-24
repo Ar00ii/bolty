@@ -4057,6 +4057,16 @@ aside button[data-active='true']::after {
 .mk-app-page .rounded-xl {
   border-radius: var(--app-radius) !important;
 }
+/* Reduced-motion users get no entry animations at all. Plus we cap
+   any decorative `whileHover` lift on lists — they read as landing
+   page polish, not product UX. */
+@media (prefers-reduced-motion: reduce) {
+  .mk-app-page * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 /* Title styles across pages — catch the big headings most apps use
    so migrated pages get the hero typography without rewriting JSX. */
 .mk-app-page h1,
@@ -4410,6 +4420,194 @@ aside button[data-active='true']::after {
   color: var(--app-text);
   border-color: var(--app-border-strong);
   background: var(--app-surface-hover);
+}
+.mk-app .mk-btn--secondary {
+  background: rgba(131, 110, 249, 0.1);
+  color: #c9beff;
+  border-color: rgba(131, 110, 249, 0.3);
+}
+.mk-app .mk-btn--secondary:hover {
+  background: rgba(131, 110, 249, 0.18);
+  border-color: rgba(131, 110, 249, 0.5);
+  color: #fff;
+}
+.mk-app .mk-btn--danger {
+  background: transparent;
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.mk-app .mk-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.6);
+  color: #fee2e2;
+}
+.mk-app .mk-btn--loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.mk-app .mk-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.mk-app .mk-btn:focus-visible {
+  outline: 2px solid var(--app-accent);
+  outline-offset: 1px;
+}
+
+@keyframes mk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ─ Card (flat, canonical) ─────────────────────────────────────────── */
+.mk-app .mk-card-flat {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 14px 16px;
+  color: var(--app-text);
+  display: block;
+  text-decoration: none;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease;
+}
+.mk-app .mk-card-flat--interactive {
+  cursor: pointer;
+}
+.mk-app .mk-card-flat--interactive:hover {
+  background: var(--app-surface-hover);
+  border-color: var(--app-border-strong);
+}
+
+/* ─ Badge (canonical) ─────────────────────────────────────────────── */
+.mk-app .mk-badge2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 4px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.mk-app .mk-badge2--neutral {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--app-text-dim);
+  border-color: var(--app-border);
+}
+.mk-app .mk-badge2--info {
+  background: rgba(131, 110, 249, 0.12);
+  color: #c9beff;
+  border-color: rgba(131, 110, 249, 0.32);
+}
+.mk-app .mk-badge2--live {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.32);
+}
+.mk-app .mk-badge2--offline {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.32);
+}
+.mk-app .mk-badge2--warn {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.32);
+}
+.mk-app .mk-badge2__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ─ Empty state (canonical) ────────────────────────────────────────── */
+.mk-app .mk-empty2 {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  padding: 56px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.mk-app .mk-empty2__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--app-accent-dim);
+  color: #c9beff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.mk-app .mk-empty2__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+.mk-app .mk-empty2__sub {
+  font-size: 12.5px;
+  color: var(--app-text-dim);
+  margin-top: 4px;
+  max-width: 340px;
+  line-height: 1.5;
+}
+.mk-app .mk-empty2__cta {
+  margin-top: 18px;
+}
+
+/* ─ Stat hint (extra slot below value, used in dense lists) ────────── */
+.mk-app .mk-stat__hint {
+  font-size: 11px;
+  color: var(--app-text-mute);
+  margin-top: 2px;
+}
+
+/* ─ Dense list rows (DataRow / List) ───────────────────────────────── */
+.mk-app .mk-list {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  overflow: hidden;
+}
+.mk-app .mk-list__row {
+  display: grid;
+  grid-template-columns: var(--mk-row-cols, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--app-border);
+  transition: background 120ms ease;
+  text-decoration: none;
+  color: inherit;
+}
+.mk-app .mk-list__row:last-child {
+  border-bottom: none;
+}
+.mk-app .mk-list__row:hover {
+  background: var(--app-surface-hover);
+}
+.mk-app .mk-list__head {
+  display: grid;
+  grid-template-columns: var(--mk-row-cols, 1fr);
+  gap: 12px;
+  padding: 9px 14px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--app-text-mute);
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid var(--app-border);
 }
 
 /* Listing card */

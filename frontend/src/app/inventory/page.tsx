@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { Hero, Stat, StatStrip } from '@/components/ui/app';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -234,28 +235,22 @@ export default function InventoryPage() {
 
   return (
     <div className="mk-app-page mx-auto max-w-6xl px-4 sm:px-6 py-8" style={{ maxWidth: '72rem' }}>
-      <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.22em] text-zinc-500 mb-3">
-        <Package className="w-3.5 h-3.5 text-[#b4a7ff]" />
-        <span>Bolty inventory</span>
-        <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
-      </div>
-      <h1 className="text-3xl font-light text-white tracking-[-0.01em]">Inventory</h1>
-      <p className="text-sm text-zinc-400 font-light mt-1 max-w-2xl">
-        Everything you&apos;ve published and everything you&apos;ve bought — rays, tx
-        hashes, sellers, all in one place.
-      </p>
-
-      <div className="grid grid-cols-3 gap-3 mt-6">
-        <StatCard label="Published" value={totals.published} icon={Upload} accent="#06B6D4" />
-        <StatCard label="Purchased" value={totals.purchased} icon={ShoppingBag} accent="#836EF9" />
-        <StatCard
-          label="Rays earned"
-          value={totals.rays}
-          icon={Sparkles}
-          accent="#EC4899"
-          suffix="rays"
-        />
-      </div>
+      <Hero
+        crumbs={
+          <span className="inline-flex items-center gap-1.5">
+            <Package className="w-3 h-3" strokeWidth={2} />
+            Inventory
+          </span>
+        }
+        title="Inventory"
+        subtitle="Everything you've published and everything you've bought — rays, tx hashes, sellers, all in one place."
+      >
+        <StatStrip>
+          <Stat label="Published" value={totals.published} />
+          <Stat label="Purchased" value={totals.purchased} />
+          <Stat label="Rays earned" value={totals.rays} />
+        </StatStrip>
+      </Hero>
 
       <div className="mt-6 flex items-center gap-1 border-b border-white/[0.06]">
         <TabButton active={tab === 'published'} onClick={() => setTab('published')}>
