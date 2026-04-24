@@ -15,6 +15,11 @@ import React, { useState } from 'react';
 
 import { Modal } from '@/components/ui/Modal';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import {
+  BOLTY_TREASURY_ADDRESS,
+  boltyAttributionFooter,
+  isRevenueManagerConfigured,
+} from '@/lib/flaunch/config';
 import { launchToken } from '@/lib/flaunch/launchpad';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
@@ -122,7 +127,7 @@ export function LaunchWizardModal({
         listingId,
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
-        description: description.trim(),
+        description: description.trim() + boltyAttributionFooter(listingUrl),
         imageUrl: listingImageUrl,
         websiteUrl: listingUrl,
         listingPath,
@@ -529,8 +534,29 @@ function Step3Review({
   launchState: LaunchState;
   launchError: string | null;
 }) {
+  const ready = isRevenueManagerConfigured();
   return (
     <div className="space-y-4">
+      {!ready && (
+        <div
+          className="rounded-lg p-3 text-[11.5px] font-light"
+          style={{
+            background: 'rgba(245,158,11,0.08)',
+            boxShadow: 'inset 0 0 0 1px rgba(245,158,11,0.3)',
+            color: '#fcd34d',
+          }}
+        >
+          <div className="flex items-center gap-1.5 uppercase tracking-[0.12em] text-[10px] font-medium mb-0.5">
+            <AlertTriangle className="w-3 h-3" /> Preview mode
+          </div>
+          <p className="text-zinc-300">
+            The launchpad&apos;s protocol contract isn&apos;t deployed on-chain yet, so launches are
+            simulated and no real ETH is spent. The UX is final; once the contract is live every
+            step below becomes a real Base transaction.
+          </p>
+        </div>
+      )}
+
       <div
         className="rounded-xl p-4 space-y-2"
         style={{
@@ -542,7 +568,10 @@ function Step3Review({
         <Row label="Token" value={`${name} (${symbol})`} />
         <Row label="Creator / community" value={`${creatorShare}% / ${100 - creatorShare}%`} />
         <Row label="Premine" value={`${premineEth || '0'} ETH`} />
-        <Row label="Bolty protocol fee" value={`${BOLTY_PROTOCOL_FEE_PERCENT}% of swap fees`} />
+        <Row
+          label="Bolty protocol fee"
+          value={`${BOLTY_PROTOCOL_FEE_PERCENT}% of swap fees → ${BOLTY_TREASURY_ADDRESS.slice(0, 6)}…${BOLTY_TREASURY_ADDRESS.slice(-4)}`}
+        />
         <Row label="Network" value="Base (chain 8453)" />
         <Row
           label="You pay"
