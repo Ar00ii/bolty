@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-import { TokenPriceChart } from '@/components/flaunch/TokenPriceChart';
 import {
   buyLaunchpadToken,
   getTokenByAddress,
@@ -30,6 +29,34 @@ function formatEth(n: number): string {
   if (n >= 0.01) return n.toFixed(4);
   if (n >= 0.0001) return n.toFixed(6);
   return n.toExponential(2);
+}
+
+/**
+ * Subscript-zero notation for tiny prices, the way DexScreener / GeckoTerminal
+ * format microcap tokens. e.g. 0.0₂₈39 = 0.000…039 with 28 leading zeros.
+ * Standard $X.XX for normal numbers.
+ */
+function formatUsd(n: number): string {
+  if (!n || n <= 0) return '$0';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}k`;
+  if (n >= 1) return `$${n.toFixed(2)}`;
+  if (n >= 0.01) return `$${n.toFixed(4)}`;
+  if (n >= 0.0001) return `$${n.toFixed(6)}`;
+  // Subscript notation
+  const expOf10 = Math.floor(Math.log10(n));
+  const leadingZeros = -expOf10 - 1;
+  if (leadingZeros < 4) return `$${n.toFixed(8)}`;
+  const sig = (n * Math.pow(10, -expOf10))
+    .toPrecision(3)
+    .replace('.', '')
+    .replace(/0+$/, '') || '1';
+  const subChars = '₀₁₂₃₄₅₆₇₈₉';
+  const sub = String(leadingZeros)
+    .split('')
+    .map((d) => subChars[Number(d)])
+    .join('');
+  return `$0.0${sub}${sig}`;
 }
 
 function shortAddr(a: string): string {
@@ -217,8 +244,8 @@ function TokenHeader({ token }: { token: TokenInfo }) {
           <CopyableAddr addr={token.tokenAddress} />
         </div>
         <div className="mt-1 flex items-center gap-3 text-[12px] font-light text-zinc-400">
-          <span className="font-mono tabular-nums text-white text-[16px]">
-            {formatEth(token.priceEth)} ETH
+          <span className="font-mono tabular-nums text-white text-[18px]">
+            {formatUsd(token.priceUsd)}
           </span>
           <span
             className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11.5px] font-mono tabular-nums"
@@ -274,9 +301,15 @@ function CopyableAddr({ addr }: { addr: string }) {
 // ── Chart + stats ───────────────────────────────────────────────────
 
 function ChartCard({ token }: { token: TokenInfo }) {
+  // DexScreener auto-resolves the token address to its primary pair on
+  // Base and renders an OHLC chart with timeframes + volume bars. Free,
+  // no API key, much better than what we'd render ourselves. New tokens
+  // appear in DexScreener within a few minutes of their first trade —
+  // the iframe shows a "no pair" state in the meantime, which is fine.
+  const src = `https://dexscreener.com/base/${token.tokenAddress}?embed=1&theme=dark&trades=0&info=0`;
   return (
     <div
-      className="rounded-xl p-4"
+      className="rounded-xl overflow-hidden"
       style={{
         background:
           'linear-gradient(180deg, rgba(20,20,26,0.65) 0%, rgba(10,10,14,0.65) 100%)',
@@ -284,13 +317,26 @@ function ChartCard({ token }: { token: TokenInfo }) {
           'inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h2 className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
-          Price · 7d
+          Price chart
         </h2>
-        <span className="text-[10.5px] text-zinc-600 font-mono">7-day window</span>
+        <a
+          href={`https://dexscreener.com/base/${token.tokenAddress}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[10.5px] text-zinc-500 hover:text-white transition inline-flex items-center gap-1 font-mono"
+        >
+          DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+        </a>
       </div>
-      <TokenPriceChart data={token.sparkline7d || []} height={260} />
+      <iframe
+        src={src}
+        title={`${token.symbol} chart on DexScreener`}
+        className="block w-full"
+        style={{ height: 480, border: 'none', background: 'transparent' }}
+        loading="lazy"
+      />
     </div>
   );
 }
@@ -298,7 +344,7 @@ function ChartCard({ token }: { token: TokenInfo }) {
 function StatsRow({ token }: { token: TokenInfo }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-      <Stat label="Market cap" value={`${formatEth(token.marketCapEth)} ETH`} />
+      <Stat label="Market cap" value={formatUsd(token.marketCapUsd)} />
       <Stat label="24h volume" value={`${formatEth(token.volume24hEth)} ETH`} />
       <Stat
         label="Holders"
@@ -332,6 +378,11 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 // ── About + links + creator ─────────────────────────────────────────
 
 function AboutCard({ token }: { token: TokenInfo }) {
+  // Show whatever the creator pinned to IPFS in the wizard. The
+  // attribution footer ("Launched on the Bolty Network launchpad —
+  // {url}") is appended automatically inside the wizard, so we don't
+  // need to add anything here.
+  if (!token.description?.trim()) return null;
   return (
     <section
       className="rounded-xl p-4"
@@ -343,11 +394,8 @@ function AboutCard({ token }: { token: TokenInfo }) {
       <h2 className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium mb-2">
         About
       </h2>
-      <p className="text-[13px] text-zinc-300 font-light leading-relaxed">
-        ${token.symbol} is a community token tied to a listing on the Bolty marketplace.
-        Fair-launched on Base via Flaunch with a Progressive Bid Wall providing a rising price
-        floor. Trading happens on a Uniswap v4 pool; 1% of every swap is split between the
-        creator, the token&apos;s community treasury, and Bolty&apos;s protocol fee.
+      <p className="text-[13px] text-zinc-300 font-light leading-relaxed whitespace-pre-wrap">
+        {token.description}
       </p>
     </section>
   );

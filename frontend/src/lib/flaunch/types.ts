@@ -45,15 +45,23 @@ export interface TokenInfo {
   flaunchUrl: string;
   /** Current spot price in ETH (per 1 token). */
   priceEth: number;
+  /** Current spot price in USD (per 1 token). Primary display value —
+   *  microcaps land at numbers like 0.0₂₈39 which are unreadable in ETH. */
+  priceUsd: number;
   /** Percentage change in price over last 24h, signed (-100 .. +∞). */
   priceChange24hPercent: number;
   marketCapEth: number;
+  /** Market cap in USD — primary display value for the launchpad UI. */
+  marketCapUsd: number;
   volume24hEth: number;
   holders: number;
   /** 7 daily points for a mini sparkline (newest last, all >= 0). */
   sparkline7d: number[];
   creatorUsername: string | null;
   creatorAvatarUrl: string | null;
+  /** Pinned IPFS metadata description — what the creator wrote in the
+   *  wizard. Null when launched outside the wizard or pin is missing. */
+  description: string | null;
   launchedAt: string;
 }
 
