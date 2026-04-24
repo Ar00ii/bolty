@@ -192,7 +192,7 @@ function LaunchpadPageContent() {
           the sidebar / viewport edge. OUTSIDE the mk-app-page wrapper
           because that shell caps children at max-width: 1280px. */}
       {hasAny && tokens && (
-        <div className="w-full font-light px-2 pt-2">
+        <div className="w-full font-light px-2 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-2 items-stretch">
             <FeaturedCarousel tokens={tokens} />
             <TokenLeaderboard tokens={tokens} />
