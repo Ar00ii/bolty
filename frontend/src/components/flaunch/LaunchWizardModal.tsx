@@ -8,7 +8,6 @@ import {
   ExternalLink,
   Globe,
   Loader2,
-  MessageCircle,
   Rocket,
   Send,
   Sparkles,
@@ -25,6 +24,8 @@ import {
   isRevenueManagerConfigured,
 } from '@/lib/flaunch/config';
 import { launchToken, setTokenOverrides } from '@/lib/flaunch/launchpad';
+
+import { ImageCropModal } from './ImageCropModal';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
   EST_LAUNCH_GAS_USD,
@@ -46,6 +47,10 @@ interface LaunchWizardModalProps {
   listingUrl: string;
   /** Path back to the listing, persisted on the token for launchpad filters. */
   listingPath: string;
+  /** Render inline (no Modal chrome) when true. The caller provides
+   *  its own container + visibility control. Used on the launchpad
+   *  page where the form expands inline below the banner row. */
+  inline?: boolean;
 }
 
 type Step = 1 | 2 | 3;
@@ -68,7 +73,9 @@ export function LaunchWizardModal({
   listingImageUrl,
   listingUrl,
   listingPath,
+  inline,
 }: LaunchWizardModalProps) {
+  if (inline && !open) return null;
   const { user } = useAuth();
   const [step, setStep] = useState<Step>(1);
   // Step 1 form
@@ -188,22 +195,8 @@ export function LaunchWizardModal({
     }
   }
 
-  return (
-    <Modal
-      isOpen={open}
-      onClose={handleClose}
-      title={
-        launchState === 'success'
-          ? 'Token launched'
-          : 'Launch a token for this listing'
-      }
-      subtitle={
-        launchState === 'success'
-          ? undefined
-          : 'Powered by Flaunch · Base'
-      }
-      size="md"
-    >
+  const body = (
+    <>
       {launchState !== 'success' && (
         <StepIndicator step={step} launchState={launchState} />
       )}
@@ -307,6 +300,57 @@ export function LaunchWizardModal({
           )}
         </div>
       )}
+    </>
+  );
+
+  if (inline) {
+    return (
+      <div className="relative">
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <div className="text-[14px] text-white font-light">
+              {launchState === 'success'
+                ? 'Token launched'
+                : 'Launch a token for this listing'}
+            </div>
+            {launchState !== 'success' && (
+              <div className="text-[11px] text-zinc-500 mt-0.5">
+                Powered by Flaunch · Base
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition"
+            style={{ background: 'rgba(255,255,255,0.03)' }}
+            aria-label="Close"
+          >
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <path d="M4 4l8 8M12 4l-8 8" />
+            </svg>
+          </button>
+        </div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Modal
+      isOpen={open}
+      onClose={handleClose}
+      title={
+        launchState === 'success'
+          ? 'Token launched'
+          : 'Launch a token for this listing'
+      }
+      subtitle={
+        launchState === 'success' ? undefined : 'Powered by Flaunch · Base'
+      }
+      size="md"
+    >
+      {body}
     </Modal>
   );
 }
@@ -377,8 +421,10 @@ function Field({
   return (
     <label className="block">
       <div className="flex items-baseline justify-between mb-1.5">
-        <span className="text-[11px] uppercase tracking-[0.14em] text-zinc-400">{label}</span>
-        {hint && <span className="text-[10.5px] text-zinc-600">{hint}</span>}
+        <span className="text-[12px] text-zinc-300 font-medium">{label}</span>
+        {hint && (
+          <span className="text-[11px] text-zinc-500 font-light">{hint}</span>
+        )}
       </div>
       {children}
     </label>
@@ -386,7 +432,7 @@ function Field({
 }
 
 const inputCls =
-  'w-full px-3 py-2 rounded-lg text-[13px] text-white placeholder:text-zinc-600 focus:outline-none';
+  'w-full px-3 py-2 rounded-lg text-[13px] text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#836EF9]/40 transition';
 const inputStyle = {
   background: 'rgba(255,255,255,0.04)',
   boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
@@ -438,6 +484,8 @@ function Step1Metadata({
   const fileRef = React.useRef<HTMLInputElement>(null);
   const bannerRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [cropSource, setCropSource] = React.useState<string | null>(null);
+  const [cropTarget, setCropTarget] = React.useState<'image' | 'banner' | null>(null);
 
   function pickFile(
     file: File | null,
@@ -456,11 +504,26 @@ function Step1Metadata({
     const reader = new FileReader();
     reader.onload = () => {
       const url = String(reader.result || '') || null;
-      if (opts.target === 'banner') onBanner(url);
-      else onImage(url);
+      if (!url) return;
+      // Open the crop/reposition modal so the user can frame the image
+      // the same way a profile-picture editor would.
+      setCropSource(url);
+      setCropTarget(opts.target);
     };
     reader.onerror = () => setError('Could not read the image file.');
     reader.readAsDataURL(file);
+  }
+
+  function onCropSave(dataUrl: string) {
+    if (cropTarget === 'banner') onBanner(dataUrl);
+    else if (cropTarget === 'image') onImage(dataUrl);
+    setCropSource(null);
+    setCropTarget(null);
+  }
+
+  function onCropCancel() {
+    setCropSource(null);
+    setCropTarget(null);
   }
 
   return (
@@ -620,13 +683,21 @@ function Step1Metadata({
             onChange={onTelegramUrl}
           />
           <SocialInput
-            icon={<MessageCircle className="w-3.5 h-3.5" />}
+            icon={<DiscordMark />}
             placeholder="https://discord.gg/yourserver"
             value={discordUrl}
             onChange={onDiscordUrl}
           />
         </div>
       </Field>
+
+      <ImageCropModal
+        open={!!cropSource}
+        source={cropSource}
+        aspect={cropTarget === 'banner' ? 'banner' : 'logo'}
+        onCancel={onCropCancel}
+        onSave={onCropSave}
+      />
     </div>
   );
 }
@@ -666,6 +737,14 @@ function GithubMark16() {
   return (
     <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
       <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.39v-1.34c-2.23.48-2.7-1.08-2.7-1.08-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.05 1.22.83 1.22.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.22 2.2.82A7.66 7.66 0 0 1 8 4.04c.68.01 1.37.1 2.01.28 1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.74.54 1.5v2.22c0 .22.15.47.55.39A8 8 0 0 0 8 0Z" />
+    </svg>
+  );
+}
+
+function DiscordMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
+      <path d="M20.317 4.369A19.79 19.79 0 0 0 16.558 3c-.201.36-.435.846-.596 1.228a18.27 18.27 0 0 0-5.924 0A12.64 12.64 0 0 0 9.44 3c-1.301.22-2.56.55-3.76 1.37-2.37 3.53-3.01 6.97-2.69 10.36.005.02.018.04.04.05 1.58 1.16 3.11 1.87 4.62 2.33.01.01.03.01.04 0 .34-.46.64-.95.9-1.46.01-.02 0-.05-.02-.06-.48-.18-.93-.4-1.37-.65-.02-.01-.02-.04 0-.06.09-.07.18-.14.27-.21.02-.01.04-.02.06-.01 2.88 1.32 6 1.32 8.85 0 .02-.01.04 0 .06.01.09.07.18.14.27.21.02.02.02.05 0 .06-.44.26-.89.47-1.37.65-.02.01-.03.04-.02.06.27.51.57 1 .9 1.46.02.01.04.01.05 0 1.52-.46 3.05-1.17 4.63-2.33.02-.01.03-.03.04-.05.39-3.91-.71-7.33-3.01-10.36-.01-.02-.02-.03-.04-.04ZM8.02 12.66c-.9 0-1.65-.83-1.65-1.85 0-1.02.73-1.85 1.65-1.85.93 0 1.66.84 1.65 1.85 0 1.02-.73 1.85-1.65 1.85Zm7.97 0c-.9 0-1.65-.83-1.65-1.85 0-1.02.73-1.85 1.65-1.85.93 0 1.66.84 1.65 1.85 0 1.02-.72 1.85-1.65 1.85Z" />
     </svg>
   );
 }

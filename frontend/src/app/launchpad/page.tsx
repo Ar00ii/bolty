@@ -200,6 +200,28 @@ function LaunchpadPageContent() {
         </div>
       )}
 
+      {/* Inline launch form — replaces the previous modal. Shown only
+          when the user clicks "Launch yours" above. Narrow container
+          so it doesn't span the whole page. */}
+      {launchOpen && (
+        <div className="w-full px-2 pt-4">
+          <div
+            className="mx-auto max-w-xl rounded-2xl p-5"
+            style={{
+              background: 'rgba(10,10,14,0.75)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(10px)',
+            }}
+          >
+            <LaunchYoursModal
+              inline
+              open
+              onClose={() => setLaunchOpen(false)}
+            />
+          </div>
+        </div>
+      )}
+
       {/* ── Browse area (filters + grid) — uses mk-app-page shell ────── */}
       <div className="mk-app-page">
         {/* Launch CTA + filters bar */}
@@ -369,7 +391,6 @@ function LaunchpadPageContent() {
         </div>
       </div>
 
-      <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
 
       <CreatorProfileModal
         open={!!creator}

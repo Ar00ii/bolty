@@ -1,10 +1,12 @@
 'use client';
 
-import { Globe, Image as ImageIcon, Loader2, MessageCircle, Send, Twitter, X } from 'lucide-react';
+import { Globe, Image as ImageIcon, Loader2, Send, Twitter, X } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { setTokenOverrides, uploadDataUrlToPinata } from '@/lib/flaunch/launchpad';
 import type { TokenInfo } from '@/lib/flaunch/types';
+
+import { ImageCropModal } from './ImageCropModal';
 
 /**
  * Post-launch editor for the token owner. Edits banner + logo + social
@@ -34,6 +36,8 @@ export function EditTokenModal({
   const [discordUrl, setDiscordUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [cropSource, setCropSource] = useState<string | null>(null);
+  const [cropTarget, setCropTarget] = useState<'logo' | 'banner' | null>(null);
 
   useEffect(() => {
     if (!token || !open) return;
@@ -62,10 +66,23 @@ export function EditTokenModal({
     const reader = new FileReader();
     reader.onload = () => {
       const url = typeof reader.result === 'string' ? reader.result : null;
-      if (target === 'logo') setLogoDataUrl(url);
-      else setBannerDataUrl(url);
+      if (!url) return;
+      setCropSource(url);
+      setCropTarget(target);
     };
     reader.readAsDataURL(file);
+  }
+
+  function onCropSave(dataUrl: string) {
+    if (cropTarget === 'logo') setLogoDataUrl(dataUrl);
+    else if (cropTarget === 'banner') setBannerDataUrl(dataUrl);
+    setCropSource(null);
+    setCropTarget(null);
+  }
+
+  function onCropCancel() {
+    setCropSource(null);
+    setCropTarget(null);
   }
 
   async function onSave() {
@@ -190,7 +207,7 @@ export function EditTokenModal({
               onChange={setTelegramUrl}
             />
             <LinkInput
-              icon={<MessageCircle className="w-3.5 h-3.5" />}
+              icon={<DiscordIcon />}
               placeholder="https://discord.gg/…"
               value={discordUrl}
               onChange={setDiscordUrl}
@@ -239,6 +256,14 @@ export function EditTokenModal({
           </button>
         </div>
       </div>
+
+      <ImageCropModal
+        open={!!cropSource}
+        source={cropSource}
+        aspect={cropTarget === 'banner' ? 'banner' : 'logo'}
+        onCancel={onCropCancel}
+        onSave={onCropSave}
+      />
     </div>
   );
 }
@@ -325,13 +350,16 @@ function LinkInput({
 
 function GithubIcon() {
   return (
-    <svg
-      viewBox="0 0 16 16"
-      className="w-3.5 h-3.5"
-      fill="currentColor"
-      aria-hidden
-    >
+    <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
       <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.39v-1.34c-2.23.48-2.7-1.08-2.7-1.08-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.05 1.22.83 1.22.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.13 0 0 .67-.22 2.2.82A7.66 7.66 0 0 1 8 4.04c.68.01 1.37.1 2.01.28 1.53-1.04 2.2-.82 2.2-.82.44 1.11.16 1.93.08 2.13.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.66 3.95.29.25.54.74.54 1.5v2.22c0 .22.15.47.55.39A8 8 0 0 0 8 0Z" />
+    </svg>
+  );
+}
+
+function DiscordIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor" aria-hidden>
+      <path d="M20.317 4.369A19.79 19.79 0 0 0 16.558 3c-.201.36-.435.846-.596 1.228a18.27 18.27 0 0 0-5.924 0A12.64 12.64 0 0 0 9.44 3c-1.301.22-2.56.55-3.76 1.37-2.37 3.53-3.01 6.97-2.69 10.36.005.02.018.04.04.05 1.58 1.16 3.11 1.87 4.62 2.33.01.01.03.01.04 0 .34-.46.64-.95.9-1.46.01-.02 0-.05-.02-.06-.48-.18-.93-.4-1.37-.65-.02-.01-.02-.04 0-.06.09-.07.18-.14.27-.21.02-.01.04-.02.06-.01 2.88 1.32 6 1.32 8.85 0 .02-.01.04 0 .06.01.09.07.18.14.27.21.02.02.02.05 0 .06-.44.26-.89.47-1.37.65-.02.01-.03.04-.02.06.27.51.57 1 .9 1.46.02.01.04.01.05 0 1.52-.46 3.05-1.17 4.63-2.33.02-.01.03-.03.04-.05.39-3.91-.71-7.33-3.01-10.36-.01-.02-.02-.03-.04-.04ZM8.02 12.66c-.9 0-1.65-.83-1.65-1.85 0-1.02.73-1.85 1.65-1.85.93 0 1.66.84 1.65 1.85 0 1.02-.73 1.85-1.65 1.85Zm7.97 0c-.9 0-1.65-.83-1.65-1.85 0-1.02.73-1.85 1.65-1.85.93 0 1.66.84 1.65 1.85 0 1.02-.72 1.85-1.65 1.85Z" />
     </svg>
   );
 }

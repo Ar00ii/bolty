@@ -79,9 +79,12 @@ function normalizeType(t: string): PickerListing['type'] {
 export function LaunchYoursModal({
   open,
   onClose,
+  inline,
 }: {
   open: boolean;
   onClose: () => void;
+  /** Render inline (no Modal chrome) when true. */
+  inline?: boolean;
 }) {
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -171,6 +174,97 @@ export function LaunchYoursModal({
     window.dispatchEvent(new CustomEvent('launchpad:refresh'));
   }
 
+  const pickerBody = !isAuthenticated ? (
+    <NotAuthed onClose={onClose} />
+  ) : loading ? (
+    <div className="py-10 grid place-items-center text-zinc-500 text-[12.5px] font-light">
+      <Loader2 className="w-4 h-4 animate-spin mb-2" />
+      Loading your listings…
+    </div>
+  ) : error ? (
+    <div className="py-6 text-center">
+      <div className="text-[13px] text-red-300 font-light">{error}</div>
+      <button
+        type="button"
+        onClick={load}
+        className="mt-3 px-3 py-1.5 rounded-md text-[12px] text-white transition"
+        style={{
+          background: 'rgba(131,110,249,0.2)',
+          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+        }}
+      >
+        Retry
+      </button>
+    </div>
+  ) : !listings?.length ? (
+    <EmptyInventory onClose={onClose} />
+  ) : (
+    <ul className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
+      {listings.map((l) => (
+        <li key={l.id}>
+          <ListingRow listing={l} onLaunch={() => pick(l)} />
+        </li>
+      ))}
+    </ul>
+  );
+
+  const wizard = selected ? (
+    <LaunchWizardModal
+      inline={inline}
+      open={!!selected}
+      onClose={handleWizardClose}
+      onLaunched={() => {
+        window.dispatchEvent(new CustomEvent('launchpad:refresh'));
+      }}
+      listingId={selected.id}
+      listingTitle={selected.title}
+      listingDescription={selected.description}
+      listingImageUrl={selected.imageUrl}
+      listingUrl={
+        typeof window !== 'undefined'
+          ? `${window.location.origin}${selected.path}`
+          : `https://bolty.network${selected.path}`
+      }
+      listingPath={selected.path}
+    />
+  ) : null;
+
+  if (inline) {
+    if (!open) return null;
+    return (
+      <div className="relative">
+        {selected ? (
+          wizard
+        ) : (
+          <>
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="text-[14px] text-white font-light">
+                  Launch a token
+                </div>
+                <div className="text-[11px] text-zinc-500 mt-0.5">
+                  Pick one of your listings to mint a community token for.
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closePicker}
+                className="grid place-items-center w-7 h-7 rounded-md text-zinc-500 hover:text-white transition"
+                style={{ background: 'rgba(255,255,255,0.03)' }}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  <path d="M4 4l8 8M12 4l-8 8" />
+                </svg>
+              </button>
+            </div>
+            {pickerBody}
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <>
       <Modal
@@ -180,62 +274,10 @@ export function LaunchYoursModal({
         subtitle="Pick one of your listings to mint a community token for."
         size="md"
       >
-        {!isAuthenticated ? (
-          <NotAuthed onClose={onClose} />
-        ) : loading ? (
-          <div className="py-10 grid place-items-center text-zinc-500 text-[12.5px] font-light">
-            <Loader2 className="w-4 h-4 animate-spin mb-2" />
-            Loading your listings…
-          </div>
-        ) : error ? (
-          <div className="py-6 text-center">
-            <div className="text-[13px] text-red-300 font-light">{error}</div>
-            <button
-              type="button"
-              onClick={load}
-              className="mt-3 px-3 py-1.5 rounded-md text-[12px] text-white transition"
-              style={{
-                background: 'rgba(131,110,249,0.2)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
-              }}
-            >
-              Retry
-            </button>
-          </div>
-        ) : !listings?.length ? (
-          <EmptyInventory onClose={onClose} />
-        ) : (
-          <ul className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
-            {listings.map((l) => (
-              <li key={l.id}>
-                <ListingRow listing={l} onLaunch={() => pick(l)} />
-              </li>
-            ))}
-          </ul>
-        )}
+        {pickerBody}
       </Modal>
 
-      {selected && (
-        <LaunchWizardModal
-          open={!!selected}
-          onClose={handleWizardClose}
-          onLaunched={() => {
-            // Wizard shows its own success screen — we just need the grid
-            // to refresh once the user closes.
-            window.dispatchEvent(new CustomEvent('launchpad:refresh'));
-          }}
-          listingId={selected.id}
-          listingTitle={selected.title}
-          listingDescription={selected.description}
-          listingImageUrl={selected.imageUrl}
-          listingUrl={
-            typeof window !== 'undefined'
-              ? `${window.location.origin}${selected.path}`
-              : `https://bolty.network${selected.path}`
-          }
-          listingPath={selected.path}
-        />
-      )}
+      {wizard}
     </>
   );
 }
