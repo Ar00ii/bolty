@@ -635,7 +635,6 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         orderBy,
         include: {
           user: { select: { username: true, avatarUrl: true } },
-          _count: { select: { votes: true } },
         },
       }),
       this.prisma.repository.count({ where }),
