@@ -1007,9 +1007,9 @@ function Step2Economics({
           <span className="uppercase tracking-[0.12em] text-[10px] font-medium">Fine print</span>
         </div>
         <div>
-          Flaunch charges 1% on every swap. Bolty takes{' '}
-          <span className="text-white">{BOLTY_PROTOCOL_FEE_PERCENT}%</span> of that for running the
-          launchpad; the rest splits per your slider above.
+          Flaunch charges 1% on every swap. <span className="text-white">Bolty takes 0%</span>{' '}
+          — 100% of that fee splits between you and your token&apos;s
+          community treasury per the slider above.
         </div>
         <div>
           Fair-launch period is 30 min, max buy 0.25% of supply per wallet.
@@ -1104,7 +1104,11 @@ function Step3Review({
         />
         <Row
           label="Bolty protocol fee"
-          value={`${BOLTY_PROTOCOL_FEE_PERCENT}% of swap fees → ${BOLTY_TREASURY_ADDRESS.slice(0, 6)}…${BOLTY_TREASURY_ADDRESS.slice(-4)}`}
+          value={
+            BOLTY_PROTOCOL_FEE_PERCENT === 0
+              ? '0% — 100% of swap fees go to you + community'
+              : `${BOLTY_PROTOCOL_FEE_PERCENT}% of swap fees → ${BOLTY_TREASURY_ADDRESS.slice(0, 6)}…${BOLTY_TREASURY_ADDRESS.slice(-4)}`
+          }
         />
         <Row label="Network" value="Base (chain 8453)" />
         <Row
