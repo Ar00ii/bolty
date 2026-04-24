@@ -884,14 +884,18 @@ function Row({
                 </span>
               )}
             </div>
-            <div className="text-[10.5px] text-zinc-200 font-light flex items-center gap-1">
+            <div className="text-[10.5px] font-light text-zinc-200 truncate">
               <span style={{ color: accent }}>{TYPE_LABEL[listing.type]}</span>
+              <span className="text-zinc-600"> · </span>
+              <span className="text-zinc-300 whitespace-nowrap">
+                {timeAgo(listing.createdAt)} ago
+              </span>
               {(listing.tags || []).slice(0, 2).map((t) => (
-                <span key={t} className="text-zinc-300">
-                  · {t}
+                <span key={t} className="hidden md:inline">
+                  <span className="text-zinc-600"> · </span>
+                  <span className="text-zinc-300">{t}</span>
                 </span>
               ))}
-              <span className="text-zinc-300">· {timeAgo(listing.createdAt)} ago</span>
             </div>
           </div>
         </div>
