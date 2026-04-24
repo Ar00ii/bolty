@@ -623,49 +623,59 @@ function NewLaunchesTicker({
   const doubled = [...items, ...items];
   return (
     <section className="px-6 md:px-10 mb-2">
-      <div
-        className="mx-auto max-w-[1400px] relative overflow-hidden rounded-lg py-2"
-        style={{
-          background: 'linear-gradient(90deg, rgba(34,197,94,0.05), rgba(131,110,249,0.05))',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-        }}
-      >
-        <div
-          className="flex items-center gap-1.5 px-3 text-[10.5px] uppercase tracking-[0.16em] text-[#22c55e] font-medium whitespace-nowrap absolute left-0 top-0 bottom-0 z-10 pr-3"
-          style={{
-            background: 'linear-gradient(90deg, rgba(10,10,14,0.95) 70%, transparent)',
-          }}
-        >
-          <Sparkles className="w-3 h-3" strokeWidth={2} />
+      <div className="mx-auto max-w-[1400px]">
+        <div className="flex items-center gap-2 mb-1.5 text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
           New launches
+          <span className="h-px flex-1 bg-white/[0.06]" />
         </div>
         <div
-          className="flex gap-6 whitespace-nowrap pl-36"
+          className="relative overflow-hidden rounded-lg py-2"
           style={{
-            animation: 'bolty-ticker 60s linear infinite',
+            background: 'rgba(255,255,255,0.02)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.05)',
           }}
         >
-          {doubled.map((item, i) => {
-            const Icon = TYPE_ICON[item.type] ?? Package;
-            return (
-              <Link
-                href={`/market/agents/${item.id}`}
-                key={`${item.id}-${i}`}
-                className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
-              >
-                <Icon
-                  className="w-3 h-3"
-                  strokeWidth={1.75}
-                  style={{ color: TYPE_ACCENT[item.type] }}
-                />
-                <span>{item.title}</span>
-                <span className="font-mono text-[#b4a7ff]">
-                  {formatEth(item.price)} {item.currency}
-                </span>
-                <span className="text-zinc-300">· {timeAgo(item.createdAt)} ago</span>
-              </Link>
-            );
-          })}
+          <div
+            className="absolute inset-y-0 left-0 w-10 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(90deg, rgba(10,10,14,1), transparent)',
+            }}
+          />
+          <div
+            className="absolute inset-y-0 right-0 w-10 z-10 pointer-events-none"
+            style={{
+              background: 'linear-gradient(270deg, rgba(10,10,14,1), transparent)',
+            }}
+          />
+          <div
+            className="flex gap-7 whitespace-nowrap px-4"
+            style={{
+              animation: 'bolty-ticker 60s linear infinite',
+            }}
+          >
+            {doubled.map((item, i) => {
+              const Icon = TYPE_ICON[item.type] ?? Package;
+              return (
+                <Link
+                  href={`/market/agents/${item.id}`}
+                  key={`${item.id}-${i}`}
+                  className="inline-flex items-center gap-2 text-[12px] font-light text-zinc-300 hover:text-white transition"
+                >
+                  <Icon
+                    className="w-3 h-3"
+                    strokeWidth={1.75}
+                    style={{ color: TYPE_ACCENT[item.type] }}
+                  />
+                  <span className="text-white">{item.title}</span>
+                  <span className="text-zinc-500">{timeAgo(item.createdAt)} ago</span>
+                  <span className="text-zinc-700">·</span>
+                  <span className="font-mono tabular-nums text-zinc-400">
+                    {formatEth(item.price)} {item.currency}
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
       <style jsx>{`
