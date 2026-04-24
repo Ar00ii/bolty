@@ -1,20 +1,28 @@
 /**
- * Launchpad client — Phase 1 (stubbed).
+ * Launchpad client.
  *
- * Sibling to client.ts (which wires the real @flaunch/sdk for the
- * /bolty swap widget). This module is the single boundary between
- * the launchpad UI and Flaunch's SDK. Phase 2 replaces each
- * implementation with the corresponding SDK call
- * (`flaunchIPFSWithRevenueManager`, `buyCoin`, `sellCoin`); the
- * exported signatures stay identical so no UI file changes.
+ * Single boundary between the launchpad UI and Flaunch. Every
+ * function decides at call time:
+ *   - If FLAUNCH_REVENUE_MANAGER env var is set  → call real SDK
+ *   - Otherwise                                  → fall back to stub
  *
- * Phase 1 behavior:
- *  - Every call sleeps a realistic amount then returns fake data
- *  - Launched tokens persist to localStorage so refreshes still
- *    render the post-launch widget — makes UX dogfooding easy
- *  - No wallet interaction; the wizard simulates the "sign" step
+ * The stub path is how /launchpad renders nicely in local dev
+ * without a wallet / contract. The real path does on-chain work
+ * against our deployed RevenueManager.
+ *
+ * No UI file needs to know which path is active — TokenInfo shape
+ * stays identical. Wallet prompts surface via the SDK's own flow
+ * when the real path runs.
  */
 
+'use client';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { parseEther } from 'viem';
+
+import { getPublicClient, getReadSdk, getReadWriteSdk } from './client';
+import { FLAUNCH_REVENUE_MANAGER, isRevenueManagerConfigured } from './config';
 import type {
   BuyInput,
   LaunchInput,
@@ -24,7 +32,16 @@ import type {
   TradeResult,
 } from './types';
 
+// ── Persistence (both paths use it) ───────────────────────────────────
+//
+// The stub uses this as its source of truth.
+// The real path uses a lightweight mapping { listingId → coinAddress }
+// cached here at launch time so getTokenForListing(listingId) can go
+// straight to a single on-chain read instead of scanning the whole
+// RevenueManager. Scanning still works as a fallback via listLaunchedTokens.
+
 const STORE_KEY = 'flaunch:launchpad:stubbed-tokens';
+const MAP_KEY = 'flaunch:launchpad:listing-to-coin';
 
 function readStore(): Record<string, TokenInfo> {
   if (typeof window === 'undefined') return {};
@@ -40,6 +57,34 @@ function writeStore(data: Record<string, TokenInfo>) {
   localStorage.setItem(STORE_KEY, JSON.stringify(data));
 }
 
+interface ListingMap {
+  [listingId: string]: {
+    coinAddress: string;
+    listingPath: string;
+    creatorUsername: string | null;
+    creatorAvatarUrl: string | null;
+    launchedAt: string;
+  };
+}
+
+function readMap(): ListingMap {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem(MAP_KEY) || '{}') as ListingMap;
+  } catch {
+    return {};
+  }
+}
+
+function writeMap(m: ListingMap) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(MAP_KEY, JSON.stringify(m));
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 function fakeHex(seed: string, len: number): string {
   let hex = '';
   for (let i = 0; i < seed.length && hex.length < len; i++) {
@@ -49,18 +94,11 @@ function fakeHex(seed: string, len: number): string {
   return '0x' + hex.slice(0, len);
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// Build a plausible-looking sparkline seeded by the listingId so
-// reloads render the same shape. Values are relative price levels,
-// not absolute — the card normalizes min/max.
 function stubSparkline(seed: string, days = 7): number[] {
   const out: number[] = [];
   let v = 40;
   for (let i = 0; i < days; i++) {
-    const n = (seed.charCodeAt((i + 3) % seed.length) % 17) - 8; // −8..+8
+    const n = (seed.charCodeAt((i + 3) % seed.length) % 17) - 8;
     v = Math.max(1, v + n);
     out.push(v);
   }
@@ -68,13 +106,190 @@ function stubSparkline(seed: string, days = 7): number[] {
 }
 
 function stubPriceChange(seed: string): number {
-  // Deterministic pseudo-random, skewed slightly positive (fresh memecoins).
   const c = seed.charCodeAt(0) + seed.charCodeAt(seed.length - 1);
-  return ((c % 61) - 20) / 2; // −10% .. +20%
+  return ((c % 61) - 20) / 2;
 }
 
-export async function launchToken(input: LaunchInput): Promise<LaunchResult> {
-  // Simulate wallet signing + on-chain confirmation on Base
+// ── Image → base64 ────────────────────────────────────────────────────
+//
+// Flaunch's IPFS metadata path expects `base64Image` (raw base64, no
+// data: prefix). Listing images live on our CDN or on GitHub, so we
+// fetch and convert. If the listing has no image, we ship a tiny
+// purple-square placeholder so the launch still succeeds.
+
+const PLACEHOLDER_B64 =
+  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAI0lEQVR42mP8z8DAwMDAwMjAwMDAwMjAwMDAwMjAwMDAwAAABjkBAYUuOJkAAAAASUVORK5CYII=';
+
+async function imageUrlToBase64(url: string | null): Promise<string> {
+  if (!url || typeof window === 'undefined') return PLACEHOLDER_B64;
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) return PLACEHOLDER_B64;
+    const blob = await res.blob();
+    return await new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const result = String(reader.result || '');
+        // strip the data:image/...;base64, prefix — SDK wants raw base64
+        resolve(result.split(',')[1] || PLACEHOLDER_B64);
+      };
+      reader.onerror = () => resolve(PLACEHOLDER_B64);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return PLACEHOLDER_B64;
+  }
+}
+
+// ── Real-path helpers ─────────────────────────────────────────────────
+
+/** Parse a listing URL stored in token metadata back into /market/…/id. */
+function parseListingPath(websiteUrl: string | undefined | null): string | null {
+  if (!websiteUrl) return null;
+  try {
+    const u = new URL(websiteUrl);
+    const m = u.pathname.match(/\/market\/(agents|repos)\/([a-zA-Z0-9_-]+)/);
+    return m ? m[0] : null;
+  } catch {
+    return null;
+  }
+}
+
+function extractListingId(listingPath: string | null): string | null {
+  if (!listingPath) return null;
+  const m = listingPath.match(/\/market\/(?:agents|repos)\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
+/** Hydrate a coin address into our TokenInfo shape with live on-chain data. */
+async function hydrateCoin(
+  coinAddress: string,
+  fallback: {
+    listingId: string;
+    listingPath: string;
+    launchedAt: string;
+    creatorUsername: string | null;
+    creatorAvatarUrl: string | null;
+  },
+): Promise<TokenInfo | null> {
+  const sdk = getReadSdk() as any;
+  try {
+    const [metaRes, infoRes, priceEthRes, mcapRes] = await Promise.allSettled([
+      sdk.getCoinMetadata(coinAddress),
+      sdk.getCoinInfo(coinAddress),
+      sdk.coinPriceInETH(coinAddress),
+      sdk.coinMarketCapInUSD({ coinAddress }),
+    ]);
+
+    const meta: any = metaRes.status === 'fulfilled' ? metaRes.value : {};
+    const info: any = infoRes.status === 'fulfilled' ? infoRes.value : {};
+    const priceEthStr: string =
+      priceEthRes.status === 'fulfilled' ? String(priceEthRes.value ?? '0') : '0';
+    // SDK returns price in ETH as an 18-decimal integer string; convert to float.
+    const priceEth = Number(priceEthStr) / 1e18 || 0;
+    const mcapUsdStr: string = mcapRes.status === 'fulfilled' ? String(mcapRes.value ?? '0') : '0';
+    const mcapUsd = Number(mcapUsdStr) || 0;
+    // Approximate mcap in ETH with a rough $3000/ETH fallback. The subgraph
+    // would give us a denominated value; this keeps the UI populated until
+    // we wire a price oracle.
+    const marketCapEth = mcapUsd / 3000;
+
+    return {
+      listingId: fallback.listingId,
+      listingPath: fallback.listingPath,
+      tokenAddress: coinAddress,
+      name: meta?.name ?? 'Unknown',
+      symbol: meta?.symbol ?? '???',
+      imageUrl: meta?.image ?? null,
+      flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
+      priceEth,
+      priceChange24hPercent: 0,
+      marketCapEth,
+      volume24hEth: 0,
+      holders: Number(info?.holders ?? 0),
+      sparkline7d: [],
+      creatorUsername: fallback.creatorUsername,
+      creatorAvatarUrl: fallback.creatorAvatarUrl,
+      launchedAt: fallback.launchedAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ── launchToken ───────────────────────────────────────────────────────
+
+async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
+  const { sdk, account } = await getReadWriteSdk();
+  const base64Image = await imageUrlToBase64(input.imageUrl);
+
+  // Symbol normalisation — SDK rejects anything outside [A-Z0-9].
+  const symbol = input.symbol.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'TOKEN';
+  const name = input.name.slice(0, 32) || symbol;
+
+  const sdkAny = sdk as unknown as {
+    flaunchIPFSWithRevenueManager: (p: any) => Promise<`0x${string}`>;
+    getPoolCreatedFromTx: (hash: `0x${string}`) => Promise<any>;
+  };
+
+  const txHash = await sdkAny.flaunchIPFSWithRevenueManager({
+    name,
+    symbol,
+    fairLaunchPercent: 0,
+    fairLaunchDuration: 30 * 60,
+    initialMarketCapUSD: 20_000,
+    creator: account,
+    creatorFeeAllocationPercent: Math.max(0, Math.min(100, input.creatorSharePercent)),
+    revenueManagerInstanceAddress: FLAUNCH_REVENUE_MANAGER,
+    metadata: {
+      base64Image,
+      description: input.description,
+      websiteUrl: input.websiteUrl,
+    },
+  });
+
+  // Wait for on-chain confirmation before reading the coin address.
+  const publicClient = getPublicClient();
+  await publicClient.waitForTransactionReceipt({ hash: txHash });
+
+  let coinAddress: string = '';
+  try {
+    const resolved: any = await sdkAny.getPoolCreatedFromTx(txHash);
+    coinAddress =
+      resolved?.coinAddress ??
+      resolved?.address ??
+      resolved?.flaunch ??
+      resolved?.pool?.coinAddress ??
+      '';
+  } catch {
+    /* best-effort — transaction succeeded but we can't parse the address */
+  }
+
+  // Cache the mapping so getTokenForListing(listingId) can resolve
+  // without scanning the whole RevenueManager.
+  if (coinAddress) {
+    const map = readMap();
+    map[input.listingId] = {
+      coinAddress,
+      listingPath: input.listingPath,
+      creatorUsername: input.creatorUsername,
+      creatorAvatarUrl: input.creatorAvatarUrl,
+      launchedAt: new Date().toISOString(),
+    };
+    writeMap(map);
+  }
+
+  return {
+    tokenAddress: coinAddress || txHash,
+    txHash,
+    flaunchUrl: coinAddress
+      ? `https://flaunch.gg/base/coin/${coinAddress}`
+      : `https://basescan.org/tx/${txHash}`,
+    launchedAt: new Date().toISOString(),
+  };
+}
+
+async function stubLaunchToken(input: LaunchInput): Promise<LaunchResult> {
   await sleep(2200);
   const tokenAddress = fakeHex(input.listingId + ':token', 40);
   const token: TokenInfo = {
@@ -106,16 +321,94 @@ export async function launchToken(input: LaunchInput): Promise<LaunchResult> {
   };
 }
 
+export async function launchToken(input: LaunchInput): Promise<LaunchResult> {
+  return isRevenueManagerConfigured() ? realLaunchToken(input) : stubLaunchToken(input);
+}
+
+// ── getTokenForListing ────────────────────────────────────────────────
+
+async function realGetTokenForListing(listingId: string): Promise<TokenInfo | null> {
+  const entry = readMap()[listingId];
+  if (!entry) return null;
+  return hydrateCoin(entry.coinAddress, {
+    listingId,
+    listingPath: entry.listingPath,
+    launchedAt: entry.launchedAt,
+    creatorUsername: entry.creatorUsername,
+    creatorAvatarUrl: entry.creatorAvatarUrl,
+  });
+}
+
 export async function getTokenForListing(listingId: string): Promise<TokenInfo | null> {
+  if (isRevenueManagerConfigured()) return realGetTokenForListing(listingId);
   await sleep(60);
   return readStore()[listingId] ?? null;
 }
 
+// ── listLaunchedTokens ────────────────────────────────────────────────
+
+async function realListLaunchedTokens(): Promise<TokenInfo[]> {
+  const sdk = getReadSdk() as unknown as {
+    revenueManagerAllTokensInManager: (p: {
+      revenueManagerAddress: string;
+      sortByDesc?: boolean;
+    }) => Promise<Array<{ flaunch: `0x${string}`; tokenId: bigint }>>;
+    getCoinMetadataFromTokenIds: (items: Array<{ flaunch: `0x${string}`; tokenId: bigint }>) => Promise<any[]>;
+  };
+  try {
+    const raw = await sdk.revenueManagerAllTokensInManager({
+      revenueManagerAddress: FLAUNCH_REVENUE_MANAGER as string,
+      sortByDesc: true,
+    });
+    if (!raw?.length) return [];
+
+    const metas = await sdk.getCoinMetadataFromTokenIds(raw);
+    const map = readMap();
+
+    // Build a list merging on-chain metadata with our local mapping for
+    // creator attribution + listingPath fallback.
+    const tokens: TokenInfo[] = [];
+    for (let i = 0; i < metas.length; i++) {
+      const meta: any = metas[i];
+      const coinAddress: string = meta?.coinAddress ?? meta?.address ?? '';
+      if (!coinAddress) continue;
+
+      // Prefer the explicit listing URL baked into metadata when we launched.
+      const websiteUrl: string | undefined = meta?.external_link ?? meta?.website_url;
+      const pathFromMeta = parseListingPath(websiteUrl);
+      const listingId = extractListingId(pathFromMeta);
+      const cached = listingId ? map[listingId] : undefined;
+
+      tokens.push({
+        listingId: listingId ?? coinAddress,
+        listingPath: pathFromMeta ?? cached?.listingPath ?? '/launchpad',
+        tokenAddress: coinAddress,
+        name: meta?.name ?? 'Unknown',
+        symbol: meta?.symbol ?? '???',
+        imageUrl: meta?.image ?? null,
+        flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
+        priceEth: 0,
+        priceChange24hPercent: 0,
+        marketCapEth: 0,
+        volume24hEth: 0,
+        holders: 0,
+        sparkline7d: [],
+        creatorUsername: cached?.creatorUsername ?? null,
+        creatorAvatarUrl: cached?.creatorAvatarUrl ?? null,
+        launchedAt: cached?.launchedAt ?? new Date().toISOString(),
+      });
+    }
+    return tokens;
+  } catch {
+    return [];
+  }
+}
+
 export async function listLaunchedTokens(): Promise<TokenInfo[]> {
+  if (isRevenueManagerConfigured()) return realListLaunchedTokens();
+
+  // Stub path
   await sleep(80);
-  // Synthesize plausible activity for tokens that have been live >60s so
-  // the grid doesn't look dead. Phase 2 pulls these numbers from the
-  // Flaunch subgraph and this block evaporates.
   const now = Date.now();
   return Object.values(readStore())
     .map((t) => {
@@ -124,8 +417,7 @@ export async function listLaunchedTokens(): Promise<TokenInfo[]> {
       return {
         ...t,
         sparkline7d: t.sparkline7d?.length ? t.sparkline7d : stubSparkline(t.tokenAddress),
-        priceChange24hPercent:
-          t.priceChange24hPercent || stubPriceChange(t.tokenAddress),
+        priceChange24hPercent: t.priceChange24hPercent || stubPriceChange(t.tokenAddress),
         volume24hEth: t.volume24hEth || Number((Math.random() * 3).toFixed(3)),
         holders: t.holders > 1 ? t.holders : 2 + Math.floor(Math.random() * 40),
       };
@@ -133,10 +425,37 @@ export async function listLaunchedTokens(): Promise<TokenInfo[]> {
     .sort((a, b) => new Date(b.launchedAt).getTime() - new Date(a.launchedAt).getTime());
 }
 
+// ── buy / sell ────────────────────────────────────────────────────────
+
+async function realBuy(input: BuyInput): Promise<TradeResult> {
+  const { sdk } = await getReadWriteSdk();
+  const amountIn = parseEther((input.ethAmount || '0') as `${number}`);
+  const txHash = await (sdk as any).buyCoin({
+    coinAddress: input.tokenAddress,
+    slippagePercent: input.slippagePercent,
+    swapType: 'EXACT_IN',
+    amountIn,
+  });
+  return { txHash, received: input.ethAmount, receivedSymbol: 'tokens' };
+}
+
+async function realSell(input: SellInput): Promise<TradeResult> {
+  const { sdk } = await getReadWriteSdk();
+  // SDK expects token amount as a bigint with 18 decimals.
+  const tokens = Number(input.tokenAmount || '0');
+  const amountIn = BigInt(Math.floor(tokens * 1e18));
+  const txHash = await (sdk as any).sellCoin({
+    coinAddress: input.tokenAddress,
+    amountIn,
+    slippagePercent: input.slippagePercent,
+  });
+  return { txHash, received: input.tokenAmount, receivedSymbol: 'ETH' };
+}
+
 export async function buyLaunchpadToken(input: BuyInput): Promise<TradeResult> {
+  if (isRevenueManagerConfigured()) return realBuy(input);
   await sleep(1400);
   const eth = Number(input.ethAmount) || 0;
-  // arbitrary fake curve — real curve comes from the v4 pool in Phase 2
   const tokens = eth / 0.00000012;
   return {
     txHash: fakeHex(input.tokenAddress + ':buy:' + Date.now(), 64),
@@ -146,6 +465,7 @@ export async function buyLaunchpadToken(input: BuyInput): Promise<TradeResult> {
 }
 
 export async function sellLaunchpadToken(input: SellInput): Promise<TradeResult> {
+  if (isRevenueManagerConfigured()) return realSell(input);
   await sleep(1400);
   const tokens = Number(input.tokenAmount) || 0;
   const eth = tokens * 0.00000012;
@@ -156,8 +476,9 @@ export async function sellLaunchpadToken(input: SellInput): Promise<TradeResult>
   };
 }
 
-/** Dev-only: wipe stubbed state. No-op in Phase 2. */
+/** Dev-only: wipe stubbed state. No-op in real mode. */
 export function _resetStubbedState(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORE_KEY);
+  localStorage.removeItem(MAP_KEY);
 }
