@@ -113,32 +113,81 @@ function stubPriceChange(seed: string): number {
 // ── Image → base64 ────────────────────────────────────────────────────
 //
 // Flaunch's IPFS metadata path expects `base64Image` (raw base64, no
-// data: prefix). Listing images live on our CDN or on GitHub, so we
-// fetch and convert. If the listing has no image, we ship a tiny
-// purple-square placeholder so the launch still succeeds.
+// data: prefix). The web2 API rejects images under a minimum size —
+// our previous 16×16 placeholder hit that and produced a 400.
+//
+// Strategy now:
+//   1. If the listing has an image URL and we can fetch it (CORS-ok),
+//      use that.
+//   2. Otherwise generate a 512×512 branded PNG on a canvas with a
+//      purple→cyan gradient + the token ticker drawn large. Big
+//      enough to pass Flaunch's validation; branded enough to look
+//      intentional, not a default.
 
-const PLACEHOLDER_B64 =
-  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAQAAAC1+jfqAAAAI0lEQVR42mP8z8DAwMDAwMjAwMDAwMjAwMDAwMjAwMDAwAAABjkBAYUuOJkAAAAASUVORK5CYII=';
+async function renderTickerImage(symbol: string): Promise<string> {
+  if (typeof document === 'undefined') return '';
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
 
-async function imageUrlToBase64(url: string | null): Promise<string> {
-  if (!url || typeof window === 'undefined') return PLACEHOLDER_B64;
-  try {
-    const res = await fetch(url, { mode: 'cors' });
-    if (!res.ok) return PLACEHOLDER_B64;
-    const blob = await res.blob();
-    return await new Promise<string>((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = String(reader.result || '');
-        // strip the data:image/...;base64, prefix — SDK wants raw base64
-        resolve(result.split(',')[1] || PLACEHOLDER_B64);
-      };
-      reader.onerror = () => resolve(PLACEHOLDER_B64);
-      reader.readAsDataURL(blob);
-    });
-  } catch {
-    return PLACEHOLDER_B64;
+  // Brand gradient background (same #836EF9 → #06B6D4 used elsewhere)
+  const grad = ctx.createLinearGradient(0, 0, 512, 512);
+  grad.addColorStop(0, '#1a1028');
+  grad.addColorStop(0.5, '#836EF9');
+  grad.addColorStop(1, '#06B6D4');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Subtle corner glow
+  const glow = ctx.createRadialGradient(128, 128, 20, 128, 128, 320);
+  glow.addColorStop(0, 'rgba(255,255,255,0.25)');
+  glow.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Ticker text — auto-shrink for long symbols so it always fits
+  const up = (symbol || 'TOKEN').toUpperCase().slice(0, 8);
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  let size = up.length <= 4 ? 220 : up.length <= 6 ? 160 : 120;
+  ctx.font = `700 ${size}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  ctx.fillText(`$${up}`, 256, 256);
+
+  // "bolty.network" micro-mark bottom
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = `500 18px ui-monospace, monospace`;
+  ctx.fillText('bolty.network · launchpad', 256, 478);
+
+  const dataUrl = canvas.toDataURL('image/png');
+  return dataUrl.split(',')[1] ?? '';
+}
+
+async function imageUrlToBase64(url: string | null, symbol: string): Promise<string> {
+  if (typeof window === 'undefined') return renderTickerImage(symbol);
+  if (url) {
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (res.ok) {
+        const blob = await res.blob();
+        const b64 = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const result = String(reader.result || '');
+            resolve(result.split(',')[1] || '');
+          };
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(blob);
+        });
+        if (b64.length > 2000) return b64; // sanity: reject tiny images
+      }
+    } catch {
+      /* fall through to canvas */
+    }
   }
+  return renderTickerImage(symbol);
 }
 
 // ── Real-path helpers ─────────────────────────────────────────────────
@@ -221,7 +270,9 @@ async function hydrateCoin(
 
 async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
   const { sdk, account } = await getReadWriteSdk();
-  const base64Image = await imageUrlToBase64(input.imageUrl);
+  // Symbol (normalised below) is used as the canvas fallback's label.
+  const symbolForImage = input.symbol.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'TOKEN';
+  const base64Image = await imageUrlToBase64(input.imageUrl, symbolForImage);
 
   // Symbol normalisation — SDK rejects anything outside [A-Z0-9].
   const symbol = input.symbol.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'TOKEN';
