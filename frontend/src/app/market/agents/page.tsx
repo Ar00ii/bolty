@@ -1137,7 +1137,7 @@ function AgentsPageContent() {
   const [negotiateStarting, setNegotiateStarting] = useState(false);
   // Hydrate filters from the URL so deep-links and back-nav keep state.
   const [type, setType] = useState<string>(
-    searchParams.get('type') ?? 'AI_AGENT',
+    searchParams.get('type') ?? 'ALL',
   );
   const [search, setSearch] = useState(searchParams.get('q') ?? '');
   // Debounced mirror — only this value hits the API so typing doesn't
@@ -1240,7 +1240,7 @@ function AgentsPageContent() {
   useEffect(() => {
     if (activeTab !== 'market') return;
     const params = new URLSearchParams();
-    if (type !== 'AI_AGENT') params.set('type', type);
+    if (type !== 'ALL') params.set('type', type);
     if (debouncedSearch) params.set('q', debouncedSearch);
     if (sort !== 'recent') params.set('sort', sort);
     const qs = params.toString();
