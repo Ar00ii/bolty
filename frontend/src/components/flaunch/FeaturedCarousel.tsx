@@ -1,7 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Users } from 'lucide-react';
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  TrendingDown,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -159,18 +167,6 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="flex flex-col justify-end max-w-2xl"
           >
-            <div className="flex items-center gap-2 mb-2 text-[10.5px] uppercase tracking-[0.18em] text-[#b4a7ff] font-medium">
-              <span
-                className="inline-flex items-center justify-center w-5 h-5 rounded"
-                style={{
-                  background: 'rgba(131,110,249,0.2)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
-                }}
-              >
-                ★
-              </span>
-              Featured on Launchpad
-            </div>
             <Link
               href={`/launchpad/${current.tokenAddress}`}
               className="inline-flex items-center gap-3 hover:brightness-110 transition"
@@ -212,6 +208,10 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
                 </div>
               </div>
             </Link>
+
+            <div className="mt-3">
+              <CopyCaButton address={current.tokenAddress} />
+            </div>
 
             {current.description && (
               <p className="mt-4 text-[13px] text-white/70 font-light leading-relaxed line-clamp-2 max-w-xl">
@@ -320,6 +320,54 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 function formatChange(change: number): string {
   const up = change >= 0;
   return `${up ? '+' : '-'}${Math.abs(change).toFixed(2)}%`;
+}
+
+function shortenAddress(addr: string): string {
+  if (!addr || addr.length < 10) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
+function CopyCaButton({ address }: { address: string }) {
+  const [copied, setCopied] = useState(false);
+  const onCopy = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!address || typeof navigator === 'undefined' || !navigator.clipboard) return;
+      navigator.clipboard.writeText(address).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      });
+    },
+    [address],
+  );
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      title={address}
+      className="inline-flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-lg text-[11px] font-mono transition hover:brightness-110"
+      style={{
+        background: 'rgba(10,10,14,0.7)',
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        color: copied ? '#22c55e' : '#e4e4e7',
+      }}
+    >
+      <span
+        className="text-[9.5px] uppercase tracking-[0.16em] font-medium"
+        style={{ color: copied ? '#22c55e' : 'rgba(255,255,255,0.45)' }}
+      >
+        CA
+      </span>
+      <span className="tabular-nums">{shortenAddress(address)}</span>
+      {copied ? (
+        <Check className="w-3 h-3" strokeWidth={2.4} />
+      ) : (
+        <Copy className="w-3 h-3" strokeWidth={2} />
+      )}
+    </button>
+  );
 }
 
 function StatCell({
