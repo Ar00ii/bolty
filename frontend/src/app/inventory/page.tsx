@@ -7,7 +7,6 @@ import {
   Code2,
   ExternalLink,
   GitBranch,
-  Package,
   Shield,
   ShoppingBag,
   Sparkles,
@@ -17,7 +16,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Hero, Stat, StatStrip } from '@/components/ui/app';
+import { Badge, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -237,10 +236,16 @@ export default function InventoryPage() {
     <div className="mk-app-page mx-auto max-w-6xl px-4 sm:px-6 py-8" style={{ maxWidth: '72rem' }}>
       <Hero
         crumbs={
-          <span className="inline-flex items-center gap-1.5">
-            <Package className="w-3 h-3" strokeWidth={2} />
-            Inventory
-          </span>
+          <>
+            <Link
+              href="/market"
+              className="mk-hero__crumb-link"
+            >
+              Market
+            </Link>
+            <span className="mk-hero__crumb-sep">/</span>
+            <span>Your inventory</span>
+          </>
         }
         title="Inventory"
         subtitle="Everything you've published and everything you've bought — rays, tx hashes, sellers, all in one place."
@@ -270,47 +275,6 @@ export default function InventoryPage() {
           <PurchasedTab purchased={data.purchased} onRecovered={() => void load()} />
         )}
         {tab === 'rays' && <RaysTab events={data.rays.recentEvents} total={data.rays.total} />}
-      </div>
-    </div>
-  );
-}
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  accent,
-  suffix,
-}: {
-  label: string;
-  value: number;
-  icon: React.ComponentType<{ className?: string }>;
-  accent: string;
-  suffix?: string;
-}) {
-  return (
-    <div
-      className="relative rounded-xl p-4 overflow-hidden"
-      style={{
-        background: 'linear-gradient(180deg, rgba(20,20,26,0.7), rgba(10,10,14,0.7))',
-        boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.03)',
-      }}
-    >
-      <div
-        className="absolute inset-x-0 top-0 h-px"
-        style={{
-          background: `linear-gradient(90deg, transparent, ${accent}80 50%, transparent)`,
-        }}
-      />
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-zinc-500 mb-2">
-        <span style={{ color: accent }} className="inline-flex">
-          <Icon className="w-3.5 h-3.5" />
-        </span>
-        {label}
-      </div>
-      <div className="text-3xl font-light text-white tabular-nums tracking-[-0.01em]">
-        {value.toLocaleString()}
-        {suffix && <span className="text-sm text-zinc-500 ml-2 font-light">{suffix}</span>}
       </div>
     </div>
   );
@@ -361,55 +325,90 @@ function PublishedTab({ published }: { published: InventoryData['published'] }) 
       />
     );
   }
+  // Merge repos + listings into one unified feed, newest first.
+  // Dense row layout (type / name / meta / rays) replaces the old
+  // section + card split — reads like a ledger, not a gallery.
+  type Row = {
+    id: string;
+    href: string;
+    kind: 'REPO' | 'AGENT' | 'BOT' | 'SCRIPT' | 'OTHER';
+    name: string;
+    meta: string;
+    createdAt: string;
+    rays: number;
+  };
+  const rows: Row[] = [
+    ...published.repos.map((r): Row => ({
+      id: r.id,
+      href: `/market/repos/${r.id}`,
+      kind: 'REPO',
+      name: r.name,
+      meta: `${r.isLocked ? `$${r.lockedPriceUsd} locked` : 'Public'} · ${r.downloadCount} downloads`,
+      createdAt: r.createdAt,
+      rays: r.raysEarned,
+    })),
+    ...published.listings.map((l): Row => {
+      const raw = (l.type || '').toUpperCase();
+      const kind: Row['kind'] =
+        raw === 'AI_AGENT' || raw === 'AGENT'
+          ? 'AGENT'
+          : raw === 'BOT'
+            ? 'BOT'
+            : raw === 'SCRIPT'
+              ? 'SCRIPT'
+              : 'OTHER';
+      return {
+        id: l.id,
+        href: `/market/agents/${l.id}`,
+        kind,
+        name: l.title,
+        meta: `${l.price} ${l.currency} · ${l.status.toLowerCase()}`,
+        createdAt: l.createdAt,
+        rays: l.raysEarned,
+      };
+    }),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return (
-    <div className="space-y-6">
-      {published.repos.length > 0 && (
-        <Section title="Repositories" count={published.repos.length} icon={GitBranch}>
-          <ul className="divide-y divide-white/[0.04]">
-            {published.repos.map((r) => (
-              <li key={r.id}>
-                <Link
-                  href={`/market/repos/${r.id}`}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-center py-3 hover:bg-white/[0.02] px-2 rounded-md transition-colors"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[13px] text-white font-light truncate">{r.name}</div>
-                    <div className="text-[11px] text-zinc-500 font-light truncate">
-                      {r.isLocked ? `$${r.lockedPriceUsd} locked` : 'Public'} ·{' '}
-                      <Sparkles className="w-3 h-3 inline -mt-0.5" /> {r.downloadCount} downloads ·{' '}
-                      {formatDate(r.createdAt)}
-                    </div>
-                  </div>
-                  <RaysBadge rays={r.raysEarned} />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
-      {published.listings.length > 0 && (
-        <Section title="Listings" count={published.listings.length} icon={Bot}>
-          <ul className="divide-y divide-white/[0.04]">
-            {published.listings.map((l) => (
-              <li key={l.id}>
-                <Link
-                  href={`/market/agents/${l.id}`}
-                  className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-center py-3 hover:bg-white/[0.02] px-2 rounded-md transition-colors"
-                >
-                  <div className="min-w-0">
-                    <div className="text-[13px] text-white font-light truncate">{l.title}</div>
-                    <div className="text-[11px] text-zinc-500 font-light truncate">
-                      {l.type} · {l.price} {l.currency} · {l.status.toLowerCase()} ·{' '}
-                      {formatDate(l.createdAt)}
-                    </div>
-                  </div>
-                  <RaysBadge rays={l.raysEarned} />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </Section>
-      )}
+    <div
+      className="mk-list"
+      style={
+        {
+          '--mk-row-cols': '70px minmax(0, 1fr) auto auto',
+        } as React.CSSProperties
+      }
+    >
+      <div className="mk-list__head">
+        <span>Type</span>
+        <span>Name</span>
+        <span style={{ textAlign: 'right' }}>Posted</span>
+        <span style={{ textAlign: 'right' }}>Rays</span>
+      </div>
+      {rows.map((r) => (
+        <Link key={r.id} href={r.href} className="mk-list__row">
+          <span>
+            <Badge
+              variant={r.kind === 'REPO' ? 'info' : 'neutral'}
+              className="uppercase tracking-wider"
+            >
+              {r.kind}
+            </Badge>
+          </span>
+          <span className="min-w-0">
+            <div className="truncate text-[13px] text-white">{r.name}</div>
+            <div className="truncate text-[11px] text-zinc-500">{r.meta}</div>
+          </span>
+          <span
+            className="text-[11px] text-zinc-500 tabular-nums"
+            style={{ textAlign: 'right' }}
+          >
+            {formatDate(r.createdAt)}
+          </span>
+          <span style={{ textAlign: 'right' }}>
+            <RaysBadge rays={r.rays} />
+          </span>
+        </Link>
+      ))}
     </div>
   );
 }
