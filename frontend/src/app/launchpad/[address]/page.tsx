@@ -16,6 +16,7 @@ import React, { useEffect, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
+import { TokenActivityCards } from '@/components/flaunch/TokenActivityCards';
 import {
   buyLaunchpadToken,
   getTokenByAddress,
@@ -199,6 +200,10 @@ export default function TokenDetailPage() {
         <div className="space-y-5 min-w-0">
           <ChartCard token={token} />
           <StatsRow token={token} />
+          <TokenActivityCards
+            tokenAddress={token.tokenAddress}
+            symbol={token.symbol}
+          />
           <AboutCard token={token} />
           <LinksCard token={token} />
         </div>

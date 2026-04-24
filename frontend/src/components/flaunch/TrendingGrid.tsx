@@ -71,9 +71,9 @@ export function TrendingGrid({ tokens }: { tokens: TokenInfo[] }) {
       <div className="flex items-center justify-between mb-3">
         <h2 className="inline-flex items-center gap-2 text-[11.5px] uppercase tracking-[0.18em] text-zinc-400 font-medium">
           <Flame className="w-3.5 h-3.5 text-[#fb7185]" strokeWidth={1.75} />
-          Tokens en tendencia
+          Trending tokens
           <span className="text-[10px] text-zinc-600 font-mono normal-case tracking-normal">
-            últimas 24h
+            last 24h
           </span>
         </h2>
       </div>

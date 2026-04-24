@@ -114,10 +114,10 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
           transition={{ duration: 0.45, ease: 'easeOut' }}
           className="absolute inset-0"
         >
-          {current.imageUrl ? (
+          {current.bannerUrl || current.imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={current.imageUrl}
+              src={current.bannerUrl ?? current.imageUrl ?? ''}
               alt=""
               className="w-full h-full object-cover"
               style={{ filter: 'saturate(110%) brightness(0.7)' }}
@@ -170,7 +170,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               >
                 ★
               </span>
-              Destacado en Launchpad
+              Featured on Launchpad
             </div>
             <Link
               href={`/launchpad/${current.tokenAddress}`}
@@ -222,7 +222,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
 
             <div className="mt-4 flex items-center gap-4 flex-wrap">
               <StatPill
-                label="Precio"
+                label="Price"
                 value={formatUsd(current.priceUsd)}
                 accent="#ffffff"
               />
@@ -232,7 +232,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
                 accent="#e4e4e7"
               />
               <StatPill
-                label="Vol 24h"
+                label="24h Vol"
                 value={`${formatEth(current.volume24hEth)} ETH`}
                 accent="#e4e4e7"
               />
@@ -266,40 +266,45 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
       {/* Navigation controls */}
       {slides.length > 1 && (
         <>
-          <button
-            type="button"
-            onClick={() => go('prev')}
-            aria-label="Anterior"
-            className="absolute left-3 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full text-white/70 hover:text-white transition"
-            style={{
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(6px)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
-            }}
-          >
-            <ChevronLeft className="w-4 h-4" strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            onClick={() => go('next')}
-            aria-label="Siguiente"
-            className="absolute right-3 top-1/2 -translate-y-1/2 grid place-items-center w-9 h-9 rounded-full text-white/70 hover:text-white transition"
-            style={{
-              background: 'rgba(0,0,0,0.45)',
-              backdropFilter: 'blur(6px)',
-              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
-            }}
-          >
-            <ChevronRight className="w-4 h-4" strokeWidth={2} />
-          </button>
+          {/* Prev / Next cluster — bottom-right so they don't overlap
+               the title + stat pills that sit in the bottom-left */}
+          <div className="absolute right-4 bottom-4 flex items-center gap-1.5 z-10">
+            <button
+              type="button"
+              onClick={() => go('prev')}
+              aria-label="Previous"
+              className="grid place-items-center w-8 h-8 rounded-full text-white/70 hover:text-white transition"
+              style={{
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(6px)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
+              }}
+            >
+              <ChevronLeft className="w-4 h-4" strokeWidth={2} />
+            </button>
+            <button
+              type="button"
+              onClick={() => go('next')}
+              aria-label="Next"
+              className="grid place-items-center w-8 h-8 rounded-full text-white/70 hover:text-white transition"
+              style={{
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(6px)',
+                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.1)',
+              }}
+            >
+              <ChevronRight className="w-4 h-4" strokeWidth={2} />
+            </button>
+          </div>
 
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-3 flex items-center gap-1.5">
+          {/* Dot indicators — bottom-left so they sit under the content */}
+          <div className="absolute left-6 lg:left-8 bottom-5 flex items-center gap-1.5 z-10">
             {slides.map((_, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => setActive(i)}
-                aria-label={`Ir al slide ${i + 1}`}
+                aria-label={`Go to slide ${i + 1}`}
                 className="transition"
                 style={{
                   width: i === active ? 22 : 8,

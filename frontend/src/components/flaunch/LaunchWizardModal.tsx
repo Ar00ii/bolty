@@ -79,6 +79,8 @@ export function LaunchWizardModal({
   // Stored as a data: URL (PNG/JPEG/WEBP) so it renders instantly
   // and we can pass straight to the SDK without re-fetching.
   const [imageDataUrl, setImageDataUrl] = useState<string | null>(listingImageUrl);
+  /** Wide-format banner for the launchpad carousel. Optional. */
+  const [bannerDataUrl, setBannerDataUrl] = useState<string | null>(null);
   // Step 2 form
   const [creatorShare, setCreatorShare] = useState(80);
   const [premineEth, setPremineEth] = useState('0');
@@ -99,6 +101,7 @@ export function LaunchWizardModal({
     setCreatorShare(80);
     setPremineEth('0');
     setImageDataUrl(listingImageUrl);
+    setBannerDataUrl(null);
     setLaunchState('idle');
     setLaunchError(null);
     setResult(null);
@@ -137,6 +140,7 @@ export function LaunchWizardModal({
         symbol: symbol.trim().toUpperCase(),
         description: description.trim() + boltyAttributionFooter(listingUrl),
         imageUrl: imageDataUrl,
+        bannerDataUrl,
         websiteUrl: listingUrl,
         listingPath,
         creatorUsername: user?.username ?? null,
@@ -186,6 +190,8 @@ export function LaunchWizardModal({
             onDescription={setDescription}
             imageUrl={imageDataUrl}
             onImage={setImageDataUrl}
+            bannerUrl={bannerDataUrl}
+            onBanner={setBannerDataUrl}
           />
         ) : step === 2 ? (
           <Step2Economics
@@ -354,6 +360,8 @@ function Step1Metadata({
   onDescription,
   imageUrl,
   onImage,
+  bannerUrl,
+  onBanner,
 }: {
   name: string;
   symbol: string;
@@ -363,24 +371,32 @@ function Step1Metadata({
   onDescription: (v: string) => void;
   imageUrl: string | null;
   onImage: (dataUrl: string | null) => void;
+  bannerUrl: string | null;
+  onBanner: (dataUrl: string | null) => void;
 }) {
   const fileRef = React.useRef<HTMLInputElement>(null);
+  const bannerRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  function pickFile(file: File | null) {
+  function pickFile(
+    file: File | null,
+    opts: { target: 'image' | 'banner'; maxMb: number },
+  ) {
     setError(null);
     if (!file) return;
     if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
       setError('Use a PNG, JPG, or WEBP image.');
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Image must be under 2 MB.');
+    if (file.size > opts.maxMb * 1024 * 1024) {
+      setError(`${opts.target === 'banner' ? 'Banner' : 'Image'} must be under ${opts.maxMb} MB.`);
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
-      onImage(String(reader.result || '') || null);
+      const url = String(reader.result || '') || null;
+      if (opts.target === 'banner') onBanner(url);
+      else onImage(url);
     };
     reader.onerror = () => setError('Could not read the image file.');
     reader.readAsDataURL(file);
@@ -423,7 +439,7 @@ function Step1Metadata({
             type="file"
             accept="image/png,image/jpeg,image/jpg,image/webp"
             className="hidden"
-            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+            onChange={(e) => pickFile(e.target.files?.[0] ?? null, { target: 'image', maxMb: 2 })}
           />
         </button>
         <div className="space-y-2">
@@ -470,6 +486,48 @@ function Step1Metadata({
           placeholder="Short pitch for the token page."
           maxLength={280}
         />
+      </Field>
+
+      {/* Banner — wide-format image used as the launchpad carousel
+          background. Optional; falls back to the square image. */}
+      <Field label="Banner" hint="Wide · 1200×400 recommended · optional">
+        <button
+          type="button"
+          onClick={() => bannerRef.current?.click()}
+          aria-label="Upload banner"
+          className="group relative block w-full rounded-xl overflow-hidden transition hover:brightness-110"
+          style={{
+            aspectRatio: '3 / 1',
+            background: 'rgba(255,255,255,0.04)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
+          }}
+        >
+          {bannerUrl ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
+              <span
+                className="absolute inset-x-0 bottom-0 text-center text-[10px] uppercase tracking-[0.14em] py-1.5 font-medium text-white opacity-0 group-hover:opacity-100 transition"
+                style={{ background: 'rgba(0,0,0,0.6)' }}
+              >
+                Change banner
+              </span>
+            </>
+          ) : (
+            <div className="absolute inset-0 grid place-items-center text-zinc-500 text-[11px] font-medium uppercase tracking-[0.14em]">
+              Upload banner
+            </div>
+          )}
+          <input
+            ref={bannerRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            className="hidden"
+            onChange={(e) =>
+              pickFile(e.target.files?.[0] ?? null, { target: 'banner', maxMb: 4 })
+            }
+          />
+        </button>
       </Field>
     </div>
   );

@@ -64,6 +64,7 @@ interface ListingMap {
     listingPath: string;
     creatorUsername: string | null;
     creatorAvatarUrl: string | null;
+    bannerUrl: string | null;
     launchedAt: string;
   };
 }
@@ -256,6 +257,7 @@ async function hydrateCoin(
     launchedAt: string;
     creatorUsername: string | null;
     creatorAvatarUrl: string | null;
+    bannerUrl: string | null;
   },
 ): Promise<TokenInfo | null> {
   const sdk = getReadSdk() as any;
@@ -301,6 +303,7 @@ async function hydrateCoin(
       name: resolvedName || 'Unknown',
       symbol: resolvedSymbol || '???',
       imageUrl: meta?.image ?? null,
+      bannerUrl: fallback.bannerUrl,
       flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
       priceEth,
       priceUsd,
@@ -321,6 +324,48 @@ async function hydrateCoin(
 }
 
 // ── launchToken ───────────────────────────────────────────────────────
+
+/**
+ * Pin a banner image to IPFS via Pinata. Takes a data URL (from the
+ * file upload in the wizard), POSTs to Pinata's pinFileToIPFS as
+ * multipart/form-data, returns a gateway URL. Best-effort — callers
+ * should treat a throw as "no banner" and continue.
+ */
+async function uploadBannerToPinata(
+  dataUrl: string,
+  opts: { name: string },
+): Promise<string | null> {
+  if (!PINATA_JWT) return null;
+  // data: URL → Blob
+  const [, b64 = ''] = dataUrl.split(',');
+  const mimeMatch = dataUrl.match(/^data:([^;]+);base64,/);
+  const mime = mimeMatch?.[1] ?? 'image/jpeg';
+  const byteStr = atob(b64);
+  const bytes = new Uint8Array(byteStr.length);
+  for (let i = 0; i < byteStr.length; i++) bytes[i] = byteStr.charCodeAt(i);
+  const blob = new Blob([bytes], { type: mime });
+  const file = new File([blob], `${opts.name}.${mime.split('/')[1] || 'jpg'}`, {
+    type: mime,
+  });
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append(
+    'pinataMetadata',
+    JSON.stringify({ name: opts.name, keyvalues: { type: 'bolty-banner' } }),
+  );
+  form.append('pinataOptions', JSON.stringify({ cidVersion: 1 }));
+
+  const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${PINATA_JWT}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Pinata upload failed: ${res.status}`);
+  const data = (await res.json()) as { IpfsHash?: string };
+  if (!data.IpfsHash) return null;
+  return `https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`;
+}
 
 async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
   const { sdk, account } = await getReadWriteSdk();
@@ -395,6 +440,23 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
     /* best-effort — transaction succeeded but we can't parse the address */
   }
 
+  // Upload the optional banner to Pinata (separate pin from the
+  // token metadata) so we can embed a full-bleed carousel hero
+  // without ballooning localStorage with base64. We reuse the
+  // existing Pinata JWT from config. Best-effort: if upload fails,
+  // the token still launches fine without a banner.
+  let bannerUrl: string | null = null;
+  if (input.bannerDataUrl && PINATA_JWT) {
+    try {
+      bannerUrl = await uploadBannerToPinata(input.bannerDataUrl, {
+        name: `${symbol}-banner`,
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[flaunch] banner upload failed', err);
+    }
+  }
+
   // Cache the mapping so getTokenForListing(listingId) can resolve
   // without scanning the whole RevenueManager.
   if (coinAddress) {
@@ -404,6 +466,7 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
       listingPath: input.listingPath,
       creatorUsername: input.creatorUsername,
       creatorAvatarUrl: input.creatorAvatarUrl,
+      bannerUrl,
       launchedAt: new Date().toISOString(),
     };
     writeMap(map);
@@ -429,6 +492,7 @@ async function stubLaunchToken(input: LaunchInput): Promise<LaunchResult> {
     name: input.name,
     symbol: input.symbol,
     imageUrl: input.imageUrl,
+    bannerUrl: input.bannerDataUrl,
     flaunchUrl: `https://flaunch.gg/base/coin/${tokenAddress}`,
     priceEth: 0.00000012,
     priceUsd: 0.0000003,
@@ -469,6 +533,7 @@ async function realGetTokenForListing(listingId: string): Promise<TokenInfo | nu
     launchedAt: entry.launchedAt,
     creatorUsername: entry.creatorUsername,
     creatorAvatarUrl: entry.creatorAvatarUrl,
+    bannerUrl: entry.bannerUrl,
   });
 }
 
@@ -504,6 +569,7 @@ export async function getTokenByAddress(address: string): Promise<TokenInfo | nu
       launchedAt: cacheEntry?.launchedAt ?? new Date().toISOString(),
       creatorUsername: cacheEntry?.creatorUsername ?? null,
       creatorAvatarUrl: cacheEntry?.creatorAvatarUrl ?? null,
+      bannerUrl: cacheEntry?.bannerUrl ?? null,
     });
   }
 
@@ -538,6 +604,7 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
       name: 'Loading…',
       symbol: '…',
       imageUrl: null,
+      bannerUrl: entry.bannerUrl,
       flaunchUrl: `https://flaunch.gg/base/coin/${entry.coinAddress}`,
       priceEth: 0,
       priceUsd: 0,
@@ -594,6 +661,7 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
       name: meta?.name || 'Unknown',
       symbol: meta?.symbol || '???',
       imageUrl: meta?.image ?? null,
+      bannerUrl: cached?.bannerUrl ?? null,
       flaunchUrl: `https://flaunch.gg/base/coin/${coinAddress}`,
       priceEth: 0,
       priceUsd: 0,
