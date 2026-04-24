@@ -25,8 +25,6 @@ import {
   isRevenueManagerConfigured,
 } from '@/lib/flaunch/config';
 import { launchToken, setTokenOverrides } from '@/lib/flaunch/launchpad';
-
-import { ImageCropModal } from './ImageCropModal';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
   EST_LAUNCH_GAS_USD,
@@ -519,8 +517,6 @@ function Step1Metadata({
   const fileRef = React.useRef<HTMLInputElement>(null);
   const bannerRef = React.useRef<HTMLInputElement>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [cropSource, setCropSource] = React.useState<string | null>(null);
-  const [cropTarget, setCropTarget] = React.useState<'image' | 'banner' | null>(null);
 
   function pickFile(
     file: File | null,
@@ -536,29 +532,17 @@ function Step1Metadata({
       setError(`${opts.target === 'banner' ? 'Banner' : 'Image'} must be under ${opts.maxMb} MB.`);
       return;
     }
+    // Direct data URL — no cropper. Whatever the user uploads is what
+    // goes to the SDK, same way it did before PR #309.
     const reader = new FileReader();
     reader.onload = () => {
       const url = String(reader.result || '') || null;
       if (!url) return;
-      // Open the crop/reposition modal so the user can frame the image
-      // the same way a profile-picture editor would.
-      setCropSource(url);
-      setCropTarget(opts.target);
+      if (opts.target === 'banner') onBanner(url);
+      else onImage(url);
     };
     reader.onerror = () => setError('Could not read the image file.');
     reader.readAsDataURL(file);
-  }
-
-  function onCropSave(dataUrl: string) {
-    if (cropTarget === 'banner') onBanner(dataUrl);
-    else if (cropTarget === 'image') onImage(dataUrl);
-    setCropSource(null);
-    setCropTarget(null);
-  }
-
-  function onCropCancel() {
-    setCropSource(null);
-    setCropTarget(null);
   }
 
   const socialCount = [websiteUrl, githubUrl, twitterUrl, telegramUrl, discordUrl].filter(Boolean).length;
@@ -797,13 +781,6 @@ function Step1Metadata({
         </div>
       </motion.div>
 
-      <ImageCropModal
-        open={!!cropSource}
-        source={cropSource}
-        aspect={cropTarget === 'banner' ? 'banner' : 'logo'}
-        onCancel={onCropCancel}
-        onSave={onCropSave}
-      />
     </motion.div>
   );
 }

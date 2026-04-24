@@ -6,8 +6,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { setTokenOverrides, uploadDataUrlToPinata } from '@/lib/flaunch/launchpad';
 import type { TokenInfo } from '@/lib/flaunch/types';
 
-import { ImageCropModal } from './ImageCropModal';
-
 /**
  * Post-launch editor for the token owner. Edits banner + logo + social
  * links, writes to local overrides (merged back into TokenInfo by the
@@ -36,8 +34,6 @@ export function EditTokenModal({
   const [discordUrl, setDiscordUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cropSource, setCropSource] = useState<string | null>(null);
-  const [cropTarget, setCropTarget] = useState<'logo' | 'banner' | null>(null);
 
   useEffect(() => {
     if (!token || !open) return;
@@ -67,22 +63,10 @@ export function EditTokenModal({
     reader.onload = () => {
       const url = typeof reader.result === 'string' ? reader.result : null;
       if (!url) return;
-      setCropSource(url);
-      setCropTarget(target);
+      if (target === 'logo') setLogoDataUrl(url);
+      else setBannerDataUrl(url);
     };
     reader.readAsDataURL(file);
-  }
-
-  function onCropSave(dataUrl: string) {
-    if (cropTarget === 'logo') setLogoDataUrl(dataUrl);
-    else if (cropTarget === 'banner') setBannerDataUrl(dataUrl);
-    setCropSource(null);
-    setCropTarget(null);
-  }
-
-  function onCropCancel() {
-    setCropSource(null);
-    setCropTarget(null);
   }
 
   async function onSave() {
@@ -257,13 +241,6 @@ export function EditTokenModal({
         </div>
       </div>
 
-      <ImageCropModal
-        open={!!cropSource}
-        source={cropSource}
-        aspect={cropTarget === 'banner' ? 'banner' : 'logo'}
-        onCancel={onCropCancel}
-        onSave={onCropSave}
-      />
     </div>
   );
 }
