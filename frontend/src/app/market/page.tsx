@@ -4,16 +4,12 @@ export const dynamic = 'force-dynamic';
 
 import {
   ArrowUpRight,
-  Bot,
   Flame,
-  GitBranch,
   Package,
   Plus,
   Search,
   Sparkles,
   TrendingUp,
-  Zap,
-  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -24,10 +20,15 @@ import { CommunityFeedStrip } from '@/components/feed/CommunityFeedStrip';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, WS_URL } from '@/lib/api/client';
 import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
+import {
+  LISTING_TYPE_ACCENT as TYPE_ACCENT,
+  LISTING_TYPE_ICON as TYPE_ICON,
+  LISTING_TYPE_LABEL as TYPE_LABEL,
+  type ListingType,
+} from '@/lib/listing/types';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 type TypeFilter = 'ALL' | ListingType;
 type SortKey = 'trending' | 'recent' | 'volume' | 'price-low' | 'price-high';
 
@@ -99,30 +100,6 @@ interface NewListingEvent {
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
-
-const TYPE_ICON: Record<ListingType, LucideIcon> = {
-  REPO: GitBranch,
-  BOT: Bot,
-  AI_AGENT: Bot,
-  SCRIPT: Zap,
-  OTHER: Package,
-};
-
-const TYPE_LABEL: Record<ListingType, string> = {
-  REPO: 'Repo',
-  BOT: 'Bot',
-  AI_AGENT: 'Agent',
-  SCRIPT: 'Script',
-  OTHER: 'Other',
-};
-
-const TYPE_ACCENT: Record<ListingType, string> = {
-  REPO: '#06B6D4',
-  BOT: '#836EF9',
-  AI_AGENT: '#836EF9',
-  SCRIPT: '#EC4899',
-  OTHER: '#94a3b8',
-};
 
 function timeAgo(d: string | Date) {
   const diff = Date.now() - new Date(d).getTime();

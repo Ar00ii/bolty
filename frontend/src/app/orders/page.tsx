@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Clock,
   Download,
-  GitBranch,
   Handshake,
   Lock,
   MessageCircle,
@@ -21,7 +20,6 @@ import {
   TrendingUp,
   Truck,
   X,
-  Zap,
   type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -33,10 +31,14 @@ import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
 import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
+import {
+  LISTING_TYPE_ACCENT as TYPE_ACCENT,
+  LISTING_TYPE_ICON as TYPE_ICON,
+  type ListingType,
+} from '@/lib/listing/types';
 
 type OrderStatus = 'PENDING_DELIVERY' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'DISPUTED';
 type EscrowStatus = 'NONE' | 'FUNDED' | 'RELEASED' | 'DISPUTED' | 'RESOLVED' | 'REFUNDED';
-type ListingType = 'REPO' | 'BOT' | 'SCRIPT' | 'AI_AGENT' | 'OTHER';
 type NegotiationStatus = 'ACTIVE' | 'AGREED' | 'REJECTED' | 'EXPIRED';
 type NegotiationMode = 'AI_AI' | 'HUMAN';
 
@@ -89,22 +91,6 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: LucideIcon; colo
   DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
   COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#836EF9' },
   DISPUTED: { label: 'Disputed', icon: AlertTriangle, color: '#ef4444' },
-};
-
-const TYPE_ICON: Record<ListingType, LucideIcon> = {
-  REPO: GitBranch,
-  BOT: Bot,
-  AI_AGENT: Bot,
-  SCRIPT: Zap,
-  OTHER: Package,
-};
-
-const TYPE_ACCENT: Record<ListingType, string> = {
-  REPO: '#06B6D4',
-  BOT: '#836EF9',
-  AI_AGENT: '#836EF9',
-  SCRIPT: '#EC4899',
-  OTHER: '#94a3b8',
 };
 
 type StatusFilter = 'ALL' | OrderStatus;
