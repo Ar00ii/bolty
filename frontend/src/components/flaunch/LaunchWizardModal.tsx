@@ -13,6 +13,7 @@ import {
   Sparkles,
   Twitter,
 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
@@ -154,10 +155,25 @@ export function LaunchWizardModal({
     setLaunchError(null);
     setLaunchState('signing');
     try {
-      // Brief "signing" phase before the "pending" on-chain wait
+      // Brief "signing" phase before the "pending" on-chain wait.
       await new Promise((r) => setTimeout(r, 700));
       setLaunchState('pending');
-      const res = await launchToken({
+      // Race against a 3min ceiling — if the SDK call or the RPC is
+      // stuck we want the UI to surface something actionable instead
+      // of spinning forever with no feedback.
+      const timeoutMs = 180_000;
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                'Launch is taking longer than expected. Check your wallet / network and try again.',
+              ),
+            ),
+          timeoutMs,
+        ),
+      );
+      const launch = launchToken({
         listingId,
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
@@ -171,6 +187,7 @@ export function LaunchWizardModal({
         creatorSharePercent: creatorShare,
         premineEth: premineEth || '0',
       });
+      const res = await Promise.race([launch, timeout]);
       // Persist social links as overrides keyed by the new token
       // address — they render on the carousel / detail page.
       const anySocial =
@@ -190,6 +207,8 @@ export function LaunchWizardModal({
       setLaunchState('success');
       onLaunched(res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[launchpad] launch failed', err);
       setLaunchError(err instanceof Error ? err.message : 'Launch failed');
       setLaunchState('error');
     }
@@ -542,22 +561,37 @@ function Step1Metadata({
     setCropTarget(null);
   }
 
-  const hasAnySocial = !!(
-    websiteUrl || githubUrl || twitterUrl || telegramUrl || discordUrl
-  );
+  const socialCount = [websiteUrl, githubUrl, twitterUrl, telegramUrl, discordUrl].filter(Boolean).length;
+
+  const stagger = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.2, 0.8, 0.2, 1] } },
+  };
 
   return (
-    <div className="space-y-4">
-      {/* ── Identity card: logo + name + ticker side by side ─────────── */}
-      <div className={sectionCls} style={sectionStyle}>
-        <div className="grid grid-cols-[84px_1fr] gap-4 items-start">
+    <motion.div
+      variants={stagger}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-1 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-5"
+    >
+      {/* ── LEFT: visual identity (logo + banner) ────────────────────── */}
+      <motion.div variants={item} className="space-y-4">
+        <div className={sectionCls} style={sectionStyle}>
+          <div className="text-[12.5px] text-zinc-200 font-medium tracking-tight mb-3">
+            Logo
+          </div>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             aria-label="Upload token logo"
-            className="group relative w-[84px] h-[84px] rounded-xl overflow-hidden transition"
+            className="group relative w-full aspect-square rounded-2xl overflow-hidden transition hover:brightness-110"
             style={{
-              background: 'rgba(255,255,255,0.035)',
+              background: 'rgba(255,255,255,0.03)',
               boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
             }}
           >
@@ -566,17 +600,20 @@ function Step1Metadata({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={imageUrl} alt="" className="w-full h-full object-cover" />
                 <span
-                  className="absolute inset-0 grid place-items-center text-[10.5px] text-white opacity-0 group-hover:opacity-100 transition"
-                  style={{ background: 'rgba(0,0,0,0.5)' }}
+                  className="absolute inset-0 grid place-items-center text-[12px] text-white opacity-0 group-hover:opacity-100 transition"
+                  style={{ background: 'rgba(0,0,0,0.55)' }}
                 >
-                  Change
+                  Change logo
                 </span>
               </>
             ) : (
-              <div className="w-full h-full grid place-items-center">
-                <div className="flex flex-col items-center gap-0.5 text-zinc-500">
+              <div className="absolute inset-0 grid place-items-center">
+                <div className="flex flex-col items-center gap-1.5 text-zinc-500">
                   <ImageUpIcon />
-                  <span className="text-[10px] font-medium">Logo</span>
+                  <span className="text-[12px] font-medium">Upload logo</span>
+                  <span className="text-[10.5px] font-light text-zinc-600">
+                    Square · PNG or JPG
+                  </span>
                 </div>
               </div>
             )}
@@ -590,64 +627,15 @@ function Step1Metadata({
               }
             />
           </button>
-          <div className="space-y-3">
-            <Field label="Token name">
-              <input
-                value={name}
-                onChange={(e) => onName(e.target.value.slice(0, 32))}
-                className={inputCls}
-                style={inputStyle}
-                placeholder="Trading Bot"
-                maxLength={32}
-              />
-            </Field>
-            <Field label="Ticker" hint="2–8 chars · A–Z, 0–9">
-              <input
-                value={symbol}
-                onChange={(e) =>
-                  onSymbol(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))
-                }
-                className={inputCls + ' font-mono tracking-wider'}
-                style={inputStyle}
-                placeholder="TBOT"
-                maxLength={8}
-              />
-            </Field>
+        </div>
+
+        <div className={sectionCls} style={sectionStyle}>
+          <div className="flex items-baseline justify-between mb-3">
+            <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+              Banner
+            </span>
+            <span className="text-[11px] text-zinc-500 font-light">Wide 3:1</span>
           </div>
-        </div>
-      </div>
-
-      {error && (
-        <div
-          className="rounded-lg px-3 py-2 text-[11.5px] text-red-300 flex items-center gap-2"
-          style={{
-            background: 'rgba(239,68,68,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)',
-          }}
-        >
-          <AlertTriangle className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
-          {error}
-        </div>
-      )}
-
-      {/* ── Description card ─────────────────────────────────────────── */}
-      <div className={sectionCls} style={sectionStyle}>
-        <Field label="Description" hint={`${description.length}/280`}>
-          <textarea
-            value={description}
-            onChange={(e) => onDescription(e.target.value.slice(0, 280))}
-            rows={3}
-            className={inputCls + ' resize-none leading-relaxed'}
-            style={inputStyle}
-            placeholder="A short pitch — what is this token for? Why should anyone hold it?"
-            maxLength={280}
-          />
-        </Field>
-      </div>
-
-      {/* ── Banner card ──────────────────────────────────────────────── */}
-      <div className={sectionCls} style={sectionStyle}>
-        <Field label="Banner" hint="Wide 3:1 · shown on the launchpad carousel">
           <button
             type="button"
             onClick={() => bannerRef.current?.click()}
@@ -665,7 +653,7 @@ function Step1Metadata({
                 <img src={bannerUrl} alt="" className="w-full h-full object-cover" />
                 <span
                   className="absolute inset-0 grid place-items-center text-[11px] text-white opacity-0 group-hover:opacity-100 transition"
-                  style={{ background: 'rgba(0,0,0,0.5)' }}
+                  style={{ background: 'rgba(0,0,0,0.55)' }}
                 >
                   Change banner
                 </span>
@@ -674,10 +662,7 @@ function Step1Metadata({
               <div className="absolute inset-0 grid place-items-center">
                 <div className="flex flex-col items-center gap-1 text-zinc-500">
                   <ImageUpIcon />
-                  <span className="text-[11.5px] font-medium">Upload banner</span>
-                  <span className="text-[10px] font-light">
-                    PNG or JPG · 1200×400 recommended
-                  </span>
+                  <span className="text-[11px] font-medium">Upload banner</span>
                 </div>
               </div>
             )}
@@ -691,63 +676,126 @@ function Step1Metadata({
               }
             />
           </button>
-        </Field>
-      </div>
+        </div>
+      </motion.div>
 
-      {/* ── Links card ───────────────────────────────────────────────── */}
-      <div className={sectionCls} style={sectionStyle}>
-        <div className="flex items-baseline justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
-              Links
-            </span>
-            {hasAnySocial && (
-              <span
-                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-mono tabular-nums text-[#b4a7ff]"
-                style={{
-                  background: 'rgba(131,110,249,0.14)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
-                }}
-              >
-                {[websiteUrl, githubUrl, twitterUrl, telegramUrl, discordUrl].filter(Boolean).length}
-              </span>
-            )}
+      {/* ── RIGHT: text fields + social links ────────────────────────── */}
+      <motion.div variants={item} className="space-y-4">
+        <div className={sectionCls} style={sectionStyle}>
+          <div className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_180px] gap-3">
+            <Field label="Token name">
+              <input
+                value={name}
+                onChange={(e) => onName(e.target.value.slice(0, 32))}
+                className={inputCls}
+                style={inputStyle}
+                placeholder="Trading Bot"
+                maxLength={32}
+              />
+            </Field>
+            <Field label="Ticker" hint="A–Z, 0–9">
+              <input
+                value={symbol}
+                onChange={(e) =>
+                  onSymbol(e.target.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 8))
+                }
+                className={inputCls + ' font-mono tracking-wider'}
+                style={inputStyle}
+                placeholder="TBOT"
+                maxLength={8}
+              />
+            </Field>
           </div>
-          <span className="text-[11px] text-zinc-500 font-light">All optional</span>
+          <div className="mt-3">
+            <Field label="Description" hint={`${description.length}/280`}>
+              <textarea
+                value={description}
+                onChange={(e) => onDescription(e.target.value.slice(0, 280))}
+                rows={4}
+                className={inputCls + ' resize-none leading-relaxed'}
+                style={inputStyle}
+                placeholder="A short pitch — what is this token for? Why should anyone hold it?"
+                maxLength={280}
+              />
+            </Field>
+          </div>
         </div>
-        <div className="space-y-2">
-          <SocialInput
-            icon={<Globe className="w-4 h-4" />}
-            placeholder="Website — https://your-site.com"
-            value={websiteUrl}
-            onChange={onWebsiteUrl}
-          />
-          <SocialInput
-            icon={<GithubMark16 />}
-            placeholder="GitHub — https://github.com/you/repo"
-            value={githubUrl}
-            onChange={onGithubUrl}
-          />
-          <SocialInput
-            icon={<Twitter className="w-4 h-4" />}
-            placeholder="X — https://x.com/yourhandle"
-            value={twitterUrl}
-            onChange={onTwitterUrl}
-          />
-          <SocialInput
-            icon={<Send className="w-4 h-4" />}
-            placeholder="Telegram — https://t.me/yourgroup"
-            value={telegramUrl}
-            onChange={onTelegramUrl}
-          />
-          <SocialInput
-            icon={<DiscordMark />}
-            placeholder="Discord — https://discord.gg/yourserver"
-            value={discordUrl}
-            onChange={onDiscordUrl}
-          />
+
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="rounded-lg px-3 py-2 text-[11.5px] text-red-300 flex items-center gap-2"
+              style={{
+                background: 'rgba(239,68,68,0.08)',
+                boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)',
+              }}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className={sectionCls} style={sectionStyle}>
+          <div className="flex items-baseline justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[12.5px] text-zinc-200 font-medium tracking-tight">
+                Links
+              </span>
+              {socialCount > 0 && (
+                <motion.span
+                  key={socialCount}
+                  initial={{ scale: 0.7, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-mono tabular-nums text-[#b4a7ff]"
+                  style={{
+                    background: 'rgba(131,110,249,0.14)',
+                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                  }}
+                >
+                  {socialCount}
+                </motion.span>
+              )}
+            </div>
+            <span className="text-[11px] text-zinc-500 font-light">All optional</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <SocialInput
+              icon={<Globe className="w-4 h-4" />}
+              placeholder="Website"
+              value={websiteUrl}
+              onChange={onWebsiteUrl}
+            />
+            <SocialInput
+              icon={<GithubMark16 />}
+              placeholder="GitHub"
+              value={githubUrl}
+              onChange={onGithubUrl}
+            />
+            <SocialInput
+              icon={<Twitter className="w-4 h-4" />}
+              placeholder="X / Twitter"
+              value={twitterUrl}
+              onChange={onTwitterUrl}
+            />
+            <SocialInput
+              icon={<Send className="w-4 h-4" />}
+              placeholder="Telegram"
+              value={telegramUrl}
+              onChange={onTelegramUrl}
+            />
+            <SocialInput
+              icon={<DiscordMark />}
+              placeholder="Discord"
+              value={discordUrl}
+              onChange={onDiscordUrl}
+            />
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       <ImageCropModal
         open={!!cropSource}
@@ -756,7 +804,7 @@ function Step1Metadata({
         onCancel={onCropCancel}
         onSave={onCropSave}
       />
-    </div>
+    </motion.div>
   );
 }
 

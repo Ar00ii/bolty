@@ -190,41 +190,62 @@ function LaunchpadPageContent() {
       {/* Top banner carousel + leaderboard — nearly edge-to-edge with a
           hairline margin on each side so the blocks don't fuse into
           the sidebar / viewport edge. OUTSIDE the mk-app-page wrapper
-          because that shell caps children at max-width: 1280px. */}
+          because that shell caps children at max-width: 1280px.
+          When the launch form is open we hide the leaderboard so the
+          user can focus on the form + banners only. */}
       {hasAny && tokens && (
         <div className="w-full font-light px-2 pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-2 items-stretch">
+          <div
+            className={
+              launchOpen
+                ? 'grid grid-cols-1 gap-2 items-stretch'
+                : 'grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_420px] gap-2 items-stretch'
+            }
+          >
             <FeaturedCarousel tokens={tokens} />
-            <TokenLeaderboard tokens={tokens} />
+            {!launchOpen && <TokenLeaderboard tokens={tokens} />}
           </div>
         </div>
       )}
 
       {/* Inline launch form — replaces the previous modal. Shown only
-          when the user clicks "Launch yours" above. Narrow container
-          so it doesn't span the whole page, centered under the banners. */}
-      {launchOpen && (
-        <div className="w-full px-2 pt-5">
-          <div
-            className="mx-auto max-w-[640px] rounded-2xl p-6 md:p-7"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(16,16,22,0.85) 0%, rgba(10,10,14,0.85) 100%)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              backdropFilter: 'blur(12px)',
-              boxShadow: '0 20px 60px -30px rgba(131,110,249,0.35)',
-            }}
+          when the user clicks "Launch yours" above. Wide horizontal
+          layout so the form reads like a full-page app form; the rest
+          of the page (browse area, filters, grid, FAQ) is suppressed
+          until the user closes it. */}
+      <AnimatePresence>
+        {launchOpen && (
+          <motion.div
+            key="launch-inline"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+            className="w-full px-2 pt-5 pb-10"
           >
-            <LaunchYoursModal
-              inline
-              open
-              onClose={() => setLaunchOpen(false)}
-            />
-          </div>
-        </div>
-      )}
+            <div
+              className="mx-auto max-w-[1100px] rounded-2xl p-6 md:p-8"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(16,16,22,0.9) 0%, rgba(10,10,14,0.9) 100%)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(14px)',
+                boxShadow: '0 30px 80px -30px rgba(131,110,249,0.4)',
+              }}
+            >
+              <LaunchYoursModal
+                inline
+                open
+                onClose={() => setLaunchOpen(false)}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Browse area (filters + grid) — uses mk-app-page shell ────── */}
+      {/* ── Browse area (filters + grid) — uses mk-app-page shell.
+          Hidden while the launch form is open so the user can focus. */}
+      {!launchOpen && (
       <div className="mk-app-page">
         {/* Launch CTA + filters bar */}
         <div className="min-w-0 space-y-6">
@@ -392,6 +413,7 @@ function LaunchpadPageContent() {
           <FAQ />
         </div>
       </div>
+      )}
 
 
       <CreatorProfileModal
