@@ -1060,13 +1060,20 @@ function Step3Review({
 
       {launchError && (
         <div
-          className="rounded-lg p-3 text-[12px] text-red-300"
+          className="rounded-lg p-3 text-[12.5px] text-red-200 space-y-1.5"
           style={{
-            background: 'rgba(239,68,68,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+            background: 'rgba(239,68,68,0.1)',
+            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.35)',
           }}
         >
-          {launchError}
+          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] font-medium">
+            <AlertTriangle className="w-3 h-3" /> Launch failed
+          </div>
+          <div className="font-mono text-[11.5px] break-words">{launchError}</div>
+          <div className="text-[11px] text-zinc-400 font-light">
+            Open the browser devtools console for the full stack trace.
+            Every stage logs a <span className="font-mono text-zinc-300">[launchpad]</span> line.
+          </div>
         </div>
       )}
 
