@@ -18,6 +18,7 @@ import {
   UploadedFile,
   BadRequestException,
   Res,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
@@ -187,6 +188,7 @@ export class ReposController {
   ) {}
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
   @Get()
   listRepos(@Query() query: ListReposQuery) {
     return this.reposService.listRepositories(query);
@@ -214,6 +216,7 @@ export class ReposController {
   }
 
   @Public()
+  @Header('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120')
   @Get(':id')
   getRepo(@Param('id') id: string) {
     return this.reposService.getRepository(id);

@@ -34,6 +34,7 @@ import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
+import { getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -1245,16 +1246,28 @@ function ReposMarketPageContent() {
   }, [searchParams]);
 
   const fetchRepos = useCallback(async () => {
-    setLoading(true);
+    const params = new URLSearchParams({ sortBy });
+    if (search) params.set('search', search);
+    if (language && language !== 'All') params.set('language', language);
+    const key = `market:repos:${params.toString()}`;
+
+    // Stale-while-revalidate: seed instantly from cache, skip network if fresh.
+    const cached = getCachedWithStatus<{ data: Repository[] }>(key);
+    if (cached.data) {
+      setRepos(cached.data.data);
+      setLoading(false);
+      if (cached.fresh) return;
+    } else {
+      setLoading(true);
+    }
+
     setError('');
     try {
-      const params = new URLSearchParams({ sortBy });
-      if (search) params.set('search', search);
-      if (language && language !== 'All') params.set('language', language);
       const data = await api.get<{ data: Repository[] }>(`/repos?${params}`);
       setRepos(data.data);
+      setCached(key, data);
     } catch {
-      setError('Failed to load repositories');
+      if (!cached.data) setError('Failed to load repositories');
     } finally {
       setLoading(false);
     }
