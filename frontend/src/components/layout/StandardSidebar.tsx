@@ -216,13 +216,7 @@ export function StandardSidebar() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
         </div>
-        <span
-          className="text-xl font-light text-white truncate"
-          style={{
-            fontFamily: "'Inter', sans-serif",
-            letterSpacing: '-0.01em',
-          }}
-        >
+        <span className="text-xl font-light text-white truncate">
           BoltyNetwork
         </span>
       </Link>
