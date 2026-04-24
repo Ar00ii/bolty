@@ -390,15 +390,15 @@ export function LaunchWizardModal({
   if (inline) {
     return (
       <div className="relative">
-        <div className="flex items-start justify-between mb-5">
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <div className="text-[17px] text-white font-light tracking-tight">
+            <div className="text-[18px] text-white font-medium tracking-tight">
               {launchState === 'success'
                 ? 'Token launched'
                 : 'Launch a token'}
             </div>
             {launchState !== 'success' && (
-              <div className="text-[12px] text-zinc-500 mt-1 font-light">
+              <div className="text-[13px] text-zinc-400 mt-1 font-light">
                 Pre-filled from your listing. Tweak anything that should
                 differ on-chain. Powered by Flaunch on Base.
               </div>
