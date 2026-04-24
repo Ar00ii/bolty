@@ -149,13 +149,16 @@ export function LaunchYoursModal({
     load();
   }, [open, isAuthenticated, load]);
 
-  async function pick(listing: PickerListing) {
+  const [pickedMode, setPickedMode] = useState<'self' | 'agent'>('self');
+
+  async function pick(listing: PickerListing, mode: 'self' | 'agent' = 'self') {
     // Hydrate full description before opening the wizard
     const hydrated = await hydrateListingDescription({
       id: listing.id,
       title: listing.title,
       type: listing.type,
     });
+    setPickedMode(mode);
     setSelected({
       ...listing,
       description: listing.description || hydrated.description,
@@ -222,7 +225,7 @@ export function LaunchYoursModal({
             },
           }}
         >
-          <ListingRow listing={l} onLaunch={() => pick(l)} />
+          <ListingRow listing={l} onLaunch={(mode) => pick(l, mode)} />
         </motion.li>
       ))}
     </motion.ul>
@@ -230,7 +233,7 @@ export function LaunchYoursModal({
     <ul className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
       {listings.map((l) => (
         <li key={l.id}>
-          <ListingRow listing={l} onLaunch={() => pick(l)} />
+          <ListingRow listing={l} onLaunch={(mode) => pick(l, mode)} />
         </li>
       ))}
     </ul>
@@ -254,6 +257,7 @@ export function LaunchYoursModal({
           : `https://bolty.network${selected.path}`
       }
       listingPath={selected.path}
+      initialLaunchMode={pickedMode}
     />
   ) : null;
 
@@ -345,74 +349,97 @@ function ListingRow({
   onLaunch,
 }: {
   listing: PickerListing;
-  onLaunch: () => void;
+  onLaunch: (mode: 'self' | 'agent') => void;
 }) {
   const Icon = iconFor(listing.type);
   const accent = accentFor(listing.type);
   const disabled = listing.tokenLaunched;
+  const isAgent = listing.type === 'AGENT' || listing.type === 'BOT';
   return (
-    <button
-      type="button"
-      onClick={disabled ? undefined : onLaunch}
-      disabled={disabled}
-      className="group relative flex items-center gap-3 rounded-2xl p-4 w-full text-left transition disabled:cursor-default enabled:hover:brightness-110"
+    <div
+      className="relative rounded-2xl p-4"
       style={{
         background: '#0a0a0c',
         border: '1px solid rgba(255,255,255,0.08)',
       }}
     >
-      <div
-        className="w-12 h-12 rounded-xl overflow-hidden grid place-items-center shrink-0"
-        style={{
-          background: `${accent}14`,
-          border: `1px solid ${accent}40`,
-        }}
-      >
-        {listing.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={listing.imageUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <Icon className="w-4 h-4" strokeWidth={1.75} style={{ color: accent }} />
+      <div className="flex items-center gap-3">
+        <div
+          className="w-12 h-12 rounded-xl overflow-hidden grid place-items-center shrink-0"
+          style={{
+            background: `${accent}14`,
+            border: `1px solid ${accent}40`,
+          }}
+        >
+          {listing.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={listing.imageUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <Icon className="w-4 h-4" strokeWidth={1.75} style={{ color: accent }} />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[14px] text-white font-medium truncate tracking-tight">
+            {listing.title}
+          </div>
+          <div
+            className="text-[11px] mt-0.5 font-medium"
+            style={{ color: accent }}
+          >
+            {listing.typeLabel}
+          </div>
+        </div>
+        {listing.tokenLaunched && (
+          <span
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] shrink-0"
+            style={{
+              color: '#22c55e',
+              background: 'rgba(34,197,94,0.1)',
+              border: '1px solid rgba(34,197,94,0.3)',
+            }}
+          >
+            <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
+            Live
+          </span>
         )}
       </div>
-      <div className="min-w-0 flex-1">
-        <div className="text-[14px] text-white font-medium truncate tracking-tight">
-          {listing.title}
+
+      {!disabled && (
+        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => onLaunch('self')}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110"
+            style={{
+              background: '#000000',
+              border: '1px solid rgba(255,255,255,0.2)',
+            }}
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Launch (no agent)
+          </button>
+          <button
+            type="button"
+            onClick={() => onLaunch('agent')}
+            disabled={!isAgent}
+            title={
+              isAgent
+                ? 'Launch and auto-post the announcement to the community'
+                : 'Only available for AI agent listings'
+            }
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[12.5px] text-white font-medium transition hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background:
+                'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
+              border: '1px solid rgba(131,110,249,0.55)',
+            }}
+          >
+            <Rocket className="w-3.5 h-3.5" />
+            Launch with AI
+          </button>
         </div>
-        <div
-          className="text-[11px] mt-0.5 font-medium"
-          style={{ color: accent }}
-        >
-          {listing.typeLabel}
-        </div>
-      </div>
-      {listing.tokenLaunched ? (
-        <span
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] shrink-0"
-          style={{
-            color: '#22c55e',
-            background: 'rgba(34,197,94,0.1)',
-            border: '1px solid rgba(34,197,94,0.3)',
-          }}
-        >
-          <Sparkles className="w-2.5 h-2.5" strokeWidth={2} />
-          Live
-        </span>
-      ) : (
-        <span
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] text-white font-medium shrink-0 transition"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
-            boxShadow:
-              '0 0 0 1px rgba(131,110,249,0.5), 0 4px 16px -8px rgba(131,110,249,0.6)',
-          }}
-        >
-          <Rocket className="w-3 h-3" />
-          Launch
-        </span>
       )}
-    </button>
+    </div>
   );
 }
 

@@ -50,6 +50,8 @@ interface LaunchWizardModalProps {
    *  its own container + visibility control. Used on the launchpad
    *  page where the form expands inline below the banner row. */
   inline?: boolean;
+  /** Launch mode picked in the listing picker. Defaults to 'self'. */
+  initialLaunchMode?: 'self' | 'agent';
 }
 
 type Step = 1 | 2 | 3;
@@ -73,6 +75,7 @@ export function LaunchWizardModal({
   listingUrl,
   listingPath,
   inline,
+  initialLaunchMode = 'self',
 }: LaunchWizardModalProps) {
   if (inline && !open) return null;
   const { user } = useAuth();
@@ -105,7 +108,7 @@ export function LaunchWizardModal({
   // auto-posts a community announcement on success. When the listing
   // is an AI_AGENT, we ping its webhook to decide whether to even
   // offer this toggle.
-  const [launchMode, setLaunchMode] = useState<'self' | 'agent'>('self');
+  const [launchMode, setLaunchMode] = useState<'self' | 'agent'>(initialLaunchMode);
   const [agentHealth, setAgentHealth] = useState<
     | { healthy: boolean; latencyMs: number; reason?: string }
     | 'checking'
@@ -167,7 +170,7 @@ export function LaunchWizardModal({
     setTwitterUrl('');
     setTelegramUrl('');
     setDiscordUrl('');
-    setLaunchMode('self');
+    setLaunchMode(initialLaunchMode);
     setLaunchState('idle');
     setLaunchError(null);
     setResult(null);

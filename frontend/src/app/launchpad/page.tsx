@@ -229,7 +229,7 @@ function LaunchpadPageContent() {
               style={{
                 background: '#000000',
                 border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 30px 80px -30px rgba(131,110,249,0.35)',
+                boxShadow: '0 30px 80px -30px rgba(0,0,0,0.9)',
               }}
             >
               <LaunchYoursModal
