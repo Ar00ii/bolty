@@ -21,7 +21,6 @@ import { CreatorProfileModal } from '@/components/flaunch/CreatorProfileModal';
 import { CuratedRow } from '@/components/flaunch/CuratedRow';
 import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
-import { TokenDetailPanel } from '@/components/flaunch/TokenDetailPanel';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
 import { Badge, EmptyState, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -69,8 +68,17 @@ function LaunchpadPageContent() {
   });
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [launchOpen, setLaunchOpen] = useState(false);
-  const [detail, setDetail] = useState<TokenInfo | null>(null);
   const [creator, setCreator] = useState<string | null>(null);
+
+  // Click a token card → full-page route. No more side panel; trading
+  // happens on /launchpad/{address} which has the chart + trade UI in
+  // a real layout instead of a sidebar squeeze.
+  const openToken = React.useCallback(
+    (t: TokenInfo) => {
+      router.push(`/launchpad/${t.tokenAddress}`);
+    },
+    [router],
+  );
 
   // Mirror filter state to the URL so /launchpad?sort=gainers is
   // shareable + survives a reload. `replace` (not `push`) avoids
@@ -282,7 +290,7 @@ function LaunchpadPageContent() {
 
       {tokens && tokens.length > 0 && (
         <div className="mt-5">
-          <JustLaunchedTicker tokens={tokens} onOpen={setDetail} />
+          <JustLaunchedTicker tokens={tokens} onOpen={openToken} />
         </div>
       )}
 
@@ -294,7 +302,7 @@ function LaunchpadPageContent() {
               icon={<TrendingUp className="w-3 h-3" strokeWidth={1.75} />}
               accent="#22c55e"
               tokens={topGainers}
-              onOpen={setDetail}
+              onOpen={openToken}
             />
           )}
           {topVolume.length > 0 && (
@@ -303,7 +311,7 @@ function LaunchpadPageContent() {
               icon={<Rocket className="w-3 h-3" strokeWidth={1.75} />}
               accent="#836EF9"
               tokens={topVolume}
-              onOpen={setDetail}
+              onOpen={openToken}
             />
           )}
         </div>
@@ -420,7 +428,7 @@ function LaunchpadPageContent() {
                   <TokenCard
                     token={t}
                     rank={i + 1}
-                    onOpen={setDetail}
+                    onOpen={openToken}
                     onCreatorClick={setCreator}
                   />
                 </motion.div>
@@ -434,14 +442,12 @@ function LaunchpadPageContent() {
 
       <LaunchYoursModal open={launchOpen} onClose={() => setLaunchOpen(false)} />
 
-      <TokenDetailPanel token={detail} onClose={() => setDetail(null)} />
-
       <CreatorProfileModal
         open={!!creator}
         username={creator}
         allTokens={tokens ?? []}
         onClose={() => setCreator(null)}
-        onOpenToken={setDetail}
+        onOpenToken={openToken}
       />
     </div>
   );

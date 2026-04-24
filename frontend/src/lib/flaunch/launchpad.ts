@@ -162,40 +162,38 @@ async function renderTickerImage(symbol: string): Promise<string> {
   ctx.font = `500 18px ui-monospace, monospace`;
   ctx.fillText('bolty.network · launchpad', 256, 478);
 
-  // JPEG at 90% quality — the Flaunch upload API has been flaky on
-  // our PNG output. JPEG is universally accepted by image parsers and
-  // the file lands smaller (~40KB vs ~120KB), which also sidesteps any
-  // payload-size limits on the upload endpoint.
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  return dataUrl.split(',')[1] ?? '';
+  // JPEG at 90% quality — JPEG is universally accepted by image
+  // parsers and the file lands smaller. Return the FULL data: URL
+  // so the SDK can detect mime type (image/jpeg) and pass the right
+  // Content-Type when pinning to Pinata. The SDK strips the prefix
+  // internally before atob().
+  return canvas.toDataURL('image/jpeg', 0.9);
 }
 
+/**
+ * Returns a data URL (data:image/...;base64,xxx) — Pinata path in the
+ * SDK uses the prefix to detect mime type for Content-Type. Stripping
+ * it (as we did before) caused images to upload as image/png even
+ * when they were JPEG, which can break flaunch.gg's metadata reader.
+ */
 async function imageUrlToBase64(url: string | null, symbol: string): Promise<string> {
   if (typeof window === 'undefined') return renderTickerImage(symbol);
   if (url) {
-    // Data URL (user upload) → already have the base64, skip fetch.
-    if (url.startsWith('data:')) {
-      const b64 = url.split(',')[1] || '';
-      if (b64.length > 500) return b64;
-    } else {
-      try {
-        const res = await fetch(url, { mode: 'cors' });
-        if (res.ok) {
-          const blob = await res.blob();
-          const b64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              const result = String(reader.result || '');
-              resolve(result.split(',')[1] || '');
-            };
-            reader.onerror = () => resolve('');
-            reader.readAsDataURL(blob);
-          });
-          if (b64.length > 500) return b64;
-        }
-      } catch {
-        /* fall through to canvas */
+    if (url.startsWith('data:')) return url; // already a data URL, perfect
+    try {
+      const res = await fetch(url, { mode: 'cors' });
+      if (res.ok) {
+        const blob = await res.blob();
+        const dataUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(String(reader.result || ''));
+          reader.onerror = () => resolve('');
+          reader.readAsDataURL(blob);
+        });
+        if (dataUrl && dataUrl.length > 500) return dataUrl;
       }
+    } catch {
+      /* fall through to canvas */
     }
   }
   return renderTickerImage(symbol);
@@ -430,6 +428,43 @@ export async function getTokenForListing(listingId: string): Promise<TokenInfo |
   if (isRevenueManagerConfigured()) return realGetTokenForListing(listingId);
   await sleep(60);
   return readStore()[listingId] ?? null;
+}
+
+/**
+ * Look up a token by its on-chain coin address (used by the
+ * /launchpad/[address] full-page route). In stub mode, scans the
+ * stubbed store for a match. In real mode, hits the SDK's metadata
+ * endpoints directly with creator info pulled from our local cache
+ * if we have it.
+ */
+export async function getTokenByAddress(address: string): Promise<TokenInfo | null> {
+  if (!address) return null;
+  const lower = address.toLowerCase();
+
+  if (isRevenueManagerConfigured()) {
+    // Try to enrich with cached creator/listing info — if we launched it
+    // through our wizard, we'll have the mapping. Anonymous if not.
+    const map = readMap();
+    const cacheEntry = Object.values(map).find(
+      (m) => m.coinAddress.toLowerCase() === lower,
+    );
+    return hydrateCoin(address, {
+      listingId: cacheEntry
+        ? Object.keys(map).find((k) => map[k].coinAddress.toLowerCase() === lower) ?? address
+        : address,
+      listingPath: cacheEntry?.listingPath ?? '/launchpad',
+      launchedAt: cacheEntry?.launchedAt ?? new Date().toISOString(),
+      creatorUsername: cacheEntry?.creatorUsername ?? null,
+      creatorAvatarUrl: cacheEntry?.creatorAvatarUrl ?? null,
+    });
+  }
+
+  // Stub mode — scan the stubbed store
+  await sleep(60);
+  const found = Object.values(readStore()).find(
+    (t) => t.tokenAddress.toLowerCase() === lower,
+  );
+  return found ?? null;
 }
 
 // ── listLaunchedTokens ────────────────────────────────────────────────
