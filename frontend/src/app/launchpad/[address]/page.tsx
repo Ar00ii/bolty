@@ -316,40 +316,75 @@ function CopyableAddr({ addr }: { addr: string }) {
 // ── Chart + stats ───────────────────────────────────────────────────
 
 function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) {
-  // DexScreener allows iframing, but only from the pair-address URL
-  // (token URL redirects and breaks the iframe sandbox). Resolve via
-  // their public API, then embed the pair URL directly. If no pair is
-  // indexed yet (fresh launch, no first trade), fall through to our
-  // own live-polled chart.
-  const [pair, setPair] = useState<{
+  // Chart strategy — try in order until we find a pool:
+  //  1. GeckoTerminal (best iframe support)
+  //  2. DexScreener (fallback via their token→pair API)
+  //  3. Our own live-polled chart if nobody has indexed the pool yet
+  const [pool, setPool] = useState<{
     status: 'loading' | 'found' | 'missing';
     address: string | null;
-  }>({ status: 'loading', address: null });
+    source: 'gecko' | 'dex' | null;
+  }>({ status: 'loading', address: null, source: null });
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`https://api.dexscreener.com/latest/dex/tokens/${token.tokenAddress}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data: any) => {
-        if (cancelled) return;
-        const pairs: any[] = Array.isArray(data?.pairs) ? data.pairs : [];
-        const basePair = pairs.find((p) => p?.chainId === 'base') ?? pairs[0];
-        if (basePair?.pairAddress) {
-          setPair({ status: 'found', address: basePair.pairAddress });
-        } else {
-          setPair({ status: 'missing', address: null });
+    async function resolve() {
+      // GeckoTerminal first — their iframe is the most reliable embed
+      try {
+        const r = await fetch(
+          `https://api.geckoterminal.com/api/v2/networks/base/tokens/${token.tokenAddress}/pools`,
+        );
+        if (r.ok) {
+          const data = await r.json();
+          const poolAddr = data?.data?.[0]?.attributes?.address;
+          if (poolAddr && !cancelled) {
+            setPool({ status: 'found', address: poolAddr, source: 'gecko' });
+            return;
+          }
         }
-      })
-      .catch(() => {
-        if (!cancelled) setPair({ status: 'missing', address: null });
-      });
+      } catch {
+        /* fall through */
+      }
+      // DexScreener fallback
+      try {
+        const r = await fetch(
+          `https://api.dexscreener.com/latest/dex/tokens/${token.tokenAddress}`,
+        );
+        if (r.ok) {
+          const data = await r.json();
+          const pairs: any[] = Array.isArray(data?.pairs) ? data.pairs : [];
+          const basePair = pairs.find((p) => p?.chainId === 'base') ?? pairs[0];
+          if (basePair?.pairAddress && !cancelled) {
+            setPool({ status: 'found', address: basePair.pairAddress, source: 'dex' });
+            return;
+          }
+        }
+      } catch {
+        /* fall through */
+      }
+      if (!cancelled) setPool({ status: 'missing', address: null, source: null });
+    }
+    resolve();
     return () => {
       cancelled = true;
     };
   }, [token.tokenAddress]);
 
   const hasSamples = samples.length >= 2;
-  const showIframe = pair.status === 'found' && pair.address;
+  const showIframe = pool.status === 'found' && !!pool.address;
+
+  const iframeSrc = (() => {
+    if (!showIframe) return '';
+    if (pool.source === 'gecko') {
+      return `https://www.geckoterminal.com/base/pools/${pool.address}?embed=1&info=0&swaps=0`;
+    }
+    return `https://dexscreener.com/base/${pool.address}?embed=1&theme=dark&trades=0&info=0&chartStyle=1&chartType=usd&interval=15`;
+  })();
+
+  const openHref =
+    pool.source === 'gecko' && pool.address
+      ? `https://www.geckoterminal.com/base/pools/${pool.address}`
+      : `https://dexscreener.com/base/${pool.address ?? token.tokenAddress}`;
 
   return (
     <div
@@ -364,7 +399,7 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h2 className="inline-flex items-center gap-2 text-[10.5px] uppercase tracking-[0.16em] text-zinc-400 font-medium">
           {showIframe ? (
-            <>Price chart</>
+            <>Price chart · {pool.source === 'gecko' ? 'GeckoTerminal' : 'DexScreener'}</>
           ) : (
             <>
               <span className="relative inline-flex items-center justify-center w-2 h-2">
@@ -379,7 +414,7 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
           )}
         </h2>
         <a
-          href={`https://dexscreener.com/base/${pair.address ?? token.tokenAddress}`}
+          href={openHref}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-[10.5px] text-zinc-300 hover:text-white transition px-2 py-1 rounded-md"
@@ -388,19 +423,19 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
           }}
         >
-          DexScreener <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
+          Open <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
         </a>
       </div>
 
       {showIframe ? (
         <iframe
-          src={`https://dexscreener.com/base/${pair.address}?embed=1&theme=dark&trades=0&info=0&chartStyle=1&chartType=usd&interval=15`}
+          src={iframeSrc}
           title={`${token.symbol} price chart`}
           className="block w-full"
           style={{ height: 520, border: 'none', background: 'transparent' }}
           loading="lazy"
         />
-      ) : pair.status === 'loading' ? (
+      ) : pool.status === 'loading' ? (
         <div className="px-4 pb-4">
           <div
             className="h-[260px] grid place-items-center"
@@ -412,7 +447,7 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
           >
             <div className="flex items-center gap-2 text-[12px] text-zinc-500 font-light">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Loading chart…
+              Looking for pool…
             </div>
           </div>
         </div>
@@ -434,8 +469,8 @@ function ChartCard({ token, samples }: { token: TokenInfo; samples: number[] }) 
                   Waiting for first trade…
                 </div>
                 <div className="text-[10.5px] text-zinc-500 font-light mt-1 max-w-xs mx-auto">
-                  DexScreener indexes new pools seconds after the first swap.
-                  Until then we show live price samples from direct RPC.
+                  Full chart appears seconds after the first swap. Until then
+                  we show live RPC samples.
                 </div>
               </div>
             </div>
