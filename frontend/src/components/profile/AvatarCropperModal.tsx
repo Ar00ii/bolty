@@ -130,13 +130,17 @@ export function AvatarCropperModal({ open, file, onClose, onSave }: AvatarCroppe
             style={{ pointerEvents: 'none' }}
             aria-label="Avatar preview"
           />
-          {/* Circular mask overlay so users see the final crop */}
+          {/* Circular mask: corners dim (what's cropped away), circle clear.
+              A non-inset box-shadow spreads OUTSIDE the circle element;
+              the parent's overflow-hidden clips it to the square viewport. */}
           <div
             aria-hidden
             className="absolute inset-0 pointer-events-none"
             style={{
-              boxShadow: '0 0 0 9999px rgba(9,9,11,0.55) inset',
+              boxShadow: '0 0 0 9999px rgba(9,9,11,0.72)',
               borderRadius: '50%',
+              outline: '1px solid rgba(255,255,255,0.18)',
+              outlineOffset: '-1px',
             }}
           />
         </div>
@@ -144,7 +148,7 @@ export function AvatarCropperModal({ open, file, onClose, onSave }: AvatarCroppe
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setZoom((z) => Math.max(0.5, z - 0.1))}
+            onClick={() => setZoom((z) => Math.max(1, z - 0.1))}
             className="grid place-items-center w-8 h-8 rounded-md text-zinc-400 hover:text-white"
             style={{ background: 'rgba(255,255,255,0.04)' }}
             aria-label="Zoom out"
@@ -153,7 +157,7 @@ export function AvatarCropperModal({ open, file, onClose, onSave }: AvatarCroppe
           </button>
           <input
             type="range"
-            min={0.5}
+            min={1}
             max={3}
             step={0.01}
             value={zoom}
