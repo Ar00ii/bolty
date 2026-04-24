@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { JustLaunchedTicker } from '@/components/flaunch/JustLaunchedTicker';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
 import { TokenDetailPanel } from '@/components/flaunch/TokenDetailPanel';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
@@ -49,6 +50,34 @@ export default function LaunchpadPage() {
 
   useEffect(() => {
     refresh();
+  }, [refresh]);
+
+  // Poll for updates every 10s so prices + new launches trickle in.
+  // Pauses when the tab is backgrounded to avoid hammering the RPC
+  // while the user isn't looking.
+  useEffect(() => {
+    if (!FLAUNCH_LAUNCHPAD_ENABLED) return;
+    let id: ReturnType<typeof setInterval> | null = null;
+    function start() {
+      if (id) return;
+      id = setInterval(refresh, 10_000);
+    }
+    function stop() {
+      if (id) {
+        clearInterval(id);
+        id = null;
+      }
+    }
+    function onVis() {
+      if (document.visibilityState === 'visible') start();
+      else stop();
+    }
+    start();
+    document.addEventListener('visibilitychange', onVis);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVis);
+    };
   }, [refresh]);
 
   // The picker modal fires this when a launch succeeds so the grid
@@ -157,6 +186,12 @@ export default function LaunchpadPage() {
           />
         </StatStrip>
       </Hero>
+
+      {tokens && tokens.length > 0 && (
+        <div className="mt-5">
+          <JustLaunchedTicker tokens={tokens} onOpen={setDetail} />
+        </div>
+      )}
 
       <HowItWorksStrip />
 
@@ -360,9 +395,24 @@ function TokenCard({
   const up = token.priceChange24hPercent >= 0;
   const changeAbs = Math.abs(token.priceChange24hPercent);
   const isAgent = token.listingPath.includes('/agents/');
+
+  // Flash green/red when price moves between polls.
+  const prevPrice = React.useRef(token.priceEth);
+  const [flash, setFlash] = useState<'up' | 'down' | null>(null);
+  useEffect(() => {
+    if (prevPrice.current === token.priceEth) return;
+    const direction: 'up' | 'down' =
+      token.priceEth > prevPrice.current ? 'up' : 'down';
+    prevPrice.current = token.priceEth;
+    setFlash(direction);
+    const id = setTimeout(() => setFlash(null), 1100);
+    return () => clearTimeout(id);
+  }, [token.priceEth]);
+
   return (
     <button
       type="button"
+      data-flash={flash ?? undefined}
       onClick={() => onOpen(token)}
       className="group block w-full text-left rounded-xl p-3 transition hover:brightness-110"
       style={{
