@@ -472,10 +472,19 @@ async function uploadBannerToPinata(
 }
 
 async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
+  // eslint-disable-next-line no-console
+  console.info('[launchpad] realLaunchToken: starting');
   const { sdk, account } = await getReadWriteSdk();
+  // eslint-disable-next-line no-console
+  console.info('[launchpad] wallet connected', { account });
   // Symbol (normalised below) is used as the canvas fallback's label.
   const symbolForImage = input.symbol.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'TOKEN';
   const base64Image = await imageUrlToBase64(input.imageUrl, symbolForImage);
+  // eslint-disable-next-line no-console
+  console.info('[launchpad] image prepared', {
+    bytes: base64Image.length,
+    head: base64Image.slice(0, 32),
+  });
 
   // Symbol normalisation — SDK rejects anything outside [A-Z0-9].
   const symbol = input.symbol.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) || 'TOKEN';
@@ -488,6 +497,13 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
 
   let txHash: `0x${string}`;
   try {
+    // eslint-disable-next-line no-console
+    console.info('[launchpad] calling flaunchIPFSWithRevenueManager', {
+      name,
+      symbol,
+      hasPinataJwt: !!PINATA_JWT,
+      revenueManager: FLAUNCH_REVENUE_MANAGER,
+    });
     txHash = await sdkAny.flaunchIPFSWithRevenueManager({
       name,
       symbol,
@@ -507,14 +523,14 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
         websiteUrl: input.websiteUrl,
       },
     });
+    // eslint-disable-next-line no-console
+    console.info('[launchpad] tx submitted', { txHash });
   } catch (err) {
     // Surface full details so we can actually debug Flaunch API rejections.
-    // The SDK re-throws axios errors with a message like "Failed to upload
-    // image to Flaunch API: <reason>". Dump the underlying response to the
-    // console so the network reason shows up in devtools.
     // eslint-disable-next-line no-console
-    console.error('[flaunch] launch failed', {
+    console.error('[launchpad] flaunchIPFSWithRevenueManager failed', {
       error: err,
+      message: (err as Error)?.message,
       imageBytesBase64: base64Image.length,
       imageFirstBytes: base64Image.slice(0, 24),
       symbol,
@@ -525,8 +541,12 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
   }
 
   // Wait for on-chain confirmation before reading the coin address.
+  // eslint-disable-next-line no-console
+  console.info('[launchpad] waiting for tx receipt', { txHash });
   const publicClient = getPublicClient();
   await publicClient.waitForTransactionReceipt({ hash: txHash });
+  // eslint-disable-next-line no-console
+  console.info('[launchpad] tx confirmed');
 
   let coinAddress: string = '';
   try {
