@@ -161,7 +161,11 @@ async function renderTickerImage(symbol: string): Promise<string> {
   ctx.font = `500 18px ui-monospace, monospace`;
   ctx.fillText('bolty.network · launchpad', 256, 478);
 
-  const dataUrl = canvas.toDataURL('image/png');
+  // JPEG at 90% quality — the Flaunch upload API has been flaky on
+  // our PNG output. JPEG is universally accepted by image parsers and
+  // the file lands smaller (~40KB vs ~120KB), which also sidesteps any
+  // payload-size limits on the upload endpoint.
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
   return dataUrl.split(',')[1] ?? '';
 }
 
@@ -283,21 +287,39 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
     getPoolCreatedFromTx: (hash: `0x${string}`) => Promise<any>;
   };
 
-  const txHash = await sdkAny.flaunchIPFSWithRevenueManager({
-    name,
-    symbol,
-    fairLaunchPercent: 0,
-    fairLaunchDuration: 30 * 60,
-    initialMarketCapUSD: 20_000,
-    creator: account,
-    creatorFeeAllocationPercent: Math.max(0, Math.min(100, input.creatorSharePercent)),
-    revenueManagerInstanceAddress: FLAUNCH_REVENUE_MANAGER,
-    metadata: {
-      base64Image,
-      description: input.description,
-      websiteUrl: input.websiteUrl,
-    },
-  });
+  let txHash: `0x${string}`;
+  try {
+    txHash = await sdkAny.flaunchIPFSWithRevenueManager({
+      name,
+      symbol,
+      fairLaunchPercent: 0,
+      fairLaunchDuration: 30 * 60,
+      initialMarketCapUSD: 20_000,
+      creator: account,
+      creatorFeeAllocationPercent: Math.max(0, Math.min(100, input.creatorSharePercent)),
+      revenueManagerInstanceAddress: FLAUNCH_REVENUE_MANAGER,
+      metadata: {
+        base64Image,
+        description: input.description,
+        websiteUrl: input.websiteUrl,
+      },
+    });
+  } catch (err) {
+    // Surface full details so we can actually debug Flaunch API rejections.
+    // The SDK re-throws axios errors with a message like "Failed to upload
+    // image to Flaunch API: <reason>". Dump the underlying response to the
+    // console so the network reason shows up in devtools.
+    // eslint-disable-next-line no-console
+    console.error('[flaunch] launch failed', {
+      error: err,
+      imageBytesBase64: base64Image.length,
+      imageFirstBytes: base64Image.slice(0, 24),
+      symbol,
+      name,
+      revenueManager: FLAUNCH_REVENUE_MANAGER,
+    });
+    throw err;
+  }
 
   // Wait for on-chain confirmation before reading the coin address.
   const publicClient = getPublicClient();
