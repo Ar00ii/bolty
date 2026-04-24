@@ -1177,10 +1177,6 @@ function AgentsPageContent() {
   };
 
   const attemptDeploy = () => {
-    if (isMobile()) {
-      setMobileBlock(true);
-      return;
-    }
     router.push('/market/agents/publish');
   };
 
@@ -1191,20 +1187,15 @@ function AgentsPageContent() {
     else setActiveTab('market');
   }, [searchParams]);
 
-  // Open deploy form when other pages redirect with ?new=1 — unless the
-  // user is on mobile, in which case we show the desktop-only notice.
+  // Open deploy form when other pages redirect with ?new=1. The
+  // /publish page is mobile-friendly so no more auto-triggered
+  // mobile-block modal for anyone who lands here via a deep link.
   useEffect(() => {
     if (!isAuthenticated) return;
     if (searchParams.get('new') === '1') {
-      if (isMobile()) {
-        setMobileBlock(true);
-        return;
-      }
-      // Legacy deep-links that used ?new=1 to pop the inline wizard
-      // now redirect to the dedicated /publish page.
       router.replace('/market/agents/publish');
     }
-  }, [searchParams, isAuthenticated]);
+  }, [searchParams, isAuthenticated, router]);
 
   // Open negotiation modal when a deep link lands here with
   // ?negotiate=<listingId> — legacy deep-link. The flow now lives at
