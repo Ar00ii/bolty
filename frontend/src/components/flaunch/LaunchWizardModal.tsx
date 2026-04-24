@@ -24,6 +24,7 @@ import { launchToken } from '@/lib/flaunch/launchpad';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
   EST_LAUNCH_GAS_USD,
+  FLAUNCH_FEE_FREE_THRESHOLD_USD,
   FLAUNCH_LAUNCH_FEE_PERCENT,
   LAUNCH_INITIAL_MARKET_CAP_USD,
 } from '@/lib/flaunch/feature';
@@ -632,7 +633,11 @@ function Step3Review({
         <Row label="Premine" value={`${premineEth || '0'} ETH`} />
         <Row
           label="Flaunch launch fee"
-          value={`${FLAUNCH_LAUNCH_FEE_PERCENT}% · ~$${((LAUNCH_INITIAL_MARKET_CAP_USD * FLAUNCH_LAUNCH_FEE_PERCENT) / 100).toFixed(2)}`}
+          value={
+            LAUNCH_INITIAL_MARKET_CAP_USD < FLAUNCH_FEE_FREE_THRESHOLD_USD
+              ? `Free (below $${(FLAUNCH_FEE_FREE_THRESHOLD_USD / 1000).toFixed(0)}k threshold)`
+              : `${FLAUNCH_LAUNCH_FEE_PERCENT}% · ~$${((LAUNCH_INITIAL_MARKET_CAP_USD * FLAUNCH_LAUNCH_FEE_PERCENT) / 100).toFixed(2)}`
+          }
         />
         <Row
           label="Bolty protocol fee"
@@ -641,7 +646,11 @@ function Step3Review({
         <Row label="Network" value="Base (chain 8453)" />
         <Row
           label="You pay"
-          value={`Premine + ~$${((LAUNCH_INITIAL_MARKET_CAP_USD * FLAUNCH_LAUNCH_FEE_PERCENT) / 100 + EST_LAUNCH_GAS_USD).toFixed(2)} (launch fee + gas)`}
+          value={
+            LAUNCH_INITIAL_MARKET_CAP_USD < FLAUNCH_FEE_FREE_THRESHOLD_USD
+              ? `Premine + ~$${EST_LAUNCH_GAS_USD.toFixed(2)} gas`
+              : `Premine + ~$${((LAUNCH_INITIAL_MARKET_CAP_USD * FLAUNCH_LAUNCH_FEE_PERCENT) / 100 + EST_LAUNCH_GAS_USD).toFixed(2)} (launch fee + gas)`
+          }
           highlight
         />
       </div>

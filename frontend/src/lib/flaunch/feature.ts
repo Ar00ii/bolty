@@ -12,12 +12,19 @@ export const FLAUNCH_LAUNCHPAD_ENABLED =
  *  Must match the protocolFeePercent set on-chain. */
 export const BOLTY_PROTOCOL_FEE_PERCENT = 15;
 
-/** Starting market cap every token launches at (USD). Drives the
- *  flaunching fee (0.1% of this) that Flaunch charges creators up
- *  front on launch. Matches Flaunch's own launch pricing — starting
- *  low keeps the user-facing cost in cents, and tokens with real
- *  volume grow past $10k mcap fast (where our 15% swap cut kicks in). */
-export const LAUNCH_INITIAL_MARKET_CAP_USD = 1_000;
+/** Starting market cap every token launches at (USD). Flaunch's
+ *  protocol has a fee-free threshold around $10k mcap — tokens
+ *  below it launch for gas only, tokens at or above pay a
+ *  proportional flaunching fee. Matches Flaunch's own UI, which
+ *  launches at ~$9k so creators pay only Base gas (cents).
+ *  Tokens with real volume push past $10k fast on their own, which
+ *  is when our 15% swap-fee cut starts flowing through the
+ *  RevenueManager. */
+export const LAUNCH_INITIAL_MARKET_CAP_USD = 9_000;
+
+/** Flaunch's fee-free threshold for launches (USD mcap). Tokens
+ *  launched under this pay no protocol fee. */
+export const FLAUNCH_FEE_FREE_THRESHOLD_USD = 10_000;
 
 /** Flaunch's protocol-level launch fee — 0.1% of starting mcap,
  *  paid in ETH at launch time. Exposed here so the wizard can
