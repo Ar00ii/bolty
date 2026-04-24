@@ -186,12 +186,12 @@ function LaunchpadPageContent() {
   const hasAny = (tokens?.length ?? 0) > 0;
 
   return (
-    <div className="mk-app-page">
+    <>
       {/* Top banner carousel + leaderboard — full-bleed across the top
-          of the dashboard. The carousel dominates the row, leaderboard
-          sits on the right. No hero, no stats strip, no trending row. */}
+          of the dashboard, intentionally OUTSIDE the mk-app-page wrapper
+          (which caps width at 1280px) so it truly spans the viewport. */}
       {hasAny && tokens && (
-        <div className="w-full px-4 sm:px-6 lg:px-10 pt-6">
+        <div className="w-full px-4 sm:px-6 lg:px-10 pt-6 font-light">
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px] gap-6 items-stretch">
             <FeaturedCarousel tokens={tokens} />
             <TokenLeaderboard tokens={tokens} />
@@ -199,8 +199,8 @@ function LaunchpadPageContent() {
         </div>
       )}
 
-      {/* ── Browse area (filters + grid) ─────────────────────────────── */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8" style={{ maxWidth: '80rem' }}>
+      {/* ── Browse area (filters + grid) — uses mk-app-page shell ────── */}
+      <div className="mk-app-page">
         {/* Launch CTA + filters bar */}
         <div className="min-w-0 space-y-6">
           {FLAUNCH_LAUNCHPAD_ENABLED && (
@@ -377,7 +377,7 @@ function LaunchpadPageContent() {
         onClose={() => setCreator(null)}
         onOpenToken={openToken}
       />
-    </div>
+    </>
   );
 }
 
