@@ -4739,9 +4739,14 @@ aside button[data-active='true']::after {
   max-width: 100%;
 }
 
-/* Add bottom breathing room on app-shell pages so content isn't hidden
-   behind the fixed tab bar on phones. */
+/* Add bottom breathing room below the fixed tab bar on phones. This
+   applies to every page that lives inside the app shell (mk-scope),
+   not just the ones that opted into .mk-app-page — so legacy pages
+   like /profile or /api-keys don't have their last row covered by
+   the tab bar either. */
 @media (max-width: 1023px) {
+  .mk-scope > .flex > div > main,
+  .mk-scope main#main-content,
   .mk-app-page {
     padding-bottom: calc(80px + env(safe-area-inset-bottom));
   }

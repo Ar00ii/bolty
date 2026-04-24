@@ -335,6 +335,9 @@ export function PowerNavbar() {
                 style={{
                   top: 'calc(100% + 6px)',
                   minWidth: '260px',
+                  // Cap width to the viewport so the menu can never
+                  // overflow the right edge on narrow desktop breakpoints.
+                  maxWidth: 'calc(100vw - 16px)',
                   maxHeight: 'calc(100vh - 80px)',
                   background: '#121214',
                   border: '1px solid #2a2a30',
@@ -458,11 +461,11 @@ export function PowerNavbar() {
             type="button"
             aria-label="Close menu"
             onClick={() => setNavDrawerOpen(false)}
-            className="lg:hidden fixed inset-0 z-40"
+            className="lg:hidden fixed inset-0 z-[60]"
             style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(2px)' }}
           />
           <aside
-            className="lg:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col"
+            className="lg:hidden fixed top-0 left-0 bottom-0 z-[61] flex flex-col"
             style={{
               width: '86%',
               maxWidth: '320px',
