@@ -155,10 +155,25 @@ export function LaunchWizardModal({
     setLaunchError(null);
     setLaunchState('signing');
     try {
-      // Brief "signing" phase before the "pending" on-chain wait
+      // Brief "signing" phase before the "pending" on-chain wait.
       await new Promise((r) => setTimeout(r, 700));
       setLaunchState('pending');
-      const res = await launchToken({
+      // Race against a 3min ceiling — if the SDK call or the RPC is
+      // stuck we want the UI to surface something actionable instead
+      // of spinning forever with no feedback.
+      const timeoutMs = 180_000;
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                'Launch is taking longer than expected. Check your wallet / network and try again.',
+              ),
+            ),
+          timeoutMs,
+        ),
+      );
+      const launch = launchToken({
         listingId,
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
@@ -172,6 +187,7 @@ export function LaunchWizardModal({
         creatorSharePercent: creatorShare,
         premineEth: premineEth || '0',
       });
+      const res = await Promise.race([launch, timeout]);
       // Persist social links as overrides keyed by the new token
       // address — they render on the carousel / detail page.
       const anySocial =
@@ -191,6 +207,8 @@ export function LaunchWizardModal({
       setLaunchState('success');
       onLaunched(res);
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('[launchpad] launch failed', err);
       setLaunchError(err instanceof Error ? err.message : 'Launch failed');
       setLaunchState('error');
     }
