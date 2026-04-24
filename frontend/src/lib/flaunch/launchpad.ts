@@ -23,6 +23,7 @@ import { parseEther } from 'viem';
 
 import { getPublicClient, getReadSdk, getReadWriteSdk } from './client';
 import { FLAUNCH_REVENUE_MANAGER, isRevenueManagerConfigured, PINATA_JWT } from './config';
+import { LAUNCH_INITIAL_MARKET_CAP_USD } from './feature';
 import type {
   BuyInput,
   LaunchInput,
@@ -300,7 +301,7 @@ async function realLaunchToken(input: LaunchInput): Promise<LaunchResult> {
       symbol,
       fairLaunchPercent: 0,
       fairLaunchDuration: 30 * 60,
-      initialMarketCapUSD: 20_000,
+      initialMarketCapUSD: LAUNCH_INITIAL_MARKET_CAP_USD,
       creator: account,
       creatorFeeAllocationPercent: Math.max(0, Math.min(100, input.creatorSharePercent)),
       revenueManagerInstanceAddress: FLAUNCH_REVENUE_MANAGER,
