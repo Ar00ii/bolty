@@ -72,6 +72,10 @@ export function LaunchWizardModal({
       ? listingDescription.slice(0, 277) + '…'
       : listingDescription,
   );
+  // Step 1: user can override the listing image with an upload.
+  // Stored as a data: URL (PNG/JPEG/WEBP) so it renders instantly
+  // and we can pass straight to the SDK without re-fetching.
+  const [imageDataUrl, setImageDataUrl] = useState<string | null>(listingImageUrl);
   // Step 2 form
   const [creatorShare, setCreatorShare] = useState(80);
   const [premineEth, setPremineEth] = useState('0');
@@ -91,6 +95,7 @@ export function LaunchWizardModal({
     );
     setCreatorShare(80);
     setPremineEth('0');
+    setImageDataUrl(listingImageUrl);
     setLaunchState('idle');
     setLaunchError(null);
     setResult(null);
@@ -128,7 +133,7 @@ export function LaunchWizardModal({
         name: name.trim(),
         symbol: symbol.trim().toUpperCase(),
         description: description.trim() + boltyAttributionFooter(listingUrl),
-        imageUrl: listingImageUrl,
+        imageUrl: imageDataUrl,
         websiteUrl: listingUrl,
         listingPath,
         creatorUsername: user?.username ?? null,
@@ -176,7 +181,8 @@ export function LaunchWizardModal({
             onName={setName}
             onSymbol={(v) => setSymbol(v.toUpperCase())}
             onDescription={setDescription}
-            imageUrl={listingImageUrl}
+            imageUrl={imageDataUrl}
+            onImage={setImageDataUrl}
           />
         ) : step === 2 ? (
           <Step2Economics
@@ -344,6 +350,7 @@ function Step1Metadata({
   onSymbol,
   onDescription,
   imageUrl,
+  onImage,
 }: {
   name: string;
   symbol: string;
@@ -352,29 +359,70 @@ function Step1Metadata({
   onSymbol: (v: string) => void;
   onDescription: (v: string) => void;
   imageUrl: string | null;
+  onImage: (dataUrl: string | null) => void;
 }) {
+  const fileRef = React.useRef<HTMLInputElement>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  function pickFile(file: File | null) {
+    setError(null);
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      setError('Use a PNG, JPG, or WEBP image.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Image must be under 2 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      onImage(String(reader.result || '') || null);
+    };
+    reader.onerror = () => setError('Could not read the image file.');
+    reader.readAsDataURL(file);
+  }
+
   return (
     <div className="space-y-3">
       <p className="text-[12px] text-zinc-400 font-light">
         Pre-filled from your listing. Tweak anything that should differ on-chain.
       </p>
       <div className="grid grid-cols-[72px_1fr] gap-3">
-        <div
-          className="w-[72px] h-[72px] rounded-xl overflow-hidden"
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          aria-label="Upload token image"
+          className="group relative w-[72px] h-[72px] rounded-xl overflow-hidden transition hover:brightness-110"
           style={{
             background: 'rgba(255,255,255,0.04)',
             boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
           }}
         >
           {imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+              <span
+                className="absolute inset-x-0 bottom-0 text-center text-[9px] uppercase tracking-[0.14em] py-1 font-medium text-white opacity-0 group-hover:opacity-100 transition"
+                style={{ background: 'rgba(0,0,0,0.55)' }}
+              >
+                Change
+              </span>
+            </>
           ) : (
-            <div className="w-full h-full grid place-items-center text-zinc-600">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-full h-full grid place-items-center text-zinc-500 text-[9.5px] font-medium uppercase tracking-[0.14em]">
+              Upload
             </div>
           )}
-        </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp"
+            className="hidden"
+            onChange={(e) => pickFile(e.target.files?.[0] ?? null)}
+          />
+        </button>
         <div className="space-y-2">
           <Field label="Token name">
             <input
@@ -398,6 +446,17 @@ function Step1Metadata({
           </Field>
         </div>
       </div>
+      {error && (
+        <div
+          className="rounded-md px-2 py-1.5 text-[11px] text-red-300"
+          style={{
+            background: 'rgba(239,68,68,0.08)',
+            boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.3)',
+          }}
+        >
+          {error}
+        </div>
+      )}
       <Field label="Description" hint={`${description.length}/280`}>
         <textarea
           value={description}
