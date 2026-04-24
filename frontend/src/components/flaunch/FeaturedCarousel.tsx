@@ -213,12 +213,6 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               <CopyCaButton address={current.tokenAddress} />
             </div>
 
-            {current.description && (
-              <p className="mt-4 text-[13px] text-white/70 font-light leading-relaxed line-clamp-2 max-w-xl">
-                {current.description.split('\n')[0]}
-              </p>
-            )}
-
             <div
               className="mt-5 inline-flex items-stretch rounded-xl overflow-hidden self-start"
               style={{
@@ -322,11 +316,6 @@ function formatChange(change: number): string {
   return `${up ? '+' : '-'}${Math.abs(change).toFixed(2)}%`;
 }
 
-function shortenAddress(addr: string): string {
-  if (!addr || addr.length < 10) return addr;
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
 function CopyCaButton({ address }: { address: string }) {
   const [copied, setCopied] = useState(false);
   const onCopy = useCallback(
@@ -346,25 +335,25 @@ function CopyCaButton({ address }: { address: string }) {
       type="button"
       onClick={onCopy}
       title={address}
-      className="inline-flex items-center gap-2 pl-2.5 pr-3 py-1.5 rounded-lg text-[11px] font-mono transition hover:brightness-110"
+      className="inline-flex items-center gap-2.5 pl-3 pr-3.5 py-2 rounded-lg text-[12px] font-mono transition hover:brightness-125"
       style={{
-        background: 'rgba(10,10,14,0.7)',
-        backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        color: copied ? '#22c55e' : '#e4e4e7',
+        background: 'rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        color: copied ? '#22c55e' : '#ffffff',
       }}
     >
       <span
-        className="text-[9.5px] uppercase tracking-[0.16em] font-medium"
-        style={{ color: copied ? '#22c55e' : 'rgba(255,255,255,0.45)' }}
+        className="text-[10px] uppercase tracking-[0.18em] font-medium shrink-0"
+        style={{ color: copied ? '#22c55e' : 'rgba(255,255,255,0.6)' }}
       >
         CA
       </span>
-      <span className="tabular-nums">{shortenAddress(address)}</span>
+      <span className="tabular-nums break-all">{address}</span>
       {copied ? (
-        <Check className="w-3 h-3" strokeWidth={2.4} />
+        <Check className="w-3.5 h-3.5 shrink-0" strokeWidth={2.4} />
       ) : (
-        <Copy className="w-3 h-3" strokeWidth={2} />
+        <Copy className="w-3.5 h-3.5 shrink-0" strokeWidth={2} />
       )}
     </button>
   );
