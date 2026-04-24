@@ -105,13 +105,7 @@ export function UnifiedHeader() {
                 filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.35))',
               }}
             />
-            <span
-              className="text-xl md:text-2xl hidden sm:inline text-white font-light"
-              style={{
-                fontFamily: "'Inter', sans-serif",
-                letterSpacing: '-0.01em',
-              }}
-            >
+            <span className="text-xl md:text-2xl hidden sm:inline text-white font-light">
               BoltyNetwork
             </span>
           </Link>
