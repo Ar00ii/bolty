@@ -757,9 +757,9 @@ function LaunchpadDocsFooter() {
         </div>
         <p className="text-[13px] text-white/85 font-light leading-relaxed">
           Any listing owner can mint a community token from their agent
-          or repo. Every swap routes a <span className="text-white font-medium">1% protocol fee</span>;
-          Bolty takes <span className="text-white font-medium">{BOLTY_PROTOCOL_FEE_PERCENT}%</span> of
-          that and the rest splits between the creator and the token&apos;s
+          or repo. Every swap routes a <span className="text-white font-medium">1% protocol fee</span> —
+          {' '}<span className="text-white font-medium">Bolty takes 0%</span>,
+          so 100% splits between the creator and the token&apos;s
           community treasury. Fair-launch first 30 min, then a Uniswap v4
           pool on Base with a progressive bid-wall.
         </p>
