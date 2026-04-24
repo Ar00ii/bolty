@@ -15,6 +15,11 @@ export interface LaunchInput {
   description: string;
   imageUrl: string | null;
   websiteUrl: string;
+  /** Path to the listing so the launchpad can infer type + link back. */
+  listingPath: string;
+  /** Attribution for the launchpad grid (auth'd user at launch time). */
+  creatorUsername: string | null;
+  creatorAvatarUrl: string | null;
   /** 0-100 percent going to the creator; remainder goes to the
    *  community treasury (buybacks / airdrops). Immutable after launch. */
   creatorSharePercent: number;
@@ -31,6 +36,8 @@ export interface LaunchResult {
 
 export interface TokenInfo {
   listingId: string;
+  /** Path back to the listing (/market/agents/… or /market/repos/…). */
+  listingPath: string;
   tokenAddress: string;
   name: string;
   symbol: string;
@@ -38,9 +45,15 @@ export interface TokenInfo {
   flaunchUrl: string;
   /** Current spot price in ETH (per 1 token). */
   priceEth: number;
+  /** Percentage change in price over last 24h, signed (-100 .. +∞). */
+  priceChange24hPercent: number;
   marketCapEth: number;
   volume24hEth: number;
   holders: number;
+  /** 7 daily points for a mini sparkline (newest last, all >= 0). */
+  sparkline7d: number[];
+  creatorUsername: string | null;
+  creatorAvatarUrl: string | null;
   launchedAt: string;
 }
 

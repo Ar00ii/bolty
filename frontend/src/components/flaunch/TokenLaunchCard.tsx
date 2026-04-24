@@ -121,6 +121,7 @@ export function TokenLaunchCard({
         listingDescription={listingDescription}
         listingImageUrl={listingImageUrl}
         listingUrl={listingUrl}
+        listingPath={listingPath}
       />
     </>
   );

@@ -14,6 +14,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/lib/auth/AuthProvider';
 import { launchToken } from '@/lib/flaunch/launchpad';
 import {
   BOLTY_PROTOCOL_FEE_PERCENT,
@@ -31,6 +32,8 @@ interface LaunchWizardModalProps {
   listingDescription: string;
   listingImageUrl: string | null;
   listingUrl: string;
+  /** Path back to the listing, persisted on the token for launchpad filters. */
+  listingPath: string;
 }
 
 type Step = 1 | 2 | 3;
@@ -52,7 +55,9 @@ export function LaunchWizardModal({
   listingDescription,
   listingImageUrl,
   listingUrl,
+  listingPath,
 }: LaunchWizardModalProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>(1);
   // Step 1 form
   const [name, setName] = useState(listingTitle);
@@ -120,6 +125,9 @@ export function LaunchWizardModal({
         description: description.trim(),
         imageUrl: listingImageUrl,
         websiteUrl: listingUrl,
+        listingPath,
+        creatorUsername: user?.username ?? null,
+        creatorAvatarUrl: user?.avatarUrl ?? null,
         creatorSharePercent: creatorShare,
         premineEth: premineEth || '0',
       });
