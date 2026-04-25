@@ -42,6 +42,6 @@ import { NegotiationsGateway } from './negotiations.gateway';
     ApiKeysService,
     AgentHealthService,
   ],
-  exports: [MarketGateway],
+  exports: [MarketGateway, MarketService],
 })
 export class MarketModule {}
