@@ -222,27 +222,6 @@ export default function BoltyGuardPage() {
     }
   }
 
-  async function onScanRepo() {
-    if (!repoUrl.trim()) {
-      setError('Paste a github.com URL or owner/repo first.');
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const data = await api.post<ScanResponse>('/boltyguard/scan-repo', {
-        url: repoUrl.trim(),
-        isAgent,
-      });
-      setResult(data);
-    } catch (e2) {
-      setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="min-h-screen" style={{ background: '#000000' }}>
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10">
