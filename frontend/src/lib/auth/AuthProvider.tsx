@@ -181,10 +181,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .get<{ data: unknown[] }>('/market?type=AI_AGENT&sortBy=recent')
           .then((r) => r?.data ?? []),
       );
+      // /market/repos consumes the standalone /repos endpoint (Repository
+      // model, not MarketListing), so prefetch THAT — not /market?type=REPO,
+      // which is a different page (the table view of REPO-typed listings).
+      // Cache key must match `market:repos:${params.toString()}` from
+      // /market/repos/page.tsx so the page lands instantly from cache.
       void prefetch('market:repos:sortBy=recent', () =>
-        api
-          .get<{ data: unknown[] }>('/market?type=REPO&sortBy=recent')
-          .then((r) => r?.data ?? []),
+        api.get<{ data: unknown[] }>('/repos?sortBy=recent'),
       );
       void prefetch('market:top-sellers:48', () =>
         api.get('/market/top-sellers?limit=48'),
