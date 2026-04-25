@@ -176,8 +176,14 @@ function MarketScreener() {
         : `market:listings:${sort}:${typeFilter}:${search.trim().toLowerCase()}`;
 
       // If we have a fresh entry for THIS filter, use it + skip fetch.
-      const { data: cachedForFilter, fresh } =
-        getCachedWithStatus<MarketListing[]>(cacheKey);
+      // Marketplace lists tolerate 2 min staleness — listings change
+      // slowly and the user feels filter / nav latency far more than
+      // minor staleness. Matches the window used on /market/agents
+      // and /market/repos.
+      const { data: cachedForFilter, fresh } = getCachedWithStatus<MarketListing[]>(
+        cacheKey,
+        120_000,
+      );
       if (cachedForFilter) {
         setListings(cachedForFilter);
         setLoading(false);
