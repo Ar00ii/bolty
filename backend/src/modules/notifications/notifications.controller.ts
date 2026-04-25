@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Header, Post, Param, Query, UseGuards, Request } from '@nestjs/common';
 import type { Request as ExpressRequest } from 'express';
 
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -23,7 +23,13 @@ export class NotificationsController {
     });
   }
 
-  /** GET /notifications/unread-count */
+  /** GET /notifications/unread-count
+   *
+   *  Browser caches the badge count for 20s. Combined with the 30s
+   *  Redis cache in the service, rapid page navigation never pays
+   *  for a fresh prisma.count round-trip. The `private` directive
+   *  keeps it out of any shared CDN cache (it's per-user). */
+  @Header('Cache-Control', 'private, max-age=20')
   @Get('unread-count')
   async unreadCount(@Request() req: ExpressRequest & { user: { id: string } }) {
     const count = await this.notifications.unreadCount(req.user.id);
