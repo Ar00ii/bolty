@@ -14,6 +14,7 @@ import { AgentsModule } from './modules/agents/agents.module';
 import { AiModule } from './modules/ai/ai.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { StepUpModule } from './modules/auth/step-up.module';
+import { BoltyGuardModule } from './modules/boltyguard/boltyguard.module';
 import { ChartModule } from './modules/chart/chart.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { DmModule } from './modules/dm/dm.module';
@@ -71,6 +72,7 @@ import { UsersModule } from './modules/users/users.module';
     DmModule,
     EscrowModule,
     MarketModule,
+    BoltyGuardModule,
     NotificationsModule,
     OrdersModule,
     ReputationModule,

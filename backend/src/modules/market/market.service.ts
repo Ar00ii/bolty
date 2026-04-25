@@ -13,6 +13,7 @@ import { ethers } from 'ethers';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 import { sanitizeText, isSafeUrl, isSafeUrlResolving } from '../../common/sanitize/sanitize.util';
+import { BoltyGuardService } from '../boltyguard/boltyguard.service';
 import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ReputationService } from '../reputation/reputation.service';
@@ -53,6 +54,7 @@ export class MarketService {
     private readonly reputation: ReputationService,
     private readonly email: EmailService,
     private readonly redis: RedisService,
+    private readonly boltyGuard: BoltyGuardService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -327,6 +329,16 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       },
       include: { seller: { select: { id: true, username: true, avatarUrl: true } } },
     });
+
+    // BoltyGuard: kick off the deep scan in the background so publish
+    // stays fast. The first /market/:id/security read after this
+    // resolves picks up the persisted score. If the seller has no
+    // file uploaded the scan no-ops with score=100.
+    if (created.fileKey) {
+      void this.boltyGuard
+        .scanListing(created.id)
+        .catch((err) => this.logger?.warn?.(`BoltyGuard scan failed: ${err}`));
+    }
 
     if (created.status === 'ACTIVE') {
       this.gateway.emitNewListing({

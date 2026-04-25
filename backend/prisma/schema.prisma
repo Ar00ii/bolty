@@ -115,11 +115,11 @@ model UserWallet {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
-  userId   String
-  address  String
-  label    String? // human label (e.g. "Hardware wallet", "Burner")
-  provider WalletProvider @default(OTHER)
-  isPrimary Boolean @default(false)
+  userId    String
+  address   String
+  label     String? // human label (e.g. "Hardware wallet", "Burner")
+  provider  WalletProvider @default(OTHER)
+  isPrimary Boolean        @default(false)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -505,6 +505,7 @@ model MarketListing {
   apiKeys       AgentApiKey[]
   purchases     MarketPurchase[]
   reviews       MarketReview[]
+  securityScans SecurityScan[]
   // ── Boost / promotion ──────────────────────────────────────────────────────
   // When set in the future, the listing is considered "boosted" and ranks
   // higher in /market browse + appears on the homepage ticker. Cleared
@@ -677,6 +678,46 @@ model AgentApiKey {
 
   @@index([listingId])
   @@map("agent_api_keys")
+}
+
+// ─── BoltyGuard ───────────────────────────────────────────────────────────────
+//
+// Security scan results for marketplace listings. One row per scan; a listing
+// can have many over time as the seller updates the code. The latest row is
+// what the UI surfaces (security badge, launchpad ranking, AI-launch gating).
+
+enum ScanSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+model SecurityScan {
+  id            String        @id @default(cuid())
+  createdAt     DateTime      @default(now())
+  listingId     String
+  listing       MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  // 0-100 score. Below 70 the AI-launch path is gated; below 40 the
+  // listing is flagged unsafe in the marketplace.
+  score         Int
+  // Worst severity finding in this scan. Drives the colour of the
+  // badge in the UI without having to scan the findings array.
+  worstSeverity ScanSeverity?
+  // Findings JSON: array of { rule, severity, file, line, message, fix }.
+  // Free-form so we can grow the structure without migrations.
+  findings      Json
+  // Tooling that produced this scan. Helps us back-fill once we add
+  // semgrep alongside the LLM pass without breaking history.
+  scanner       String        @default("claude")
+  // Snapshot of the file / repo we scanned so the score is reproducible.
+  fileKey       String?
+  // Free-form note from the model (e.g. "Found eval() of LLM output").
+  summary       String?       @db.Text
+
+  @@index([listingId, createdAt])
+  @@map("security_scans")
 }
 
 // ─── Friendships ──────────────────────────────────────────────────────────────
@@ -895,18 +936,18 @@ enum NotificationType {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
   readAt    DateTime?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type    NotificationType
-  title   String
-  body    String?           @db.Text
-  url     String?           // in-app route to navigate to when clicked
-  meta    Json?             // optional payload (listingId, orderId, etc.)
+  type  NotificationType
+  title String
+  body  String?          @db.Text
+  url   String? // in-app route to navigate to when clicked
+  meta  Json? // optional payload (listingId, orderId, etc.)
 
   @@index([userId, createdAt])
   @@index([userId, readAt])
