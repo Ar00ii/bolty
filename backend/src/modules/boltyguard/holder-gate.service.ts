@@ -37,7 +37,13 @@ export class HolderGateService {
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    const rpc = this.config.get<string>('BASE_RPC_URL') ?? null;
+    // Reuse the project-wide ETH_RPC_URL convention (escrow, market,
+    // rays all read it). BASE_RPC_URL is honoured as a backwards-
+    // compatible alias if someone set it explicitly for BoltyGuard.
+    const rpc =
+      this.config.get<string>('ETH_RPC_URL') ??
+      this.config.get<string>('BASE_RPC_URL') ??
+      'https://mainnet.base.org';
     this.tokenAddress = this.config.get<string>('BOLTY_TOKEN_ADDRESS') ?? null;
     const minRaw = this.config.get<string>('BOLTYGUARD_MIN_HOLDING') ?? '1000';
     // Default 1,000 BOLTY in 18-decimal units. Override via env.
