@@ -38,8 +38,12 @@ export class SocialXController {
   async connectUrl(
     @CurrentUser('id') userId: string,
     @Query('returnTo') returnTo?: string,
+    @Query('forceLogin') forceLogin?: string,
   ) {
-    const { url, state } = await this.x.generateAuthUrl(userId, returnTo);
+    const force = forceLogin === '1' || forceLogin === 'true';
+    const { url, state } = await this.x.generateAuthUrl(userId, returnTo, {
+      forceLogin: force,
+    });
     return { url, state };
   }
 
