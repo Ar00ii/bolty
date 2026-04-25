@@ -194,16 +194,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       );
       void prefetch('orders:buyer', () => api.get('/orders'));
       void prefetch('orders:seller', () => api.get('/orders/selling'));
+      // /orders also reads stats and negotiations on mount — warm both
+      // so the seller-side dashboard lands fully populated. Safe again
+      // now that #345 raised the Prisma pool from 1 → 5 connections.
+      void prefetch('orders:stats', () => api.get('/orders/seller/stats'));
+      void prefetch('orders:negotiations', () => api.get('/market/negotiations'));
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));
       void prefetch('library:items', () => api.get('/market/library'));
-      // NB: previously we also pre-warmed orders:stats, orders:negotiations,
-      // and the favorites bulk-lookup endpoints here. Removed — Render's
-      // Prisma is configured with connection_limit=1, so firing this many
-      // parallel reads on every login saturated the pool and caused 10 s
-      // timeouts across the entire site. Pages that need those endpoints
-      // (the Orders dashboard, /favorites) fetch them lazily on mount and
-      // pay the cost only for users actually visiting them. Re-enable the
-      // wider prefetch set after raising connection_limit on DATABASE_URL.
+      // Favorites live in localStorage; read the id lists and warm the
+      // bulk-lookup endpoints under the same cache keys /favorites uses
+      // so navigating to that page is instant when the user has saved
+      // anything. Empty lists skip — we only pay the network cost when
+      // there's actually data to fetch. Keys must match useFavorites.ts.
+      try {
+        const repoIds = JSON.parse(
+          window.localStorage.getItem('bolty.repo.favorites.v1') || '[]',
+        );
+        if (Array.isArray(repoIds) && repoIds.length > 0) {
+          void prefetch(`favorites:repos:${repoIds.join(',')}`, () =>
+            api.get(`/repos/by-ids?ids=${encodeURIComponent(repoIds.join(','))}`),
+          );
+        }
+        const listingIds = JSON.parse(
+          window.localStorage.getItem('bolty.market.favorites.v1') || '[]',
+        );
+        if (Array.isArray(listingIds) && listingIds.length > 0) {
+          void prefetch(`favorites:listings:${listingIds.join(',')}`, () =>
+            api.get(`/market/by-ids?ids=${encodeURIComponent(listingIds.join(','))}`),
+          );
+        }
+      } catch {
+        /* localStorage parse error — ignore, /favorites will fetch on click */
+      }
     });
   }, [user]);
 
