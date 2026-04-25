@@ -18,6 +18,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 import { Modal } from '@/components/ui/Modal';
+import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
   BOLTY_TREASURY_ADDRESS,
@@ -131,16 +132,11 @@ export function LaunchWizardModal({
     setAgentHealth('checking');
     (async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/market/${listingId}/health`,
-          { credentials: 'include' },
-        );
-        if (!res.ok) throw new Error(String(res.status));
-        const data = (await res.json()) as {
+        const data = await api.get<{
           healthy: boolean;
           latencyMs: number;
           reason?: string;
-        };
+        }>(`/market/${listingId}/health`);
         if (!cancelled) setAgentHealth(data);
       } catch {
         if (!cancelled)
@@ -206,16 +202,15 @@ export function LaunchWizardModal({
       // own code at their own risk, but we don't broadcast it.
       if (launchMode === 'agent' && listingPath.includes('/agents/')) {
         try {
-          const r = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/boltyguard/listings/${listingId}/latest`,
-          );
-          if (r.ok) {
-            const scan = (await r.json()) as { score?: number } | null;
-            if (scan && typeof scan.score === 'number' && scan.score < 70) {
-              throw new Error(
-                `BoltyGuard blocked the AI launch — security score ${scan.score}/100. Open the agent page, fix the findings, then try again.`,
-              );
-            }
+          const scan = await api
+            .get<{ score?: number } | null>(
+              `/boltyguard/listings/${listingId}/latest`,
+            )
+            .catch(() => null);
+          if (scan && typeof scan.score === 'number' && scan.score < 70) {
+            throw new Error(
+              `BoltyGuard blocked the AI launch — security score ${scan.score}/100. Open the agent page, fix the findings, then try again.`,
+            );
           }
         } catch (gateErr) {
           if (gateErr instanceof Error && gateErr.message.startsWith('BoltyGuard')) {
@@ -279,20 +274,17 @@ export function LaunchWizardModal({
       // background. Non-blocking — if the announce endpoint fails we
       // still treat the launch as successful since the coin is on-chain.
       if (launchMode === 'agent' && res.tokenAddress) {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/chat/announce-launch`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        api
+          .post('/chat/announce-launch', {
             tokenAddress: res.tokenAddress,
             symbol: symbol.trim().toUpperCase(),
             name: name.trim(),
             listingId,
-          }),
-        }).catch((err2) => {
-          // eslint-disable-next-line no-console
-          console.warn('[launchpad] announce failed', err2);
-        });
+          })
+          .catch((err2) => {
+            // eslint-disable-next-line no-console
+            console.warn('[launchpad] announce failed', err2);
+          });
       }
       setResult(res);
       setLaunchState('success');
