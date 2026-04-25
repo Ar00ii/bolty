@@ -354,8 +354,22 @@ async function hydrateCoin(
     const priceEth = Number(priceEthStr) / 1e18 || 0;
     const priceUsd =
       priceUsdRes.status === 'fulfilled' ? Number(priceUsdRes.value ?? 0) || 0 : 0;
-    const marketCapUsd =
+    const sdkMarketCapUsd =
       mcapRes.status === 'fulfilled' ? Number(mcapRes.value ?? 0) || 0 : 0;
+    // SDK's coinMarketCapInUSD relies on Base RPC reads which are
+    // routinely rate-limited on the public mainnet.base.org endpoint,
+    // so we end up with mcap=0 even when the token is actually trading
+    // at a non-zero price. Compute a fallback from priceUsd × supply
+    // when that happens. Flaunch tokens have a fixed 100B supply by
+    // protocol design (no team mint, no inflation), so this is a safe
+    // ceiling — never under-reports an active token at $9k as $0.
+    const FLAUNCH_FIXED_SUPPLY = 100_000_000_000;
+    const marketCapUsd =
+      sdkMarketCapUsd > 0
+        ? sdkMarketCapUsd
+        : priceUsd > 0
+          ? priceUsd * FLAUNCH_FIXED_SUPPLY
+          : 0;
     // Keep marketCapEth around for any caller still on it — derive from USD
     // mcap and the SDK-reported ETH/USD ratio (priceEth / priceUsd) rather
     // than a hardcoded ETH price.

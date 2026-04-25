@@ -338,8 +338,13 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
             </button>
           </div>
 
-          {/* Dot indicators — bottom-left so they sit under the content */}
-          <div className="absolute left-6 lg:left-8 bottom-5 flex items-center gap-1.5 z-10">
+          {/* Dot indicators — bottom-left so they sit under the content
+              on desktop. Hidden below `md` because on phones the stat
+              strip and the dots end up vertically stacked at the same
+              `bottom-5` band: the dots render right on top of the
+              "PRICE / MCAP" cells as solid white squares. The auto-
+              rotate + the prev/next arrows are enough on mobile. */}
+          <div className="hidden md:flex absolute left-6 lg:left-8 bottom-5 items-center gap-1.5 z-10">
             {slides.map((_, i) => (
               <button
                 key={i}
