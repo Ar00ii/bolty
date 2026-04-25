@@ -1699,94 +1699,97 @@ export default function ProfilePage() {
 
                 <SaveButton loading={genSaving} />
               </form>
-            </div>
 
-            {/* Social links — folded in from the old Social tab. Three URL
-                fields + a single Save action. The form state is wired up in
-                the same useState set as before; only the surface moved. */}
-            <div className="profile-content-card">
-              <SectionHeader
-                title="Social links"
-                subtitle="Where else people can find you."
-              />
-              <Alert type="success" msg={socMsg} />
-              <Alert type="error" msg={socErr} />
-              <form onSubmit={handleSaveSocial} className="space-y-4">
-                {(
-                  [
-                    {
-                      key: 'twitter',
-                      label: 'X / Twitter',
-                      icon: (
-                        <svg
-                          className="w-4 h-4 text-[var(--text-muted)]"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                        </svg>
-                      ),
-                      value: twitterUrl,
-                      setter: setTwitterUrl,
-                      placeholder: 'https://x.com/yourhandle',
-                    },
-                    {
-                      key: 'linkedin',
-                      label: 'LinkedIn',
-                      icon: (
-                        <svg
-                          className="w-4 h-4 text-blue-400"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                        </svg>
-                      ),
-                      value: linkedinUrl,
-                      setter: setLinkedinUrl,
-                      placeholder: 'https://linkedin.com/in/yourprofile',
-                    },
-                    {
-                      key: 'website',
-                      label: 'Website',
-                      icon: <IconGlobe className="w-4 h-4 text-[var(--text-muted)]" />,
-                      value: websiteUrl,
-                      setter: setWebsiteUrl,
-                      placeholder: 'https://yourwebsite.com',
-                    },
-                  ] as Array<{
-                    key: string;
-                    label: string;
-                    icon: React.ReactNode;
-                    value: string;
-                    setter: (v: string) => void;
-                    placeholder: string;
-                  }>
-                ).map((item) => (
-                  <Field key={item.key} label={item.label}>
-                    <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
-                      {item.icon}
-                      <input
-                        type="url"
-                        value={item.value}
-                        onChange={(e) => item.setter(e.target.value)}
-                        placeholder={item.placeholder}
-                        className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
-                      />
-                      {item.value && (
-                        <button
-                          type="button"
-                          onClick={() => item.setter('')}
-                          className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
-                        >
-                          <IconX className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </Field>
-                ))}
-                <SaveButton loading={socSaving} label="Save social links" />
-              </form>
+              {/* Social links live INSIDE the Identity card now (was a
+                  separate card below — too much scroll to reach). Same
+                  three URL fields + their own Save button, but rendered
+                  as a sibling subsection so the user sees both at once. */}
+              <div className="mt-6 pt-5 border-t border-white/[0.06]">
+                <div className="mb-4">
+                  <h3 className="text-[14px] text-white font-light">Social links</h3>
+                  <p className="text-[11.5px] text-zinc-500 mt-0.5">
+                    Where else people can find you.
+                  </p>
+                </div>
+                <Alert type="success" msg={socMsg} />
+                <Alert type="error" msg={socErr} />
+                <form onSubmit={handleSaveSocial} className="space-y-3">
+                  {(
+                    [
+                      {
+                        key: 'twitter',
+                        label: 'X / Twitter',
+                        icon: (
+                          <svg
+                            className="w-4 h-4 text-[var(--text-muted)]"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.259 5.631 5.905-5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                          </svg>
+                        ),
+                        value: twitterUrl,
+                        setter: setTwitterUrl,
+                        placeholder: 'https://x.com/yourhandle',
+                      },
+                      {
+                        key: 'linkedin',
+                        label: 'LinkedIn',
+                        icon: (
+                          <svg
+                            className="w-4 h-4 text-blue-400"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                          </svg>
+                        ),
+                        value: linkedinUrl,
+                        setter: setLinkedinUrl,
+                        placeholder: 'https://linkedin.com/in/yourprofile',
+                      },
+                      {
+                        key: 'website',
+                        label: 'Website',
+                        icon: <IconGlobe className="w-4 h-4 text-[var(--text-muted)]" />,
+                        value: websiteUrl,
+                        setter: setWebsiteUrl,
+                        placeholder: 'https://yourwebsite.com',
+                      },
+                    ] as Array<{
+                      key: string;
+                      label: string;
+                      icon: React.ReactNode;
+                      value: string;
+                      setter: (v: string) => void;
+                      placeholder: string;
+                    }>
+                  ).map((item) => (
+                    <Field key={item.key} label={item.label}>
+                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
+                        {item.icon}
+                        <input
+                          type="url"
+                          value={item.value}
+                          onChange={(e) => item.setter(e.target.value)}
+                          placeholder={item.placeholder}
+                          className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)] font-light"
+                        />
+                        {item.value && (
+                          <button
+                            type="button"
+                            onClick={() => item.setter('')}
+                            className="text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
+                          >
+                            <IconX className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </Field>
+                  ))}
+                  <SaveButton loading={socSaving} label="Save social links" />
+                </form>
+              </div>
             </div>
 
             <ConnectedAccountsPanel
@@ -1999,80 +2002,32 @@ export default function ProfilePage() {
                 </div>
               ) : null}
 
-              {/* Primary connect/disconnect CTAs for the legacy single-wallet flow */}
-              {walletAddress ? (
-                <div className="flex flex-col sm:flex-row gap-2 mb-6">
-                  <button
-                    type="button"
-                    onClick={handleAddAdditionalWallet}
-                    disabled={walletLoading}
-                    className="flex-1 py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
-                    style={{
-                      background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                      boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-                    }}
-                  >
-                    {walletLoading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        Linking…
-                      </>
-                    ) : (
-                      <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-                        Link another wallet
-                      </>
-                    )}
-                  </button>
+              {/* Single connect surface — the supported-wallets grid below.
+                  We used to render a duplicate big "Connect MetaMask" / "Link
+                  another" button on top of the grid that already had MetaMask
+                  + WalletConnect tiles, which confused users into thinking
+                  the two paths did different things. Disconnect for the
+                  primary wallet is now a small inline link instead of its
+                  own large CTA. */}
+              {walletAddress && (
+                <div className="mb-5 flex items-center justify-end">
                   <button
                     type="button"
                     onClick={handleDisconnectWallet}
                     disabled={walletLoading}
-                    className="flex-1 py-3 rounded-xl border border-red-500/25 hover:border-red-500/40 bg-red-500/5 hover:bg-red-500/10 text-red-400 text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="text-[11.5px] text-red-400 hover:text-red-300 underline decoration-red-500/30 underline-offset-2 hover:decoration-red-300 transition disabled:opacity-50"
                   >
-                    {walletLoading ? (
-                      <>
-                        <div className="w-4 h-4 rounded-full border-2 border-red-400/30 border-t-red-400 animate-spin" />
-                        Disconnecting…
-                      </>
-                    ) : (
-                      'Disconnect primary wallet'
-                    )}
+                    {walletLoading ? 'Disconnecting…' : 'Disconnect primary wallet'}
                   </button>
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleConnectWallet}
-                  disabled={walletLoading}
-                  className="w-full mb-6 py-3 rounded-xl text-sm font-light transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2 text-white"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                    boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
-                  }}
-                >
-                  {walletLoading ? (
-                    <>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                      Connecting…
-                    </>
-                  ) : (
-                    <>
-                      <WalletProviderIcon provider="METAMASK" size={18} />
-                      Connect MetaMask
-                    </>
-                  )}
-                </button>
               )}
 
-              {/* Supported wallets */}
+              {/* Supported wallets — single source of truth for adding wallets.
+                  Each tile branches between "first connect" and "link
+                  another" based on whether a primary already exists. */}
               <div className="border-t border-white/8 pt-5">
                 <div className="text-xs uppercase tracking-widest text-white/50 mb-3">
-                  Supported wallets
+                  {walletAddress ? 'Link another wallet' : 'Connect a wallet'}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {/* MetaMask — browser extension */}
