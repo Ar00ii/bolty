@@ -11,6 +11,15 @@ import {
 } from 'lightweight-charts';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { API_URL } from '@/lib/api/client';
+
+// Backend proxy that fronts GeckoTerminal with a Redis cache + a
+// stale-fallback. Avoids each browser hammering the public mainnet
+// rate limit independently — instead one cache hit per ~30 s feeds
+// every viewer of the same coin.
+type ProxyCandle = { t: number; o: number; h: number; l: number; c: number };
+type ProxyResponse = ProxyCandle[];
+
 /**
  * Candlestick chart for any launchpad token, built the same way as
  * BoltyCandleChart (lightweight-charts + GeckoTerminal OHLCV) but
@@ -147,14 +156,17 @@ export function LaunchpadCandleChart({
       if (!poolAddress) return;
       const isInitial = opts.initial ?? false;
       try {
-        const url = `https://api.geckoterminal.com/api/v2/networks/base/pools/${poolAddress}/ohlcv/${timeframe.tf}?aggregate=${timeframe.agg}&limit=300&currency=usd`;
-        const res = await fetch(url);
+        // Backend proxy (Redis-cached + stale-fallback). Keeps the
+        // chart populated through GeckoTerminal rate limits and means
+        // one cache hit serves every viewer of the same token.
+        const url = `${API_URL}/token/coin/${poolAddress}/ohlcv?timeframe=${timeframe.tf}&aggregate=${timeframe.agg}&limit=300`;
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) {
           if (!hasDataRef.current) setStatus('error');
           return;
         }
-        const data = (await res.json()) as GeckoOhlcv;
-        const rows = data?.data?.attributes?.ohlcv_list ?? [];
+        const data = (await res.json()) as ProxyResponse;
+        const rows = Array.isArray(data) ? data : [];
         const series = seriesRef.current;
         if (!series) return;
         if (rows.length === 0) {
@@ -164,10 +176,10 @@ export function LaunchpadCandleChart({
           }
           return;
         }
-        // GeckoTerminal returns newest-first; lightweight-charts needs
-        // ascending by time.
+        // Backend already returns ascending by time, but defensively
+        // sort in case of upstream weirdness.
         const candles: Candle[] = rows
-          .map(([t, o, h, l, c]) => ({ t, o, h, l, c }))
+          .map(({ t, o, h, l, c }) => ({ t, o, h, l, c }))
           .sort((a, b) => a.t - b.t);
         series.setData(
           candles.map((c) => ({

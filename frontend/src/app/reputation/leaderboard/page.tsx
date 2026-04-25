@@ -20,6 +20,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getReputationRank, RANK_TIERS } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
+import { getCached, setCached } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 
 interface LeaderboardEntry {
@@ -68,9 +69,19 @@ function formatNumber(n: number) {
 }
 
 export default function LeaderboardPage() {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [topAgents, setTopAgents] = useState<TopAgentEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Seed both lists from pageCache on first paint so the table renders
+  // instantly when AuthProvider's idle prefetch already filled the keys.
+  // The interval refresh below still keeps the data live every 30 s.
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(
+    () => getCached<LeaderboardEntry[]>('reputation:leaderboard:50') ?? [],
+  );
+  const [topAgents, setTopAgents] = useState<TopAgentEntry[]>(() => {
+    const seed = getCached<{ topAgents: TopAgentEntry[] }>('market:leaderboard');
+    return Array.isArray(seed?.topAgents) ? seed!.topAgents : [];
+  });
+  const [loading, setLoading] = useState(
+    () => !getCached<LeaderboardEntry[]>('reputation:leaderboard:50'),
+  );
   const [query, setQuery] = useState('');
   const [rankFilter, setRankFilter] = useState<string>('ALL');
   const [showHelp, setShowHelp] = useState(false);
@@ -90,8 +101,12 @@ export default function LeaderboardPage() {
           .catch(() => ({ topAgents: [] as TopAgentEntry[], topDevs: [] })),
       ]);
       if (cancelled) return;
-      setLeaderboard(Array.isArray(devs) ? devs : []);
-      setTopAgents(Array.isArray(ticker?.topAgents) ? ticker.topAgents : []);
+      const devsList = Array.isArray(devs) ? devs : [];
+      const agentsList = Array.isArray(ticker?.topAgents) ? ticker.topAgents : [];
+      setLeaderboard(devsList);
+      setTopAgents(agentsList);
+      setCached('reputation:leaderboard:50', devsList);
+      setCached('market:leaderboard', ticker);
       setLoading(false);
     }
     load();
