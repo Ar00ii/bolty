@@ -25,6 +25,10 @@ const ConnectedAccountsPanel = dynamicImport(
     import('@/components/profile/ConnectedAccountsPanel').then((m) => m.ConnectedAccountsPanel),
   { ssr: false },
 );
+const RanksPanel = dynamicImport(
+  () => import('@/components/profile/RanksPanel').then((m) => m.RanksPanel),
+  { ssr: false },
+);
 const AvatarCropperModal = dynamicImport(
   () => import('@/components/profile/AvatarCropperModal').then((m) => m.AvatarCropperModal),
   { ssr: false },
@@ -47,7 +51,8 @@ import {
 //   • Removed: 'usage', 'activity', 'integrations', 'notifications', 'agent', 'social'
 //   • 'social' folded into 'general' (PR2) — Twitter / LinkedIn / Website
 //     fields now live inside the General section as one form
-type Tab = 'general' | 'wallet' | 'friends' | 'api-keys' | 'security';
+//   • 'ranks' added (PR3) — interactive tier ladder with perks per tier
+type Tab = 'general' | 'ranks' | 'wallet' | 'friends' | 'api-keys' | 'security';
 
 interface Friend {
   id: string;
@@ -190,6 +195,24 @@ function IconUsers({ className }: { className?: string }) {
     </svg>
   );
 }
+function IconTrophy({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"
+      />
+    </svg>
+  );
+}
+
 function IconShield({ className }: { className?: string }) {
   return (
     <svg
@@ -595,7 +618,7 @@ export default function ProfilePage() {
     const tabParam = params.get('tab') as Tab | null;
     if (
       tabParam &&
-      ['general', 'wallet', 'friends', 'api-keys', 'security'].includes(tabParam)
+      ['general', 'ranks', 'wallet', 'friends', 'api-keys', 'security'].includes(tabParam)
     ) {
       setTab(tabParam);
       window.history.replaceState({}, '', '/profile');
@@ -1354,6 +1377,7 @@ export default function ProfilePage() {
   // tabs to add a Twitter URL, it's identity data.
   const tabItems = [
     { id: 'general' as Tab, label: 'General', Icon: IconUser },
+    { id: 'ranks' as Tab, label: 'Ranks', Icon: IconTrophy },
     { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
     { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
     { id: 'security' as Tab, label: 'Security', Icon: IconShield },
@@ -1773,6 +1797,15 @@ export default function ProfilePage() {
           )}
 
           {/* ════════════════════════════════════════════
+          RANKS
+      ════════════════════════════════════════════ */}
+          {tab === 'ranks' && (
+            <RanksPanel
+              points={(user as { reputationPoints?: number } | null)?.reputationPoints ?? 0}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════
           WALLET
       ════════════════════════════════════════════ */}
           {tab === 'wallet' && (
@@ -2082,12 +2115,54 @@ export default function ProfilePage() {
           API KEYS
       ════════════════════════════════════════════ */}
           {tab === 'api-keys' && (
-            <APIKeysSection
-              apiKeys={apiKeys}
-              onDelete={handleDeleteAPIKey}
-              onGenerate={handleGenerateAPIKey}
-              onCopy={handleCopyAPIKey}
-            />
+            <div className="space-y-4">
+              {/* Help banner — surfaces what API keys are, where they're used,
+                  and the security rules at all times. The user kept asking
+                  the team what each key is for; pin it on screen. */}
+              <div
+                className="rounded-xl p-4 space-y-3"
+                style={{
+                  background: 'rgba(131,110,249,0.06)',
+                  border: '1px solid rgba(131,110,249,0.18)',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10.5px] uppercase tracking-[0.16em] text-[#b4a7ff] font-medium">
+                    What are API keys
+                  </span>
+                </div>
+                <p className="text-[12px] text-zinc-300 font-light leading-relaxed">
+                  API keys let your code, agents, or third-party tools call the Bolty API on
+                  your behalf. Anyone who holds one of your keys can read your data and
+                  publish on your account, so treat them like passwords.
+                </p>
+                <ul className="text-[11.5px] text-zinc-400 font-light leading-relaxed space-y-1 list-disc pl-4">
+                  <li>
+                    <span className="text-zinc-200">Use in:</span> agent webhooks, marketplace
+                    automations, internal scripts, CI/CD that pings Bolty.
+                  </li>
+                  <li>
+                    <span className="text-zinc-200">Header:</span>{' '}
+                    <code className="text-[#b4a7ff] bg-black/30 px-1 rounded">Authorization: Bearer YOUR_KEY</code>
+                  </li>
+                  <li>
+                    <span className="text-zinc-200">Rotate</span> any key you ever paste into a
+                    document, screenshot, or shared chat — including this one.
+                  </li>
+                  <li>
+                    <span className="text-zinc-200">Never</span> embed a key in client-side
+                    code shipped to a browser or mobile app. Use a server proxy.
+                  </li>
+                </ul>
+              </div>
+
+              <APIKeysSection
+                apiKeys={apiKeys}
+                onDelete={handleDeleteAPIKey}
+                onGenerate={handleGenerateAPIKey}
+                onCopy={handleCopyAPIKey}
+              />
+            </div>
           )}
 
           {/* ════════════════════════════════════════════
