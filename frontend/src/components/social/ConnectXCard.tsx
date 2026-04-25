@@ -73,20 +73,40 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
     }
   }, [refresh]);
 
-  const handleConnect = useCallback(async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      const dest = returnTo ?? '/profile?tab=integrations';
-      const { url } = await api.get<{ url: string }>(
-        `/social/x/connect-url?returnTo=${encodeURIComponent(dest)}`,
-      );
-      window.location.href = url;
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not start X OAuth');
-      setBusy(false);
-    }
-  }, [returnTo]);
+  const handleConnect = useCallback(
+    async (opts: { forceLogin?: boolean } = {}) => {
+      setBusy(true);
+      setError(null);
+      try {
+        const dest = returnTo ?? '/profile';
+        const params = new URLSearchParams({ returnTo: dest });
+        if (opts.forceLogin) params.set('forceLogin', '1');
+        const { url } = await api.get<{ url: string }>(
+          `/social/x/connect-url?${params.toString()}`,
+        );
+        // Force-login flow: punch the X session first so the user lands
+        // on a fresh login screen instead of a one-click "Authorize"
+        // for whatever account is currently signed in. We open the
+        // logout in the same tab; X redirects to login on its own,
+        // and we follow with the OAuth URL once the user is back.
+        if (opts.forceLogin) {
+          // Best-effort: pop a logout tab in a hidden window. Some
+          // browsers block this, so we still set our location to the
+          // OAuth URL with force_login=true as the real switch lever.
+          try {
+            window.open('https://x.com/logout', '_blank', 'noopener');
+          } catch {
+            /* popup blocked — force_login on the auth URL is enough */
+          }
+        }
+        window.location.href = url;
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Could not start X OAuth');
+        setBusy(false);
+      }
+    },
+    [returnTo],
+  );
 
   const handleDisconnect = useCallback(async () => {
     if (!window.confirm('Disconnect your X account from Bolty?')) return;
@@ -147,7 +167,7 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
         ) : (
           <button
             type="button"
-            onClick={handleConnect}
+            onClick={() => handleConnect()}
             disabled={busy}
             className="text-[12px] font-medium px-3 py-1.5 rounded-md transition disabled:opacity-50"
             style={{
@@ -160,6 +180,27 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
           </button>
         )}
       </div>
+
+      {/* Account-picker hint. X's OAuth reuses whatever session the
+          browser has, so users logged into a brand handle (e.g. an
+          ops account) get auto-redirected to authorize THAT account
+          with no chooser. The "Switch X account" link punches the
+          session first + adds force_login=true so they land on the
+          login screen and can pick the right one. */}
+      {status?.connected === false && (
+        <div className="mt-2 text-[10.5px] text-zinc-500 font-light leading-relaxed">
+          Will connect whichever X account you&apos;re currently signed into.{' '}
+          <button
+            type="button"
+            onClick={() => handleConnect({ forceLogin: true })}
+            disabled={busy}
+            className="underline decoration-zinc-600 underline-offset-2 hover:text-[#b4a7ff] hover:decoration-[#b4a7ff] transition disabled:opacity-50"
+          >
+            Switch X account
+          </button>{' '}
+          to log in with a different one.
+        </div>
+      )}
 
       {status?.connected && (
         <div className="mt-3 flex items-center gap-3 text-[11.5px] font-mono text-zinc-400">

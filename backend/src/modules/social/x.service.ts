@@ -59,8 +59,21 @@ export class SocialXService {
   // OAuth
   // ───────────────────────────────────────────────────────────────
 
-  /** Generate a PKCE-protected authorize URL and remember the verifier. */
-  async generateAuthUrl(userId: string, returnTo?: string): Promise<{ url: string; state: string }> {
+  /** Generate a PKCE-protected authorize URL and remember the verifier.
+   *
+   *  When `forceLogin` is true we ask X to force a fresh credential
+   *  prompt instead of silently reusing whatever session the browser
+   *  currently has. Critical for users who are logged into the wrong
+   *  X account (e.g. a brand handle) and need to authorize a personal
+   *  one instead. X 2.0 doesn't document the parameter formally, but
+   *  the underlying twitter.com authorize page still respects
+   *  `force_login=true` from OAuth 1.0a. We send `prompt=login` too
+   *  as a belt-and-suspenders against future renames. */
+  async generateAuthUrl(
+    userId: string,
+    returnTo?: string,
+    opts?: { forceLogin?: boolean },
+  ): Promise<{ url: string; state: string }> {
     const clientId = this.requireEnv('X_CLIENT_ID');
     const redirectUri = this.requireEnv('X_REDIRECT_URI');
 
@@ -91,6 +104,10 @@ export class SocialXService {
       code_challenge: challenge,
       code_challenge_method: 'S256',
     });
+    if (opts?.forceLogin) {
+      params.set('force_login', 'true');
+      params.set('prompt', 'login');
+    }
 
     return { url: `${SocialXService.OAUTH_AUTH_URL}?${params.toString()}`, state };
   }
