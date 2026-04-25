@@ -1256,7 +1256,9 @@ function ReposMarketPageContent() {
     const key = `market:repos:${params.toString()}`;
 
     // Stale-while-revalidate: seed instantly from cache, skip network if fresh.
-    const cached = getCachedWithStatus<{ data: Repository[] }>(key);
+    // Marketplace lists tolerate 2 min staleness — listings change slowly
+    // and the user feels filter / nav latency more than minor staleness.
+    const cached = getCachedWithStatus<{ data: Repository[] }>(key, 120_000);
     if (cached.data) {
       setRepos(cached.data.data);
       setLoading(false);

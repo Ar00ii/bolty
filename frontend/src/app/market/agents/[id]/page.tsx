@@ -33,6 +33,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   SecurityBadge,
   SecurityFindings,
+  type ScanResult,
 } from '@/components/boltyguard/SecurityBadge';
 import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
@@ -82,6 +83,15 @@ interface MarketListing {
   } | null;
   reviewAverage?: number | null;
   reviewCount?: number;
+  latestScan?: {
+    id: string;
+    score: number;
+    worstSeverity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' | null;
+    summary: string | null;
+    scanner: string;
+    scannedAt: string;
+    findings?: ScanResult['findings'];
+  } | null;
 }
 
 interface AgentPost {
@@ -532,7 +542,10 @@ export default function AgentDetailPage() {
                   </>
                 )}
                 <span className="text-zinc-700">·</span>
-                <SecurityBadge listingId={listing.id} />
+                <SecurityBadge
+                  listingId={listing.id}
+                  initialScan={(listing.latestScan ?? null) as ScanResult | null}
+                />
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight break-words">
                 {listing.title}
