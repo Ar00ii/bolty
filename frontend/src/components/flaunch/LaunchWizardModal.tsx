@@ -17,6 +17,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
+import { ConnectXCard } from '@/components/social/ConnectXCard';
 import { LaunchTweetModal } from '@/components/social/LaunchTweetModal';
 import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api/client';
@@ -973,6 +974,12 @@ function Step2Economics({
     agentHealth !== null &&
     agentHealth !== 'checking' &&
     agentHealth.healthy;
+  // Surface the X connect card right inside the AI-agent launch flow:
+  // the moment the user is choosing to let the agent run the launch is
+  // also the moment they want it to tweet about that launch. Hidden on
+  // self-launch since the post-launch modal already covers the casual
+  // case there.
+  const showXConnect = launchMode === 'agent' || agentOption;
   return (
     <div className="space-y-4">
       <Field label="Fee split" hint="Immutable after launch">
@@ -1038,6 +1045,22 @@ function Step2Economics({
           Fair-launch period is 30 min, max buy 0.25% of supply per wallet.
         </div>
       </div>
+
+      {showXConnect && (
+        <div className="space-y-1.5">
+          <div className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
+            Agent voice (optional)
+          </div>
+          <ConnectXCard
+            returnTo={typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined}
+          />
+          <div className="text-[11px] font-light text-zinc-500 leading-relaxed">
+            Connect X here so this agent can post the launch tweet from your account
+            the moment the token goes live. You can review or edit the draft before it
+            sends, and disconnect any time.
+          </div>
+        </div>
+      )}
     </div>
   );
 }
