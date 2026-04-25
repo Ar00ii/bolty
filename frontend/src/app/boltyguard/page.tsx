@@ -217,30 +217,6 @@ export default function BoltyGuardPage() {
       setResult(data);
     } catch (e2) {
       setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
-<<<<<<< HEAD
-=======
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function onScanRepo() {
-    if (!repoUrl.trim()) {
-      setError('Paste a github.com URL or owner/repo first.');
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      const data = await api.post<ScanResponse>('/boltyguard/scan-repo', {
-        url: repoUrl.trim(),
-        isAgent,
-      });
-      setResult(data);
-    } catch (e2) {
-      setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
->>>>>>> origin/main
     } finally {
       setLoading(false);
     }
