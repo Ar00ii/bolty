@@ -1456,7 +1456,7 @@ function AgentsPageContent() {
               className="mk-btn mk-btn--secondary"
               title="Scan any code with BoltyGuard"
             >
-              <span className="w-3.5 h-3.5 inline-block">🛡️</span>
+              <ShieldCheck className="w-3.5 h-3.5" strokeWidth={2} />
               BoltyGuard
             </Link>
             {isAuthenticated && (

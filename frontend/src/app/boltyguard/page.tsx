@@ -1,9 +1,9 @@
 'use client';
 
-import { Loader2, Shield, ShieldAlert, ShieldCheck, ShieldX } from 'lucide-react';
-import React, { useState } from 'react';
+import { FileArchive, Loader2, Shield, ShieldAlert, ShieldCheck, ShieldX, Upload } from 'lucide-react';
+import React, { useRef, useState } from 'react';
 
-import { api, ApiError } from '@/lib/api/client';
+import { api, API_URL, ApiError } from '@/lib/api/client';
 
 interface ScanFinding {
   rule: string;
@@ -16,10 +16,11 @@ interface ScanFinding {
 
 interface ScanResponse {
   score: number;
-  worstSeverity: string | null;
+  worstSeverity?: string | null;
   findings: ScanFinding[];
   summary: string;
-  scanner: string;
+  scanner?: string;
+  files?: Array<{ path: string; score: number; findingCount: number }>;
   tier: 'holder' | 'free';
   holding: string;
   minHolding: string;
@@ -35,28 +36,69 @@ const FILE_EXTENSIONS = [
 ];
 
 export default function BoltyGuardPage() {
+  const [mode, setMode] = useState<'paste' | 'zip'>('paste');
   const [code, setCode] = useState('');
   const [fileExt, setFileExt] = useState('.ts');
   const [isAgent, setIsAgent] = useState(true);
+  const [zipFile, setZipFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const zipInputRef = useRef<HTMLInputElement>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!code.trim()) return;
-    setLoading(true);
     setError(null);
     setResult(null);
+    if (mode === 'paste') {
+      if (!code.trim()) return;
+      setLoading(true);
+      try {
+        const data = await api.post<ScanResponse>('/boltyguard/scan', {
+          code,
+          fileName: `snippet${fileExt}`,
+          isAgent,
+        });
+        setResult(data);
+      } catch (e2) {
+        setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+    // ZIP mode — multipart upload via raw fetch since the api client
+    // is JSON-only.
+    if (!zipFile) {
+      setError('Select a ZIP file first.');
+      return;
+    }
+    if (zipFile.size > 5 * 1024 * 1024) {
+      setError('ZIP exceeds 5MB cap.');
+      return;
+    }
+    setLoading(true);
     try {
-      const data = await api.post<ScanResponse>('/boltyguard/scan', {
-        code,
-        fileName: `snippet${fileExt}`,
-        isAgent,
+      const fd = new FormData();
+      fd.append('file', zipFile);
+      fd.append('isAgent', String(isAgent));
+      const res = await fetch(`${API_URL}/boltyguard/scan-bundle`, {
+        method: 'POST',
+        body: fd,
+        credentials: 'include',
       });
-      setResult(data);
+      const json = (await res.json().catch(() => null)) as
+        | ScanResponse
+        | { message?: string }
+        | null;
+      if (!res.ok) {
+        throw new Error(
+          (json as { message?: string } | null)?.message ?? `Scan failed (${res.status})`,
+        );
+      }
+      setResult(json as ScanResponse);
     } catch (e2) {
-      setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
+      setError(e2 instanceof Error ? e2.message : 'Scan failed');
     } finally {
       setLoading(false);
     }
@@ -99,6 +141,37 @@ export default function BoltyGuardPage() {
           </div>
         </header>
 
+        <div className="mb-3 inline-flex items-center gap-1 p-1 rounded-xl"
+          style={{
+            background: '#0a0a0c',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setMode('paste')}
+            className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition"
+            style={{
+              background: mode === 'paste' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              color: mode === 'paste' ? '#ffffff' : '#a1a1aa',
+            }}
+          >
+            Paste code
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('zip')}
+            className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
+            style={{
+              background: mode === 'zip' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              color: mode === 'zip' ? '#ffffff' : '#a1a1aa',
+            }}
+          >
+            <FileArchive className="w-3.5 h-3.5" />
+            Upload ZIP
+          </button>
+        </div>
+
         <form onSubmit={onSubmit} className="space-y-4">
           <div
             className="rounded-2xl p-5 space-y-3"
@@ -108,20 +181,22 @@ export default function BoltyGuardPage() {
             }}
           >
             <div className="flex items-center gap-3 flex-wrap">
-              <label className="flex items-center gap-2 text-[12px] text-zinc-300">
-                <span className="text-zinc-400">Language:</span>
-                <select
-                  value={fileExt}
-                  onChange={(e) => setFileExt(e.target.value)}
-                  className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50"
-                >
-                  {FILE_EXTENSIONS.map((f) => (
-                    <option key={f.value} value={f.value}>
-                      {f.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {mode === 'paste' && (
+                <label className="flex items-center gap-2 text-[12px] text-zinc-300">
+                  <span className="text-zinc-400">Language:</span>
+                  <select
+                    value={fileExt}
+                    onChange={(e) => setFileExt(e.target.value)}
+                    className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50"
+                  >
+                    {FILE_EXTENSIONS.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <label className="flex items-center gap-2 text-[12px] text-zinc-300">
                 <input
                   type="checkbox"
@@ -132,23 +207,87 @@ export default function BoltyGuardPage() {
                 Treat as AI agent (extra checks)
               </label>
             </div>
-            <textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste your code here…"
-              rows={14}
-              spellCheck={false}
-              className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
-              style={{
-                background: '#000000',
-                border: '1px solid rgba(255,255,255,0.12)',
-                resize: 'vertical',
-              }}
-            />
+
+            {mode === 'paste' ? (
+              <textarea
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Paste your code here…"
+                rows={14}
+                spellCheck={false}
+                className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
+                style={{
+                  background: '#000000',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  resize: 'vertical',
+                }}
+              />
+            ) : (
+              <div
+                className="rounded-xl p-6 text-center cursor-pointer transition hover:brightness-125"
+                style={{
+                  background: '#000000',
+                  border: '1px dashed rgba(255,255,255,0.18)',
+                }}
+                onClick={() => zipInputRef.current?.click()}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  const f = e.dataTransfer.files?.[0];
+                  if (f) setZipFile(f);
+                }}
+              >
+                <input
+                  ref={zipInputRef}
+                  type="file"
+                  accept=".zip,application/zip,application/x-zip-compressed"
+                  className="hidden"
+                  onChange={(e) => setZipFile(e.target.files?.[0] ?? null)}
+                />
+                {zipFile ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <FileArchive className="w-5 h-5 text-[#b4a7ff]" />
+                    <div className="text-left">
+                      <div className="text-[13px] text-white font-medium">
+                        {zipFile.name}
+                      </div>
+                      <div className="text-[11px] text-zinc-500 font-mono">
+                        {(zipFile.size / 1024).toFixed(1)} KB
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(ev) => {
+                        ev.stopPropagation();
+                        setZipFile(null);
+                      }}
+                      className="ml-3 text-[11px] text-zinc-500 hover:text-white"
+                    >
+                      remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-zinc-500">
+                    <Upload className="w-6 h-6" strokeWidth={1.6} />
+                    <div className="text-[13px] text-white font-medium">
+                      Drop a ZIP or click to upload
+                    </div>
+                    <div className="text-[11px] font-light">
+                      Up to 5MB · 100 files · 10MB uncompressed.
+                      Bombs / traversal / symlinks are auto-rejected.
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center justify-end gap-2">
               <button
                 type="submit"
-                disabled={loading || !code.trim()}
+                disabled={
+                  loading ||
+                  (mode === 'paste' ? !code.trim() : !zipFile)
+                }
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                 style={{
                   background:

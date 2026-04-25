@@ -7,15 +7,21 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  PayloadTooLargeException,
   Post,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Throttle } from '@nestjs/throttler';
+import * as multer from 'multer';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
 import { RedisService } from '../../common/redis/redis.service';
 
 import { BoltyGuardService } from './boltyguard.service';
+import { BundleScanner } from './bundle-scanner';
 import { FREE_TIER_DAILY_QUOTA, HolderGateService } from './holder-gate.service';
 
 @Controller('boltyguard')
@@ -24,6 +30,7 @@ export class BoltyGuardController {
     private readonly guard: BoltyGuardService,
     private readonly holderGate: HolderGateService,
     private readonly redis: RedisService,
+    private readonly bundle: BundleScanner,
   ) {}
 
   /** Public — anyone can read the latest score for any listing.
@@ -94,6 +101,71 @@ export class BoltyGuardController {
     });
     return {
       ...report,
+      tier: gate.holder ? 'holder' : 'free',
+      holding: gate.balance,
+      minHolding: gate.minHolding,
+    };
+  }
+
+  /**
+   * Scan a ZIP bundle. Multipart upload, single field `file`. Hard-
+   * capped at 5MB on the wire by multer; the BundleScanner then re-
+   * validates the magic bytes, walks the entries with strict caps
+   * (max 100 files, 500KB / file uncompressed, 10MB total, ratio
+   * cap 200:1), drops anything with path traversal / symlinks /
+   * banned extensions, and only scans whitelisted text formats.
+   */
+  @Public()
+  @Throttle({ default: { limit: 6, ttl: 60_000 } })
+  @Post('scan-bundle')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: multer.memoryStorage(),
+      limits: {
+        fileSize: BundleScanner.MAX_ZIP_BYTES,
+        files: 1,
+        fields: 4,
+      },
+      fileFilter: (_req, file, cb) => {
+        const okMime =
+          file.mimetype === 'application/zip' ||
+          file.mimetype === 'application/x-zip-compressed' ||
+          file.mimetype === 'application/octet-stream';
+        if (!okMime) {
+          cb(new BadRequestException('only zip uploads are allowed'), false);
+          return;
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async scanBundle(
+    @CurrentUser('id') userId: string | null,
+    @UploadedFile() file: Express.Multer.File | undefined,
+    @Body('isAgent') isAgentRaw?: string,
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('zip file is required');
+    }
+    if (file.size > BundleScanner.MAX_ZIP_BYTES) {
+      throw new PayloadTooLargeException('zip exceeds 5MB cap');
+    }
+
+    const gate = await this.holderGate.isHolder(userId);
+    if (!gate.holder) {
+      const remaining = await this.consumeFreeQuota(userId ?? null);
+      if (remaining < 0) {
+        throw new ForbiddenException(
+          `Free quota exhausted. Hold ≥ ${gate.minHolding} $BOLTY in a linked wallet to unlock unmetered scans (current balance: ${gate.balance}).`,
+        );
+      }
+    }
+
+    const isAgent = isAgentRaw === 'true' || isAgentRaw === '1';
+    const result = await this.bundle.scanZip(file.buffer, { isAgent });
+    return {
+      ...result,
       tier: gate.holder ? 'holder' : 'free',
       holding: gate.balance,
       minHolding: gate.minHolding,
