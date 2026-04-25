@@ -145,7 +145,13 @@ function MarketScreener() {
 
   const [search, setSearch] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
-  const [sort, setSort] = useState<SortKey>('trending');
+  // Default to 'recent' instead of 'trending'. Trending uses a 7-day
+  // activity score path on the backend (purchases + negotiations) and
+  // can return surprising results in low-volume windows; 'recent' is
+  // also what the CacheWarmer cron pre-warms in Redis, so the landing
+  // hit is reliably served from cache. Users can still pick "Hot" to
+  // get the trending sort.
+  const [sort, setSort] = useState<SortKey>('recent');
   const [listings, setListings] = useState<MarketListing[]>(
     () => getCached<MarketListing[]>('market:listings') ?? [],
   );
@@ -202,12 +208,15 @@ function MarketScreener() {
         if (typeFilter !== 'ALL') qs.set('type', typeFilter);
 
         const [listRes, pulseRes] = await Promise.all([
-          api.get<{ data: MarketListing[] }>(`/market?${qs.toString()}`),
+          api.get<{ data: MarketListing[] } | MarketListing[]>(`/market?${qs.toString()}`),
           api.get<Pulse>('/market/pulse?limit=20'),
         ]);
         if (cancelled) return;
 
-        const data = listRes?.data || [];
+        // Tolerate both shapes — the controller wraps in `{ data: [] }`
+        // but defensive in case a future endpoint returns a raw array
+        // and the cache layer dehydrates differently.
+        const data = Array.isArray(listRes) ? listRes : (listRes?.data ?? []);
         if (sort === 'volume') {
           data.sort((a, b) => (b.volumeEth24h || 0) - (a.volumeEth24h || 0));
         }
@@ -216,6 +225,13 @@ function MarketScreener() {
         setLiveTrades(pulseRes?.recentTrades || []);
         setCached(cacheKey, data);
         setCached('market:pulse', pulseRes);
+      } catch (err) {
+        if (cancelled) return;
+        // Don't blank the previous listings on a transient fetch failure.
+        // Surface the issue in the console; the empty-state UI is reserved
+        // for "nothing matches" not "request failed".
+        // eslint-disable-next-line no-console
+        console.error('[market] failed to load listings', err);
       } finally {
         if (!cancelled) setLoading(false);
       }
