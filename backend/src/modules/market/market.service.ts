@@ -895,6 +895,60 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     };
   }
 
+  /** Bulk lookup. Same row shape as getListings (with latestScan baked
+   *  in), but takes an explicit id list. Caller is the favorites /
+   *  library "saved" tab — one round-trip instead of N. Skips REMOVED
+   *  rows so soft-deleted favorites disappear from the list naturally
+   *  without exploding. Empty input returns an empty array. */
+  async getListingsByIds(ids: string[]) {
+    if (ids.length === 0) return [];
+    const rows = await this.prisma.marketListing.findMany({
+      where: { id: { in: ids }, status: { not: 'REMOVED' } },
+      include: {
+        seller: { select: { id: true, username: true, avatarUrl: true } },
+        repository: { select: { id: true, name: true, githubUrl: true, language: true } },
+        securityScans: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            score: true,
+            worstSeverity: true,
+            summary: true,
+            scanner: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+    // Preserve the caller's order — the FE pages this drives expect
+    // the response to come back in the order they passed (= the order
+    // the user starred them). Default DB order is undefined.
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((r): r is NonNullable<typeof r> => !!r)
+      .map((row) => {
+        const r = row as Record<string, unknown> & {
+          agentEndpoint?: string | null;
+          securityScans?: Array<{ createdAt: Date | string; [k: string]: unknown }>;
+        };
+        const copy = { ...r } as Record<string, unknown>;
+        const endpoint = r.agentEndpoint;
+        delete copy.agentEndpoint;
+        copy.hasAgentEndpoint = Boolean(endpoint);
+        const scans = r.securityScans;
+        if (scans && scans.length > 0) {
+          const { createdAt, ...rest } = scans[0]!;
+          copy.latestScan = { ...rest, scannedAt: createdAt };
+        } else {
+          copy.latestScan = null;
+        }
+        delete copy.securityScans;
+        return copy;
+      });
+  }
+
   async getListingByFileKey(fileKey: string) {
     return this.prisma.marketListing.findUnique({
       where: { fileKey },

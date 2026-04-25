@@ -787,6 +787,25 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     return repo;
   }
 
+  /** Bulk lookup — same row shape as getRepository, but one round-trip
+   *  for an explicit id list. Caller is the favorites page; the cap at
+   *  100 ids is enforced by the controller's parseIdList. Preserves the
+   *  caller's id ordering since favorites are user-ordered. */
+  async getRepositoriesByIds(ids: string[]) {
+    if (ids.length === 0) return [];
+    const rows = await this.prisma.repository.findMany({
+      where: { id: { in: ids } },
+      include: {
+        user: {
+          select: { username: true, displayName: true, avatarUrl: true, walletAddress: true },
+        },
+        _count: { select: { votes: true } },
+      },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return ids.map((id) => byId.get(id)).filter((r): r is NonNullable<typeof r> => !!r);
+  }
+
   // ── Purchase (locked repos) ────────────────────────────────────────────────
 
   /**

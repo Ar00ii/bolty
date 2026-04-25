@@ -49,14 +49,12 @@ export default function FavoritesPage() {
     setLoading(true);
     setError(null);
     try {
-      const results = await Promise.all(
-        repoIds.map((id) =>
-          api
-            .get<RepoSummary & { _count?: unknown }>(`/repos/${id}`)
-            .catch(() => null),
-        ),
+      // Bulk lookup — one request instead of N parallel `/repos/:id`
+      // fetches. Backend preserves the caller's id ordering.
+      const rows = await api.get<RepoSummary[]>(
+        `/repos/by-ids?ids=${encodeURIComponent(repoIds.join(','))}`,
       );
-      setRepos(results.filter((r): r is RepoSummary => !!r));
+      setRepos(Array.isArray(rows) ? rows : []);
     } catch {
       setError('Could not load favorite repos');
     } finally {
@@ -72,12 +70,10 @@ export default function FavoritesPage() {
     setLoading(true);
     setError(null);
     try {
-      const results = await Promise.all(
-        listingIds.map((id) =>
-          api.get<ListingSummary>(`/market/${id}`).catch(() => null),
-        ),
+      const rows = await api.get<ListingSummary[]>(
+        `/market/by-ids?ids=${encodeURIComponent(listingIds.join(','))}`,
       );
-      setListings(results.filter((l): l is ListingSummary => !!l));
+      setListings(Array.isArray(rows) ? rows : []);
     } catch {
       setError('Could not load favorite listings');
     } finally {
