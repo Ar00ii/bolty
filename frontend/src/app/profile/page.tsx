@@ -20,6 +20,11 @@ const APIKeysSection = dynamicImport(
   () => import('@/components/profile/APIKeysSection').then((m) => m.APIKeysSection),
   { ssr: false },
 );
+const ConnectedAccountsPanel = dynamicImport(
+  () =>
+    import('@/components/profile/ConnectedAccountsPanel').then((m) => m.ConnectedAccountsPanel),
+  { ssr: false },
+);
 const AvatarCropperModal = dynamicImport(
   () => import('@/components/profile/AvatarCropperModal').then((m) => m.AvatarCropperModal),
   { ssr: false },
@@ -39,16 +44,10 @@ import {
 } from '@/lib/wallet/walletconnect';
 
 // Tabs after the April 2026 redesign:
-//   • Removed: 'usage', 'activity', 'integrations', 'notifications', 'agent'
-//   • 'social' will be folded into 'general' in PR2 — still present for now
-//     so the existing fields keep rendering until they're moved
-type Tab =
-  | 'general'
-  | 'social'
-  | 'wallet'
-  | 'friends'
-  | 'api-keys'
-  | 'security';
+//   • Removed: 'usage', 'activity', 'integrations', 'notifications', 'agent', 'social'
+//   • 'social' folded into 'general' (PR2) — Twitter / LinkedIn / Website
+//     fields now live inside the General section as one form
+type Tab = 'general' | 'wallet' | 'friends' | 'api-keys' | 'security';
 
 interface Friend {
   id: string;
@@ -596,9 +595,15 @@ export default function ProfilePage() {
     const tabParam = params.get('tab') as Tab | null;
     if (
       tabParam &&
-      ['general', 'social', 'wallet', 'friends', 'api-keys', 'security'].includes(tabParam)
+      ['general', 'wallet', 'friends', 'api-keys', 'security'].includes(tabParam)
     ) {
       setTab(tabParam);
+      window.history.replaceState({}, '', '/profile');
+    } else if (params.get('tab') === 'social') {
+      // Old links to ?tab=social land on General now that Social was folded
+      // in. We compare against the raw string here because the Tab union
+      // no longer contains 'social'.
+      setTab('general');
       window.history.replaceState({}, '', '/profile');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -914,12 +919,23 @@ export default function ProfilePage() {
     setWalletActionId(walletId);
     setWalletErr('');
     setWalletMsg('');
+    // Optimistic removal: drop the row from local state BEFORE the DELETE
+    // resolves so the UI updates instantly. The previous version awaited
+    // the DELETE then ran a fresh GET — the GET sometimes hit an in-flight
+    // dedup of an earlier GET and returned the stale list, leaving the
+    // wallet on screen until the user manually refreshed. Roll back on
+    // failure.
+    const previousWallets = linkedWallets;
+    setLinkedWallets((prev) => prev.filter((w) => w.id !== walletId));
     try {
       await api.delete(`/users/wallets/${walletId}`);
-      await loadLinkedWallets();
+      // Auth context owns the canonical user (incl. primary wallet) so we
+      // refresh that, but we deliberately do NOT re-run loadLinkedWallets:
+      // local state is already correct + matches what the server returned.
       await refresh();
       setWalletMsg('Wallet removed.');
     } catch (err) {
+      setLinkedWallets(previousWallets);
       setWalletErr(err instanceof ApiError ? err.message : 'Failed to remove wallet.');
     } finally {
       setWalletActionId(null);
@@ -1333,11 +1349,11 @@ export default function ProfilePage() {
   const userEmail = (user as { email?: string })?.email;
   const profileUrl = username ? `/u/${username}` : null;
 
-  // App-style sidebar nav. Order = priority. Social will be folded into
-  // General in PR2 (the link card moves up into the General info panel).
+  // App-style sidebar nav. Order = priority. Socials (Twitter, LinkedIn,
+  // Website) live inside General now — the user shouldn't have to switch
+  // tabs to add a Twitter URL, it's identity data.
   const tabItems = [
     { id: 'general' as Tab, label: 'General', Icon: IconUser },
-    { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
     { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
     { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
     { id: 'security' as Tab, label: 'Security', Icon: IconShield },
@@ -1462,10 +1478,11 @@ export default function ProfilePage() {
       ════════════════════════════════════════════ */}
           {tab === 'general' && (
             <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 items-start">
+            <div className="space-y-4 min-w-0">
             <div className="profile-content-card">
               <SectionHeader
-                title="General Information"
-                subtitle="Your public identity on Bolty."
+                title="Identity"
+                subtitle="Your public information on Bolty."
               />
               <Alert type="success" msg={genMsg} />
               <Alert type="error" msg={genErr} />
@@ -1655,25 +1672,18 @@ export default function ProfilePage() {
                 <SaveButton loading={genSaving} />
               </form>
             </div>
-            <RankProgressPanel
-              points={(user as { reputationPoints?: number } | null)?.reputationPoints ?? 0}
-            />
-            </div>
-          )}
 
-          {/* ════════════════════════════════════════════
-          SOCIAL  — blue tint
-      ════════════════════════════════════════════ */}
-          {tab === 'social' && (
+            {/* Social links — folded in from the old Social tab. Three URL
+                fields + a single Save action. The form state is wired up in
+                the same useState set as before; only the surface moved. */}
             <div className="profile-content-card">
               <SectionHeader
-                title="Social Links"
-                subtitle="Connect your online presence to your Bolty profile."
+                title="Social links"
+                subtitle="Where else people can find you."
               />
               <Alert type="success" msg={socMsg} />
               <Alert type="error" msg={socErr} />
-
-              <form onSubmit={handleSaveSocial} className="space-y-6">
+              <form onSubmit={handleSaveSocial} className="space-y-4">
                 {(
                   [
                     {
@@ -1747,11 +1757,18 @@ export default function ProfilePage() {
                     </div>
                   </Field>
                 ))}
-
-                <div className="pt-2">
-                  <SaveButton loading={socSaving} label="Save social links" />
-                </div>
+                <SaveButton loading={socSaving} label="Save social links" />
               </form>
+            </div>
+
+            <ConnectedAccountsPanel
+              userId={user?.id ?? null}
+              walletCount={linkedWallets.length}
+            />
+            </div>
+            <RankProgressPanel
+              points={(user as { reputationPoints?: number } | null)?.reputationPoints ?? 0}
+            />
             </div>
           )}
 
