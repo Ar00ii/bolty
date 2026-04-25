@@ -598,20 +598,25 @@ function TokenCard({
             />
           </div>
           <div className="text-[11px] font-mono tabular-nums text-zinc-500 truncate">
-            ${token.symbol} · by{' '}
-            {token.creatorUsername && onCreatorClick ? (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onCreatorClick(token.creatorUsername as string);
-                }}
-                className="text-zinc-400 hover:text-white transition"
-              >
-                @{token.creatorUsername}
-              </button>
-            ) : (
-              <span className="text-zinc-400">@{token.creatorUsername ?? 'anon'}</span>
+            ${token.symbol}
+            {token.creatorUsername && (
+              <>
+                {' · by '}
+                {onCreatorClick ? (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCreatorClick(token.creatorUsername as string);
+                    }}
+                    className="text-zinc-400 hover:text-white transition"
+                  >
+                    @{token.creatorUsername}
+                  </button>
+                ) : (
+                  <span className="text-zinc-400">@{token.creatorUsername}</span>
+                )}
+              </>
             )}
           </div>
         </div>
