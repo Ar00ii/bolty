@@ -27,7 +27,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 
-import { api, ApiError } from '@/lib/api/client';
+import { api, API_URL, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 type Protocol = 'webhook' | 'sandbox' | 'hybrid';
@@ -115,6 +115,23 @@ export default function PublishAgentPage() {
   const [endpointMsg, setEndpointMsg] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // BoltyGuard pre-publish scan. Fires automatically right after the
+  // user uploads the file. Score < 40 = block publish; < 70 = warn.
+  const [scanning, setScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<{
+    score: number;
+    summary: string;
+    findings: Array<{
+      rule: string;
+      severity: string;
+      file?: string;
+      line?: number;
+      message: string;
+      fix?: string;
+    }>;
+    files?: Array<{ path: string; score: number; findingCount: number }>;
+  } | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
@@ -186,11 +203,58 @@ export default function PublishAgentPage() {
     }
     setUploading(true);
     setError(null);
+    setScanResult(null);
+    setScanError(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
       const result = await api.upload<UploadedFileMeta>('/market/upload', formData);
       set('uploadedFile', result);
+
+      // Fire BoltyGuard scan in parallel with the rest of the form
+      // filling. The publish CTA is gated on the result. Bundle path
+      // for zips, single-file path for everything else.
+      setScanning(true);
+      try {
+        const isZip =
+          /\.zip$/i.test(file.name) ||
+          file.type === 'application/zip' ||
+          file.type === 'application/x-zip-compressed';
+        if (isZip) {
+          const fd = new FormData();
+          fd.append('file', file);
+          fd.append('isAgent', 'true');
+          const res = await fetch(`${API_URL}/boltyguard/scan-bundle`, {
+            method: 'POST',
+            body: fd,
+            credentials: 'include',
+          });
+          const j = (await res.json().catch(() => null)) as
+            | typeof scanResult
+            | { message?: string }
+            | null;
+          if (!res.ok) {
+            throw new Error(
+              (j as { message?: string } | null)?.message ?? `Scan failed (${res.status})`,
+            );
+          }
+          setScanResult(j as typeof scanResult);
+        } else {
+          const code = await file.text();
+          const j = await api.post<typeof scanResult>('/boltyguard/scan', {
+            code,
+            fileName: file.name,
+            isAgent: true,
+          });
+          setScanResult(j);
+        }
+      } catch (scanErr) {
+        setScanError(
+          scanErr instanceof Error ? scanErr.message : 'Pre-publish scan failed',
+        );
+      } finally {
+        setScanning(false);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Upload failed');
     } finally {
@@ -233,8 +297,11 @@ export default function PublishAgentPage() {
     const hasEndpoint = form.protocol !== 'sandbox' && form.agentEndpoint.trim().length > 0;
     const hasSandbox = form.protocol !== 'webhook' && !!form.uploadedFile;
     if (!hasEndpoint && !hasSandbox) return false;
+    // BoltyGuard: still scanning, or score below the unsafe floor → block.
+    if (scanning) return false;
+    if (scanResult && scanResult.score < 40) return false;
     return true;
-  }, [form]);
+  }, [form, scanning, scanResult]);
 
   const submit = useCallback(async () => {
     if (!canSubmit || submitting) return;
@@ -618,6 +685,12 @@ export default function PublishAgentPage() {
                   />
                 </Field>
               )}
+
+              <BoltyGuardScanPanel
+                scanning={scanning}
+                error={scanError}
+                result={scanResult}
+              />
             </Section>
 
             {/* Section: Technical */}
@@ -1010,6 +1083,152 @@ function TipsCard() {
           Payments go through escrow, held until the buyer confirms.
         </li>
       </ul>
+    </div>
+  );
+}
+
+function BoltyGuardScanPanel({
+  scanning,
+  error,
+  result,
+}: {
+  scanning: boolean;
+  error: string | null;
+  result: {
+    score: number;
+    summary: string;
+    findings: Array<{
+      rule: string;
+      severity: string;
+      file?: string;
+      line?: number;
+      message: string;
+      fix?: string;
+    }>;
+    files?: Array<{ path: string; score: number; findingCount: number }>;
+  } | null;
+}) {
+  if (!scanning && !result && !error) return null;
+  if (scanning) {
+    return (
+      <div
+        className="rounded-xl p-4 mt-3 flex items-center gap-3"
+        style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+      >
+        <div className="w-7 h-7 rounded-md grid place-items-center"
+          style={{ background: 'rgba(131,110,249,0.18)' }}
+        >
+          <Loader2 className="w-4 h-4 animate-spin text-[#b4a7ff]" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[13px] text-white font-medium">
+            BoltyGuard scanning your code…
+          </div>
+          <div className="text-[11px] text-zinc-500 mt-0.5">
+            Semgrep + Claude. ~10s typical.
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div
+        className="rounded-xl p-3 mt-3 text-[12.5px] text-amber-300"
+        style={{
+          background: 'rgba(245,158,11,0.06)',
+          border: '1px solid rgba(245,158,11,0.3)',
+        }}
+      >
+        BoltyGuard pre-scan failed ({error}). Listing will still be re-scanned in background after publish — you can retry the upload to scan now.
+      </div>
+    );
+  }
+  if (!result) return null;
+  const colour =
+    result.score >= 85
+      ? { bg: 'rgba(34,197,94,0.06)', text: '#22c55e', label: 'Secure', border: 'rgba(34,197,94,0.4)' }
+      : result.score >= 70
+        ? { bg: 'rgba(56,189,248,0.06)', text: '#38bdf8', label: 'OK', border: 'rgba(56,189,248,0.4)' }
+        : result.score >= 40
+          ? { bg: 'rgba(245,158,11,0.06)', text: '#f59e0b', label: 'Risky', border: 'rgba(245,158,11,0.5)' }
+          : { bg: 'rgba(239,68,68,0.06)', text: '#ef4444', label: 'Unsafe — publish blocked', border: 'rgba(239,68,68,0.55)' };
+  return (
+    <div
+      className="rounded-xl p-4 mt-3 space-y-3"
+      style={{ background: colour.bg, border: `1px solid ${colour.border}` }}
+    >
+      <div className="flex items-center gap-3">
+        <div
+          className="text-[24px] font-medium tracking-tight"
+          style={{ color: colour.text }}
+        >
+          {result.score}
+          <span className="text-[12px] text-zinc-400 font-light"> / 100</span>
+        </div>
+        <div className="flex-1">
+          <div className="text-[13px] font-medium" style={{ color: colour.text }}>
+            BoltyGuard · {colour.label}
+          </div>
+          <div className="text-[11.5px] text-zinc-300 mt-0.5">{result.summary}</div>
+        </div>
+      </div>
+      {result.findings.length > 0 && (
+        <ul className="space-y-1.5 max-h-60 overflow-y-auto">
+          {result.findings.slice(0, 12).map((f, i) => {
+            const sev = f.severity.toUpperCase();
+            const sevColour =
+              sev === 'CRITICAL'
+                ? '#ef4444'
+                : sev === 'HIGH'
+                  ? '#f59e0b'
+                  : sev === 'MEDIUM'
+                    ? '#38bdf8'
+                    : '#a1a1aa';
+            return (
+              <li
+                key={i}
+                className="rounded-lg p-2.5 text-[11.5px]"
+                style={{
+                  background: 'rgba(0,0,0,0.35)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span
+                    className="text-[9px] uppercase tracking-[0.14em] font-semibold px-1.5 py-0.5 rounded"
+                    style={{
+                      color: sevColour,
+                      background: `${sevColour}14`,
+                      border: `1px solid ${sevColour}40`,
+                    }}
+                  >
+                    {sev}
+                  </span>
+                  <span className="font-mono text-[10.5px] text-zinc-300">{f.rule}</span>
+                  {f.file && (
+                    <span className="font-mono text-[10.5px] text-zinc-500">
+                      · {f.file}{f.line ? `:${f.line}` : ''}
+                    </span>
+                  )}
+                </div>
+                <div className="text-white/85 font-light">{f.message}</div>
+                {f.fix && (
+                  <div className="text-emerald-300/85 font-light mt-0.5">Fix: {f.fix}</div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      {result.score < 40 && (
+        <div className="text-[11.5px] text-red-300 font-medium">
+          Publish is blocked while the score is below 40. Fix the critical findings and re-upload to rescan.
+        </div>
+      )}
     </div>
   );
 }
