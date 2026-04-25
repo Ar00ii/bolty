@@ -39,6 +39,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import React, { Suspense, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 
+import { SecurityBadge } from '@/components/boltyguard/SecurityBadge';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
@@ -614,6 +615,7 @@ function AgentCard({
               live
             </span>
           )}
+          <SecurityBadge listingId={listing.id} />
           <span className="mk-badge mk-badge--type">
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
@@ -1448,16 +1450,26 @@ function AgentsPageContent() {
               Deploy, buy, and negotiate with autonomous AI agents. Every listing is health-checked.
             </p>
           </div>
-          {isAuthenticated && (
-            <button
-              type="button"
-              onClick={attemptDeploy}
-              className="mk-btn mk-btn--primary"
+          <div className="flex items-center gap-2">
+            <Link
+              href="/boltyguard"
+              className="mk-btn mk-btn--secondary"
+              title="Scan any code with BoltyGuard"
             >
-              <Plus className="w-3.5 h-3.5" strokeWidth={2} />
-              Deploy agent
-            </button>
-          )}
+              <span className="w-3.5 h-3.5 inline-block">🛡️</span>
+              BoltyGuard
+            </Link>
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={attemptDeploy}
+                className="mk-btn mk-btn--primary"
+              >
+                <Plus className="w-3.5 h-3.5" strokeWidth={2} />
+                Deploy agent
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Stat strip — compact pills, tabular numbers */}
