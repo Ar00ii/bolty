@@ -183,30 +183,42 @@ function LibraryPageContent() {
   }, [isAuthenticated, isLoading, router]);
 
   // Lazy-load the saved listings only when the Saved tab is active.
+  // Bulk lookup — one request instead of N. The endpoint already drops
+  // REMOVED rows server-side and preserves the order we pass; missing
+  // ids (deleted on the server) are detected by diffing the input list
+  // against the response so we can scrub stale localStorage entries.
   useEffect(() => {
     if (view !== 'saved') return;
+    if (favIds.length === 0) {
+      setSavedListings([]);
+      setSavedMissing([]);
+      setSavedLoading(false);
+      return;
+    }
     let cancelled = false;
     (async () => {
       setSavedLoading(true);
-      const found: SavedListing[] = [];
-      const gone: string[] = [];
-      await Promise.all(
-        favIds.map(async (id) => {
-          try {
-            const l = await api.get<SavedListing>(`/market/${id}`);
-            if (l && l.status !== 'REMOVED') found.push(l);
-            else gone.push(id);
-          } catch (err) {
-            if (err instanceof ApiError && err.status === 404) gone.push(id);
-          }
-        }),
-      );
-      if (cancelled) return;
-      const order = new Map(favIds.map((id, i) => [id, i]));
-      found.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
-      setSavedListings(found);
-      setSavedMissing(gone);
-      setSavedLoading(false);
+      try {
+        const rows = await api.get<SavedListing[]>(
+          `/market/by-ids?ids=${encodeURIComponent(favIds.join(','))}`,
+        );
+        if (cancelled) return;
+        const found = Array.isArray(rows) ? rows : [];
+        const foundIds = new Set(found.map((l) => l.id));
+        const gone = favIds.filter((id) => !foundIds.has(id));
+        setSavedListings(found);
+        setSavedMissing(gone);
+      } catch (err) {
+        if (cancelled) return;
+        if (err instanceof ApiError) {
+          // Soft fail — leave state untouched, show no list rather
+          // than nuke the saved view on a transient error.
+          setSavedListings([]);
+          setSavedMissing([]);
+        }
+      } finally {
+        if (!cancelled) setSavedLoading(false);
+      }
     })();
     return () => {
       cancelled = true;

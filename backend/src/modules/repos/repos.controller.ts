@@ -180,6 +180,20 @@ class ListReposQuery {
   sortBy?: 'votes' | 'stars' | 'recent' | 'downloads';
 }
 
+/** Parse a comma-separated `ids` query param into a clean string array.
+ *  Trims, dedupes, drops empties, caps at 100. Used by the bulk lookup
+ *  endpoint so the FE can collapse N favorite-fetches into one. */
+function parseIdList(raw: string | undefined): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  for (const part of raw.split(',')) {
+    const id = part.trim();
+    if (id) seen.add(id);
+    if (seen.size >= 100) break;
+  }
+  return [...seen];
+}
+
 @Controller('repos')
 export class ReposController {
   constructor(
@@ -217,6 +231,17 @@ export class ReposController {
     if (!user.githubLogin) return { ok: true };
     await this.reposService.clearGitHubReposCache(user.githubLogin);
     return { ok: true };
+  }
+
+  /** Bulk lookup — favorites page hits this with the id list it has in
+   *  localStorage, skipping the N-fetch fan-out the per-row /repos/:id
+   *  pattern would otherwise create. Cap of 100 enforced by parseIdList.
+   *  Public — same access level as /repos/:id. */
+  @Public()
+  @Header('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=60')
+  @Get('by-ids')
+  getReposByIds(@Query('ids') ids?: string) {
+    return this.reposService.getRepositoriesByIds(parseIdList(ids));
   }
 
   @Public()

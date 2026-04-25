@@ -109,6 +109,21 @@ const BLOCKED_MIMETYPES = new Set([
   'application/svg+xml',
 ]);
 
+/** Parse a comma-separated `ids` query param into a clean string array.
+ *  Trims whitespace, dedupes, drops empties, caps at 100. Used by the
+ *  batch lookup endpoint so the FE can collapse N favorite-fetches into
+ *  one request. Cap is intentional — anything bigger should paginate. */
+function parseIdList(raw: string | undefined): string[] {
+  if (!raw) return [];
+  const seen = new Set<string>();
+  for (const part of raw.split(',')) {
+    const id = part.trim();
+    if (id) seen.add(id);
+    if (seen.size >= 100) break;
+  }
+  return [...seen];
+}
+
 @UseGuards(JwtAuthGuard)
 @Controller('market')
 export class MarketController {
@@ -370,6 +385,18 @@ export class MarketController {
   @Get('sellers/:username')
   getSellerProfile(@Param('username') username: string) {
     return this.marketService.getSellerProfile(username);
+  }
+
+  /** Bulk lookup. Used by the favorites page and the library "saved"
+   *  tab so they don't fan out into N parallel `GET /market/:id`
+   *  requests when the user has multiple bookmarks. Capped at 100
+   *  ids per call to keep the URL short and the payload bounded;
+   *  the FE chunks above that. Public — same access rules as
+   *  `GET /market/:id`, which is also Public. */
+  @Public()
+  @Get('by-ids')
+  getListingsByIds(@Query('ids') ids?: string) {
+    return this.marketService.getListingsByIds(parseIdList(ids));
   }
 
   @Public()
