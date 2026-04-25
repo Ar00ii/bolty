@@ -201,6 +201,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void prefetch('orders:negotiations', () => api.get('/market/negotiations'));
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));
       void prefetch('library:items', () => api.get('/market/library'));
+      // /reputation/leaderboard runs ~5 aggregate queries on cold cache,
+      // so warming it on login means navigating to the Leaderboard tab
+      // hits a Redis-warm response. Both the reputation board (top 50
+      // by points) and the market board (top agents + top devs) are
+      // pre-warmed in parallel.
+      void prefetch('reputation:leaderboard:50', () =>
+        api.get('/reputation/leaderboard?limit=50'),
+      );
+      void prefetch('market:leaderboard', () => api.get('/market/leaderboard'));
       // Favorites live in localStorage; read the id lists and warm the
       // bulk-lookup endpoints under the same cache keys /favorites uses
       // so navigating to that page is instant when the user has saved

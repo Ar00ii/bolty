@@ -1380,6 +1380,22 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   }
 
   async getMyLibrary(buyerId: string) {
+    // Cache per-user 30 s. Library content only changes when the buyer
+    // makes a new purchase or writes a review — both happen rarely
+    // enough that 30 s staleness is invisible. The PRE-CACHE was the
+    // single biggest reason `/market/library` felt sluggish on cold
+    // navigation: 3 prisma queries (purchases, repo-purchases, reviews)
+    // each ran fresh on every nav even though the user landed on the
+    // same data 100 % of the time within a session.
+    const cacheKey = `market:library:user:${buyerId}`;
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        /* corrupt — fall through to recompute */
+      }
+    }
     const [purchases, repoPurchases] = await Promise.all([
       this.prisma.marketPurchase.findMany({
         where: { buyerId },
@@ -1485,9 +1501,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         };
       });
 
-    return [...marketItems, ...repoItems].sort(
+    const result = [...marketItems, ...repoItems].sort(
       (a, b) => new Date(b.purchasedAt).getTime() - new Date(a.purchasedAt).getTime(),
     );
+    await this.redis.set(cacheKey, JSON.stringify(result), 30).catch(() => null);
+    return result;
   }
 
   // ── Reviews ────────────────────────────────────────────────────────────────
@@ -2309,10 +2327,10 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
   // so /leaderboard doesn't recompute on every navigation.
   private tickerCache: { at: number; data: { topAgents: unknown[]; topDevs: unknown[] } } | null =
     null;
-  private leaderboardCache: {
-    at: number;
-    data: { topAgents: unknown[]; topDevs: unknown[] };
-  } | null = null;
+  // Leaderboard cache moved to Redis (key `market:leaderboard:v1`) so it
+  // survives single-instance Render restarts; the in-process Map version
+  // dropped on every redeploy and made every fresh boot the slowest hit
+  // on the platform.
 
   async getTickerSnapshot() {
     const now = Date.now();
@@ -2463,18 +2481,27 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
   async getLeaderboard() {
     // Two-tab leaderboard payload — top agents (by sales) + top devs (by rep).
-    // Cached 90s: each tab runs ~5 aggregate queries, so the /leaderboard
-    // page was the single slowest endpoint on cold navigation.
-    const now = Date.now();
-    if (this.leaderboardCache && now - this.leaderboardCache.at < 90_000) {
-      return this.leaderboardCache.data;
+    // Cached 90s in Redis (was: in-process Map). Each tab runs ~5 aggregate
+    // queries, so this used to be the single slowest endpoint on cold
+    // navigation — the in-process cache only survived for one Node instance,
+    // so a Render redeploy / cold instance always re-ran the full
+    // aggregation. Redis means the cache actually persists across deploys
+    // and cron warm-ups, so users effectively always hit a warm cache.
+    const cacheKey = 'market:leaderboard:v1';
+    const cached = await this.redis.get(cacheKey).catch(() => null);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        /* corrupt entry — fall through to recompute */
+      }
     }
     const [topAgents, topDevs] = await Promise.all([
       this.getTopAgents(25),
       this.getTopDevelopers(25),
     ]);
     const data = { topAgents, topDevs };
-    this.leaderboardCache = { at: now, data };
+    await this.redis.set(cacheKey, JSON.stringify(data), 90).catch(() => null);
     return data;
   }
 
@@ -2577,7 +2604,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     ]);
     // Drop the ticker + leaderboard caches so the boost shows up immediately.
     this.tickerCache = null;
-    this.leaderboardCache = null;
+    await this.redis.del('market:leaderboard:v1').catch(() => null);
     return {
       ok: true,
       boostedUntil: updated.boostedUntil,
