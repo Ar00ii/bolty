@@ -66,6 +66,12 @@ model User {
   // most "real" listings (leaderboard, user search, etc).
   isBot Boolean @default(false)
 
+  // Privacy toggles (PR4 redesign). Defaults preserve current behaviour:
+  // requests open, public DMs allowed. Users can flip either off from
+  // the Friends tab → Privacy sub-panel.
+  friendRequestsEnabled Boolean @default(true)
+  publicMessagesEnabled Boolean @default(true)
+
   // Reputation
   reputationPoints Int @default(0)
 
