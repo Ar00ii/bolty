@@ -2,7 +2,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import Anthropic from '@anthropic-ai/sdk';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ScanSeverity } from '@prisma/client';
 
@@ -57,7 +62,7 @@ const PRISMA_SEVERITY: Record<Severity, ScanSeverity> = {
  * the report. The score is what gates AI-launch + drives the badge.
  */
 @Injectable()
-export class BoltyGuardService {
+export class BoltyGuardService implements OnApplicationBootstrap {
   private readonly logger = new Logger(BoltyGuardService.name);
   private readonly anthropic: Anthropic;
 
@@ -69,6 +74,67 @@ export class BoltyGuardService {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') ?? '',
     });
+  }
+
+  /**
+   * One-shot backfill on app startup. Gated behind the
+   * BOLTYGUARD_BACKFILL_ON_BOOT env so it never runs by accident.
+   *
+   * After the deploy completes once with the flag set, unset the
+   * env var so subsequent boots skip the work. Backfill walks every
+   * AI_AGENT / BOT listing that has no SecurityScan yet, runs the
+   * full scanner, and persists the result. Errors are swallowed per
+   * listing so one bad row can't block the rest.
+   */
+  async onApplicationBootstrap(): Promise<void> {
+    if (this.config.get<string>('BOLTYGUARD_BACKFILL_ON_BOOT') !== '1') return;
+    // Defer so the Nest module graph finishes wiring before we hit
+    // the DB / Anthropic. Keeps boot quick; backfill runs in bg.
+    setTimeout(() => {
+      this.runBootBackfill().catch((err) => {
+        this.logger.error(`backfill crashed: ${(err as Error).message}`);
+      });
+    }, 2_000);
+  }
+
+  private async runBootBackfill(): Promise<void> {
+    this.logger.log('[backfill] starting BOLTYGUARD_BACKFILL_ON_BOOT pass');
+    const listings = await this.prisma.marketListing.findMany({
+      where: {
+        type: { in: ['AI_AGENT', 'BOT'] },
+        status: { in: ['ACTIVE', 'REMOVED'] },
+        securityScans: { none: {} },
+      },
+      select: { id: true, title: true },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+
+    this.logger.log(`[backfill] ${listings.length} listings without a scan`);
+    let scanned = 0;
+    let failed = 0;
+
+    for (const l of listings) {
+      try {
+        const r = await this.scanListing(l.id);
+        scanned++;
+        this.logger.log(
+          `[backfill] ${l.id} · ${l.title.slice(0, 40)} → ${r.score} (${r.findings.length} findings, ${r.scanner})`,
+        );
+      } catch (err) {
+        failed++;
+        this.logger.warn(
+          `[backfill] ${l.id} · ${l.title.slice(0, 40)} FAILED: ${(err as Error).message}`,
+        );
+      }
+      // Throttle so we don't blast the LLM API.
+      await new Promise((r) => setTimeout(r, 400));
+    }
+
+    this.logger.log(
+      `[backfill] done. scanned=${scanned} failed=${failed}. ` +
+        `Unset BOLTYGUARD_BACKFILL_ON_BOOT in Render so it doesn't re-run.`,
+    );
   }
 
   /** Latest persisted scan for a listing — used by the agent detail
