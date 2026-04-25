@@ -23,6 +23,16 @@ export class GithubFetcher {
   // Hard cap on the zipball download. Same as BundleScanner.MAX_ZIP_BYTES.
   static readonly MAX_DOWNLOAD_BYTES = BundleScanner.MAX_ZIP_BYTES;
   static readonly DOWNLOAD_TIMEOUT_MS = 20_000;
+  // 10-minute LRU cache keyed by `owner/repo@ref?`. Without a
+  // GITHUB_TOKEN the public API rate-limits at 60 req/h per IP, so
+  // caching repeated scans of the same repo is the difference between
+  // the public scanner being usable and being throttled by 11am.
+  static readonly CACHE_TTL_MS = 10 * 60 * 1000;
+  static readonly MAX_CACHE_ENTRIES = 32;
+  private readonly cache = new Map<
+    string,
+    { buffer: Buffer; cachedAt: number }
+  >();
 
   /** Parse `owner/repo` or a full URL → { owner, repo, ref? }.
    *  Returns null if the input doesn't point at a github.com repo. */
@@ -69,12 +79,19 @@ export class GithubFetcher {
 
   /** Download the repo as a zip into memory. Aborts if it exceeds
    *  MAX_DOWNLOAD_BYTES. Throws a useful error on every failure
-   *  mode so the controller can surface it. */
+   *  mode so the controller can surface it. Cached for 10min so a
+   *  burst of scans on the same repo doesn't burn the API quota. */
   async fetchZip(spec: {
     owner: string;
     repo: string;
     ref?: string;
   }): Promise<Buffer> {
+    const cacheKey = `${spec.owner}/${spec.repo}@${spec.ref ?? 'HEAD'}`;
+    const hit = this.cache.get(cacheKey);
+    if (hit && Date.now() - hit.cachedAt < GithubFetcher.CACHE_TTL_MS) {
+      return hit.buffer;
+    }
+
     // GitHub returns 302 to codeload.github.com which is also fine.
     const path = spec.ref
       ? `/repos/${enc(spec.owner)}/${enc(spec.repo)}/zipball/${enc(spec.ref)}`
@@ -139,7 +156,15 @@ export class GithubFetcher {
         }
         chunks.push(value);
       }
-      return Buffer.concat(chunks.map((c) => Buffer.from(c)));
+      const buf = Buffer.concat(chunks.map((c) => Buffer.from(c)));
+      // Trim oldest entries before inserting so the map can't grow
+      // unbounded under traffic.
+      if (this.cache.size >= GithubFetcher.MAX_CACHE_ENTRIES) {
+        const oldestKey = this.cache.keys().next().value;
+        if (oldestKey) this.cache.delete(oldestKey);
+      }
+      this.cache.set(cacheKey, { buffer: buf, cachedAt: Date.now() });
+      return buf;
     } finally {
       clearTimeout(timer);
     }
