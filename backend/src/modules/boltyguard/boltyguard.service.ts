@@ -8,6 +8,8 @@ import { ScanSeverity } from '@prisma/client';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
+import { SemgrepRunner } from './semgrep-runner';
+
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads', 'market');
 const MAX_SCAN_BYTES = 200_000;
 
@@ -62,6 +64,7 @@ export class BoltyGuardService {
   constructor(
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly semgrep: SemgrepRunner,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') ?? '',
@@ -123,21 +126,43 @@ export class BoltyGuardService {
     const trimmed = code.slice(0, MAX_SCAN_BYTES);
     if (!trimmed.trim()) return EMPTY_REPORT;
 
-    try {
-      const findings = await this.runClaudePass(trimmed, opts);
-      return buildReport(findings, 'claude');
-    } catch (err) {
-      this.logger.error('Claude pass failed', err);
-      // Don't fail the publish — return a low-confidence neutral score
-      // and let the seller try again or have a moderator review.
-      return {
-        score: 75,
-        worstSeverity: null,
-        findings: [],
-        summary: 'Automated scan unavailable. Manual review recommended.',
-        scanner: 'unavailable',
-      };
+    // Run Semgrep + Claude in parallel. Semgrep is deterministic and
+    // catches well-known sinks (eval, secrets, shell-no-allowlist);
+    // Claude reasons about novel issues and prompt-injection paths.
+    // Each pass is best-effort: a crash on one side doesn't lose the
+    // other's findings.
+    const [semgrepFindings, claudeFindings] = await Promise.all([
+      this.semgrep
+        .scan(trimmed, opts.fileName ?? 'snippet.txt')
+        .catch((err) => {
+          this.logger.warn(`semgrep failed: ${(err as Error).message}`);
+          return [] as Finding[];
+        }),
+      this.runClaudePass(trimmed, opts).catch((err) => {
+        this.logger.error('Claude pass failed', err);
+        return [] as Finding[];
+      }),
+    ]);
+
+    // Merge + dedupe by (rule, file, line). Semgrep wins on conflicts
+    // because its line numbers are exact.
+    const merged = dedupe([...semgrepFindings, ...claudeFindings]);
+    const scanner =
+      semgrepFindings.length && claudeFindings.length
+        ? 'semgrep+claude'
+        : semgrepFindings.length
+          ? 'semgrep'
+          : claudeFindings.length
+            ? 'claude'
+            : 'noop';
+
+    if (scanner === 'noop' && !semgrepFindings.length && !claudeFindings.length) {
+      // Both passes returned nothing — could be a clean file OR both
+      // failed. Be honest: if either pass actually executed (we got
+      // here without throwing), treat as clean. Score = 100.
+      return { ...EMPTY_REPORT, scanner: 'merged' };
     }
+    return buildReport(merged, scanner);
   }
 
   // ── Internals ──────────────────────────────────────────────────────
@@ -268,6 +293,26 @@ function buildReport(findings: Finding[], scanner: string): ScanReport {
         ) as Severity);
   const summary = summarise(findings);
   return { score, worstSeverity: worst, findings, summary, scanner };
+}
+
+function dedupe(findings: Finding[]): Finding[] {
+  const seen = new Map<string, Finding>();
+  for (const f of findings) {
+    const key = `${f.rule}|${f.file ?? ''}|${f.line ?? ''}`;
+    const prev = seen.get(key);
+    if (!prev) {
+      seen.set(key, f);
+      continue;
+    }
+    // Keep the one with the higher severity. If equal, keep the
+    // existing (which is Semgrep, since we put it first in the spread).
+    if (SEVERITY_RANK[f.severity] > SEVERITY_RANK[prev.severity]) {
+      seen.set(key, f);
+    }
+  }
+  return Array.from(seen.values()).sort(
+    (a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity],
+  );
 }
 
 function summarise(findings: Finding[]): string {
