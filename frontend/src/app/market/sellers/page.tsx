@@ -340,6 +340,9 @@ export default function TopSellersPage() {
               >
                 <Link
                   href={`/market/sellers/${s.username || ''}`}
+                  onMouseEnter={() =>
+                    s.username && api.prefetch([`/market/sellers/${s.username}`])
+                  }
                   className="group relative block p-5 rounded-xl overflow-hidden transition-all"
                   style={{
                     background:

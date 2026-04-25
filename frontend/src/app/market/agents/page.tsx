@@ -590,6 +590,7 @@ function AgentCard({
       href={`/market/agents/${listing.id}`}
       className="mk-card mk-card--listing"
       aria-label={listing.title}
+      onMouseEnter={() => api.prefetch([`/market/${listing.id}`])}
     >
       {/* Top row: title + seller + type badge */}
       <div className="mk-card__top">
