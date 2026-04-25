@@ -423,7 +423,15 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     if (sortBy === 'trending') {
-      return this.getTrendingListings(where, page, take, skip);
+      const result = await this.getTrendingListings(where, page, take, skip);
+      // Mirror the regular path's Redis write so trending also benefits
+      // from the 30s server-side cache and the CacheWarmer cron. Without
+      // this, every trending hit re-runs purchase/negotiation aggregations
+      // even when the same response could be served from cache.
+      if (cacheKey) {
+        this.redis.set(cacheKey, JSON.stringify(result), 30).catch(() => null);
+      }
+      return result;
     }
 
     const orderBy =

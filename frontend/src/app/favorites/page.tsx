@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { api } from '@/lib/api/client';
+import { getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useFavoriteRepos, useFavorites } from '@/lib/hooks/useFavorites';
 
 interface RepoSummary {
@@ -32,6 +33,12 @@ interface ListingSummary {
 
 type Tab = 'repos' | 'listings';
 
+// Cache keys are scoped to the localStorage id list so adding / removing
+// a favorite naturally invalidates by changing the key. Stale-while-
+// revalidate window matches the marketplace pages (2 min).
+const reposKey = (ids: string[]) => `favorites:repos:${ids.join(',')}`;
+const listingsKey = (ids: string[]) => `favorites:listings:${ids.join(',')}`;
+
 export default function FavoritesPage() {
   const [tab, setTab] = useState<Tab>('repos');
   const { ids: repoIds, remove: removeRepo } = useFavoriteRepos();
@@ -46,15 +53,25 @@ export default function FavoritesPage() {
       setRepos([]);
       return;
     }
-    setLoading(true);
+    // Stale-while-revalidate from pageCache so tab-switching (or coming
+    // back to /favorites within the freshness window) paints instantly.
+    const key = reposKey(repoIds);
+    const cached = getCachedWithStatus<RepoSummary[]>(key, 120_000);
+    if (cached.data) {
+      setRepos(cached.data);
+      setLoading(false);
+      if (cached.fresh) return; // skip network entirely if <2 min old
+    } else {
+      setLoading(true);
+    }
     setError(null);
     try {
-      // Bulk lookup — one request instead of N parallel `/repos/:id`
-      // fetches. Backend preserves the caller's id ordering.
       const rows = await api.get<RepoSummary[]>(
         `/repos/by-ids?ids=${encodeURIComponent(repoIds.join(','))}`,
       );
-      setRepos(Array.isArray(rows) ? rows : []);
+      const list = Array.isArray(rows) ? rows : [];
+      setRepos(list);
+      setCached(key, list);
     } catch {
       setError('Could not load favorite repos');
     } finally {
@@ -67,13 +84,23 @@ export default function FavoritesPage() {
       setListings([]);
       return;
     }
-    setLoading(true);
+    const key = listingsKey(listingIds);
+    const cached = getCachedWithStatus<ListingSummary[]>(key, 120_000);
+    if (cached.data) {
+      setListings(cached.data);
+      setLoading(false);
+      if (cached.fresh) return;
+    } else {
+      setLoading(true);
+    }
     setError(null);
     try {
       const rows = await api.get<ListingSummary[]>(
         `/market/by-ids?ids=${encodeURIComponent(listingIds.join(','))}`,
       );
-      setListings(Array.isArray(rows) ? rows : []);
+      const list = Array.isArray(rows) ? rows : [];
+      setListings(list);
+      setCached(key, list);
     } catch {
       setError('Could not load favorite listings');
     } finally {
