@@ -30,6 +30,10 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import {
+  SecurityBadge,
+  SecurityFindings,
+} from '@/components/boltyguard/SecurityBadge';
 import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
@@ -516,7 +520,7 @@ export default function AgentDetailPage() {
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2 text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
+              <div className="flex items-center gap-2 mb-2 text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 flex-wrap">
                 <span style={{ color: meta.color }}>{meta.label}</span>
                 {listing.agentEndpoint && (
                   <>
@@ -527,6 +531,8 @@ export default function AgentDetailPage() {
                     </span>
                   </>
                 )}
+                <span className="text-zinc-700">·</span>
+                <SecurityBadge listingId={listing.id} />
               </div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-white tracking-tight leading-tight break-words">
                 {listing.title}
@@ -669,6 +675,8 @@ export default function AgentDetailPage() {
               listingPath={`/market/agents/${listing.id}`}
               isOwner={isOwner}
             />
+
+            <SecurityFindings listingId={listing.id} />
 
             <Section title="Live demo" icon={Play}>
               {agentOffline ? (

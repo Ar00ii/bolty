@@ -200,6 +200,31 @@ export function LaunchWizardModal({
     setLaunchError(null);
     setLaunchState('signing');
     try {
+      // BoltyGuard gate — only when the user picked AI-launch mode.
+      // Below 70 we refuse to mint + auto-announce. Self-launch
+      // doesn't trigger this; the seller is welcome to launch their
+      // own code at their own risk, but we don't broadcast it.
+      if (launchMode === 'agent' && listingPath.includes('/agents/')) {
+        try {
+          const r = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/boltyguard/listings/${listingId}/latest`,
+          );
+          if (r.ok) {
+            const scan = (await r.json()) as { score?: number } | null;
+            if (scan && typeof scan.score === 'number' && scan.score < 70) {
+              throw new Error(
+                `BoltyGuard blocked the AI launch — security score ${scan.score}/100. Open the agent page, fix the findings, then try again.`,
+              );
+            }
+          }
+        } catch (gateErr) {
+          if (gateErr instanceof Error && gateErr.message.startsWith('BoltyGuard')) {
+            throw gateErr;
+          }
+          // Network / lookup miss — fail open. The cron + manual
+          // review still cover the safety net.
+        }
+      }
       // Brief "signing" phase before the "pending" on-chain wait.
       await new Promise((r) => setTimeout(r, 700));
       setLaunchState('pending');

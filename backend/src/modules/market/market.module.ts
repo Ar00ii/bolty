@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { AuthModule } from '../auth/auth.module';
+import { BoltyGuardModule } from '../boltyguard/boltyguard.module';
 import { DmModule } from '../dm/dm.module';
 import { EmailModule } from '../email/email.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -27,6 +28,7 @@ import { NegotiationsGateway } from './negotiations.gateway';
     DmModule,
     NotificationsModule,
     ReputationModule,
+    BoltyGuardModule,
   ],
   controllers: [AgentPostsController, MarketController],
   providers: [
