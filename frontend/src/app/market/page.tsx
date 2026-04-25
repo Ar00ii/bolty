@@ -829,6 +829,7 @@ function Row({
     <li>
       <Link
         href={`/market/agents/${listing.id}`}
+        onMouseEnter={() => api.prefetch([`/market/${listing.id}`])}
         className="group relative grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all"
         style={{
           background: flashing

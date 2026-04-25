@@ -173,6 +173,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .then((r) => r?.data ?? []),
       );
       void prefetch('market:pulse', () => api.get('/market/pulse?limit=20'));
+      // Most-clicked sub-routes from the marketplace section. Fired here
+      // instead of waiting for the user's first sidebar hover so the
+      // landing render → first nav transition is also instant.
+      void prefetch('market:agents:type=AI_AGENT&sortBy=recent', () =>
+        api
+          .get<{ data: unknown[] }>('/market?type=AI_AGENT&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      void prefetch('market:repos:sortBy=recent', () =>
+        api
+          .get<{ data: unknown[] }>('/market?type=REPO&sortBy=recent')
+          .then((r) => r?.data ?? []),
+      );
+      void prefetch('market:top-sellers:48', () =>
+        api.get('/market/top-sellers?limit=48'),
+      );
       void prefetch('orders:buyer', () => api.get('/orders'));
       void prefetch('orders:seller', () => api.get('/orders/selling'));
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));
