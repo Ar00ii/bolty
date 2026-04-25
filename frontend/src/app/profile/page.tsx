@@ -23,6 +23,10 @@ const IntegrationsSection = dynamicImport(
   () => import('@/components/profile/IntegrationsSection').then((m) => m.IntegrationsSection),
   { ssr: false },
 );
+const ConnectXCard = dynamicImport(
+  () => import('@/components/social/ConnectXCard').then((m) => m.ConnectXCard),
+  { ssr: false },
+);
 const NotificationsSection = dynamicImport(
   () => import('@/components/profile/NotificationsSection').then((m) => m.NotificationsSection),
   { ssr: false },
@@ -2456,7 +2460,11 @@ export default function ProfilePage() {
 
           {/* INTEGRATIONS */}
           {tab === 'integrations' && (
-            <IntegrationsSection
+            <>
+              <div className="mb-4">
+                <ConnectXCard returnTo="/profile?tab=integrations" />
+              </div>
+              <IntegrationsSection
               integrations={(() => {
                 // Wallet connections live in the dedicated Wallet tab — we
                 // don't re-surface them here to avoid a duplicate surface
@@ -2589,6 +2597,7 @@ export default function ProfilePage() {
                 }
               }}
             />
+            </>
           )}
 
           {/* ════════════════════════════════════════════

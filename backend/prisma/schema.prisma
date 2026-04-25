@@ -99,6 +99,7 @@ model User {
   notificationPreference NotificationPreference?
   notifications          Notification[]
   integrations           UserIntegration[]
+  xConnection            XConnection?
   aiAgents               Agent[]
   raysPurchases          RaysPurchase[]
   listingBoosts          ListingBoost[]
@@ -998,6 +999,43 @@ model UserIntegration {
   @@unique([userId, provider, name])
   @@index([userId, provider])
   @@map("user_integrations")
+}
+
+// ─── X (Twitter) connection ──────────────────────────────────────────────────
+//
+// One row per user. Holds the OAuth 2.0 access + refresh tokens we need
+// to post on the user's behalf when one of their AI agents launches a
+// token. Tokens are AES-256-GCM encrypted at rest with X_TOKEN_ENC_KEY
+// so a DB leak doesn't hand the attacker live posting access.
+//
+// We store xUserId + screenName for display ("Posting as @handle") and
+// scopes so the FE can show what the user authorised. expiresAt drives
+// the silent refresh on every post attempt.
+
+model XConnection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  xUserId    String // Twitter's numeric user id
+  screenName String // @handle (no @ prefix)
+
+  // Format: base64(iv) + ":" + base64(ciphertext) + ":" + base64(authTag)
+  accessTokenEnc  String   @db.Text
+  refreshTokenEnc String   @db.Text
+  expiresAt       DateTime
+  scopes          String // space-separated list, e.g. "tweet.read tweet.write users.read offline.access"
+
+  // Per-user posting throttle so a runaway agent doesn't spam the user's
+  // account into a suspension. Reset by the service every 24h on first
+  // post of the new window.
+  postsLast24h     Int      @default(0)
+  postsWindowStart DateTime @default(now())
+
+  @@map("x_connections")
 }
 
 // ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────

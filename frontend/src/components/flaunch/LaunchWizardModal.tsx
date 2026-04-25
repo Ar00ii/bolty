@@ -17,6 +17,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useState } from 'react';
 
+import { LaunchTweetModal } from '@/components/social/LaunchTweetModal';
 import { Modal } from '@/components/ui/Modal';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
@@ -305,7 +306,12 @@ export function LaunchWizardModal({
 
       <div className="mt-5 space-y-4">
         {launchState === 'success' && result ? (
-          <SuccessView result={result} symbol={symbol} onClose={handleClose} />
+          <SuccessView
+            result={result}
+            symbol={symbol}
+            name={name}
+            onClose={handleClose}
+          />
         ) : step === 1 ? (
           <Step1Metadata
             name={name}
@@ -1203,13 +1209,24 @@ function Row({
 function SuccessView({
   result,
   symbol,
+  name,
   onClose,
 }: {
   result: LaunchResult;
   symbol: string;
+  name: string;
   onClose: () => void;
 }) {
   const short = `${result.tokenAddress.slice(0, 8)}…${result.tokenAddress.slice(-6)}`;
+  const [tweetOpen, setTweetOpen] = useState(false);
+  // Build the public launchpad URL for the tweet body. We point at the
+  // Bolty page (chart + holders + CA in one screen) rather than the
+  // Flaunch one, so the click brings the visitor into our funnel.
+  const origin =
+    typeof window !== 'undefined' && window.location?.origin
+      ? window.location.origin
+      : 'https://www.boltynetwork.xyz';
+  const launchpadUrl = `${origin}/launchpad/${result.tokenAddress}`;
   return (
     <div className="space-y-4 text-center py-2">
       <div
@@ -1240,16 +1257,27 @@ function SuccessView({
       >
         <Copy className="w-3 h-3" /> {short}
       </button>
-      <div className="flex items-center justify-center gap-2 pt-2">
-        <Link
-          href={result.flaunchUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setTweetOpen(true)}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] text-white transition hover:brightness-110"
           style={{
             background:
               'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
             boxShadow: '0 0 0 1px rgba(131,110,249,0.5)',
+          }}
+        >
+          Tweet your launch
+        </button>
+        <Link
+          href={result.flaunchUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] text-zinc-300 hover:text-white transition"
+          style={{
+            background: 'rgba(255,255,255,0.04)',
+            boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
           }}
         >
           View on Flaunch <ExternalLink className="w-3 h-3" />
@@ -1266,6 +1294,11 @@ function SuccessView({
           Done
         </button>
       </div>
+      <LaunchTweetModal
+        open={tweetOpen}
+        token={{ name, symbol, tokenAddress: result.tokenAddress, url: launchpadUrl }}
+        onClose={() => setTweetOpen(false)}
+      />
     </div>
   );
 }
