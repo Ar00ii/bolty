@@ -29,6 +29,10 @@ const RanksPanel = dynamicImport(
   () => import('@/components/profile/RanksPanel').then((m) => m.RanksPanel),
   { ssr: false },
 );
+const FriendsExtras = dynamicImport(
+  () => import('@/components/profile/FriendsExtras').then((m) => m.FriendsExtras),
+  { ssr: false },
+);
 const AvatarCropperModal = dynamicImport(
   () => import('@/components/profile/AvatarCropperModal').then((m) => m.AvatarCropperModal),
   { ssr: false },
@@ -2170,11 +2174,22 @@ export default function ProfilePage() {
       ════════════════════════════════════════════ */}
           {tab === 'friends' && (
             <div className="space-y-4">
+              {/* Privacy + Suggested users — added in PR4. Sits above the
+                  existing search/list/requests panel so the user lands on
+                  the active surfaces first. */}
+              <FriendsExtras
+                onFriendRequestSent={() => {
+                  // Tickle the existing requests-out list so a freshly-sent
+                  // request shows up in the parent panel without a reload.
+                  void loadFriends();
+                }}
+              />
+
               {/* Search */}
               <div className="profile-content-card">
                 <SectionHeader
-                  title="Professional Network"
-                  subtitle="Build meaningful connections with developers and expand your professional community."
+                  title="Search"
+                  subtitle="Find someone by username, display name, or tag."
                 />
                 <Alert type="success" msg={friendsMsg} />
                 <Alert type="error" msg={friendsErr} />

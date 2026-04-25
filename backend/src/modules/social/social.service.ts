@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FriendshipStatus } from '@prisma/client';
 
@@ -18,6 +19,12 @@ export class SocialService {
     const receiver = await this.prisma.user.findUnique({ where: { id: receiverId } });
     if (!receiver) throw new NotFoundException('User not found');
     if (receiver.id === senderId) throw new BadRequestException('You cannot add yourself');
+    // Honour the receiver's privacy toggle (PR4 — Friends → Privacy).
+    // Surface a clear error so the FE can show "X has friend requests
+    // turned off" instead of a generic "request failed".
+    if (receiver.friendRequestsEnabled === false) {
+      throw new ForbiddenException('This user is not accepting friend requests');
+    }
 
     // Wrap the "delete DECLINED row, then re-create" in a transaction so two
     // concurrent re-requests can't both succeed past the delete and then

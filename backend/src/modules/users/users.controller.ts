@@ -207,6 +207,34 @@ export class UsersController {
     return this.usersService.getNotificationPreferences(userId);
   }
 
+  /** Privacy toggles surfaced in /profile → Friends → Privacy. */
+  @UseGuards(JwtAuthGuard)
+  @Get('preferences/privacy')
+  getPrivacy(@CurrentUser('id') userId: string) {
+    return this.usersService.getPrivacy(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('preferences/privacy')
+  updatePrivacy(
+    @CurrentUser('id') userId: string,
+    @Body() data: { friendRequestsEnabled?: boolean; publicMessagesEnabled?: boolean },
+  ) {
+    return this.usersService.updatePrivacy(userId, data);
+  }
+
+  /** Suggested users to befriend — used by the Friends → Suggested tab.
+   *  Returns a small list mixing high-reputation users + recently
+   *  active users + a few random faces. Excludes the caller and people
+   *  they already friend / have a pending request with. Public so
+   *  anonymous discovery still works on the public showcase. */
+  @UseGuards(JwtAuthGuard)
+  @Get('suggested')
+  getSuggested(@CurrentUser('id') userId: string, @Query('limit') limit?: string) {
+    const lim = Math.max(1, Math.min(Number(limit) || 12, 24));
+    return this.usersService.getSuggested(userId, lim);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Patch('preferences/notifications')
   updateNotificationPreferences(

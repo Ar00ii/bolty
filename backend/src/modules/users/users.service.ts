@@ -250,6 +250,124 @@ export class UsersService {
     });
   }
 
+  // ─── Privacy preferences ─────────────────────────────────────────────────
+
+  async getPrivacy(userId: string) {
+    const u = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { friendRequestsEnabled: true, publicMessagesEnabled: true },
+    });
+    return {
+      friendRequestsEnabled: u?.friendRequestsEnabled ?? true,
+      publicMessagesEnabled: u?.publicMessagesEnabled ?? true,
+    };
+  }
+
+  async updatePrivacy(
+    userId: string,
+    data: { friendRequestsEnabled?: boolean; publicMessagesEnabled?: boolean },
+  ) {
+    const updated = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(typeof data.friendRequestsEnabled === 'boolean'
+          ? { friendRequestsEnabled: data.friendRequestsEnabled }
+          : {}),
+        ...(typeof data.publicMessagesEnabled === 'boolean'
+          ? { publicMessagesEnabled: data.publicMessagesEnabled }
+          : {}),
+      },
+      select: { friendRequestsEnabled: true, publicMessagesEnabled: true },
+    });
+    return updated;
+  }
+
+  // ─── Suggested users ─────────────────────────────────────────────────────
+
+  /**
+   * Friends → Suggested tab. Returns a tight, varied list:
+   *   • a few high-reputation users (people worth knowing)
+   *   • a few users active in the last 7 days (alive accounts)
+   *   • a couple of recent joiners (fresh faces)
+   * Always excludes the caller, banned/bot accounts, and anyone already
+   * connected (friend or pending request either direction).
+   */
+  async getSuggested(userId: string, limit = 12) {
+    // The Friendship model carries both pending and accepted edges,
+    // distinguished by `status`. Pull every row that touches the caller
+    // (either side) and turn them into a single set of "ids to skip"
+    // so suggestions never include people the user already knows or
+    // has pending traffic with.
+    const friendshipRows = await this.prisma.friendship.findMany({
+      where: { OR: [{ senderId: userId }, { receiverId: userId }] },
+      select: { senderId: true, receiverId: true },
+    });
+    const blocked = new Set<string>([userId]);
+    for (const f of friendshipRows) {
+      blocked.add(f.senderId === userId ? f.receiverId : f.senderId);
+    }
+
+    const baseFilter = {
+      isBanned: false,
+      isBot: false,
+      friendRequestsEnabled: true,
+      id: { notIn: Array.from(blocked) },
+    } as const;
+
+    const select = {
+      id: true,
+      username: true,
+      displayName: true,
+      avatarUrl: true,
+      bio: true,
+      reputationPoints: true,
+      userTag: true,
+      createdAt: true,
+    } as const;
+
+    // No `lastActiveAt` on the User table; use `updatedAt` as a proxy.
+    // It bumps on most user-facing writes (profile edits, settings,
+    // connections), so a high `updatedAt` is a reasonable signal of
+    // "this account is alive".
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const [topRep, recentlyActive, freshJoiners] = await Promise.all([
+      this.prisma.user.findMany({
+        where: baseFilter,
+        orderBy: { reputationPoints: 'desc' },
+        take: Math.ceil(limit * 0.5),
+        select,
+      }),
+      this.prisma.user.findMany({
+        where: { ...baseFilter, updatedAt: { gte: since7d } },
+        orderBy: { updatedAt: 'desc' },
+        take: Math.ceil(limit * 0.4),
+        select,
+      }),
+      this.prisma.user.findMany({
+        where: baseFilter,
+        orderBy: { createdAt: 'desc' },
+        take: Math.ceil(limit * 0.3),
+        select,
+      }),
+    ]);
+
+    // Merge by id, preserving the priority order: top-rep first, then
+    // active, then fresh. Cap at requested limit.
+    const seen = new Set<string>();
+    const merged: typeof topRep = [];
+    for (const list of [topRep, recentlyActive, freshJoiners]) {
+      for (const u of list) {
+        if (seen.has(u.id)) continue;
+        seen.add(u.id);
+        merged.push(u);
+        if (merged.length >= limit) break;
+      }
+      if (merged.length >= limit) break;
+    }
+    return merged;
+  }
+
   // ─── Activity Log ──────────────────────────────────────────────────────────
 
   async getActivityLog(userId: string, limit = 50) {
