@@ -62,6 +62,16 @@ function prefetchForHref(href: string) {
           .then((r) => r?.data ?? []),
       );
       break;
+    case '/market/sellers':
+      void prefetch('market:top-sellers:48', () =>
+        api.get('/market/top-sellers?limit=48'),
+      );
+      break;
+    case '/launchpad':
+      // Backend stats are cheap to prewarm; the actual token list lives
+      // off-chain (flaunch) and polls on its own.
+      void prefetch('token:bolty', () => api.get('/token/bolty'));
+      break;
     case '/feed':
       void prefetch('chat:general', () =>
         api.get('/chat/messages?limit=50&channel=general'),
@@ -489,6 +499,11 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                       if (!isActive) {
                         e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                       }
+                      // Same prefetch story as parent rows — child rows
+                      // (Agents, Repos under Marketplace) are clicked the
+                      // most, so warming pageCache on hover means the
+                      // landing render is instant.
+                      prefetchForHref(c.href);
                     }}
                     onMouseLeave={(e) => {
                       if (!isActive) {
