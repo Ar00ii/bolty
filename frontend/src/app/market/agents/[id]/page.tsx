@@ -585,7 +585,7 @@ export default function AgentDetailPage() {
               <ShareButton title={listing.title} />
               {isOwner ? (
                 <Link
-                  href={`/market/agents/${listing.id}/edit`}
+                  href="/market/seller"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
                   style={{
                     background:
@@ -1315,7 +1315,7 @@ function PricingCard({
       {isOwner ? (
         <>
           <Link
-            href={`/market/agents/${listing.id}/edit`}
+            href="/market/seller"
             className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-zinc-200 text-[13px] font-light tracking-[0.005em] transition-all hover:text-white hover:brightness-110"
             style={{
               background:
