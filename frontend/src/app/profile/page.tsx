@@ -11,24 +11,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 // Profile has 5+ sibling tabs but the user only sees one at a time. Defer
 // the non-active panels so the initial /profile bundle is the identity form
 // plus whichever tab is currently mounted, not every tab's code at once.
-const AgentDashboard = dynamicImport(
-  () => import('@/components/profile/AgentDashboard').then((m) => m.AgentDashboard),
-  { ssr: false },
-);
+// AgentDashboard / IntegrationsSection / NotificationsSection /
+// UsageSection were all removed in the April 2026 profile redesign —
+// dynamic imports dropped to keep the bundle clean. The component
+// files still exist on disk for the moment in case we want to revive
+// any of them as a standalone route later.
 const APIKeysSection = dynamicImport(
   () => import('@/components/profile/APIKeysSection').then((m) => m.APIKeysSection),
-  { ssr: false },
-);
-const IntegrationsSection = dynamicImport(
-  () => import('@/components/profile/IntegrationsSection').then((m) => m.IntegrationsSection),
-  { ssr: false },
-);
-const NotificationsSection = dynamicImport(
-  () => import('@/components/profile/NotificationsSection').then((m) => m.NotificationsSection),
-  { ssr: false },
-);
-const UsageSection = dynamicImport(
-  () => import('@/components/profile/UsageSection').then((m) => m.UsageSection),
   { ssr: false },
 );
 const AvatarCropperModal = dynamicImport(
@@ -49,17 +38,16 @@ import {
   linkWalletConnect,
 } from '@/lib/wallet/walletconnect';
 
+// Tabs after the April 2026 redesign:
+//   • Removed: 'usage', 'activity', 'integrations', 'notifications', 'agent'
+//   • 'social' will be folded into 'general' in PR2 — still present for now
+//     so the existing fields keep rendering until they're moved
 type Tab =
   | 'general'
   | 'social'
   | 'wallet'
   | 'friends'
-  | 'agent'
   | 'api-keys'
-  | 'usage'
-  | 'notifications'
-  | 'integrations'
-  | 'activity'
   | 'security';
 
 interface Friend {
@@ -600,25 +588,15 @@ export default function ProfilePage() {
     if (params.get('linked') === 'github') {
       refresh();
       window.history.replaceState({}, '', '/profile');
-      setTab('integrations');
+      // Integrations tab is gone after the redesign — bounce GitHub-linked
+      // returns to General where the social block now lives.
+      setTab('general');
       setConMsg('GitHub account linked successfully.');
     }
     const tabParam = params.get('tab') as Tab | null;
     if (
       tabParam &&
-      [
-        'general',
-        'social',
-        'wallet',
-        'friends',
-        'agent',
-        'api-keys',
-        'usage',
-        'notifications',
-        'integrations',
-        'activity',
-        'security',
-      ].includes(tabParam)
+      ['general', 'social', 'wallet', 'friends', 'api-keys', 'security'].includes(tabParam)
     ) {
       setTab(tabParam);
       window.history.replaceState({}, '', '/profile');
@@ -675,48 +653,9 @@ export default function ProfilePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery]);
 
-  // Load data based on active tab
-  useEffect(() => {
-    if (!user) return;
-
-    if (tab === 'activity') {
-      api
-        .get<any>('/users/activity-log?limit=50')
-        .then((logs) => {
-          setActivityLog(Array.isArray(logs) ? logs : []);
-        })
-        .catch(() => setActivityLog([]));
-    }
-
-    if (tab === 'usage') {
-      api
-        .get<any>('/users/usage-stats')
-        .then((stats) => {
-          setUsageStats(stats || {});
-        })
-        .catch(() => {});
-    }
-
-    if (tab === 'agent') {
-      // Load both usage stats and activity log for the agent tab
-      Promise.all([
-        api.get<any>('/users/usage-stats').catch(() => ({})),
-        api.get<any>('/users/activity-log?limit=50').catch(() => []),
-      ]).then(([stats, logs]) => {
-        setUsageStats(stats || {});
-        setActivityLog(Array.isArray(logs) ? logs : []);
-      });
-    }
-
-    if (tab === 'integrations') {
-      api
-        .get<any>('/users/integrations')
-        .then((ints) => {
-          setIntegrations(Array.isArray(ints) ? ints : []);
-        })
-        .catch(() => setIntegrations([]));
-    }
-  }, [tab, user]);
+  // Per-tab data hooks were used by the old usage/activity/integrations/
+  // agent panels; all four tabs were removed in the April 2026 redesign.
+  // Nothing left to load on tab change for now.
 
   // ── Formatting Utilities ──────────────────────────────────────────────────────
 
@@ -1394,132 +1333,130 @@ export default function ProfilePage() {
   const userEmail = (user as { email?: string })?.email;
   const profileUrl = username ? `/u/${username}` : null;
 
+  // App-style sidebar nav. Order = priority. Social will be folded into
+  // General in PR2 (the link card moves up into the General info panel).
   const tabItems = [
     { id: 'general' as Tab, label: 'General', Icon: IconUser },
     { id: 'social' as Tab, label: 'Social', Icon: IconGlobe },
     { id: 'wallet' as Tab, label: 'Wallet', Icon: IconWallet },
     { id: 'api-keys' as Tab, label: 'API Keys', Icon: IconLink },
-    { id: 'usage' as Tab, label: 'Usage', Icon: IconCpu },
-    { id: 'notifications' as Tab, label: 'Notifications', Icon: IconGlobe },
-    { id: 'integrations' as Tab, label: 'Integrations', Icon: IconLink },
     { id: 'security' as Tab, label: 'Security', Icon: IconShield },
     { id: 'friends' as Tab, label: 'Friends', Icon: IconUsers },
-    { id: 'activity' as Tab, label: 'Activity', Icon: IconGitHub },
   ];
   const activeTab = tabItems.find((t) => t.id === tab) ?? tabItems[0];
 
   return (
-    <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
-      {/* Ambient brand glows */}
-      <div
-        className="absolute -top-40 -left-40 w-[560px] h-[560px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
-      />
-      <div
-        className="absolute top-[40vh] -right-40 w-[480px] h-[480px] rounded-full opacity-[0.12] blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #06B6D4 0%, transparent 70%)' }}
-      />
-
-      {/* ── Sticky hero header ───────────────────────────────────────── */}
-      <div className="border-b border-white/[0.06] sticky top-0 z-40 backdrop-blur-md bg-zinc-950/90">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 sm:gap-4">
-          <div className="min-w-0">
-            <div className="text-[10.5px] uppercase tracking-[0.18em] text-zinc-200 font-medium mb-2 flex items-center gap-2">
-              <Link href="/" className="hover:text-white transition-colors">
-                Home
-              </Link>
-              <span className="text-zinc-400">/</span>
-              <span className="text-zinc-300">Profile</span>
-              <span className="text-zinc-400">/</span>
-              <span className="text-[#b4a7ff]">{activeTab.label}</span>
+    <div style={{ background: '#09090b' }} className="min-h-screen text-white">
+      {/* App-style two-column shell.
+       *  Left:  sticky sidebar with the user identity card on top + the
+       *         section list below. Black panel, 1px purple-tinted border,
+       *         active row marked by a 2px left bar in #836EF9.
+       *  Right: section content. No ambient glows, no cyan accents, no
+       *         heavy gradients — clean dark surface with a single brand
+       *         accent so the data inside reads. */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6 lg:gap-8">
+        <aside className="lg:sticky lg:top-6 self-start space-y-3">
+          {/* Identity card */}
+          <div
+            className="rounded-xl p-4"
+            style={{
+              background: '#0d0d12',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-full overflow-hidden grid place-items-center shrink-0"
+                style={{
+                  background: 'rgba(131,110,249,0.12)',
+                  border: '1px solid rgba(131,110,249,0.3)',
+                }}
+              >
+                {user?.avatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-[12px] font-mono text-[#b4a7ff]">
+                    {(displayName || username || '?').slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="text-[13px] font-medium truncate">
+                  {displayName || username || 'You'}
+                </div>
+                <div className="text-[11px] text-zinc-500 truncate">
+                  @{username || '—'}
+                </div>
+              </div>
             </div>
-            <h1
-              className="font-light text-white"
-              style={{ fontSize: 'clamp(1.6rem, 3.2vw, 2.4rem)', lineHeight: 1.1 }}
-            >
-              <GradientText gradient="purple">{activeTab.label}</GradientText>
-            </h1>
-            <p className="text-[13px] sm:text-sm text-zinc-300 mt-1 font-light">
-              Manage your identity, security and connections on Bolty.
-            </p>
+            {profileUrl && (
+              <Link
+                href={profileUrl}
+                className="mt-3 inline-flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-white transition-colors"
+              >
+                <IconArrow className="w-3 h-3" />
+                View public profile
+              </Link>
+            )}
           </div>
-          {profileUrl && (
-            <Link
-              href={profileUrl}
-              className="group hidden sm:inline-flex items-center gap-2 rounded-lg h-10 px-3.5 text-[12.5px] font-medium text-white transition-colors self-start sm:self-end"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 18px -6px rgba(131,110,249,0.4)',
-              }}
-            >
-              <IconArrow className="w-3.5 h-3.5 text-[#b4a7ff] group-hover:text-white transition-colors" />
-              <span className="tracking-[0.005em]">View public profile</span>
-            </Link>
-          )}
-        </div>
 
-        {/* ── Horizontal tab bar ──────────────────────────────────── */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          {/* Nav list */}
           <nav
-            className="profile-menu-bar flex items-center gap-1 overflow-x-auto pb-2 -mb-px"
+            className="rounded-xl py-1.5"
+            style={{
+              background: '#0d0d12',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
             role="tablist"
             aria-label="Profile sections"
           >
             {tabItems.map(({ id, label, Icon }) => {
               const active = tab === id;
               return (
-                <motion.button
+                <button
                   key={id}
+                  type="button"
                   onClick={() => setTab(id)}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: 'spring', stiffness: 360, damping: 22 }}
-                  className="profile-menu-item"
-                  style={active ? { color: '#ffffff' } : undefined}
                   role="tab"
                   aria-selected={active}
-                  title={label}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-light transition-colors relative"
+                  style={{
+                    color: active ? '#ffffff' : '#a1a1aa',
+                    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+                  }}
                 >
                   {active && (
-                    <>
-                      <motion.span
-                        layoutId="profile-menu-pill"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        className="absolute inset-x-0 inset-y-1 rounded-lg"
-                        style={{
-                          background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                          boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 18px -6px rgba(131,110,249,0.55)',
-                        }}
-                      />
-                      <motion.span
-                        layoutId="profile-menu-bar"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        aria-hidden="true"
-                        className="absolute left-3 right-3 -bottom-px h-[2px] rounded-full"
-                        style={{
-                          background:
-                            'linear-gradient(90deg, transparent 0%, #836ef9 30%, #836ef9 70%, transparent 100%)',
-                        }}
-                      />
-                    </>
+                    <span
+                      aria-hidden
+                      className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r"
+                      style={{ background: '#836EF9' }}
+                    />
                   )}
-                  <div className="relative z-10 profile-menu-icon">
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <span className="relative z-10 profile-menu-label">{label}</span>
-                </motion.button>
+                  <span
+                    className="inline-flex shrink-0"
+                    style={{ color: active ? '#836EF9' : '#71717a' }}
+                  >
+                    <Icon className="w-[15px] h-[15px]" />
+                  </span>
+                  <span>{label}</span>
+                </button>
               );
             })}
           </nav>
-        </div>
-      </div>
+        </aside>
 
-      {/* ── Main content ─────────────────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10">
-        <div className="profile-content">
+        <main className="min-w-0">
+          <div className="mb-5">
+            <h1 className="text-[22px] font-light tracking-tight">
+              {activeTab.label}
+            </h1>
+            <p className="text-[12.5px] text-zinc-500 mt-0.5">
+              Manage your identity, security and connections on Bolty.
+            </p>
+          </div>
+
+          <div className="profile-content">
           {/* ════════════════════════════════════════════
           GENERAL
       ════════════════════════════════════════════ */}
@@ -2402,194 +2339,8 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* ════════════════════════════════════════════
-          AI AGENT — Professional SaaS Dashboard
-      ════════════════════════════════════════════ */}
-          {tab === 'agent' && <AgentDashboard />}
 
-          {/* USAGE */}
-          {tab === 'usage' && (
-            <UsageSection
-              data={{
-                totalCalls: usageStats.totalCallsThisMonth || 0,
-                maxCalls: usageStats.maxCallsAllowed || 100000,
-                activeAgents: usageStats.activeAgents || 0,
-                last24hCalls: usageStats.last24hCalls || 0,
-                lastResetDate: usageStats.lastResetDate || new Date().toISOString(),
-                purchasesThisMonth: usageStats.purchasesThisMonth || 0,
-                repoPurchasesThisMonth: usageStats.repoPurchasesThisMonth || 0,
-                salesThisMonth: usageStats.salesThisMonth || 0,
-                activeListings: usageStats.activeListings || 0,
-                last24hPurchases: usageStats.last24hPurchases || 0,
-                last30dPurchases: usageStats.last30dPurchases || 0,
-                apiKeysCount: usageStats.apiKeysCount || 0,
-                lastApiUsedAt: usageStats.lastApiUsedAt || null,
-                lastPurchaseAt: usageStats.lastPurchaseAt || null,
-              }}
-            />
-          )}
 
-          {/* NOTIFICATIONS */}
-          {tab === 'notifications' && (
-            <NotificationsSection
-              settings={{
-                emailOnErrors: notifErrors,
-                weeklyReport: notifReports,
-                monthlyReport: notifMonthly,
-                deploymentAlerts: notifDeployments,
-              }}
-              email={userEmail || ''}
-              onUpdate={async (settings) => {
-                await api.patch('/users/preferences/notifications', {
-                  emailOnErrors: settings.emailOnErrors,
-                  emailWeeklyReport: settings.weeklyReport,
-                  emailMonthlyReport: settings.monthlyReport,
-                  emailDeploymentAlerts: settings.deploymentAlerts,
-                });
-                setNotifErrors(settings.emailOnErrors);
-                setNotifReports(settings.weeklyReport);
-                setNotifMonthly(settings.monthlyReport);
-                setNotifDeployments(settings.deploymentAlerts);
-              }}
-            />
-          )}
-
-          {/* INTEGRATIONS */}
-          {tab === 'integrations' && (
-            <IntegrationsSection
-              integrations={(() => {
-                // Wallet connections live in the dedicated Wallet tab — we
-                // don't re-surface them here to avoid a duplicate surface
-                // that opened a web page instead of a real extension.
-                const defaults = [
-                  {
-                    id: 'twitter',
-                    category: 'social',
-                    name: 'Twitter/X',
-                    description: 'Share your achievements and activity',
-                    connected: !!twitterUrl,
-                    connectedAs: twitterUrl
-                      ? (() => {
-                          try {
-                            return new URL(twitterUrl).pathname.replace(/^\//, '');
-                          } catch {
-                            return twitterUrl;
-                          }
-                        })()
-                      : undefined,
-                  },
-                  {
-                    id: 'discord',
-                    category: 'social',
-                    name: 'Discord',
-                    description: 'Join community updates and notifications',
-                    connected: false,
-                  },
-                  {
-                    id: 'github-social',
-                    category: 'social',
-                    name: 'GitHub',
-                    description: 'Link your development profile',
-                    connected: !!githubLogin,
-                    connectedAs: githubLogin || undefined,
-                  },
-                  {
-                    id: 'two-factor',
-                    category: 'security',
-                    name: '2FA Authentication',
-                    description: 'Enable two-factor authentication',
-                    connected: twoFAEnabled,
-                  },
-                  {
-                    id: 'api-keys',
-                    category: 'security',
-                    name: 'API Keys',
-                    description: 'Manage API keys for programmatic access',
-                    connected: true,
-                  },
-                ];
-
-                // Deduplicate: use API data if available, otherwise use defaults
-                const seen = new Set<string>();
-                const merged: any[] = [];
-
-                // First add from API integrations, skipping any wallet entries
-                // that older deployments may still return from the backend.
-                const WALLET_IDS = new Set(['metamask', 'walletconnect', 'ledger', 'coinbase', 'rainbow', 'uniswap']);
-                if (integrations.length > 0) {
-                  integrations.forEach((int: any) => {
-                    if (WALLET_IDS.has(int.id) || int.category === 'wallet') return;
-                    const integrationConfig: Record<string, any> = {
-                      twitter: { category: 'social' },
-                      discord: { category: 'social' },
-                      'github-social': { category: 'social' },
-                      'two-factor': { category: 'security' },
-                      'api-keys': { category: 'security' },
-                    };
-                    const config = integrationConfig[int.id] || {
-                      category: int.category || 'service',
-                    };
-                    const item = {
-                      id: int.id,
-                      category: config.category,
-                      name: int.name || int.provider,
-                      description: int.description || 'Connect this integration',
-                      connected: int.connected,
-                      connectedAs: int.connectedAs,
-                      lastUsedAt: int.lastUsedAt,
-                      verified: int.verified,
-                    };
-                    if (!seen.has(int.id)) {
-                      merged.push(item);
-                      seen.add(int.id);
-                    }
-                  });
-                }
-
-                // Then add defaults that aren't already in merged list
-                defaults.forEach((def) => {
-                  if (!seen.has(def.id)) {
-                    merged.push(def);
-                    seen.add(def.id);
-                  } else {
-                    // Update with real state if default
-                    const idx = merged.findIndex((m) => m.id === def.id);
-                    if (idx !== -1 && !integrations.length) {
-                      merged[idx] = { ...merged[idx], ...def };
-                    }
-                  }
-                });
-
-                return merged;
-              })()}
-              onConnect={async (id: string) => {
-                if (id === 'github-social') {
-                  handleLinkGitHub();
-                  return;
-                }
-                try {
-                  await api.post('/users/integrations', { provider: id, name: id });
-                  const ints = await api.get<any>('/users/integrations');
-                  setIntegrations(Array.isArray(ints) ? ints : []);
-                } catch (err) {
-                  console.error('Failed to connect:', err);
-                }
-              }}
-              onDisconnect={async (id: string) => {
-                if (id === 'github-social') {
-                  await handleUnlinkGitHub();
-                  return;
-                }
-                try {
-                  await api.delete(`/users/integrations/${id}`);
-                  const ints = await api.get<any>('/users/integrations');
-                  setIntegrations(Array.isArray(ints) ? ints : []);
-                } catch (err) {
-                  console.error('Failed to disconnect:', err);
-                }
-              }}
-            />
-          )}
 
           {/* ════════════════════════════════════════════
           SECURITY
@@ -2999,123 +2750,11 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* ACTIVITY LOG */}
-          {tab === 'activity' && (
-            <div className="profile-content-card">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-light text-[var(--text)]">Activity Log</h2>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    Timeline of your account and platform activity
-                  </p>
-                </div>
-                <select className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text)]">
-                  <option>All Activities</option>
-                  <option>Login</option>
-                  <option>API Calls</option>
-                  <option>Settings</option>
-                  <option>Security</option>
-                </select>
-              </div>
-
-              {activityLog && activityLog.length > 0 ? (
-                <div className="space-y-1">
-                  {activityLog.map((log: any, idx: number) => {
-                    const timestamp = new Date(log.timestamp || log.createdAt);
-                    const now = new Date();
-                    const diffMs = now.getTime() - timestamp.getTime();
-                    const diffMins = Math.floor(diffMs / 60000);
-                    const diffHours = Math.floor(diffMs / 3600000);
-                    const diffDays = Math.floor(diffMs / 86400000);
-
-                    let timeStr = 'just now';
-                    if (diffMins < 60) {
-                      timeStr = diffMins <= 0 ? 'just now' : `${diffMins}m ago`;
-                    } else if (diffHours < 24) {
-                      timeStr = `${diffHours}h ago`;
-                    } else if (diffDays < 7) {
-                      timeStr = `${diffDays}d ago`;
-                    } else {
-                      timeStr = timestamp.toLocaleDateString();
-                    }
-
-                    // Determine activity type and color
-                    const action = log.action || log.type || 'Activity';
-                    let typeColor = 'text-zinc-400';
-                    let typeBg = 'bg-zinc-500/10';
-                    if (action.toLowerCase().includes('login')) {
-                      typeColor = 'text-emerald-400';
-                      typeBg = 'bg-emerald-500/10';
-                    } else if (action.toLowerCase().includes('api')) {
-                      typeColor = 'text-bolty-400';
-                      typeBg = 'bg-bolty-500/10';
-                    } else if (
-                      action.toLowerCase().includes('error') ||
-                      action.toLowerCase().includes('failed')
-                    ) {
-                      typeColor = 'text-red-400';
-                      typeBg = 'bg-red-500/10';
-                    } else if (
-                      action.toLowerCase().includes('update') ||
-                      action.toLowerCase().includes('change')
-                    ) {
-                      typeColor = 'text-amber-400';
-                      typeBg = 'bg-amber-500/10';
-                    }
-
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-start gap-3 p-4 border border-[var(--border)] rounded-xl hover:border-bolty-500/20 hover:bg-bolty-500/2 transition-all duration-200 group"
-                      >
-                        <div
-                          className={`w-2 h-2 rounded-full flex-shrink-0 mt-2 ${typeColor.replace('text-', 'bg-')}`}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span
-                              className={`text-xs font-mono px-2 py-1 rounded ${typeBg} ${typeColor}`}
-                            >
-                              {action}
-                            </span>
-                            <span className="text-xs text-[var(--text-muted)] ml-auto">
-                              {timeStr}
-                            </span>
-                          </div>
-                          {log.description && (
-                            <p className="text-sm text-[var(--text-muted)] mb-1">
-                              {log.description}
-                            </p>
-                          )}
-                          {log.metadata && (
-                            <div className="text-xs text-[var(--text-muted)] font-mono bg-black/20 p-2 rounded border border-[var(--border)] overflow-x-auto max-w-full">
-                              {typeof log.metadata === 'string'
-                                ? log.metadata
-                                : JSON.stringify(log.metadata, null, 2).substring(0, 200)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-12 h-12 rounded-full bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center mx-auto mb-3">
-                    <IconCpu className="w-5 h-5 text-[var(--text-muted)]" />
-                  </div>
-                  <p className="text-sm text-[var(--text-muted)]">No activity recorded yet</p>
-                  <p className="text-xs text-[var(--text-muted)] mt-1">
-                    Your account activity will appear here
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        {/* end profile-content */}
+          </div>
+          {/* end profile-content */}
+        </main>
       </div>
-      {/* end max-w-7xl */}
+      {/* end shell grid */}
       <VerificationCodeModal
         open={stepUp.stepUpOpen}
         source={stepUp.stepUpSource}
