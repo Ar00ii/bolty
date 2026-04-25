@@ -13,5 +13,6 @@ import { ReposService } from './repos.service';
   imports: [ConfigModule, ReputationModule, ChartModule, EmailModule, MarketModule],
   providers: [ReposService],
   controllers: [ReposController],
+  exports: [ReposService],
 })
 export class ReposModule {}
