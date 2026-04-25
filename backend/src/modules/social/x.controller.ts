@@ -1,0 +1,108 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
+import { Response } from 'express';
+
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
+import { SkipCsrf } from '../../common/guards/csrf.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+import { SocialXService } from './x.service';
+
+/**
+ * X (Twitter) integration endpoints.
+ *
+ *   GET  /social/x/connect-url   → kick off OAuth (auth-required)
+ *   GET  /social/x/callback      → OAuth redirect target (Public — X is the caller)
+ *   GET  /social/x/status        → "connected as @handle" pill (auth)
+ *   DELETE /social/x             → disconnect (auth)
+ *   POST /social/x/post          → post a tweet on the user's behalf (auth)
+ */
+@Controller('social/x')
+export class SocialXController {
+  constructor(private readonly x: SocialXService) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Get('connect-url')
+  async connectUrl(
+    @CurrentUser('id') userId: string,
+    @Query('returnTo') returnTo?: string,
+  ) {
+    const { url, state } = await this.x.generateAuthUrl(userId, returnTo);
+    return { url, state };
+  }
+
+  /** Redirect target. X hits this with ?code &amp; ?state. We send the
+   *  user back to the FE with a short-lived success/error fragment. */
+  @Public()
+  @SkipCsrf()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Get('callback')
+  async callback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Query('error') error: string | undefined,
+    @Res() res: Response,
+  ) {
+    const fe = process.env.FRONTEND_URL || 'https://www.boltynetwork.xyz';
+    if (error) {
+      return res.redirect(302, `${fe}/profile?x_error=${encodeURIComponent(error)}`);
+    }
+    try {
+      const { screenName, returnTo } = await this.x.handleCallback(code, state);
+      const dest = sanitizeReturnTo(returnTo, fe);
+      const sep = dest.includes('?') ? '&' : '?';
+      return res.redirect(302, `${dest}${sep}x_connected=${encodeURIComponent(screenName)}`);
+    } catch (err) {
+      const msg = (err as Error).message ?? 'oauth_failed';
+      return res.redirect(302, `${fe}/profile?x_error=${encodeURIComponent(msg)}`);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('status')
+  status(@CurrentUser('id') userId: string) {
+    return this.x.getStatus(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete()
+  @HttpCode(200)
+  async disconnect(@CurrentUser('id') userId: string) {
+    await this.x.disconnect(userId);
+    return { ok: true };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('post')
+  async post(@CurrentUser('id') userId: string, @Body() body: { text?: string }) {
+    return this.x.postTweet(userId, body?.text ?? '');
+  }
+}
+
+/** Only allow returnTo that lives on our own FE host so OAuth replies
+ *  can't be redirected to attacker-controlled URLs. */
+function sanitizeReturnTo(raw: string | null, fe: string): string {
+  if (!raw) return `${fe}/profile`;
+  try {
+    if (raw.startsWith('/')) return `${fe}${raw}`;
+    const u = new URL(raw);
+    const f = new URL(fe);
+    if (u.host === f.host) return raw;
+  } catch {
+    /* fall through */
+  }
+  return `${fe}/profile`;
+}
