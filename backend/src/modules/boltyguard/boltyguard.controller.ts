@@ -18,6 +18,7 @@ import * as multer from 'multer';
 
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Public } from '../../common/decorators/public.decorator';
+import { SkipCsrf } from '../../common/guards/csrf.guard';
 import { RedisService } from '../../common/redis/redis.service';
 
 import { BoltyGuardService } from './boltyguard.service';
@@ -58,6 +59,7 @@ export class BoltyGuardController {
   /** Trigger a fresh scan of a listing. Used by the publish flow and
    *  by sellers who updated their code. Heavier op — tighter throttle. */
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 6, ttl: 60_000 } })
   @Post('listings/:id/scan')
   @HttpCode(HttpStatus.OK)
@@ -77,6 +79,7 @@ export class BoltyGuardController {
    *  unlocks the API.
    */
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 12, ttl: 60_000 } })
   @Post('scan')
   @HttpCode(HttpStatus.OK)
@@ -118,6 +121,7 @@ export class BoltyGuardController {
    * banned extensions, and only scans whitelisted text formats.
    */
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 6, ttl: 60_000 } })
   @Post('scan-bundle')
   @HttpCode(HttpStatus.OK)
@@ -202,6 +206,7 @@ export class BoltyGuardController {
    * binary guards. Free quota counts the same as a single scan.
    */
   @Public()
+  @SkipCsrf()
   @Throttle({ default: { limit: 4, ttl: 60_000 } })
   @Post('scan-repo')
   @HttpCode(HttpStatus.OK)
