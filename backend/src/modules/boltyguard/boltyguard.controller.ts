@@ -130,12 +130,17 @@ export class BoltyGuardController {
         fields: 4,
       },
       fileFilter: (_req, file, cb) => {
-        const okMime =
-          file.mimetype === 'application/zip' ||
-          file.mimetype === 'application/x-zip-compressed' ||
-          file.mimetype === 'application/octet-stream';
-        if (!okMime) {
-          cb(new BadRequestException('only zip uploads are allowed'), false);
+        // Don't trust the mime — browsers send all sorts of values
+        // for .zip (application/zip, x-zip-compressed, x-zip,
+        // octet-stream, sometimes empty). The real defense is the
+        // EOCD magic-byte sniff inside BundleScanner. Just check
+        // the extension as a hint and let the scanner reject bad
+        // bytes deeper in.
+        const looksZip =
+          /\.zip$/i.test(file.originalname || '') ||
+          (file.mimetype || '').toLowerCase().includes('zip');
+        if (!looksZip) {
+          cb(new BadRequestException('upload a .zip file'), false);
           return;
         }
         cb(null, true);
@@ -165,7 +170,18 @@ export class BoltyGuardController {
     }
 
     const isAgent = isAgentRaw === 'true' || isAgentRaw === '1';
-    const result = await this.bundle.scanZip(file.buffer, { isAgent });
+    let result;
+    try {
+      result = await this.bundle.scanZip(file.buffer, { isAgent });
+    } catch (err) {
+      // Surface a useful 400 instead of a 500 stack trace. The
+      // bundle scanner throws Errors with human-readable messages
+      // ("not a zip", "too many entries", "aggregate uncompressed
+      // size exceeds limit", etc).
+      throw new BadRequestException(
+        (err as Error).message || 'failed to scan bundle',
+      );
+    }
     return {
       ...result,
       tier: gate.holder ? 'holder' : 'free',

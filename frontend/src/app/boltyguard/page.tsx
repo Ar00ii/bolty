@@ -37,6 +37,25 @@ const FILE_EXTENSIONS = [
 ];
 
 /**
+ * NestJS sometimes returns `message` as a string, sometimes an array
+ * of strings (validation errors), sometimes an object. Normalise so
+ * the UI never shows "[object Object]" or a JSON blob.
+ */
+function extractErrorMessage(
+  body:
+    | { message?: string | string[]; error?: string; statusCode?: number }
+    | null,
+  fallbackStatus: number,
+): string {
+  if (!body) return `Scan failed (${fallbackStatus})`;
+  const m = body.message;
+  if (typeof m === 'string' && m.trim()) return m;
+  if (Array.isArray(m) && m.length) return m.filter(Boolean).join(' · ');
+  if (typeof body.error === 'string' && body.error.trim()) return body.error;
+  return `Scan failed (${fallbackStatus})`;
+}
+
+/**
  * Heuristic: does this look like source code, or did the user type a
  * sentence? We don't gate the scan on it — server still runs — but the
  * client surfaces a clearer message when the input is plainly natural
@@ -158,16 +177,46 @@ export default function BoltyGuardPage() {
       });
       const json = (await res.json().catch(() => null)) as
         | ScanResponse
-        | { message?: string }
+        | { message?: string | string[]; error?: string; statusCode?: number }
         | null;
       if (!res.ok) {
+        // eslint-disable-next-line no-console
+        console.error('[boltyguard] scan-bundle failed', { status: res.status, body: json });
         throw new Error(
-          (json as { message?: string } | null)?.message ?? `Scan failed (${res.status})`,
+          extractErrorMessage(
+            json as
+              | { message?: string | string[]; error?: string; statusCode?: number }
+              | null,
+            res.status,
+          ),
         );
       }
       setResult(json as ScanResponse);
     } catch (e2) {
-      setError(e2 instanceof Error ? e2.message : 'Scan failed');
+      // eslint-disable-next-line no-console
+      console.error('[boltyguard] scan-bundle threw', e2);
+      setError(e2 instanceof Error ? e2.message : 'Scan failed (see devtools console)');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onScanRepo() {
+    if (!repoUrl.trim()) {
+      setError('Paste a github.com URL or owner/repo first.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const data = await api.post<ScanResponse>('/boltyguard/scan-repo', {
+        url: repoUrl.trim(),
+        isAgent,
+      });
+      setResult(data);
+    } catch (e2) {
+      setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
     } finally {
       setLoading(false);
     }
