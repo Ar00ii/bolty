@@ -35,6 +35,49 @@ const FILE_EXTENSIONS = [
   { value: '.java', label: 'Java' },
 ];
 
+/**
+ * Heuristic: does this look like source code, or did the user type a
+ * sentence? We don't gate the scan on it — server still runs — but the
+ * client surfaces a clearer message when the input is plainly natural
+ * language so users don't think the green "Secure" verdict is the AI
+ * answering "Hello" back to them.
+ */
+function looksLikeCode(s: string): boolean {
+  const t = s.trim();
+  if (t.length < 8) return false;
+  // Multi-line is usually code.
+  if (t.includes('\n')) return true;
+  // Punctuation that's rare in prose, common in source.
+  if (/[{};=()<>[\]]/.test(t)) return true;
+  // Common keywords across our supported languages.
+  if (
+    /\b(function|const|let|var|class|def|import|from|return|if|else|for|while|async|await|public|private|fn|package)\b/.test(
+      t,
+    )
+  ) {
+    return true;
+  }
+  return false;
+}
+
+const SAMPLES: Record<string, { label: string; ext: string; code: string }> = {
+  evalRce: {
+    label: 'Python: eval RCE',
+    ext: '.py',
+    code: `def handle(user_input):\n    # CRITICAL: eval on attacker-controlled input → RCE.\n    return eval(user_input)\n`,
+  },
+  hardcodedKey: {
+    label: 'JS: hardcoded API key',
+    ext: '.js',
+    code: `const OPENAI_KEY = "sk-proj-AbCd1234EfGh5678IjKl9012MnOp";\n\nasync function ask(q) {\n  return fetch("https://api.openai.com/v1/chat/completions", {\n    headers: { Authorization: "Bearer " + OPENAI_KEY },\n    body: JSON.stringify({ messages: [{ role: "user", content: q }] }),\n  });\n}\n`,
+  },
+  shellInjection: {
+    label: 'TS: shell injection',
+    ext: '.ts',
+    code: `import { exec } from "child_process";\n\nexport function run(cmd: string) {\n  // HIGH: no allowlist, command may come from an LLM.\n  exec(cmd, (err, stdout) => console.log(stdout));\n}\n`,
+  },
+};
+
 export default function BoltyGuardPage() {
   const [mode, setMode] = useState<'paste' | 'zip'>('paste');
   const [code, setCode] = useState('');
@@ -45,6 +88,14 @@ export default function BoltyGuardPage() {
   const [result, setResult] = useState<ScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const zipInputRef = useRef<HTMLInputElement>(null);
+
+  function loadSample(key: keyof typeof SAMPLES) {
+    const s = SAMPLES[key];
+    setCode(s.code);
+    setFileExt(s.ext);
+    setResult(null);
+    setError(null);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -123,7 +174,8 @@ export default function BoltyGuardPage() {
                 BoltyGuard
               </h1>
               <p className="text-[13.5px] text-zinc-400 font-light mt-0.5">
-                AI security scanner for code &amp; AI agents. Semgrep + Claude.
+                Static security scanner — paste source code or upload a zip.
+                Not a chat. Returns a 0–100 score, findings + fixes.
               </p>
             </div>
           </div>
@@ -209,19 +261,54 @@ export default function BoltyGuardPage() {
             </div>
 
             {mode === 'paste' ? (
-              <textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Paste your code here…"
-                rows={14}
-                spellCheck={false}
-                className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
-                style={{
-                  background: '#000000',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  resize: 'vertical',
-                }}
-              />
+              <>
+                <div className="flex items-center gap-1.5 flex-wrap text-[11.5px] text-zinc-400">
+                  <span>Try a sample:</span>
+                  {(Object.keys(SAMPLES) as Array<keyof typeof SAMPLES>).map((k) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => loadSample(k)}
+                      className="px-2 py-1 rounded-md text-[11px] text-zinc-300 hover:text-white transition"
+                      style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      {SAMPLES[k].label}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Paste source code (Python, TS, JS, Go, Ruby, Java...). BoltyGuard is a security scanner — not a chat. Try one of the samples above to see findings."
+                  rows={14}
+                  spellCheck={false}
+                  className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
+                  style={{
+                    background: '#000000',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    resize: 'vertical',
+                  }}
+                />
+                {code.trim().length > 0 && !looksLikeCode(code) && (
+                  <div
+                    className="rounded-lg px-3 py-2 text-[11.5px] text-amber-300 flex items-start gap-2"
+                    style={{
+                      background: 'rgba(245,158,11,0.06)',
+                      border: '1px solid rgba(245,158,11,0.3)',
+                    }}
+                  >
+                    <span>⚠</span>
+                    <span>
+                      That looks like text, not code. BoltyGuard is a static
+                      security scanner — paste a function, file, or zip and it
+                      will return vulnerabilities + fixes. It is not a chat.
+                    </span>
+                  </div>
+                )}
+              </>
             ) : (
               <div
                 className="rounded-xl p-6 text-center cursor-pointer transition hover:brightness-125"
