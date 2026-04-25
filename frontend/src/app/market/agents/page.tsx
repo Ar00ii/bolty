@@ -39,7 +39,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import React, { Suspense, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-import { SecurityBadge } from '@/components/boltyguard/SecurityBadge';
+import { SecurityBadge, type ScanResult } from '@/components/boltyguard/SecurityBadge';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
@@ -80,6 +80,15 @@ interface MarketListing {
   seller: { id: string; username: string | null; avatarUrl: string | null };
   reviewAverage?: number | null;
   reviewCount?: number;
+  latestScan?: {
+    id: string;
+    score: number;
+    worstSeverity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO' | null;
+    summary: string | null;
+    scanner: string;
+    scannedAt: string;
+    findings?: ScanResult['findings'];
+  } | null;
 }
 
 interface ApiKeyInfo {
@@ -616,7 +625,10 @@ function AgentCard({
               live
             </span>
           )}
-          <SecurityBadge listingId={listing.id} />
+          <SecurityBadge
+            listingId={listing.id}
+            initialScan={(listing.latestScan ?? null) as ScanResult | null}
+          />
           <span className="mk-badge mk-badge--type">
             {listing.type.toLowerCase().replace('_', ' ')}
           </span>
@@ -1257,12 +1269,15 @@ function AgentsPageContent() {
     if (sort) params.set('sortBy', sort);
     const cacheKey = `market:agents:${params.toString()}`;
     // Stale-while-revalidate: seed from cache so the grid paints
-    // instantly on back-nav, then refetch in the background.
-    const cached = getCachedWithStatus<MarketListing[]>(cacheKey);
+    // instantly on back-nav, then refetch in the background. We
+    // bump the freshness window to 2 min (vs the global 30 s
+    // default) for marketplace lists — listings change slowly and
+    // the user feels filter changes far more than 1-min staleness.
+    const cached = getCachedWithStatus<MarketListing[]>(cacheKey, 120_000);
     if (cached.data) {
       setListings(cached.data);
       setLoading(false);
-      if (cached.fresh) return; // skip refetch; data is < 30s old
+      if (cached.fresh) return; // skip refetch; data is < 2 min old
     } else {
       setLoading(true);
     }

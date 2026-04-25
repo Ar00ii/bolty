@@ -442,6 +442,24 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         include: {
           seller: { select: { id: true, username: true, avatarUrl: true } },
           repository: { select: { id: true, name: true, githubUrl: true, language: true } },
+          // Bake the latest BoltyGuard scan into each row so the badge
+          // on every card doesn't have to fire its own GET. Eliminates
+          // the N-extra-requests-per-list-page waterfall that made
+          // filter changes feel like a fresh page load. `findings` is
+          // intentionally excluded — heavy JSON, only loaded on the
+          // detail page where the user actually wants it.
+          securityScans: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            select: {
+              id: true,
+              score: true,
+              worstSeverity: true,
+              summary: true,
+              scanner: true,
+              createdAt: true,
+            },
+          },
         },
       }),
       this.prisma.marketListing.count({ where }),
@@ -464,6 +482,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       const copy = { ...row } as Record<string, unknown>;
       delete copy.agentEndpoint;
       copy.hasAgentEndpoint = Boolean(endpoint);
+      // Flatten the take-1 array into a single field so the FE can read
+      // listing.latestScan directly. Drop the noisy plural `securityScans`
+      // array to keep the payload tight. Match the public scan endpoint
+      // shape (`scannedAt`, not `createdAt`) so consumers can swap the
+      // two sources interchangeably.
+      const scans = copy.securityScans as
+        | Array<{ createdAt: Date | string; [k: string]: unknown }>
+        | undefined;
+      if (scans && scans.length > 0) {
+        const { createdAt, ...rest } = scans[0]!;
+        copy.latestScan = { ...rest, scannedAt: createdAt };
+      } else {
+        copy.latestScan = null;
+      }
+      delete copy.securityScans;
       return copy;
     });
     const result = { data, total, page, pages: Math.ceil(total / take) };
@@ -823,6 +856,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repository: {
           select: { id: true, name: true, githubUrl: true, language: true, stars: true },
         },
+        // Same trick as the list endpoint — ship the latest scan with
+        // the listing so the detail page renders the badge from the
+        // first response, no extra GET round-trip.
+        securityScans: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            score: true,
+            worstSeverity: true,
+            summary: true,
+            scanner: true,
+            createdAt: true,
+          },
+        },
       },
     });
     if (!listing || listing.status === 'REMOVED') throw new NotFoundException('Listing not found');
@@ -831,8 +879,17 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       _avg: { rating: true },
       _count: { _all: true },
     });
+    const { securityScans, ...rest } = listing as typeof listing & {
+      securityScans?: Array<{ createdAt: Date | string; [k: string]: unknown }>;
+    };
+    let latestScan: Record<string, unknown> | null = null;
+    if (securityScans && securityScans.length > 0) {
+      const { createdAt, ...sr } = securityScans[0]!;
+      latestScan = { ...sr, scannedAt: createdAt };
+    }
     return {
-      ...listing,
+      ...rest,
+      latestScan,
       reviewAverage: agg._avg.rating ? Number(agg._avg.rating.toFixed(2)) : null,
       reviewCount: agg._count._all,
     };

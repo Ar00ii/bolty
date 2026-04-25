@@ -24,13 +24,26 @@ export interface ScanResult {
 
 /**
  * Light fetcher hook for the persisted BoltyGuard scan of a listing.
- * Used by the agent detail badge + the launchpad ranking.
+ *
+ * Now accepts an optional `initialScan` so callers that already got
+ * the scan baked into the listing payload (from `GET /market` or
+ * `GET /market/:id`) don't need to fire another network request just
+ * to render the badge. Pass `initialScan={listing.latestScan}` and
+ * the hook resolves immediately with no fetch.
  */
-export function useSecurityScan(listingId: string | null | undefined) {
-  const [scan, setScan] = useState<ScanResult | null>(null);
+export function useSecurityScan(
+  listingId: string | null | undefined,
+  initialScan?: ScanResult | null,
+) {
+  const [scan, setScan] = useState<ScanResult | null>(initialScan ?? null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (!listingId) return;
+    if (initialScan !== undefined) {
+      // Caller seeded the badge — no fetch needed.
+      setScan(initialScan ?? null);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     api
@@ -48,7 +61,7 @@ export function useSecurityScan(listingId: string | null | undefined) {
     return () => {
       cancelled = true;
     };
-  }, [listingId]);
+  }, [listingId, initialScan]);
   return { scan, loading };
 }
 
@@ -91,8 +104,14 @@ function colourFor(score: number) {
  * tooltip with the scanner summary; the full findings list lives in
  * the dedicated `<SecurityFindings>` panel below.
  */
-export function SecurityBadge({ listingId }: { listingId: string }) {
-  const { scan, loading } = useSecurityScan(listingId);
+export function SecurityBadge({
+  listingId,
+  initialScan,
+}: {
+  listingId: string;
+  initialScan?: ScanResult | null;
+}) {
+  const { scan, loading } = useSecurityScan(listingId, initialScan);
   if (loading) {
     return (
       <span
