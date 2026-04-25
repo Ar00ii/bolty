@@ -3,32 +3,36 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Append default Prisma pool tuning to the connection URL when the
- * caller hasn't already specified them. Render's provided DATABASE_URL
- * ships with `connection_limit=1`, meaning the whole service
- * serializes through one Postgres connection. A handful of concurrent
- * reads (eg. AuthProvider's idle prefetch) saturated the pool and
- * 500'd every endpoint at once. 5 connections + 15 s pool timeout
- * gives sane headroom on the starter Postgres tier without going near
- * Postgres' max_connections.
+ * FORCE Prisma pool tuning on the connection URL. Render's bundled
+ * DATABASE_URL ships with `connection_limit=1` baked into the
+ * connection string itself, which means the whole service serializes
+ * through one Postgres connection and any handful of concurrent reads
+ * 500s every endpoint at once. The previous "skip if already present"
+ * version of this helper let Render's `connection_limit=1` win, so
+ * the pool stayed at 1 even though the env var said 5.
  *
- * String-level append avoids `new URL(...)` — Postgres passwords can
- * legally contain characters that break the URL parser.
+ * Now we strip any existing connection_limit / pool_timeout from the
+ * URL and re-append our values. The env vars
+ * PRISMA_CONNECTION_LIMIT / PRISMA_POOL_TIMEOUT win; otherwise
+ * defaults are 5 / 15 s.
+ *
+ * String-level surgery (not `new URL(...)`) — Postgres passwords can
+ * legally contain `@`, `?`, `&` which break the URL parser.
  */
 function tunePoolDefaults(
   url: string,
   opts: { connectionLimit: string; poolTimeout: string },
 ): string {
-  const additions: string[] = [];
-  if (!/[?&]connection_limit=/.test(url)) {
-    additions.push(`connection_limit=${opts.connectionLimit}`);
-  }
-  if (!/[?&]pool_timeout=/.test(url)) {
-    additions.push(`pool_timeout=${opts.poolTimeout}`);
-  }
-  if (additions.length === 0) return url;
-  const sep = url.includes('?') ? '&' : '?';
-  return url + sep + additions.join('&');
+  // Drop any existing copies — `(\?|&)connection_limit=[^&]*` matches
+  // `?connection_limit=1` at the start AND `&connection_limit=1` later.
+  // We stitch the leading `?` back if it was the first param removed.
+  let stripped = url
+    .replace(/(\?|&)connection_limit=[^&]*/g, (_, sep) => (sep === '?' ? '?' : ''))
+    .replace(/(\?|&)pool_timeout=[^&]*/g, (_, sep) => (sep === '?' ? '?' : ''));
+  // Heal any `?&` left behind by stripping a non-leading param after a leading one.
+  stripped = stripped.replace(/\?&/, '?').replace(/\?$/, '');
+  const sep = stripped.includes('?') ? '&' : '?';
+  return `${stripped}${sep}connection_limit=${opts.connectionLimit}&pool_timeout=${opts.poolTimeout}`;
 }
 
 @Injectable()
