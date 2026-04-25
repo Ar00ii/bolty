@@ -22,6 +22,7 @@ import { RedisService } from '../../common/redis/redis.service';
 
 import { BoltyGuardService } from './boltyguard.service';
 import { BundleScanner } from './bundle-scanner';
+import { GithubFetcher } from './github-fetcher';
 import { FREE_TIER_DAILY_QUOTA, HolderGateService } from './holder-gate.service';
 
 @Controller('boltyguard')
@@ -31,6 +32,7 @@ export class BoltyGuardController {
     private readonly holderGate: HolderGateService,
     private readonly redis: RedisService,
     private readonly bundle: BundleScanner,
+    private readonly github: GithubFetcher,
   ) {}
 
   /** Public — anyone can read the latest score for any listing.
@@ -166,6 +168,60 @@ export class BoltyGuardController {
     const result = await this.bundle.scanZip(file.buffer, { isAgent });
     return {
       ...result,
+      tier: gate.holder ? 'holder' : 'free',
+      holding: gate.balance,
+      minHolding: gate.minHolding,
+    };
+  }
+
+  /**
+   * Scan a public GitHub repo. Body: { url: "owner/repo" or
+   * "https://github.com/owner/repo[/tree/<ref>]", isAgent?: bool }.
+   *
+   * Server-side fetch via the GitHub REST API (zipball endpoint). We
+   * never load arbitrary URLs the user supplies — only github.com /
+   * codeload.github.com / objects.githubusercontent.com — and the
+   * download is hard-capped at 5MB. The resulting buffer is handed
+   * to BundleScanner which re-applies its own caps + path / symlink /
+   * binary guards. Free quota counts the same as a single scan.
+   */
+  @Public()
+  @Throttle({ default: { limit: 4, ttl: 60_000 } })
+  @Post('scan-repo')
+  @HttpCode(HttpStatus.OK)
+  async scanRepo(
+    @CurrentUser('id') userId: string | null,
+    @Body() body: { url?: string; isAgent?: boolean },
+  ) {
+    const spec = this.github.parseRepoSpec(String(body?.url || ''));
+    if (!spec) {
+      throw new BadRequestException(
+        'Provide a github.com URL or owner/repo (e.g. ar00ii/bolty).',
+      );
+    }
+    const gate = await this.holderGate.isHolder(userId);
+    if (!gate.holder) {
+      const remaining = await this.consumeFreeQuota(userId ?? null);
+      if (remaining < 0) {
+        throw new ForbiddenException(
+          `Free quota exhausted. Hold ≥ ${gate.minHolding} $BOLTY in a linked wallet to unlock unmetered scans (current balance: ${gate.balance}).`,
+        );
+      }
+    }
+    let zipBuf: Buffer;
+    try {
+      zipBuf = await this.github.fetchZip(spec);
+    } catch (err) {
+      throw new BadRequestException(
+        (err as Error).message || 'failed to download repo',
+      );
+    }
+    const result = await this.bundle.scanZip(zipBuf, {
+      isAgent: !!body?.isAgent,
+    });
+    return {
+      ...result,
+      source: { kind: 'github', owner: spec.owner, repo: spec.repo, ref: spec.ref ?? null },
       tier: gate.holder ? 'holder' : 'free',
       holding: gate.balance,
       minHolding: gate.minHolding,

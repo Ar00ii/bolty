@@ -1,6 +1,6 @@
 'use client';
 
-import { FileArchive, Loader2, Shield, ShieldAlert, ShieldCheck, ShieldX, Upload } from 'lucide-react';
+import { Download, FileArchive, Github, Loader2, Shield, ShieldAlert, ShieldCheck, ShieldX, Upload } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 import { api, API_URL, ApiError } from '@/lib/api/client';
@@ -21,6 +21,7 @@ interface ScanResponse {
   summary: string;
   scanner?: string;
   files?: Array<{ path: string; score: number; findingCount: number }>;
+  source?: { kind: 'github'; owner: string; repo: string; ref: string | null };
   tier: 'holder' | 'free';
   holding: string;
   minHolding: string;
@@ -79,11 +80,12 @@ const SAMPLES: Record<string, { label: string; ext: string; code: string }> = {
 };
 
 export default function BoltyGuardPage() {
-  const [mode, setMode] = useState<'paste' | 'zip'>('paste');
+  const [mode, setMode] = useState<'paste' | 'zip' | 'repo'>('paste');
   const [code, setCode] = useState('');
   const [fileExt, setFileExt] = useState('.ts');
   const [isAgent, setIsAgent] = useState(true);
   const [zipFile, setZipFile] = useState<File | null>(null);
+  const [repoUrl, setRepoUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -95,6 +97,22 @@ export default function BoltyGuardPage() {
     setFileExt(s.ext);
     setResult(null);
     setError(null);
+  }
+
+  function downloadReport() {
+    if (!result) return;
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+    const blob = new Blob([JSON.stringify(result, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `boltyguard-report-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -150,6 +168,27 @@ export default function BoltyGuardPage() {
       setResult(json as ScanResponse);
     } catch (e2) {
       setError(e2 instanceof Error ? e2.message : 'Scan failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onScanRepo() {
+    if (!repoUrl.trim()) {
+      setError('Paste a github.com URL or owner/repo first.');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const data = await api.post<ScanResponse>('/boltyguard/scan-repo', {
+        url: repoUrl.trim(),
+        isAgent,
+      });
+      setResult(data);
+    } catch (e2) {
+      setError(e2 instanceof ApiError ? e2.message : 'Scan failed');
     } finally {
       setLoading(false);
     }
@@ -221,6 +260,18 @@ export default function BoltyGuardPage() {
           >
             <FileArchive className="w-3.5 h-3.5" />
             Upload ZIP
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('repo')}
+            className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
+            style={{
+              background: mode === 'repo' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              color: mode === 'repo' ? '#ffffff' : '#a1a1aa',
+            }}
+          >
+            <Github className="w-3.5 h-3.5" />
+            GitHub repo
           </button>
         </div>
 
@@ -368,12 +419,43 @@ export default function BoltyGuardPage() {
               </div>
             )}
 
+            {mode === 'repo' && (
+              <>
+                <div
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                  style={{
+                    background: '#000000',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                  }}
+                >
+                  <Github className="w-4 h-4 text-zinc-500 shrink-0" />
+                  <input
+                    type="text"
+                    value={repoUrl}
+                    onChange={(e) => setRepoUrl(e.target.value)}
+                    placeholder="github.com/owner/repo · or owner/repo · or .../tree/branch"
+                    className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-white placeholder-zinc-600 font-mono"
+                  />
+                </div>
+                <div className="text-[11px] text-zinc-500 font-light">
+                  Public repos only · max 5MB zipball · scans every
+                  source file with the same caps as ZIP uploads. Each
+                  repo scan counts as one against your daily quota.
+                </div>
+              </>
+            )}
+
             <div className="flex items-center justify-end gap-2">
               <button
-                type="submit"
+                type={mode === 'repo' ? 'button' : 'submit'}
+                onClick={mode === 'repo' ? onScanRepo : undefined}
                 disabled={
                   loading ||
-                  (mode === 'paste' ? !code.trim() : !zipFile)
+                  (mode === 'paste'
+                    ? !code.trim()
+                    : mode === 'zip'
+                      ? !zipFile
+                      : !repoUrl.trim())
                 }
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                 style={{
@@ -409,13 +491,19 @@ export default function BoltyGuardPage() {
           </div>
         )}
 
-        {result && <ResultPanel result={result} />}
+        {result && <ResultPanel result={result} onDownload={downloadReport} />}
       </div>
     </div>
   );
 }
 
-function ResultPanel({ result }: { result: ScanResponse }) {
+function ResultPanel({
+  result,
+  onDownload,
+}: {
+  result: ScanResponse;
+  onDownload: () => void;
+}) {
   const colour =
     result.score >= 85
       ? { bg: 'rgba(34,197,94,0.08)', text: '#22c55e', label: 'Secure', Icon: ShieldCheck }
@@ -425,29 +513,192 @@ function ResultPanel({ result }: { result: ScanResponse }) {
           ? { bg: 'rgba(245,158,11,0.08)', text: '#f59e0b', label: 'Risky', Icon: ShieldAlert }
           : { bg: 'rgba(239,68,68,0.08)', text: '#ef4444', label: 'Unsafe', Icon: ShieldX };
   const Icon = colour.Icon;
+
+  // Severity counts so the user immediately sees "1 critical, 2 high"
+  // before scrolling the list.
+  const counts = { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, INFO: 0 } as Record<
+    string,
+    number
+  >;
+  for (const f of result.findings) {
+    const sev = f.severity.toUpperCase();
+    if (sev in counts) counts[sev]++;
+  }
+
+  // What to fix first: the highest-severity findings, top 3.
+  const SEV_RANK: Record<string, number> = {
+    CRITICAL: 4,
+    HIGH: 3,
+    MEDIUM: 2,
+    LOW: 1,
+    INFO: 0,
+  };
+  const sortedFindings = [...result.findings].sort(
+    (a, b) =>
+      (SEV_RANK[b.severity.toUpperCase()] ?? 0) -
+      (SEV_RANK[a.severity.toUpperCase()] ?? 0),
+  );
+  const topPriority = sortedFindings.slice(0, 3);
+
   return (
     <div className="mt-6 space-y-4">
       <div
-        className="rounded-2xl p-5 flex items-center gap-4"
+        className="rounded-2xl p-5"
         style={{
           background: colour.bg,
           border: `1px solid ${colour.text}55`,
         }}
       >
-        <Icon className="w-10 h-10 shrink-0" strokeWidth={1.6} style={{ color: colour.text }} />
-        <div className="flex-1 min-w-0">
-          <div
-            className="text-[28px] font-medium tracking-tight"
-            style={{ color: colour.text }}
+        <div className="flex items-center gap-4">
+          <Icon className="w-10 h-10 shrink-0" strokeWidth={1.6} style={{ color: colour.text }} />
+          <div className="flex-1 min-w-0">
+            <div
+              className="text-[28px] font-medium tracking-tight"
+              style={{ color: colour.text }}
+            >
+              {result.score} / 100 · {colour.label}
+            </div>
+            <div className="text-[13px] text-white/85 mt-0.5">{result.summary}</div>
+            <div className="text-[11px] text-zinc-500 font-mono mt-1">
+              scanner: {result.scanner} · tier: {result.tier} ({result.holding} $BOLTY)
+              {result.source?.kind === 'github' && (
+                <>
+                  {' · '}repo: {result.source.owner}/{result.source.repo}
+                  {result.source.ref ? `@${result.source.ref}` : ''}
+                </>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onDownload}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] text-white transition hover:brightness-125"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.15)',
+            }}
+            title="Download the full report as JSON"
           >
-            {result.score} / 100 · {colour.label}
-          </div>
-          <div className="text-[13px] text-white/85 mt-0.5">{result.summary}</div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-1">
-            scanner: {result.scanner} · tier: {result.tier} ({result.holding} $BOLTY)
-          </div>
+            <Download className="w-3.5 h-3.5" /> JSON
+          </button>
         </div>
+        {/* Severity tally — shown when there are findings. */}
+        {result.findings.length > 0 && (
+          <div className="mt-4 grid grid-cols-5 gap-2">
+            {(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO'] as const).map((sev) => {
+              const c =
+                sev === 'CRITICAL'
+                  ? '#ef4444'
+                  : sev === 'HIGH'
+                    ? '#f59e0b'
+                    : sev === 'MEDIUM'
+                      ? '#38bdf8'
+                      : sev === 'LOW'
+                        ? '#a1a1aa'
+                        : '#71717a';
+              return (
+                <div
+                  key={sev}
+                  className="rounded-lg p-2 text-center"
+                  style={{
+                    background: counts[sev] > 0 ? `${c}14` : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${counts[sev] > 0 ? `${c}40` : 'rgba(255,255,255,0.06)'}`,
+                  }}
+                >
+                  <div
+                    className="text-[18px] font-medium tabular-nums"
+                    style={{ color: counts[sev] > 0 ? c : '#52525b' }}
+                  >
+                    {counts[sev]}
+                  </div>
+                  <div className="text-[9.5px] uppercase tracking-[0.14em] font-medium text-zinc-500">
+                    {sev.toLowerCase()}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* What to fix first — only meaningful when ≥ MEDIUM. */}
+      {topPriority.length > 0 && topPriority[0].severity.toUpperCase() !== 'INFO' && (
+        <div
+          className="rounded-2xl p-5"
+          style={{
+            background: '#0a0a0c',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div className="text-[12px] uppercase tracking-[0.16em] text-zinc-500 font-medium mb-3">
+            Fix these first
+          </div>
+          <ol className="space-y-2 list-decimal list-inside text-[12.5px] text-white/85">
+            {topPriority.map((f, i) => (
+              <li key={i}>
+                <span className="font-mono text-zinc-300">{f.rule}</span>
+                {f.file && (
+                  <span className="font-mono text-zinc-500 text-[11px]">
+                    {' '}· {f.file}{f.line ? `:${f.line}` : ''}
+                  </span>
+                )}
+                {' — '}
+                <span className="font-light">{f.message}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Per-file breakdown when scanning a bundle / repo. */}
+      {result.files && result.files.length > 1 && (
+        <div
+          className="rounded-2xl p-5"
+          style={{
+            background: '#0a0a0c',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div className="text-[12px] uppercase tracking-[0.16em] text-zinc-500 font-medium mb-3">
+            Files (worst first)
+          </div>
+          <ul className="space-y-1.5">
+            {result.files.slice(0, 20).map((f, i) => {
+              const c =
+                f.score >= 85
+                  ? '#22c55e'
+                  : f.score >= 70
+                    ? '#38bdf8'
+                    : f.score >= 40
+                      ? '#f59e0b'
+                      : '#ef4444';
+              return (
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-3 text-[12.5px]"
+                >
+                  <span className="font-mono text-white/85 truncate">{f.path}</span>
+                  <span className="flex items-center gap-2 shrink-0">
+                    <span className="text-[10.5px] text-zinc-500 font-mono">
+                      {f.findingCount} finding{f.findingCount === 1 ? '' : 's'}
+                    </span>
+                    <span
+                      className="font-medium font-mono tabular-nums px-1.5 py-0.5 rounded"
+                      style={{
+                        color: c,
+                        background: `${c}14`,
+                        border: `1px solid ${c}40`,
+                      }}
+                    >
+                      {f.score}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
 
       {result.findings.length > 0 && (
         <ul className="space-y-2">
