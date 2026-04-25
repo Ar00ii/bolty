@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 
 import { PrismaModule } from '../../common/prisma/prisma.module';
+import { RedisModule } from '../../common/redis/redis.module';
 
 import { BoltyGuardController } from './boltyguard.controller';
 import { BoltyGuardService } from './boltyguard.service';
+import { HolderGateService } from './holder-gate.service';
+import { SemgrepRunner } from './semgrep-runner';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, RedisModule],
   controllers: [BoltyGuardController],
-  providers: [BoltyGuardService],
+  providers: [BoltyGuardService, SemgrepRunner, HolderGateService],
   exports: [BoltyGuardService],
 })
 export class BoltyGuardModule {}
