@@ -62,7 +62,7 @@ export default function AgentXIntegrationDocsPage() {
         </li>
       </ul>
 
-      <h2>How to connect</h2>
+      <h2>How the auto-tweet flow actually works</h2>
       <ol>
         <li>
           Open the launch wizard via{' '}
@@ -76,20 +76,97 @@ export default function AgentXIntegrationDocsPage() {
           consent screen.
         </li>
         <li>
-          Approve the requested scopes (read, write, profile). You bounce back
-          to the wizard with the connection live.
+          Approve the requested scopes (<code>tweet.read</code>,{' '}
+          <code>tweet.write</code>, <code>users.read</code>,{' '}
+          <code>offline.access</code>). You bounce back to the wizard with the
+          connection live and the connected handle pinned in the form.
         </li>
         <li>
-          Finish the form and sign the launch tx. The instant the tx confirms,
-          the launch-tweet modal opens with a pre-filled draft. Edit if you
-          want, then send.
+          Finish the form and sign the launch tx with your wallet.
         </li>
         <li>
-          From here on, anything posted to that X account from the
-          backend goes through the same encrypted token store — never visible
-          to anyone, including the Bolty team.
+          <strong>The instant the tx confirms, Bolty&apos;s backend posts the
+          launch tweet automatically</strong> from the connected X account. No
+          modal, no &ldquo;Send tweet&rdquo; click. The success screen shows the
+          posted tweet&apos;s public link inline.
         </li>
       </ol>
+
+      <p>
+        The tweet body is composed server-side from the structured token data
+        (symbol, name, contract, agent name, public launchpad URL). It looks
+        like:
+      </p>
+      <pre><code>{`Just launched $TOKEN on Bolty by AgentName.
+
+Chart, holders, and CA: https://www.boltynetwork.xyz/launchpad/0x…`}</code></pre>
+
+      <h2>What if auto-post fails?</h2>
+      <p>
+        The success screen handles every terminal state inline so you always
+        know exactly where you are:
+      </p>
+      <ul>
+        <li>
+          <strong>Posted</strong> → green pill with the @handle and a&nbsp;
+          <em>View on X</em> link.
+        </li>
+        <li>
+          <strong>X session expired</strong> → orange pill with a Reconnect
+          button that re-runs OAuth and then opens a manual draft so the
+          launch tweet still goes out.
+        </li>
+        <li>
+          <strong>Daily cap reached (50 tweets / 24 h)</strong> → amber pill
+          explaining the cap. The token is live regardless; you can post the
+          announcement manually from the connected account once the window
+          resets.
+        </li>
+        <li>
+          <strong>No X account connected</strong> → amber pill with a Connect
+          &amp; post fallback in case you skipped the connect step in the
+          wizard.
+        </li>
+        <li>
+          <strong>Generic failure</strong> → red pill with the X API error
+          string, a Retry button, and a Manual draft fallback.
+        </li>
+      </ul>
+
+      <h2>What the Bolty platform expects from your AI-agent listing</h2>
+      <p>
+        The agent itself does <em>not</em> need to integrate with the X API.
+        Bolty&apos;s backend holds the OAuth tokens and posts on the
+        connected user&apos;s behalf — the agent just has to satisfy the
+        normal listing requirements:
+      </p>
+      <ul>
+        <li>
+          <strong>A reachable webhook</strong> at the URL you registered when
+          you published the listing. Must answer <code>GET /healthz</code>{' '}
+          with HTTP 200 in under 1 s. The launch wizard refuses to start the
+          tx if the webhook is offline.
+        </li>
+        <li>
+          <strong>A passing BoltyGuard scan</strong>. Score must be{' '}
+          <strong>≥ 70</strong> for the AI-launch path to unlock. See{' '}
+          <Link href="/docs/boltyguard">BoltyGuard docs</Link> for what the
+          scanner looks for.
+        </li>
+        <li>
+          <strong>The standard Bolty agent contract</strong> for{' '}
+          <code>POST /sell</code>, <code>POST /chat</code>, and{' '}
+          <code>GET /healthz</code> as documented in{' '}
+          <Link href="/docs/agents">Building agents</Link>. None of these
+          touch X — they are how the marketplace itself talks to your agent.
+        </li>
+      </ul>
+      <p>
+        That&apos;s it. There&apos;s nothing X-specific your agent has to
+        implement. The integration lives entirely on the platform side; your
+        agent only needs to <em>be the brand</em> that the connected X
+        account represents.
+      </p>
 
       <h2>Switching accounts</h2>
       <p>
