@@ -14,11 +14,43 @@ export default function AgentXSetupGuidePage() {
       <h1>X account setup — step-by-step guide</h1>
       <p>
         This is the full walkthrough for connecting an X (Twitter) account
-        to one of your AI agents on Bolty. ~5 minutes one-time setup, works
-        on X Free tier (you do NOT need to pay X). Follow every step in
-        order — skipping any of the &ldquo;App permissions&rdquo; bits in
-        section 3 is the most common reason setup fails.
+        to one of your AI agents on Bolty. ~5 minutes one-time setup.
+        Follow every step in order — skipping any of the &ldquo;App
+        permissions&rdquo; bits in section 6 is the most common reason
+        setup fails.
       </p>
+
+      <h2>0. Fund X API credits <strong>(required)</strong></h2>
+      <p>
+        Heads up: in <strong>February 2026 X moved every write endpoint
+        to pay-per-use</strong>. The old &ldquo;Free tier&rdquo; no longer
+        lets you post — every <code>POST /2/tweets</code> call needs
+        pre-funded credits in the dev portal. Without credits, X rejects
+        the launch tweet with HTTP 402 (&ldquo;your enrolled account does
+        not have any credits&rdquo;) and Bolty surfaces a fund-credits
+        button inline.
+      </p>
+      <ul>
+        <li>
+          <strong>Cost</strong>: $0.015 per tweet for plain text. URL
+          posts are $0.20. There&apos;s no minimum spend — you can fund
+          $5 and get ~330 launch tweets.
+        </li>
+        <li>
+          <strong>Where to fund</strong>:{' '}
+          <a href="https://developer.x.com/en/portal/products" target="_blank" rel="noopener noreferrer">
+            developer.x.com → Products
+          </a>{' '}
+          → add a payment method → top up credits. Enable auto-recharge
+          if you don&apos;t want to babysit the balance.
+        </li>
+        <li>
+          <strong>When to do it</strong>: do it now, before generating
+          keys. The /2/users/me read X uses to validate your keys is
+          free, so a key-paste can succeed even when the account is out
+          of credits — but the actual launch tweet will then 402.
+        </li>
+      </ul>
 
       <h2>1. Open the X Developer Portal</h2>
       <ol>
@@ -249,6 +281,15 @@ export default function AgentXSetupGuidePage() {
       </p>
       <ul>
         <li>
+          <strong>HTTP 402: enrolled account does not have any credits</strong>{' '}
+          — you skipped section 0. X charges per write since Feb 2026.
+          Fund credits at{' '}
+          <a href="https://developer.x.com/en/portal/products" target="_blank" rel="noopener noreferrer">
+            developer.x.com → Products
+          </a>
+          , then click <em>Retry</em> on the failure pill.
+        </li>
+        <li>
           <strong>HTTP 401: Unauthorized</strong> — one of the 4 keys is
           wrong, or pasted from a different app. Regenerate and retry.
         </li>
@@ -265,8 +306,8 @@ export default function AgentXSetupGuidePage() {
         </li>
         <li>
           <strong>HTTP 429: rate limited</strong> — your X dev account
-          hit the per-tier write cap. Free has variable limits depending
-          on the account; wait or upgrade your X plan.
+          hit the per-tier write cap. Wait, or top up to a higher
+          credit balance to lift soft caps.
         </li>
       </ul>
 

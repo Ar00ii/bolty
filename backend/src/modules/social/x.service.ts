@@ -249,6 +249,12 @@ export class SocialXService {
       if (status === 401) {
         throw new ForbiddenException('X token rejected, please reconnect');
       }
+      if (status === 402) {
+        // X moved to pay-per-use in Feb 2026. Surface this distinctly
+        // so the launch wizard can show a fund-credits CTA instead of
+        // a generic retry.
+        throw new HttpException(`X requires API credits to post: ${xMessage}`, 402);
+      }
       if (status === 403) {
         // 403 from /tweets is almost always one of: duplicate content,
         // app missing the tweet.write scope, or account flagged. Surface
@@ -304,7 +310,11 @@ export class SocialXService {
     },
   ): Promise<
     | { posted: true; id: string; screenName: string; text: string }
-    | { posted: false; reason: 'not_connected' | 'cap_reached' | 'reauth' | 'failed'; detail?: string }
+    | {
+        posted: false;
+        reason: 'not_connected' | 'cap_reached' | 'reauth' | 'no_credits' | 'failed';
+        detail?: string;
+      }
   > {
     const row = await this.prisma.xConnection.findUnique({ where: { userId } });
     if (!row) return { posted: false, reason: 'not_connected' };
@@ -314,7 +324,9 @@ export class SocialXService {
       const res = await this.postTweet(userId, text);
       return { posted: true, id: res.id, screenName: row.screenName, text: res.text };
     } catch (err) {
+      const status = err instanceof HttpException ? err.getStatus() : 0;
       const msg = (err as Error)?.message ?? '';
+      if (status === 402) return { posted: false, reason: 'no_credits', detail: msg };
       if (err instanceof ForbiddenException) {
         if (/cap reached/i.test(msg)) return { posted: false, reason: 'cap_reached', detail: msg };
         return { posted: false, reason: 'reauth', detail: msg };
