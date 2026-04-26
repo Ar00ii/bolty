@@ -200,7 +200,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       void prefetch('orders:stats', () => api.get('/orders/seller/stats'));
       void prefetch('orders:negotiations', () => api.get('/market/negotiations'));
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));
-      void prefetch('library:items', () => api.get('/market/library'));
       // /reputation/leaderboard runs ~5 aggregate queries on cold cache,
       // so warming it on login means navigating to the Leaderboard tab
       // hits a Redis-warm response. Both the reputation board (top 50
