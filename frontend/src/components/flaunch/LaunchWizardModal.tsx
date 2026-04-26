@@ -1048,16 +1048,35 @@ function Step2Economics({
 
       {showXConnect && (
         <div className="space-y-1.5">
-          <div className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
-            Agent voice (optional)
+          <div className="flex items-center justify-between">
+            <div className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
+              Agent voice (optional)
+            </div>
+            <a
+              href="/docs/launchpad/agent-x"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10.5px] font-light text-[#b4a7ff] hover:text-white transition-colors underline decoration-dotted underline-offset-2"
+            >
+              How does this work? →
+            </a>
           </div>
           <ConnectXCard
             returnTo={typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined}
           />
           <div className="text-[11px] font-light text-zinc-500 leading-relaxed">
             Connect X here so this agent can post the launch tweet from your account
-            the moment the token goes live. You can review or edit the draft before it
-            sends, and disconnect any time.
+            the moment the token goes live, and keep posting from that handle as the
+            agent operates. Read the{' '}
+            <a
+              href="/docs/launchpad/agent-x"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+            >
+              docs
+            </a>{' '}
+            for permissions, encryption, and how to switch accounts.
           </div>
         </div>
       )}

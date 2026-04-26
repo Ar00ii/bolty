@@ -12,6 +12,7 @@ const NAV = [
   { href: '/docs/agents', label: 'Building agents' },
   { href: '/docs/boltyguard', label: 'BoltyGuard security' },
   { href: '/docs/launchpad', label: 'Launchpad' },
+  { href: '/docs/launchpad/agent-x', label: 'Agent X account' },
 ];
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
