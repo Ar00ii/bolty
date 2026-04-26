@@ -458,6 +458,16 @@ export class AgentXService {
         502,
       );
     }
+    if (res.status === 402) {
+      // X moved to pay-per-use in Feb 2026: every write requires
+      // pre-funded credits in the dev portal. There's nothing we can
+      // do server-side; surface a precise reason so the FE can route
+      // the seller straight to developer.x.com to fund their account.
+      const data = res.data as { detail?: string; title?: string; errors?: Array<{ message?: string }> } | undefined;
+      const msg =
+        data?.detail || data?.title || data?.errors?.[0]?.message || 'pay-per-use credits required';
+      throw new HttpException(`X requires API credits to post: ${msg}`, 402);
+    }
     if (res.status === 401 || res.status === 403) {
       const data = res.data as { detail?: string; title?: string; errors?: Array<{ message?: string }> } | undefined;
       const msg =
@@ -494,7 +504,13 @@ export class AgentXService {
     | { posted: true; id: string; screenName: string; text: string }
     | {
         posted: false;
-        reason: 'not_configured' | 'not_connected' | 'cap_reached' | 'reauth' | 'failed';
+        reason:
+          | 'not_configured'
+          | 'not_connected'
+          | 'cap_reached'
+          | 'reauth'
+          | 'no_credits'
+          | 'failed';
         detail?: string;
       }
   > {
@@ -502,8 +518,8 @@ export class AgentXService {
     if (!row) return { posted: false, reason: 'not_configured' };
 
     // Auth-method dispatch. OAuth 1.0a takes precedence when present
-    // (Free-tier-friendly path). Fallback to OAuth 2.0 for rows that
-    // pre-date the 1.0a flow.
+    // (no redirect flow, simpler key paste). Fallback to OAuth 2.0
+    // for rows that pre-date the 1.0a flow.
     const oauth1 = await this.loadOauth1Creds(listingId);
     const text = composeLaunchTweet(input);
 
@@ -517,7 +533,9 @@ export class AgentXService {
           text: out.text,
         };
       } catch (err) {
+        const status = err instanceof HttpException ? err.getStatus() : 0;
         const msg = (err as Error)?.message ?? '';
+        if (status === 402) return { posted: false, reason: 'no_credits', detail: msg };
         this.logger.warn(`agent-x oauth1 post failed for listing=${listingId}: ${msg}`);
         return { posted: false, reason: 'failed', detail: msg };
       }
@@ -529,7 +547,9 @@ export class AgentXService {
       const out = await this.postTweet(listingId, text);
       return { posted: true, id: out.id, screenName: row.screenName ?? 'unknown', text: out.text };
     } catch (err) {
+      const status = err instanceof HttpException ? err.getStatus() : 0;
       const msg = (err as Error)?.message ?? '';
+      if (status === 402) return { posted: false, reason: 'no_credits', detail: msg };
       if (err instanceof ForbiddenException) {
         if (/cap reached/i.test(msg)) {
           return { posted: false, reason: 'cap_reached', detail: msg };
@@ -589,6 +609,9 @@ export class AgentXService {
         `http_${status}`;
       this.logger.warn(`agent-x tweet failed (${status}): ${JSON.stringify(data)}`);
       if (status === 401) throw new ForbiddenException('X token rejected, please reconnect');
+      if (status === 402) {
+        throw new HttpException(`X requires API credits to post: ${xMessage}`, 402);
+      }
       if (status === 403) throw new HttpException(`X refused tweet (403): ${xMessage}`, 403);
       if (status === 429) throw new HttpException(`X rate-limited (429): ${xMessage}`, 429);
       throw new HttpException(

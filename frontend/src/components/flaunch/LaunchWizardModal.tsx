@@ -1346,6 +1346,7 @@ function LaunchTweetAutoPost({
     | { phase: 'not_configured' }
     | { phase: 'cap_reached'; detail?: string }
     | { phase: 'reauth'; detail?: string }
+    | { phase: 'no_credits'; detail?: string }
     | { phase: 'failed'; detail?: string };
   const [state, setState] = useState<State>({ phase: 'posting' });
   const [manualOpen, setManualOpen] = useState(false);
@@ -1357,7 +1358,13 @@ function LaunchTweetAutoPost({
         | { posted: true; id: string; screenName: string; text: string }
         | {
             posted: false;
-            reason: 'not_configured' | 'not_connected' | 'cap_reached' | 'reauth' | 'failed';
+            reason:
+              | 'not_configured'
+              | 'not_connected'
+              | 'cap_reached'
+              | 'reauth'
+              | 'no_credits'
+              | 'failed';
             detail?: string;
           }
       >('/social/x/post-launch', { symbol, name, tokenAddress, url, agentName, listingId });
@@ -1469,6 +1476,51 @@ function LaunchTweetAutoPost({
             className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
           >
             Reconnect & post manually
+          </button>
+        </div>
+        <ManualTweetFallback
+          open={manualOpen}
+          onClose={() => setManualOpen(false)}
+          token={{ name, symbol, tokenAddress, url, agentName }}
+        />
+      </div>
+    );
+  }
+  if (state.phase === 'no_credits') {
+    // X moved to pay-per-use in Feb 2026 — every write needs pre-funded
+    // credits in the dev portal. Send the seller straight to the
+    // billing page so they can fund and retry.
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-amber-300 font-light"
+        style={containerStyle('#f59e0b')}
+      >
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <Twitter className="w-3.5 h-3.5 text-amber-300" />
+          X requires paid API credits to post (~$0.015 / tweet).
+          <a
+            href="https://developer.x.com/en/portal/products"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          >
+            Add credits at developer.x.com →
+          </a>
+          <span className="text-zinc-600">·</span>
+          <button
+            type="button"
+            onClick={() => void fire()}
+            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          >
+            Retry
+          </button>
+          <span className="text-zinc-600">·</span>
+          <button
+            type="button"
+            onClick={() => setManualOpen(true)}
+            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          >
+            Manual draft
           </button>
         </div>
         <ManualTweetFallback
