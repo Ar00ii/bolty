@@ -136,6 +136,10 @@ export const NAV: NavSection[] = [
   {
     section: 'Discover',
     items: [
+      // Launchpad sits first in Discover to match the public landing
+      // navbar + the mobile bottom-tab bar — single clear wedge for new
+      // visitors. Marketplace stays in the section but moves below.
+      { label: 'Launchpad', icon: Rocket, href: '/launchpad' },
       {
         label: 'Marketplace',
         icon: LayoutGrid,
@@ -145,7 +149,6 @@ export const NAV: NavSection[] = [
           { label: 'Repos', icon: GitBranch, href: '/market/repos' },
         ],
       },
-      { label: 'Launchpad', icon: Rocket, href: '/launchpad' },
       { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
       { label: '$BOLTY', icon: Zap, href: '/bolty' },
     ],

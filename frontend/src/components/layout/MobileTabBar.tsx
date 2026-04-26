@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutGrid, Mail, MessageSquare, Package, User } from 'lucide-react';
+import { Mail, MessageSquare, Package, Rocket, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -13,14 +13,17 @@ import { usePathname } from 'next/navigation';
 const TABS: Array<{
   href: string;
   label: string;
-  icon: typeof LayoutGrid;
+  icon: typeof Rocket;
   matches: (pathname: string) => boolean;
 }> = [
+  // Launchpad replaces Market on the bottom bar to match the same
+  // demotion done on the public landing nav. Market sub-pages still
+  // ship via the hamburger drawer + sidebar so nothing's lost.
   {
-    href: '/market',
-    label: 'Market',
-    icon: LayoutGrid,
-    matches: (p) => p === '/market' || p.startsWith('/market/'),
+    href: '/launchpad',
+    label: 'Launchpad',
+    icon: Rocket,
+    matches: (p) => p === '/launchpad' || p.startsWith('/launchpad/'),
   },
   {
     href: '/feed',
