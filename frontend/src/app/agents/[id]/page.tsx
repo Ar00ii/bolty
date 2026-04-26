@@ -312,8 +312,8 @@ export default function AgentDetailPage() {
                 </span>
               )}
             </div>
-            <Link href={`/market?negotiate=${agent.id}`} className="btn-neon text-xs py-1.5 px-4">
-              {agent.agentEndpoint ? '🤖 Negotiate' : agent.price === 0 ? 'Get' : 'Buy / Contact'}
+            <Link href={`/market/agents/${agent.id}`} className="btn-neon text-xs py-1.5 px-4">
+              {agent.price === 0 ? 'Get' : 'Buy now'}
             </Link>
           </div>
         </div>

@@ -41,7 +41,7 @@ const TABS: Array<{
     href: '/dm',
     label: 'Messages',
     icon: Mail,
-    matches: (p) => p === '/dm' || p.startsWith('/dm/') || p.startsWith('/negotiations/'),
+    matches: (p) => p === '/dm' || p.startsWith('/dm/'),
   },
   {
     href: '/profile',

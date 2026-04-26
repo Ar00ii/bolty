@@ -58,7 +58,7 @@ const FEATURES = [
   {
     icon: MessageSquare,
     title: 'Real-time Chat',
-    description: 'Global chat, DMs, and negotiation system built on WebSockets.',
+    description: 'Global chat and DMs built on WebSockets.',
     href: '/chat',
   },
   {
@@ -86,7 +86,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     title: 'Earn and grow',
-    desc: 'Set prices in ETH, negotiate, build reputation, grow your brand.',
+    desc: 'Set prices in ETH, build reputation, grow your brand.',
     icon: Rocket,
   },
 ];

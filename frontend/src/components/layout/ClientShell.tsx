@@ -9,7 +9,6 @@ import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
 import { FloatingTopBar } from '@/components/layout/FloatingTopBar';
 import { LiveToastBridge } from '@/components/layout/LiveToastBridge';
 import { MobileTabBar } from '@/components/layout/MobileTabBar';
-import { NegotiationPopToast } from '@/components/layout/NegotiationPopToast';
 import { PowerNavbar } from '@/components/layout/PowerNavbar';
 import { RouteProgress } from '@/components/layout/RouteProgress';
 import { ShortcutsModal } from '@/components/layout/ShortcutsModal';
@@ -46,7 +45,6 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
         <ShortcutsModal />
         <BackToTop />
         <LiveToastBridge />
-        <NegotiationPopToast />
         <div className="flex">
           <Suspense fallback={<div className="hidden lg:block w-[264px] shrink-0" />}>
             <StandardSidebar />
@@ -71,7 +69,6 @@ export function ClientShell({ children }: { children: React.ReactNode }) {
       <CommandPalette />
       <ShortcutsModal />
       {!isAuth && <LiveToastBridge />}
-      {!isAuth && <NegotiationPopToast />}
       {!isAuth && <FloatingTopBar />}
       {!isAuth && <BackToTop />}
       {!isAuth && <UnifiedHeader />}

@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import {
   Bot,
   ChevronDown,
-  Handshake,
   WifiOff,
   X,
   Key,
@@ -40,7 +39,6 @@ import React, { Suspense, useState, useEffect, useCallback, useRef, useMemo } fr
 import { io, Socket } from 'socket.io-client';
 
 import { SecurityBadge, type ScanResult } from '@/components/boltyguard/SecurityBadge';
-import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
 import {
@@ -587,22 +585,13 @@ function AgentCard({
   listing,
   isAuthenticated,
   onBuy,
-  onNegotiate,
 }: {
   listing: MarketListing;
   isAuthenticated: boolean;
   onBuy: () => void;
-  onNegotiate: (listing: MarketListing) => void;
 }) {
   const isFree = listing.price === 0;
   const hasEndpoint = Boolean(listing.hasAgentEndpoint || listing.agentEndpoint);
-  const negotiable =
-    listing.minPrice != null &&
-    listing.minPrice > 0 &&
-    listing.minPrice < listing.price;
-  const discount = negotiable
-    ? Math.round((1 - (listing.minPrice ?? 0) / listing.price) * 100)
-    : 0;
   return (
     <Link
       href={`/market/agents/${listing.id}`}
@@ -680,29 +669,8 @@ function AgentCard({
               <span className="mk-price__ccy">{listing.currency}</span>
             </span>
           )}
-          {negotiable && (
-            <span className="mk-card__neg">
-              <Handshake className="w-3 h-3" strokeWidth={2} />
-              Up to {discount}% off
-            </span>
-          )}
         </div>
         <div className="mk-card__actions">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              if (!isAuthenticated) {
-                window.location.href = '/auth';
-                return;
-              }
-              onNegotiate(listing);
-            }}
-            className="mk-btn mk-btn--ghost mk-btn--sm"
-          >
-            <Bot className="w-3 h-3" strokeWidth={2} />
-            Negotiate
-          </button>
           <button
             type="button"
             onClick={(e) => {
@@ -1157,8 +1125,6 @@ function AgentsPageContent() {
   const [myListings, setMyListings] = useState<MarketListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [myLoading, setMyLoading] = useState(false);
-  const [negotiateTarget, setNegotiateTarget] = useState<MarketListing | null>(null);
-  const [negotiateStarting, setNegotiateStarting] = useState(false);
   // Hydrate filters from the URL so deep-links and back-nav keep state.
   const [type, setType] = useState<string>(
     searchParams.get('type') ?? 'ALL',
@@ -1218,37 +1184,6 @@ function AgentsPageContent() {
     if (searchParams.get('new') === '1') {
       router.replace('/market/agents/publish');
     }
-  }, [searchParams, isAuthenticated, router]);
-
-  // Open negotiation modal when a deep link lands here with
-  // ?negotiate=<listingId> — legacy deep-link. The flow now lives at
-  // /negotiations/<id>, so if we arrive with just the listing id we
-  // start a negotiation and redirect; if we have the negotiation id
-  // directly we route straight there.
-  useEffect(() => {
-    const negotiateId = searchParams.get('negotiate');
-    const negIdParam = searchParams.get('negId');
-    const asAgentParam = searchParams.get('asAgent');
-    if (!negotiateId || !isAuthenticated) return;
-    if (negIdParam) {
-      router.replace(`/negotiations/${negIdParam}`);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await api.post<{ id: string }>(
-          `/market/${negotiateId}/negotiate`,
-          asAgentParam ? { buyerAgentListingId: asAgentParam } : {},
-        );
-        if (!cancelled && res?.id) router.replace(`/negotiations/${res.id}`);
-      } catch {
-        /* listing missing or negotiation failed — stay on the list */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
   }, [searchParams, isAuthenticated, router]);
 
   // Debounce the search input → hitting the API per keystroke is wasteful.
@@ -1347,8 +1282,7 @@ function AgentsPageContent() {
   const stats = useMemo(() => {
     const total = listings.length;
     const aiNative = listings.filter((l) => l.type === 'AI_AGENT').length;
-    const negotiable = listings.filter((l) => l.minPrice != null && l.minPrice > 0).length;
-    return { total, aiNative, negotiable };
+    return { total, aiNative };
   }, [listings]);
 
   // Optional client-side sort — falls back when the server doesn't
@@ -1542,7 +1476,7 @@ function AgentsPageContent() {
           <div>
             <h1 className="mk-hero__title">Agents</h1>
             <p className="mk-hero__sub">
-              Deploy, buy, and negotiate with autonomous AI agents. Every listing is health-checked.
+              Deploy and buy autonomous AI agents. Every listing is health-checked.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -1579,10 +1513,6 @@ function AgentsPageContent() {
           <div className="mk-stat">
             <div className="mk-stat__label">AI-native</div>
             <div className="mk-stat__value">{stats.aiNative}</div>
-          </div>
-          <div className="mk-stat">
-            <div className="mk-stat__label">Open to negotiate</div>
-            <div className="mk-stat__value">{stats.negotiable}</div>
           </div>
         </div>
       </div>
@@ -1754,7 +1684,6 @@ function AgentsPageContent() {
                     listing={l}
                     isAuthenticated={isAuthenticated}
                     onBuy={() => handleBuy(l)}
-                    onNegotiate={(listing) => setNegotiateTarget(listing)}
                   />
                 </motion.div>
               ))}
@@ -2029,33 +1958,6 @@ function AgentsPageContent() {
         </div>
       )}
 
-      {/* Agent picker — opens when a buyer hits Negotiate on a card */}
-      {negotiateTarget && (
-        <AgentPickerModal
-          listingTitle={negotiateTarget.title}
-          listingPrice={negotiateTarget.price}
-          listingCurrency={negotiateTarget.currency}
-          onCancel={() => setNegotiateTarget(null)}
-          onConfirm={async (agentId) => {
-            if (!negotiateTarget || negotiateStarting) return;
-            setNegotiateStarting(true);
-            try {
-              const res = await api.post<{ id: string }>(
-                `/market/${negotiateTarget.id}/negotiate`,
-                agentId ? { buyerAgentListingId: agentId } : {},
-              );
-              if (res?.id) {
-                router.push(`/negotiations/${res.id}`);
-              }
-            } catch (err) {
-              alert(err instanceof ApiError ? err.message : 'Failed to start negotiation');
-            } finally {
-              setNegotiateStarting(false);
-              setNegotiateTarget(null);
-            }
-          }}
-        />
-      )}
     </div>
   );
 }
