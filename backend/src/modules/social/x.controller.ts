@@ -94,6 +94,46 @@ export class SocialXController {
   async post(@CurrentUser('id') userId: string, @Body() body: { text?: string }) {
     return this.x.postTweet(userId, body?.text ?? '');
   }
+
+  /**
+   * Auto-post the launch announcement for a freshly minted token.
+   * Called by the launch wizard the moment the on-chain tx confirms,
+   * with the structured token data (symbol, name, address, public URL,
+   * optional agent name). The body is composed server-side so the user
+   * never has to click a "send" button.
+   *
+   * Returns a structured shape so the FE can render the right state
+   * inline (posted / cap reached / token expired / not connected /
+   * generic failed) without parsing error strings.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Post('post-launch')
+  async postLaunch(
+    @CurrentUser('id') userId: string,
+    @Body()
+    body: {
+      symbol?: string;
+      name?: string | null;
+      tokenAddress?: string;
+      url?: string;
+      agentName?: string | null;
+    },
+  ) {
+    const symbol = (body?.symbol ?? '').trim();
+    const tokenAddress = (body?.tokenAddress ?? '').trim();
+    const url = (body?.url ?? '').trim();
+    if (!symbol || !tokenAddress || !url) {
+      return { posted: false as const, reason: 'failed' as const, detail: 'missing fields' };
+    }
+    return this.x.postLaunchTweet(userId, {
+      symbol,
+      name: body?.name ?? null,
+      tokenAddress,
+      url,
+      agentName: body?.agentName ?? null,
+    });
+  }
 }
 
 /** Only allow returnTo that lives on our own FE host so OAuth replies

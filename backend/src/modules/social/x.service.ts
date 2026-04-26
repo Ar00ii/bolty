@@ -249,6 +249,53 @@ export class SocialXService {
     return { id: String(out.id ?? ''), text: String(out.text ?? trimmed) };
   }
 
+  /**
+   * Compose + post the launch-announcement tweet for a freshly minted
+   * token. Wraps {@link postTweet} so the daily cap, refresh, and 401
+   * handling all stay consistent — but the tweet body is built from
+   * structured token data instead of free user input. Called from the
+   * launch wizard the moment the on-chain tx confirms; the user never
+   * sees a draft.
+   *
+   * Returns a stable shape the FE can act on:
+   *   { posted: true,  id, screenName }
+   *   { posted: false, reason: 'not_connected' }   → show Connect CTA
+   *   { posted: false, reason: 'cap_reached' }     → show "tomorrow"
+   *   { posted: false, reason: 'reauth' }          → show Reconnect
+   *   { posted: false, reason: 'failed', detail }  → manual fallback
+   */
+  async postLaunchTweet(
+    userId: string,
+    input: {
+      symbol: string;
+      name?: string | null;
+      tokenAddress: string;
+      url: string;
+      agentName?: string | null;
+    },
+  ): Promise<
+    | { posted: true; id: string; screenName: string; text: string }
+    | { posted: false; reason: 'not_connected' | 'cap_reached' | 'reauth' | 'failed'; detail?: string }
+  > {
+    const row = await this.prisma.xConnection.findUnique({ where: { userId } });
+    if (!row) return { posted: false, reason: 'not_connected' };
+
+    const text = composeLaunchTweet(input);
+    try {
+      const res = await this.postTweet(userId, text);
+      return { posted: true, id: res.id, screenName: row.screenName, text: res.text };
+    } catch (err) {
+      const msg = (err as Error)?.message ?? '';
+      if (err instanceof ForbiddenException) {
+        if (/cap reached/i.test(msg)) return { posted: false, reason: 'cap_reached', detail: msg };
+        return { posted: false, reason: 'reauth', detail: msg };
+      }
+      if (err instanceof NotFoundException) return { posted: false, reason: 'not_connected' };
+      this.logger.warn(`postLaunchTweet failed for user=${userId}: ${msg}`);
+      return { posted: false, reason: 'failed', detail: msg };
+    }
+  }
+
   // ───────────────────────────────────────────────────────────────
   // Internals
   // ───────────────────────────────────────────────────────────────
@@ -359,4 +406,32 @@ function b64url(buf: Buffer): string {
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
+}
+
+
+/**
+ * Build the launch-announcement tweet body. Kept under 280 chars even
+ * with long token names + long URLs by trimming the name first and
+ * dropping the agent attribution if needed.
+ */
+export function composeLaunchTweet(input: {
+  symbol: string;
+  name?: string | null;
+  tokenAddress: string;
+  url: string;
+  agentName?: string | null;
+}): string {
+  const sym = `$${(input.symbol || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || "TOKEN"}`;
+  const url = input.url;
+  const agentName = (input.agentName || "").trim().slice(0, 40);
+  const fullByLine = agentName ? ` by ${agentName}` : "";
+
+  // Try the rich form first.
+  const rich = `Just launched ${sym} on Bolty${fullByLine}.\n\nChart, holders, and CA: ${url}`;
+  if (rich.length <= 280) return rich;
+  // Drop the agent attribution if we are over.
+  const lean = `Just launched ${sym} on Bolty.\n\nChart, holders, and CA: ${url}`;
+  if (lean.length <= 280) return lean;
+  // Last resort — keep it tweetable even with very long URLs.
+  return `Just launched ${sym} on Bolty. ${url}`.slice(0, 280);
 }

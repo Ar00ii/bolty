@@ -15,12 +15,12 @@ import {
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { ConnectXCard } from '@/components/social/ConnectXCard';
 import { LaunchTweetModal } from '@/components/social/LaunchTweetModal';
 import { Modal } from '@/components/ui/Modal';
-import { api } from '@/lib/api/client';
+import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import {
   BOLTY_TREASURY_ADDRESS,
@@ -311,6 +311,7 @@ export function LaunchWizardModal({
             result={result}
             symbol={symbol}
             name={name}
+            agentName={listingTitle}
             onClose={handleClose}
           />
         ) : step === 1 ? (
@@ -1252,15 +1253,16 @@ function SuccessView({
   result,
   symbol,
   name,
+  agentName,
   onClose,
 }: {
   result: LaunchResult;
   symbol: string;
   name: string;
+  agentName?: string | null;
   onClose: () => void;
 }) {
   const short = `${result.tokenAddress.slice(0, 8)}…${result.tokenAddress.slice(-6)}`;
-  const [tweetOpen, setTweetOpen] = useState(false);
   // Build the public launchpad URL for the tweet body. We point at the
   // Bolty page (chart + holders + CA in one screen) rather than the
   // Flaunch one, so the click brings the visitor into our funnel.
@@ -1299,19 +1301,16 @@ function SuccessView({
       >
         <Copy className="w-3 h-3" /> {short}
       </button>
+
+      <LaunchTweetAutoPost
+        symbol={symbol}
+        name={name}
+        tokenAddress={result.tokenAddress}
+        url={launchpadUrl}
+        agentName={agentName ?? null}
+      />
+
       <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
-        <button
-          type="button"
-          onClick={() => setTweetOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] text-white transition hover:brightness-110"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-            boxShadow: '0 0 0 1px rgba(131,110,249,0.5)',
-          }}
-        >
-          Tweet your launch
-        </button>
         <Link
           href={result.flaunchUrl}
           target="_blank"
@@ -1336,12 +1335,226 @@ function SuccessView({
           Done
         </button>
       </div>
-      <LaunchTweetModal
-        open={tweetOpen}
-        token={{ name, symbol, tokenAddress: result.tokenAddress, url: launchpadUrl }}
-        onClose={() => setTweetOpen(false)}
+    </div>
+  );
+}
+
+/**
+ * Inline status pane. Auto-posts the launch tweet from the connected X
+ * account the moment SuccessView mounts — there's no human click on
+ * the happy path. Surfaces five terminal states inline (posting,
+ * posted, not_connected, cap_reached, reauth, failed) with a single
+ * recovery action per branch (Connect / Reconnect / Retry / Manual
+ * draft). The manual draft modal stays available as a last-resort
+ * fallback so the user can always recover.
+ */
+function LaunchTweetAutoPost({
+  symbol,
+  name,
+  tokenAddress,
+  url,
+  agentName,
+}: {
+  symbol: string;
+  name: string;
+  tokenAddress: string;
+  url: string;
+  agentName: string | null;
+}) {
+  type State =
+    | { phase: 'posting' }
+    | { phase: 'posted'; tweetId: string; screenName: string }
+    | { phase: 'not_connected' }
+    | { phase: 'cap_reached'; detail?: string }
+    | { phase: 'reauth'; detail?: string }
+    | { phase: 'failed'; detail?: string };
+  const [state, setState] = useState<State>({ phase: 'posting' });
+  const [manualOpen, setManualOpen] = useState(false);
+
+  const fire = useCallback(async () => {
+    setState({ phase: 'posting' });
+    try {
+      const res = await api.post<
+        | { posted: true; id: string; screenName: string; text: string }
+        | { posted: false; reason: 'not_connected' | 'cap_reached' | 'reauth' | 'failed'; detail?: string }
+      >('/social/x/post-launch', { symbol, name, tokenAddress, url, agentName });
+      if (res.posted) {
+        setState({ phase: 'posted', tweetId: res.id, screenName: res.screenName });
+      } else {
+        setState({ phase: res.reason, detail: res.detail });
+      }
+    } catch (err) {
+      setState({
+        phase: 'failed',
+        detail: err instanceof ApiError ? err.message : 'unexpected error',
+      });
+    }
+  }, [symbol, name, tokenAddress, url, agentName]);
+
+  // Fire exactly once on mount. The endpoint is itself idempotent against
+  // accidental re-mount because the daily-cap counter would just bump.
+  useEffect(() => {
+    void fire();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const containerStyle = (accent: string) => ({
+    background: `${accent}10`,
+    boxShadow: `inset 0 0 0 1px ${accent}33`,
+  });
+
+  if (state.phase === 'posting') {
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-zinc-300 font-light flex items-center justify-center gap-2"
+        style={containerStyle('#836EF9')}
+      >
+        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#b4a7ff]" />
+        Posting launch tweet from your X account…
+      </div>
+    );
+  }
+  if (state.phase === 'posted') {
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-emerald-300 font-light"
+        style={containerStyle('#22c55e')}
+      >
+        <div className="flex items-center justify-center gap-2">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          Tweet posted by{' '}
+          <span className="text-white">@{state.screenName}</span>.
+          <a
+            href={`https://x.com/${state.screenName}/status/${state.tweetId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#86efac] hover:text-white underline decoration-dotted underline-offset-2 ml-1"
+          >
+            View on X
+          </a>
+        </div>
+      </div>
+    );
+  }
+  if (state.phase === 'not_connected') {
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-zinc-300 font-light"
+        style={containerStyle('#f59e0b')}
+      >
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <Twitter className="w-3.5 h-3.5 text-amber-300" />
+          No X account connected — launch tweet not posted.
+          <button
+            type="button"
+            onClick={() => setManualOpen(true)}
+            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          >
+            Connect & post manually
+          </button>
+        </div>
+        <ManualTweetFallback
+          open={manualOpen}
+          onClose={() => setManualOpen(false)}
+          token={{ name, symbol, tokenAddress, url, agentName }}
+        />
+      </div>
+    );
+  }
+  if (state.phase === 'cap_reached') {
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-amber-300 font-light"
+        style={containerStyle('#f59e0b')}
+      >
+        Daily X post cap reached (50 / 24 h). The launch tweet was not posted — your token is still live.
+      </div>
+    );
+  }
+  if (state.phase === 'reauth') {
+    return (
+      <div
+        className="rounded-lg p-3 text-[12px] text-amber-300 font-light"
+        style={containerStyle('#f59e0b')}
+      >
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          X session expired.
+          <button
+            type="button"
+            onClick={() => setManualOpen(true)}
+            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+          >
+            Reconnect & post manually
+          </button>
+        </div>
+        <ManualTweetFallback
+          open={manualOpen}
+          onClose={() => setManualOpen(false)}
+          token={{ name, symbol, tokenAddress, url, agentName }}
+        />
+      </div>
+    );
+  }
+  // failed
+  return (
+    <div
+      className="rounded-lg p-3 text-[12px] text-rose-300 font-light"
+      style={containerStyle('#ef4444')}
+    >
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        Auto-tweet failed{state.detail ? `: ${state.detail}` : ''}.
+        <button
+          type="button"
+          onClick={() => void fire()}
+          className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+        >
+          Retry
+        </button>
+        <span className="text-zinc-600">·</span>
+        <button
+          type="button"
+          onClick={() => setManualOpen(true)}
+          className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+        >
+          Manual draft
+        </button>
+      </div>
+      <ManualTweetFallback
+        open={manualOpen}
+        onClose={() => setManualOpen(false)}
+        token={{ name, symbol, tokenAddress, url, agentName }}
       />
     </div>
+  );
+}
+
+function ManualTweetFallback({
+  open,
+  onClose,
+  token,
+}: {
+  open: boolean;
+  onClose: () => void;
+  token: {
+    name: string;
+    symbol: string;
+    tokenAddress: string;
+    url: string;
+    agentName: string | null;
+  };
+}) {
+  return (
+    <LaunchTweetModal
+      open={open}
+      token={{
+        name: token.name,
+        symbol: token.symbol,
+        tokenAddress: token.tokenAddress,
+        url: token.url,
+        agentName: token.agentName,
+      }}
+      onClose={onClose}
+    />
   );
 }
 
