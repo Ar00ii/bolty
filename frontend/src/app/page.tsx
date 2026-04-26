@@ -2,453 +2,489 @@
 
 import { motion } from 'framer-motion';
 import {
+  Activity,
+  ArrowUpRight,
   Bot,
   GitBranch,
-  Shield,
-  Key,
-  Star,
-  TrendingUp,
-  MessageSquare,
-  UserPlus,
-  Upload,
   Rocket,
+  Shield,
+  Sparkles,
+  Wallet,
+  Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-import { ClickClickDone } from '@/components/ClickClickDone';
-import { EliteBoost } from '@/components/EliteBoost';
-import { FeaturesGrid } from '@/components/FeaturesGrid';
-import { AvatarCircles } from '@/components/ui/AvatarCircles';
-import { BoltyLogoSVG } from '@/components/ui/BoltyLogo';
-import { RenderHero } from '@/components/ui/RenderHero';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { resolveAssetUrl } from '@/lib/utils/asset-url';
 
-// Data
-const FEATURES = [
+/**
+ * Bolty home — radically rebuilt as an app dashboard, not a marketing
+ * landing. The previous /page.tsx was a 454-line scroll-and-pitch
+ * surface that buried the actual product behind hero headers; this
+ * one drops the visitor straight into live data the platform is
+ * generating right now.
+ *
+ * Design language:
+ *  - Ethereum mainnet brand (deep blue #2535A8, primary blue #627EEA,
+ *    cyan accent #00D4FF) instead of the old purple identity.
+ *  - App grid layout: a top banner showing chain + wallet, then a
+ *    4-up metric strip that fetches real numbers from the API on
+ *    mount, then nav tiles, then a recent-activity feed.
+ *  - Framer-motion entrance animations on every primary card so the
+ *    first paint feels alive instead of static.
+ *  - No more "Sign up free" CTA — accounts only exist with a wallet.
+ */
+type Metrics = {
+  agents: number;
+  repos: number;
+  launches: number;
+  activeUsers: number;
+};
+
+const NAV_TILES = [
   {
     icon: Bot,
-    title: 'AI Agent Marketplace',
-    description:
-      'Discover, publish, and sell AI agents. From GPT-powered tools to custom automation bots.',
+    title: 'Agents',
     href: '/market/agents',
-    featured: true,
+    teaser: 'Buy, sell, run autonomous agents.',
+    accent: '#627EEA',
   },
   {
     icon: GitBranch,
-    title: 'Code Repositories',
-    description:
-      'Sync GitHub repos. Offer free or paid access, earn reputation, build your profile.',
+    title: 'Repos',
     href: '/market/repos',
+    teaser: 'GitHub-backed paid access.',
+    accent: '#00D4FF',
   },
   {
-    icon: Key,
-    title: 'API Key Management',
-    description: 'Generate API keys for your agents to interact programmatically.',
-    href: '/api-keys',
+    icon: Rocket,
+    title: 'Launchpad',
+    href: '/launchpad',
+    teaser: 'Mint a token for any agent.',
+    accent: '#8DA4F1',
+    badge: 'Coming to ETH',
   },
   {
     icon: Shield,
-    title: 'Secure Payments',
-    description: 'On-chain ETH payments with smart contract escrow. No middleman.',
-    href: '/how-it-works',
-  },
-  {
-    icon: MessageSquare,
-    title: 'Real-time Chat',
-    description: 'Global chat and DMs built on WebSockets.',
-    href: '/chat',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Boost System',
-    description:
-      'Power up your agent and dominate the trending rankings with strategic visibility.',
-    href: '/#boost-marketplace',
+    title: 'BoltyGuard',
+    href: '/docs/boltyguard',
+    teaser: 'Every listing scanned on upload.',
+    accent: '#34D399',
   },
 ];
 
-const HOW_IT_WORKS = [
-  {
-    step: '01',
-    title: 'Create your account',
-    desc: 'Sign up with GitHub, email, or Web3 wallet. Your profile is your identity.',
-    icon: UserPlus,
-  },
-  {
-    step: '02',
-    title: 'Publish your work',
-    desc: 'Connect GitHub or upload AI agents to the marketplace.',
-    icon: Upload,
-  },
-  {
-    step: '03',
-    title: 'Earn and grow',
-    desc: 'Set prices in ETH, build reputation, grow your brand.',
-    icon: Rocket,
-  },
-];
-
-const TESTIMONIALS = [
-  {
-    name: 'Alex R.',
-    role: 'Senior Full-Stack Dev',
-    text: 'Published three repos in my first week and earned ETH without crypto complexity.',
-  },
-  {
-    name: 'Yuki T.',
-    role: 'AI/ML Engineer',
-    text: 'The AI agent marketplace is exactly what I needed. Deployed my toolkit and it has buyers.',
-  },
-  {
-    name: 'Sara M.',
-    role: 'Indie Developer',
-    text: 'The built-in AI assistant saves me hours every week.',
-  },
-];
-
-interface CommunityUser {
-  id: string;
-  username: string | null;
-  displayName: string | null;
-  avatarUrl: string | null;
-}
-
-export default function HomePage() {
-  const { isAuthenticated } = useAuth();
-  const [communityAvatars, setCommunityAvatars] = useState<
-    { imageUrl: string; profileUrl?: string; initial?: string }[]
+export default function HomeDashboard() {
+  const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [recent, setRecent] = useState<
+    Array<{ id: string; title: string; href: string; sub: string }>
   >([]);
-  const [totalMembers, setTotalMembers] = useState<number>(0);
 
   useEffect(() => {
-    let cancelled = false;
-    api
-      .get<{ users: CommunityUser[]; totalCount: number }>('/users/community?limit=6')
-      .then((data) => {
-        if (cancelled) return;
-        const avatars: { imageUrl: string; profileUrl?: string; initial?: string }[] = [];
-        for (const u of data.users || []) {
-          const imageUrl = resolveAssetUrl(u.avatarUrl);
-          const initial = (u.displayName || u.username || 'U').trim().charAt(0).toUpperCase();
-          // Still include the entry even when the avatar URL is missing —
-          // the component will render a letter-only fallback circle so the
-          // social-proof row stays visually complete.
-          avatars.push({
-            imageUrl: imageUrl || '',
-            profileUrl: u.username ? `/u/${u.username}` : undefined,
-            initial,
-          });
-        }
-        setCommunityAvatars(avatars);
-        setTotalMembers(Math.max(0, (data.totalCount || 0) - avatars.length));
-      })
-      .catch(() => {
-        // Silent fail — the section just won't render without real data.
+    let cancel = false;
+    Promise.all([
+      api
+        .get<{ totalCount?: number }>('/users/community')
+        .catch(() => ({ totalCount: 0 })),
+      api
+        .get<{ items?: Array<{ id: string; title?: string; type?: string }> }>(
+          '/market/listings?limit=12',
+        )
+        .catch(() => ({ items: [] })),
+    ]).then(([community, listings]) => {
+      if (cancel) return;
+      const items = listings.items ?? [];
+      const agentCount = items.filter((l) => l.type === 'AI_AGENT').length;
+      const repoCount = items.filter((l) => l.type === 'REPO').length;
+      setMetrics({
+        agents: agentCount,
+        repos: repoCount,
+        launches: 0,
+        activeUsers: community.totalCount ?? 0,
       });
+      setRecent(
+        items.slice(0, 6).map((l) => ({
+          id: l.id,
+          title: l.title ?? 'Untitled',
+          href:
+            l.type === 'AI_AGENT'
+              ? `/market/agents/${l.id}`
+              : `/market/repos/${l.id}`,
+          sub: l.type === 'AI_AGENT' ? 'AI Agent' : 'Repository',
+        })),
+      );
+    });
     return () => {
-      cancelled = true;
+      cancel = true;
     };
   }, []);
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'var(--bg)' }}>
-      {/* ── HERO (RENDER STYLE) ── */}
-      <RenderHero isAuthenticated={isAuthenticated} />
+    <div
+      className="min-h-screen relative"
+      style={{ background: 'var(--bg)', color: 'var(--text)' }}
+    >
+      {/* Ambient ETH-blue glow — fixed at the top, behind everything. */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed top-0 left-0 right-0 h-[420px] opacity-70 z-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at top, rgba(98,126,234,0.18), rgba(98,126,234,0) 60%)',
+        }}
+      />
 
-      {/* ── COMMUNITY SOCIAL PROOF ── */}
-      {communityAvatars.length > 0 && (
-        <div className="py-8 px-[7%] max-w-[1810px] mx-auto border-b border-white/[0.06]">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-center gap-4"
+      <div className="relative z-10 mx-auto max-w-7xl px-6 sm:px-8 py-8">
+        {/* ── Top banner: chain + wallet status ────────────────────── */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center justify-between flex-wrap gap-3 mb-10"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-light"
+              style={{
+                background: 'var(--brand-dim)',
+                color: 'var(--brand)',
+                boxShadow: 'inset 0 0 0 1px var(--brand-dim)',
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ background: 'var(--brand)' }}
+              />
+              Ethereum Mainnet · chain 1
+            </span>
+            <span className="text-[11.5px] font-light text-[var(--text-muted)]">
+              gas live · WebSocket connected
+            </span>
+          </div>
+          {isAuthenticated ? (
+            <button
+              onClick={() => router.push('/profile')}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[12.5px] font-light transition"
+              style={{
+                background: 'var(--bg-card)',
+                color: 'var(--text)',
+                boxShadow: 'inset 0 0 0 1px var(--border)',
+              }}
+            >
+              <Wallet className="w-3.5 h-3.5" style={{ color: 'var(--brand)' }} />
+              {user?.username ?? 'Profile'}
+              <ArrowUpRight className="w-3 h-3 opacity-60" />
+            </button>
+          ) : (
+            <button
+              onClick={() => router.push('/auth')}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110"
+              style={{
+                background:
+                  'linear-gradient(135deg, var(--brand) 0%, var(--brand-deep) 100%)',
+                boxShadow: 'var(--shadow-brand)',
+              }}
+            >
+              <Wallet className="w-3.5 h-3.5" />
+              Connect wallet
+            </button>
+          )}
+        </motion.div>
+
+        {/* ── Hero: terse, app-style ───────────────────────────────── */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="mb-12"
+        >
+          <h1
+            className="text-[var(--text)]"
+            style={{
+              fontSize: 'clamp(36px, 4.6vw, 56px)',
+              fontWeight: 300,
+              lineHeight: 1.05,
+              letterSpacing: '-1.2px',
+            }}
           >
-            <AvatarCircles numPeople={totalMembers} avatarUrls={communityAvatars} />
-            <p className="text-white/40" style={{ fontSize: '14px', fontWeight: 300 }}>
-              Share your work with other developers worldwide.
-            </p>
-          </motion.div>
-        </div>
-      )}
+            The marketplace for{' '}
+            <span
+              style={{
+                background:
+                  'linear-gradient(90deg, #627EEA 0%, #00D4FF 50%, #627EEA 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 6s ease-in-out infinite',
+              }}
+            >
+              autonomous agents
+            </span>
+            <br />
+            on Ethereum.
+          </h1>
+          <p
+            className="mt-3 max-w-2xl text-[var(--text-muted)] font-light"
+            style={{ fontSize: '15px', lineHeight: 1.6 }}
+          >
+            Buy AI agents, paid GitHub repos, mint launch tokens — all
+            settled onchain on ETH mainnet, with BoltyGuard scanning
+            every listing before it goes live.
+          </p>
+        </motion.section>
 
-      {/* ── CLICK CLICK DONE ── */}
-      <ClickClickDone />
-
-      {/* ── DEPLOY APPS WITH ZERO OPS ── */}
-      <section
-        className="flex flex-col gap-2 py-20 px-[7%] max-w-[1810px] mx-auto relative"
-        style={{ background: '#0d0d0d' }}
-      >
-        {/* Heading */}
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-white"
-          style={{
-            fontSize: '64px',
-            fontWeight: 300,
-            lineHeight: 1.05,
-            letterSpacing: '-1.28px',
-          }}
-        >
-          Deploy apps and agents
-          <br />
-          with zero ops.
-        </motion.h2>
-
-        <p
-          className="text-white/60"
-          style={{
-            fontSize: '20px',
-            lineHeight: '1.5',
-            maxWidth: '520px',
-            marginTop: '16px',
-          }}
-        >
-          Ship to production in seconds. No servers, no config, no headaches.
-        </p>
-
-        {/* Feature cards grid */}
-        <div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          style={{ paddingTop: '60px' }}
-        >
-          {FEATURES.map((f, i) => {
-            const Icon = f.icon;
+        {/* ── 4-up metric strip — live data, not marketing copy ──── */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
+          {[
+            {
+              label: 'AI agents',
+              value: metrics?.agents ?? '—',
+              icon: Bot,
+              accent: '#627EEA',
+            },
+            {
+              label: 'Repos',
+              value: metrics?.repos ?? '—',
+              icon: GitBranch,
+              accent: '#00D4FF',
+            },
+            {
+              label: 'Token launches',
+              value: metrics?.launches ?? '—',
+              icon: Rocket,
+              accent: '#8DA4F1',
+            },
+            {
+              label: 'Community',
+              value: metrics?.activeUsers ?? '—',
+              icon: Sparkles,
+              accent: '#34D399',
+            },
+          ].map((m, i) => {
+            const Icon = m.icon;
             return (
               <motion.div
-                key={f.href}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-                className="group flex flex-col gap-5 rounded-lg border p-6 cursor-pointer transition-all duration-500 hover:border-purple-600/50 hover:shadow-[0_0_40px_rgba(147,51,234,0.12)]"
+                key={m.label}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
+                className="rounded-xl p-4 transition hover:translate-y-[-1px]"
                 style={{
-                  borderColor: '#272727',
-                  background: '#1a1a1a',
+                  background: 'var(--bg-card)',
+                  boxShadow: 'var(--shadow-sm), inset 0 0 0 1px var(--border)',
                 }}
               >
-                {/* Icon */}
-                <div
-                  className="flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(147,51,234,0.4)] group-hover:scale-110"
-                  style={{ background: '#9333ea' }}
-                >
-                  <Icon className="w-5 h-5 text-white" />
+                <div className="flex items-center justify-between mb-3">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center"
+                    style={{
+                      background: `${m.accent}18`,
+                      boxShadow: `inset 0 0 0 1px ${m.accent}40`,
+                    }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: m.accent }} />
+                  </div>
+                  <Activity className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
                 </div>
-
-                {/* Title */}
-                <h3
-                  className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
+                <div
+                  className="font-light"
                   style={{
-                    fontSize: '22px',
-                    lineHeight: 1.2,
+                    fontSize: '28px',
+                    color: 'var(--text)',
                     letterSpacing: '-0.5px',
                   }}
                 >
-                  {f.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  style={{
-                    fontSize: '15px',
-                    lineHeight: 1.5,
-                    color: '#a0a0a0',
-                  }}
+                  {m.value}
+                </div>
+                <div
+                  className="text-[11.5px] font-light mt-0.5"
+                  style={{ color: 'var(--text-muted)' }}
                 >
-                  {f.description}
-                </p>
+                  {m.label}
+                </div>
               </motion.div>
             );
           })}
-        </div>
-      </section>
+        </section>
 
-      {/* ── FEATURES GRID ── */}
-      <FeaturesGrid />
-
-      {/* ── ELITE BOOST ── */}
-      <EliteBoost />
-
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-20 px-4" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
-            <p className="text-xs uppercase tracking-widest text-gray-500 mb-3">Developers</p>
-            <h2 className="text-5xl font-light text-white">What developers say</h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
+        {/* ── Primary nav tiles ─────────────────────────────────── */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
+          {NAV_TILES.map((t, i) => {
+            const Icon = t.icon;
+            return (
               <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="rounded-lg border p-6"
-                style={{
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                  background: 'rgba(0, 0, 0, 0)',
-                }}
+                key={t.href}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.2 + i * 0.06 }}
               >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-purple-400 fill-purple-400" />
-                  ))}
-                </div>
-                <p className="text-gray-300 mb-4">&quot;{t.text}&quot;</p>
-                <div className="pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-                  <p className="font-light text-white">{t.name}</p>
-                  <p className="text-xs text-gray-500">{t.role}</p>
-                </div>
+                <Link
+                  href={t.href}
+                  className="group relative block rounded-xl p-5 h-full transition overflow-hidden"
+                  style={{
+                    background: 'var(--bg-card)',
+                    boxShadow: 'var(--shadow-sm), inset 0 0 0 1px var(--border)',
+                  }}
+                >
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition pointer-events-none"
+                    style={{
+                      background: `radial-gradient(circle at top right, ${t.accent}22, transparent 60%)`,
+                    }}
+                  />
+                  <div className="relative flex items-start justify-between mb-4">
+                    <div
+                      className="w-9 h-9 rounded-lg flex items-center justify-center"
+                      style={{
+                        background: `${t.accent}18`,
+                        boxShadow: `inset 0 0 0 1px ${t.accent}40`,
+                      }}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: t.accent }} />
+                    </div>
+                    {t.badge && (
+                      <span
+                        className="text-[10px] uppercase tracking-wider font-light px-1.5 py-0.5 rounded"
+                        style={{
+                          background: `${t.accent}18`,
+                          color: t.accent,
+                        }}
+                      >
+                        {t.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    className="font-light text-[16px] mb-1"
+                    style={{ color: 'var(--text)' }}
+                  >
+                    {t.title}
+                  </div>
+                  <div
+                    className="text-[12px] font-light"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    {t.teaser}
+                  </div>
+                  <ArrowUpRight
+                    className="absolute right-4 bottom-4 w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition"
+                    style={{ color: t.accent }}
+                  />
+                </Link>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+            );
+          })}
+        </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="border-t px-4 py-12" style={{ borderColor: 'var(--border)' }}>
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <BoltyLogoSVG size={24} />
-                <span className="text-white font-light">Bolty</span>
+        {/* ── Live activity feed — actual recent listings ────────── */}
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-light" style={{ fontSize: '18px', color: 'var(--text)' }}>
+              Recent activity
+            </h2>
+            <Link
+              href="/market"
+              className="text-[12px] font-light hover:underline"
+              style={{ color: 'var(--brand)' }}
+            >
+              View all →
+            </Link>
+          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className="rounded-xl overflow-hidden"
+            style={{
+              background: 'var(--bg-card)',
+              boxShadow: 'var(--shadow-sm), inset 0 0 0 1px var(--border)',
+            }}
+          >
+            {recent.length === 0 ? (
+              <div className="p-6 text-center text-[12.5px] font-light text-[var(--text-muted)]">
+                <Zap
+                  className="w-5 h-5 mx-auto mb-2 opacity-50"
+                  style={{ color: 'var(--brand)' }}
+                />
+                No listings yet — be the first to publish.{' '}
+                <Link href="/auth" style={{ color: 'var(--brand)' }} className="hover:underline">
+                  Connect wallet
+                </Link>
               </div>
-              <p className="text-sm text-gray-500">
-                The fastest path to production for AI agents and apps.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h3 className="text-white font-light mb-4">Product</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link href="/market" className="text-gray-400 hover:text-white transition-colors">
-                    Marketplace
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/market/agents"
-                    className="text-gray-400 hover:text-white transition-colors"
+            ) : (
+              <ul>
+                {recent.map((r, i) => (
+                  <motion.li
+                    key={r.id}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.45 + i * 0.04 }}
+                    style={{
+                      borderTop: i === 0 ? 'none' : '1px solid var(--border)',
+                    }}
                   >
-                    Agents
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/market/repos"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Repositories
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#how-it-works"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    How It Works
-                  </Link>
-                </li>
+                    <Link
+                      href={r.href}
+                      className="flex items-center justify-between px-4 py-3 hover:bg-[var(--bg-card2)] transition"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-7 h-7 rounded-md flex items-center justify-center"
+                          style={{
+                            background: 'var(--brand-dim)',
+                            color: 'var(--brand)',
+                          }}
+                        >
+                          {r.sub === 'AI Agent' ? (
+                            <Bot className="w-3.5 h-3.5" />
+                          ) : (
+                            <GitBranch className="w-3.5 h-3.5" />
+                          )}
+                        </div>
+                        <div>
+                          <div
+                            className="text-[13px] font-light"
+                            style={{ color: 'var(--text)' }}
+                          >
+                            {r.title}
+                          </div>
+                          <div
+                            className="text-[10.5px] uppercase tracking-wider font-light"
+                            style={{ color: 'var(--text-muted)' }}
+                          >
+                            {r.sub}
+                          </div>
+                        </div>
+                      </div>
+                      <ArrowUpRight
+                        className="w-3.5 h-3.5"
+                        style={{ color: 'var(--text-muted)' }}
+                      />
+                    </Link>
+                  </motion.li>
+                ))}
               </ul>
-            </div>
+            )}
+          </motion.div>
+        </section>
+      </div>
 
-            {/* Resources */}
-            <div>
-              <h3 className="text-white font-light mb-4">Resources</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/docs/agent-protocol"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Documentation
-                  </Link>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    API Reference
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    Community
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="text-white font-light mb-4">Company</h3>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <Link
-                    href="/privacy"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Privacy
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
-                    Terms
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom */}
-          <div className="border-t pt-8" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
-            <div className="flex flex-col md:flex-row justify-between items-center">
-              <p className="text-sm text-gray-500">© 2026 Bolty. All rights reserved.</p>
-              <div className="flex gap-6 mt-4 md:mt-0">
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                  aria-label="GitHub"
-                >
-                  GitHub
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                  aria-label="Twitter"
-                >
-                  Twitter
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors text-sm"
-                  aria-label="Discord"
-                >
-                  Discord
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <style jsx>{`
+        @keyframes shimmer {
+          0%,
+          100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -22,18 +22,6 @@ import { SkipCsrf } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 import { AuthService } from './auth.service';
-import {
-  RegisterEmailDto,
-  LoginEmailDto,
-  Verify2FADto,
-  RequestEmailChangeDto,
-  ConfirmEmailChangeDto,
-  DeleteAccountDto,
-  Toggle2FADto,
-  ForgotPasswordDto,
-  ResetPasswordDto,
-  Enable2FADto,
-} from './dto/email-auth.dto';
 import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
 import { WalletAuthService } from './wallet-auth.service';
 
@@ -48,6 +36,22 @@ const COOKIE_OPTIONS = {
 const ACCESS_TOKEN_MAX_AGE = 15 * 60 * 1000; // 15 minutes — matches JWT_EXPIRES_IN
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+/**
+ * Auth controller — wallet-only since the ETH-mainnet pivot.
+ *
+ * Email / password / 2FA / password-reset / email-change / delete-account
+ * endpoints were removed because Bolty no longer authenticates with
+ * an email address. Identity is established by signing a nonce with
+ * an Ethereum wallet (MetaMask injected, browser-injected EVM wallet,
+ * or WalletConnect for mobile). The corresponding service methods on
+ * AuthService remain in the file as orphaned dead code — they'll be
+ * pruned in a follow-up so this PR stays scoped to "remove the
+ * surface area".
+ *
+ * GitHub OAuth stays because some agents need a `gh_token` cookie
+ * to clone private repos for their sandbox bundles — that's a
+ * pure linking flow, not a primary login.
+ */
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -55,187 +59,6 @@ export class AuthController {
     private readonly walletAuthService: WalletAuthService,
     private readonly config: ConfigService,
   ) {}
-
-  // ── Email / Password Auth ─────────────────────────────────────────────────
-
-  @Public()
-  @SkipCsrf()
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.CREATED)
-  @Post('register')
-  async register(@Body() dto: RegisterEmailDto, @Res() res: Response) {
-    const tokens = await this.authService.registerWithEmail({
-      email: dto.email,
-      username: dto.username,
-      password: dto.password,
-      gender: dto.gender,
-      occupation: dto.occupation,
-    });
-
-    res.cookie('access_token', tokens.accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    });
-    res.cookie('refresh_token', tokens.refreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: REFRESH_TOKEN_MAX_AGE,
-    });
-
-    return res.status(HttpStatus.CREATED).json({ success: true });
-  }
-
-  @Public()
-  @SkipCsrf()
-  @Throttle({ default: { limit: 10, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('login/email')
-  async loginEmail(@Body() dto: LoginEmailDto, @Res() res: Response) {
-    const result = await this.authService.loginWithEmail({
-      identifier: dto.identifier,
-      password: dto.password,
-    });
-
-    if ('twoFactorRequired' in result) {
-      return res.json({ twoFactorRequired: true, tempToken: result.tempToken });
-    }
-
-    res.cookie('access_token', result.accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    });
-    res.cookie('refresh_token', result.refreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: REFRESH_TOKEN_MAX_AGE,
-    });
-
-    return res.json({ success: true });
-  }
-
-  @Public()
-  @SkipCsrf()
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/verify')
-  async verify2FA(@Body() dto: Verify2FADto, @Res() res: Response) {
-    const tokens = await this.authService.verifyLogin2FA(dto.tempToken, dto.code);
-
-    res.cookie('access_token', tokens.accessToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: ACCESS_TOKEN_MAX_AGE,
-    });
-    res.cookie('refresh_token', tokens.refreshToken, {
-      ...COOKIE_OPTIONS,
-      maxAge: REFRESH_TOKEN_MAX_AGE,
-    });
-
-    return res.json({ success: true });
-  }
-
-  // ── Password Reset ────────────────────────────────────────────────────────
-
-  @Public()
-  @SkipCsrf()
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('password/forgot')
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    await this.authService.requestPasswordReset(dto.identifier);
-    // Always return success to avoid account enumeration
-    return { success: true };
-  }
-
-  @Public()
-  @SkipCsrf()
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('password/reset')
-  async resetPassword(@Body() dto: ResetPasswordDto) {
-    await this.authService.resetPassword(dto.token, dto.newPassword);
-    return { success: true };
-  }
-
-  // ── 2FA Management ────────────────────────────────────────────────────────
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/enable/request')
-  async request2FAEnable(@CurrentUser('id') userId: string) {
-    const { qrCode, secret } = await this.authService.request2FAEnable(userId);
-    return { success: true, qrCode, secret, message: 'Scan QR code with your authenticator app' };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/enable')
-  async enable2FA(@CurrentUser('id') userId: string, @Body() dto: Enable2FADto) {
-    await this.authService.enable2FA(userId, dto.code);
-    return { success: true };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('2fa/disable')
-  async disable2FA(@CurrentUser('id') userId: string, @Body() dto: Toggle2FADto) {
-    await this.authService.disable2FA(userId, dto.password || '');
-    return { success: true };
-  }
-
-  // ── Email Change ──────────────────────────────────────────────────────────
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('email/change-request')
-  async requestEmailChange(@CurrentUser('id') userId: string, @Body() dto: RequestEmailChangeDto) {
-    await this.authService.requestEmailChange(
-      userId,
-      dto.newEmail,
-      dto.password,
-      dto.twoFactorCode,
-    );
-    return { success: true };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('email/confirm')
-  async confirmEmailChange(@CurrentUser('id') userId: string, @Body() dto: ConfirmEmailChangeDto) {
-    await this.authService.confirmEmailChange(userId, dto.code);
-    return { success: true };
-  }
-
-  // ── Delete Account ────────────────────────────────────────────────────────
-
-  @UseGuards(JwtAuthGuard)
-  @Throttle({ default: { limit: 3, ttl: 60000 } })
-  @HttpCode(HttpStatus.OK)
-  @Post('account/delete-request')
-  async requestDeleteAccount(
-    @CurrentUser('id') userId: string,
-    @Body() body: { twoFactorCode?: string } = {},
-  ) {
-    await this.authService.requestDeleteAccount(userId, body.twoFactorCode);
-    return { success: true };
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  @Delete('account')
-  async deleteAccount(
-    @CurrentUser('id') userId: string,
-    @Body() dto: DeleteAccountDto,
-    @Res() res: Response,
-  ) {
-    await this.authService.deleteAccount(userId, dto.code);
-    res.clearCookie('access_token', COOKIE_OPTIONS);
-    res.clearCookie('refresh_token', COOKIE_OPTIONS);
-    res.clearCookie('gh_token', COOKIE_OPTIONS);
-    return res.json({ success: true });
-  }
 
   // ── GitHub OAuth ──────────────────────────────────────────────────────────
 
@@ -323,7 +146,7 @@ export class AuthController {
     return { success: true };
   }
 
-  // ── Wallet Linking (authenticated user links MetaMask) ────────────────────
+  // ── Wallet Linking (authenticated user adds an additional wallet) ────────
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -369,7 +192,7 @@ export class AuthController {
     return { success: true };
   }
 
-  // ── MetaMask ──────────────────────────────────────────────────────────────
+  // ── Wallet Auth (the only sign-in path now) ──────────────────────────────
 
   @Public()
   @SkipCsrf()

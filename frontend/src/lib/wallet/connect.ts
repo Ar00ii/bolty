@@ -84,19 +84,23 @@ export async function connectWallet(provider: Eip1193Provider): Promise<Connecte
   return { address, chainId };
 }
 
-export async function switchToBase(provider: Eip1193Provider): Promise<boolean> {
-  const baseChainId = 8453;
-  const hexChainId = '0x' + baseChainId.toString(16);
+/**
+ * Switch the connected wallet to Ethereum mainnet (chain 1). Renamed
+ * from `switchToBase` as part of the Base → ETH mainnet migration —
+ * Bolty no longer uses Base for any onchain settlement.
+ */
+export async function switchToEthereum(provider: Eip1193Provider): Promise<boolean> {
+  const ethChainId = 1;
+  const hexChainId = '0x' + ethChainId.toString(16);
 
   try {
-    // Try to switch to Base
     await provider.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: hexChainId }],
     });
     return true;
   } catch (err) {
-    // Chain not added, try to add it
+    // Chain not added (extremely rare for ETH mainnet but handle it).
     const error = err as { code?: number };
     if (error?.code === 4902) {
       try {
@@ -105,25 +109,33 @@ export async function switchToBase(provider: Eip1193Provider): Promise<boolean> 
           params: [
             {
               chainId: hexChainId,
-              chainName: 'Base',
+              chainName: 'Ethereum',
               nativeCurrency: {
                 name: 'Ether',
                 symbol: 'ETH',
                 decimals: 18,
               },
-              rpcUrls: ['https://mainnet.base.org'],
-              blockExplorerUrls: ['https://basescan.org'],
+              rpcUrls: [
+                process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://eth.llamarpc.com',
+                'https://ethereum.publicnode.com',
+                'https://rpc.ankr.com/eth',
+              ],
+              blockExplorerUrls: ['https://etherscan.io'],
             },
           ],
         });
         return true;
       } catch (addErr) {
-        throw new Error('Failed to add Base network to wallet');
+        throw new Error('Failed to add Ethereum mainnet to wallet');
       }
     }
-    throw new Error('Failed to switch to Base network');
+    throw new Error('Failed to switch to Ethereum mainnet');
   }
 }
+
+/** @deprecated Kept as a thin alias only so call-sites that still
+ *  reference `switchToBase` keep compiling during the rename. */
+export const switchToBase = switchToEthereum;
 
 interface TransactionRequest {
   to: string;

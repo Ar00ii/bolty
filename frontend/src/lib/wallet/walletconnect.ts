@@ -35,14 +35,17 @@ async function loadProvider(): Promise<IEthereumProvider> {
   const mod = await import('@walletconnect/ethereum-provider');
   const provider = await mod.EthereumProvider.init({
     projectId,
-    // Base mainnet (primary chain for Bolty payments).
-    chains: [8453],
-    optionalChains: [1, 10, 137, 42161],
+    // Ethereum mainnet — Bolty's only settlement chain after the
+    // Base → ETH migration. Optional L2s kept so a user can sign
+    // from a wallet that's currently on Arbitrum/Optimism without
+    // an extra prompt.
+    chains: [1],
+    optionalChains: [10, 137, 42161, 8453],
     showQrModal: true,
     metadata: {
       name: 'Bolty',
-      description: 'Bolty — AI agent + repo marketplace on Base.',
-      url: typeof window !== 'undefined' ? window.location.origin : 'https://bolty.app',
+      description: 'Bolty — AI agent + repo marketplace on Ethereum.',
+      url: typeof window !== 'undefined' ? window.location.origin : 'https://boltynetwork.xyz',
       icons: ['/icon.png'],
     },
   });
