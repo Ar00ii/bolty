@@ -209,21 +209,32 @@ function SetupXContent() {
           <Field label="Client ID">
             <input
               value={clientId}
-              onChange={(e) => setClientId(e.target.value.slice(0, 200))}
-              placeholder="OAuth 2.0 Client ID from your X app"
-              className="input-std"
+              onChange={(e) => setClientId(e.target.value.trim().slice(0, 200))}
+              placeholder="OAuth 2.0 Client ID — looks like dXNlckJsYWg6MTpjaQ"
+              className="input-std font-mono"
               autoComplete="off"
+              spellCheck={false}
             />
+            <p className="mt-1 text-[10.5px] text-zinc-500 font-light leading-relaxed">
+              Find it at developer.x.com → your App → Keys and Tokens →{' '}
+              <strong>OAuth 2.0 Client ID and Client Secret</strong>. NOT your X
+              username, NOT the API Key (those are different fields).
+            </p>
           </Field>
           <Field label="Client Secret">
             <input
               type="password"
               value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value.slice(0, 200))}
+              onChange={(e) => setClientSecret(e.target.value.trim().slice(0, 200))}
               placeholder={status?.configured ? '•••• (already saved — paste to rotate)' : 'OAuth 2.0 Client Secret'}
-              className="input-std"
+              className="input-std font-mono"
               autoComplete="off"
+              spellCheck={false}
             />
+            <p className="mt-1 text-[10.5px] text-zinc-500 font-light">
+              Same screen as the Client ID. X only shows the Secret once when
+              you generate it — if you lost it, regenerate it on developer.x.com.
+            </p>
           </Field>
         </div>
         <div className="mt-3 flex items-center gap-2">

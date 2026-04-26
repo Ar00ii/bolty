@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowUpRight,
+  Bot,
   ChevronDown,
   ExternalLink,
   Info,
@@ -249,22 +250,36 @@ function LaunchpadPageContent() {
         {/* Launch CTA + filters bar */}
         <div className="min-w-0 space-y-6">
           {FLAUNCH_LAUNCHPAD_ENABLED && (
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-end gap-2 flex-wrap">
               {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={() => setLaunchOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
-                  style={{
-                    background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-                    boxShadow:
-                      '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
-                  }}
-                >
-                  <Rocket className="w-3 h-3" />
-                  Launch yours
-                </button>
+                <>
+                  <Link
+                    href="/market/agents/publish"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                    title="Publish an AI agent + connect its own X account, then launch from there"
+                  >
+                    <Bot className="w-3 h-3" />
+                    Launch with AI agent
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setLaunchOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
+                    style={{
+                      background:
+                        'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                      boxShadow:
+                        '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                    }}
+                  >
+                    <Rocket className="w-3 h-3" />
+                    Launch yours
+                  </button>
+                </>
               ) : (
                 <Link
                   href="/auth"
