@@ -43,7 +43,7 @@ import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { platformWeiForSeller } from '@/lib/payments/fees';
 import {
   encodeErc20Transfer,
-  getBoltyTokenConfig,
+  loadBoltyTokenConfig,
   usdToTokenUnits,
 } from '@/lib/wallet/bolty-token';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
@@ -1388,7 +1388,7 @@ function ReposMarketPageContent() {
         sellerWallet,
         buyerAddress,
         baseUsd: repo.lockedPriceUsd,
-        boltyDisabled: !getBoltyTokenConfig(),
+        boltyDisabled: !(await loadBoltyTokenConfig()),
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
@@ -1411,7 +1411,7 @@ function ReposMarketPageContent() {
     }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
 
-    const boltyCfg = method === 'BOLTY' ? getBoltyTokenConfig() : null;
+    const boltyCfg = method === 'BOLTY' ? await loadBoltyTokenConfig() : null;
     if (method === 'BOLTY' && !boltyCfg) {
       setError('BOLTY payments are not enabled — please retry with ETH');
       return;

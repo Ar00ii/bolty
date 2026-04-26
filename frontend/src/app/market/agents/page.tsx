@@ -60,7 +60,7 @@ import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
 import { platformWeiForSeller, grossWeiForSeller } from '@/lib/payments/fees';
 import {
   encodeErc20Transfer,
-  getBoltyTokenConfig,
+  loadBoltyTokenConfig,
   usdToTokenUnits,
 } from '@/lib/wallet/bolty-token';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
@@ -1414,7 +1414,7 @@ function AgentsPageContent() {
         buyerAddress,
         baseEth: listing.price,
         baseUsd: listing.price * ethPrice,
-        boltyDisabled: !getBoltyTokenConfig(),
+        boltyDisabled: !(await loadBoltyTokenConfig()),
       });
     } catch (err: unknown) {
       const msg = (err as Error)?.message || String(err);
@@ -1435,7 +1435,7 @@ function AgentsPageContent() {
     const ethereum = getMetaMaskProvider();
     if (!ethereum) { setBuyError('MetaMask not found'); return; }
 
-    const boltyCfg = paymentMethod === 'BOLTY' ? getBoltyTokenConfig() : null;
+    const boltyCfg = paymentMethod === 'BOLTY' ? await loadBoltyTokenConfig() : null;
     if (paymentMethod === 'BOLTY' && !boltyCfg) {
       setBuyError('BOLTY payments are not enabled — please retry with ETH');
       return;

@@ -2,6 +2,8 @@
 
 import { Interface, parseUnits } from 'ethers';
 
+import { api } from '@/lib/api/client';
+
 // Minimal ERC-20 Transfer ABI fragment — just enough to encode the
 // single call we need from the repo / listing purchase flow.
 const ERC20_TRANSFER_IFACE = new Interface([
@@ -18,9 +20,13 @@ export interface BoltyTokenConfig {
 }
 
 /**
- * Read BOLTY token config from NEXT_PUBLIC_* env vars. Returns null when
- * the token isn't launched yet — callers should fall back to ETH in
- * that case. Safe to call on the server (env is inlined by Next).
+ * Synchronous fast-path: read BOLTY token config from NEXT_PUBLIC_*
+ * env vars. Returns null when any var is missing or malformed —
+ * callers should fall back to {@link loadBoltyTokenConfig}, which
+ * additionally fetches the backend's live config when env is not set.
+ *
+ * Kept for any caller that runs before async work is OK (none exist
+ * today, but the export stays as a stable API).
  */
 export function getBoltyTokenConfig(): BoltyTokenConfig | null {
   const address = process.env.NEXT_PUBLIC_BOLTY_TOKEN_CONTRACT;
@@ -35,6 +41,69 @@ export function getBoltyTokenConfig(): BoltyTokenConfig | null {
     usdPrice,
     decimals: Number.isFinite(decimals) && decimals > 0 ? decimals : 18,
   };
+}
+
+// ─── Async loader with backend fallback ─────────────────────────────────
+//
+// When the NEXT_PUBLIC_* env vars aren't set on the deploy (the
+// common case — we'd rather single-source the contract on Render),
+// fetch the live config from the backend's /token/bolty endpoint.
+// That endpoint already returns the deployed contract address and
+// the live DexScreener priceUsd, both of which we need to quote
+// purchases in BOLTY units.
+//
+// Module-scoped promise cache keeps us to a single round-trip for
+// the lifetime of the page, even if multiple callsites await
+// concurrently (modal opens fire 1–2 calls per purchase flow).
+
+interface BoltyStatsResponse {
+  contract?: string | null;
+  priceUsd?: number | null;
+}
+
+const REMOTE_TTL_MS = 60_000;
+let remoteCache: { value: BoltyTokenConfig | null; at: number } | null = null;
+let inflight: Promise<BoltyTokenConfig | null> | null = null;
+
+async function fetchRemoteConfig(): Promise<BoltyTokenConfig | null> {
+  try {
+    const stats = await api.get<BoltyStatsResponse>('/token/bolty');
+    const address = stats?.contract ?? null;
+    const priceUsd = typeof stats?.priceUsd === 'number' ? stats.priceUsd : null;
+    if (!address || !/^0x[0-9a-fA-F]{40}$/.test(address)) return null;
+    if (!priceUsd || !(priceUsd > 0)) return null;
+    return { address, usdPrice: priceUsd, decimals: 18 };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Resolve the BOLTY token config. Order of precedence:
+ *   1. NEXT_PUBLIC_* env vars (sync, no network)
+ *   2. Backend /token/bolty endpoint (cached for 60s in-process)
+ *
+ * Returns null when neither source has a valid contract + price —
+ * callers must hide the BOLTY payment option in that case so the
+ * user only sees ETH.
+ */
+export async function loadBoltyTokenConfig(): Promise<BoltyTokenConfig | null> {
+  const fromEnv = getBoltyTokenConfig();
+  if (fromEnv) return fromEnv;
+
+  const cached = remoteCache;
+  if (cached && Date.now() - cached.at < REMOTE_TTL_MS) {
+    return cached.value;
+  }
+
+  if (inflight) return inflight;
+
+  inflight = fetchRemoteConfig().then((value) => {
+    remoteCache = { value, at: Date.now() };
+    inflight = null;
+    return value;
+  });
+  return inflight;
 }
 
 /**
