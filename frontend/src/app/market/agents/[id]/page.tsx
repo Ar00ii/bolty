@@ -38,7 +38,10 @@ import {
 import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { AgentPickerModal } from '@/components/negotiation/AgentPickerModal';
 import { Markdown } from '@/components/ui/Markdown';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import {
+  PaymentConsentModal,
+  type PaymentMethod,
+} from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError } from '@/lib/api/client';
@@ -47,6 +50,12 @@ import { useFavorites } from '@/lib/hooks/useFavorites';
 import { useRecentlyViewed } from '@/lib/hooks/useRecentlyViewed';
 import { useToast } from '@/lib/hooks/useToast';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
+import { platformWeiForSeller, grossWeiForSeller } from '@/lib/payments/fees';
+import {
+  encodeErc20Transfer,
+  getBoltyTokenConfig,
+  usdToTokenUnits,
+} from '@/lib/wallet/bolty-token';
 import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
@@ -265,8 +274,12 @@ export default function AgentDetailPage() {
     !agentHealth.healthy;
   const { pickWallet, pickerElement: buyWalletPicker } = useWalletPicker();
   const [buyConsentData, setBuyConsentData] = useState<{
-    sellerWallet: string; buyerAddress: string; sellerWei: bigint;
-    platformWei: bigint; totalWei: bigint; amountWei: string; totalUsd: number;
+    sellerWallet: string;
+    buyerAddress: string;
+    /** Seller's net amount in ETH (the listing price). Wei is computed at sign time. */
+    baseEth: number;
+    baseUsd: number;
+    boltyDisabled: boolean;
   } | null>(null);
   const [buyPaying, setBuyPaying] = useState(false);
   const [buyError, setBuyError] = useState('');
@@ -367,11 +380,14 @@ export default function AgentDetailPage() {
       if (!sellerWallet) { setBuyError('Seller has no wallet linked'); return; }
       let ethPrice = 2000;
       try { const p = await api.get<{ price?: number }>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch { /* fallback */ }
-      const totalWei = BigInt(Math.ceil(listing.price * 1e18));
-      const sellerWei = (totalWei * BigInt(930)) / BigInt(1000);
-      const platformWei = totalWei - sellerWei;
       const buyerAddress = await pickWallet();
-      setBuyConsentData({ sellerWallet, buyerAddress, sellerWei, platformWei, totalWei, amountWei: totalWei.toString(), totalUsd: listing.price * ethPrice });
+      setBuyConsentData({
+        sellerWallet,
+        buyerAddress,
+        baseEth: listing.price,
+        baseUsd: listing.price * ethPrice,
+        boltyDisabled: !getBoltyTokenConfig(),
+      });
     } catch (err: unknown) {
       const msg = (err as Error)?.message || String(err);
       setBuyError(msg.includes('rejected') ? 'Payment cancelled' : 'Failed: ' + msg.slice(0, 80));
@@ -380,28 +396,94 @@ export default function AgentDetailPage() {
     }
   };
 
-  const executeBuy = async (signature: string, consentMessage: string, paymentMethod: 'ETH' | 'BOLTY' = 'ETH') => {
+  const executeBuy = async (
+    signature: string,
+    consentMessage: string,
+    paymentMethod: PaymentMethod,
+  ) => {
     if (!buyConsentData || !listing) return;
-    const { sellerWallet, buyerAddress, totalWei, amountWei } = buyConsentData;
-    const feeBps = paymentMethod === 'BOLTY' ? 300 : 700;
-    const platformWei = (totalWei * BigInt(feeBps)) / BigInt(10000);
-    const sellerWei = totalWei - platformWei;
+    const { sellerWallet, buyerAddress, baseEth, baseUsd } = buyConsentData;
     setBuyConsentData(null);
     const ethereum = getMetaMaskProvider();
     if (!ethereum) { setBuyError('MetaMask not found'); return; }
+
+    const boltyCfg = paymentMethod === 'BOLTY' ? getBoltyTokenConfig() : null;
+    if (paymentMethod === 'BOLTY' && !boltyCfg) {
+      setBuyError('BOLTY payments are not enabled — please retry with ETH');
+      return;
+    }
+
+    let sellerWei: bigint;
+    let platformWei: bigint;
+    let totalWei: bigint;
+    try {
+      if (boltyCfg) {
+        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
+      } else {
+        sellerWei = BigInt(Math.ceil(baseEth * 1e18));
+      }
+      platformWei = platformWeiForSeller(sellerWei, paymentMethod);
+      totalWei = grossWeiForSeller(sellerWei, paymentMethod);
+    } catch (err) {
+      setBuyError(err instanceof Error ? err.message : 'Could not compute price');
+      return;
+    }
+
     try {
       if (isEscrowEnabled()) {
         const orderId = crypto.randomUUID();
         const txHash = await escrowDeposit(orderId, sellerWallet, totalWei);
-        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, consentSignature: signature, consentMessage, escrowContract: getEscrowAddress() });
+        await api.post(`/market/${listing.id}/purchase`, {
+          txHash,
+          amountWei: totalWei.toString(),
+          consentSignature: signature,
+          consentMessage,
+          escrowContract: getEscrowAddress(),
+        });
       } else {
         const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-        const txHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }] })) as string;
+        const txHash = boltyCfg
+          ? ((await ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [
+                {
+                  from: buyerAddress,
+                  to: boltyCfg.address,
+                  data: encodeErc20Transfer(sellerWallet, sellerWei),
+                  value: '0x0',
+                },
+              ],
+            })) as string)
+          : ((await ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
+            })) as string);
         let platformFeeTxHash: string | undefined;
         if (platformWallet) {
-          platformFeeTxHash = (await ethereum.request({ method: 'eth_sendTransaction', params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }] })) as string;
+          platformFeeTxHash = boltyCfg
+            ? ((await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [
+                  {
+                    from: buyerAddress,
+                    to: boltyCfg.address,
+                    data: encodeErc20Transfer(platformWallet, platformWei),
+                    value: '0x0',
+                  },
+                ],
+              })) as string)
+            : ((await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }],
+              })) as string);
         }
-        await api.post(`/market/${listing.id}/purchase`, { txHash, amountWei, platformFeeTxHash, consentSignature: signature, consentMessage });
+        await api.post(`/market/${listing.id}/purchase`, {
+          txHash,
+          amountWei: sellerWei.toString(),
+          platformFeeTxHash,
+          consentSignature: signature,
+          consentMessage,
+        });
       }
       setBuySuccess(true);
     } catch (err: unknown) {
@@ -879,11 +961,9 @@ export default function AgentDetailPage() {
         <PaymentConsentModal
           listingTitle={listing.title}
           sellerAddress={buyConsentData.sellerWallet}
-          sellerAmountETH={(Number(buyConsentData.sellerWei) / 1e18).toFixed(6)}
-          platformFeeETH={(Number(buyConsentData.platformWei) / 1e18).toFixed(6)}
-          totalETH={(Number(buyConsentData.totalWei) / 1e18).toFixed(6)}
-          totalUsd={buyConsentData.totalUsd.toFixed(2)}
+          baseUsd={buyConsentData.baseUsd}
           buyerAddress={buyConsentData.buyerAddress}
+          boltyDisabled={buyConsentData.boltyDisabled}
           onConsent={executeBuy}
           onCancel={() => { setBuyConsentData(null); }}
         />

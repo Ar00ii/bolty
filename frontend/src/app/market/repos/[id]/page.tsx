@@ -25,12 +25,16 @@ import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import {
+  PaymentConsentModal,
+  type PaymentMethod,
+} from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavoriteRepos } from '@/lib/hooks/useFavorites';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
+import { platformWeiForSeller } from '@/lib/payments/fees';
 import {
   encodeErc20Transfer,
   getBoltyTokenConfig,
@@ -87,10 +91,10 @@ interface Collaborator {
 interface ConsentState {
   sellerWallet: string;
   buyerAddress: string;
-  sellerWei: bigint;
-  platformWei: bigint;
-  totalWei: bigint;
-  totalUsd: number;
+  /** USD the seller takes home (= listing price). Wei is computed at sign time. */
+  baseUsd: number;
+  /** Whether the BOLTY option should be hidden in the modal. */
+  boltyDisabled: boolean;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -155,7 +159,6 @@ export default function RepoDetailPage() {
   const [recoverTx, setRecoverTx] = useState('');
   const [recoverBusy, setRecoverBusy] = useState(false);
   const [recoverMsg, setRecoverMsg] = useState<string | null>(null);
-  const [payCurrency, setPayCurrency] = useState<'ETH' | 'BOLTY'>('ETH');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -220,56 +223,13 @@ export default function RepoDetailPage() {
       setError('MetaMask not found');
       return;
     }
-
-    // ── BOLTY path ───────────────────────────────────────────────────────
-    // If the buyer picked BOLTY and the token is live (env var set), we
-    // quote in BOLTY units using the configured USD rate. The backend's
-    // auto-detect picks up the ERC-20 Transfer log and applies the 3%
-    // platform fee. Quotes are shown in BOLTY but consent still displays
-    // the USD price so the buyer knows what they're paying.
-    const boltyCfg = payCurrency === 'BOLTY' ? getBoltyTokenConfig() : null;
-    if (payCurrency === 'BOLTY' && !boltyCfg) {
-      setError('BOLTY payments are not enabled yet — please pay with ETH');
-      return;
-    }
-
-    let sellerWei: bigint;
-    let platformWei: bigint;
-    let totalWei: bigint;
-    try {
-      if (boltyCfg) {
-        // 3% platform / 97% seller split for BOLTY.
-        totalWei = usdToTokenUnits(repo.lockedPriceUsd, boltyCfg);
-        sellerWei = (totalWei * BigInt(970)) / BigInt(1000);
-        platformWei = totalWei - sellerWei;
-      } else {
-        let ethPrice = 2000;
-        try {
-          const p = await api.get<{ price?: number }>('/chart/eth-price');
-          if (p.price) ethPrice = p.price;
-        } catch {
-          /* use fallback */
-        }
-        totalWei = BigInt(Math.ceil((repo.lockedPriceUsd / ethPrice) * 1e18));
-        // 7% platform / 93% seller for ETH; frontend historically sent
-        // 97.5/2.5, the backend's 5% slippage window absorbs the delta.
-        sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
-        platformWei = totalWei - sellerWei;
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not compute price');
-      return;
-    }
-
     try {
       const buyerAddress = await pickWallet();
       setConsent({
         sellerWallet,
         buyerAddress,
-        sellerWei,
-        platformWei,
-        totalWei,
-        totalUsd: repo.lockedPriceUsd,
+        baseUsd: repo.lockedPriceUsd,
+        boltyDisabled: !getBoltyTokenConfig(),
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
@@ -277,9 +237,13 @@ export default function RepoDetailPage() {
     }
   };
 
-  const executePurchase = async (signature: string, message: string) => {
+  const executePurchase = async (
+    signature: string,
+    message: string,
+    method: PaymentMethod,
+  ) => {
     if (!consent || !repo) return;
-    const { sellerWallet, buyerAddress, sellerWei, platformWei } = consent;
+    const { sellerWallet, buyerAddress, baseUsd } = consent;
     setConsent(null);
     const ethereum = getMetaMaskProvider();
     if (!ethereum) {
@@ -287,7 +251,38 @@ export default function RepoDetailPage() {
       return;
     }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-    const boltyCfg = payCurrency === 'BOLTY' ? getBoltyTokenConfig() : null;
+
+    // Compute on-chain amounts now that the method is known. The seller
+    // always receives `baseUsd` worth of the chosen currency; the platform
+    // fee is added on top so BOLTY (3%) is strictly cheaper for the buyer
+    // than ETH (7%).
+    const boltyCfg = method === 'BOLTY' ? getBoltyTokenConfig() : null;
+    if (method === 'BOLTY' && !boltyCfg) {
+      setError('BOLTY payments are not enabled — please retry with ETH');
+      return;
+    }
+
+    let sellerWei: bigint;
+    let platformWei: bigint;
+    try {
+      if (boltyCfg) {
+        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
+      } else {
+        let ethPrice = 2000;
+        try {
+          const p = await api.get<{ price?: number }>('/chart/eth-price');
+          if (p.price) ethPrice = p.price;
+        } catch {
+          /* fallback */
+        }
+        sellerWei = BigInt(Math.ceil((baseUsd / ethPrice) * 1e18));
+      }
+      platformWei = platformWeiForSeller(sellerWei, method);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not compute price');
+      return;
+    }
+
     try {
       // Build the seller-payment tx. ETH → plain value transfer. BOLTY →
       // eth_sendTransaction to the token contract with encoded
@@ -700,9 +695,6 @@ export default function RepoDetailPage() {
               copied={copiedCmd}
               isAuthenticated={isAuthenticated}
               isOwner={!!user && repo.user.id === user.id}
-              payCurrency={payCurrency}
-              onPayCurrencyChange={setPayCurrency}
-              boltyEnabled={!!getBoltyTokenConfig()}
             />
             <SellerCard user={repo.user} />
             <StatsCard repo={repo} />
@@ -715,11 +707,9 @@ export default function RepoDetailPage() {
         <PaymentConsentModal
           listingTitle={repo.name}
           sellerAddress={consent.sellerWallet}
-          sellerAmountETH={(Number(consent.sellerWei) / 1e18).toFixed(6)}
-          platformFeeETH={(Number(consent.platformWei) / 1e18).toFixed(6)}
-          totalETH={(Number(consent.totalWei) / 1e18).toFixed(6)}
-          totalUsd={consent.totalUsd.toFixed(2)}
+          baseUsd={consent.baseUsd}
           buyerAddress={consent.buyerAddress}
+          boltyDisabled={consent.boltyDisabled}
           onConsent={executePurchase}
           onCancel={() => setConsent(null)}
         />
@@ -839,9 +829,6 @@ function ActionsCard({
   copied,
   isAuthenticated,
   isOwner,
-  payCurrency,
-  onPayCurrencyChange,
-  boltyEnabled,
 }: {
   repo: RepositoryDetail;
   onDownload: () => void;
@@ -852,9 +839,6 @@ function ActionsCard({
   copied: boolean;
   isAuthenticated: boolean;
   isOwner?: boolean;
-  payCurrency: 'ETH' | 'BOLTY';
-  onPayCurrencyChange: (c: 'ETH' | 'BOLTY') => void;
-  boltyEnabled: boolean;
 }) {
   // Owners never see the unlock button — they already own the content.
   const locked = repo.isLocked && repo.lockedPriceUsd && !isOwner;
@@ -889,53 +873,9 @@ function ActionsCard({
 
       {locked ? (
         <>
-          {boltyEnabled && (
-            <div
-              role="group"
-              aria-label="Payment currency"
-              className="mt-4 grid grid-cols-2 gap-1 p-1 rounded-lg"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-              }}
-            >
-              <button
-                onClick={() => onPayCurrencyChange('ETH')}
-                aria-pressed={payCurrency === 'ETH'}
-                className="px-2 py-1.5 rounded-md text-[11.5px] transition-colors"
-                style={{
-                  background:
-                    payCurrency === 'ETH' ? 'rgba(131,110,249,0.25)' : 'transparent',
-                  color: payCurrency === 'ETH' ? '#ffffff' : '#9ca3af',
-                  boxShadow:
-                    payCurrency === 'ETH'
-                      ? 'inset 0 0 0 1px rgba(131,110,249,0.45)'
-                      : 'none',
-                }}
-              >
-                Pay with ETH · 7% fee
-              </button>
-              <button
-                onClick={() => onPayCurrencyChange('BOLTY')}
-                aria-pressed={payCurrency === 'BOLTY'}
-                className="px-2 py-1.5 rounded-md text-[11.5px] transition-colors"
-                style={{
-                  background:
-                    payCurrency === 'BOLTY' ? 'rgba(236,72,153,0.22)' : 'transparent',
-                  color: payCurrency === 'BOLTY' ? '#ffffff' : '#9ca3af',
-                  boxShadow:
-                    payCurrency === 'BOLTY'
-                      ? 'inset 0 0 0 1px rgba(236,72,153,0.5)'
-                      : 'none',
-                }}
-              >
-                Pay with BOLTY · 3% fee
-              </button>
-            </div>
-          )}
           <button
             onClick={onUnlock}
-            className="w-full mt-3 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
+            className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
                 'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
@@ -944,7 +884,7 @@ function ActionsCard({
             }}
           >
             <Lock className="w-4 h-4" />
-            Unlock with {payCurrency === 'BOLTY' ? 'BOLTY' : 'MetaMask'}
+            Unlock — choose ETH or BOLTY
           </button>
           <button
             onClick={onRecover}
