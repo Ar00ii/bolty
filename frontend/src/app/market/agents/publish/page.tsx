@@ -30,7 +30,12 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { api, API_URL, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
-type Protocol = 'webhook' | 'sandbox' | 'hybrid';
+// `webhook` | `mcp` | `openai` map directly onto the backend's
+// AgentsTestService dispatcher. `sandbox` keeps the upload-a-bundle
+// path; `hybrid` (webhook + sandbox fallback) is preserved for legacy
+// listings. `docker` ships in a follow-up — disabled in the picker
+// with a "coming soon" badge.
+type Protocol = 'webhook' | 'mcp' | 'openai' | 'sandbox' | 'hybrid' | 'docker';
 
 interface UploadedFileMeta {
   fileKey: string;
@@ -49,6 +54,8 @@ interface FormState {
   category: string;
   protocol: Protocol;
   agentEndpoint: string;
+  agentModel: string;
+  agentApiKey: string;
   uploadedFile: UploadedFileMeta | null;
   model: string;
   framework: string;
@@ -68,6 +75,8 @@ const EMPTY: FormState = {
   category: 'assistant',
   protocol: 'webhook',
   agentEndpoint: '',
+  agentModel: '',
+  agentApiKey: '',
   uploadedFile: null,
   model: '',
   framework: '',
@@ -262,41 +271,67 @@ export default function PublishAgentPage() {
     }
   }, []);
 
+  // Server-side test runner. We used to do `fetch()` from the browser
+  // directly to the seller's endpoint, which (a) hit CORS for any agent
+  // without permissive headers (most of them) and (b) could only check
+  // status, not the response body shape. The /agents/test-deploy
+  // endpoint runs the full IProtocolAdapter pipeline server-side and
+  // returns structured diagnostics we render inline.
   const testEndpoint = useCallback(async () => {
     const url = form.agentEndpoint.trim();
     if (!url) return;
     setTestingEndpoint(true);
     setEndpointStatus('idle');
+    setEndpointMsg('');
     try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Bolty-Event': 'health_check' },
-        body: JSON.stringify({ event: 'health_check', prompt: 'ping' }),
-        signal: AbortSignal.timeout(6000),
+      const result = await api.post<{
+        protocol: string;
+        health: { healthy: boolean; latencyMs: number; reason?: string; status?: number };
+        invoke?: { ok: boolean; latencyMs: number; reply?: string; error?: string };
+      }>('/agents/test-deploy', {
+        protocol: form.protocol,
+        endpoint: url,
+        model: form.agentModel || undefined,
+        apiKey: form.agentApiKey || undefined,
       });
-      if (res.ok) {
+      if (result.health.healthy && result.invoke?.ok) {
         setEndpointStatus('ok');
-        setEndpointMsg(`Responded with ${res.status}`);
+        const replySnippet = (result.invoke.reply ?? '').slice(0, 80);
+        setEndpointMsg(
+          `Healthy in ${result.health.latencyMs}ms · invoke replied "${replySnippet}" in ${result.invoke.latencyMs}ms`,
+        );
+      } else if (result.health.healthy) {
+        setEndpointStatus('fail');
+        setEndpointMsg(
+          `Health passed but invoke failed: ${result.invoke?.error ?? 'no_reply'}`,
+        );
       } else {
         setEndpointStatus('fail');
-        setEndpointMsg(`Responded with ${res.status}`);
+        const status = result.health.status ? ` (HTTP ${result.health.status})` : '';
+        setEndpointMsg(`Health failed${status}: ${result.health.reason ?? 'unknown'}`);
       }
     } catch (err) {
       setEndpointStatus('fail');
-      setEndpointMsg(err instanceof Error ? err.message : 'Request failed');
+      setEndpointMsg(err instanceof ApiError ? err.message : 'Request failed');
     } finally {
       setTestingEndpoint(false);
     }
-  }, [form.agentEndpoint]);
+  }, [form.agentEndpoint, form.protocol, form.agentModel, form.agentApiKey]);
 
   const canSubmit = useMemo(() => {
     if (!form.title.trim()) return false;
     if (!form.tagline.trim()) return false;
     const price = Number(form.price);
     if (!Number.isFinite(price) || price < 0) return false;
-    const hasEndpoint = form.protocol !== 'sandbox' && form.agentEndpoint.trim().length > 0;
-    const hasSandbox = form.protocol !== 'webhook' && !!form.uploadedFile;
-    if (!hasEndpoint && !hasSandbox) return false;
+    const hasEndpoint =
+      needsHttpEndpoint(form.protocol) && form.agentEndpoint.trim().length > 0;
+    const hasSandbox = needsSandboxFile(form.protocol) && !!form.uploadedFile;
+    // OpenAI-compatible additionally requires a model id.
+    if (form.protocol === 'openai' && !form.agentModel.trim()) return false;
+    // Hybrid needs BOTH a webhook AND a sandbox; everything else needs
+    // at least one of the two.
+    if (form.protocol === 'hybrid' && !(hasEndpoint && hasSandbox)) return false;
+    if (form.protocol !== 'hybrid' && !hasEndpoint && !hasSandbox) return false;
     // BoltyGuard: still scanning, or score below the unsafe floor → block.
     if (scanning) return false;
     if (scanResult && scanResult.score < 40) return false;
@@ -317,13 +352,15 @@ export default function PublishAgentPage() {
         `- **Context length**: ${form.contextLength}\n` +
         `- **Avg latency**: ${form.avgLatency}\n` +
         `- **License**: ${form.license}\n`;
-      const proto =
-        `\n\n## Integration\n\n` +
-        (form.protocol === 'webhook'
-          ? '- **Protocol**: webhook (POST with `event`, `prompt`)\n'
-          : form.protocol === 'sandbox'
-            ? '- **Protocol**: sandboxed file\n'
-            : '- **Protocol**: webhook + sandbox fallback\n');
+      const protocolBlurb: Record<Protocol, string> = {
+        webhook: 'webhook (POST with `event`, `prompt`)',
+        mcp: 'MCP server (JSON-RPC `tools/call` named `invoke`)',
+        openai: `OpenAI-compatible (model: ${form.agentModel || 'unspecified'})`,
+        sandbox: 'sandboxed file',
+        hybrid: 'webhook + sandbox fallback',
+        docker: 'docker container',
+      };
+      const proto = `\n\n## Integration\n\n- **Protocol**: ${protocolBlurb[form.protocol]}\n`;
 
       const fullDescription =
         (form.description.trim() || form.tagline.trim()) + tech + proto;
@@ -337,14 +374,19 @@ export default function PublishAgentPage() {
         tags: [form.category, form.model, form.framework, form.license.toLowerCase(), ...form.tags]
           .filter(Boolean)
           .slice(0, 12),
+        agentProtocol: form.protocol,
       };
       if (form.minPrice && Number(form.minPrice) > 0) {
         payload.minPrice = Number(form.minPrice);
       }
-      if (form.protocol !== 'sandbox' && form.agentEndpoint.trim()) {
+      if (needsHttpEndpoint(form.protocol) && form.agentEndpoint.trim()) {
         payload.agentEndpoint = form.agentEndpoint.trim();
       }
-      if (form.protocol !== 'webhook' && form.uploadedFile) {
+      if (form.protocol === 'openai') {
+        if (form.agentModel.trim()) payload.agentModel = form.agentModel.trim();
+        if (form.agentApiKey.trim()) payload.agentApiKey = form.agentApiKey.trim();
+      }
+      if (needsSandboxFile(form.protocol) && form.uploadedFile) {
         payload.fileKey = form.uploadedFile.fileKey;
         payload.fileName = form.uploadedFile.fileName;
         payload.fileSize = form.uploadedFile.fileSize;
@@ -555,38 +597,68 @@ export default function PublishAgentPage() {
             <Section
               icon={Radio}
               step="02"
-              title="Protocol"
-              description="How does a buyer invoke your agent?"
+              title="Deploy protocol"
+              description="Pick the contract your endpoint speaks. Bolty will probe it server-side before you publish."
             >
               <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                 <ProtocolOption
                   active={form.protocol === 'webhook'}
                   icon={Globe}
-                  name="Webhook"
-                  tagline="Buyers POST JSON to your URL."
+                  name="Bolty webhook"
+                  tagline="Bolty POSTs JSON, you reply { reply: string }."
                   onClick={() => set('protocol', 'webhook')}
+                />
+                <ProtocolOption
+                  active={form.protocol === 'mcp'}
+                  icon={Cpu}
+                  name="MCP server"
+                  tagline="Model Context Protocol over HTTP (JSON-RPC)."
+                  onClick={() => set('protocol', 'mcp')}
+                />
+                <ProtocolOption
+                  active={form.protocol === 'openai'}
+                  icon={Bot}
+                  name="OpenAI-compatible"
+                  tagline="Any /v1/chat/completions endpoint with a model id."
+                  onClick={() => set('protocol', 'openai')}
                 />
                 <ProtocolOption
                   active={form.protocol === 'sandbox'}
                   icon={FileCode}
                   name="Sandboxed file"
-                  tagline="Upload code, Bolty runs it."
+                  tagline="Upload code, Bolty runs it server-side."
                   onClick={() => set('protocol', 'sandbox')}
                 />
                 <ProtocolOption
                   active={form.protocol === 'hybrid'}
                   icon={Cloud}
                   name="Hybrid"
-                  tagline="Webhook + file fallback."
+                  tagline="Webhook with sandbox bundle as a fallback."
                   onClick={() => set('protocol', 'hybrid')}
+                />
+                <ProtocolOption
+                  active={false}
+                  icon={Cpu}
+                  name="Docker container"
+                  tagline="Coming soon — pull from a registry, Bolty runs it isolated."
+                  onClick={() => {
+                    /* docker is coming-soon; the picker rejects clicks */
+                  }}
+                  disabled
                 />
               </div>
 
-              {form.protocol !== 'sandbox' && (
+              {needsHttpEndpoint(form.protocol) && (
                 <Field
-                  label="Webhook URL"
+                  label={form.protocol === 'mcp' ? 'MCP server URL' : form.protocol === 'openai' ? 'API endpoint' : 'Webhook URL'}
                   required
-                  hint="POST endpoint that accepts { event, prompt, negotiation? } and returns a JSON response."
+                  hint={
+                    form.protocol === 'mcp'
+                      ? 'JSON-RPC 2.0 endpoint that supports `initialize` and a `tools/call` named `invoke`.'
+                      : form.protocol === 'openai'
+                        ? 'Any OpenAI-compatible /v1/chat/completions endpoint (OpenAI, Together, Groq, OpenRouter, vLLM, llama.cpp, etc.).'
+                        : 'POST endpoint that accepts { event, prompt, conversationId?, history? } and returns { reply: string, action?: { type, data? } }.'
+                  }
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -629,7 +701,37 @@ export default function PublishAgentPage() {
                 </Field>
               )}
 
-              {form.protocol !== 'webhook' && (
+              {form.protocol === 'openai' && (
+                <>
+                  <Field
+                    label="Model id"
+                    required
+                    hint="Whatever the endpoint accepts as `model` (e.g. gpt-4o-mini, claude-3-5-sonnet, llama-3-70b)."
+                  >
+                    <input
+                      value={form.agentModel}
+                      onChange={(e) => set('agentModel', e.target.value.slice(0, 80))}
+                      placeholder="gpt-4o-mini"
+                      className="input-std"
+                    />
+                  </Field>
+                  <Field
+                    label="API key"
+                    hint="Bearer token forwarded as Authorization header. Optional for local runtimes (llama.cpp, vLLM)."
+                  >
+                    <input
+                      type="password"
+                      value={form.agentApiKey}
+                      onChange={(e) => set('agentApiKey', e.target.value.slice(0, 256))}
+                      placeholder="sk-…"
+                      className="input-std"
+                      autoComplete="off"
+                    />
+                  </Field>
+                </>
+              )}
+
+              {needsSandboxFile(form.protocol) && (
                 <Field
                   label="Sandbox bundle"
                   required
@@ -935,19 +1037,27 @@ function ProtocolOption({
   name,
   tagline,
   onClick,
+  disabled,
 }: {
   active: boolean;
   icon: React.ComponentType<{ className?: string }>;
   name: string;
   tagline: string;
   onClick: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
-      onClick={onClick}
-      className={`group flex flex-col items-start gap-2 rounded-xl p-3 text-left transition ${
-        active ? 'ring-2 ring-[#836EF9]/60' : 'ring-1 ring-white/5 hover:ring-white/15'
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      aria-disabled={disabled}
+      className={`group relative flex flex-col items-start gap-2 rounded-xl p-3 text-left transition ${
+        disabled
+          ? 'cursor-not-allowed opacity-50 ring-1 ring-white/5'
+          : active
+            ? 'ring-2 ring-[#836EF9]/60'
+            : 'ring-1 ring-white/5 hover:ring-white/15'
       }`}
       style={{
         background: active
@@ -967,14 +1077,36 @@ function ProtocolOption({
         <div className="text-[13px] font-normal text-white">{name}</div>
         <div className="mt-0.5 text-[10.5px] font-light text-white/50">{tagline}</div>
       </div>
-      {active && (
+      {active && !disabled && (
         <span className="inline-flex items-center gap-1 rounded-full bg-[#836EF9]/20 px-1.5 py-[1px] text-[9.5px] uppercase tracking-wide text-[#C9BEFF]">
           <Check className="h-2.5 w-2.5" />
           Selected
         </span>
       )}
+      {disabled && (
+        <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-[1px] text-[9.5px] uppercase tracking-wide text-white/60">
+          Soon
+        </span>
+      )}
     </button>
   );
+}
+
+/**
+ * True for protocols where the publish form needs an HTTP endpoint
+ * field. `sandbox` is the only fully-bundled path; everything else has
+ * a remote endpoint we test server-side.
+ */
+function needsHttpEndpoint(p: Protocol): boolean {
+  return p === 'webhook' || p === 'mcp' || p === 'openai' || p === 'hybrid';
+}
+
+/**
+ * True for protocols where the publish form needs the user to upload
+ * a sandbox bundle.
+ */
+function needsSandboxFile(p: Protocol): boolean {
+  return p === 'sandbox' || p === 'hybrid';
 }
 
 function PreviewCard({ form }: { form: FormState }) {

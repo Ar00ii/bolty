@@ -50,6 +50,9 @@ interface CreateListingBody {
   repositoryId?: string;
   agentUrl?: string;
   agentEndpoint?: string;
+  agentProtocol?: 'webhook' | 'mcp' | 'openai' | 'sandbox' | 'hybrid' | 'docker';
+  agentModel?: string;
+  agentApiKey?: string;
   fileKey?: string;
   fileName?: string;
   fileSize?: number;
