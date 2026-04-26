@@ -17,7 +17,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { ConnectXCard } from '@/components/social/ConnectXCard';
 import { LaunchTweetModal } from '@/components/social/LaunchTweetModal';
 import { Modal } from '@/components/ui/Modal';
 import { api, ApiError } from '@/lib/api/client';
@@ -981,7 +980,6 @@ function Step2Economics({
   // also the moment they want it to tweet about that launch. Hidden on
   // self-launch since the post-launch modal already covers the casual
   // case there.
-  const showXConnect = launchMode === 'agent' || agentOption;
   return (
     <div className="space-y-4">
       <Field label="Fee split" hint="Immutable after launch">
@@ -1048,40 +1046,14 @@ function Step2Economics({
         </div>
       </div>
 
-      {showXConnect && (
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <div className="text-[10.5px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
-              Agent voice (optional)
-            </div>
-            <a
-              href="/docs/launchpad/agent-x"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10.5px] font-light text-[#b4a7ff] hover:text-white transition-colors underline decoration-dotted underline-offset-2"
-            >
-              How does this work? →
-            </a>
-          </div>
-          <ConnectXCard
-            returnTo={typeof window !== 'undefined' ? window.location.pathname + window.location.search : undefined}
-          />
-          <div className="text-[11px] font-light text-zinc-500 leading-relaxed">
-            Connect X here so this agent can post the launch tweet from your account
-            the moment the token goes live, and keep posting from that handle as the
-            agent operates. Read the{' '}
-            <a
-              href="/docs/launchpad/agent-x"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
-            >
-              docs
-            </a>{' '}
-            for permissions, encryption, and how to switch accounts.
-          </div>
-        </div>
-      )}
+      {/* Per-user "Connect X" card removed in the BYO X switch — the
+          per-agent X connection now happens upstream in
+          /market/agents/<id>/setup-x BEFORE the listing becomes
+          visible in the launch wizard. Showing a generic per-user
+          OAuth 2.0 connect button here is misleading (it's the path
+          that gave 402 in production) and contradicts the per-agent
+          model. The auto-tweet success/failure pill on the post-
+          launch screen is the only X-related UI now. */}
     </div>
   );
 }
