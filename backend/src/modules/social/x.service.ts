@@ -229,13 +229,42 @@ export class SocialXService {
         },
       );
     } catch (err) {
-      // 401 from X = our access token is dead even though we thought
-      // it was fresh. Force a re-auth on the FE.
+      // 401 = access token dead even though we thought it was fresh.
+      // 403 = app lacks write scope, account suspended, or X policy
+      //       block (duplicate content most often).
+      // 429 = rate limit (X Free tier is way stricter than our 50/24h cap).
+      // Anything else (4xx/5xx) we surface verbatim so the publish UI
+      // can render the real reason instead of "failed to post tweet".
       const status = (err as { response?: { status?: number } }).response?.status ?? 500;
-      const detail = (err as { response?: { data?: unknown } }).response?.data;
-      this.logger.warn(`tweet post failed (${status}): ${JSON.stringify(detail)}`);
-      if (status === 401) throw new ForbiddenException('X token rejected, please reconnect');
-      throw new HttpException('failed to post tweet', status >= 400 && status < 600 ? status : 502);
+      const data = (err as { response?: { data?: unknown } }).response?.data as
+        | { detail?: string; title?: string; errors?: Array<{ message?: string }> }
+        | undefined;
+      const xMessage =
+        data?.detail ||
+        data?.title ||
+        data?.errors?.[0]?.message ||
+        (typeof data === 'string' ? data : '') ||
+        `http_${status}`;
+      this.logger.warn(`tweet post failed (${status}): ${JSON.stringify(data)}`);
+      if (status === 401) {
+        throw new ForbiddenException('X token rejected, please reconnect');
+      }
+      if (status === 403) {
+        // 403 from /tweets is almost always one of: duplicate content,
+        // app missing the tweet.write scope, or account flagged. Surface
+        // the X message verbatim so the user knows which.
+        throw new HttpException(`X refused tweet (403): ${xMessage}`, 403);
+      }
+      if (status === 429) {
+        throw new HttpException(
+          `X rate-limited the post (429): ${xMessage}`,
+          429,
+        );
+      }
+      throw new HttpException(
+        `X API ${status}: ${xMessage}`,
+        status >= 400 && status < 600 ? status : 502,
+      );
     }
 
     await this.prisma.xConnection.update({
