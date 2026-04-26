@@ -238,7 +238,7 @@ describe('AgentXService', () => {
     it('reports not configured when no row exists', async () => {
       const { svc } = makeService();
       const s = await svc.getStatus('L?');
-      expect(s).toEqual({ configured: false, connected: false });
+      expect(s).toEqual({ configured: false, connected: false, authMethod: null });
     });
     it('reports configured but not connected after only credentials saved', async () => {
       const { svc } = makeService();

@@ -1,22 +1,24 @@
 'use client';
 
-import { CheckCircle2, ExternalLink, KeyRound, Loader2, ShieldAlert, Twitter } from 'lucide-react';
+import { CheckCircle2, ExternalLink, KeyRound, Loader2, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
 
-import { api, ApiError, API_URL } from '@/lib/api/client';
+import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
 type Status =
-  | { configured: false; connected: false }
+  | { configured: false; connected: false; authMethod: null }
   | {
       configured: true;
       connected: false;
+      authMethod: null;
     }
   | {
       configured: true;
       connected: true;
+      authMethod: 'oauth1' | 'oauth2';
       screenName: string;
       postsLast24h: number;
       dailyCap: number;
@@ -45,10 +47,11 @@ function SetupXContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [clientId, setClientId] = useState('');
-  const [clientSecret, setClientSecret] = useState('');
-  const [savingKeys, setSavingKeys] = useState(false);
-  const [connectStarting, setConnectStarting] = useState(false);
+  const [consumerKey, setConsumerKey] = useState('');
+  const [consumerSecret, setConsumerSecret] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [accessTokenSecret, setAccessTokenSecret] = useState('');
+  const [linking, setLinking] = useState(false);
 
   const refresh = useCallback(async () => {
     try {
@@ -70,46 +73,44 @@ function SetupXContent() {
     void refresh();
   }, [isAuthenticated, isLoading, listingId, refresh, router]);
 
-  const saveKeys = useCallback(async () => {
+  const link = useCallback(async () => {
     setError(null);
-    if (!clientId.trim() || !clientSecret.trim()) {
-      setError('Both Client ID and Client Secret are required.');
+    if (
+      !consumerKey.trim() ||
+      !consumerSecret.trim() ||
+      !accessToken.trim() ||
+      !accessTokenSecret.trim()
+    ) {
+      setError('All four keys are required.');
       return;
     }
-    setSavingKeys(true);
+    setLinking(true);
     try {
-      await api.post(`/social/agent-x/${listingId}/setup`, {
-        clientId: clientId.trim(),
-        clientSecret: clientSecret.trim(),
-      });
-      // Wipe the secret from FE state — it lives encrypted on the server
-      // now and there's no reason to keep it in memory.
-      setClientSecret('');
+      await api.post<{ ok: true; screenName: string }>(
+        `/social/agent-x/${listingId}/setup-oauth1`,
+        {
+          consumerKey: consumerKey.trim(),
+          consumerSecret: consumerSecret.trim(),
+          accessToken: accessToken.trim(),
+          accessTokenSecret: accessTokenSecret.trim(),
+        },
+      );
+      // Wipe secrets from FE state — they live encrypted on the
+      // backend now, no reason to keep them in memory.
+      setConsumerKey('');
+      setConsumerSecret('');
+      setAccessToken('');
+      setAccessTokenSecret('');
       await refresh();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save credentials');
+      setError(err instanceof ApiError ? err.message : 'Could not link X account');
     } finally {
-      setSavingKeys(false);
+      setLinking(false);
     }
-  }, [clientId, clientSecret, listingId, refresh]);
-
-  const startConnect = useCallback(async () => {
-    setError(null);
-    setConnectStarting(true);
-    try {
-      const ret = `/market/agents/${listingId}/setup-x`;
-      const { url } = await api.get<{ url: string }>(
-        `/social/agent-x/${listingId}/connect-url?returnTo=${encodeURIComponent(ret)}`,
-      );
-      window.location.href = url;
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not start OAuth');
-      setConnectStarting(false);
-    }
-  }, [listingId]);
+  }, [consumerKey, consumerSecret, accessToken, accessTokenSecret, listingId, refresh]);
 
   const disconnect = useCallback(async () => {
-    if (!confirm('Disconnect X from this agent? You will need to re-connect to publish to the marketplace.')) return;
+    if (!confirm('Disconnect X from this agent? You will need to re-link to publish to the marketplace.')) return;
     try {
       await api.delete(`/social/agent-x/${listingId}`);
       await refresh();
@@ -117,8 +118,6 @@ function SetupXContent() {
       setError(err instanceof ApiError ? err.message : 'Could not disconnect');
     }
   }, [listingId, refresh]);
-
-  const callbackUrl = `${API_URL}/social/agent-x/callback`;
 
   if (loading || isLoading) {
     return (
@@ -136,12 +135,12 @@ function SetupXContent() {
           <span>X account setup — required</span>
         </div>
         <h1 className="text-2xl md:text-3xl font-light text-white">
-          Connect this agent&apos;s X account
+          Link this agent&apos;s X account
         </h1>
         <p className="text-[13px] text-zinc-500 font-light mt-2 max-w-xl">
-          Paste this agent&apos;s X Developer App credentials, then run OAuth
-          against the X account it will tweet from. Until both steps are done,
-          your listing is not visible in the public marketplace.
+          Generate 4 keys on developer.x.com, paste them here, click Link.
+          Done. No OAuth dance, no callback URLs to register, works on X
+          Free tier.
         </p>
       </header>
 
@@ -153,172 +152,168 @@ function SetupXContent() {
             boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)',
           }}
         >
-          OAuth failed: {oauthError}
+          {oauthError}
         </div>
       )}
 
-      {justConnected && status?.connected && (
+      {status?.connected && (
         <div
-          className="mb-4 rounded-lg p-3 text-[12px] text-emerald-300"
+          className="mb-5 rounded-xl p-4"
           style={{
             background: 'rgba(34,197,94,0.06)',
             boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.25)',
           }}
         >
-          ✓ Connected as <span className="text-white">@{justConnected}</span>. Your listing is now
-          live in the marketplace.
-        </div>
-      )}
-
-      {/* Step 1 — credentials */}
-      <Section
-        index="01"
-        title="Save your X App credentials"
-        subtitle="Get these from developer.x.com → Projects & Apps → your app."
-      >
-        <div className="text-[12px] text-zinc-400 font-light mb-3 leading-relaxed">
-          When creating the app on{' '}
-          <a
-            href="https://developer.x.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
-          >
-            developer.x.com
-          </a>
-          :
-          <ul className="mt-2 list-disc list-inside space-y-1">
-            <li>
-              <strong className="text-zinc-300">User authentication settings</strong> →{' '}
-              <strong className="text-zinc-300">App permissions: Read and write</strong> (otherwise
-              X rejects every tweet with 403).
-            </li>
-            <li>
-              <strong className="text-zinc-300">Type of App</strong>: Web App, Automated App or Bot.
-            </li>
-            <li>
-              <strong className="text-zinc-300">Callback URL</strong>: paste exactly{' '}
-              <code className="text-[#b4a7ff] font-mono text-[11px] break-all">{callbackUrl}</code>
-            </li>
-            <li>
-              <strong className="text-zinc-300">Website URL</strong>: <code>https://www.boltynetwork.xyz</code>
-            </li>
-          </ul>
-        </div>
-        <div className="grid grid-cols-1 gap-3">
-          <Field label="Client ID">
-            <input
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value.trim().slice(0, 200))}
-              placeholder="OAuth 2.0 Client ID — looks like dXNlckJsYWg6MTpjaQ"
-              className="input-std font-mono"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <p className="mt-1 text-[10.5px] text-zinc-500 font-light leading-relaxed">
-              Find it at developer.x.com → your App → Keys and Tokens →{' '}
-              <strong>OAuth 2.0 Client ID and Client Secret</strong>. NOT your X
-              username, NOT the API Key (those are different fields).
-            </p>
-          </Field>
-          <Field label="Client Secret">
-            <input
-              type="password"
-              value={clientSecret}
-              onChange={(e) => setClientSecret(e.target.value.trim().slice(0, 200))}
-              placeholder={status?.configured ? '•••• (already saved — paste to rotate)' : 'OAuth 2.0 Client Secret'}
-              className="input-std font-mono"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <p className="mt-1 text-[10.5px] text-zinc-500 font-light">
-              Same screen as the Client ID. X only shows the Secret once when
-              you generate it — if you lost it, regenerate it on developer.x.com.
-            </p>
-          </Field>
-        </div>
-        <div className="mt-3 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={saveKeys}
-            disabled={savingKeys || !clientId.trim() || !clientSecret.trim()}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] font-light text-white transition disabled:opacity-50"
-            style={{
-              background: 'rgba(131,110,249,0.22)',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
-            }}
-          >
-            {savingKeys ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
-            {status?.configured ? 'Rotate credentials' : 'Save credentials'}
-          </button>
-          {status?.configured && (
-            <span className="text-[11.5px] text-emerald-300 inline-flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Credentials saved
-            </span>
-          )}
-        </div>
-      </Section>
-
-      {/* Step 2 — OAuth */}
-      <Section
-        index="02"
-        title="Connect the X account"
-        subtitle="Authorize the app to post from the account this agent will tweet AS."
-        disabled={!status?.configured}
-      >
-        {!status?.configured ? (
-          <p className="text-[12px] text-zinc-500 font-light flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5 text-zinc-600" />
-            Save your Client ID + Secret in step 01 first.
-          </p>
-        ) : status.connected ? (
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="text-[12.5px] text-zinc-300">
-              Connected as{' '}
+            <div className="text-[13px] text-emerald-200 font-light flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              Linked as{' '}
               <a
                 href={`https://x.com/${status.screenName}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white underline decoration-dotted underline-offset-2 hover:text-[#b4a7ff]"
+                className="text-white underline decoration-dotted underline-offset-2 hover:text-[#86efac]"
               >
                 @{status.screenName}
               </a>
-              <span className="text-zinc-500 font-mono ml-2 text-[11px]">
+              <span className="text-emerald-400/70 font-mono text-[11px]">
                 · {status.postsLast24h}/{status.dailyCap} posts in 24h
+                {status.authMethod ? ` · ${status.authMethod}` : ''}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={startConnect}
-                className="text-[11.5px] text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
-              >
-                Switch X account
-              </button>
-              <button
-                type="button"
-                onClick={disconnect}
-                className="text-[11.5px] text-rose-400 hover:text-rose-200"
-              >
-                Disconnect
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={disconnect}
+              className="text-[11.5px] text-rose-400 hover:text-rose-200"
+            >
+              Disconnect
+            </button>
           </div>
-        ) : (
+          <p className="mt-2 text-[11.5px] text-emerald-200/70 font-light">
+            {justConnected
+              ? `Done. Your listing is now live in the marketplace.`
+              : `Your listing is live in the marketplace and the launch wizard auto-tweet will fire from this account.`}
+          </p>
+        </div>
+      )}
+
+      {/* Step 1 — where to find the keys */}
+      <Section
+        index="01"
+        title="Get your 4 keys from developer.x.com"
+        subtitle="Free tier works. ~3 minutes one-time setup."
+      >
+        <ol className="text-[12.5px] text-zinc-300 font-light leading-relaxed space-y-1.5 list-decimal pl-5">
+          <li>
+            Go to{' '}
+            <a
+              href="https://developer.x.com/en/portal/dashboard"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
+            >
+              developer.x.com
+            </a>{' '}
+            → your Project → your App.
+          </li>
+          <li>
+            Open <strong>User authentication settings</strong> → set{' '}
+            <strong>App permissions: Read and write</strong> → save.{' '}
+            <span className="text-zinc-500">(Required, otherwise X returns 403 on every tweet.)</span>
+          </li>
+          <li>
+            Open <strong>Keys and Tokens</strong> tab.
+          </li>
+          <li>
+            Under <strong>Consumer Keys</strong> → <em>API Key and Secret</em> → click{' '}
+            <strong>Regenerate</strong>. Copy <strong>API Key</strong> and{' '}
+            <strong>API Key Secret</strong>.
+          </li>
+          <li>
+            Under <strong>Authentication Tokens</strong> →{' '}
+            <em>Access Token and Secret</em> → click <strong>Generate</strong>{' '}
+            (or Regenerate). Make sure the screen says &quot;Created with{' '}
+            <strong>Read and Write</strong> permissions&quot; — if it says
+            Read only, fix step 2 first then regenerate. Copy{' '}
+            <strong>Access Token</strong> and <strong>Access Token Secret</strong>.
+          </li>
+          <li>
+            Paste all 4 below.
+          </li>
+        </ol>
+      </Section>
+
+      {/* Step 2 — paste + link */}
+      <Section index="02" title="Paste the 4 keys" subtitle="They are encrypted before they touch our database.">
+        <div className="grid grid-cols-1 gap-3">
+          <Field label="API Key (Consumer Key)">
+            <input
+              value={consumerKey}
+              onChange={(e) => setConsumerKey(e.target.value.trim().slice(0, 200))}
+              placeholder="From Consumer Keys → API Key"
+              className="input-std font-mono"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label="API Key Secret (Consumer Secret)">
+            <input
+              type="password"
+              value={consumerSecret}
+              onChange={(e) => setConsumerSecret(e.target.value.trim().slice(0, 200))}
+              placeholder="From Consumer Keys → API Key Secret"
+              className="input-std font-mono"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label="Access Token">
+            <input
+              value={accessToken}
+              onChange={(e) => setAccessToken(e.target.value.trim().slice(0, 200))}
+              placeholder="From Authentication Tokens → Access Token"
+              className="input-std font-mono"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </Field>
+          <Field label="Access Token Secret">
+            <input
+              type="password"
+              value={accessTokenSecret}
+              onChange={(e) => setAccessTokenSecret(e.target.value.trim().slice(0, 200))}
+              placeholder="From Authentication Tokens → Access Token Secret"
+              className="input-std font-mono"
+              autoComplete="off"
+              spellCheck={false}
+            />
+          </Field>
+        </div>
+        <div className="mt-4 flex items-center gap-3">
           <button
             type="button"
-            onClick={startConnect}
-            disabled={connectStarting}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] font-light text-white transition disabled:opacity-50"
+            onClick={link}
+            disabled={
+              linking ||
+              !consumerKey.trim() ||
+              !consumerSecret.trim() ||
+              !accessToken.trim() ||
+              !accessTokenSecret.trim()
+            }
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-light text-white transition disabled:opacity-50"
             style={{
-              background: 'rgba(131,110,249,0.22)',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+              boxShadow: '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
             }}
           >
-            {connectStarting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Twitter className="w-3.5 h-3.5" />}
-            Connect X account
+            {linking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
+            {status?.connected ? 'Re-link X account' : 'Link X account'}
           </button>
-        )}
+          <p className="text-[11px] text-zinc-500 font-light">
+            We verify the keys against X before saving. If anything is wrong
+            you&apos;ll see the exact error from X.
+          </p>
+        </div>
       </Section>
 
       {error && (
@@ -374,13 +369,11 @@ function Section({
   index,
   title,
   subtitle,
-  disabled,
   children,
 }: {
   index: string;
   title: string;
   subtitle: string;
-  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -389,7 +382,6 @@ function Section({
       style={{
         background: 'linear-gradient(180deg, rgba(20,20,26,0.65), rgba(10,10,14,0.65))',
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-        opacity: disabled ? 0.55 : 1,
       }}
     >
       <div className="flex items-start gap-3 mb-3">

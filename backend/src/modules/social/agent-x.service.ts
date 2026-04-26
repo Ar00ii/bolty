@@ -13,6 +13,7 @@ import { decryptToken, encryptToken } from '../../common/crypto/token-cipher.uti
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisService } from '../../common/redis/redis.service';
 
+import { buildAuthHeader, Oauth1Credentials } from './oauth1.util';
 import { composeLaunchTweet } from './x.service';
 
 /**
@@ -230,14 +231,23 @@ export class AgentXService {
 
   async getStatus(listingId: string) {
     const row = await this.prisma.agentXConnection.findUnique({ where: { listingId } });
-    if (!row) return { configured: false as const, connected: false as const };
+    if (!row) return { configured: false as const, connected: false as const, authMethod: null };
+    const oauth1Connected = !!(
+      row.oauth1ConsumerKeyEnc &&
+      row.oauth1ConsumerSecretEnc &&
+      row.oauth1AccessTokenEnc &&
+      row.oauth1AccessTokenSecretEnc
+    );
+    const oauth2Connected = !!row.accessTokenEnc;
+    const connected = oauth1Connected || oauth2Connected;
     return {
       configured: true as const,
-      connected: !!row.accessTokenEnc,
+      connected,
+      authMethod: oauth1Connected ? ('oauth1' as const) : oauth2Connected ? ('oauth2' as const) : null,
       screenName: row.screenName,
       postsLast24h: row.postsLast24h,
       dailyCap: AgentXService.DAILY_POST_CAP,
-      connectedAt: row.accessTokenEnc ? row.updatedAt.toISOString() : null,
+      connectedAt: connected ? row.updatedAt.toISOString() : null,
     };
   }
 
@@ -257,22 +267,31 @@ export class AgentXService {
         status: true,
         createdAt: true,
         agentXConnection: {
-          select: { screenName: true, accessTokenEnc: true, postsLast24h: true, updatedAt: true },
+          select: {
+            screenName: true,
+            accessTokenEnc: true,
+            oauth1AccessTokenEnc: true,
+            postsLast24h: true,
+            updatedAt: true,
+          },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
     return listings.map((l) => {
       const x = l.agentXConnection;
+      const oauth1Connected = !!x?.oauth1AccessTokenEnc;
+      const oauth2Connected = !!x?.accessTokenEnc;
       const status = x
         ? {
             configured: true as const,
-            connected: !!x.accessTokenEnc,
+            connected: oauth1Connected || oauth2Connected,
+            authMethod: oauth1Connected ? ('oauth1' as const) : oauth2Connected ? ('oauth2' as const) : null,
             screenName: x.screenName,
             postsLast24h: x.postsLast24h,
-            connectedAt: x.accessTokenEnc ? x.updatedAt.toISOString() : null,
+            connectedAt: oauth1Connected || oauth2Connected ? x.updatedAt.toISOString() : null,
           }
-        : { configured: false as const, connected: false as const };
+        : { configured: false as const, connected: false as const, authMethod: null };
       return {
         listingId: l.id,
         title: l.title,
@@ -281,6 +300,182 @@ export class AgentXService {
         x: status,
       };
     });
+  }
+
+  // ─── OAuth 1.0a path (BYO 4 keys, no redirect) ─────────────────────
+  //
+  // The simpler alternative to OAuth 2.0. Seller pastes 4 keys
+  // (Consumer Key, Consumer Secret, Access Token, Access Token
+  // Secret) generated directly in developer.x.com → Keys and Tokens.
+  // No OAuth dance, no callback URL fiddling. Works on X Free tier
+  // for accounts that have the endpoint enabled (the OAuth 2.0 path
+  // gets 402 from Free, this one usually doesn't).
+
+  /** Validate the 4 keys against /2/users/me, then persist them
+   *  encrypted. On success captures the X account's screen name so
+   *  the rest of the system (status pills, profile rows, post-launch
+   *  tweet) can show "Connected as @handle" without a separate fetch.
+   *  Wipes any prior OAuth 2.0 state so the post-router knows to use
+   *  the 1.0a path. */
+  async saveOauth1Credentials(
+    listingId: string,
+    creds: Oauth1Credentials,
+  ): Promise<{ ok: true; screenName: string }> {
+    const { consumerKey, consumerSecret, accessToken, accessTokenSecret } = creds;
+    if (!consumerKey || !consumerSecret || !accessToken || !accessTokenSecret) {
+      throw new BadRequestException('All four keys are required (API Key, API Key Secret, Access Token, Access Token Secret)');
+    }
+    if (
+      consumerKey.length > 200 ||
+      consumerSecret.length > 200 ||
+      accessToken.length > 200 ||
+      accessTokenSecret.length > 200
+    ) {
+      throw new BadRequestException('A key looks unreasonably long — double-check what you pasted');
+    }
+
+    // Verify by calling /2/users/me with these creds. If X accepts
+    // the auth, we're good; if not we surface the verbatim error so
+    // the seller knows whether they pasted wrong, the keys are
+    // expired, or the app has the wrong permissions (Read-only).
+    const url = AgentXService.USERS_ME_URL;
+    const authHeader = buildAuthHeader('GET', url, {}, creds);
+    let res;
+    try {
+      res = await axios.get<{ data?: { id: string; username: string } }>(url, {
+        headers: { Authorization: authHeader },
+        timeout: 8000,
+        validateStatus: () => true,
+      });
+    } catch (err) {
+      throw new BadRequestException(
+        `Could not reach X with these keys: ${(err as Error).message ?? 'network error'}`,
+      );
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new BadRequestException(
+        `X rejected these keys (HTTP ${res.status}). Make sure all four are from the SAME app, App permissions = Read and write, and the Access Token was generated for the account that should tweet.`,
+      );
+    }
+    if (res.status !== 200 || !res.data?.data?.id) {
+      throw new BadRequestException(
+        `X returned an unexpected response (HTTP ${res.status}). Try regenerating the Access Token and pasting again.`,
+      );
+    }
+    const screenName = res.data.data.username;
+    const xUserId = res.data.data.id;
+
+    await this.prisma.agentXConnection.upsert({
+      where: { listingId },
+      create: {
+        listingId,
+        // Reuse the OAuth-2 columns minimally — clientId/Secret are
+        // required NOT NULL in the schema, so we stash a marker that
+        // says "OAuth 1.0a row" so the rest of the system doesn't try
+        // to refresh-or-redirect-with-them.
+        clientIdEnc: encryptToken('oauth1'),
+        clientSecretEnc: encryptToken('oauth1'),
+        oauth1ConsumerKeyEnc: encryptToken(consumerKey),
+        oauth1ConsumerSecretEnc: encryptToken(consumerSecret),
+        oauth1AccessTokenEnc: encryptToken(accessToken),
+        oauth1AccessTokenSecretEnc: encryptToken(accessTokenSecret),
+        xUserId,
+        screenName,
+      },
+      update: {
+        oauth1ConsumerKeyEnc: encryptToken(consumerKey),
+        oauth1ConsumerSecretEnc: encryptToken(consumerSecret),
+        oauth1AccessTokenEnc: encryptToken(accessToken),
+        oauth1AccessTokenSecretEnc: encryptToken(accessTokenSecret),
+        xUserId,
+        screenName,
+        // Switching auth method invalidates any stale OAuth 2 tokens.
+        accessTokenEnc: null,
+        refreshTokenEnc: null,
+        expiresAt: null,
+        postsLast24h: 0,
+        postsWindowStart: new Date(),
+      },
+    });
+    return { ok: true, screenName };
+  }
+
+  /** Internal — pull decrypted OAuth 1.0a creds for a listing, or null
+   *  if the row is configured for OAuth 2.0 instead. */
+  private async loadOauth1Creds(listingId: string): Promise<Oauth1Credentials | null> {
+    const row = await this.prisma.agentXConnection.findUnique({ where: { listingId } });
+    if (!row) return null;
+    if (
+      !row.oauth1ConsumerKeyEnc ||
+      !row.oauth1ConsumerSecretEnc ||
+      !row.oauth1AccessTokenEnc ||
+      !row.oauth1AccessTokenSecretEnc
+    ) {
+      return null;
+    }
+    const consumerKey = decryptToken(row.oauth1ConsumerKeyEnc);
+    const consumerSecret = decryptToken(row.oauth1ConsumerSecretEnc);
+    const accessToken = decryptToken(row.oauth1AccessTokenEnc);
+    const accessTokenSecret = decryptToken(row.oauth1AccessTokenSecretEnc);
+    if (!consumerKey || !consumerSecret || !accessToken || !accessTokenSecret) return null;
+    return { consumerKey, consumerSecret, accessToken, accessTokenSecret };
+  }
+
+  /** Post a tweet via OAuth 1.0a. Same return shape as the OAuth 2
+   *  postTweet so the launch-tweet caller is auth-agnostic. */
+  private async postTweetOauth1(
+    listingId: string,
+    creds: Oauth1Credentials,
+    text: string,
+  ): Promise<{ id: string; text: string }> {
+    const trimmed = (text ?? '').trim();
+    if (!trimmed) throw new BadRequestException('empty tweet');
+    if (trimmed.length > 280) throw new BadRequestException('tweet over 280 chars');
+
+    // OAuth 1.0a + JSON body: the body does NOT participate in the
+    // signature base string — only the OAuth params do. We sign
+    // accordingly (empty params object in buildAuthHeader).
+    const url = AgentXService.TWEETS_URL;
+    const authHeader = buildAuthHeader('POST', url, {}, creds);
+
+    let res;
+    try {
+      res = await axios.post(
+        url,
+        { text: trimmed },
+        {
+          headers: {
+            Authorization: authHeader,
+            'Content-Type': 'application/json',
+          },
+          timeout: 10_000,
+          validateStatus: () => true,
+        },
+      );
+    } catch (err) {
+      throw new HttpException(
+        `Could not reach X: ${(err as Error).message ?? 'network error'}`,
+        502,
+      );
+    }
+    if (res.status === 401 || res.status === 403) {
+      const data = res.data as { detail?: string; title?: string; errors?: Array<{ message?: string }> } | undefined;
+      const msg =
+        data?.detail || data?.title || data?.errors?.[0]?.message || `http_${res.status}`;
+      throw new HttpException(`X refused tweet (${res.status}): ${msg}`, res.status);
+    }
+    if (res.status >= 400) {
+      const data = res.data as { detail?: string; title?: string; errors?: Array<{ message?: string }> } | undefined;
+      const msg =
+        data?.detail || data?.title || data?.errors?.[0]?.message || `http_${res.status}`;
+      throw new HttpException(`X API ${res.status}: ${msg}`, res.status);
+    }
+    const out = res.data?.data ?? {};
+    await this.prisma.agentXConnection.update({
+      where: { listingId },
+      data: { postsLast24h: { increment: 1 } },
+    });
+    return { id: String(out.id ?? ''), text: String(out.text ?? trimmed) };
   }
 
   /** Compose + post the launch-announcement tweet for a freshly
@@ -305,9 +500,31 @@ export class AgentXService {
   > {
     const row = await this.prisma.agentXConnection.findUnique({ where: { listingId } });
     if (!row) return { posted: false, reason: 'not_configured' };
+
+    // Auth-method dispatch. OAuth 1.0a takes precedence when present
+    // (Free-tier-friendly path). Fallback to OAuth 2.0 for rows that
+    // pre-date the 1.0a flow.
+    const oauth1 = await this.loadOauth1Creds(listingId);
+    const text = composeLaunchTweet(input);
+
+    if (oauth1) {
+      try {
+        const out = await this.postTweetOauth1(listingId, oauth1, text);
+        return {
+          posted: true,
+          id: out.id,
+          screenName: row.screenName ?? 'unknown',
+          text: out.text,
+        };
+      } catch (err) {
+        const msg = (err as Error)?.message ?? '';
+        this.logger.warn(`agent-x oauth1 post failed for listing=${listingId}: ${msg}`);
+        return { posted: false, reason: 'failed', detail: msg };
+      }
+    }
+
     if (!row.accessTokenEnc) return { posted: false, reason: 'not_connected' };
 
-    const text = composeLaunchTweet(input);
     try {
       const out = await this.postTweet(listingId, text);
       return { posted: true, id: out.id, screenName: row.screenName ?? 'unknown', text: out.text };

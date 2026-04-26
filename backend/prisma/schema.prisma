@@ -1090,6 +1090,17 @@ model AgentXConnection {
   expiresAt       DateTime?
   scopes          String?
 
+  // ── OAuth 1.0a path (the simpler "paste 4 keys" flow) ──
+  // X Free tier rejects POST /2/tweets via OAuth 2.0 with HTTP 402,
+  // but the OAuth 1.0a path still works on Free for accounts that
+  // have the endpoint enabled. We let the seller choose either path
+  // — if any oauth1* field is set, the post path uses 1.0a; otherwise
+  // it falls back to OAuth 2.0 (accessTokenEnc).
+  oauth1ConsumerKeyEnc       String? @db.Text
+  oauth1ConsumerSecretEnc    String? @db.Text
+  oauth1AccessTokenEnc       String? @db.Text
+  oauth1AccessTokenSecretEnc String? @db.Text
+
   postsLast24h     Int      @default(0)
   postsWindowStart DateTime @default(now())
 
