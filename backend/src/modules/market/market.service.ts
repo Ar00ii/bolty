@@ -31,6 +31,14 @@ interface CreateListingDto {
   repositoryId?: string;
   agentUrl?: string;
   agentEndpoint?: string;
+  /** One of webhook|mcp|openai|sandbox|hybrid|docker. Defaults to webhook
+   *  for backward compatibility with rows created before this column
+   *  existed. Validated server-side against the allow-list. */
+  agentProtocol?: string;
+  /** OpenAI-compatible only — model id (e.g. gpt-4o-mini). */
+  agentModel?: string;
+  /** OpenAI-compatible only — bearer token forwarded as Authorization. */
+  agentApiKey?: string;
   fileKey?: string;
   fileName?: string;
   fileSize?: number;
@@ -290,6 +298,19 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (dto.agentUrl && !isSafeUrl(dto.agentUrl)) {
       throw new ForbiddenException('Invalid agent URL');
     }
+    // Validate agent protocol against the allow-list. Anything outside
+    // the known set is rejected so the row can never disagree with the
+    // backend dispatcher.
+    const ALLOWED_PROTOCOLS = ['webhook', 'mcp', 'openai', 'sandbox', 'hybrid'] as const;
+    const agentProtocol = (dto.agentProtocol ?? 'webhook') as (typeof ALLOWED_PROTOCOLS)[number];
+    if (!ALLOWED_PROTOCOLS.includes(agentProtocol)) {
+      throw new ForbiddenException(`Unsupported agent protocol: ${dto.agentProtocol}`);
+    }
+    // OpenAI-compatible needs a model id; reject upfront so we never
+    // create a half-configured row that fails at first invocation.
+    if (agentProtocol === 'openai' && !(dto.agentModel ?? '').trim()) {
+      throw new ForbiddenException('OpenAI-compatible protocol requires a model id');
+    }
 
     // Check seller is not banned
     const seller = await this.prisma.user.findUnique({
@@ -313,6 +334,9 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         repositoryId: dto.repositoryId || null,
         agentUrl: dto.agentUrl ? dto.agentUrl.trim().slice(0, 500) : null,
         agentEndpoint: dto.agentEndpoint ? dto.agentEndpoint.trim().slice(0, 500) : null,
+        agentProtocol,
+        agentModel: dto.agentModel ? dto.agentModel.trim().slice(0, 80) : null,
+        agentApiKey: dto.agentApiKey ? dto.agentApiKey.trim().slice(0, 256) : null,
         minPrice: dto.minPrice !== null && dto.minPrice !== undefined ? dto.minPrice : null,
         fileKey: dto.fileKey || null,
         fileName: dto.fileName ? sanitizeText(dto.fileName.slice(0, 255)) : null,

@@ -506,6 +506,17 @@ model MarketListing {
   fileSize      Int? // bytes
   fileMimeType  String? // MIME type
   agentEndpoint String? // Webhook URL — seller's bot receives negotiation messages here
+  // Protocol the agent endpoint speaks. One of: "webhook" (Bolty JSON
+  // contract), "mcp" (Model Context Protocol JSON-RPC), "openai"
+  // (/v1/chat/completions). Defaults to "webhook" so existing rows
+  // are correctly characterised.
+  agentProtocol String  @default("webhook")
+  // Optional model id for OpenAI-compatible endpoints (e.g. "gpt-4o-mini").
+  agentModel    String?
+  // Optional API key for OpenAI-compatible endpoints. Stored in plain
+  // text for now since these are seller-supplied bearer tokens; if we
+  // upgrade to per-listing rotation this becomes encrypted.
+  agentApiKey   String?
   minPrice      Float? // seller's minimum acceptable negotiation price
   negotiations  AgentNegotiation[]
   posts         AgentPost[]
