@@ -806,7 +806,7 @@ function ScreenerTable({
         boxShadow: '0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
-      <div className="grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-200 font-medium border-b border-white/5">
+      <div className="grid grid-cols-[28px_minmax(0,1fr)_70px_44px_56px_44px_88px_32px] md:grid-cols-[28px_minmax(0,1fr)_88px_60px_72px_56px_120px_32px] items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-zinc-200 font-medium border-b border-white/5">
         <span className="text-center">#</span>
         <span>Listing</span>
         <span className="text-right">Price</span>
@@ -852,7 +852,7 @@ function Row({
       <Link
         href={`/market/agents/${listing.id}`}
         onMouseEnter={() => api.prefetch([`/market/${listing.id}`])}
-        className="group relative grid grid-cols-[28px_minmax(0,1fr)_90px_72px_88px_72px_120px_32px] md:grid-cols-[28px_minmax(0,1fr)_100px_90px_100px_90px_140px_32px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all"
+        className="group relative grid grid-cols-[28px_minmax(0,1fr)_70px_44px_56px_44px_88px_32px] md:grid-cols-[28px_minmax(0,1fr)_88px_60px_72px_56px_120px_32px] items-center gap-3 px-3 py-2.5 border-b border-white/[0.04] transition-all"
         style={{
           background: flashing
             ? 'linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.02))'
