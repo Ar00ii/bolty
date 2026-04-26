@@ -6,18 +6,19 @@ import { useEffect, useRef } from 'react';
 const ROUTES: Record<string, string> = {
   h: '/',
   m: '/market',
-  l: '/market/library',
+  l: '/inventory',
+  i: '/inventory',
   o: '/orders',
   n: '/notifications',
   s: '/market/seller',
-  f: '/market/library?tab=saved',
+  f: '/inventory?tab=saved',
   p: '/profile',
 };
 
 export const GOTO_SHORTCUTS: { keys: string[]; description: string }[] = [
   { keys: ['G', 'H'], description: 'Go to home' },
   { keys: ['G', 'M'], description: 'Go to marketplace' },
-  { keys: ['G', 'L'], description: 'Go to your library' },
+  { keys: ['G', 'I'], description: 'Go to your inventory' },
   { keys: ['G', 'O'], description: 'Go to orders' },
   { keys: ['G', 'N'], description: 'Go to notifications' },
   { keys: ['G', 'S'], description: 'Go to seller dashboard' },

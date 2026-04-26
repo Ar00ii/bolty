@@ -7,14 +7,15 @@ import {
   Code2,
   ExternalLink,
   GitBranch,
+  Heart,
   Shield,
   ShoppingBag,
   Sparkles,
   Upload,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Badge, Hero, Stat, StatStrip } from '@/components/ui/app';
 import { UserAvatar } from '@/components/ui/UserAvatar';
@@ -22,6 +23,12 @@ import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { getCached, getCachedWithStatus, setCached } from '@/lib/cache/pageCache';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
+import { useFavorites } from '@/lib/hooks/useFavorites';
+import {
+  LISTING_TYPE_ACCENT as TYPE_ACCENT,
+  LISTING_TYPE_LABEL as TYPE_LABEL,
+  type ListingType,
+} from '@/lib/listing/types';
 
 interface PublishedRepo {
   id: string;
@@ -113,7 +120,19 @@ interface InventoryData {
   rays: { total: number; recentEvents: ReputationEvent[] };
 }
 
-type Tab = 'published' | 'purchased' | 'rays';
+type Tab = 'published' | 'purchased' | 'saved' | 'rays';
+
+interface SavedListing {
+  id: string;
+  title: string;
+  description: string;
+  type: ListingType;
+  price: number;
+  currency: string;
+  tags: string[];
+  status: string;
+  seller: { id: string; username: string | null; avatarUrl: string | null };
+}
 
 const REASON_LABEL: Record<string, string> = {
   REPO_PUBLISHED: 'Published a repository',
@@ -162,8 +181,21 @@ function shortTx(tx: string): string {
 }
 
 export default function InventoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <InventoryPageContent />
+    </Suspense>
+  );
+}
+
+function InventoryPageContent() {
   useAuth(); // keeps the subscription live; gate delegated to useRequireAuth
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab: Tab = useMemo(() => {
+    const t = searchParams.get('tab');
+    return t === 'purchased' || t === 'saved' || t === 'rays' ? t : 'published';
+  }, [searchParams]);
   const { isAuthenticated, isLoading } = useRequireAuth({
     message: 'Create an account or sign in to see your inventory.',
   });
@@ -172,7 +204,17 @@ export default function InventoryPage() {
   );
   const [loading, setLoading] = useState(() => !getCached('inventory:data'));
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>('published');
+  const [tab, setTab] = useState<Tab>(initialTab);
+  const { ids: favIds, remove: removeFav } = useFavorites();
+  // Sync ?tab=… in the URL so deep links + back-nav land on the right tab
+  // without re-triggering the data fetch.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (tab === 'published') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', tab);
+    window.history.replaceState({}, '', url.toString());
+  }, [tab]);
 
   const load = useCallback(async () => {
     setError(null);
@@ -264,6 +306,9 @@ export default function InventoryPage() {
         <TabButton active={tab === 'purchased'} onClick={() => setTab('purchased')}>
           Purchased {totals.purchased ? <Count>{totals.purchased}</Count> : null}
         </TabButton>
+        <TabButton active={tab === 'saved'} onClick={() => setTab('saved')}>
+          Saved {favIds.length ? <Count>{favIds.length}</Count> : null}
+        </TabButton>
         <TabButton active={tab === 'rays'} onClick={() => setTab('rays')}>
           Rays history {data.rays.recentEvents.length ? <Count>{data.rays.recentEvents.length}</Count> : null}
         </TabButton>
@@ -273,6 +318,9 @@ export default function InventoryPage() {
         {tab === 'published' && <PublishedTab published={data.published} />}
         {tab === 'purchased' && (
           <PurchasedTab purchased={data.purchased} onRecovered={() => void load()} />
+        )}
+        {tab === 'saved' && (
+          <SavedTab favIds={favIds} onRemove={removeFav} />
         )}
         {tab === 'rays' && <RaysTab events={data.rays.recentEvents} total={data.rays.total} />}
       </div>
@@ -737,6 +785,150 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function SavedTab({
+  favIds,
+  onRemove,
+}: {
+  favIds: string[];
+  onRemove: (id: string) => void;
+}) {
+  const [listings, setListings] = useState<SavedListing[]>([]);
+  const [missing, setMissing] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (favIds.length === 0) {
+      setListings([]);
+      setMissing([]);
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      setLoading(true);
+      try {
+        const rows = await api.get<SavedListing[]>(
+          `/market/by-ids?ids=${encodeURIComponent(favIds.join(','))}`,
+        );
+        if (cancelled) return;
+        const found = Array.isArray(rows) ? rows : [];
+        const foundIds = new Set(found.map((l) => l.id));
+        setListings(found);
+        setMissing(favIds.filter((id) => !foundIds.has(id)));
+      } catch {
+        if (!cancelled) {
+          setListings([]);
+          setMissing([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [favIds]);
+
+  if (favIds.length === 0) {
+    return (
+      <EmptyState
+        icon={Heart}
+        title="Nothing saved yet"
+        subtitle="Hit the heart on any listing to keep it here for later. Saved items live in this browser."
+        action={{ label: 'Browse marketplace', href: '/market' }}
+      />
+    );
+  }
+  if (loading && listings.length === 0) {
+    return (
+      <div
+        className="rounded-xl px-6 py-12 text-center text-[12.5px] text-zinc-500 font-light"
+        style={{
+          background: 'linear-gradient(180deg, rgba(20,20,26,0.5), rgba(10,10,14,0.5))',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.05)',
+        }}
+      >
+        Loading your saved listings…
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {missing.length > 0 && (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-[11.5px] text-zinc-400 font-light"
+          style={{
+            background: 'rgba(245,158,11,0.06)',
+            boxShadow: 'inset 0 0 0 1px rgba(245,158,11,0.25)',
+          }}
+        >
+          <span>{missing.length} saved listing{missing.length === 1 ? '' : 's'} no longer available.</span>
+          <button
+            onClick={() => missing.forEach(onRemove)}
+            className="text-amber-300 hover:text-amber-200 underline underline-offset-2"
+          >
+            Clean up
+          </button>
+        </div>
+      )}
+      <div
+        className="mk-list"
+        style={
+          {
+            '--mk-row-cols': '70px minmax(0, 1fr) auto auto 28px',
+          } as React.CSSProperties
+        }
+      >
+        <div className="mk-list__head">
+          <span>Type</span>
+          <span>Listing</span>
+          <span style={{ textAlign: 'right' }}>Price</span>
+          <span style={{ textAlign: 'right' }}>Seller</span>
+          <span />
+        </div>
+        {listings.map((l) => {
+          return (
+            <div key={l.id} className="mk-list__row">
+              <span>
+                <Badge variant="neutral" className="uppercase tracking-wider">
+                  {TYPE_LABEL[l.type]}
+                </Badge>
+              </span>
+              <Link
+                href={`/market/agents/${l.id}`}
+                className="min-w-0 hover:text-white transition-colors"
+              >
+                <div className="truncate text-[13px] text-white">{l.title}</div>
+                <div className="truncate text-[11px] text-zinc-500">{l.description}</div>
+              </Link>
+              <span
+                className="text-[12px] font-mono tabular-nums text-[#b4a7ff]"
+                style={{ textAlign: 'right' }}
+              >
+                {l.price === 0 ? 'Free' : `${l.price} ${l.currency}`}
+              </span>
+              <Link
+                href={`/u/${l.seller.username ?? ''}`}
+                className="text-[11px] text-zinc-400 hover:text-white truncate"
+                style={{ textAlign: 'right' }}
+              >
+                @{l.seller.username || 'anon'}
+              </Link>
+              <button
+                onClick={() => onRemove(l.id)}
+                aria-label="Remove from saved"
+                className="text-pink-300 hover:text-pink-200 transition-colors"
+                title="Remove from saved"
+              >
+                <Heart className="w-3.5 h-3.5 fill-pink-400" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

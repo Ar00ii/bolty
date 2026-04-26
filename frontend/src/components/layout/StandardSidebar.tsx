@@ -12,7 +12,6 @@ import {
   GitBranch,
   Heart,
   LayoutGrid,
-  Library,
   LifeBuoy,
   MessageCircle,
   MessageSquare,
@@ -93,9 +92,6 @@ function prefetchForHref(href: string) {
     case '/inventory':
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));
       break;
-    case '/market/library':
-      void prefetch('library:items', () => api.get('/market/library'));
-      break;
     case '/notifications':
       void prefetch('notifications:list', () => api.get('/notifications'));
       break;
@@ -157,8 +153,7 @@ export const NAV: NavSection[] = [
     section: 'My work',
     items: [
       { label: 'Inventory', icon: Package, href: '/inventory' },
-      { label: 'Favorites', icon: Heart, href: '/favorites' },
-      { label: 'Library', icon: Library, href: '/market/library' },
+      { label: 'Saved', icon: Heart, href: '/inventory?tab=saved' },
       { label: 'Orders', icon: ShoppingBag, href: '/orders' },
     ],
   },
@@ -195,6 +190,16 @@ export function isItemActive(
       return expected.get('tab') === searchParams.get('tab');
     }
     return !searchParams.get('tab') || searchParams.get('tab') === 'profile';
+  }
+  if (cleanHref === '/inventory') {
+    if (pathname !== '/inventory') return false;
+    if (query) {
+      const expected = new URLSearchParams(query);
+      return expected.get('tab') === searchParams.get('tab');
+    }
+    // Bare /inventory link is active on the default tab only — saved /
+    // purchased / rays use their own URL and shouldn't double-highlight.
+    return !searchParams.get('tab');
   }
   return pathname === cleanHref || pathname.startsWith(cleanHref + '/');
 }

@@ -59,8 +59,8 @@ const TOPICS: Topic[] = [
     title: 'Buying & downloads',
     icon: ShoppingBag,
     accent: '#06B6D4',
-    description: 'How orders, deliveries and library access work after a purchase.',
-    href: '/market/library',
+    description: 'How orders, deliveries and inventory access work after a purchase.',
+    href: '/inventory?tab=purchased',
   },
   {
     id: 'selling',
