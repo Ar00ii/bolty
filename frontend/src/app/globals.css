@@ -2291,30 +2291,11 @@ aside button[data-active='true']::after {
   color: var(--mk-text);
 }
 
-.mk-scope .mk-stat {
-  background: var(--mk-surface-1);
-  border-radius: var(--mk-radius);
-  padding: 16px;
-  box-shadow: var(--mk-shadow-card);
-}
-.mk-scope .mk-stat__label {
-  font-size: 12px;
-  color: var(--mk-text-muted);
-  text-transform: none;
-  letter-spacing: 0;
-  margin-bottom: 8px;
-}
-.mk-scope .mk-stat__value {
-  font-size: 24px;
-  font-weight: 500;
-  color: var(--mk-text);
-  line-height: 1.1;
-}
-.mk-scope .mk-stat__trend {
-  font-size: 12px;
-  color: var(--mk-text-secondary);
-  margin-top: 4px;
-}
+/* Legacy `.mk-scope .mk-stat` rules removed — every consumer is now
+ * inside the `.mk-app` shell and uses the cleaner inline-strip design
+ * defined further down. The old card-style background + box-shadow
+ * was leaking through into the new design and reading as "bordered
+ * pills", which the founder explicitly rejected. */
 
 .mk-scope .mk-empty {
   border-radius: var(--mk-radius);
@@ -3954,8 +3935,8 @@ aside button[data-active='true']::after {
     font-size: 12.5px;
   }
   /* Mobile: keep the inline strip but allow horizontal scroll instead
-   * of stacking into a 2x2 grid that took half the screen vertically.
-   * Each stat shrinks; the strip scrolls if it overflows. */
+   * of stacking into a 2x2 grid. Each stat shrinks; the strip scrolls
+   * if it overflows. Same divider treatment as desktop, just tighter. */
   .mk-app .mk-stats {
     display: flex !important;
     grid-template-columns: none;
@@ -3964,6 +3945,7 @@ aside button[data-active='true']::after {
     overflow-x: auto;
     scrollbar-width: none;
     padding-bottom: 2px;
+    margin-top: 12px;
   }
   .mk-app .mk-stats::-webkit-scrollbar {
     display: none;
@@ -3971,23 +3953,20 @@ aside button[data-active='true']::after {
   .mk-app .mk-stat {
     min-width: 0 !important;
     flex-shrink: 0;
-    padding: 2px 14px;
-    border-bottom: none !important;
-    border-left: 1px solid var(--app-border);
+    padding: 2px 16px;
+  }
+  .mk-app .mk-stat + .mk-stat {
+    border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
   }
   .mk-app .mk-stat:first-child {
-    border-left: none;
     padding-left: 0;
-  }
-  .mk-app .mk-stat:nth-child(odd) {
-    border-right: none !important;
   }
   .mk-app .mk-stat__label {
     font-size: 9.5px;
+    margin-bottom: 6px;
   }
   .mk-app .mk-stat__value {
     font-size: 15px;
-    margin-top: 4px;
   }
   .mk-app .mk-toolbar {
     gap: 8px;
@@ -4161,57 +4140,85 @@ aside button[data-active='true']::after {
   max-width: 560px;
   line-height: 1.5;
 }
-/* App-style stat strip. April 2026 redesign:
- *   • dropped the bordered card wrapper — was reading as a chunky
- *     bubble container that fought every other surface on the page
- *   • stats are now an inline row separated by thin vertical dividers
- *   • values lead with a distinct purple accent at the start so the
- *     row has personality without re-introducing borders
+/* App-style stat strip — dashboard typography, no boxes.
+ *   • Header reads as a dense data row (Stripe / Linear vibe), not
+ *     a row of bordered pills.
+ *   • Each stat = small uppercase label stacked over a tabular-num
+ *     value. Hairline 1px divider between stats; everything else is
+ *     pure typography.
+ *   • Defensive resets on background / border-radius / box-shadow so
+ *     no legacy `.mk-scope` rule can re-introduce the card look.
  */
 .mk-app .mk-stats {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
+  align-items: stretch;
   gap: 0;
   width: fit-content;
   max-width: 100%;
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 .mk-app .mk-stat {
   position: relative;
-  padding: 4px 22px;
+  padding: 4px 28px;
   min-width: 0;
-  border-left: 1px solid var(--app-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+.mk-app .mk-stat + .mk-stat {
+  border-left: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 .mk-app .mk-stat:first-child {
-  border-left: none;
   padding-left: 0;
+}
+.mk-app .mk-stat:last-child {
+  padding-right: 0;
 }
 .mk-app .mk-stat__label {
   font-size: 10px;
-  color: var(--app-text-mute);
+  color: rgba(255, 255, 255, 0.42);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-weight: 600;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  margin-bottom: 8px;
+  line-height: 1;
 }
 .mk-app .mk-stat__value {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--app-text);
-  margin-top: 6px;
+  font-size: 17px;
+  font-weight: 400;
+  color: #fafafa;
   font-variant-numeric: tabular-nums;
   display: flex;
   align-items: baseline;
   gap: 6px;
   line-height: 1;
+  letter-spacing: -0.005em;
+}
+/* Inline unit suffix (e.g. "ETH" after a number) — render light + muted
+ * so the value reads as the number, with the unit as quiet metadata. */
+.mk-app .mk-stat__value > span:not(.mk-stat__dot) {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .mk-app .mk-stat__dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   display: inline-block;
 }
 .mk-app .mk-stat__dot--live {
   background: var(--app-ok);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.55);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.55);
   animation: pulse 2s ease-in-out infinite;
 }
 
