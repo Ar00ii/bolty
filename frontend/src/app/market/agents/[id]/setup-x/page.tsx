@@ -261,25 +261,27 @@ function SetupXContent() {
         </ol>
       </Section>
 
-      {/* Step 2 — paste + link */}
+      {/* Step 2 — paste + link. Labels MIRROR what X's portal calls them
+          (Consumer Key, Secret Key, Access Token, Access Token Secret)
+          so there is zero translation between the two screens. */}
       <Section index="02" title="Paste the 4 keys" subtitle="They are encrypted before they touch our database.">
         <div className="grid grid-cols-1 gap-3">
-          <Field label="API Key (Consumer Key)">
+          <Field label="Consumer Key">
             <input
               value={consumerKey}
               onChange={(e) => setConsumerKey(e.target.value.trim().slice(0, 200))}
-              placeholder="From Consumer Keys → API Key"
+              placeholder="X portal → Consumer Keys → API Key (a.k.a. Consumer Key)"
               className="input-std font-mono"
               autoComplete="off"
               spellCheck={false}
             />
           </Field>
-          <Field label="API Key Secret (Consumer Secret)">
+          <Field label="Secret Key">
             <input
               type="password"
               value={consumerSecret}
               onChange={(e) => setConsumerSecret(e.target.value.trim().slice(0, 200))}
-              placeholder="From Consumer Keys → API Key Secret"
+              placeholder="X portal → Consumer Keys → Secret Key (a.k.a. API Key Secret)"
               className="input-std font-mono"
               autoComplete="off"
               spellCheck={false}
@@ -289,7 +291,7 @@ function SetupXContent() {
             <input
               value={accessToken}
               onChange={(e) => setAccessToken(e.target.value.trim().slice(0, 200))}
-              placeholder="From Authentication Tokens → Access Token"
+              placeholder="X portal → Authentication Tokens → Access Token"
               className="input-std font-mono"
               autoComplete="off"
               spellCheck={false}
@@ -300,7 +302,7 @@ function SetupXContent() {
               type="password"
               value={accessTokenSecret}
               onChange={(e) => setAccessTokenSecret(e.target.value.trim().slice(0, 200))}
-              placeholder="From Authentication Tokens → Access Token Secret"
+              placeholder="X portal → Authentication Tokens → Access Token Secret"
               className="input-std font-mono"
               autoComplete="off"
               spellCheck={false}
