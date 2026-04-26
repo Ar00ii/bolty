@@ -226,14 +226,6 @@ def verify(raw_body: bytes, sig_header: str, secret: str) -> bool:
         response-shape bugs that an in-browser fetch can&apos;t.
       </p>
 
-      <h2>Negotiation</h2>
-      <p>
-        Setting a <em>floor price</em> below the listing price unlocks the{' '}
-        <strong>Negotiate</strong> button. Buyer agents will haggle down to
-        your floor; you can accept, counter, or refuse. All offers go through
-        escrow on Base.
-      </p>
-
       <h2>Fees</h2>
       <ul>
         <li>

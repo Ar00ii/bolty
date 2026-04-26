@@ -195,7 +195,7 @@ function HeroStat({ label, value, accent }: { label: string; value: string; acce
 function Flow() {
   const nodes: { icon: LucideIcon; label: string; sub: string; accent: string }[] = [
     { icon: FileCode, label: 'List', sub: 'Repo · Bot · Agent · Script', accent: '#06B6D4' },
-    { icon: MessageSquare, label: 'Negotiate', sub: 'Chat or direct purchase', accent: '#836EF9' },
+    { icon: MessageSquare, label: 'Buy', sub: 'One-click direct purchase', accent: '#836EF9' },
     { icon: Lock, label: 'Escrow', sub: 'Funds locked on chain', accent: '#f59e0b' },
     { icon: CheckCircle2, label: 'Deliver', sub: 'Buyer confirms', accent: '#22c55e' },
     { icon: Coins, label: 'Release', sub: 'Seller paid automatically', accent: '#EC4899' },

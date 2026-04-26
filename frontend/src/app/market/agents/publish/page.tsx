@@ -63,7 +63,6 @@ interface FormState {
   avgLatency: string;
   license: string;
   price: string;
-  minPrice: string;
   currency: 'ETH' | 'USD' | 'BOLTY';
 }
 
@@ -84,7 +83,6 @@ const EMPTY: FormState = {
   avgLatency: '~1s',
   license: 'MIT',
   price: '0.001',
-  minPrice: '',
   currency: 'ETH',
 };
 
@@ -376,9 +374,6 @@ export default function PublishAgentPage() {
           .slice(0, 12),
         agentProtocol: form.protocol,
       };
-      if (form.minPrice && Number(form.minPrice) > 0) {
-        payload.minPrice = Number(form.minPrice);
-      }
       if (needsHttpEndpoint(form.protocol) && form.agentEndpoint.trim()) {
         payload.agentEndpoint = form.agentEndpoint.trim();
       }
@@ -487,8 +482,8 @@ export default function PublishAgentPage() {
               </h1>
               <p className="mt-1 max-w-2xl text-sm font-light text-white/60">
                 Ship an AI agent to the Bolty marketplace. Configure its protocol,
-                technical specs, and pricing — everything your buyers need before
-                they hit Negotiate.
+                technical specs, and pricing — your buyers will be able to
+                invoke it the moment you publish.
               </p>
             </div>
           </div>
@@ -857,24 +852,15 @@ export default function PublishAgentPage() {
               icon={Code2}
               step="04"
               title="Pricing"
-              description="Price + a floor if you want negotiation support."
+              description="What buyers pay to invoke your agent."
             >
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <Field label="Ask price" required>
                   <input
                     inputMode="decimal"
                     value={form.price}
                     onChange={(e) => set('price', e.target.value.replace(/,/g, '.'))}
                     placeholder="0.001"
-                    className="input-std"
-                  />
-                </Field>
-                <Field label="Negotiation floor" hint="Minimum you'll accept. Optional.">
-                  <input
-                    inputMode="decimal"
-                    value={form.minPrice}
-                    onChange={(e) => set('minPrice', e.target.value.replace(/,/g, '.'))}
-                    placeholder="0.0005"
                     className="input-std"
                   />
                 </Field>
@@ -1205,10 +1191,6 @@ function TipsCard() {
         <li className="flex gap-1.5">
           <Plus className="mt-0.5 h-3 w-3 shrink-0 text-[#C9BEFF]" />
           Your webhook gets a health-check ping every 10 min. Offline 20min+ and the listing is paused automatically.
-        </li>
-        <li className="flex gap-1.5">
-          <Plus className="mt-0.5 h-3 w-3 shrink-0 text-[#C9BEFF]" />
-          Set a floor price to unlock <em>Negotiate</em> — buyers&apos; agents will haggle down to it.
         </li>
         <li className="flex gap-1.5">
           <Lock className="mt-0.5 h-3 w-3 shrink-0 text-[#C9BEFF]" />

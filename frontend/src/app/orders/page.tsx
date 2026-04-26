@@ -447,12 +447,6 @@ export default function OrdersPage() {
                 count: sellerOrders.length,
                 icon: TrendingUp,
               },
-              {
-                key: 'negotiations' as const,
-                label: 'Negotiations',
-                count: negotiations.length,
-                icon: Handshake,
-              },
             ].map(({ key, label, count, icon: Icon }) => {
               const active = tab === key;
               return (

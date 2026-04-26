@@ -77,7 +77,7 @@ function prefetchForHref(href: string) {
       );
       break;
     case '/dm':
-      void prefetch('dm:negotiations', () => api.get('/market/negotiations'));
+      // No additional prefetch — DM list is loaded by the page itself.
       break;
     case '/bolty':
       void prefetch('token:bolty', () => api.get('/token/bolty'));
@@ -87,7 +87,6 @@ function prefetchForHref(href: string) {
       void prefetch('orders:buyer', () => api.get('/orders'));
       void prefetch('orders:seller', () => api.get('/orders/selling'));
       void prefetch('orders:stats', () => api.get('/orders/seller/stats'));
-      void prefetch('orders:negotiations', () => api.get('/market/negotiations'));
       break;
     case '/inventory':
       void prefetch('inventory:data', () => api.get('/market/my-inventory'));

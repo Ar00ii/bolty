@@ -1107,22 +1107,13 @@ export default function ProfilePage() {
     try {
       const res = await fetch(agentEndpoint.trim(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Bolty-Event': 'negotiation.ping' },
-        body: JSON.stringify({
-          event: 'negotiation.ping',
-          negotiationId: 'ping-test',
-          listing: { id: 'test', title: 'Ping Test', price: 1, currency: 'ETH', minPrice: 0.5 },
-          messages: [],
-          currentOffer: 1,
-        }),
+        headers: { 'Content-Type': 'application/json', 'X-Bolty-Event': 'health_check' },
+        body: JSON.stringify({ event: 'health_check' }),
         signal: AbortSignal.timeout(8000),
       });
       if (res.ok) {
-        const data = await res.json().catch(() => ({}));
         setAgentTestStatus('ok');
-        setAgentTestDetail(
-          `HTTP ${res.status} — action: "${data?.action || '?'}", price: ${data?.proposedPrice ?? '?'}`,
-        );
+        setAgentTestDetail(`HTTP ${res.status} — agent reachable`);
       } else {
         setAgentTestStatus('fail');
         setAgentTestDetail(`HTTP ${res.status} ${res.statusText}`);
