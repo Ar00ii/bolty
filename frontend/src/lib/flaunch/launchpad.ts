@@ -352,8 +352,21 @@ async function hydrateCoin(
       priceEthRes.status === 'fulfilled' ? String(priceEthRes.value ?? '0') : '0';
     // SDK returns ETH price as 18-decimal integer string; convert to float.
     const priceEth = Number(priceEthStr) / 1e18 || 0;
-    const priceUsd =
+    const sdkPriceUsd =
       priceUsdRes.status === 'fulfilled' ? Number(priceUsdRes.value ?? 0) || 0 : 0;
+    // Public Base RPC (mainnet.base.org) rate-limits the SDK calls
+    // hard, which leaves priceUsd at 0 even for actively-trading coins.
+    // Fall back to DexScreener's free token endpoint, which carries the
+    // same priceUsd from chain analytics. Only hit it when the SDK
+    // actually returned 0, so the happy path stays a single round trip.
+    let priceUsd = sdkPriceUsd;
+    if (priceUsd === 0) {
+      try {
+        priceUsd = await fetchDexScreenerPriceUsd(coinAddress);
+      } catch {
+        /* DexScreener down too — keep 0 and fall through */
+      }
+    }
     const sdkMarketCapUsd =
       mcapRes.status === 'fulfilled' ? Number(mcapRes.value ?? 0) || 0 : 0;
     // SDK's coinMarketCapInUSD relies on Base RPC reads which are
@@ -920,4 +933,40 @@ export function _resetStubbedState(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STORE_KEY);
   localStorage.removeItem(MAP_KEY);
+}
+
+// ─── DexScreener fallback for priceUsd ───────────────────────────────────────
+//
+// Process-level cache so a launchpad list with N tokens hits DexScreener at
+// most N times in a 30s window even if the components mount + re-render in
+// quick succession. Survives the lifetime of the tab, refreshes per token
+// every CACHE_TTL_MS.
+const DEX_SCREENER_TTL_MS = 30_000;
+const dexScreenerCache = new Map<string, { value: number; at: number }>();
+
+async function fetchDexScreenerPriceUsd(coinAddress: string): Promise<number> {
+  if (!coinAddress || typeof coinAddress !== 'string') return 0;
+  const lower = coinAddress.toLowerCase();
+  const cached = dexScreenerCache.get(lower);
+  if (cached && Date.now() - cached.at < DEX_SCREENER_TTL_MS) return cached.value;
+  // DexScreener accepts "tokens/{address}" and returns every pair this
+  // token appears in. We pick the highest-liquidity pair as the source
+  // of truth so a thin secondary pool can't mis-quote the price.
+  const url = `https://api.dexscreener.com/latest/dex/tokens/${lower}`;
+  const res = await fetch(url, { method: 'GET' });
+  if (!res.ok) return 0;
+  const data = (await res.json()) as {
+    pairs?: Array<{ priceUsd?: string | null; liquidity?: { usd?: number } | null }>;
+  };
+  const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
+  if (pairs.length === 0) {
+    dexScreenerCache.set(lower, { value: 0, at: Date.now() });
+    return 0;
+  }
+  // Sort by USD liquidity desc, pick the deepest pair.
+  pairs.sort((a, b) => (b?.liquidity?.usd ?? 0) - (a?.liquidity?.usd ?? 0));
+  const raw = pairs[0]?.priceUsd;
+  const priceUsd = raw ? Number(raw) || 0 : 0;
+  dexScreenerCache.set(lower, { value: priceUsd, at: Date.now() });
+  return priceUsd;
 }

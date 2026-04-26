@@ -627,7 +627,7 @@ function TokenCard({
         <div>
           <div className="text-[11px] text-zinc-500 font-light">Price</div>
           <div className="text-[14px] text-white font-mono tabular-nums">
-            {formatEth(token.priceEth)} <span className="text-[10px] text-zinc-500">ETH</span>
+            {token.priceUsd > 0 ? formatUsd(token.priceUsd) : '—'}
           </div>
         </div>
         <div className="text-right">
@@ -657,7 +657,10 @@ function TokenCard({
 
       {/* stats row */}
       <div className="grid grid-cols-3 gap-1.5 mt-3 text-[11px] font-light">
-        <Cell label="Mcap" value={`${formatEth(token.marketCapEth)} ETH`} />
+        <Cell
+          label="Mcap"
+          value={token.marketCapUsd > 0 ? formatUsd(token.marketCapUsd) : '—'}
+        />
         <Cell label="24h vol" value={`${formatEth(token.volume24hEth)} ETH`} />
         <Cell
           label="Holders"
@@ -835,6 +838,32 @@ function formatEth(n: number): string {
   if (n >= 0.01) return n.toFixed(4);
   if (n >= 0.0001) return n.toFixed(6);
   return n.toExponential(2);
+}
+
+// USD formatter for token cards. Matches the FeaturedCarousel one:
+// k/M abbreviations above $1k, fixed decimals between, scientific
+// fallback with subscript-zero notation for sub-cent prices so
+// $0.000000 doesn't squash readability of micro-priced tokens.
+function formatUsd(n: number): string {
+  if (!n || n <= 0) return '$0';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(2)}k`;
+  if (n >= 1) return `$${n.toFixed(2)}`;
+  if (n >= 0.0001) return `$${n.toPrecision(3)}`;
+  const expOf10 = Math.floor(Math.log10(n));
+  const leadingZeros = -expOf10 - 1;
+  if (leadingZeros < 4) return `$${n.toFixed(8)}`;
+  const sig =
+    (n * Math.pow(10, -expOf10))
+      .toPrecision(2)
+      .replace('.', '')
+      .replace(/0+$/, '') || '1';
+  const subChars = '₀₁₂₃₄₅₆₇₈₉';
+  const sub = String(leadingZeros)
+    .split('')
+    .map((d) => subChars[Number(d)])
+    .join('');
+  return `$0.0${sub}${sig}`;
 }
 
 /**
