@@ -391,7 +391,12 @@ export default function PublishAgentPage() {
       const res = await api.post<{ id: string }>('/market', payload);
       if (res?.id) {
         clearDraft();
-        router.push(`/market/agents/${res.id}`);
+        // AI_AGENT listings need a connected X account before they show
+        // in the public marketplace (per the BYO X model). Send the
+        // seller straight to the X setup page instead of the detail
+        // page so the listing actually goes live in one continuous flow.
+        const isAgent = String(payload.type) === 'AI_AGENT';
+        router.push(isAgent ? `/market/agents/${res.id}/setup-x` : `/market/agents/${res.id}`);
         return;
       }
       setError('Publish succeeded but no listing id returned.');

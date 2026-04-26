@@ -30,6 +30,21 @@ interface AgentRow {
   status: string;
 }
 
+interface AgentXStatus {
+  configured: boolean;
+  connected: boolean;
+  screenName?: string | null;
+  postsLast24h?: number;
+}
+
+interface OwnedAgent {
+  listingId: string;
+  title: string;
+  listingStatus: string;
+  createdAt: string;
+  x: AgentXStatus;
+}
+
 export function ConnectedAccountsPanel({
   userId,
   walletCount,
@@ -37,16 +52,17 @@ export function ConnectedAccountsPanel({
   userId: string | null;
   walletCount: number;
 }) {
-  const [agents, setAgents] = useState<AgentRow[] | null>(null);
+  const [agents, setAgents] = useState<OwnedAgent[] | null>(null);
   const [agentsErr, setAgentsErr] = useState<string | null>(null);
   const [xHandle, setXHandle] = useState<string | null>(null);
 
   const loadAgents = useCallback(async () => {
     if (!userId) return;
     try {
-      const data = await api.get<AgentRow[] | { data: AgentRow[] }>('/market/my-listings');
-      const rows = Array.isArray(data) ? data : (data?.data ?? []);
-      setAgents(rows.filter((l) => l.type === 'AI_AGENT'));
+      // Per-agent X status (BYO X). One row per AI_AGENT listing the
+      // user owns, each with its own connected/configured/screenName.
+      const rows = await api.get<OwnedAgent[]>('/social/agent-x/owned');
+      setAgents(Array.isArray(rows) ? rows : []);
     } catch (err) {
       setAgents([]);
       setAgentsErr(err instanceof ApiError ? err.message : 'Could not load your agents');
@@ -132,18 +148,12 @@ export function ConnectedAccountsPanel({
         </Link>
       </div>
 
-      {/* AI agents the user has published */}
+      {/* AI agents the user has published — each with its own X status */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-medium">
             Your AI agents
           </div>
-          {xHandle && (
-            <span className="text-[10.5px] text-zinc-500 font-light">
-              all posting via{' '}
-              <span className="text-[#b4a7ff] font-mono">@{xHandle}</span>
-            </span>
-          )}
         </div>
         {agents === null ? (
           <div
@@ -177,42 +187,63 @@ export function ConnectedAccountsPanel({
           </div>
         ) : (
           <ul className="space-y-1.5">
-            {agents.map((a) => (
-              <li
-                key={a.id}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}
-              >
-                <Bot className="w-3.5 h-3.5 text-zinc-400 shrink-0" strokeWidth={1.75} />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[12.5px] text-white font-light truncate">{a.title}</div>
-                  <div className="text-[10.5px] text-zinc-500 font-mono truncate">
-                    {xHandle ? `posts via @${xHandle}` : 'no X linked'}
-                    {a.status !== 'ACTIVE' && (
-                      <>
-                        {' · '}
-                        <span className="text-amber-400">{a.status.toLowerCase()}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <Link
-                  href={`/market/agents/${a.id}`}
-                  className="text-zinc-500 hover:text-white transition"
-                  aria-label="Open agent"
+            {agents.map((a) => {
+              const xPill = a.x.connected ? (
+                <span className="text-[10.5px] text-emerald-300 font-mono">
+                  ✓ @{a.x.screenName}
+                </span>
+              ) : a.x.configured ? (
+                <span className="text-[10.5px] text-amber-300 font-mono">⚠ keys saved · OAuth pending</span>
+              ) : (
+                <span className="text-[10.5px] text-rose-300 font-mono">⨯ X not configured</span>
+              );
+              return (
+                <li
+                  key={a.listingId}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg"
+                  style={{
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}
                 >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </li>
-            ))}
+                  <Bot className="w-3.5 h-3.5 text-zinc-400 shrink-0" strokeWidth={1.75} />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12.5px] text-white font-light truncate">{a.title}</div>
+                    <div className="text-[10.5px] text-zinc-500 truncate">
+                      {xPill}
+                      {a.listingStatus !== 'ACTIVE' && (
+                        <>
+                          {' · '}
+                          <span className="text-amber-400">{a.listingStatus.toLowerCase()}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <Link
+                    href={`/market/agents/${a.listingId}/setup-x`}
+                    className="text-[11px] font-light px-2 py-1 rounded text-zinc-300 hover:text-white transition"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    {a.x.connected ? 'Manage' : 'Setup X'}
+                  </Link>
+                  <Link
+                    href={`/market/agents/${a.listingId}`}
+                    className="text-zinc-500 hover:text-white transition"
+                    aria-label="Open agent"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
         <p className="mt-2 text-[10.5px] text-zinc-600 font-light leading-relaxed">
-          Phase 1: every agent you own posts via your single connected X. Per-agent X
-          accounts land in Phase 2 — disconnect that agent's account inline here.
+          Each agent connects its own X Developer App + X account. The agent IS its own brand.
+          Setup runs in the per-agent setup-x page after the listing is created.
         </p>
       </div>
       {/* Hide unused noise from React */}

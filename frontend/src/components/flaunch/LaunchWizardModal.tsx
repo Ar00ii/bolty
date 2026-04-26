@@ -312,6 +312,7 @@ export function LaunchWizardModal({
             symbol={symbol}
             name={name}
             agentName={listingTitle}
+            listingId={listingId}
             onClose={handleClose}
           />
         ) : step === 1 ? (
@@ -1254,12 +1255,14 @@ function SuccessView({
   symbol,
   name,
   agentName,
+  listingId,
   onClose,
 }: {
   result: LaunchResult;
   symbol: string;
   name: string;
   agentName?: string | null;
+  listingId: string;
   onClose: () => void;
 }) {
   const short = `${result.tokenAddress.slice(0, 8)}…${result.tokenAddress.slice(-6)}`;
@@ -1308,6 +1311,7 @@ function SuccessView({
         tokenAddress={result.tokenAddress}
         url={launchpadUrl}
         agentName={agentName ?? null}
+        listingId={listingId}
       />
 
       <div className="flex items-center justify-center gap-2 pt-2 flex-wrap">
@@ -1354,17 +1358,20 @@ function LaunchTweetAutoPost({
   tokenAddress,
   url,
   agentName,
+  listingId,
 }: {
   symbol: string;
   name: string;
   tokenAddress: string;
   url: string;
   agentName: string | null;
+  listingId: string;
 }) {
   type State =
     | { phase: 'posting' }
     | { phase: 'posted'; tweetId: string; screenName: string }
     | { phase: 'not_connected' }
+    | { phase: 'not_configured' }
     | { phase: 'cap_reached'; detail?: string }
     | { phase: 'reauth'; detail?: string }
     | { phase: 'failed'; detail?: string };
@@ -1376,8 +1383,12 @@ function LaunchTweetAutoPost({
     try {
       const res = await api.post<
         | { posted: true; id: string; screenName: string; text: string }
-        | { posted: false; reason: 'not_connected' | 'cap_reached' | 'reauth' | 'failed'; detail?: string }
-      >('/social/x/post-launch', { symbol, name, tokenAddress, url, agentName });
+        | {
+            posted: false;
+            reason: 'not_configured' | 'not_connected' | 'cap_reached' | 'reauth' | 'failed';
+            detail?: string;
+          }
+      >('/social/x/post-launch', { symbol, name, tokenAddress, url, agentName, listingId });
       if (res.posted) {
         setState({ phase: 'posted', tweetId: res.id, screenName: res.screenName });
       } else {
@@ -1389,7 +1400,7 @@ function LaunchTweetAutoPost({
         detail: err instanceof ApiError ? err.message : 'unexpected error',
       });
     }
-  }, [symbol, name, tokenAddress, url, agentName]);
+  }, [symbol, name, tokenAddress, url, agentName, listingId]);
 
   // Fire exactly once on mount. The endpoint is itself idempotent against
   // accidental re-mount because the daily-cap counter would just bump.
@@ -1436,7 +1447,12 @@ function LaunchTweetAutoPost({
       </div>
     );
   }
-  if (state.phase === 'not_connected') {
+  if (state.phase === 'not_configured' || state.phase === 'not_connected') {
+    const setupHref = `/market/agents/${listingId}/setup-x`;
+    const reason =
+      state.phase === 'not_configured'
+        ? 'X App credentials not saved for this agent'
+        : 'X account not connected for this agent';
     return (
       <div
         className="rounded-lg p-3 text-[12px] text-zinc-300 font-light"
@@ -1444,20 +1460,16 @@ function LaunchTweetAutoPost({
       >
         <div className="flex items-center justify-center gap-2 flex-wrap">
           <Twitter className="w-3.5 h-3.5 text-amber-300" />
-          No X account connected — launch tweet not posted.
-          <button
-            type="button"
-            onClick={() => setManualOpen(true)}
+          {reason} — launch tweet not posted.
+          <a
+            href={setupHref}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
           >
-            Connect & post manually
-          </button>
+            Open X setup →
+          </a>
         </div>
-        <ManualTweetFallback
-          open={manualOpen}
-          onClose={() => setManualOpen(false)}
-          token={{ name, symbol, tokenAddress, url, agentName }}
-        />
       </div>
     );
   }

@@ -445,6 +445,20 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (params.hasDemo) {
       where.agentEndpoint = { not: null };
     }
+    // Hide AI_AGENT listings from public discovery until the seller has
+    // both saved their X App credentials AND completed OAuth. Sellers
+    // see their own incomplete listings via /market/my-listings; the
+    // public market only shows fully-configured agents so a buyer never
+    // lands on a card whose auto-tweet capability is half-built. We
+    // gate on accessTokenEnc because that's the field that flips
+    // non-null exactly when OAuth completes.
+    where.OR = [
+      { type: { not: 'AI_AGENT' } },
+      {
+        type: 'AI_AGENT',
+        agentXConnection: { is: { accessTokenEnc: { not: null } } },
+      },
+    ];
 
     if (sortBy === 'trending') {
       const result = await this.getTrendingListings(where, page, take, skip);
