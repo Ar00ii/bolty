@@ -1,5 +1,24 @@
 import { buildAuthHeader, rfc3986, signatureBaseString } from './oauth1.util';
 
+/**
+ * Synthetic test vectors. Earlier revisions of this file used the
+ * example credentials from X's public OAuth 1.0a documentation; even
+ * though those values are fake (X's own teaching examples that have
+ * been on the internet for over a decade), GitHub's secret-scanning
+ * matched the format and flagged the file. Replaced with fully
+ * synthetic strings so the scanner stays quiet.
+ */
+
+const FIXTURE = {
+  consumerKey: 'EXAMPLE_CK_1234567890',
+  consumerSecret: 'EXAMPLE_CS_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+  accessToken: '999999999-EXAMPLE_TOKEN_1234567890abcdef',
+  accessTokenSecret: 'EXAMPLE_ATS_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz',
+  nonce: 'EXAMPLE_NONCE_abcdefghijklmnop',
+  timestamp: '1700000000',
+  status: 'Hello Ladies + Gentlemen, a signed OAuth request!',
+};
+
 describe('oauth1.util', () => {
   describe('rfc3986', () => {
     it('encodes the OAuth-special chars beyond encodeURIComponent', () => {
@@ -14,31 +33,31 @@ describe('oauth1.util', () => {
   });
 
   describe('signatureBaseString', () => {
-    it('matches X docs example for a sample tweet POST', () => {
-      // Lifted from https://developer.x.com/en/docs/authentication/oauth-1-0a/creating-a-signature
-      // Slightly trimmed (status param only) to keep the test focused.
-      const params = {
-        status: 'Hello Ladies + Gentlemen, a signed OAuth request!',
-        oauth_consumer_key: 'xvz1evFS4wEEPTGEFPHBog',
-        oauth_nonce: 'kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg',
-        oauth_signature_method: 'HMAC-SHA1',
-        oauth_timestamp: '1318622958',
-        oauth_token: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb',
-        oauth_version: '1.0',
-      };
-      const sig = signatureBaseString(
+    it('produces the canonical base string per RFC 5849 with sorted params + percent encoding', () => {
+      const base = signatureBaseString(
         'POST',
         'https://api.twitter.com/1.1/statuses/update.json',
-        params,
+        {
+          status: FIXTURE.status,
+          oauth_consumer_key: FIXTURE.consumerKey,
+          oauth_nonce: FIXTURE.nonce,
+          oauth_signature_method: 'HMAC-SHA1',
+          oauth_timestamp: FIXTURE.timestamp,
+          oauth_token: FIXTURE.accessToken,
+          oauth_version: '1.0',
+        },
       );
-      // Expected per X's example. Verifies that param-sort + URL canonicalisation
-      // + percent-encoding all match the spec.
-      expect(sig).toBe(
+      // Locked-in vector. Any change in encoding / sort order breaks
+      // this assertion, which is the whole point.
+      expect(base).toBe(
         'POST&https%3A%2F%2Fapi.twitter.com%2F1.1%2Fstatuses%2Fupdate.json' +
-          '&oauth_consumer_key%3Dxvz1evFS4wEEPTGEFPHBog%26oauth_nonce%3DkYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg' +
-          '%26oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D1318622958' +
-          '%26oauth_token%3D370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb' +
-          '%26oauth_version%3D1.0%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521',
+          '&oauth_consumer_key%3DEXAMPLE_CK_1234567890' +
+          '%26oauth_nonce%3DEXAMPLE_NONCE_abcdefghijklmnop' +
+          '%26oauth_signature_method%3DHMAC-SHA1' +
+          '%26oauth_timestamp%3D1700000000' +
+          '%26oauth_token%3D999999999-EXAMPLE_TOKEN_1234567890abcdef' +
+          '%26oauth_version%3D1.0' +
+          '%26status%3DHello%2520Ladies%2520%252B%2520Gentlemen%252C%2520a%2520signed%2520OAuth%2520request%2521',
       );
     });
 
@@ -54,32 +73,21 @@ describe('oauth1.util', () => {
 
   describe('buildAuthHeader', () => {
     it('produces a deterministic signature for fixed nonce + timestamp', () => {
-      // X's documented signing example yields signature "hCtSmYh+iHYCEqBWrE7C7hYmtUk="
       const header = buildAuthHeader(
         'POST',
         'https://api.twitter.com/1.1/statuses/update.json',
-        { status: 'Hello Ladies + Gentlemen, a signed OAuth request!' },
-        {
-          consumerKey: 'xvz1evFS4wEEPTGEFPHBog',
-          consumerSecret: 'kAcSOqF21Fu85e7zjz7ZN2U4ZRhfV3WpwPAoE3Z7kBw',
-          accessToken: '370773112-GmHxMAgYyLbNEtIKZeRNFsMKPR9EyMZeS9weJAEb',
-          accessTokenSecret: 'LswwdoUaIvS8ltyTt5jkRh4J50vUPVVHtR2YPi5kE',
-        },
-        'kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg',
-        '1318622958',
+        { status: FIXTURE.status },
+        FIXTURE,
+        FIXTURE.nonce,
+        FIXTURE.timestamp,
       );
-      // Signature locked from running our impl against X's documented
-      // base string. The docs example signature ("hCtSmYh+iHYCEqBWrE7C7hYmtUk=")
-      // assumes additional `include_entities=true` in the body — for
-      // status-only the HMAC of the base string with the docs signing
-      // key is "Tqz6pFAShJQqSyxctXvqKWrv3BQ=". Either way the base
-      // string assertion above guarantees we follow the spec; this
-      // assertion just locks in the HMAC step against regression.
-      expect(header).toContain('oauth_signature="Tqz6pFAShJQqSyxctXvqKWrv3BQ%3D"');
-      expect(header).toContain('oauth_consumer_key="xvz1evFS4wEEPTGEFPHBog"');
-      expect(header).toContain('oauth_nonce="kYjzVBB8Y0ZFabxSWbWovY3uYSQ2pTgmZeNu2VS4cg"');
+      // Locked-in vector — HMAC-SHA1(signing_key, base_string) for the
+      // synthetic FIXTURE inputs above.
+      expect(header).toContain('oauth_signature="9V7MahP%2B7AolS8BhrN238OG7FCc%3D"');
+      expect(header).toContain(`oauth_consumer_key="${FIXTURE.consumerKey}"`);
+      expect(header).toContain(`oauth_nonce="${FIXTURE.nonce}"`);
       expect(header).toContain('oauth_signature_method="HMAC-SHA1"');
-      expect(header).toContain('oauth_timestamp="1318622958"');
+      expect(header).toContain(`oauth_timestamp="${FIXTURE.timestamp}"`);
     });
 
     it('returns an OAuth header even when no body params are supplied', () => {
