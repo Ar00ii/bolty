@@ -849,6 +849,30 @@ async function realListLaunchedTokens(): Promise<TokenInfo[]> {
   // If on-chain gave us nothing usable, still show the local cache so
   // the user's own just-launched coin doesn't vanish on refresh.
   if (tokens.length === 0) return fromCache();
+
+  // Backfill priceUsd + marketCapUsd from DexScreener in a single batch
+  // call. The SDK's per-token coinPriceInUSD / coinMarketCapInUSD reads
+  // are routinely rate-limited by the public Base RPC, leaving the list
+  // grid showing $0 for actively-trading coins (the detail page works
+  // because hydrateCoin already has this fallback). Best-effort: if the
+  // request fails, prices stay at 0 and the UI shows them as such.
+  try {
+    const addresses = tokens
+      .map((t) => t.tokenAddress)
+      .filter((a): a is string => !!a);
+    const priceMap = await fetchDexScreenerPricesUsd(addresses);
+    const FLAUNCH_FIXED_SUPPLY = 100_000_000_000;
+    for (const t of tokens) {
+      const priceUsd = priceMap.get(t.tokenAddress.toLowerCase()) ?? 0;
+      if (priceUsd > 0) {
+        t.priceUsd = priceUsd;
+        t.marketCapUsd = priceUsd * FLAUNCH_FIXED_SUPPLY;
+      }
+    }
+  } catch {
+    /* keep zeros */
+  }
+
   return tokens;
 }
 
@@ -945,28 +969,83 @@ const DEX_SCREENER_TTL_MS = 30_000;
 const dexScreenerCache = new Map<string, { value: number; at: number }>();
 
 async function fetchDexScreenerPriceUsd(coinAddress: string): Promise<number> {
-  if (!coinAddress || typeof coinAddress !== 'string') return 0;
-  const lower = coinAddress.toLowerCase();
-  const cached = dexScreenerCache.get(lower);
-  if (cached && Date.now() - cached.at < DEX_SCREENER_TTL_MS) return cached.value;
-  // DexScreener accepts "tokens/{address}" and returns every pair this
-  // token appears in. We pick the highest-liquidity pair as the source
-  // of truth so a thin secondary pool can't mis-quote the price.
-  const url = `https://api.dexscreener.com/latest/dex/tokens/${lower}`;
-  const res = await fetch(url, { method: 'GET' });
-  if (!res.ok) return 0;
-  const data = (await res.json()) as {
-    pairs?: Array<{ priceUsd?: string | null; liquidity?: { usd?: number } | null }>;
-  };
-  const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
-  if (pairs.length === 0) {
-    dexScreenerCache.set(lower, { value: 0, at: Date.now() });
-    return 0;
+  const map = await fetchDexScreenerPricesUsd([coinAddress]);
+  return map.get(coinAddress.toLowerCase()) ?? 0;
+}
+
+/**
+ * Batch variant — DexScreener accepts a comma-separated list of token
+ * addresses (up to 30 per request) and returns every pair across all of
+ * them. Used by the launchpad list so we can backfill priceUsd for the
+ * entire grid in one round trip instead of N× single-token requests.
+ *
+ * Per-address 30s cache shared with the single-token entry point.
+ */
+async function fetchDexScreenerPricesUsd(
+  coinAddresses: string[],
+): Promise<Map<string, number>> {
+  const result = new Map<string, number>();
+  if (!Array.isArray(coinAddresses) || coinAddresses.length === 0) return result;
+
+  const now = Date.now();
+  const lowered = coinAddresses
+    .filter((a): a is string => !!a && typeof a === 'string')
+    .map((a) => a.toLowerCase());
+  const toFetch: string[] = [];
+  for (const addr of lowered) {
+    const cached = dexScreenerCache.get(addr);
+    if (cached && now - cached.at < DEX_SCREENER_TTL_MS) {
+      result.set(addr, cached.value);
+    } else {
+      toFetch.push(addr);
+    }
   }
-  // Sort by USD liquidity desc, pick the deepest pair.
-  pairs.sort((a, b) => (b?.liquidity?.usd ?? 0) - (a?.liquidity?.usd ?? 0));
-  const raw = pairs[0]?.priceUsd;
-  const priceUsd = raw ? Number(raw) || 0 : 0;
-  dexScreenerCache.set(lower, { value: priceUsd, at: Date.now() });
-  return priceUsd;
+  if (toFetch.length === 0) return result;
+
+  const CHUNK = 30;
+  for (let i = 0; i < toFetch.length; i += CHUNK) {
+    const chunk = toFetch.slice(i, i + CHUNK);
+    const url = `https://api.dexscreener.com/latest/dex/tokens/${chunk.join(',')}`;
+    try {
+      const res = await fetch(url, { method: 'GET' });
+      if (!res.ok) {
+        // Mark this chunk as 0 so we don't re-hit DexScreener every render.
+        for (const addr of chunk) {
+          dexScreenerCache.set(addr, { value: 0, at: now });
+          result.set(addr, 0);
+        }
+        continue;
+      }
+      const data = (await res.json()) as {
+        pairs?: Array<{
+          baseToken?: { address?: string };
+          priceUsd?: string | null;
+          liquidity?: { usd?: number } | null;
+        }>;
+      };
+      const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
+      // Pick the deepest-liquidity pair per token so a thin secondary
+      // pool can't mis-quote the price.
+      const deepest = new Map<string, { priceUsd: number; liquidity: number }>();
+      for (const p of pairs) {
+        const addr = p?.baseToken?.address?.toLowerCase();
+        if (!addr) continue;
+        const liquidity = p?.liquidity?.usd ?? 0;
+        const priceUsd = p?.priceUsd ? Number(p.priceUsd) || 0 : 0;
+        const existing = deepest.get(addr);
+        if (!existing || liquidity > existing.liquidity) {
+          deepest.set(addr, { priceUsd, liquidity });
+        }
+      }
+      for (const addr of chunk) {
+        const value = deepest.get(addr)?.priceUsd ?? 0;
+        dexScreenerCache.set(addr, { value, at: now });
+        result.set(addr, value);
+      }
+    } catch {
+      // Transient error — don't poison the cache, just skip this
+      // chunk so the next call can retry.
+    }
+  }
+  return result;
 }
