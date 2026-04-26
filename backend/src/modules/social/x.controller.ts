@@ -17,6 +17,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { SkipCsrf } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
+import { AgentXService } from './agent-x.service';
 import { SocialXService } from './x.service';
 
 /**
@@ -30,7 +31,10 @@ import { SocialXService } from './x.service';
  */
 @Controller('social/x')
 export class SocialXController {
-  constructor(private readonly x: SocialXService) {}
+  constructor(
+    private readonly x: SocialXService,
+    private readonly agentX: AgentXService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
@@ -118,6 +122,12 @@ export class SocialXController {
       tokenAddress?: string;
       url?: string;
       agentName?: string | null;
+      /** When provided, posts using THE LISTING'S X app credentials
+       *  (per-agent BYO). Falls back to the user-level X connection
+       *  when omitted, kept only for backwards-compatibility with any
+       *  caller that still uses the old shape. New launches always
+       *  pass listingId. */
+      listingId?: string | null;
     },
   ) {
     const symbol = (body?.symbol ?? '').trim();
@@ -125,6 +135,20 @@ export class SocialXController {
     const url = (body?.url ?? '').trim();
     if (!symbol || !tokenAddress || !url) {
       return { posted: false as const, reason: 'failed' as const, detail: 'missing fields' };
+    }
+    const listingId = body?.listingId?.trim() || null;
+    if (listingId) {
+      // Caller supplied a listing → BYO X path. Verify the caller
+      // actually owns the listing before doing anything; otherwise a
+      // hostile client could trigger another seller's agent to tweet.
+      await this.agentX.assertOwner(listingId, userId);
+      return this.agentX.postLaunchTweet(listingId, {
+        symbol,
+        name: body?.name ?? null,
+        tokenAddress,
+        url,
+        agentName: body?.agentName ?? null,
+      });
     }
     return this.x.postLaunchTweet(userId, {
       symbol,

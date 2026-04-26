@@ -524,6 +524,7 @@ model MarketListing {
   purchases     MarketPurchase[]
   reviews       MarketReview[]
   securityScans SecurityScan[]
+  agentXConnection AgentXConnection?
   // ── Boost / promotion ──────────────────────────────────────────────────────
   // When set in the future, the listing is considered "boosted" and ranks
   // higher in /market browse + appears on the homepage ticker. Cleared
@@ -1053,6 +1054,46 @@ model XConnection {
   postsWindowStart DateTime @default(now())
 
   @@map("x_connections")
+}
+
+// ─── Per-AI-agent X (Twitter) connection (BYO X App) ───────────────────────────
+//
+// Each AI_AGENT MarketListing brings its own X Developer App (Client ID +
+// Secret) so the platform doesn't bottleneck on a shared API plan. The
+// seller pastes their app credentials into the publish wizard, then runs
+// the OAuth flow against THEIR app, which writes this row. All four
+// secrets (clientId, clientSecret, accessToken, refreshToken) are
+// AES-256-GCM encrypted at rest with TOKEN_CRYPTO_KEY.
+//
+// One connection per listing. Disconnect = delete the row.
+model AgentXConnection {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listingId String        @unique
+  listing   MarketListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  // The seller's X Developer App credentials. Encrypted at rest because
+  // they grant API access to anyone who reads them.
+  clientIdEnc     String @db.Text
+  clientSecretEnc String @db.Text
+
+  // The X account the agent will tweet AS. Filled on completed OAuth.
+  // Nullable because the row exists between "keys saved" and "OAuth done".
+  xUserId    String?
+  screenName String?
+
+  // OAuth tokens — same encryption envelope as the user-level XConnection.
+  accessTokenEnc  String?   @db.Text
+  refreshTokenEnc String?   @db.Text
+  expiresAt       DateTime?
+  scopes          String?
+
+  postsLast24h     Int      @default(0)
+  postsWindowStart DateTime @default(now())
+
+  @@map("agent_x_connections")
 }
 
 // ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────
