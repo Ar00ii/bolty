@@ -29,6 +29,7 @@ import { ServicesModule } from './modules/services/services.module';
 import { SocialModule } from './modules/social/social.module';
 import { TokenModule } from './modules/token/token.module';
 import { CacheWarmerModule } from './modules/cache-warmer/cache-warmer.module';
+import { SeedModule } from './modules/seed/seed.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -80,6 +81,7 @@ import { UsersModule } from './modules/users/users.module';
     ServicesModule,
     TokenModule,
     CacheWarmerModule,
+    SeedModule,
   ],
   providers: [
     // Global CSRF protection guard (double-submit cookie pattern).
