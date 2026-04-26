@@ -21,6 +21,7 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { CreatorProfileModal } from '@/components/flaunch/CreatorProfileModal';
 import { FeaturedCarousel } from '@/components/flaunch/FeaturedCarousel';
 import { LaunchYoursModal } from '@/components/flaunch/LaunchYoursModal';
+import { ConnectAgentXModal } from '@/components/social/ConnectAgentXModal';
 import { TokenLeaderboard } from '@/components/flaunch/TokenLeaderboard';
 import { TokenMiniSparkline } from '@/components/flaunch/TokenMiniSparkline';
 import { EmptyState } from '@/components/ui/app';
@@ -69,6 +70,7 @@ function LaunchpadPageContent() {
   });
   const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
   const [launchOpen, setLaunchOpen] = useState(false);
+  const [connectXOpen, setConnectXOpen] = useState(false);
   const [creator, setCreator] = useState<string | null>(null);
 
   // Click a token card → full-page route. No more side panel; trading
@@ -253,18 +255,19 @@ function LaunchpadPageContent() {
             <div className="flex items-center justify-end gap-2 flex-wrap">
               {isAuthenticated ? (
                 <>
-                  <Link
-                    href="/market/agents/publish"
+                  <button
+                    type="button"
+                    onClick={() => setConnectXOpen(true)}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
                     style={{
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.08)',
                     }}
-                    title="Publish an AI agent + connect its own X account, then launch from there"
+                    title="Pick one of your AI agents and link it to its own X account"
                   >
                     <Bot className="w-3 h-3" />
-                    Launch with AI agent
-                  </Link>
+                    Connect X to an agent
+                  </button>
                   <button
                     type="button"
                     onClick={() => setLaunchOpen(true)}
@@ -435,6 +438,10 @@ function LaunchpadPageContent() {
         allTokens={tokens ?? []}
         onClose={() => setCreator(null)}
         onOpenToken={openToken}
+      />
+      <ConnectAgentXModal
+        open={connectXOpen}
+        onClose={() => setConnectXOpen(false)}
       />
     </>
   );
