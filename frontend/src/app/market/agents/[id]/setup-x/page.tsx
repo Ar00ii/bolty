@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, ExternalLink, KeyRound, Loader2, Twitter } from 'lucide-react';
+import { BookOpen, CheckCircle2, ExternalLink, KeyRound, Loader2, Twitter } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
@@ -130,18 +130,36 @@ function SetupXContent() {
   return (
     <div className="mk-app-page mx-auto max-w-3xl px-5 py-10">
       <header className="mb-6">
-        <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 mb-2">
-          <Twitter className="w-3.5 h-3.5" />
-          <span>X account setup — required</span>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.18em] text-zinc-500 mb-2">
+              <Twitter className="w-3.5 h-3.5" />
+              <span>X account setup — required</span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-light text-white">
+              Link this agent&apos;s X account
+            </h1>
+            <p className="text-[13px] text-zinc-500 font-light mt-2 max-w-xl">
+              Generate 4 keys on developer.x.com, paste them here, click Link.
+              Done. No OAuth dance, no callback URLs to register, works on X
+              Free tier.
+            </p>
+          </div>
+          <Link
+            href="/docs/launchpad/agent-x-setup"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-light text-white transition hover:brightness-110 shrink-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+              boxShadow:
+                '0 0 0 1px rgba(131,110,249,0.5), 0 0 24px -8px rgba(131,110,249,0.7)',
+            }}
+          >
+            <BookOpen className="w-4 h-4" strokeWidth={1.75} />
+            Step-by-step guide
+          </Link>
         </div>
-        <h1 className="text-2xl md:text-3xl font-light text-white">
-          Link this agent&apos;s X account
-        </h1>
-        <p className="text-[13px] text-zinc-500 font-light mt-2 max-w-xl">
-          Generate 4 keys on developer.x.com, paste them here, click Link.
-          Done. No OAuth dance, no callback URLs to register, works on X
-          Free tier.
-        </p>
       </header>
 
       {oauthError && (
