@@ -219,12 +219,16 @@ export function PaymentConsentModal({
                 active={method === 'BOLTY'}
                 onClick={() => setMethod('BOLTY')}
                 title="BOLTY"
-                subtitle="Base network · cheaper"
+                subtitle="Base network · 97% to seller"
                 fee="3% fee"
                 accent="#836EF9"
                 highlighted
               />
             </div>
+            <p className="mt-2 text-[10.5px] font-light text-zinc-500 leading-relaxed">
+              Same buyer total either way. Choosing BOLTY routes more of the payment
+              to the seller (97% vs 93%), so paying in BOLTY rewards the creator.
+            </p>
           </div>
 
           {/* Warning / Info */}
@@ -411,6 +415,12 @@ function MethodCard({
         border: `1px solid ${active ? `${accent}80` : 'rgba(255,255,255,0.06)'}`,
       }}
     >
+      {/* Highlight badge — currently labels BOLTY as the seller-friendly
+       *  option. We deliberately don't say "CHEAPER" here: the buyer's
+       *  total is the same in either currency (the listing price IS the
+       *  buyer's cost regardless of method). The lower fee just means
+       *  more goes to the seller. Users were asking why "CHEAPER" still
+       *  showed the same total, so this label is now honest. */}
       {highlighted && !active && (
         <span
           className="absolute top-1.5 right-1.5 text-[8.5px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded"
@@ -420,7 +430,7 @@ function MethodCard({
             border: `1px solid ${accent}50`,
           }}
         >
-          Cheaper
+          More to seller
         </span>
       )}
       {active && (
