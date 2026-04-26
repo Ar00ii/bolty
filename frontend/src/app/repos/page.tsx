@@ -27,7 +27,10 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
+import {
+  PaymentConsentModal,
+  type PaymentMethod,
+} from '@/components/ui/payment-consent-modal';
 
 // three.js is ~150 kB minified. Defer it off the critical path so the first
 // render of /repos doesn't wait on the background decoration.
@@ -39,6 +42,12 @@ import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
+import { platformWeiForSeller } from '@/lib/payments/fees';
+import {
+  encodeErc20Transfer,
+  getBoltyTokenConfig,
+  usdToTokenUnits,
+} from '@/lib/wallet/bolty-token';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {
@@ -216,10 +225,8 @@ export default function ReposPage() {
     repo: Repository;
     sellerWallet: string;
     buyerAddress: string;
-    sellerWei: bigint;
-    platformWei: bigint;
-    totalWei: bigint;
-    totalUsd: number;
+    baseUsd: number;
+    boltyDisabled: boolean;
   } | null>(null);
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
@@ -446,17 +453,6 @@ export default function ReposPage() {
       setError('MetaMask not found');
       return;
     }
-    let ethPrice = 2000;
-    try {
-      const priceData = await api.get<{ price: number }>('/chart/eth-price');
-      if (priceData.price) ethPrice = priceData.price;
-    } catch {
-      /* fallback */
-    }
-    const totalUsd = repo.lockedPriceUsd;
-    const totalWei = BigInt(Math.ceil((totalUsd / ethPrice) * 1e18));
-    const sellerWei = (totalWei * BigInt(975)) / BigInt(1000);
-    const platformWei = totalWei - sellerWei;
     let buyerAddress: string;
     try {
       buyerAddress = await pickWallet();
@@ -469,16 +465,18 @@ export default function ReposPage() {
       repo,
       sellerWallet,
       buyerAddress,
-      sellerWei,
-      platformWei,
-      totalWei,
-      totalUsd,
+      baseUsd: repo.lockedPriceUsd,
+      boltyDisabled: !getBoltyTokenConfig(),
     });
   };
 
-  const executeRepoPurchase = async (signature: string, message: string) => {
+  const executeRepoPurchase = async (
+    signature: string,
+    message: string,
+    method: PaymentMethod,
+  ) => {
     if (!consentModal) return;
-    const { repo, sellerWallet, buyerAddress, sellerWei, platformWei } = consentModal;
+    const { repo, sellerWallet, buyerAddress, baseUsd } = consentModal;
     setConsentModal(null);
     const ethereum = getMetaMaskProvider();
     if (!ethereum) {
@@ -486,19 +484,78 @@ export default function ReposPage() {
       return;
     }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
+
+    const boltyCfg = method === 'BOLTY' ? getBoltyTokenConfig() : null;
+    if (method === 'BOLTY' && !boltyCfg) {
+      setError('BOLTY payments are not enabled — please retry with ETH');
+      return;
+    }
+
+    let sellerWei: bigint;
+    let platformWei: bigint;
     try {
-      const txHash = (await ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
-      })) as string;
+      if (boltyCfg) {
+        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
+      } else {
+        let ethPrice = 2000;
+        try {
+          const priceData = await api.get<{ price: number }>('/chart/eth-price');
+          if (priceData.price) ethPrice = priceData.price;
+        } catch {
+          /* fallback */
+        }
+        sellerWei = BigInt(Math.ceil((baseUsd / ethPrice) * 1e18));
+      }
+      platformWei = platformWeiForSeller(sellerWei, method);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not compute price');
+      return;
+    }
+
+    try {
+      const txHash = boltyCfg
+        ? ((await ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [
+              {
+                from: buyerAddress,
+                to: boltyCfg.address,
+                data: encodeErc20Transfer(sellerWallet, sellerWei),
+                value: '0x0',
+              },
+            ],
+          })) as string)
+        : ((await ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [
+              { from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) },
+            ],
+          })) as string);
+
       let platformFeeTxHash: string | undefined;
       if (platformWallet) {
-        platformFeeTxHash = (await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [
-            { from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) },
-          ],
-        })) as string;
+        platformFeeTxHash = boltyCfg
+          ? ((await ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [
+                {
+                  from: buyerAddress,
+                  to: boltyCfg.address,
+                  data: encodeErc20Transfer(platformWallet, platformWei),
+                  value: '0x0',
+                },
+              ],
+            })) as string)
+          : ((await ethereum.request({
+              method: 'eth_sendTransaction',
+              params: [
+                {
+                  from: buyerAddress,
+                  to: platformWallet,
+                  value: '0x' + platformWei.toString(16),
+                },
+              ],
+            })) as string);
       }
       const result = await api.post<{ success: boolean; downloadUrl?: string }>(
         `/repos/${repo.id}/purchase`,
@@ -1549,11 +1606,9 @@ export default function ReposPage() {
         <PaymentConsentModal
           listingTitle={consentModal.repo.name}
           sellerAddress={consentModal.sellerWallet}
-          sellerAmountETH={(Number(consentModal.sellerWei) / 1e18).toFixed(6)}
-          platformFeeETH={(Number(consentModal.platformWei) / 1e18).toFixed(6)}
-          totalETH={(Number(consentModal.totalWei) / 1e18).toFixed(6)}
-          totalUsd={consentModal.totalUsd.toFixed(2)}
+          baseUsd={consentModal.baseUsd}
           buyerAddress={consentModal.buyerAddress}
+          boltyDisabled={consentModal.boltyDisabled}
           onConsent={executeRepoPurchase}
           onCancel={() => setConsentModal(null)}
         />

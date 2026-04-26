@@ -1,61 +1,62 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Shield, AlertTriangle, Lock, X, Check } from 'lucide-react';
+import { Shield, AlertTriangle, Lock, X, Check, TrendingDown } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import {
+  feeUsdForBase,
+  FEE_BPS,
+  grossUsdForBase,
+  type PaymentMethod,
+} from '@/lib/payments/fees';
 import { isEscrowEnabled } from '@/lib/wallet/escrow';
 import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
-export type PaymentMethod = 'ETH' | 'BOLTY';
+export type { PaymentMethod };
 
 interface PaymentConsentModalProps {
   listingTitle: string;
   sellerAddress: string;
-  /** @deprecated fee breakdown is now computed from `totalETH` + selected method */
-  sellerAmountETH?: string;
-  /** @deprecated fee breakdown is now computed from `totalETH` + selected method */
-  platformFeeETH?: string;
-  totalETH: string;
-  totalUsd: string;
+  /** USD amount the seller takes home (= the listing price). */
+  baseUsd: number;
   buyerAddress: string;
+  /** When true, BOLTY option is hidden (token not configured for this build). */
+  boltyDisabled?: boolean;
   onConsent: (signature: string, message: string, paymentMethod: PaymentMethod) => void;
   onCancel: () => void;
 }
 
-// Base network dual-fee model: ETH = 7%, BOLTY = 3% (preferred).
-const FEE_BPS: Record<PaymentMethod, number> = { ETH: 700, BOLTY: 300 };
-
-function splitFee(totalStr: string, method: PaymentMethod): { seller: string; fee: string } {
-  const total = Number(totalStr);
-  if (!Number.isFinite(total) || total <= 0) return { seller: '0.000000', fee: '0.000000' };
-  const feeRate = FEE_BPS[method] / 10000;
-  const fee = total * feeRate;
-  const seller = total - fee;
-  return { seller: seller.toFixed(6), fee: fee.toFixed(6) };
+function fmtUsd(n: number): string {
+  if (!Number.isFinite(n)) return '—';
+  if (n >= 100) return n.toFixed(2);
+  if (n >= 1) return n.toFixed(2);
+  return n.toFixed(3);
 }
 
 export function PaymentConsentModal({
   listingTitle,
   sellerAddress,
-  totalETH,
-  totalUsd,
+  baseUsd,
   buyerAddress,
+  boltyDisabled = false,
   onConsent,
   onCancel,
 }: PaymentConsentModalProps) {
   const [signing, setSigning] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
-  // Default to BOLTY — it's the cheaper option we want to nudge users to.
-  const [method, setMethod] = useState<PaymentMethod>('BOLTY');
+  // Default to BOLTY when available — it's the strictly cheaper option.
+  const [method, setMethod] = useState<PaymentMethod>(boltyDisabled ? 'ETH' : 'BOLTY');
 
   const escrow = isEscrowEnabled();
-  const { seller: sellerAmount, fee: platformFee } = useMemo(
-    () => splitFee(totalETH, method),
-    [totalETH, method],
-  );
+
+  const ethTotal = useMemo(() => grossUsdForBase(baseUsd, 'ETH'), [baseUsd]);
+  const boltyTotal = useMemo(() => grossUsdForBase(baseUsd, 'BOLTY'), [baseUsd]);
+  const savingsUsd = ethTotal - boltyTotal;
+
+  const grossUsd = method === 'BOLTY' ? boltyTotal : ethTotal;
+  const platformFeeUsd = useMemo(() => feeUsdForBase(baseUsd, method), [baseUsd, method]);
   const feePct = method === 'ETH' ? '7%' : '3%';
-  const sellerPct = method === 'ETH' ? '93%' : '97%';
   const currency = method === 'ETH' ? 'ETH' : 'BOLTY';
 
   useEffect(() => {
@@ -117,10 +118,10 @@ export function PaymentConsentModal({
         `Listing: ${listingTitle}`,
         escrow ? 'Mode: ESCROW (funds held until delivery confirmed)' : 'Mode: DIRECT PAYMENT',
         '',
-        'PAYMENT BREAKDOWN:',
-        `  To seller:        ${sellerAmount} ${currency}  (${sellerPct})`,
-        `  Platform fee:     ${platformFee} ${currency}   (${feePct})`,
-        `  Total:            ${totalETH} ${currency}`,
+        'PAYMENT BREAKDOWN (USD-equivalent):',
+        `  Listing price (to seller):   $${fmtUsd(baseUsd)}`,
+        `  Platform fee (${feePct}):${' '.repeat(Math.max(1, 14 - feePct.length))}$${fmtUsd(platformFeeUsd)}`,
+        `  Total you pay:               $${fmtUsd(grossUsd)} (in ${currency})`,
         '',
         'BY SIGNING THIS DOCUMENT I CONFIRM:',
         ...escrowTerms,
@@ -206,29 +207,34 @@ export function PaymentConsentModal({
             <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">
               Choose payment method on Base
             </p>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className={`grid gap-2.5 ${boltyDisabled ? 'grid-cols-1' : 'grid-cols-2'}`}>
               <MethodCard
                 active={method === 'ETH'}
                 onClick={() => setMethod('ETH')}
                 title="ETH"
-                subtitle="Base network"
-                fee="7% fee"
+                subtitle={`7% fee · you pay $${fmtUsd(ethTotal)}`}
                 accent="#60a5fa"
               />
-              <MethodCard
-                active={method === 'BOLTY'}
-                onClick={() => setMethod('BOLTY')}
-                title="BOLTY"
-                subtitle="Base network · 97% to seller"
-                fee="3% fee"
-                accent="#836EF9"
-                highlighted
-              />
+              {!boltyDisabled && (
+                <MethodCard
+                  active={method === 'BOLTY'}
+                  onClick={() => setMethod('BOLTY')}
+                  title="BOLTY"
+                  subtitle={`3% fee · you pay $${fmtUsd(boltyTotal)}`}
+                  accent="#836EF9"
+                  badge={savingsUsd > 0 ? `Save $${fmtUsd(savingsUsd)}` : undefined}
+                  highlighted
+                />
+              )}
             </div>
-            <p className="mt-2 text-[10.5px] font-light text-zinc-500 leading-relaxed">
-              Same buyer total either way. Choosing BOLTY routes more of the payment
-              to the seller (97% vs 93%), so paying in BOLTY rewards the creator.
-            </p>
+            {!boltyDisabled && savingsUsd > 0 && (
+              <p className="mt-2 flex items-center gap-1.5 text-[10.5px] font-light text-zinc-400 leading-relaxed">
+                <TrendingDown className="w-3 h-3 text-emerald-400 shrink-0" strokeWidth={2} />
+                Paying in BOLTY costs $
+                {fmtUsd(savingsUsd)} less. The seller receives $
+                {fmtUsd(baseUsd)} either way — only the fee changes.
+              </p>
+            )}
           </div>
 
           {/* Warning / Info */}
@@ -275,34 +281,26 @@ export function PaymentConsentModal({
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-zinc-400">
-                  To seller <span className="text-zinc-600 font-mono text-xs">({sellerPct})</span>
-                </span>
-                <span className="text-white font-mono">
-                  {sellerAmount} {currency}
-                </span>
+                <span className="text-zinc-400">Listing price (to seller)</span>
+                <span className="text-white font-mono">${fmtUsd(baseUsd)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-zinc-400">
                   Platform fee <span className="text-zinc-600 font-mono text-xs">({feePct})</span>
                 </span>
-                <span className="text-white font-mono">
-                  {platformFee} {currency}
-                </span>
+                <span className="text-white font-mono">+ ${fmtUsd(platformFeeUsd)}</span>
               </div>
               <div
                 className="flex justify-between pt-2 border-t"
                 style={{ borderColor: 'rgba(255,255,255,0.06)' }}
               >
                 <span className="text-zinc-200 font-light">
-                  Total{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
+                  You pay{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
                 </span>
-                <div className="text-right">
-                  <span className="text-bolty-300 font-mono font-light">
-                    {totalETH} {currency}
-                  </span>
-                  <span className="text-zinc-500 font-mono text-xs ml-2">(≈ ${totalUsd} USD)</span>
-                </div>
+                <span className="text-bolty-300 font-mono font-light">
+                  ${fmtUsd(grossUsd)}{' '}
+                  <span className="text-zinc-500 text-xs">in {currency}</span>
+                </span>
               </div>
             </div>
           </div>
@@ -378,7 +376,7 @@ export function PaymentConsentModal({
                 border: '1px solid rgba(131,110,249,0.45)',
               }}
             >
-              {signing ? 'Signing…' : `Sign & pay with ${currency}`}
+              {signing ? 'Signing…' : `Sign & pay $${fmtUsd(grossUsd)} ${currency}`}
             </motion.button>
           </div>
         </motion.div>
@@ -387,22 +385,25 @@ export function PaymentConsentModal({
   );
 }
 
+// Keep FEE_BPS available to anyone still importing from this file.
+export { FEE_BPS };
+
 function MethodCard({
   active,
   onClick,
   title,
   subtitle,
-  fee,
   accent,
   highlighted,
+  badge,
 }: {
   active: boolean;
   onClick: () => void;
   title: string;
   subtitle: string;
-  fee: string;
   accent: string;
   highlighted?: boolean;
+  badge?: string;
 }) {
   return (
     <motion.button
@@ -415,13 +416,7 @@ function MethodCard({
         border: `1px solid ${active ? `${accent}80` : 'rgba(255,255,255,0.06)'}`,
       }}
     >
-      {/* Highlight badge — currently labels BOLTY as the seller-friendly
-       *  option. We deliberately don't say "CHEAPER" here: the buyer's
-       *  total is the same in either currency (the listing price IS the
-       *  buyer's cost regardless of method). The lower fee just means
-       *  more goes to the seller. Users were asking why "CHEAPER" still
-       *  showed the same total, so this label is now honest. */}
-      {highlighted && !active && (
+      {highlighted && !active && badge && (
         <span
           className="absolute top-1.5 right-1.5 text-[8.5px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded"
           style={{
@@ -430,7 +425,7 @@ function MethodCard({
             border: `1px solid ${accent}50`,
           }}
         >
-          More to seller
+          {badge}
         </span>
       )}
       {active && (
@@ -444,13 +439,7 @@ function MethodCard({
       <div className="flex items-center gap-1.5">
         <span className="text-sm font-light text-white">{title}</span>
       </div>
-      <p className="text-[10px] text-zinc-500 mt-0.5 leading-snug">{subtitle}</p>
-      <p
-        className="text-[11px] font-mono mt-1.5"
-        style={{ color: active ? accent : 'rgba(255,255,255,0.5)' }}
-      >
-        {fee}
-      </p>
+      <p className="text-[10.5px] text-zinc-500 mt-1 leading-snug">{subtitle}</p>
     </motion.button>
   );
 }
