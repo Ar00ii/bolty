@@ -6,9 +6,9 @@ import {
   X,
   ChevronDown,
   Sparkles,
-  ShoppingBag,
   Bot,
   GitBranch,
+  Rocket,
   BookOpen,
   User,
   KeyRound,
@@ -28,8 +28,12 @@ import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { useAuth } from '@/lib/auth/AuthProvider';
 
+// Top nav for the public landing pages. Marketplace was demoted off
+// the top bar — at this stage Launchpad is the wedge we want every
+// new visitor to land on first. Agents + Repos still link straight
+// to the marketplace sub-pages so the surface isn't lost.
 const NAV_LINKS = [
-  { href: '/market', label: 'Marketplace', icon: ShoppingBag },
+  { href: '/launchpad', label: 'Launchpad', icon: Rocket },
   { href: '/market/agents', label: 'Agents', icon: Bot },
   { href: '/market/repos', label: 'Repos', icon: GitBranch },
   { href: '/docs/agent-protocol', label: 'Docs', icon: BookOpen },

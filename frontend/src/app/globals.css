@@ -3953,26 +3953,41 @@ aside button[data-active='true']::after {
   .mk-app .mk-hero__sub {
     font-size: 12.5px;
   }
+  /* Mobile: keep the inline strip but allow horizontal scroll instead
+   * of stacking into a 2x2 grid that took half the screen vertically.
+   * Each stat shrinks; the strip scrolls if it overflows. */
   .mk-app .mk-stats {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
+    display: flex !important;
+    grid-template-columns: none;
     width: 100%;
     max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .mk-app .mk-stats::-webkit-scrollbar {
+    display: none;
   }
   .mk-app .mk-stat {
     min-width: 0 !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--app-border);
-    padding: 10px 14px;
+    flex-shrink: 0;
+    padding: 2px 14px;
+    border-bottom: none !important;
+    border-left: 1px solid var(--app-border);
+  }
+  .mk-app .mk-stat:first-child {
+    border-left: none;
+    padding-left: 0;
   }
   .mk-app .mk-stat:nth-child(odd) {
-    border-right: 1px solid var(--app-border) !important;
+    border-right: none !important;
   }
-  .mk-app .mk-stat:nth-last-child(-n + 2) {
-    border-bottom: none;
+  .mk-app .mk-stat__label {
+    font-size: 9.5px;
   }
   .mk-app .mk-stat__value {
-    font-size: 18px;
+    font-size: 15px;
+    margin-top: 4px;
   }
   .mk-app .mk-toolbar {
     gap: 8px;
@@ -4146,41 +4161,46 @@ aside button[data-active='true']::after {
   max-width: 560px;
   line-height: 1.5;
 }
+/* App-style stat strip. April 2026 redesign:
+ *   • dropped the bordered card wrapper — was reading as a chunky
+ *     bubble container that fought every other surface on the page
+ *   • stats are now an inline row separated by thin vertical dividers
+ *   • values lead with a distinct purple accent at the start so the
+ *     row has personality without re-introducing borders
+ */
 .mk-app .mk-stats {
-  margin-top: 18px;
+  margin-top: 14px;
   display: flex;
   gap: 0;
-  border: 1px solid var(--app-border);
-  border-radius: var(--app-radius);
-  background: var(--app-surface);
-  overflow: hidden;
   width: fit-content;
   max-width: 100%;
 }
 .mk-app .mk-stat {
-  padding: 12px 20px;
-  border-right: 1px solid var(--app-border);
-  min-width: 140px;
+  position: relative;
+  padding: 4px 22px;
+  min-width: 0;
+  border-left: 1px solid var(--app-border);
 }
-.mk-app .mk-stat:last-child {
-  border-right: none;
+.mk-app .mk-stat:first-child {
+  border-left: none;
+  padding-left: 0;
 }
 .mk-app .mk-stat__label {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--app-text-mute);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   font-weight: 600;
 }
 .mk-app .mk-stat__value {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--app-text);
-  margin-top: 4px;
+  margin-top: 6px;
   font-variant-numeric: tabular-nums;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: baseline;
+  gap: 6px;
   line-height: 1;
 }
 .mk-app .mk-stat__dot {
