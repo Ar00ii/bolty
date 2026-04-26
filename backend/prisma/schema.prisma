@@ -1104,7 +1104,89 @@ model AgentXConnection {
   postsLast24h     Int      @default(0)
   postsWindowStart DateTime @default(now())
 
+  // ── Autonomous tweeting (Phase 2) ──
+  // When `autonomousEnabled` is true, a backend cron polls the
+  // listing's agent webhook every `postIntervalHours` and lets the
+  // agent decide whether to tweet about its token. When
+  // `requireApproval` is true (default), the agent's tweet proposals
+  // land in `scheduledPosts` for a human click before posting; when
+  // false the cron posts directly. `mentionsEnabled` opts the listing
+  // into reply-to-mentions polling.
+  autonomousEnabled    Boolean   @default(false)
+  postIntervalHours    Int       @default(24)
+  requireApproval      Boolean   @default(true)
+  mentionsEnabled      Boolean   @default(false)
+  lastAutonomousAt     DateTime?
+  mentionsLastSyncedAt DateTime?
+  // Last X tweet id we replied-to / acknowledged. Used as the
+  // since_id pointer when polling /2/users/:id/mentions so we don't
+  // process the same mention twice.
+  lastMentionId        String?
+
+  scheduledPosts AgentXScheduledPost[]
+
   @@map("agent_x_connections")
+}
+
+// ─── Autonomous tweet queue ──────────────────────────────────────────────────
+//
+// Every time the autonomous cron (or a manual decide-now hit) asks the
+// agent webhook "should you tweet?", the agent's reply is materialised
+// here. If the listing has `requireApproval = true` the row stays in
+// PENDING_APPROVAL until a human clicks Approve / Reject; otherwise it
+// is posted immediately and lands in POSTED (or FAILED with the X
+// error verbatim).
+//
+// The same table backs mention-reply proposals (triggerType =
+// MENTION_REPLY, with `inReplyToTweetId` set) so the queue UI is
+// uniform.
+model AgentXScheduledPost {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // FK to AgentXConnection.listingId — the listing's X connection
+  // owns the queue. Cascade-delete so disconnecting the X account
+  // also clears the queue.
+  listingId  String
+  connection AgentXConnection @relation(fields: [listingId], references: [listingId], onDelete: Cascade)
+
+  text          String  @db.Text
+  reason        String? @db.Text
+  // Token / mention context the agent saw at decision time. Kept so
+  // we can replay or audit "why did the agent suggest this tweet".
+  context       Json?
+
+  status      AgentXPostStatus  @default(PENDING_APPROVAL)
+  triggerType AgentXPostTrigger @default(SCHEDULED)
+
+  // Only set when triggerType = MENTION_REPLY — the X tweet id we are
+  // replying to.
+  inReplyToTweetId String?
+
+  // Filled once posted: X's tweet id + when it was posted. On failure
+  // we capture the verbatim X error so the queue UI can render it.
+  tweetId       String?
+  failureReason String?   @db.Text
+  postedAt      DateTime?
+
+  @@index([listingId, status])
+  @@index([createdAt])
+  @@map("agent_x_scheduled_posts")
+}
+
+enum AgentXPostStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  POSTED
+  FAILED
+}
+
+enum AgentXPostTrigger {
+  SCHEDULED
+  MENTION_REPLY
+  MANUAL
 }
 
 // ─── AI Agents (User-owned buyer negotiation agents) ────────────────────────────

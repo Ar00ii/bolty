@@ -1,6 +1,17 @@
 'use client';
 
-import { BookOpen, CheckCircle2, ExternalLink, KeyRound, Loader2, Twitter } from 'lucide-react';
+import {
+  Bot,
+  BookOpen,
+  Check,
+  CheckCircle2,
+  ExternalLink,
+  KeyRound,
+  Loader2,
+  PlayCircle,
+  Twitter,
+  X as XIcon,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useState } from 'react';
@@ -347,6 +358,12 @@ function SetupXContent() {
         </div>
       )}
 
+      {/* Phase 2 — autonomous tweeting. Only renders once X is linked
+          via OAuth 1.0a, the only auth path that can reliably post. */}
+      {status?.connected && status.authMethod === 'oauth1' && (
+        <AutonomousPanel listingId={listingId} />
+      )}
+
       <div className="mt-8 flex items-center justify-between flex-wrap gap-3">
         <Link
           href={`/market/agents/${listingId}`}
@@ -422,6 +439,412 @@ function Section({
       </div>
       {children}
     </section>
+  );
+}
+
+/**
+ * Phase 2 panel — autonomous tweet config + the approval queue.
+ *
+ * Two columns of UX:
+ *  1. Toggles + interval slider that PATCH /social/agent-x/:listingId/autonomous
+ *  2. Pending tweets list (when requireApproval=true) with Approve/Reject
+ *
+ * Purposefully kept as a sub-component of setup-x rather than its own
+ * page so the seller flips on autonomy in the same place they paste
+ * keys. Keeps the mental model "your agent's X account, all knobs in
+ * one screen."
+ */
+function AutonomousPanel({ listingId }: { listingId: string }) {
+  type Config = {
+    autonomousEnabled: boolean;
+    postIntervalHours: number;
+    requireApproval: boolean;
+    mentionsEnabled: boolean;
+    lastAutonomousAt: string | null;
+    mentionsLastSyncedAt: string | null;
+  };
+  type Queued = {
+    id: string;
+    text: string;
+    reason: string | null;
+    status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED' | 'POSTED' | 'FAILED';
+    triggerType: 'SCHEDULED' | 'MENTION_REPLY' | 'MANUAL';
+    inReplyToTweetId: string | null;
+    createdAt: string;
+    failureReason: string | null;
+    tweetId: string | null;
+  };
+
+  const [config, setConfig] = useState<Config | null>(null);
+  const [queue, setQueue] = useState<Queued[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [decideBusy, setDecideBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [decideMsg, setDecideMsg] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    try {
+      const [cfg, q] = await Promise.all([
+        api.get<Config>(`/social/agent-x/${listingId}/autonomous`),
+        api.get<Queued[]>(`/social/agent-x/${listingId}/queue`),
+      ]);
+      setConfig(cfg);
+      setQueue(q);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'failed to load autonomous config');
+    }
+  }, [listingId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const patch = useCallback(
+    async (changes: Partial<Config>) => {
+      if (!config) return;
+      setBusy(true);
+      setError(null);
+      // Optimistic — flip locally so toggles feel instant, revert on error.
+      const next = { ...config, ...changes };
+      setConfig(next);
+      try {
+        await api.patch(`/social/agent-x/${listingId}/autonomous`, changes);
+      } catch (err) {
+        setConfig(config);
+        setError(err instanceof ApiError ? err.message : 'update failed');
+      } finally {
+        setBusy(false);
+      }
+    },
+    [config, listingId],
+  );
+
+  const approve = useCallback(
+    async (postId: string) => {
+      try {
+        await api.post(`/social/agent-x/${listingId}/queue/${postId}/approve`, {});
+        await refresh();
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'approve failed');
+      }
+    },
+    [listingId, refresh],
+  );
+
+  const reject = useCallback(
+    async (postId: string) => {
+      try {
+        await api.post(`/social/agent-x/${listingId}/queue/${postId}/reject`, {});
+        await refresh();
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'reject failed');
+      }
+    },
+    [listingId, refresh],
+  );
+
+  const decideNow = useCallback(async () => {
+    setDecideBusy(true);
+    setDecideMsg(null);
+    setError(null);
+    try {
+      const res = await api.post<{ queued: boolean; postId?: string; reason?: string }>(
+        `/social/agent-x/${listingId}/decide-now`,
+        {},
+      );
+      if (res.queued) {
+        setDecideMsg('Agent decided to tweet — proposal added to the queue.');
+        await refresh();
+      } else {
+        setDecideMsg(`Agent declined: ${res.reason ?? 'no reason given'}`);
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'decide-now failed');
+    } finally {
+      setDecideBusy(false);
+    }
+  }, [listingId, refresh]);
+
+  if (!config) {
+    return (
+      <div className="mt-6 text-[12px] text-zinc-500 font-light">
+        <Loader2 className="w-3 h-3 animate-spin inline mr-1.5" />
+        Loading autonomous settings…
+      </div>
+    );
+  }
+
+  const pending = queue.filter((q) => q.status === 'PENDING_APPROVAL');
+  const recent = queue.filter((q) => q.status !== 'PENDING_APPROVAL').slice(0, 5);
+
+  return (
+    <div className="mt-8 space-y-5">
+      <Section
+        index="03"
+        title="Let the AI agent post on its own"
+        subtitle="Cron asks your agent every N hours whether to tweet. Optional human approval before each post."
+      >
+        {error && (
+          <div className="mb-3 rounded-lg p-2.5 text-[11.5px] text-rose-300 font-light"
+            style={{ background: 'rgba(239,68,68,0.06)', boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)' }}
+          >
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <ToggleRow
+            label="Enable autonomous posting"
+            sub="Bolty calls your agent webhook on schedule with token context. Agent decides if/what to tweet."
+            checked={config.autonomousEnabled}
+            disabled={busy}
+            onChange={(v) => patch({ autonomousEnabled: v })}
+          />
+          <IntervalRow
+            value={config.postIntervalHours}
+            disabled={busy || !config.autonomousEnabled}
+            onChange={(v) => patch({ postIntervalHours: v })}
+          />
+          <ToggleRow
+            label="Require human approval before posting"
+            sub="When ON: tweet proposals queue here and you click Approve. When OFF: agent posts directly."
+            checked={config.requireApproval}
+            disabled={busy || !config.autonomousEnabled}
+            onChange={(v) => patch({ requireApproval: v })}
+          />
+          <ToggleRow
+            label="Reply to mentions"
+            sub="Bolty polls your @handle every 5 min. New mentions go to your agent for an optional reply."
+            checked={config.mentionsEnabled}
+            disabled={busy || !config.autonomousEnabled}
+            onChange={(v) => patch({ mentionsEnabled: v })}
+          />
+
+          <div className="pt-2 flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={decideNow}
+              disabled={decideBusy || !config.autonomousEnabled}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-light text-white transition disabled:opacity-50"
+              style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}
+            >
+              {decideBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
+              Ask agent now (test)
+            </button>
+            {decideMsg && (
+              <span className="text-[11.5px] text-zinc-400 font-light">{decideMsg}</span>
+            )}
+          </div>
+        </div>
+      </Section>
+
+      {config.autonomousEnabled && config.requireApproval && (
+        <Section
+          index="04"
+          title={`Pending tweets — ${pending.length}`}
+          subtitle="Click Approve to post · Reject to drop. Posting drains your X dev account credits (~$0.015 each)."
+        >
+          {pending.length === 0 ? (
+            <div className="text-[12px] text-zinc-500 font-light italic">
+              No proposals waiting. The cron checks every hour — try &quot;Ask agent now&quot; above to test.
+            </div>
+          ) : (
+            <ul className="space-y-2">
+              {pending.map((p) => (
+                <QueueItem
+                  key={p.id}
+                  item={p}
+                  onApprove={() => approve(p.id)}
+                  onReject={() => reject(p.id)}
+                />
+              ))}
+            </ul>
+          )}
+        </Section>
+      )}
+
+      {config.autonomousEnabled && recent.length > 0 && (
+        <Section
+          index={config.requireApproval ? '05' : '04'}
+          title="Recent autonomous activity"
+          subtitle="Last 5 results. Failed rows include the verbatim X error so you can diagnose."
+        >
+          <ul className="space-y-2">
+            {recent.map((p) => (
+              <RecentItem key={p.id} item={p} />
+            ))}
+          </ul>
+        </Section>
+      )}
+    </div>
+  );
+}
+
+function ToggleRow({
+  label,
+  sub,
+  checked,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  sub: string;
+  checked: boolean;
+  disabled?: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <label className="flex items-start justify-between gap-3 cursor-pointer select-none">
+      <div className="flex-1">
+        <div className="text-[12.5px] text-white font-light">{label}</div>
+        <div className="text-[11px] text-zinc-500 font-light">{sub}</div>
+      </div>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition disabled:opacity-50 ${
+          checked ? 'bg-[#836EF9]' : 'bg-zinc-700'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
+            checked ? 'left-[18px]' : 'left-0.5'
+          }`}
+        />
+      </button>
+    </label>
+  );
+}
+
+function IntervalRow({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: number;
+  disabled?: boolean;
+  onChange: (v: number) => void;
+}) {
+  const presets = [1, 6, 12, 24, 48];
+  return (
+    <div>
+      <div className="text-[12.5px] text-white font-light">Post interval</div>
+      <div className="text-[11px] text-zinc-500 font-light mb-2">
+        Minimum hours between autonomous posts. Agent may still decline.
+      </div>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {presets.map((h) => (
+          <button
+            key={h}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(h)}
+            className={`px-2.5 py-1 rounded-md text-[11.5px] font-light transition disabled:opacity-50 ${
+              value === h
+                ? 'bg-[#836EF9]/20 text-white'
+                : 'bg-white/5 text-zinc-400 hover:text-white'
+            }`}
+            style={{
+              boxShadow: value === h ? 'inset 0 0 0 1px rgba(131,110,249,0.5)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+            }}
+          >
+            {h === 1 ? '1 h' : h === 24 ? '24 h (daily)' : `${h} h`}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function QueueItem({
+  item,
+  onApprove,
+  onReject,
+}: {
+  item: { id: string; text: string; reason: string | null; triggerType: string; inReplyToTweetId: string | null; createdAt: string };
+  onApprove: () => void;
+  onReject: () => void;
+}) {
+  const [busy, setBusy] = useState<'approve' | 'reject' | null>(null);
+  const handle = async (which: 'approve' | 'reject', cb: () => void | Promise<void>) => {
+    setBusy(which);
+    try {
+      await cb();
+    } finally {
+      setBusy(null);
+    }
+  };
+  return (
+    <li
+      className="rounded-lg p-3"
+      style={{ background: 'rgba(255,255,255,0.03)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)' }}
+    >
+      <div className="flex items-center gap-2 mb-1.5 text-[11px] text-zinc-500 font-light">
+        <Bot className="w-3 h-3" />
+        {item.triggerType === 'MENTION_REPLY' ? 'Reply to mention' : item.triggerType === 'MANUAL' ? 'Manual trigger' : 'Scheduled'}
+        <span className="text-zinc-700">·</span>
+        <span>{new Date(item.createdAt).toLocaleString()}</span>
+      </div>
+      <div className="text-[12.5px] text-zinc-200 font-light whitespace-pre-wrap">{item.text}</div>
+      {item.reason && (
+        <div className="mt-1.5 text-[11px] text-zinc-500 italic font-light">Why: {item.reason}</div>
+      )}
+      <div className="mt-2.5 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => handle('approve', onApprove)}
+          disabled={busy !== null}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-emerald-300 font-light transition disabled:opacity-50"
+          style={{ background: 'rgba(34,197,94,0.08)', boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.25)' }}
+        >
+          {busy === 'approve' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+          Approve & post
+        </button>
+        <button
+          type="button"
+          onClick={() => handle('reject', onReject)}
+          disabled={busy !== null}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11.5px] text-rose-300 font-light transition disabled:opacity-50"
+          style={{ background: 'rgba(239,68,68,0.06)', boxShadow: 'inset 0 0 0 1px rgba(239,68,68,0.25)' }}
+        >
+          {busy === 'reject' ? <Loader2 className="w-3 h-3 animate-spin" /> : <XIcon className="w-3 h-3" />}
+          Reject
+        </button>
+      </div>
+    </li>
+  );
+}
+
+function RecentItem({
+  item,
+}: {
+  item: { id: string; text: string; status: string; tweetId: string | null; failureReason: string | null; createdAt: string };
+}) {
+  const colour = item.status === 'POSTED' ? '#22c55e' : item.status === 'FAILED' ? '#ef4444' : '#a1a1aa';
+  return (
+    <li
+      className="rounded-lg p-3"
+      style={{
+        background: 'rgba(255,255,255,0.03)',
+        boxShadow: `inset 0 0 0 1px ${colour}33`,
+      }}
+    >
+      <div className="flex items-center gap-2 mb-1 text-[11px] font-light" style={{ color: colour }}>
+        {item.status === 'POSTED' ? '✓ Posted' : item.status === 'FAILED' ? '✗ Failed' : '— ' + item.status}
+        <span className="text-zinc-700">·</span>
+        <span className="text-zinc-500">{new Date(item.createdAt).toLocaleString()}</span>
+      </div>
+      <div className="text-[12px] text-zinc-300 font-light whitespace-pre-wrap">{item.text}</div>
+      {item.failureReason && (
+        <div className="mt-1.5 text-[11px] text-rose-300/80 font-light">
+          {item.failureReason}
+        </div>
+      )}
+    </li>
   );
 }
 

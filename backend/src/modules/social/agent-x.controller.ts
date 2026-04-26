@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   Res,
@@ -18,6 +19,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { SkipCsrf } from '../../common/guards/csrf.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
+import { AgentXAutonomousService } from './agent-x-autonomous.service';
 import { AgentXService } from './agent-x.service';
 
 /**
@@ -31,7 +33,10 @@ import { AgentXService } from './agent-x.service';
  */
 @Controller('social/agent-x')
 export class AgentXController {
-  constructor(private readonly agentX: AgentXService) {}
+  constructor(
+    private readonly agentX: AgentXService,
+    private readonly autonomous: AgentXAutonomousService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
@@ -145,6 +150,93 @@ export class AgentXController {
     await this.agentX.assertOwner(listingId, userId);
     await this.agentX.disconnect(listingId);
     return { ok: true };
+  }
+
+  // ─── Phase 2 — autonomous tweeting ──────────────────────────────────
+
+  /** Get the seller's autonomous-mode prefs for a listing. Drives the
+   *  toggles in the setup-x autonomous panel. */
+  @UseGuards(JwtAuthGuard)
+  @Get(':listingId/autonomous')
+  async autonomousConfig(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.autonomous.getConfig(listingId);
+  }
+
+  /** Patch any subset of the autonomous prefs. Used by the toggles +
+   *  interval slider in the autonomous panel. */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Patch(':listingId/autonomous')
+  async updateAutonomous(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+    @Body() body: {
+      autonomousEnabled?: boolean;
+      postIntervalHours?: number;
+      requireApproval?: boolean;
+      mentionsEnabled?: boolean;
+    },
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.autonomous.updateConfig(listingId, body ?? {});
+  }
+
+  /** List queued / posted / failed proposals. The frontend calls this
+   *  with `?status=PENDING_APPROVAL` to render the approval tray and
+   *  with no filter to render history. */
+  @UseGuards(JwtAuthGuard)
+  @Get(':listingId/queue')
+  async listQueue(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+    @Query('status') status?: string,
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    const validStatuses = ['PENDING_APPROVAL', 'POSTED', 'FAILED', 'REJECTED'] as const;
+    type Q = (typeof validStatuses)[number];
+    const q = status && (validStatuses as readonly string[]).includes(status) ? (status as Q) : undefined;
+    return this.autonomous.listQueue(listingId, q);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Post(':listingId/queue/:postId/approve')
+  async approve(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+    @Param('postId') postId: string,
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.autonomous.approve(listingId, postId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Post(':listingId/queue/:postId/reject')
+  async reject(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+    @Param('postId') postId: string,
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.autonomous.reject(listingId, postId);
+  }
+
+  /** Manual "ask the agent now" trigger — useful for the seller to
+   *  test the webhook contract without waiting up to N hours. */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Post(':listingId/decide-now')
+  async decideNow(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.autonomous.decideNow(listingId);
   }
 }
 

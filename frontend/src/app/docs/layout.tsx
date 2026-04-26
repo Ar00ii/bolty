@@ -14,6 +14,7 @@ const NAV = [
   { href: '/docs/launchpad', label: 'Launchpad' },
   { href: '/docs/launchpad/agent-x', label: 'Agent X account' },
   { href: '/docs/launchpad/agent-x-setup', label: 'Agent X — setup guide' },
+  { href: '/docs/launchpad/agent-x-autonomous', label: 'Agent X — autonomous mode' },
 ];
 
 export default function DocsLayout({ children }: { children: React.ReactNode }) {
