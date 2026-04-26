@@ -400,6 +400,41 @@ export class AgentXService {
     return { ok: true, screenName };
   }
 
+  /** Public alias of {@link loadOauth1Creds} for the autonomous service
+   *  to reuse the decryption path without duplicating it. Same return
+   *  shape: null when the listing is not on OAuth 1.0a. */
+  async loadOauth1CredsForListing(listingId: string): Promise<Oauth1Credentials | null> {
+    return this.loadOauth1Creds(listingId);
+  }
+
+  /** Public OAuth 1.0a header builder so the autonomous service can
+   *  sign read-paths (mentions list, profile lookups) without
+   *  re-importing the util everywhere. */
+  buildOauth1Header(
+    method: string,
+    url: string,
+    params: Record<string, string>,
+    creds: Oauth1Credentials,
+  ): string {
+    return buildAuthHeader(method, url, params, creds);
+  }
+
+  /** Public wrapper around {@link postTweetOauth1} for the autonomous
+   *  service. Optionally takes `inReplyToTweetId` so a queued mention
+   *  reply threads under the original tweet via X's reply.in_reply_to
+   *  field. */
+  async postTweetForListing(
+    listingId: string,
+    text: string,
+    opts?: { inReplyToTweetId?: string },
+  ): Promise<{ id: string; text: string }> {
+    const creds = await this.loadOauth1Creds(listingId);
+    if (!creds) {
+      throw new ForbiddenException('Listing has no OAuth 1.0a credentials configured');
+    }
+    return this.postTweetOauth1(listingId, creds, text, opts);
+  }
+
   /** Internal — pull decrypted OAuth 1.0a creds for a listing, or null
    *  if the row is configured for OAuth 2.0 instead. */
   private async loadOauth1Creds(listingId: string): Promise<Oauth1Credentials | null> {
@@ -422,11 +457,15 @@ export class AgentXService {
   }
 
   /** Post a tweet via OAuth 1.0a. Same return shape as the OAuth 2
-   *  postTweet so the launch-tweet caller is auth-agnostic. */
+   *  postTweet so the launch-tweet caller is auth-agnostic. When
+   *  `opts.inReplyToTweetId` is set the request includes the v2
+   *  `reply.in_reply_to_tweet_id` field so the tweet threads as a
+   *  reply (used by the autonomous service for mention replies). */
   private async postTweetOauth1(
     listingId: string,
     creds: Oauth1Credentials,
     text: string,
+    opts?: { inReplyToTweetId?: string },
   ): Promise<{ id: string; text: string }> {
     const trimmed = (text ?? '').trim();
     if (!trimmed) throw new BadRequestException('empty tweet');
@@ -438,11 +477,16 @@ export class AgentXService {
     const url = AgentXService.TWEETS_URL;
     const authHeader = buildAuthHeader('POST', url, {}, creds);
 
+    const payload: Record<string, unknown> = { text: trimmed };
+    if (opts?.inReplyToTweetId) {
+      payload.reply = { in_reply_to_tweet_id: opts.inReplyToTweetId };
+    }
+
     let res;
     try {
       res = await axios.post(
         url,
-        { text: trimmed },
+        payload,
         {
           headers: {
             Authorization: authHeader,
