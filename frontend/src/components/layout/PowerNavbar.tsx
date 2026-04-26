@@ -520,31 +520,59 @@ export function PowerNavbar() {
                   </div>
                   {sect.items.map((item) => {
                     const Icon = item.icon;
-                    const active = isItemActive(
-                      pathname,
-                      searchParams ?? new URLSearchParams(),
-                      item.href,
-                    );
+                    const params = searchParams ?? new URLSearchParams();
+                    const active = isItemActive(pathname, params, item.href);
                     return (
-                      <Link
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setNavDrawerOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors"
-                        style={{
-                          color: active ? '#e4e4e7' : '#a1a1aa',
-                          background: active ? 'rgba(131,110,249,0.10)' : 'transparent',
-                          fontSize: '14px',
-                          fontWeight: 300,
-                        }}
-                      >
-                        <Icon
-                          className="w-[15px] h-[15px] shrink-0"
-                          style={{ color: active ? '#a594ff' : '#71717a' }}
-                          strokeWidth={1.75}
-                        />
-                        <span className="flex-1 truncate">{item.label}</span>
-                      </Link>
+                      <React.Fragment key={item.label}>
+                        <Link
+                          href={item.href}
+                          onClick={() => setNavDrawerOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors"
+                          style={{
+                            color: active ? '#e4e4e7' : '#a1a1aa',
+                            background: active ? 'rgba(131,110,249,0.10)' : 'transparent',
+                            fontSize: '14px',
+                            fontWeight: 300,
+                          }}
+                        >
+                          <Icon
+                            className="w-[15px] h-[15px] shrink-0"
+                            style={{ color: active ? '#a594ff' : '#71717a' }}
+                            strokeWidth={1.75}
+                          />
+                          <span className="flex-1 truncate">{item.label}</span>
+                        </Link>
+                        {item.children?.map((child) => {
+                          const ChildIcon = child.icon;
+                          const childActive = isItemActive(pathname, params, child.href);
+                          return (
+                            <Link
+                              key={child.href}
+                              href={child.href}
+                              onClick={() => setNavDrawerOpen(false)}
+                              className="flex items-center gap-3 ml-6 pl-3 pr-3 py-2 rounded-md transition-colors relative"
+                              style={{
+                                color: childActive ? '#e4e4e7' : '#a1a1aa',
+                                background: childActive
+                                  ? 'rgba(131,110,249,0.10)'
+                                  : 'transparent',
+                                fontSize: '13px',
+                                fontWeight: 300,
+                                borderLeft: '1px solid #1f1f23',
+                              }}
+                            >
+                              {ChildIcon && (
+                                <ChildIcon
+                                  className="w-[14px] h-[14px] shrink-0"
+                                  style={{ color: childActive ? '#a594ff' : '#71717a' }}
+                                  strokeWidth={1.75}
+                                />
+                              )}
+                              <span className="flex-1 truncate">{child.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </React.Fragment>
                     );
                   })}
                 </div>
