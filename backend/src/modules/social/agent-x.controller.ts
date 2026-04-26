@@ -49,6 +49,31 @@ export class AgentXController {
     );
   }
 
+  /** Simpler "paste 4 keys" auth path. Verifies the keys against
+   *  /2/users/me, captures the screen name on success, no OAuth dance.
+   *  This is the path that works on X Free tier. */
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Post(':listingId/setup-oauth1')
+  async setupOauth1(
+    @CurrentUser('id') userId: string,
+    @Param('listingId') listingId: string,
+    @Body() body: {
+      consumerKey?: string;
+      consumerSecret?: string;
+      accessToken?: string;
+      accessTokenSecret?: string;
+    },
+  ) {
+    await this.agentX.assertOwner(listingId, userId);
+    return this.agentX.saveOauth1Credentials(listingId, {
+      consumerKey: (body?.consumerKey ?? '').trim(),
+      consumerSecret: (body?.consumerSecret ?? '').trim(),
+      accessToken: (body?.accessToken ?? '').trim(),
+      accessTokenSecret: (body?.accessTokenSecret ?? '').trim(),
+    });
+  }
+
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Get(':listingId/connect-url')

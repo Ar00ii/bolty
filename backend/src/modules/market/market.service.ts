@@ -452,11 +452,21 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     // lands on a card whose auto-tweet capability is half-built. We
     // gate on accessTokenEnc because that's the field that flips
     // non-null exactly when OAuth completes.
+    // AI_AGENT is visible publicly when EITHER OAuth path completed:
+    //  - OAuth 2.0 → accessTokenEnc not null
+    //  - OAuth 1.0a (BYO 4 keys) → oauth1AccessTokenEnc not null
     where.OR = [
       { type: { not: 'AI_AGENT' } },
       {
         type: 'AI_AGENT',
-        agentXConnection: { is: { accessTokenEnc: { not: null } } },
+        agentXConnection: {
+          is: {
+            OR: [
+              { accessTokenEnc: { not: null } },
+              { oauth1AccessTokenEnc: { not: null } },
+            ],
+          },
+        },
       },
     ];
 
