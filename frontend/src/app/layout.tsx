@@ -133,19 +133,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
         />
-        {/* Non-blocking Geist + Geist Mono. The `media="print"` trick lets the
-             browser fetch the stylesheet in the background without blocking
-             the initial paint; the onLoad handler promotes it to `all` once
-             ready. Fontshare's "General Sans" + "Clash Display" links were
-             dropped — the few spots that used General Sans now fall back to
-             Inter, which is visually close and already loaded. */}
+        {/* Non-blocking Geist + Geist Mono. React 18 rejects string event
+             handlers (`onLoad="..."` would crash hydration with error
+             #231), so the async-CSS swap is injected client-side via a
+             tiny inline script. <noscript> below covers JS-disabled. */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
-          media="print"
-          // @ts-expect-error onLoad swap trick for async CSS
-          onLoad="this.media='all'"
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap';l.media='print';l.onload=function(){this.media='all';};document.head.appendChild(l);})();`,
+          }}
         />
         <noscript>
           <link
