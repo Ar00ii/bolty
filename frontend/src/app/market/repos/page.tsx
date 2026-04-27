@@ -1217,7 +1217,7 @@ function ReposMarketPageContent() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'mine' ? 'mine' : 'market';
+  const initialTab = searchParams?.get('tab') === 'mine' ? 'mine' : 'market';
   const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
 
   const [activeTab, setActiveTab] = useState<'market' | 'mine'>(initialTab);
@@ -1253,7 +1253,7 @@ function ReposMarketPageContent() {
   } | null>(null);
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams?.get('tab');
     setActiveTab(tab === 'mine' ? 'mine' : 'market');
   }, [searchParams]);
 

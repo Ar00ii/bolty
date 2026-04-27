@@ -193,7 +193,7 @@ function InventoryPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialTab: Tab = useMemo(() => {
-    const t = searchParams.get('tab');
+    const t = searchParams?.get('tab');
     return t === 'purchased' || t === 'saved' || t === 'rays' ? t : 'published';
   }, [searchParams]);
   const { isAuthenticated, isLoading } = useRequireAuth({
