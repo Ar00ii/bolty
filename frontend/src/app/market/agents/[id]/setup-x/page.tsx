@@ -51,8 +51,8 @@ function SetupXContent() {
   const { isAuthenticated, isLoading } = useAuth();
 
   const listingId = params.id;
-  const justConnected = search.get('agent_x_connected');
-  const oauthError = search.get('agent_x_error');
+  const justConnected = search?.get('agent_x_connected');
+  const oauthError = search?.get('agent_x_error');
 
   const [status, setStatus] = useState<Status | null>(null);
   const [loading, setLoading] = useState(true);

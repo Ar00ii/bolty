@@ -176,31 +176,31 @@ export const NAV: NavSection[] = [
 ];
 
 export function isItemActive(
-  pathname: string,
-  searchParams: URLSearchParams,
+  pathname: string | null,
+  searchParams: URLSearchParams | null,
   href: string,
 ): boolean {
+  const path = pathname ?? '';
+  const tab = searchParams?.get('tab') ?? null;
   const [cleanHref, query] = href.split('?');
-  if (cleanHref === '/market') return pathname === '/market';
+  if (cleanHref === '/market') return path === '/market';
   if (cleanHref === '/profile') {
-    if (!(pathname === '/profile' || pathname.startsWith('/profile/'))) return false;
+    if (!(path === '/profile' || path.startsWith('/profile/'))) return false;
     if (query) {
       const expected = new URLSearchParams(query);
-      return expected.get('tab') === searchParams.get('tab');
+      return expected.get('tab') === tab;
     }
-    return !searchParams.get('tab') || searchParams.get('tab') === 'profile';
+    return !tab || tab === 'profile';
   }
   if (cleanHref === '/inventory') {
-    if (pathname !== '/inventory') return false;
+    if (path !== '/inventory') return false;
     if (query) {
       const expected = new URLSearchParams(query);
-      return expected.get('tab') === searchParams.get('tab');
+      return expected.get('tab') === tab;
     }
-    // Bare /inventory link is active on the default tab only — saved /
-    // purchased / rays use their own URL and shouldn't double-highlight.
-    return !searchParams.get('tab');
+    return !tab;
   }
-  return pathname === cleanHref || pathname.startsWith(cleanHref + '/');
+  return path === cleanHref || path.startsWith(cleanHref + '/');
 }
 
 function shortenAddress(addr: string): string {

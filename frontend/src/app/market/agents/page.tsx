@@ -1118,7 +1118,7 @@ function AgentsPageContent() {
   const { isAuthenticated, user, refresh } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams.get('tab') === 'mine' ? 'mine' : 'market';
+  const initialTab = searchParams?.get('tab') === 'mine' ? 'mine' : 'market';
 
   const [activeTab, setActiveTab] = useState<'market' | 'mine'>(initialTab);
   const [listings, setListings] = useState<MarketListing[]>([]);
@@ -1127,14 +1127,14 @@ function AgentsPageContent() {
   const [myLoading, setMyLoading] = useState(false);
   // Hydrate filters from the URL so deep-links and back-nav keep state.
   const [type, setType] = useState<string>(
-    searchParams.get('type') ?? 'ALL',
+    searchParams?.get('type') ?? 'ALL',
   );
-  const [search, setSearch] = useState(searchParams.get('q') ?? '');
+  const [search, setSearch] = useState(searchParams?.get('q') ?? '');
   // Debounced mirror — only this value hits the API so typing doesn't
   // fire a request per keystroke.
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   const [sort, setSort] = useState<SortKey>(
-    (searchParams.get('sort') as SortKey) ?? 'recent',
+    (searchParams?.get('sort') as SortKey) ?? 'recent',
   );
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [error, setError] = useState('');
@@ -1171,7 +1171,7 @@ function AgentsPageContent() {
 
   // Sync tab to URL
   useEffect(() => {
-    const tab = searchParams.get('tab');
+    const tab = searchParams?.get('tab');
     if (tab === 'mine') setActiveTab('mine');
     else setActiveTab('market');
   }, [searchParams]);
@@ -1181,7 +1181,7 @@ function AgentsPageContent() {
   // mobile-block modal for anyone who lands here via a deep link.
   useEffect(() => {
     if (!isAuthenticated) return;
-    if (searchParams.get('new') === '1') {
+    if (searchParams?.get('new') === '1') {
       router.replace('/market/agents/publish');
     }
   }, [searchParams, isAuthenticated, router]);

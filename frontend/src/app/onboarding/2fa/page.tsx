@@ -31,8 +31,8 @@ function Onboarding2FAInner() {
   const { user, isLoading, refresh } = useAuth();
   const router = useRouter();
   const search = useSearchParams();
-  const next = search.get('next') || '/profile';
-  const reason = search.get('reason');
+  const next = search?.get('next') || '/profile';
+  const reason = search?.get('reason');
 
   const [step, setStep] = useState<Step>('loading');
   const [qrCode, setQrCode] = useState<string | null>(null);

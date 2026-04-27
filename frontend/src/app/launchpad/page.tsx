@@ -61,14 +61,14 @@ function LaunchpadPageContent() {
 
   const [tokens, setTokens] = useState<TokenInfo[] | null>(null);
   const [sort, setSort] = useState<Sort>(() => {
-    const s = searchParams.get('sort');
+    const s = searchParams?.get('sort') ?? null;
     return isSort(s) ? s : 'recent';
   });
   const [section, setSection] = useState<SectionFilter>(() => {
-    const s = searchParams.get('section');
+    const s = searchParams?.get('section') ?? null;
     return isSection(s) ? s : 'ALL';
   });
-  const [search, setSearch] = useState(() => searchParams.get('q') ?? '');
+  const [search, setSearch] = useState(() => searchParams?.get('q') ?? '');
   const [launchOpen, setLaunchOpen] = useState(false);
   const [connectXOpen, setConnectXOpen] = useState(false);
   const [creator, setCreator] = useState<string | null>(null);

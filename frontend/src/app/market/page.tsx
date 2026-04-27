@@ -141,7 +141,7 @@ export default function MarketPage() {
 
 function MarketScreener() {
   const searchParams = useSearchParams();
-  const initialSearch = searchParams.get('search') || '';
+  const initialSearch = searchParams?.get('search') || '';
 
   const [search, setSearch] = useState(initialSearch);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('ALL');
