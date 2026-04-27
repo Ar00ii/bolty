@@ -2,128 +2,91 @@
 
 import { motion } from 'framer-motion';
 import {
-  Activity,
   ArrowUpRight,
   Bot,
   GitBranch,
   Rocket,
-  Shield,
+  ShoppingBag,
   Sparkles,
-  Wallet,
-  Zap,
+  Upload,
+  Users,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
+import { AppShell } from '@/components/layout/AppShell';
 import { api } from '@/lib/api/client';
-import { useAuth } from '@/lib/auth/AuthProvider';
-import { BRAND_NAME_DISPLAY, BRAND_TAGLINE } from '@/lib/brand';
 
 /**
- * Home dashboard — base.org-inspired light surface, app-flow content.
+ * Home — wrapped in the new AppShell so visitors land in the same
+ * left-rail navigation as the rest of the app, with a content layout
+ * that prioritises CLARITY over marketing flourish.
  *
- * Design language follows the base.org public site:
- *  - White background (#ffffff) as the dominant canvas, with a soft
- *    radial blue wash at the very top so the surface doesn't feel
- *    clinical.
- *  - Lowercase wordmark in the top-left (typographic logo, no icon
- *    glyph — same visual idiom as base.org's "base" wordmark).
- *  - Oversized hero typography (clamp 48-72px) with the brand word
- *    rendered in solid Coinbase blue (#0052FF) — no gradient because
- *    base.org doesn't use one in the hero.
- *  - Cards: pure white with a 1px hairline border (#E5EAF6) and a
- *    subtle 8/24 shadow on hover. No glow effects, no neon.
- *  - Pills: white pill with a 1px border and dot indicator. Live
- *    chain pill at the top sits in the same idiom.
- *  - Framer-motion entrance animations on every card so the first
- *    paint feels alive (the base.org site does this too on scroll).
+ * Information hierarchy was rebuilt from "what's pretty" to "what
+ * does a first-time visitor need to understand in 5 seconds":
  *
- * The information architecture (chain pill → hero → 4 metric tiles →
- * 4 nav tiles → recent activity feed) is unchanged from the prior
- * iteration so the user gets the same dashboard flow they liked,
- * just on the new aesthetic surface.
+ *  1. **Hero** — one sentence, plain language, what the platform is
+ *     for.
+ *  2. **Three "what you can do" cards** — Browse, Sell, Launch — each
+ *     with a one-line teaser and a primary action. This is the part
+ *     the previous iteration buried; it now sits right under the
+ *     hero so the value prop is concrete.
+ *  3. **Featured / live data** — actual listings, not abstract
+ *     marketing tiles. Pulls from /market/listings on mount.
+ *  4. **Stats strip** — small, secondary, just enough to signal the
+ *     platform is alive.
+ *
+ * Everything sits on a white surface with soft shadows + 1px
+ * hairline borders, matching the base.org aesthetic the user
+ * requested.
  */
-type Metrics = {
-  agents: number;
-  repos: number;
-  launches: number;
-  activeUsers: number;
+type Listing = {
+  id: string;
+  title: string;
+  description?: string | null;
+  type: string;
+  price?: number | null;
+  imageUrl?: string | null;
 };
 
-const NAV_TILES = [
-  {
-    icon: Bot,
-    title: 'Agents',
-    href: '/market/agents',
-    teaser: 'Buy, sell, run autonomous agents.',
-    accent: '#0052FF',
-  },
-  {
-    icon: GitBranch,
-    title: 'Repos',
-    href: '/market/repos',
-    teaser: 'GitHub-backed paid access.',
-    accent: '#627EEA',
-  },
-  {
-    icon: Rocket,
-    title: 'Launchpad',
-    href: '/launchpad',
-    teaser: 'Mint a token for any agent.',
-    accent: '#00D4FF',
-    badge: 'Soon',
-  },
-  {
-    icon: Shield,
-    title: 'Guard',
-    href: '/docs/boltyguard',
-    teaser: 'Every listing scanned on upload.',
-    accent: '#16A34A',
-  },
-];
+export default function HomePage() {
+  return (
+    <AppShell>
+      <HomeContent />
+    </AppShell>
+  );
+}
 
-export default function HomeDashboard() {
-  const { user, isAuthenticated } = useAuth();
-  const router = useRouter();
-  const [metrics, setMetrics] = useState<Metrics | null>(null);
-  const [recent, setRecent] = useState<
-    Array<{ id: string; title: string; href: string; sub: string }>
-  >([]);
+function HomeContent() {
+  const [agents, setAgents] = useState<Listing[]>([]);
+  const [repos, setRepos] = useState<Listing[]>([]);
+  const [stats, setStats] = useState<{
+    agents: number;
+    repos: number;
+    community: number;
+  } | null>(null);
 
   useEffect(() => {
     let cancel = false;
     Promise.all([
       api
+        .get<{ items?: Listing[] }>('/market/listings?type=AI_AGENT&limit=6')
+        .catch(() => ({ items: [] as Listing[] })),
+      api
+        .get<{ items?: Listing[] }>('/market/listings?type=REPO&limit=6')
+        .catch(() => ({ items: [] as Listing[] })),
+      api
         .get<{ totalCount?: number }>('/users/community')
         .catch(() => ({ totalCount: 0 })),
-      api
-        .get<{ items?: Array<{ id: string; title?: string; type?: string }> }>(
-          '/market/listings?limit=12',
-        )
-        .catch(() => ({ items: [] })),
-    ]).then(([community, listings]) => {
+    ]).then(([a, r, c]) => {
       if (cancel) return;
-      const items = listings.items ?? [];
-      const agentCount = items.filter((l) => l.type === 'AI_AGENT').length;
-      const repoCount = items.filter((l) => l.type === 'REPO').length;
-      setMetrics({
-        agents: agentCount,
-        repos: repoCount,
-        launches: 0,
-        activeUsers: community.totalCount ?? 0,
+      setAgents(a.items ?? []);
+      setRepos(r.items ?? []);
+      setStats({
+        agents: (a.items ?? []).length,
+        repos: (r.items ?? []).length,
+        community: c.totalCount ?? 0,
       });
-      setRecent(
-        items.slice(0, 6).map((l) => ({
-          id: l.id,
-          title: l.title ?? 'Untitled',
-          href:
-            l.type === 'AI_AGENT'
-              ? `/market/agents/${l.id}`
-              : `/market/repos/${l.id}`,
-          sub: l.type === 'AI_AGENT' ? 'AI Agent' : 'Repository',
-        })),
-      );
     });
     return () => {
       cancel = true;
@@ -131,396 +94,233 @@ export default function HomeDashboard() {
   }, []);
 
   return (
-    <div
-      className="min-h-screen relative"
-      style={{
-        background: '#ffffff',
-        color: 'var(--text)',
-      }}
-    >
-      {/* Soft blue wash at the top — subtle, no neon. */}
+    <div className="relative">
+      {/* Soft top wash */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-0 left-0 right-0 h-[600px] z-0"
+        className="pointer-events-none absolute top-0 left-0 right-0 h-[480px] z-0"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,82,255,0.08), rgba(0,82,255,0) 60%)',
+            'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0,82,255,0.07), rgba(0,82,255,0) 60%)',
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-6 sm:px-8 py-6">
-        {/* ── Top bar: wordmark + chain + wallet ──────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: -6 }}
+      <div className="relative z-10 px-6 sm:px-10 py-8 max-w-6xl mx-auto">
+        {/* ── Hero ───────────────────────────────────────────────── */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35 }}
-          className="flex items-center justify-between mb-16"
+          transition={{ duration: 0.45 }}
+          className="pt-6 pb-10"
         >
-          <Link
-            href="/"
-            className="font-light tracking-tight"
+          <span
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium mb-5"
             style={{
-              fontSize: '20px',
-              color: 'var(--text)',
-              letterSpacing: '-0.4px',
+              background: 'var(--brand-dim)',
+              color: '#0052FF',
             }}
           >
-            {BRAND_NAME_DISPLAY}
-          </Link>
-          <div className="flex items-center gap-3">
-            <span
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-light"
-              style={{
-                background: '#ffffff',
-                color: 'var(--text-secondary)',
-                boxShadow: 'inset 0 0 0 1px var(--border)',
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: '#16A34A' }}
-              />
-              Ethereum Mainnet
-            </span>
-            {isAuthenticated ? (
-              <button
-                onClick={() => router.push('/profile')}
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[12.5px] font-light transition hover:bg-[var(--bg-muted)]"
-                style={{
-                  background: '#ffffff',
-                  color: 'var(--text)',
-                  boxShadow: 'inset 0 0 0 1px var(--border)',
-                }}
-              >
-                <Wallet className="w-3.5 h-3.5" style={{ color: 'var(--brand)' }} />
-                {user?.username ?? 'Profile'}
-                <ArrowUpRight className="w-3 h-3 opacity-60" />
-              </button>
-            ) : (
-              <button
-                onClick={() => router.push('/auth')}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[12.5px] font-medium text-white transition hover:brightness-110"
-                style={{
-                  background: '#0052FF',
-                }}
-              >
-                <Wallet className="w-3.5 h-3.5" />
-                Connect wallet
-              </button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* ── Hero — base.org style: oversized lowercase, brand-blue word ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.05 }}
-          className="mb-14"
-        >
+            <Sparkles className="w-3 h-3" />
+            Now live on Ethereum mainnet
+          </span>
           <h1
             style={{
-              fontSize: 'clamp(44px, 6vw, 76px)',
+              fontSize: 'clamp(40px, 5.6vw, 68px)',
               fontWeight: 400,
               lineHeight: 1.02,
-              letterSpacing: '-2px',
+              letterSpacing: '-1.8px',
               color: 'var(--text)',
             }}
           >
-            the marketplace for{' '}
-            <span style={{ color: '#0052FF' }}>autonomous</span>
+            buy and sell{' '}
+            <span style={{ color: '#0052FF' }}>AI agents</span>
             <br />
-            agents on{' '}
-            <span style={{ color: '#0052FF' }}>ethereum</span>.
+            that actually do work.
           </h1>
           <p
-            className="mt-5 max-w-xl"
+            className="mt-4 max-w-xl"
             style={{
-              fontSize: '17px',
+              fontSize: '16.5px',
               fontWeight: 400,
               lineHeight: 1.55,
               color: 'var(--text-muted)',
             }}
           >
-            Buy AI agents, paid GitHub repos, mint launch tokens — all
-            settled onchain on Ethereum mainnet, with every listing
-            scanned before it goes live.
+            A marketplace for autonomous agents — settled onchain,
+            scanned for security on upload, and powered by your wallet.
+            No accounts, no email, no middleman.
           </p>
-          <div className="mt-7 flex items-center gap-3 flex-wrap">
-            <Link
-              href="/market/agents"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[14px] font-medium text-white transition hover:brightness-110"
-              style={{ background: '#0052FF' }}
-            >
-              Explore agents
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-            <Link
-              href="/docs"
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[14px] font-medium transition hover:bg-[var(--bg-muted)]"
-              style={{
-                color: 'var(--text)',
-                background: '#ffffff',
-                boxShadow: 'inset 0 0 0 1px var(--border)',
-              }}
-            >
-              Read the docs
-            </Link>
-          </div>
         </motion.section>
 
-        {/* ── 4-up metric strip — live data ──────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-12">
-          {[
-            {
-              label: 'AI agents',
-              value: metrics?.agents ?? '—',
-              icon: Bot,
-              accent: '#0052FF',
-            },
-            {
-              label: 'Repos',
-              value: metrics?.repos ?? '—',
-              icon: GitBranch,
-              accent: '#627EEA',
-            },
-            {
-              label: 'Token launches',
-              value: metrics?.launches ?? '—',
-              icon: Rocket,
-              accent: '#00D4FF',
-            },
-            {
-              label: 'Community',
-              value: metrics?.activeUsers ?? '—',
-              icon: Sparkles,
-              accent: '#16A34A',
-            },
-          ].map((m, i) => {
-            const Icon = m.icon;
-            return (
-              <motion.div
-                key={m.label}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 + i * 0.05 }}
-                className="rounded-2xl p-5 transition hover:translate-y-[-2px]"
-                style={{
-                  background: '#ffffff',
-                  boxShadow: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
-                }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: `${m.accent}14` }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: m.accent }} />
-                  </div>
-                  <Activity className="w-3 h-3" style={{ color: 'var(--text-muted)' }} />
-                </div>
-                <div
-                  style={{
-                    fontSize: '32px',
-                    fontWeight: 500,
-                    color: 'var(--text)',
-                    letterSpacing: '-1px',
-                    lineHeight: 1,
-                  }}
-                >
-                  {m.value}
-                </div>
-                <div
-                  className="mt-1.5 text-[12px] font-light"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {m.label}
-                </div>
-              </motion.div>
-            );
-          })}
+        {/* ── 3-card "what you can do here" — the headline value prop ── */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-12">
+          <ActionCard
+            icon={ShoppingBag}
+            accent="#0052FF"
+            label="Browse"
+            title="Use an agent"
+            body="Find an agent that fits your job. Pay once, run as much as you like."
+            cta="Browse agents"
+            href="/market/agents"
+            delay={0.05}
+          />
+          <ActionCard
+            icon={Upload}
+            accent="#627EEA"
+            label="Sell"
+            title="Publish your agent"
+            body="Upload a sandbox bundle or webhook. Get paid in ETH each time someone buys access."
+            cta="Start selling"
+            href="/profile?publish=1"
+            delay={0.1}
+          />
+          <ActionCard
+            icon={Rocket}
+            accent="#00D4FF"
+            label="Launch"
+            title="Mint a token"
+            body="Spin up a launch token for your agent's community. Powered by ETH liquidity."
+            cta="Open launchpad"
+            href="/launchpad"
+            badge="Soon"
+            delay={0.15}
+          />
         </section>
 
-        {/* ── Primary nav tiles — base.org card style ──────────────── */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-12">
-          {NAV_TILES.map((t, i) => {
-            const Icon = t.icon;
-            return (
-              <motion.div
-                key={t.href}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: 0.2 + i * 0.06 }}
-              >
-                <Link
-                  href={t.href}
-                  className="group relative block rounded-2xl p-5 h-full transition overflow-hidden hover:translate-y-[-2px]"
-                  style={{
-                    background: '#ffffff',
-                    boxShadow: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
-                  }}
-                >
-                  <div className="relative flex items-start justify-between mb-5">
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center"
-                      style={{ background: `${t.accent}14` }}
-                    >
-                      <Icon className="w-4.5 h-4.5" style={{ color: t.accent }} />
-                    </div>
-                    {t.badge && (
-                      <span
-                        className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full"
-                        style={{
-                          background: `${t.accent}14`,
-                          color: t.accent,
-                        }}
-                      >
-                        {t.badge}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    className="font-medium text-[16px] mb-1"
-                    style={{ color: 'var(--text)' }}
-                  >
-                    {t.title}
-                  </div>
-                  <div
-                    className="text-[13px] font-light"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
-                    {t.teaser}
-                  </div>
-                  <ArrowUpRight
-                    className="absolute right-5 bottom-5 w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition"
-                    style={{ color: t.accent }}
-                  />
-                </Link>
-              </motion.div>
-            );
-          })}
-        </section>
-
-        {/* ── Live activity feed ─────────────────────────────────── */}
-        <section className="mb-16">
-          <div className="flex items-center justify-between mb-3">
-            <h2
-              style={{
-                fontSize: '20px',
-                fontWeight: 500,
-                color: 'var(--text)',
-                letterSpacing: '-0.3px',
-              }}
-            >
-              Recent activity
-            </h2>
-            <Link
-              href="/market"
-              className="text-[12.5px] font-medium transition hover:underline"
-              style={{ color: '#0052FF' }}
-            >
-              View all →
-            </Link>
+        {/* ── How it works — 3 simple steps ─────────────────────── */}
+        <section
+          className="rounded-2xl p-6 mb-12"
+          style={{
+            background: 'var(--bg-muted)',
+            boxShadow: 'inset 0 0 0 1px var(--border)',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '14px',
+              fontWeight: 500,
+              color: 'var(--text-muted)',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+            className="mb-5"
+          >
+            How it works · 3 steps
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <Step
+              number="01"
+              title="Connect your wallet"
+              body="MetaMask or any EVM wallet. Sign one message — no email, no password."
+            />
+            <Step
+              number="02"
+              title="Pick or list"
+              body="Buyers browse the catalog. Sellers upload an agent + a price."
+            />
+            <Step
+              number="03"
+              title="Settle onchain"
+              body="ETH transfers between buyer and seller through escrow. Done in one block."
+            />
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-            className="rounded-2xl overflow-hidden"
+        </section>
+
+        {/* ── Featured agents — actual listings, not abstract pitches ── */}
+        {agents.length > 0 && (
+          <section className="mb-12">
+            <SectionHeader
+              title="Featured agents"
+              href="/market/agents"
+              cta="See all agents →"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {agents.slice(0, 6).map((a, i) => (
+                <ListingCard key={a.id} listing={a} delay={i * 0.04} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Featured repos ─────────────────────────────────────── */}
+        {repos.length > 0 && (
+          <section className="mb-12">
+            <SectionHeader
+              title="Code repositories"
+              href="/market/repos"
+              cta="See all repos →"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {repos.slice(0, 6).map((r, i) => (
+                <ListingCard key={r.id} listing={r} delay={i * 0.04} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Empty state if no listings yet */}
+        {stats && agents.length === 0 && repos.length === 0 && (
+          <section
+            className="rounded-2xl p-10 text-center mb-12"
             style={{
               background: '#ffffff',
               boxShadow: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
             }}
           >
-            {recent.length === 0 ? (
-              <div className="p-8 text-center">
-                <Zap
-                  className="w-5 h-5 mx-auto mb-2.5 opacity-50"
-                  style={{ color: '#0052FF' }}
-                />
-                <div className="text-[13px] font-light text-[var(--text-muted)]">
-                  No listings yet — be the first to publish.{' '}
-                  <Link
-                    href="/auth"
-                    className="font-medium hover:underline"
-                    style={{ color: '#0052FF' }}
-                  >
-                    Connect wallet
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <ul>
-                {recent.map((r, i) => (
-                  <motion.li
-                    key={r.id}
-                    initial={{ opacity: 0, x: -6 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: 0.45 + i * 0.04 }}
-                    style={{
-                      borderTop: i === 0 ? 'none' : '1px solid var(--border)',
-                    }}
-                  >
-                    <Link
-                      href={r.href}
-                      className="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--bg-muted)] transition"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{
-                            background: 'var(--brand-dim)',
-                            color: 'var(--brand)',
-                          }}
-                        >
-                          {r.sub === 'AI Agent' ? (
-                            <Bot className="w-4 h-4" />
-                          ) : (
-                            <GitBranch className="w-4 h-4" />
-                          )}
-                        </div>
-                        <div>
-                          <div
-                            className="text-[13.5px] font-medium"
-                            style={{ color: 'var(--text)' }}
-                          >
-                            {r.title}
-                          </div>
-                          <div
-                            className="text-[10.5px] uppercase tracking-wider font-medium mt-0.5"
-                            style={{ color: 'var(--text-muted)' }}
-                          >
-                            {r.sub}
-                          </div>
-                        </div>
-                      </div>
-                      <ArrowUpRight
-                        className="w-3.5 h-3.5"
-                        style={{ color: 'var(--text-muted)' }}
-                      />
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            )}
-          </motion.div>
+            <Sparkles
+              className="w-7 h-7 mx-auto mb-3"
+              style={{ color: '#0052FF' }}
+            />
+            <h3
+              style={{
+                fontSize: '20px',
+                fontWeight: 500,
+                color: 'var(--text)',
+                letterSpacing: '-0.4px',
+              }}
+            >
+              Be one of the first.
+            </h3>
+            <p
+              className="mt-2 max-w-md mx-auto"
+              style={{
+                fontSize: '14px',
+                fontWeight: 400,
+                color: 'var(--text-muted)',
+                lineHeight: 1.5,
+              }}
+            >
+              The marketplace is wide open. Connect your wallet and
+              publish the first agent — your listing will be the first
+              thing visitors see.
+            </p>
+            <Link
+              href="/auth"
+              className="mt-5 inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[14px] font-medium text-white transition hover:brightness-110"
+              style={{ background: '#0052FF' }}
+            >
+              Connect wallet
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            </Link>
+          </section>
+        )}
+
+        {/* ── Stats strip — small, secondary, signals "alive" ────── */}
+        <section
+          className="grid grid-cols-3 gap-3 mb-12"
+        >
+          <Stat label="AI agents" value={stats?.agents ?? '—'} icon={Bot} />
+          <Stat label="Code repos" value={stats?.repos ?? '—'} icon={GitBranch} />
+          <Stat label="Community" value={stats?.community ?? '—'} icon={Users} />
         </section>
 
-        {/* ── Footer — minimal, base.org style ─────────────────────── */}
+        {/* Footer */}
         <footer
-          className="pt-8 mt-8 flex items-center justify-between flex-wrap gap-3"
+          className="pt-6 pb-10 flex items-center justify-between flex-wrap gap-3"
           style={{ borderTop: '1px solid var(--border)' }}
         >
-          <div className="flex items-center gap-2">
-            <span
-              className="font-light tracking-tight"
-              style={{ fontSize: '14px', color: 'var(--text)' }}
-            >
-              {BRAND_NAME_DISPLAY}
-            </span>
-            <span className="text-[11.5px] font-light text-[var(--text-muted)]">
-              · {BRAND_TAGLINE}
-            </span>
+          <div className="text-[11.5px] font-light text-[var(--text-muted)]">
+            © 2026 — onchain marketplace for autonomous agents
           </div>
           <div className="flex items-center gap-4 text-[11.5px] font-light text-[var(--text-muted)]">
             <Link href="/docs" className="hover:text-[var(--text)] transition">
@@ -534,6 +334,314 @@ export default function HomeDashboard() {
             </Link>
           </div>
         </footer>
+      </div>
+    </div>
+  );
+}
+
+function ActionCard({
+  icon: Icon,
+  accent,
+  label,
+  title,
+  body,
+  cta,
+  href,
+  badge,
+  delay,
+}: {
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  accent: string;
+  label: string;
+  title: string;
+  body: string;
+  cta: string;
+  href: string;
+  badge?: string;
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, delay }}
+    >
+      <Link
+        href={href}
+        className="group relative block rounded-2xl p-6 h-full transition hover:translate-y-[-2px]"
+        style={{
+          background: '#ffffff',
+          boxShadow: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
+        }}
+      >
+        <div className="flex items-start justify-between mb-5">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{ background: `${accent}14` }}
+          >
+            <Icon className="w-5 h-5" style={{ color: accent }} />
+          </div>
+          {badge && (
+            <span
+              className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full"
+              style={{ background: `${accent}14`, color: accent }}
+            >
+              {badge}
+            </span>
+          )}
+        </div>
+        <div
+          className="text-[10px] uppercase tracking-[0.16em] font-medium mb-1.5"
+          style={{ color: accent }}
+        >
+          {label}
+        </div>
+        <div
+          className="font-medium mb-1.5"
+          style={{
+            fontSize: '18px',
+            color: 'var(--text)',
+            letterSpacing: '-0.3px',
+          }}
+        >
+          {title}
+        </div>
+        <div
+          className="font-light mb-5"
+          style={{
+            fontSize: '13.5px',
+            lineHeight: 1.55,
+            color: 'var(--text-muted)',
+          }}
+        >
+          {body}
+        </div>
+        <span
+          className="inline-flex items-center gap-1 text-[13px] font-medium transition group-hover:gap-1.5"
+          style={{ color: accent }}
+        >
+          {cta}
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </span>
+      </Link>
+    </motion.div>
+  );
+}
+
+function Step({
+  number,
+  title,
+  body,
+}: {
+  number: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div>
+      <div
+        className="font-medium mb-2"
+        style={{
+          fontSize: '32px',
+          fontWeight: 400,
+          color: '#0052FF',
+          letterSpacing: '-1px',
+          lineHeight: 1,
+        }}
+      >
+        {number}
+      </div>
+      <div
+        className="font-medium mb-1"
+        style={{
+          fontSize: '15px',
+          color: 'var(--text)',
+        }}
+      >
+        {title}
+      </div>
+      <div
+        className="font-light"
+        style={{
+          fontSize: '13.5px',
+          color: 'var(--text-muted)',
+          lineHeight: 1.55,
+        }}
+      >
+        {body}
+      </div>
+    </div>
+  );
+}
+
+function SectionHeader({
+  title,
+  href,
+  cta,
+}: {
+  title: string;
+  href: string;
+  cta: string;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <h2
+        style={{
+          fontSize: '20px',
+          fontWeight: 500,
+          color: 'var(--text)',
+          letterSpacing: '-0.3px',
+        }}
+      >
+        {title}
+      </h2>
+      <Link
+        href={href}
+        className="text-[12.5px] font-medium transition hover:underline"
+        style={{ color: '#0052FF' }}
+      >
+        {cta}
+      </Link>
+    </div>
+  );
+}
+
+function ListingCard({
+  listing,
+  delay,
+}: {
+  listing: Listing;
+  delay: number;
+}) {
+  const isAgent = listing.type === 'AI_AGENT';
+  const href = isAgent
+    ? `/market/agents/${listing.id}`
+    : `/market/repos/${listing.id}`;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+    >
+      <Link
+        href={href}
+        className="group block rounded-2xl p-5 h-full transition hover:translate-y-[-2px]"
+        style={{
+          background: '#ffffff',
+          boxShadow: 'inset 0 0 0 1px var(--border), var(--shadow-xs)',
+        }}
+      >
+        <div className="flex items-start gap-3 mb-3">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: isAgent ? 'rgba(0,82,255,0.08)' : 'rgba(98,126,234,0.08)',
+              color: isAgent ? '#0052FF' : '#627EEA',
+            }}
+          >
+            {isAgent ? (
+              <Bot className="w-4 h-4" />
+            ) : (
+              <GitBranch className="w-4 h-4" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div
+              className="text-[10px] uppercase tracking-[0.16em] font-medium mb-0.5"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {isAgent ? 'AI Agent' : 'Repository'}
+            </div>
+            <div
+              className="font-medium truncate"
+              style={{
+                fontSize: '14.5px',
+                color: 'var(--text)',
+              }}
+            >
+              {listing.title || 'Untitled'}
+            </div>
+          </div>
+        </div>
+        {listing.description && (
+          <p
+            className="font-light"
+            style={{
+              fontSize: '12.5px',
+              lineHeight: 1.5,
+              color: 'var(--text-muted)',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
+            {listing.description}
+          </p>
+        )}
+        <div
+          className="mt-3 pt-3 flex items-center justify-between"
+          style={{ borderTop: '1px solid var(--border)' }}
+        >
+          <span
+            className="text-[12.5px] font-medium"
+            style={{ color: 'var(--text)' }}
+          >
+            {listing.price != null
+              ? `${listing.price} ETH`
+              : 'Free / open access'}
+          </span>
+          <ArrowUpRight
+            className="w-3.5 h-3.5 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            style={{ color: 'var(--text-muted)' }}
+          />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: number | string;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+}) {
+  return (
+    <div
+      className="rounded-xl p-4 flex items-center gap-3"
+      style={{
+        background: '#ffffff',
+        boxShadow: 'inset 0 0 0 1px var(--border)',
+      }}
+    >
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+        style={{ background: 'var(--bg-muted)' }}
+      >
+        <Icon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+      </div>
+      <div className="min-w-0">
+        <div
+          className="font-medium"
+          style={{
+            fontSize: '20px',
+            color: 'var(--text)',
+            letterSpacing: '-0.4px',
+            lineHeight: 1,
+          }}
+        >
+          {value}
+        </div>
+        <div
+          className="text-[11.5px] font-light mt-0.5"
+          style={{ color: 'var(--text-muted)' }}
+        >
+          {label}
+        </div>
       </div>
     </div>
   );
