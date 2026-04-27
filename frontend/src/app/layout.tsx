@@ -5,6 +5,13 @@ import React from 'react';
 import './globals.css';
 import { ClientShell } from '@/components/layout/ClientShell';
 import { ToastContainer } from '@/components/ui/Toast';
+import {
+  BRAND_DESCRIPTION,
+  BRAND_DOMAIN,
+  BRAND_NAME,
+  BRAND_NAME_DISPLAY,
+  BRAND_TAGLINE,
+} from '@/lib/brand';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ToastProvider } from '@/lib/hooks/useToast';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
@@ -22,71 +29,63 @@ const inter = Inter({
   preload: true,
 });
 
-const BASE_URL = 'https://boltynetwork.xyz';
+const BASE_URL = `https://${BRAND_DOMAIN}`;
 
 // Responsive viewport — without this, mobile browsers render the page
 // at the virtual 980px layout width and scale it down, which is why
 // the dashboard looked catastrophically broken on phones even with
-// correct responsive CSS.
+// correct responsive CSS. themeColor flipped to white now that the
+// public surface defaults to the light theme.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
   viewportFit: 'cover',
-  themeColor: '#07070a',
+  themeColor: '#ffffff',
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Bolty — AI Developer Platform',
-    template: '%s | Bolty',
+    default: `${BRAND_NAME_DISPLAY} — ${BRAND_TAGLINE}`,
+    template: `%s | ${BRAND_NAME_DISPLAY}`,
   },
-  description:
-    'Bolty is the developer platform for publishing code, deploying AI agents, and earning from your work. Join the community at boltynetwork.xyz.',
+  description: BRAND_DESCRIPTION,
   keywords: [
-    'bolty',
-    'boltynetwork',
-    'bolty network',
-    'ai developer platform',
+    BRAND_NAME,
+    'ethereum',
+    'eth mainnet',
     'ai agents marketplace',
-    'publish code',
-    'code marketplace',
-    'developer community',
-    'ethereum payments',
+    'autonomous agents',
     'web3 developer',
-    'bolty ai',
-    'boltynetwork.xyz',
+    'agent marketplace',
+    'onchain agents',
   ],
-  authors: [{ name: 'Bolty', url: BASE_URL }],
-  creator: 'Bolty',
-  publisher: 'Bolty',
+  authors: [{ name: BRAND_NAME_DISPLAY, url: BASE_URL }],
+  creator: BRAND_NAME_DISPLAY,
+  publisher: BRAND_NAME_DISPLAY,
   category: 'technology',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: BASE_URL,
-    siteName: 'Bolty',
-    title: 'Bolty — AI Developer Platform',
-    description:
-      'Publish code, deploy AI agents, and earn from your work. The developer platform for the next generation of builders.',
+    siteName: BRAND_NAME_DISPLAY,
+    title: `${BRAND_NAME_DISPLAY} — ${BRAND_TAGLINE}`,
+    description: BRAND_DESCRIPTION,
     images: [
       {
         url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'Bolty — AI Developer Platform',
+        alt: `${BRAND_NAME_DISPLAY} — ${BRAND_TAGLINE}`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bolty — AI Developer Platform',
-    description:
-      'Publish code, deploy AI agents, and earn from your work. The developer platform for the next generation of builders.',
+    title: `${BRAND_NAME_DISPLAY} — ${BRAND_TAGLINE}`,
+    description: BRAND_DESCRIPTION,
     images: [`${BASE_URL}/og-image.png`],
-    creator: '@boltynetwork',
-    site: '@boltynetwork',
   },
   robots: {
     index: true,
@@ -107,13 +106,10 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Bolty',
-  alternateName: 'BoltyNetwork',
+  name: BRAND_NAME_DISPLAY,
   url: BASE_URL,
   logo: `${BASE_URL}/icon.png`,
-  description:
-    'Bolty is the AI developer platform for publishing code, deploying AI agents, and earning from your work.',
-  sameAs: ['https://twitter.com/boltynetwork', 'https://github.com/boltynetwork'],
+  description: BRAND_DESCRIPTION,
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',
@@ -123,7 +119,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="dark" className={inter.variable}>
+    <html lang="en" data-theme="light" className={inter.variable}>
       <head>
         {/* Explicit viewport meta as a belt-and-suspenders backup to the
             `export const viewport` above — some deploy pipelines strip or

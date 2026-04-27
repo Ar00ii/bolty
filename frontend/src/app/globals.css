@@ -98,87 +98,88 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   CSS Variables — Ethereum mainnet brand
+   CSS Variables — base.org-inspired Ethereum mainnet brand
    ═══════════════════════════════════════════════════════════════════════════
-   Bolty's previous purple identity is gone. The new system mirrors
-   Ethereum's official brand: deep blue + light blue, tuned for an
-   app/dashboard aesthetic (dense data, subtle motion, glassy surfaces)
-   instead of the marketing/landing aesthetic the purple theme served.
+   The default theme is now LIGHT (white surface) to mirror the
+   base.org / coinbase aesthetic the user asked for. Dark theme is
+   kept as an opt-in via [data-theme='dark'] for accessibility but
+   the public surface defaults to light.
 */
 
 :root,
-:root[data-theme='dark'] {
-  --bg: #0a0e1a;
-  --bg-elevated: #0f1424;
-  --bg-card: #131a2c;
-  --bg-card2: #1a2238;
-  --border: #1f2942;
-  --border-hover: #2c3a5c;
-  --text: #e4e8f4;
-  --text-secondary: #c4cbe0;
-  --text-muted: #8e98b2;
-  --brand: #627eea;
-  --brand-dim: rgba(98, 126, 234, 0.09);
-  --brand-hover: #7a92f0;
-  --brand-deep: #2535a8;
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --bg-elevated: #f7f9ff;
+  --bg-card: #ffffff;
+  --bg-card2: #f3f6ff;
+  --bg-muted: #f0f3fb;
+  --border: #e5eaf6;
+  --border-hover: #c7d1ec;
+  --text: #060e1f;
+  --text-secondary: #2a3357;
+  --text-muted: #5b6485;
+  --brand: #0052ff;
+  --brand-dim: rgba(0, 82, 255, 0.06);
+  --brand-soft: rgba(0, 82, 255, 0.12);
+  --brand-hover: #1463ff;
+  --brand-deep: #0040cc;
   --accent-cyan: #00d4ff;
   --accent-glow: #4f8cff;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --error: #f87171;
+  --eth-blue: #627eea;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
   --sidebar-width: 240px;
-  --shadow-sm: 0 1px 2px rgba(0, 8, 30, 0.4);
-  --shadow-md: 0 4px 16px rgba(0, 8, 30, 0.4);
-  --shadow-lg: 0 16px 40px rgba(0, 8, 30, 0.5);
-  --shadow-brand: 0 4px 16px rgba(98, 126, 234, 0.3);
-  --shadow-glow: 0 0 24px rgba(98, 126, 234, 0.35), 0 0 56px rgba(0, 212, 255, 0.18);
-  --card-hover-shadow: 0 12px 32px rgba(0, 8, 30, 0.4), 0 0 0 1px rgba(98, 126, 234, 0.18);
-  /* Extended Ethereum palette — keep purple-* names as legacy
-     aliases (a few utility classes still reference them) but point
-     them at the new blue scale. */
-  --purple-300: #b8c5f6;
-  --purple-400: #8da4f1;
-  --purple-500: #627eea;
-  --purple-600: #4561d8;
-  --purple-700: #2f48b8;
-  --purple-800: #25399a;
-  --purple-900: #1b2a78;
-  --purple-950: #0e1845;
-  /* Spacing constants */
+  --shadow-xs: 0 1px 2px rgba(36, 50, 110, 0.04);
+  --shadow-sm: 0 2px 6px rgba(36, 50, 110, 0.05);
+  --shadow-md: 0 8px 24px rgba(36, 50, 110, 0.08);
+  --shadow-lg: 0 16px 48px rgba(36, 50, 110, 0.12);
+  --shadow-brand: 0 8px 24px rgba(0, 82, 255, 0.18);
+  --card-hover-shadow: 0 12px 32px rgba(0, 82, 255, 0.1);
+  /* Legacy purple-* aliases — point at the blue scale so any leftover
+     class references compile against the new palette. */
+  --purple-300: #b8c8ff;
+  --purple-400: #7d99ff;
+  --purple-500: #4d76ff;
+  --purple-600: #0052ff;
+  --purple-700: #0040cc;
+  --purple-800: #0034a8;
+  --purple-900: #002780;
+  --purple-950: #001550;
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   --spacing-2xl: 3rem;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
-:root[data-theme='light'] {
-  --bg: #f6f8ff;
-  --bg-elevated: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card2: #f1f4ff;
-  --border: #dde3f3;
-  --border-hover: #b8c4e6;
-  --text: #0d1326;
-  --text-secondary: #2a3357;
-  --text-muted: #5b6485;
-  --brand: #4561d8;
-  --brand-dim: rgba(69, 97, 216, 0.07);
-  --brand-hover: #3551c4;
-  --brand-deep: #1d2b85;
-  --accent-cyan: #0099cc;
-  --accent-glow: #627eea;
-  --success: #16a34a;
-  --warning: #d97706;
-  --error: #dc2626;
-  --shadow-sm: 0 1px 2px rgba(36, 50, 110, 0.06);
-  --shadow-md: 0 4px 12px rgba(36, 50, 110, 0.08);
-  --shadow-lg: 0 12px 32px rgba(36, 50, 110, 0.1);
-  --shadow-brand: 0 4px 14px rgba(69, 97, 216, 0.18);
-  --card-hover-shadow: 0 8px 24px rgba(36, 50, 110, 0.08), 0 0 0 1px rgba(69, 97, 216, 0.18);
-  color-scheme: light;
+:root[data-theme='dark'] {
+  --bg: #050b1a;
+  --bg-elevated: #0a1226;
+  --bg-card: #0e1730;
+  --bg-card2: #14203f;
+  --bg-muted: #0c1428;
+  --border: #1a2545;
+  --border-hover: #2a3a66;
+  --text: #e6ebf6;
+  --text-secondary: #c4cbe0;
+  --text-muted: #8e98b2;
+  --brand: #4d8aff;
+  --brand-dim: rgba(77, 138, 255, 0.1);
+  --brand-soft: rgba(77, 138, 255, 0.18);
+  --brand-hover: #6a9eff;
+  --brand-deep: #2c5dcc;
+  --accent-cyan: #00d4ff;
+  --accent-glow: #4f8cff;
+  --eth-blue: #8da4f1;
+  --shadow-sm: 0 2px 6px rgba(0, 8, 30, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 8, 30, 0.5);
+  --shadow-lg: 0 16px 48px rgba(0, 8, 30, 0.6);
+  --shadow-brand: 0 8px 24px rgba(77, 138, 255, 0.35);
+  --card-hover-shadow: 0 12px 32px rgba(0, 8, 30, 0.5);
+  color-scheme: dark;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
