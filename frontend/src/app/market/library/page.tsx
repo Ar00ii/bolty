@@ -24,7 +24,7 @@ function LibraryRedirect() {
   const router = useRouter();
   const params = useSearchParams();
   useEffect(() => {
-    const target = params.get('tab') === 'saved' ? '/inventory?tab=saved' : '/inventory';
+    const target = params?.get('tab') === 'saved' ? '/inventory?tab=saved' : '/inventory';
     router.replace(target);
   }, [router, params]);
   return null;
