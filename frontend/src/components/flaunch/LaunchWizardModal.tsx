@@ -79,7 +79,6 @@ export function LaunchWizardModal({
   inline,
   initialLaunchMode = 'self',
 }: LaunchWizardModalProps) {
-  if (inline && !open) return null;
   const { user } = useAuth();
   const [step, setStep] = useState<Step>(1);
   // Step 1 form
@@ -418,6 +417,7 @@ export function LaunchWizardModal({
   );
 
   if (inline) {
+    if (!open) return null;
     return (
       <div className="relative">
         <div className="flex items-start justify-between mb-6">
