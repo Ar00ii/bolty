@@ -1,12 +1,10 @@
-'use client';
-
-const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '';
+/**
+ * Legacy Web3Modal stub. Solana wallets ship via the
+ * `@solana/wallet-adapter-react-ui` modal — see `SolanaWalletProvider`.
+ */
 
 export function initWeb3Modal() {
-  // Web3Modal initialization happens automatically with the provider setup
-  if (!projectId) {
-    console.warn('NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID not set. Wallet connections may not work.');
-  }
+  /* no-op */
 }
 
-export { projectId };
+export const projectId = '';

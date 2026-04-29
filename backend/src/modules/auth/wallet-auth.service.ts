@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException, Logger } from '@nestjs/common';
 import { WalletProvider } from '@prisma/client';
-import { ethers } from 'ethers';
+import bs58 from 'bs58';
+import nacl from 'tweetnacl';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 
@@ -9,13 +10,15 @@ import { AuthTokens } from './auth.service';
 import { invalidateUserCache } from './strategies/jwt.strategy';
 
 const VALID_PROVIDERS = new Set<WalletProvider>([
-  'METAMASK',
-  'WALLETCONNECT',
+  'PHANTOM',
+  'SOLFLARE',
+  'BACKPACK',
+  'GLOW',
   'COINBASE',
-  'RAINBOW',
-  'UNISWAP',
   'OTHER',
 ]);
+
+const SOLANA_BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 @Injectable()
 export class WalletAuthService {
@@ -26,64 +29,45 @@ export class WalletAuthService {
     private readonly authService: AuthService,
   ) {}
 
-  // ── MetaMask (Ethereum) Auth ──────────────────────────────────────────────
+  // ── Solana wallet auth ────────────────────────────────────────────────────
 
   async getNonce(address: string): Promise<{ nonce: string; message: string }> {
-    const normalized = address.toLowerCase();
-
-    // Validate Ethereum address format
-    if (!ethers.isAddress(address)) {
-      throw new UnauthorizedException('Invalid Ethereum address');
+    if (!isSolanaAddress(address)) {
+      throw new UnauthorizedException('Invalid Solana address');
     }
-
-    const nonce = await this.authService.generateNonce(normalized);
-    const message = this.buildSignMessage(normalized, nonce, 'ethereum');
-
+    const nonce = await this.authService.generateNonce(address);
+    const message = this.buildSignMessage(address, nonce);
     return { nonce, message };
   }
 
-  async verifyEthereum(
+  async verifySolana(
     address: string,
     signature: string,
     nonce: string,
     ipAddress?: string,
   ): Promise<AuthTokens> {
-    const normalized = address.toLowerCase();
-
-    if (!ethers.isAddress(address)) {
-      throw new UnauthorizedException('Invalid Ethereum address');
+    if (!isSolanaAddress(address)) {
+      throw new UnauthorizedException('Invalid Solana address');
     }
 
-    // Verify nonce (also deletes it — replay attack prevention)
-    const nonceValid = await this.authService.verifyAndConsumeNonce(normalized, nonce);
+    const nonceValid = await this.authService.verifyAndConsumeNonce(address, nonce);
     if (!nonceValid) {
       throw new UnauthorizedException('Invalid or expired nonce');
     }
 
-    // Reconstruct the signed message
-    const message = this.buildSignMessage(normalized, nonce, 'ethereum');
-
-    // Verify signature
-    let recoveredAddress: string;
-    try {
-      recoveredAddress = ethers.verifyMessage(message, signature);
-    } catch {
-      throw new UnauthorizedException('Invalid signature');
-    }
-
-    if (recoveredAddress.toLowerCase() !== normalized) {
+    const message = this.buildSignMessage(address, nonce);
+    if (!verifySolanaSignature(address, message, signature)) {
       throw new UnauthorizedException('Signature verification failed');
     }
 
-    // Find or create user
-    const user = await this.findOrCreateWalletUser(normalized);
+    const user = await this.findOrCreateWalletUser(address);
 
     await this.authService.createAuditLog({
       action: 'LOGIN',
       resource: 'AUTH',
       userId: user.id,
       ipAddress,
-      metadata: { method: 'metamask', address: normalized.slice(0, 8) + '...' },
+      metadata: { method: 'solana', address: address.slice(0, 6) + '…' + address.slice(-4) },
     });
 
     return this.authService.generateTokens(user.id);
@@ -98,25 +82,18 @@ export class WalletAuthService {
     nonce: string,
   ): Promise<void> {
     if (!userId) throw new UnauthorizedException('Authentication required');
-    const normalized = address.toLowerCase();
-    if (!ethers.isAddress(address)) throw new UnauthorizedException('Invalid Ethereum address');
+    if (!isSolanaAddress(address)) throw new UnauthorizedException('Invalid Solana address');
 
-    const nonceValid = await this.authService.verifyAndConsumeNonce(normalized, nonce);
+    const nonceValid = await this.authService.verifyAndConsumeNonce(address, nonce);
     if (!nonceValid) throw new UnauthorizedException('Invalid or expired nonce');
 
-    const message = this.buildSignMessage(normalized, nonce, 'ethereum');
-    let recovered: string;
-    try {
-      recovered = ethers.verifyMessage(message, signature);
-    } catch {
-      throw new UnauthorizedException('Invalid signature');
-    }
-    if (recovered.toLowerCase() !== normalized)
+    const message = this.buildSignMessage(address, nonce);
+    if (!verifySolanaSignature(address, message, signature)) {
       throw new UnauthorizedException('Signature verification failed');
+    }
 
-    // Ensure wallet isn't already linked to another account — use transaction to prevent race
     await this.prisma.$transaction(async (tx) => {
-      const existing = await tx.user.findUnique({ where: { walletAddress: normalized } });
+      const existing = await tx.user.findUnique({ where: { walletAddress: address } });
       if (existing && existing.id !== userId) {
         const isWalletOnly = !existing.email && !existing.githubId;
         if (!isWalletOnly) {
@@ -124,36 +101,28 @@ export class WalletAuthService {
         }
         await tx.user.update({ where: { id: existing.id }, data: { walletAddress: null } });
         await tx.userWallet.deleteMany({
-          where: { userId: existing.id, address: normalized },
+          where: { userId: existing.id, address },
         });
         this.logger.log(
-          `Transferred wallet ${normalized.slice(0, 8)}... from wallet-only account ${existing.id} to user ${userId}`,
+          `Transferred wallet ${address.slice(0, 6)}… from wallet-only account ${existing.id} to user ${userId}`,
         );
       }
-      await tx.user.update({ where: { id: userId }, data: { walletAddress: normalized } });
+      await tx.user.update({ where: { id: userId }, data: { walletAddress: address } });
 
-      // Keep the UserWallet sidecar in sync so the profile listing always
-      // reflects the primary wallet without a second roundtrip.
       await tx.userWallet.updateMany({
         where: { userId, isPrimary: true },
         data: { isPrimary: false },
       });
       await tx.userWallet.upsert({
-        where: { userId_address: { userId, address: normalized } },
-        create: { userId, address: normalized, provider: 'METAMASK', isPrimary: true },
+        where: { userId_address: { userId, address } },
+        create: { userId, address, provider: 'PHANTOM', isPrimary: true },
         update: { isPrimary: true },
       });
     });
     invalidateUserCache(userId);
-    this.logger.log(`Wallet linked: ${normalized.slice(0, 8)}... → user ${userId}`);
+    this.logger.log(`Wallet linked: ${address.slice(0, 6)}… → user ${userId}`);
   }
 
-  /**
-   * Link a second (or third...) wallet to an account that already has a
-   * primary. Does signature verification but does NOT change the primary
-   * walletAddress on the user — the user promotes it explicitly via
-   * WalletsService.setPrimary.
-   */
   async linkAdditionalWallet(
     userId: string,
     address: string,
@@ -163,26 +132,19 @@ export class WalletAuthService {
     label?: string,
   ) {
     if (!userId) throw new UnauthorizedException('Authentication required');
-    const normalized = address.toLowerCase();
-    if (!ethers.isAddress(address)) throw new UnauthorizedException('Invalid Ethereum address');
+    if (!isSolanaAddress(address)) throw new UnauthorizedException('Invalid Solana address');
 
-    const nonceValid = await this.authService.verifyAndConsumeNonce(normalized, nonce);
+    const nonceValid = await this.authService.verifyAndConsumeNonce(address, nonce);
     if (!nonceValid) throw new UnauthorizedException('Invalid or expired nonce');
 
-    const message = this.buildSignMessage(normalized, nonce, 'ethereum');
-    let recovered: string;
-    try {
-      recovered = ethers.verifyMessage(message, signature);
-    } catch {
-      throw new UnauthorizedException('Invalid signature');
-    }
-    if (recovered.toLowerCase() !== normalized) {
+    const message = this.buildSignMessage(address, nonce);
+    if (!verifySolanaSignature(address, message, signature)) {
       throw new UnauthorizedException('Signature verification failed');
     }
 
     const owningUser = await this.prisma.user.findFirst({
       where: {
-        OR: [{ walletAddress: normalized }, { linkedWallets: { some: { address: normalized } } }],
+        OR: [{ walletAddress: address }, { linkedWallets: { some: { address } } }],
         NOT: { id: userId },
       },
       select: { id: true },
@@ -192,7 +154,7 @@ export class WalletAuthService {
     }
 
     const existing = await this.prisma.userWallet.findUnique({
-      where: { userId_address: { userId, address: normalized } },
+      where: { userId_address: { userId, address } },
     });
     if (existing) {
       throw new ConflictException('This wallet is already linked to your account');
@@ -201,19 +163,19 @@ export class WalletAuthService {
     const providerEnum: WalletProvider =
       provider && VALID_PROVIDERS.has(provider.toUpperCase() as WalletProvider)
         ? (provider.toUpperCase() as WalletProvider)
-        : 'METAMASK';
+        : 'PHANTOM';
 
     const wallet = await this.prisma.userWallet.create({
       data: {
         userId,
-        address: normalized,
+        address,
         provider: providerEnum,
         label: label?.slice(0, 60) || null,
         isPrimary: false,
       },
     });
     invalidateUserCache(userId);
-    this.logger.log(`Additional wallet linked: ${normalized.slice(0, 8)}... → user ${userId}`);
+    this.logger.log(`Additional wallet linked: ${address.slice(0, 6)}… → user ${userId}`);
     return wallet;
   }
 
@@ -249,8 +211,8 @@ export class WalletAuthService {
     throw new ConflictException('Unable to generate user tag — please try again');
   }
 
-  private buildSignMessage(address: string, nonce: string, chain: string): string {
-    return `Welcome to Bolty!\n\nPlease sign this message to authenticate.\n\nChain: ${chain}\nAddress: ${address}\nNonce: ${nonce}\n\nThis request will not trigger any blockchain transaction.`;
+  private buildSignMessage(address: string, nonce: string): string {
+    return `Welcome to Bolty!\n\nSign this message to authenticate.\n\nChain: solana\nWallet: ${address}\nNonce: ${nonce}\n\nThis request will not trigger a transaction.`;
   }
 
   private async findOrCreateWalletUser(address: string) {
@@ -263,12 +225,12 @@ export class WalletAuthService {
       user = await this.prisma.user.create({
         data: {
           walletAddress: address,
-          username: `eth_${address.slice(0, 6)}`,
+          username: `sol_${address.slice(0, 6)}`,
           lastLoginAt: new Date(),
           userTag,
         },
       });
-      this.logger.log(`New ethereum wallet user: ${address.slice(0, 8)}...`);
+      this.logger.log(`New solana wallet user: ${address.slice(0, 6)}…`);
     } else {
       user = await this.prisma.user.update({
         where: { id: user.id },
@@ -281,5 +243,28 @@ export class WalletAuthService {
     }
 
     return user;
+  }
+}
+
+function isSolanaAddress(address: string): boolean {
+  if (!SOLANA_BASE58.test(address)) return false;
+  try {
+    const bytes = bs58.decode(address);
+    return bytes.length === 32;
+  } catch {
+    return false;
+  }
+}
+
+function verifySolanaSignature(address: string, message: string, signatureBase58: string): boolean {
+  try {
+    const pubkey = bs58.decode(address);
+    const sig = bs58.decode(signatureBase58);
+    if (pubkey.length !== 32) return false;
+    if (sig.length !== 64) return false;
+    const msg = new TextEncoder().encode(message);
+    return nacl.sign.detached.verify(msg, sig, pubkey);
+  } catch {
+    return false;
   }
 }

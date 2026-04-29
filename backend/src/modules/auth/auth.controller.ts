@@ -34,7 +34,7 @@ import {
   ResetPasswordDto,
   Enable2FADto,
 } from './dto/email-auth.dto';
-import { GetNonceDto, VerifyEthereumDto } from './dto/wallet-auth.dto';
+import { GetNonceDto, VerifySolanaDto } from './dto/wallet-auth.dto';
 import { WalletAuthService } from './wallet-auth.service';
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -323,7 +323,7 @@ export class AuthController {
     return { success: true };
   }
 
-  // ── Wallet Linking (authenticated user links MetaMask) ────────────────────
+  // ── Wallet Linking (authenticated user links a Solana wallet) ────────────
 
   @UseGuards(JwtAuthGuard)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -337,7 +337,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @Post('link/wallet')
-  async linkWallet(@CurrentUser('id') userId: string, @Body() dto: VerifyEthereumDto) {
+  async linkWallet(@CurrentUser('id') userId: string, @Body() dto: VerifySolanaDto) {
     await this.walletAuthService.linkWalletToUser(userId, dto.address, dto.signature, dto.nonce);
     return { success: true };
   }
@@ -348,7 +348,7 @@ export class AuthController {
   @Post('link/wallet/additional')
   async linkAdditionalWallet(
     @CurrentUser('id') userId: string,
-    @Body() dto: VerifyEthereumDto & { provider?: string; label?: string },
+    @Body() dto: VerifySolanaDto,
   ) {
     const wallet = await this.walletAuthService.linkAdditionalWallet(
       userId,
@@ -369,13 +369,13 @@ export class AuthController {
     return { success: true };
   }
 
-  // ── MetaMask ──────────────────────────────────────────────────────────────
+  // ── Solana wallet sign-in (Phantom / Solflare / Backpack / …) ─────────────
 
   @Public()
   @SkipCsrf()
   @Throttle({ default: { limit: 20, ttl: 60000 } })
-  @Post('nonce/ethereum')
-  async getEthereumNonce(@Body() dto: GetNonceDto) {
+  @Post('nonce/solana')
+  async getSolanaNonce(@Body() dto: GetNonceDto) {
     return this.walletAuthService.getNonce(dto.address);
   }
 
@@ -383,9 +383,9 @@ export class AuthController {
   @SkipCsrf()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
-  @Post('verify/ethereum')
-  async verifyEthereum(@Body() dto: VerifyEthereumDto, @Req() req: Request, @Res() res: Response) {
-    const tokens = await this.walletAuthService.verifyEthereum(
+  @Post('verify/solana')
+  async verifySolana(@Body() dto: VerifySolanaDto, @Req() req: Request, @Res() res: Response) {
+    const tokens = await this.walletAuthService.verifySolana(
       dto.address,
       dto.signature,
       dto.nonce,
