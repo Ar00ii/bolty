@@ -35,7 +35,6 @@ import {
   SecurityFindings,
   type ScanResult,
 } from '@/components/boltyguard/SecurityBadge';
-import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import { Markdown } from '@/components/ui/Markdown';
 import {
   PaymentConsentModal,
@@ -703,15 +702,6 @@ export default function AgentDetailPage() {
                 </p>
               )}
             </Section>
-
-            <TokenLaunchCard
-              listingId={listing.id}
-              listingTitle={listing.title}
-              listingDescription={listing.description ?? ''}
-              listingImageUrl={null}
-              listingPath={`/market/agents/${listing.id}`}
-              isOwner={isOwner}
-            />
 
             <SecurityFindings listingId={listing.id} />
 

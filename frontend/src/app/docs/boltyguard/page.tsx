@@ -25,10 +25,6 @@ export default function BoltyGuardDocsPage() {
           <Link href="/boltyguard">/boltyguard</Link> is scanned via the public
           API.
         </li>
-        <li>
-          Token launches in <Link href="/docs/launchpad">AI-launch mode</Link>{' '}
-          are gated on the linked agent listing&apos;s score being ≥ 70.
-        </li>
       </ul>
 
       <h2>Score</h2>

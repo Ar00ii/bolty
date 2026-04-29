@@ -24,7 +24,6 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { TokenLaunchCard } from '@/components/flaunch/TokenLaunchCard';
 import {
   PaymentConsentModal,
   type PaymentMethod,
@@ -614,15 +613,6 @@ export default function RepoDetailPage() {
                 </p>
               )}
             </Section>
-
-            <TokenLaunchCard
-              listingId={repo.id}
-              listingTitle={repo.name}
-              listingDescription={repo.description ?? ''}
-              listingImageUrl={repo.logoUrl ?? null}
-              listingPath={`/market/repos/${repo.id}`}
-              isOwner={!!user && repo.user.id === user.id}
-            />
 
             <Section title={`Collaborators (${collaborators.length})`} icon={Users}>
               {collaborators.length === 0 ? (

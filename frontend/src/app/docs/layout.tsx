@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 /**
  * Docs surface chrome.
  *
- * Visual goals (mirroring the landing + launchpad surfaces):
+ * Visual goals (mirroring the landing surface):
  *  - Pure black background.
  *  - Brand purple (#836EF9) as the only chromatic accent — links,
  *    sidebar active state, gradient hero word, list bullets,

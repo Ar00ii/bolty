@@ -16,7 +16,6 @@ import {
   MessageCircle,
   MessageSquare,
   Package,
-  Rocket,
   Search,
   Settings,
   ShoppingBag,
@@ -65,11 +64,6 @@ function prefetchForHref(href: string) {
       void prefetch('market:top-sellers:48', () =>
         api.get('/market/top-sellers?limit=48'),
       );
-      break;
-    case '/launchpad':
-      // Backend stats are cheap to prewarm; the actual token list lives
-      // off-chain (flaunch) and polls on its own.
-      void prefetch('token:bolty', () => api.get('/token/bolty'));
       break;
     case '/feed':
       void prefetch('chat:general', () =>
@@ -131,10 +125,6 @@ export const NAV: NavSection[] = [
   {
     section: 'Discover',
     items: [
-      // Launchpad sits first in Discover to match the public landing
-      // navbar + the mobile bottom-tab bar — single clear wedge for new
-      // visitors. Marketplace stays in the section but moves below.
-      { label: 'Launchpad', icon: Rocket, href: '/launchpad' },
       {
         label: 'Marketplace',
         icon: LayoutGrid,

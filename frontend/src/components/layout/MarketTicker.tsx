@@ -1,15 +1,12 @@
 'use client';
 
-import { Crown, DollarSign, Flame, Rocket, TrendingUp } from 'lucide-react';
+import { Crown, DollarSign, Flame, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { getReputationRank } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
-import { FLAUNCH_LAUNCHPAD_ENABLED } from '@/lib/flaunch/feature';
-import { listLaunchedTokens } from '@/lib/flaunch/launchpad';
-import type { TokenInfo } from '@/lib/flaunch/types';
 
 interface TickerAgent {
   id: string;
@@ -40,7 +37,6 @@ const REFRESH_MS = 30_000;
 
 export function MarketTicker() {
   const [data, setData] = useState<TickerData>({ topAgents: [], topDevs: [] });
-  const [tokens, setTokens] = useState<TokenInfo[]>([]);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,28 +57,7 @@ export function MarketTicker() {
     };
   }, []);
 
-  // Pull launched tokens too so the ticker shows "just minted" alongside
-  // top agents + top devs. Same 30s refresh cadence.
-  useEffect(() => {
-    if (!FLAUNCH_LAUNCHPAD_ENABLED) return;
-    let cancelled = false;
-    async function load() {
-      try {
-        const res = await listLaunchedTokens();
-        if (!cancelled) setTokens(res ?? []);
-      } catch {
-        /* best-effort */
-      }
-    }
-    load();
-    const id = setInterval(load, REFRESH_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
-
-  const items = useTickerItems(data, tokens);
+  const items = useTickerItems(data);
   const [viewportWidth, setViewportWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -187,20 +162,9 @@ type TickerItem =
       reputationPoints: number;
       totalSales: number;
       totalEarnings: number;
-    }
-  | {
-      key: string;
-      kind: 'launch';
-      href: string;
-      name: string;
-      symbol: string;
-      imageUrl: string | null;
-      priceUsd: number;
-      creatorUsername: string | null;
     };
 
-function useTickerItems(data: TickerData, tokens: TokenInfo[]): TickerItem[] {
-  // Interleave agents / devs / launched tokens so the bar feels mixed.
+function useTickerItems(data: TickerData): TickerItem[] {
   const agents = data.topAgents.slice(0, 10);
   const devs = data.topDevs.slice(0, 10);
   const items: TickerItem[] = [];
@@ -234,45 +198,8 @@ function useTickerItems(data: TickerData, tokens: TokenInfo[]): TickerItem[] {
         totalEarnings: d.totalEarnings,
       });
     }
-    // Every 2nd slot also gets a launched token when available, so the
-    // feed mixes "Top sold / Top dev / Just launched" without clumping.
-    const t = tokens[i];
-    if (t) {
-      items.push({
-        key: `t-${t.tokenAddress}`,
-        kind: 'launch',
-        href: `/launchpad/${t.tokenAddress}`,
-        name: t.name,
-        symbol: t.symbol,
-        imageUrl: t.imageUrl,
-        priceUsd: t.priceUsd,
-        creatorUsername: t.creatorUsername,
-      });
-    }
   }
   return items;
-}
-
-function formatUsdShort(n: number): string {
-  if (!n || n <= 0) return '$0';
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`;
-  if (n >= 1) return `$${n.toFixed(2)}`;
-  if (n >= 0.0001) return `$${n.toPrecision(3)}`;
-  // Subscript notation for microcaps
-  const expOf10 = Math.floor(Math.log10(n));
-  const leadingZeros = -expOf10 - 1;
-  if (leadingZeros < 4) return `$${n.toFixed(8)}`;
-  const sig = (n * Math.pow(10, -expOf10))
-    .toPrecision(2)
-    .replace('.', '')
-    .replace(/0+$/, '') || '1';
-  const subChars = '₀₁₂₃₄₅₆₇₈₉';
-  const sub = String(leadingZeros)
-    .split('')
-    .map((d) => subChars[Number(d)])
-    .join('');
-  return `$0.0${sub}${sig}`;
 }
 
 function formatEarnings(amount: number, currency: string = 'ETH'): string {
@@ -283,65 +210,6 @@ function formatEarnings(amount: number, currency: string = 'ETH'): string {
 }
 
 function TickerEntry({ item }: { item: TickerItem }) {
-  if (item.kind === 'launch') {
-    return (
-      <Link
-        href={item.href}
-        className="inline-flex items-center gap-2 hover:brightness-125 transition-all"
-        style={{ fontSize: 11.5 }}
-      >
-        <span
-          className="inline-flex items-center gap-1 px-1.5 py-[1.5px] rounded font-mono uppercase"
-          style={{
-            background: 'rgba(131,110,249,0.14)',
-            color: '#b4a7ff',
-            border: '1px solid rgba(131,110,249,0.35)',
-            fontSize: 9.5,
-            letterSpacing: '0.12em',
-          }}
-        >
-          <Rocket className="w-2.5 h-2.5" strokeWidth={2.5} />
-          Launched
-        </span>
-        {item.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.imageUrl}
-            alt=""
-            className="w-4 h-4 rounded-full object-cover"
-            style={{ boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)' }}
-          />
-        ) : (
-          <span
-            className="w-4 h-4 rounded-full grid place-items-center text-[8px] font-mono"
-            style={{
-              background: 'rgba(131,110,249,0.14)',
-              color: '#b4a7ff',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
-            }}
-          >
-            ${item.symbol.charAt(0)}
-          </span>
-        )}
-        <span style={{ color: '#e4e4e7' }} className="truncate max-w-[140px]">
-          {item.name}
-        </span>
-        <span style={{ color: '#71717a' }} className="font-mono">
-          ${item.symbol}
-        </span>
-        <span style={{ color: '#71717a' }} className="font-mono">
-          ·
-        </span>
-        <span
-          style={{ color: '#b4a7ff', fontSize: 10.5 }}
-          className="font-mono tabular-nums"
-        >
-          {formatUsdShort(item.priceUsd)}
-        </span>
-      </Link>
-    );
-  }
-
   if (item.kind === 'agent') {
     return (
       <Link

@@ -28,15 +28,6 @@ const GROUPS: Array<{ heading: string; items: Array<{ href: string; label: strin
       { href: '/docs/boltyguard', label: 'BoltyGuard security' },
     ],
   },
-  {
-    heading: 'Launchpad',
-    items: [
-      { href: '/docs/launchpad', label: 'Launchpad' },
-      { href: '/docs/launchpad/agent-x', label: 'Agent X account' },
-      { href: '/docs/launchpad/agent-x-setup', label: 'Setup guide' },
-      { href: '/docs/launchpad/agent-x-autonomous', label: 'Autonomous mode' },
-    ],
-  },
 ];
 
 export function DocsSidebar() {
@@ -113,7 +104,7 @@ export function DocsHero() {
           style={{ fontSize: '15.5px', lineHeight: 1.7 }}
         >
           Webhook contracts, marketplace mechanics, BoltyGuard security
-          scoring, launchpad mechanics, and the per-agent X integration
+          scoring and the per-agent X integration
           that lets the agent itself run the token&apos;s social.
         </p>
       </div>

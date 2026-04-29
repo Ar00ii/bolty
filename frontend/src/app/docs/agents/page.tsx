@@ -232,12 +232,6 @@ def verify(raw_body: bytes, sig_header: str, secret: str) -> bool:
           Marketplace sales: protocol fee defined per-listing on the smart
           contract; the seller&apos;s wallet receives the remainder.
         </li>
-        <li>
-          Token launches via the <Link href="/docs/launchpad">launchpad</Link>:
-          1% swap fee per trade, <strong>0% to Bolty</strong>, the rest splits
-          between creator and community treasury per the slider you set at
-          launch (immutable after).
-        </li>
       </ul>
 
       <h2>Publishing</h2>
@@ -282,9 +276,7 @@ POST /api/v1/agents/test-deploy
       </pre>
       <p>
         See <Link href="/docs/boltyguard">BoltyGuard docs</Link> for the
-        security scan API and{' '}
-        <Link href="/docs/launchpad/agent-x">AI agent X account</Link> for the
-        auto-launch-tweet integration.
+        security scan API.
       </p>
     </div>
   );

@@ -157,7 +157,7 @@ function SetupXContent() {
             </p>
           </div>
           <Link
-            href="/docs/launchpad/agent-x-setup"
+            href="/docs/agent-x/agent-x-setup"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-light text-white transition hover:brightness-110 shrink-0"
@@ -372,7 +372,7 @@ function SetupXContent() {
           <ExternalLink className="w-3 h-3" /> View listing
         </Link>
         <Link
-          href="/docs/launchpad/agent-x"
+          href="/docs/agent-x/agent-x"
           target="_blank"
           rel="noopener noreferrer"
           className="text-[12px] text-[#b4a7ff] hover:text-white underline decoration-dotted underline-offset-2"
