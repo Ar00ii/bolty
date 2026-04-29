@@ -41,10 +41,6 @@ import { io, Socket } from 'socket.io-client';
 import { SecurityBadge, type ScanResult } from '@/components/boltyguard/SecurityBadge';
 import { Badge } from '@/components/ui/badge';
 import { GradientText } from '@/components/ui/GradientText';
-import {
-  PaymentConsentModal,
-  type PaymentMethod,
-} from '@/components/ui/payment-consent-modal';
 import { ShimmerButton } from '@/components/ui/ShimmerButton';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api, ApiError, API_URL } from '@/lib/api/client';
@@ -54,15 +50,6 @@ import {
   setCached as setCachedEntry,
 } from '@/lib/cache/pageCache';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
-import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
-import { platformWeiForSeller, grossWeiForSeller } from '@/lib/payments/fees';
-import {
-  encodeErc20Transfer,
-  loadBoltyTokenConfig,
-  usdToTokenUnits,
-} from '@/lib/wallet/bolty-token';
-import { isEscrowEnabled, getEscrowAddress, escrowDeposit } from '@/lib/wallet/escrow';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -1141,16 +1128,7 @@ function AgentsPageContent() {
   const [mobileBlock, setMobileBlock] = useState(false);
 
   // ── Direct buy state ──────────────────────────────────────────────────────
-  const { pickWallet, pickerElement: buyWalletPicker } = useWalletPicker();
   const [buyingListing, setBuyingListing] = useState<MarketListing | null>(null);
-  const [buyConsentData, setBuyConsentData] = useState<{
-    sellerWallet: string;
-    buyerAddress: string;
-    /** Seller's net amount in ETH (the listing price) — wei is computed at sign time. */
-    baseEth: number;
-    baseUsd: number;
-    boltyDisabled: boolean;
-  } | null>(null);
   const [buyPaying, setBuyPaying] = useState(false);
   const [buyError, setBuyError] = useState('');
   const [buySuccess, setBuySuccess] = useState(false);
@@ -1317,7 +1295,6 @@ function AgentsPageContent() {
     setBuyingListing(listing);
     setBuyError('');
     setBuySuccess(false);
-    // Free listings — claim directly, no payment needed
     if (listing.price === 0) {
       setBuyPaying(true);
       try {
@@ -1331,134 +1308,9 @@ function AgentsPageContent() {
       }
       return;
     }
-    // Paid listings — fetch seller wallet, open wallet picker, defer wei
-    // computation to executeBuy now that we know the chosen payment method.
-    setBuyPaying(true);
-    try {
-      const ethereum = getMetaMaskProvider();
-      if (!ethereum) { setBuyError('MetaMask not found'); return; }
-      const sellerData = await api.get<{ seller?: { walletAddress?: string } }>(`/market/${listing.id}`);
-      const sellerWallet = sellerData?.seller?.walletAddress;
-      if (!sellerWallet) { setBuyError('Seller has no wallet linked'); return; }
-      let ethPrice = 2000;
-      try { const p = await api.get<{ price?: number }>('/chart/eth-price'); if (p.price) ethPrice = p.price; } catch { /* fallback */ }
-      const buyerAddress = await pickWallet();
-      setBuyConsentData({
-        sellerWallet,
-        buyerAddress,
-        baseEth: listing.price,
-        baseUsd: listing.price * ethPrice,
-        boltyDisabled: !(await loadBoltyTokenConfig()),
-      });
-    } catch (err: unknown) {
-      const msg = (err as Error)?.message || String(err);
-      setBuyError(msg.includes('rejected') ? 'Payment cancelled' : 'Failed: ' + msg.slice(0, 80));
-    } finally {
-      setBuyPaying(false);
-    }
-  };
-
-  const executeBuy = async (
-    signature: string,
-    consentMessage: string,
-    paymentMethod: PaymentMethod,
-  ) => {
-    if (!buyConsentData || !buyingListing) return;
-    const { sellerWallet, buyerAddress, baseEth, baseUsd } = buyConsentData;
-    setBuyConsentData(null);
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) { setBuyError('MetaMask not found'); return; }
-
-    const boltyCfg = paymentMethod === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (paymentMethod === 'BOLTY' && !boltyCfg) {
-      setBuyError('BOLTY payments are not enabled — please retry with ETH');
-      return;
-    }
-
-    let sellerWei: bigint;
-    let platformWei: bigint;
-    let totalWei: bigint;
-    try {
-      if (boltyCfg) {
-        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
-      } else {
-        sellerWei = BigInt(Math.ceil(baseEth * 1e18));
-      }
-      platformWei = platformWeiForSeller(sellerWei, paymentMethod);
-      totalWei = grossWeiForSeller(sellerWei, paymentMethod);
-    } catch (err) {
-      setBuyError(err instanceof Error ? err.message : 'Could not compute price');
-      return;
-    }
-
-    try {
-      if (isEscrowEnabled()) {
-        // Escrow holds the buyer's gross; the contract releases the
-        // seller's net on confirmation and forwards the fee to the
-        // platform wallet.
-        const orderId = crypto.randomUUID();
-        const txHash = await escrowDeposit(orderId, sellerWallet, totalWei);
-        await api.post(`/market/${buyingListing.id}/purchase`, {
-          txHash,
-          amountWei: totalWei.toString(),
-          consentSignature: signature,
-          consentMessage,
-          escrowContract: getEscrowAddress(),
-        });
-      } else {
-        const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-        const txHash = boltyCfg
-          ? ((await ethereum.request({
-              method: 'eth_sendTransaction',
-              params: [
-                {
-                  from: buyerAddress,
-                  to: boltyCfg.address,
-                  data: encodeErc20Transfer(sellerWallet, sellerWei),
-                  value: '0x0',
-                },
-              ],
-            })) as string)
-          : ((await ethereum.request({
-              method: 'eth_sendTransaction',
-              params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
-            })) as string);
-        let platformFeeTxHash: string | undefined;
-        if (platformWallet) {
-          platformFeeTxHash = boltyCfg
-            ? ((await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [
-                  {
-                    from: buyerAddress,
-                    to: boltyCfg.address,
-                    data: encodeErc20Transfer(platformWallet, platformWei),
-                    value: '0x0',
-                  },
-                ],
-              })) as string)
-            : ((await ethereum.request({
-                method: 'eth_sendTransaction',
-                params: [{ from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) }],
-              })) as string);
-        }
-        await api.post(`/market/${buyingListing.id}/purchase`, {
-          txHash,
-          amountWei: sellerWei.toString(),
-          platformFeeTxHash,
-          consentSignature: signature,
-          consentMessage,
-        });
-      }
-      setBuySuccess(true);
-    } catch (err: unknown) {
-      const msg = (err as Error)?.message || String(err);
-      setBuyError(
-        msg.includes('rejected') ? 'Payment cancelled'
-          : err instanceof ApiError ? err.message
-          : 'Payment failed: ' + msg.slice(0, 80),
-      );
-    }
+    // Paid listings: route to the detail page where the wallet
+    // adapter + consent modal handle the signature + payment.
+    router.push(`/market/agents/${listing.id}`);
   };
 
   return (
@@ -1757,27 +1609,11 @@ function AgentsPageContent() {
         </>
       )}
 
-      {/* Direct buy — wallet picker injected by useWalletPicker */}
-      {buyWalletPicker}
-
-      {/* Loading overlay while fetching seller data */}
-      {buyPaying && !buyConsentData && (
+      {/* Loading overlay while we route to the detail page */}
+      {buyPaying && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
           <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#836EF9] animate-spin" />
         </div>
-      )}
-
-      {/* Payment consent modal for direct buy */}
-      {buyConsentData && buyingListing && (
-        <PaymentConsentModal
-          listingTitle={buyingListing.title}
-          sellerAddress={buyConsentData.sellerWallet}
-          baseUsd={buyConsentData.baseUsd}
-          buyerAddress={buyConsentData.buyerAddress}
-          boltyDisabled={buyConsentData.boltyDisabled}
-          onConsent={executeBuy}
-          onCancel={() => { setBuyConsentData(null); setBuyingListing(null); }}
-        />
       )}
 
       {/* Buy error overlay */}

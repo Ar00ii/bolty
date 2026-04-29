@@ -24,22 +24,15 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import {
-  PaymentConsentModal,
-  type PaymentMethod,
-} from '@/components/ui/payment-consent-modal';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+
+import { PaymentConsentModal } from '@/components/ui/payment-consent-modal';
 import { ShareButton } from '@/components/ui/ShareButton';
 import { api, ApiError, API_URL } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useFavoriteRepos } from '@/lib/hooks/useFavorites';
-import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
-import { platformWeiForSeller } from '@/lib/payments/fees';
-import {
-  encodeErc20Transfer,
-  loadBoltyTokenConfig,
-  usdToTokenUnits,
-} from '@/lib/wallet/bolty-token';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
+import { solToLamports } from '@/lib/wallet/solana';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -90,10 +83,10 @@ interface Collaborator {
 interface ConsentState {
   sellerWallet: string;
   buyerAddress: string;
-  /** USD the seller takes home (= listing price). Wei is computed at sign time. */
+  /** USD the seller takes home (= listing price, headline display only). */
   baseUsd: number;
-  /** Whether the BOLTY option should be hidden in the modal. */
-  boltyDisabled: boolean;
+  /** Lamports the seller will receive — computed from USD via SOL/USD oracle. */
+  sellerLamports: bigint;
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -145,7 +138,8 @@ export default function RepoDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { isAuthenticated, user } = useAuth();
-  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
+  const { publicKey: solanaPublicKey, connected: solanaConnected } = useWallet();
+  const { setVisible: setWalletModalVisible } = useWalletModal();
 
   const [repo, setRepo] = useState<RepositoryDetail | null>(null);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -214,126 +208,44 @@ export default function RepoDetailPage() {
     }
     const sellerWallet = repo.user.walletAddress;
     if (!sellerWallet) {
-      setError('Seller has no wallet linked');
+      setError('Seller has no Solana wallet linked');
       return;
     }
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) {
-      setError('MetaMask not found');
+    if (!solanaConnected || !solanaPublicKey) {
+      setWalletModalVisible(true);
       return;
     }
+
+    let solUsd = 100;
     try {
-      const buyerAddress = await pickWallet();
-      setConsent({
-        sellerWallet,
-        buyerAddress,
-        baseUsd: repo.lockedPriceUsd,
-        boltyDisabled: !(await loadBoltyTokenConfig()),
-      });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
-      setError(msg);
+      const p = await api.get<{ price?: number }>('/chart/eth-price');
+      if (p.price) solUsd = p.price;
+    } catch {
+      /* fallback */
     }
+    // Add 5% buffer on the lamports we ship to backend so a brief oracle
+    // drift between modal open and tx confirm doesn't fail verification.
+    // Backend already enforces a 5% slippage window on top of this.
+    const sellerLamports = BigInt(
+      Math.ceil(solToLamports(repo.lockedPriceUsd / solUsd) * 1.05),
+    );
+    setConsent({
+      sellerWallet,
+      buyerAddress: solanaPublicKey.toBase58(),
+      baseUsd: repo.lockedPriceUsd,
+      sellerLamports,
+    });
   };
 
   const executePurchase = async (
-    signature: string,
-    message: string,
-    method: PaymentMethod,
+    txSignature: string,
+    sellerLamports: bigint,
+    totalLamports: bigint,
   ) => {
     if (!consent || !repo) return;
-    const { sellerWallet, buyerAddress, baseUsd } = consent;
     setConsent(null);
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) {
-      setError('MetaMask not found');
-      return;
-    }
-    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-
-    // Compute on-chain amounts now that the method is known. The seller
-    // always receives `baseUsd` worth of the chosen currency; the platform
-    // fee is added on top so BOLTY (3%) is strictly cheaper for the buyer
-    // than ETH (7%).
-    const boltyCfg = method === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (method === 'BOLTY' && !boltyCfg) {
-      setError('BOLTY payments are not enabled — please retry with ETH');
-      return;
-    }
-
-    let sellerWei: bigint;
-    let platformWei: bigint;
-    try {
-      if (boltyCfg) {
-        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
-      } else {
-        let ethPrice = 2000;
-        try {
-          const p = await api.get<{ price?: number }>('/chart/eth-price');
-          if (p.price) ethPrice = p.price;
-        } catch {
-          /* fallback */
-        }
-        sellerWei = BigInt(Math.ceil((baseUsd / ethPrice) * 1e18));
-      }
-      platformWei = platformWeiForSeller(sellerWei, method);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not compute price');
-      return;
-    }
 
     try {
-      // Build the seller-payment tx. ETH → plain value transfer. BOLTY →
-      // eth_sendTransaction to the token contract with encoded
-      // transfer(seller, amount) calldata, value 0.
-      let txHash: string;
-      if (boltyCfg) {
-        txHash = (await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [
-            {
-              from: buyerAddress,
-              to: boltyCfg.address,
-              data: encodeErc20Transfer(sellerWallet, sellerWei),
-              value: '0x0',
-            },
-          ],
-        })) as string;
-      } else {
-        txHash = (await ethereum.request({
-          method: 'eth_sendTransaction',
-          params: [{ from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) }],
-        })) as string;
-      }
-
-      let platformFeeTxHash: string | undefined;
-      if (platformWallet) {
-        if (boltyCfg) {
-          platformFeeTxHash = (await ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [
-              {
-                from: buyerAddress,
-                to: boltyCfg.address,
-                data: encodeErc20Transfer(platformWallet, platformWei),
-                value: '0x0',
-              },
-            ],
-          })) as string;
-        } else {
-          platformFeeTxHash = (await ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [
-              { from: buyerAddress, to: platformWallet, value: '0x' + platformWei.toString(16) },
-            ],
-          })) as string;
-        }
-      }
-      // Retry the verify POST if the backend reports the tx is still pending.
-      // The RPC can lag a few seconds behind wallet confirmation, and we
-      // don't want to leave the buyer stranded after money has left their
-      // wallet. The backend persists the attempt on first call so even
-      // aborted retries won't lose the purchase record.
       const submitPurchase = async (): Promise<{ success: boolean; downloadUrl?: string }> => {
         const maxAttempts = 4;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -341,10 +253,8 @@ export default function RepoDetailPage() {
             return await api.post<{ success: boolean; downloadUrl?: string }>(
               `/repos/${repo.id}/purchase`,
               {
-                txHash,
-                platformFeeTxHash,
-                consentSignature: signature,
-                consentMessage: message,
+                txHash: txSignature,
+                amountWei: sellerLamports.toString(),
               },
             );
           } catch (err) {
@@ -365,6 +275,7 @@ export default function RepoDetailPage() {
         window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
       }
       await load();
+      void totalLamports;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (err instanceof ApiError && err.status >= 400) {
@@ -698,9 +609,10 @@ export default function RepoDetailPage() {
           listingTitle={repo.name}
           sellerAddress={consent.sellerWallet}
           baseUsd={consent.baseUsd}
+          sellerLamports={consent.sellerLamports}
           buyerAddress={consent.buyerAddress}
-          boltyDisabled={consent.boltyDisabled}
-          onConsent={executePurchase}
+          feeRecipient={process.env.NEXT_PUBLIC_PLATFORM_WALLET || null}
+          onPaid={executePurchase}
           onCancel={() => setConsent(null)}
         />
       )}
@@ -771,7 +683,6 @@ export default function RepoDetailPage() {
           </div>
         </div>
       )}
-      {walletPicker}
     </div>
   );
 }
