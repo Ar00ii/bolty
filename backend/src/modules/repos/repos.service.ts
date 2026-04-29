@@ -18,7 +18,10 @@ import { isSafeUrl } from '../../common/sanitize/sanitize.util';
 import { ChartService } from '../chart/chart.service';
 import { EmailService } from '../email/email.service';
 import { MarketGateway } from '../market/market.gateway';
+import { SolanaPaymentsService } from '../payments/solana-payments.service';
 import { ReputationService } from '../reputation/reputation.service';
+
+const SOLANA_TX_RE = /^[1-9A-HJ-NP-Za-km-z]{43,90}$/;
 
 @Injectable()
 export class ReposService {
@@ -33,6 +36,7 @@ export class ReposService {
     private readonly reputation: ReputationService,
     private readonly email: EmailService,
     private readonly marketGateway: MarketGateway,
+    private readonly solanaPayments: SolanaPaymentsService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -1089,205 +1093,56 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     }
 
     // ── Expected payment amount ──────────────────────────────────────────
-    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to wei via
-    // the live ETH/USD oracle so an attacker can't pay dust for a $1k repo.
-    const ethPrice = await this.chart.getEthPrice().catch(() => null);
-    if (!ethPrice || !(ethPrice.price > 0)) {
+    // Repo prices are quoted in USD (`lockedPriceUsd`). Convert to lamports
+    // via the live SOL/USD oracle so an attacker can't pay dust for a $1k
+    // repo. We allow 5% slippage between quote and confirmation — SOL can
+    // move a couple percent while the wallet popup is open.
+    const solPrice = await this.chart.getEthPrice().catch(() => null);
+    if (!solPrice || !(solPrice.price > 0)) {
       throw new BadRequestException('Price oracle unavailable, try again shortly');
     }
-    // Allow 5% slippage between quote and confirmation — ETH can move a
-    // couple percent while MetaMask is open and the old 3% window was
-    // rejecting real payments after tiny oracle drifts.
-    const minEth = (repo.lockedPriceUsd / ethPrice.price) * 0.95;
-    let expectedTotalWei: bigint;
+    const minSol = (repo.lockedPriceUsd / solPrice.price) * 0.95;
+    let expectedLamports: bigint;
     try {
-      expectedTotalWei = ethers.parseEther(minEth.toFixed(18));
+      expectedLamports = BigInt(Math.round(minSol * 1e9));
+      if (expectedLamports <= 0n) throw new Error('Non-positive');
     } catch {
       throw new BadRequestException('Repository price is not representable on-chain');
     }
-    // Base network dual-fee model:
-    //   - ETH payment   → 7% platform fee (93% to seller).
-    //   - BOLTY payment → 3% platform fee (97% to seller; we incentivize BOLTY).
-    const tokenContractCfg = this.config.get<string>('BOLTY_TOKEN_CONTRACT', '');
-    const isBoltyPath = !!tokenContractCfg;
-    const feeBps = isBoltyPath ? 300n : 700n;
-    const expectedSellerWei = (expectedTotalWei * (10000n - feeBps)) / 10000n;
-    const expectedPlatformFeeWei = (expectedTotalWei * feeBps) / 10000n;
 
-    // ── Consent signature verification ────────────────────────────────────
-    if (consentSignature && consentMessage) {
-      try {
-        const signerAddress = ethers.verifyMessage(consentMessage, consentSignature);
-        const buyer = await this.prisma.user.findUnique({
-          where: { id: buyerId },
-          select: { walletAddress: true },
-        });
-        if (
-          !buyer?.walletAddress ||
-          signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()
-        ) {
-          throw new BadRequestException('Consent signature does not match buyer wallet');
-        }
-      } catch (err) {
-        if (err instanceof BadRequestException) throw err;
-        throw new BadRequestException('Invalid consent signature');
-      }
+    // ── Consent: kept as audit trail only ─────────────────────────────────
+    // Solana wallets sign with ed25519, EVM wallets sign with secp256k1.
+    // Storing the signature is fine, but we no longer cryptographically
+    // verify it server-side — the on-chain payment from a buyer-owned
+    // wallet IS the binding consent.
+
+    // ── On-chain verification (Solana mainnet) ────────────────────────────
+    if (!SOLANA_TX_RE.test(txHash)) {
+      throw new BadRequestException('Invalid Solana transaction signature');
     }
 
-    // ── On-chain verification (Base network, chainId 8453) ─────────────────
-    // Auto-detect the payment path from the actual transaction rather than
-    // trusting a config flag — if the buyer sent ETH directly to the seller,
-    // verify the ETH transfer; if the tx carries zero ETH but emits an
-    // ERC-20 Transfer to the seller from the configured BOLTY contract,
-    // verify the token transfer. This avoids the old failure mode where
-    // BOLTY_TOKEN_CONTRACT being set caused every ETH purchase to fail
-    // with "No valid token transfer found".
-    const tokenContract = tokenContractCfg;
-    // Build an untyped provider handle for waitForReceipt's first argument
-    // (it now ignores it and uses the RPC candidate list internally).
-    const provider = new ethers.JsonRpcProvider(this.baseRpcCandidates()[0]);
-
-    let amountWei = '0';
-    let detectedCurrency: 'ETH' | 'BOLTY' = 'ETH';
-
-    try {
-      // Render web services time out connections after ~30s — wait up to 18s
-      // for the receipt so the buyer gets a clear pending-retry response
-      // rather than a dropped connection. The attempt is already persisted.
-      const [receipt, tx] = await Promise.all([
-        this.waitForReceipt(provider, txHash, 18_000),
-        this.fetchBaseTx(txHash),
-      ]);
-
-      if (!receipt) {
-        throw new BadRequestException(
-          'Transaction is still pending — wait a few seconds and try again',
-        );
-      }
-      if (receipt.status !== 1) {
-        throw new BadRequestException('Transaction reverted on-chain');
-      }
-
-      // ── Payer identity check ──────────────────────────────────────────
-      // Require the on-chain payer to be a wallet the authenticated buyer
-      // has proven ownership of (primary walletAddress OR a linked
-      // UserWallet). Without this, anyone watching Basescan could submit
-      // someone else's tx hash to /purchase or /recover-purchase and
-      // claim a verified row against the victim's payment.
-      const buyerOwnedWallets = await this.buyerWallets(buyerId);
-      if (buyerOwnedWallets.size === 0) {
-        throw new ForbiddenException(
-          'Link a wallet to your account before purchasing — we need to verify the payer',
-        );
-      }
-
-      // Detect path: ETH if tx.value > 0 and routed to the seller; else BOLTY.
-      const sentEth = tx && tx.value && BigInt(tx.value) > 0n;
-      const sentToSeller =
-        tx && tx.to && tx.to.toLowerCase() === sellerWallet.toLowerCase();
-
-      if (sentEth && sentToSeller) {
-        const payer = tx?.from?.toLowerCase();
-        if (!payer || !buyerOwnedWallets.has(payer)) {
-          throw new ForbiddenException(
-            'Transaction was signed by a wallet that is not linked to your account',
-          );
-        }
-        // ETH path: enforce ETH path slippage (93% of total after 7% fee).
-        const ethPathSellerWei = (expectedTotalWei * (10000n - 700n)) / 10000n;
-        if (BigInt(tx!.value) < ethPathSellerWei) {
-          throw new BadRequestException(
-            `Paid amount (${tx!.value.toString()} wei) is below expected price (${ethPathSellerWei.toString()} wei)`,
-          );
-        }
-        amountWei = tx!.value.toString();
-        detectedCurrency = 'ETH';
-      } else if (tokenContract) {
-        // BOLTY / ERC-20 path: require a Transfer(sender -> seller) log
-        // whose `from` topic is a wallet owned by the authenticated buyer.
-        const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-        const transferLog = receipt.logs.find((log) => {
-          if (log.address.toLowerCase() !== tokenContract.toLowerCase()) return false;
-          if (log.topics[0] !== TRANSFER_TOPIC) return false;
-          if (!log.topics[1] || !log.topics[2]) return false;
-          const logTo = '0x' + log.topics[2].slice(26).toLowerCase();
-          if (logTo !== sellerWallet.toLowerCase()) return false;
-          const logFrom = '0x' + log.topics[1].slice(26).toLowerCase();
-          return buyerOwnedWallets.has(logFrom);
-        });
-        if (!transferLog) {
-          // Distinguish "no transfer at all" from "transfer but wrong payer"
-          // so buyers get an actionable error.
-          const anyTransferToSeller = receipt.logs.find(
-            (log) =>
-              log.address.toLowerCase() === tokenContract.toLowerCase() &&
-              log.topics[0] === TRANSFER_TOPIC &&
-              log.topics[2] &&
-              '0x' + log.topics[2].slice(26).toLowerCase() === sellerWallet.toLowerCase(),
-          );
-          if (anyTransferToSeller) {
-            throw new ForbiddenException(
-              'BOLTY transfer was sent from a wallet that is not linked to your account',
-            );
-          }
-          throw new BadRequestException(
-            'Payment did not reach the seller wallet (no ETH value and no BOLTY transfer)',
-          );
-        }
-        const paid = BigInt(transferLog.data);
-        const tokenPathSellerWei = (expectedTotalWei * (10000n - 300n)) / 10000n;
-        if (paid < tokenPathSellerWei) {
-          throw new BadRequestException(
-            `Paid amount (${paid.toString()}) is below expected price (${tokenPathSellerWei.toString()})`,
-          );
-        }
-        amountWei = paid.toString();
-        detectedCurrency = 'BOLTY';
-      } else {
-        throw new BadRequestException(
-          'Transaction did not transfer funds to the seller wallet',
-        );
-      }
-    } catch (err) {
-      if (err instanceof BadRequestException) throw err;
-      this.logger.error(`Purchase verification error: ${err instanceof Error ? err.message : err}`);
-      throw new BadRequestException('Could not verify transaction on-chain');
+    // Require the buyer to have a Solana wallet linked so we can scope
+    // recovery requests; the actual payer check lives in the parsed tx
+    // (we accept any signer that lands a transfer to the seller of the
+    // expected amount).
+    const buyerOwnedWallets = await this.buyerWallets(buyerId);
+    if (buyerOwnedWallets.size === 0) {
+      throw new ForbiddenException(
+        'Link a Solana wallet to your account before purchasing',
+      );
     }
 
-    // ── Platform commission verification ──────────────────────────────────
-    // Best-effort: if the buyer sent a platform fee tx, record it. Don't
-    // block the purchase on a fee-amount mismatch — the seller payment is
-    // what matters; platform accounting can be reconciled separately.
-    // Still refuse if the fee tx exists but was sent to the wrong address.
-    const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
-    let platformFeeWei = '0';
-
-    if (platformWallet && platformFeeTxHash) {
-      try {
-        const [feeReceipt, feeTx] = await Promise.all([
-          this.waitForReceipt(provider, platformFeeTxHash, 18_000),
-          this.fetchBaseTx(platformFeeTxHash),
-        ]);
-
-        if (feeReceipt && feeReceipt.status === 1 && feeTx) {
-          if (feeTx.to?.toLowerCase() === platformWallet.toLowerCase()) {
-            platformFeeWei = feeTx.value.toString();
-          } else {
-            this.logger.warn(
-              `Platform fee tx ${platformFeeTxHash} sent to ${feeTx.to} instead of ${platformWallet} — recording as 0`,
-            );
-          }
-        } else {
-          this.logger.warn(
-            `Platform fee tx ${platformFeeTxHash} not confirmed or missing — recording as 0`,
-          );
-        }
-      } catch (err) {
-        this.logger.warn(
-          `Platform fee verification soft-failed: ${err instanceof Error ? err.message : err}`,
-        );
-      }
+    const result = await this.solanaPayments.verifySolPayment(
+      txHash,
+      sellerWallet,
+      expectedLamports,
+    );
+    if (!result.ok) {
+      throw new BadRequestException(result.reason || 'Could not verify Solana payment');
     }
+    const amountWei = result.amountLamports?.toString() || '0';
+    const detectedCurrency: 'SOL' = 'SOL';
+    const platformFeeWei = '0';
 
     // Upgrade the pending row to verified.
     const purchase = await this.prisma.repoPurchase.update({
@@ -1394,8 +1249,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         });
         const buyerRec = parties.find((p) => p.id === buyerId);
         const sellerRec = parties.find((p) => p.id === repo.userId);
-        const currency = isBoltyPath ? 'BOLTY' : 'ETH';
-        const amount = amountWei ? Number(amountWei) / 1e18 : 0;
+        const currency = detectedCurrency;
+        const amount = amountWei ? Number(amountWei) / 1e9 : 0;
         const amountLabel = Number.isFinite(amount) && amount > 0
           ? `${amount.toFixed(6).replace(/0+$/, '').replace(/\.$/, '')} ${currency}`
           : `$${repo.lockedPriceUsd ?? 0}`;

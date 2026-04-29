@@ -16,9 +16,23 @@ import { sanitizeText, isSafeUrl, isSafeUrlResolving } from '../../common/saniti
 import { BoltyGuardService } from '../boltyguard/boltyguard.service';
 import { EmailService } from '../email/email.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SolanaPaymentsService } from '../payments/solana-payments.service';
 import { ReputationService } from '../reputation/reputation.service';
 
 import { MarketGateway } from './market.gateway';
+
+const LAMPORTS_PER_SOL = 1_000_000_000n;
+const SOLANA_TX_RE = /^[1-9A-HJ-NP-Za-km-z]{43,90}$/;
+
+function priceToLamports(priceSol: number): bigint {
+  if (!isFinite(priceSol) || priceSol < 0) {
+    throw new Error('Invalid price');
+  }
+  // Avoid floating-point drift: SOL prices land on at most 9 decimal
+  // places; round at 9dp and multiply.
+  const rounded = Math.round(priceSol * 1e9);
+  return BigInt(rounded);
+}
 
 interface CreateListingDto {
   title: string;
@@ -63,6 +77,7 @@ export class MarketService {
     private readonly email: EmailService,
     private readonly redis: RedisService,
     private readonly boltyGuard: BoltyGuardService,
+    private readonly solanaPayments: SolanaPaymentsService,
   ) {
     this.anthropic = new Anthropic({
       apiKey: this.config.get<string>('ANTHROPIC_API_KEY') || '',
@@ -1809,14 +1824,13 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
    * the repo-recovery flow so /inventory's widget can serve both.
    */
   async recoverListingPurchaseByTx(buyerId: string, txHash: string) {
-    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
-      throw new BadRequestException('Invalid transaction hash');
+    // Solana tx signatures are base58, ~88 chars. Be permissive on length
+    // since both legacy systems used distinct formats.
+    if (!SOLANA_TX_RE.test(txHash)) {
+      throw new BadRequestException('Invalid Solana transaction signature');
     }
 
-    // Short-circuit: if we already have a row for this txHash, return it.
-    const existing = await this.prisma.marketPurchase.findUnique({
-      where: { txHash },
-    });
+    const existing = await this.prisma.marketPurchase.findUnique({ where: { txHash } });
     if (existing) {
       if (existing.buyerId !== buyerId) {
         throw new ForbiddenException('Transaction belongs to a different buyer');
@@ -1824,99 +1838,13 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       return { success: true, alreadyPurchased: true, purchase: existing };
     }
 
-    // Pull the tx from any working Base RPC.
-    const configured = this.config.get<string>('ETH_RPC_URL', '');
-    const candidates = [
-      configured,
-      'https://mainnet.base.org',
-      'https://base.publicnode.com',
-      'https://base.llamarpc.com',
-    ].filter((url, i, arr) => url && arr.indexOf(url) === i);
-    let tx: ethers.TransactionResponse | null = null;
-    let lastErr: string | null = null;
-    for (const rpc of candidates) {
-      try {
-        const provider = new ethers.JsonRpcProvider(rpc);
-        const t = await provider.getTransaction(txHash);
-        if (t) {
-          tx = t;
-          break;
-        }
-      } catch (err) {
-        lastErr = `${rpc}: ${err instanceof Error ? err.message : String(err)}`;
-      }
-    }
-    if (!tx || !tx.to) {
-      throw new BadRequestException(
-        `Could not fetch transaction from Base RPC. ${lastErr ?? ''}`.trim(),
-      );
-    }
-
-    // Resolve the seller from tx.to (either the seller wallet directly
-    // or the escrow contract; in the escrow case we need the negotiation
-    // or the listing id to disambiguate — we ask the user to use the
-    // per-listing endpoint instead).
-    const sellerByWallet = await this.prisma.user.findFirst({
-      where: {
-        walletAddress: { equals: tx.to.toLowerCase(), mode: 'insensitive' },
-      },
-      select: { id: true, username: true },
-    });
-    if (!sellerByWallet) {
-      throw new BadRequestException(
-        'Could not match the tx recipient to a Bolty seller wallet. If it went through escrow, open /orders and retry from there.',
-      );
-    }
-
-    const paidWei = BigInt(tx.value);
-    const listings = await this.prisma.marketListing.findMany({
-      where: {
-        sellerId: sellerByWallet.id,
-        status: { not: 'REMOVED' },
-      },
-      select: { id: true, price: true, title: true },
-    });
-    if (listings.length === 0) {
-      throw new BadRequestException(
-        `@${sellerByWallet.username ?? 'seller'} has no active listings.`,
-      );
-    }
-
-    // If the buyer has an AGREED negotiation with this seller, prefer
-    // that listing — price has been pinned by agents and matches the tx.
-    const agreed = await this.prisma.agentNegotiation.findFirst({
-      where: {
-        buyerId,
-        status: 'AGREED',
-        listing: { sellerId: sellerByWallet.id },
-      },
-      orderBy: { updatedAt: 'desc' },
-      select: { listingId: true, id: true, agreedPrice: true },
-    });
-    if (agreed) {
-      return this.recoverListingPurchase(buyerId, agreed.listingId, txHash, agreed.id);
-    }
-
-    // Otherwise try to match by paid amount within 5% slippage.
-    const matching = listings.filter((l) => {
-      try {
-        const expected = ethers.parseEther(l.price.toString());
-        const min = (expected * 95n) / 100n;
-        return paidWei >= min;
-      } catch {
-        return false;
-      }
-    });
-    if (matching.length === 1) {
-      return this.recoverListingPurchase(buyerId, matching[0].id, txHash);
-    }
-    if (matching.length === 0) {
-      throw new BadRequestException(
-        `Paid ${(Number(paidWei) / 1e18).toFixed(6)} ETH but none of @${sellerByWallet.username ?? 'seller'}'s listings match that price.`,
-      );
-    }
+    // Tx-only recovery on Solana would need us to scan every transfer in
+    // the tx and find the seller wallet that owns it. That's expensive
+    // and prone to false matches. The frontend always knows which listing
+    // a payment was for, so funnel users through the per-listing recover
+    // endpoint instead.
     throw new BadRequestException(
-      `Multiple listings from @${sellerByWallet.username ?? 'seller'} match this amount. Open the specific listing and retry purchase from there.`,
+      'Open the listing you paid for and use "Recover purchase" there — tx-only recovery is no longer supported on Solana.',
     );
   }
 
@@ -1931,8 +1859,8 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     txHash: string,
     negotiationId?: string,
   ) {
-    if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
-      throw new BadRequestException('Invalid transaction hash');
+    if (!SOLANA_TX_RE.test(txHash)) {
+      throw new BadRequestException('Invalid Solana transaction signature');
     }
     // If we already have a row for this txHash we're done — return it.
     const existing = await this.prisma.marketPurchase.findUnique({
@@ -2034,140 +1962,31 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
     if (!(expectedPrice > 0)) {
       throw new BadRequestException('Listing price is not set');
     }
-    let expectedWei: bigint;
+    let expectedLamports: bigint;
     try {
-      expectedWei = ethers.parseEther(expectedPrice.toString());
+      expectedLamports = priceToLamports(expectedPrice);
     } catch {
       throw new BadRequestException('Listing price is not representable on-chain');
     }
 
-    const rpcUrl = this.config.get<string>('ETH_RPC_URL', 'https://mainnet.base.org');
-    const platformWallet = this.config.get<string>('PLATFORM_WALLET', '');
-    const configuredEscrow = this.config.get<string>('ESCROW_CONTRACT', '');
     const sellerWallet = listing.seller.walletAddress;
-
     if (!sellerWallet) {
-      throw new BadRequestException('Seller has no wallet address configured');
+      throw new BadRequestException('Seller has no Solana wallet on file');
     }
 
-    // ── Consent signature verification ──────────────────────────────────
-    if (consentSignature && consentMessage) {
-      try {
-        const signerAddress = ethers.verifyMessage(consentMessage, consentSignature);
-        const buyer = await this.prisma.user.findUnique({
-          where: { id: buyerId },
-          select: { walletAddress: true },
-        });
-        if (
-          !buyer?.walletAddress ||
-          signerAddress.toLowerCase() !== buyer.walletAddress.toLowerCase()
-        ) {
-          throw new BadRequestException('Consent signature does not match buyer wallet');
-        }
-      } catch (err) {
-        if (err instanceof BadRequestException) throw err;
-        throw new BadRequestException('Invalid consent signature');
-      }
+    if (!SOLANA_TX_RE.test(txHash)) {
+      throw new BadRequestException('Invalid Solana transaction signature');
     }
 
-    const useEscrow = !!(escrowContract && configuredEscrow);
-    let verifiedAmountWei = amountWei;
-    let platformFeeWei = '0';
-
-    try {
-      // Base RPC candidate list: configured one first, then public
-      // endpoints. Using a single RPC used to silently fail when
-      // ETH_RPC_URL was misconfigured or rate-limited, surfacing as
-      // "cannot verify transaction" even though the tx was fine.
-      const candidates = [
-        rpcUrl,
-        'https://mainnet.base.org',
-        'https://base.publicnode.com',
-        'https://base.llamarpc.com',
-      ].filter((url, i, arr) => url && arr.indexOf(url) === i);
-      let receipt: ethers.TransactionReceipt | null = null;
-      let tx: ethers.TransactionResponse | null = null;
-      let lastErr: string | null = null;
-      for (const candidate of candidates) {
-        try {
-          const provider = new ethers.JsonRpcProvider(candidate);
-          const [r, t] = await Promise.all([
-            provider.getTransactionReceipt(txHash),
-            provider.getTransaction(txHash),
-          ]);
-          if (r && t) {
-            receipt = r;
-            tx = t;
-            break;
-          }
-          if (!lastErr)
-            lastErr = `RPC ${candidate}: receipt=${r ? 'ok' : 'null'} tx=${t ? 'ok' : 'null'}`;
-        } catch (err) {
-          lastErr = `RPC ${candidate}: ${err instanceof Error ? err.message : String(err)}`;
-        }
-      }
-      if (!receipt || receipt.status !== 1) {
-        throw new BadRequestException(
-          `Transaction failed or not found. ${lastErr ? `Last RPC error: ${lastErr}` : ''}`,
-        );
-      }
-      if (!tx) throw new BadRequestException('Transaction not found');
-
-      if (useEscrow) {
-        // ── Escrow mode: verify deposit was sent to the escrow contract ──
-        if (escrowContract.toLowerCase() !== configuredEscrow.toLowerCase()) {
-          throw new BadRequestException('Escrow contract address mismatch');
-        }
-        if (tx.to?.toLowerCase() !== escrowContract.toLowerCase()) {
-          throw new BadRequestException('Transaction was not sent to escrow contract');
-        }
-        if (BigInt(tx.value) < expectedWei) {
-          throw new BadRequestException(
-            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedWei.toString()} wei)`,
-          );
-        }
-        verifiedAmountWei = tx.value.toString();
-      } else {
-        // ── Legacy direct mode: verify payment to seller ─────────────────
-        if (tx.to?.toLowerCase() !== sellerWallet.toLowerCase()) {
-          throw new BadRequestException('Transaction recipient does not match seller wallet');
-        }
-        if (BigInt(tx.value) < expectedWei) {
-          throw new BadRequestException(
-            `Paid amount (${tx.value.toString()} wei) is below expected price (${expectedWei.toString()} wei)`,
-          );
-        }
-        verifiedAmountWei = tx.value.toString();
-
-        // Verify platform commission (legacy only — escrow handles split automatically)
-        if (platformWallet && platformFeeTxHash) {
-          try {
-            const feeProvider = new ethers.JsonRpcProvider(candidates[0]);
-            const [feeReceipt, feeTx] = await Promise.all([
-              feeProvider.getTransactionReceipt(platformFeeTxHash),
-              feeProvider.getTransaction(platformFeeTxHash),
-            ]);
-            if (!feeReceipt || feeReceipt.status !== 1) {
-              throw new BadRequestException('Platform fee transaction failed or not found');
-            }
-            if (!feeTx || feeTx.to?.toLowerCase() !== platformWallet.toLowerCase()) {
-              throw new BadRequestException('Platform fee recipient does not match Bolty wallet');
-            }
-            platformFeeWei = feeTx.value.toString();
-          } catch (err) {
-            if (err instanceof BadRequestException) throw err;
-            this.logger.error(
-              `Platform fee verification error: ${err instanceof Error ? err.message : err}`,
-            );
-            throw new BadRequestException('Could not verify platform fee transaction');
-          }
-        }
-      }
-    } catch (err) {
-      if (err instanceof BadRequestException) throw err;
-      this.logger.error(`Tx verification error: ${err instanceof Error ? err.message : err}`);
-      throw new BadRequestException('Could not verify transaction on-chain');
+    const result = await this.solanaPayments.verifySolPayment(
+      txHash,
+      sellerWallet,
+      expectedLamports,
+    );
+    if (!result.ok) {
+      throw new BadRequestException(result.reason || 'Could not verify Solana payment');
     }
+    const verifiedAmountWei = result.amountLamports?.toString() || amountWei || '0';
 
     let purchase;
     try {
@@ -2181,12 +2000,12 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
           negotiationId: negotiationId || null,
           verified: true,
           status: 'PENDING_DELIVERY',
-          platformFeeTxHash: useEscrow ? null : platformFeeTxHash || null,
-          platformFeeWei: useEscrow ? null : platformFeeWei || null,
+          platformFeeTxHash: platformFeeTxHash || null,
+          platformFeeWei: null,
           consentSignature: consentSignature || null,
           consentMessage: consentMessage || null,
-          escrowContract: useEscrow ? escrowContract : null,
-          escrowStatus: useEscrow ? 'FUNDED' : 'NONE',
+          escrowContract: null,
+          escrowStatus: 'NONE',
         },
       });
     } catch (err: unknown) {
@@ -2210,14 +2029,11 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
 
     // Auto-create welcome message in order chat
     try {
-      const escrowNote = useEscrow
-        ? ' Funds are held in escrow and will be released when you confirm delivery.'
-        : '';
       await this.prisma.orderMessage.create({
         data: {
           orderId: purchase.id,
           senderId: listing.sellerId,
-          content: `Order created! Payment confirmed on-chain.${escrowNote} I'm ready to fulfill your order for "${listing.title}". Feel free to message me here with any questions.`,
+          content: `Order created! Payment confirmed on Solana. I'm ready to fulfill your order for "${listing.title}". Feel free to message me here with any questions.`,
         },
       });
     } catch (err) {
@@ -2229,7 +2045,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
         userId: listing.sellerId,
         type: 'MARKET_NEW_SALE',
         title: `New sale: "${listing.title}"`,
-        body: `Your listing just sold. ${useEscrow ? 'Funds are in escrow — mark the order as delivered to release them.' : 'The order is ready to be fulfilled.'}`,
+        body: `Your listing just sold. The order is ready to be fulfilled.`,
         url: `/orders/${purchase.id}`,
         meta: { listingId, orderId: purchase.id, buyerId },
       });
@@ -2349,7 +2165,7 @@ NOTE: A preliminary scan flagged this as potentially suspicious. Perform a thoro
       }
     })();
 
-    return { success: true, purchase, orderId: purchase.id, escrow: useEscrow };
+    return { success: true, purchase, orderId: purchase.id, escrow: false };
   }
 
   async deleteListing(id: string, userId: string) {

@@ -6,6 +6,7 @@ import { BoltyGuardModule } from '../boltyguard/boltyguard.module';
 import { DmModule } from '../dm/dm.module';
 import { EmailModule } from '../email/email.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { ReputationModule } from '../reputation/reputation.module';
 
 import { AgentHealthService } from './agent-health.service';
@@ -29,6 +30,7 @@ import { NegotiationsGateway } from './negotiations.gateway';
     NotificationsModule,
     ReputationModule,
     BoltyGuardModule,
+    PaymentsModule,
   ],
   controllers: [AgentPostsController, MarketController],
   providers: [
