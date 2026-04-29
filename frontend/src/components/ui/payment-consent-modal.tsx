@@ -1,28 +1,35 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Shield, AlertTriangle, Lock, X, Check, TrendingDown } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import { Shield, AlertTriangle, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 import {
   feeUsdForBase,
-  FEE_BPS,
   grossUsdForBase,
-  type PaymentMethod,
+  platformLamportsForSeller,
+  grossLamportsForSeller,
 } from '@/lib/payments/fees';
-import { isEscrowEnabled } from '@/lib/wallet/escrow';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
-
-export type { PaymentMethod };
+import { useSolanaPayment } from '@/lib/hooks/useSolanaPayment';
+import { lamportsToSol, shortenSolanaAddress } from '@/lib/wallet/solana';
 
 interface PaymentConsentModalProps {
   listingTitle: string;
+  /** Seller's Solana wallet (base58). */
   sellerAddress: string;
-  /** USD amount the seller takes home (= the listing price). */
+  /** USD amount the seller takes home. Used for headline display. */
   baseUsd: number;
+  /** Lamports the seller will receive. = priceSol × 1e9 (caller computes). */
+  sellerLamports: bigint;
+  /** Buyer's connected wallet (base58) — display only. */
   buyerAddress: string;
-  /** When true, BOLTY option is hidden (token not configured for this build). */
-  boltyDisabled?: boolean;
-  onConsent: (signature: string, message: string, paymentMethod: PaymentMethod) => void;
+  /** Optional fee recipient (base58). When unset, no fee is collected. */
+  feeRecipient?: string | null;
+  /**
+   * Called with the confirmed Solana tx signature once the buyer has
+   * approved + the chain has confirmed. The caller then POSTs the
+   * signature to the backend purchase endpoint.
+   */
+  onPaid: (txSignature: string, sellerLamports: bigint, totalLamports: bigint) => void;
   onCancel: () => void;
 }
 
@@ -33,35 +40,39 @@ function fmtUsd(n: number): string {
   return n.toFixed(3);
 }
 
+function fmtSol(lamports: bigint): string {
+  return lamportsToSol(Number(lamports)).toFixed(4).replace(/0+$/, '').replace(/\.$/, '');
+}
+
 export function PaymentConsentModal({
   listingTitle,
   sellerAddress,
   baseUsd,
+  sellerLamports,
   buyerAddress,
-  boltyDisabled = false,
-  onConsent,
+  feeRecipient = null,
+  onPaid,
   onCancel,
 }: PaymentConsentModalProps) {
-  const [signing, setSigning] = useState(false);
+  const [paying, setPaying] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
-  // Default to BOLTY when available — it's the strictly cheaper option.
-  const [method, setMethod] = useState<PaymentMethod>(boltyDisabled ? 'ETH' : 'BOLTY');
+  const { pay, ready } = useSolanaPayment();
 
-  const escrow = isEscrowEnabled();
+  // 5% protocol fee on top of the seller's net price (only collected if a
+  // fee recipient is configured at deploy time — otherwise the buyer just
+  // pays the seller's net price).
+  const feeLamports = feeRecipient ? platformLamportsForSeller(sellerLamports) : 0n;
+  const totalLamports = feeRecipient
+    ? grossLamportsForSeller(sellerLamports)
+    : sellerLamports;
 
-  const ethTotal = useMemo(() => grossUsdForBase(baseUsd, 'ETH'), [baseUsd]);
-  const boltyTotal = useMemo(() => grossUsdForBase(baseUsd, 'BOLTY'), [baseUsd]);
-  const savingsUsd = ethTotal - boltyTotal;
-
-  const grossUsd = method === 'BOLTY' ? boltyTotal : ethTotal;
-  const platformFeeUsd = useMemo(() => feeUsdForBase(baseUsd, method), [baseUsd, method]);
-  const feePct = method === 'ETH' ? '7%' : '3%';
-  const currency = method === 'ETH' ? 'ETH' : 'BOLTY';
+  const grossUsd = feeRecipient ? grossUsdForBase(baseUsd) : baseUsd;
+  const platformFeeUsd = feeRecipient ? feeUsdForBase(baseUsd) : 0;
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !signing) onCancel();
+      if (e.key === 'Escape' && !paying) onCancel();
     };
     window.addEventListener('keydown', handler);
     const previous = document.body.style.overflow;
@@ -70,81 +81,37 @@ export function PaymentConsentModal({
       window.removeEventListener('keydown', handler);
       document.body.style.overflow = previous;
     };
-  }, [onCancel, signing]);
+  }, [onCancel, paying]);
 
-  const handleSign = async () => {
+  const handlePay = async () => {
     if (!checked) {
       setError('You must accept the terms first');
       return;
     }
-    setSigning(true);
+    if (!ready) {
+      setError('Connect a Solana wallet first.');
+      return;
+    }
+    setPaying(true);
     setError('');
 
     try {
-      const eth = getMetaMaskProvider();
-      if (!eth) throw new Error('MetaMask not found. Install it to continue.');
-
-      const timestamp = new Date().toISOString();
-      const escrowTerms = escrow
-        ? [
-            '1. Funds will be deposited into the Bolty Escrow smart contract on Base (chainId 8453).',
-            '2. The seller will NOT receive payment until I confirm delivery.',
-            '3. I can open a dispute if the seller does not deliver.',
-            '4. After 14 days without dispute, funds auto-release to the seller.',
-            '5. Disputes are resolved by the Bolty admin.',
-            '6. Smart contract interactions on Base require gas fees (paid in ETH).',
-            '7. This cryptographic signature constitutes irrevocable proof of my consent.',
-            '8. I have the technical knowledge required to conduct this transaction.',
-          ]
-        : [
-            '1. This is a voluntary peer-to-peer transaction on Base (Ethereum Layer 2).',
-            '2. Blockchain transactions are FINAL and IRREVERSIBLE once confirmed.',
-            '3. Bolty Platform is NOT a custodian and does NOT hold or escrow funds.',
-            '4. Bolty Platform bears NO liability for disputes, fraud, or losses.',
-            '5. I have independently verified the seller and listing before paying.',
-            '6. I accept FULL personal responsibility for this transaction.',
-            '7. This cryptographic signature constitutes irrevocable proof of my consent.',
-            '8. I have the technical knowledge required to conduct this transaction.',
-          ];
-
-      const message = [
-        `=== BOLTY PLATFORM — PAYMENT CONSENT DOCUMENT${escrow ? ' (ESCROW)' : ''} ===`,
-        '',
-        `Date: ${timestamp}`,
-        `Network: Base (Ethereum L2, chainId 8453)`,
-        `Payment method: ${method}${method === 'BOLTY' ? ' (ERC-20, lower fee)' : ' (native)'}`,
-        `Buyer wallet:  ${buyerAddress}`,
-        `Seller wallet: ${sellerAddress}`,
-        `Listing: ${listingTitle}`,
-        escrow ? 'Mode: ESCROW (funds held until delivery confirmed)' : 'Mode: DIRECT PAYMENT',
-        '',
-        'PAYMENT BREAKDOWN (USD-equivalent):',
-        `  Listing price (to seller):   $${fmtUsd(baseUsd)}`,
-        `  Platform fee (${feePct}):${' '.repeat(Math.max(1, 14 - feePct.length))}$${fmtUsd(platformFeeUsd)}`,
-        `  Total you pay:               $${fmtUsd(grossUsd)} (in ${currency})`,
-        '',
-        'BY SIGNING THIS DOCUMENT I CONFIRM:',
-        ...escrowTerms,
-        '',
-        'This document is stored as proof of informed consent.',
-      ].join('\n');
-
-      const accounts = (await eth.request({ method: 'eth_requestAccounts' })) as string[];
-      const signature = (await eth.request({
-        method: 'personal_sign',
-        params: [message, accounts[0]],
-      })) as string;
-
-      onConsent(signature, message, method);
+      const sig = await pay({
+        recipient: sellerAddress,
+        lamports: Number(sellerLamports),
+        feeRecipient: feeRecipient || null,
+        feeLamports: Number(feeLamports),
+      });
+      onPaid(sig, sellerLamports, totalLamports);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('rejected') || msg.includes('denied') || msg.includes('User denied')) {
-        setError('Signature cancelled.');
+      if (msg.includes('rejected') || msg.includes('User rejected')) {
+        setError('Payment cancelled.');
       } else {
-        setError(msg.slice(0, 120));
+        setError(msg.slice(0, 160));
       }
     } finally {
-      setSigning(false);
+      setPaying(false);
     }
   };
 
@@ -178,16 +145,15 @@ export function PaymentConsentModal({
                 'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
             }}
           />
-          {/* Header */}
           <div
             className="flex items-center justify-between px-6 py-4 border-b"
             style={{ borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <div className="flex items-center gap-2.5">
               <Shield className="w-4 h-4 text-bolty-400" />
-              <span className="font-light text-white text-sm">Payment Consent</span>
+              <span className="font-light text-white text-sm">Confirm payment</span>
               <span className="text-[10px] font-mono text-cyan-300/80 border border-cyan-400/25 px-1.5 py-0.5 rounded">
-                BASE
+                SOLANA
               </span>
             </div>
             <motion.button
@@ -202,73 +168,20 @@ export function PaymentConsentModal({
             </motion.button>
           </div>
 
-          {/* Payment method selector */}
-          <div className="px-5 pt-5">
-            <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest mb-2">
-              Choose payment method on Base
+          <div
+            className="mx-5 mt-5 flex gap-3 p-3.5 rounded-xl"
+            style={{
+              background: 'rgba(234,179,8,0.06)',
+              border: '1px solid rgba(234,179,8,0.2)',
+            }}
+          >
+            <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-yellow-300/80 leading-relaxed">
+              <strong>Direct on-chain payment.</strong> Solana transactions are final and
+              irreversible once confirmed. The platform does not hold or escrow funds.
             </p>
-            <div className={`grid gap-2.5 ${boltyDisabled ? 'grid-cols-1' : 'grid-cols-2'}`}>
-              <MethodCard
-                active={method === 'ETH'}
-                onClick={() => setMethod('ETH')}
-                title="ETH"
-                subtitle={`7% fee · you pay $${fmtUsd(ethTotal)}`}
-                accent="#60a5fa"
-              />
-              {!boltyDisabled && (
-                <MethodCard
-                  active={method === 'BOLTY'}
-                  onClick={() => setMethod('BOLTY')}
-                  title="BOLTY"
-                  subtitle={`3% fee · you pay $${fmtUsd(boltyTotal)}`}
-                  accent="#836EF9"
-                  badge={savingsUsd > 0 ? `Save $${fmtUsd(savingsUsd)}` : undefined}
-                  highlighted
-                />
-              )}
-            </div>
-            {!boltyDisabled && savingsUsd > 0 && (
-              <p className="mt-2 flex items-center gap-1.5 text-[10.5px] font-light text-zinc-400 leading-relaxed">
-                <TrendingDown className="w-3 h-3 text-emerald-400 shrink-0" strokeWidth={2} />
-                Paying in BOLTY costs $
-                {fmtUsd(savingsUsd)} less. The seller receives $
-                {fmtUsd(baseUsd)} either way — only the fee changes.
-              </p>
-            )}
           </div>
 
-          {/* Warning / Info */}
-          {escrow ? (
-            <div
-              className="mx-5 mt-4 flex gap-3 p-3.5 rounded-xl"
-              style={{
-                background: 'rgba(34,197,94,0.06)',
-                border: '1px solid rgba(34,197,94,0.2)',
-              }}
-            >
-              <Lock className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-green-300/80 leading-relaxed">
-                <strong>Escrow protected.</strong> Funds are held in a smart contract on Base until
-                you confirm delivery. You can dispute if the seller doesn&apos;t deliver.
-              </p>
-            </div>
-          ) : (
-            <div
-              className="mx-5 mt-4 flex gap-3 p-3.5 rounded-xl"
-              style={{
-                background: 'rgba(234,179,8,0.06)',
-                border: '1px solid rgba(234,179,8,0.2)',
-              }}
-            >
-              <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-yellow-300/80 leading-relaxed">
-                <strong>Peer-to-peer Base transaction.</strong> Payments are irreversible. Bolty is
-                not responsible for disputes or losses.
-              </p>
-            </div>
-          )}
-
-          {/* Breakdown */}
           <div
             className="mx-5 mt-4 p-4 rounded-xl"
             style={{
@@ -281,59 +194,50 @@ export function PaymentConsentModal({
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-zinc-400">Listing price (to seller)</span>
-                <span className="text-white font-mono">${fmtUsd(baseUsd)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-zinc-400">
-                  Platform fee <span className="text-zinc-600 font-mono text-xs">({feePct})</span>
+                <span className="text-zinc-400">Listing (to seller)</span>
+                <span className="text-white font-mono">
+                  {fmtSol(sellerLamports)} SOL
+                  <span className="text-zinc-500 text-xs ml-1.5">${fmtUsd(baseUsd)}</span>
                 </span>
-                <span className="text-white font-mono">+ ${fmtUsd(platformFeeUsd)}</span>
               </div>
+              {feeRecipient && (
+                <div className="flex justify-between">
+                  <span className="text-zinc-400">
+                    Platform fee <span className="text-zinc-600 font-mono text-xs">(5%)</span>
+                  </span>
+                  <span className="text-white font-mono">
+                    + {fmtSol(feeLamports)} SOL
+                    <span className="text-zinc-500 text-xs ml-1.5">${fmtUsd(platformFeeUsd)}</span>
+                  </span>
+                </div>
+              )}
               <div
                 className="flex justify-between pt-2 border-t"
                 style={{ borderColor: 'rgba(255,255,255,0.06)' }}
               >
-                <span className="text-zinc-200 font-light">
-                  You pay{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
-                </span>
+                <span className="text-zinc-200 font-light">You pay (1 transaction)</span>
                 <span className="text-bolty-300 font-mono font-light">
-                  ${fmtUsd(grossUsd)}{' '}
-                  <span className="text-zinc-500 text-xs">in {currency}</span>
+                  {fmtSol(totalLamports)} SOL
+                  <span className="text-zinc-500 text-xs ml-1.5">${fmtUsd(grossUsd)}</span>
                 </span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t flex flex-col gap-1 text-[10.5px] font-mono text-zinc-500" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+              <div className="flex justify-between">
+                <span>Listing</span>
+                <span className="text-zinc-300 truncate max-w-[60%] text-right">{listingTitle}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Seller</span>
+                <span className="text-zinc-300">{shortenSolanaAddress(sellerAddress)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Buyer</span>
+                <span className="text-zinc-300">{shortenSolanaAddress(buyerAddress)}</span>
               </div>
             </div>
           </div>
 
-          {/* Terms scroll box */}
-          <div
-            className="mx-5 mt-4 max-h-36 overflow-y-auto p-4 rounded-xl text-[11px] text-zinc-500 leading-relaxed font-mono space-y-1"
-            style={{ background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.04)' }}
-          >
-            <p className="text-zinc-400 font-light">By signing you confirm:</p>
-            {escrow ? (
-              <ol className="list-decimal list-inside space-y-0.5 mt-1">
-                <li>Funds will be deposited into the Bolty Escrow contract on Base.</li>
-                <li>The seller will NOT receive payment until I confirm delivery.</li>
-                <li>I can dispute within 14 days if the seller does not deliver.</li>
-                <li>After 14 days without dispute, funds auto-release to the seller.</li>
-                <li>Disputes are resolved by Bolty admin.</li>
-                <li>This cryptographic signature is irrevocable proof of consent.</li>
-              </ol>
-            ) : (
-              <ol className="list-decimal list-inside space-y-0.5 mt-1">
-                <li>All Base transactions are final and irreversible.</li>
-                <li>Bolty Platform does not hold, escrow, or guarantee any funds.</li>
-                <li>You have independently verified the seller and listing.</li>
-                <li>Bolty Platform bears no liability for disputes, fraud, or losses.</li>
-                <li>You accept full personal responsibility for this transaction.</li>
-                <li>This cryptographic signature is irrevocable proof of consent.</li>
-                <li>You possess sufficient technical knowledge to conduct this transaction.</li>
-              </ol>
-            )}
-          </div>
-
-          {/* Checkbox */}
           <div className="mx-5 mt-4 flex items-start gap-3">
             <input
               type="checkbox"
@@ -346,14 +250,13 @@ export function PaymentConsentModal({
               htmlFor="consent-check"
               className="text-xs text-zinc-400 cursor-pointer leading-relaxed"
             >
-              I have read and understood all terms. I voluntarily consent to this transaction on
-              Base network and accept all associated risks.
+              I understand Solana transactions are final and irreversible. I have verified the
+              seller and listing, and accept full responsibility for this payment.
             </label>
           </div>
 
           {error && <p className="mx-5 mt-3 text-xs text-red-400 font-mono">{error}</p>}
 
-          {/* Actions */}
           <div className="px-5 py-5 mt-1 flex gap-3">
             <motion.button
               onClick={onCancel}
@@ -365,10 +268,10 @@ export function PaymentConsentModal({
               Cancel
             </motion.button>
             <motion.button
-              onClick={handleSign}
-              disabled={!checked || signing}
-              whileHover={!checked || signing ? undefined : { y: -1 }}
-              whileTap={!checked || signing ? undefined : { scale: 0.97 }}
+              onClick={handlePay}
+              disabled={!checked || paying || !ready}
+              whileHover={!checked || paying || !ready ? undefined : { y: -1 }}
+              whileTap={!checked || paying || !ready ? undefined : { scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 360, damping: 22 }}
               className="flex-1 py-2.5 text-sm font-light text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
               style={{
@@ -376,70 +279,11 @@ export function PaymentConsentModal({
                 border: '1px solid rgba(131,110,249,0.45)',
               }}
             >
-              {signing ? 'Signing…' : `Sign & pay $${fmtUsd(grossUsd)} ${currency}`}
+              {paying ? 'Confirming…' : `Pay ${fmtSol(totalLamports)} SOL`}
             </motion.button>
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
-}
-
-// Keep FEE_BPS available to anyone still importing from this file.
-export { FEE_BPS };
-
-function MethodCard({
-  active,
-  onClick,
-  title,
-  subtitle,
-  accent,
-  highlighted,
-  badge,
-}: {
-  active: boolean;
-  onClick: () => void;
-  title: string;
-  subtitle: string;
-  accent: string;
-  highlighted?: boolean;
-  badge?: string;
-}) {
-  return (
-    <motion.button
-      type="button"
-      onClick={onClick}
-      whileTap={{ scale: 0.98 }}
-      className="relative text-left p-3 rounded-xl transition-colors"
-      style={{
-        background: active ? `${accent}18` : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${active ? `${accent}80` : 'rgba(255,255,255,0.06)'}`,
-      }}
-    >
-      {highlighted && !active && badge && (
-        <span
-          className="absolute top-1.5 right-1.5 text-[8.5px] font-mono uppercase tracking-widest px-1.5 py-0.5 rounded"
-          style={{
-            background: `${accent}22`,
-            color: accent,
-            border: `1px solid ${accent}50`,
-          }}
-        >
-          {badge}
-        </span>
-      )}
-      {active && (
-        <span
-          className="absolute top-1.5 right-1.5 grid place-items-center w-4 h-4 rounded-full"
-          style={{ background: accent }}
-        >
-          <Check className="w-2.5 h-2.5 text-black" strokeWidth={3} />
-        </span>
-      )}
-      <div className="flex items-center gap-1.5">
-        <span className="text-sm font-light text-white">{title}</span>
-      </div>
-      <p className="text-[10.5px] text-zinc-500 mt-1 leading-snug">{subtitle}</p>
-    </motion.button>
   );
 }

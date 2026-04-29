@@ -22,15 +22,12 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import dynamicImport from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import { ActionSearchBar, Action } from '@/components/ui/action-search-bar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import {
-  PaymentConsentModal,
-  type PaymentMethod,
-} from '@/components/ui/payment-consent-modal';
 
 // three.js is ~150 kB minified. Defer it off the critical path so the first
 // render of /repos doesn't wait on the background decoration.
@@ -41,14 +38,6 @@ const DottedSurface = dynamicImport(
 import { api, ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
-import { useWalletPicker } from '@/lib/hooks/useWalletPicker';
-import { platformWeiForSeller } from '@/lib/payments/fees';
-import {
-  encodeErc20Transfer,
-  loadBoltyTokenConfig,
-  usdToTokenUnits,
-} from '@/lib/wallet/bolty-token';
-import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 
 interface Collaborator {
   id: string;
@@ -163,7 +152,7 @@ const SORTS = [
 
 export default function ReposPage() {
   const { isAuthenticated, user } = useAuth();
-  const { pickWallet, pickerElement: walletPicker } = useWalletPicker();
+  const router = useRouter();
   const [repos, setRepos] = useState<Repository[]>([]);
   const [ghRepos, setGhRepos] = useState<GitHubRepo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -220,14 +209,6 @@ export default function ReposPage() {
   const [collabRole, setCollabRole] = useState('');
   const [collabUrl, setCollabUrl] = useState('');
   const [showCollabForm, setShowCollabForm] = useState(false);
-
-  const [consentModal, setConsentModal] = useState<{
-    repo: Repository;
-    sellerWallet: string;
-    buyerAddress: string;
-    baseUsd: number;
-    boltyDisabled: boolean;
-  } | null>(null);
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
   useEffect(() => {
@@ -434,144 +415,10 @@ export default function ReposPage() {
     }
   };
 
-  const payAndUnlock = async (repo: Repository) => {
-    if (!repo.lockedPriceUsd) return;
-    let sellerWallet: string | null = null;
-    try {
-      const details = await api.get<{ user: { walletAddress: string } }>(`/repos/${repo.id}`);
-      sellerWallet = details.user?.walletAddress ?? null;
-    } catch {
-      setError('Could not fetch seller wallet');
-      return;
-    }
-    if (!sellerWallet) {
-      setError('Seller has no Ethereum wallet linked');
-      return;
-    }
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) {
-      setError('MetaMask not found');
-      return;
-    }
-    let buyerAddress: string;
-    try {
-      buyerAddress = await pickWallet();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Could not connect to MetaMask';
-      setError(msg);
-      return;
-    }
-    setConsentModal({
-      repo,
-      sellerWallet,
-      buyerAddress,
-      baseUsd: repo.lockedPriceUsd,
-      boltyDisabled: !(await loadBoltyTokenConfig()),
-    });
-  };
-
-  const executeRepoPurchase = async (
-    signature: string,
-    message: string,
-    method: PaymentMethod,
-  ) => {
-    if (!consentModal) return;
-    const { repo, sellerWallet, buyerAddress, baseUsd } = consentModal;
-    setConsentModal(null);
-    const ethereum = getMetaMaskProvider();
-    if (!ethereum) {
-      setError('MetaMask not found');
-      return;
-    }
-    const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
-
-    const boltyCfg = method === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (method === 'BOLTY' && !boltyCfg) {
-      setError('BOLTY payments are not enabled — please retry with ETH');
-      return;
-    }
-
-    let sellerWei: bigint;
-    let platformWei: bigint;
-    try {
-      if (boltyCfg) {
-        sellerWei = usdToTokenUnits(baseUsd, boltyCfg);
-      } else {
-        let ethPrice = 2000;
-        try {
-          const priceData = await api.get<{ price: number }>('/chart/eth-price');
-          if (priceData.price) ethPrice = priceData.price;
-        } catch {
-          /* fallback */
-        }
-        sellerWei = BigInt(Math.ceil((baseUsd / ethPrice) * 1e18));
-      }
-      platformWei = platformWeiForSeller(sellerWei, method);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not compute price');
-      return;
-    }
-
-    try {
-      const txHash = boltyCfg
-        ? ((await ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [
-              {
-                from: buyerAddress,
-                to: boltyCfg.address,
-                data: encodeErc20Transfer(sellerWallet, sellerWei),
-                value: '0x0',
-              },
-            ],
-          })) as string)
-        : ((await ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [
-              { from: buyerAddress, to: sellerWallet, value: '0x' + sellerWei.toString(16) },
-            ],
-          })) as string);
-
-      let platformFeeTxHash: string | undefined;
-      if (platformWallet) {
-        platformFeeTxHash = boltyCfg
-          ? ((await ethereum.request({
-              method: 'eth_sendTransaction',
-              params: [
-                {
-                  from: buyerAddress,
-                  to: boltyCfg.address,
-                  data: encodeErc20Transfer(platformWallet, platformWei),
-                  value: '0x0',
-                },
-              ],
-            })) as string)
-          : ((await ethereum.request({
-              method: 'eth_sendTransaction',
-              params: [
-                {
-                  from: buyerAddress,
-                  to: platformWallet,
-                  value: '0x' + platformWei.toString(16),
-                },
-              ],
-            })) as string);
-      }
-      const result = await api.post<{ success: boolean; downloadUrl?: string }>(
-        `/repos/${repo.id}/purchase`,
-        { txHash, platformFeeTxHash, consentSignature: signature, consentMessage: message },
-      );
-      setError('');
-      if (result.success && result.downloadUrl)
-        window.open(result.downloadUrl, '_blank', 'noopener,noreferrer');
-      api.invalidate('/repos');
-      await fetchRepos();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes('rejected') || msg.includes('denied')) setError('Payment cancelled');
-      else if (err instanceof ApiError) setError(err.message);
-      else setError('Payment failed: ' + msg.slice(0, 80));
-    }
+  const payAndUnlock = (repo: Repository) => {
+    // Route to the detail page where the wallet adapter + Solana
+    // payment flow live. Keeps the buy logic in one place.
+    router.push(`/market/repos/${repo.id}`);
   };
 
   // Build ActionSearchBar actions from ghRepos
@@ -1602,18 +1449,6 @@ export default function ReposPage() {
         </div>
       )}
 
-      {consentModal && (
-        <PaymentConsentModal
-          listingTitle={consentModal.repo.name}
-          sellerAddress={consentModal.sellerWallet}
-          baseUsd={consentModal.baseUsd}
-          buyerAddress={consentModal.buyerAddress}
-          boltyDisabled={consentModal.boltyDisabled}
-          onConsent={executeRepoPurchase}
-          onCancel={() => setConsentModal(null)}
-        />
-      )}
-      {walletPicker}
     </div>
   );
 }

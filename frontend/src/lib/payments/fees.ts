@@ -1,24 +1,24 @@
-// Base network dual-fee model.
-// The buyer-side discount lives here: the seller's listing price is the
-// amount they take home, and the platform fee is added on top of that.
-// BOLTY (3%) is therefore strictly cheaper for the buyer than ETH (7%).
+/**
+ * Solana fee model: flat 5% to the platform on top of the seller's
+ * net price. The listing price is what the seller takes home — the
+ * fee is added so the buyer's total = price × 1.05 (rounded up so the
+ * platform never loses dust).
+ */
 
-export type PaymentMethod = 'ETH' | 'BOLTY';
+export const PLATFORM_FEE_BPS = 500; // 5%
 
-export const FEE_BPS: Record<PaymentMethod, number> = { ETH: 700, BOLTY: 300 };
-
-export function feeRateFor(method: PaymentMethod): number {
-  return FEE_BPS[method] / 10000;
+export function feeRate(): number {
+  return PLATFORM_FEE_BPS / 10000;
 }
 
 /** USD the buyer pays so the seller nets `baseUsd` after the platform fee. */
-export function grossUsdForBase(baseUsd: number, method: PaymentMethod): number {
-  return baseUsd / (1 - feeRateFor(method));
+export function grossUsdForBase(baseUsd: number): number {
+  return baseUsd / (1 - feeRate());
 }
 
 /** USD platform fee (= grossUsd − baseUsd). */
-export function feeUsdForBase(baseUsd: number, method: PaymentMethod): number {
-  return grossUsdForBase(baseUsd, method) - baseUsd;
+export function feeUsdForBase(baseUsd: number): number {
+  return grossUsdForBase(baseUsd) - baseUsd;
 }
 
 function ceilDiv(num: bigint, den: bigint): bigint {
@@ -26,17 +26,17 @@ function ceilDiv(num: bigint, den: bigint): bigint {
 }
 
 /**
- * Given `sellerWei` (the seller's net amount on-chain), return the platform
- * fee the buyer must also send so the platform receives feeBps of the gross.
- * Rounded up so the platform never loses dust.
+ * Given `sellerLamports` (what the seller nets on-chain), return the
+ * platform fee in lamports the buyer must send alongside so the
+ * platform receives 5% of the gross. Rounded up.
  */
-export function platformWeiForSeller(sellerWei: bigint, method: PaymentMethod): bigint {
-  const feeBps = BigInt(FEE_BPS[method]);
+export function platformLamportsForSeller(sellerLamports: bigint): bigint {
+  const feeBps = BigInt(PLATFORM_FEE_BPS);
   const sellerBps = 10000n - feeBps;
-  return ceilDiv(sellerWei * feeBps, sellerBps);
+  return ceilDiv(sellerLamports * feeBps, sellerBps);
 }
 
 /** Buyer's gross on-chain amount: seller net + platform fee. */
-export function grossWeiForSeller(sellerWei: bigint, method: PaymentMethod): bigint {
-  return sellerWei + platformWeiForSeller(sellerWei, method);
+export function grossLamportsForSeller(sellerLamports: bigint): bigint {
+  return sellerLamports + platformLamportsForSeller(sellerLamports);
 }
