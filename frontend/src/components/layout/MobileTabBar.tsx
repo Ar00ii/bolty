@@ -1,29 +1,20 @@
 'use client';
 
-import { Mail, MessageSquare, Package, Rocket, User } from 'lucide-react';
+import { Mail, MessageSquare, Package, Store, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-/**
- * Bottom tab bar — only shown on mobile (lg:hidden). The hamburger drawer
- * stays for secondary nav (Leaderboard, $BOLTY, Settings) but the 5
- * most-used destinations move to a persistent tab bar so the app feels
- * native on a phone.
- */
 const TABS: Array<{
   href: string;
   label: string;
-  icon: typeof Rocket;
+  icon: typeof Store;
   matches: (pathname: string) => boolean;
 }> = [
-  // Launchpad replaces Market on the bottom bar to match the same
-  // demotion done on the public landing nav. Market sub-pages still
-  // ship via the hamburger drawer + sidebar so nothing's lost.
   {
-    href: '/launchpad',
-    label: 'Launchpad',
-    icon: Rocket,
-    matches: (p) => p === '/launchpad' || p.startsWith('/launchpad/'),
+    href: '/market',
+    label: 'Market',
+    icon: Store,
+    matches: (p) => p === '/market' || p.startsWith('/market/'),
   },
   {
     href: '/feed',
