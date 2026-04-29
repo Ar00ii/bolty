@@ -40,6 +40,7 @@
     "@nestjs/throttler": "^5.1.1",
     "@nestjs/websockets": "^10.3.0",
     "@prisma/client": "^5.8.0",
+    "@solana/web3.js": "^1.98.4",
     "@types/yauzl": "^2.10.3",
     "axios": "^1.6.5",
     "bcrypt": "^5.1.1",
