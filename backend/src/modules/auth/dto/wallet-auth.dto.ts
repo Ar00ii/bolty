@@ -1,24 +1,34 @@
-import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
+
+const SOLANA_BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
 export class GetNonceDto {
   @IsString()
   @IsNotEmpty()
-  @Length(10, 100)
+  @Matches(SOLANA_BASE58, { message: 'Invalid Solana address' })
   address!: string;
 }
 
-export class VerifyEthereumDto {
+export class VerifySolanaDto {
   @IsString()
   @IsNotEmpty()
-  @Matches(/^0x[a-fA-F0-9]{40}$/, { message: 'Invalid Ethereum address' })
+  @Matches(SOLANA_BASE58, { message: 'Invalid Solana address' })
   address!: string;
 
   @IsString()
   @IsNotEmpty()
-  @Length(100, 200)
+  @Length(64, 200)
   signature!: string;
 
   @IsString()
   @IsNotEmpty()
   nonce!: string;
+
+  @IsString()
+  @IsOptional()
+  provider?: string;
+
+  @IsString()
+  @IsOptional()
+  label?: string;
 }

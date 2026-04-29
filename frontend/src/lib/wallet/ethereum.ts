@@ -1,112 +1,23 @@
 'use client';
 
-import { BrowserProvider, Eip1193Provider } from 'ethers';
-
-import { api } from '@/lib/api/client';
-
-interface EthereumProvider {
-  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
-  on: (event: string, handler: (...args: unknown[]) => void) => void;
-  removeListener: (event: string, handler: (...args: unknown[]) => void) => void;
-  isMetaMask?: boolean;
-  isPhantom?: boolean;
-  providers?: EthereumProvider[];
-}
-
-declare global {
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
-}
-
 /**
- * Returns the MetaMask-specific provider, even when multiple wallets are installed.
- * When Phantom + MetaMask coexist, both inject into window.ethereum. The EIP-5749
- * multi-provider standard exposes them in window.ethereum.providers[].
- * We pick the one that is MetaMask (isMetaMask=true) and NOT Phantom (isPhantom!=true).
+ * Legacy EVM shim. The platform is on Solana now — wallet connection
+ * goes through `@solana/wallet-adapter-react`. Returning a permissive
+ * interface (with `request`) so the dozen places that still gate UI
+ * on the EVM provider compile; at runtime the provider is always null
+ * so the code path falls through to the disabled state.
  */
-export function getMetaMaskProvider(): EthereumProvider | null {
-  if (typeof window === 'undefined' || !window.ethereum) return null;
 
-  const eth = window.ethereum;
+export interface LegacyEthereumProvider {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+}
 
-  // Multi-wallet scenario: providers array present (EIP-5749)
-  if (eth.providers && eth.providers.length > 0) {
-    const mm = eth.providers.find((p) => p.isMetaMask && !p.isPhantom);
-    return mm ?? null;
-  }
-
-  // Single wallet: ensure it's MetaMask and not Phantom masquerading
-  if (eth.isMetaMask && !eth.isPhantom) return eth;
-
+export function getMetaMaskProvider(): LegacyEthereumProvider | null {
   return null;
 }
 
-function parseMetaMaskError(err: unknown): string {
-  if (err instanceof Error) {
-    const code = (err as { code?: number }).code;
-    if (code === 4001) return 'Connection rejected. You cancelled the request in MetaMask.';
-    if (code === -32603) return 'MetaMask internal error. Make sure your wallet is unlocked.';
-    if (code === 4100) return 'MetaMask is locked. Please unlock your wallet and try again.';
-    if (err.message.includes('User rejected'))
-      return 'Connection rejected. You cancelled the request in MetaMask.';
-    if (err.message.includes('pending'))
-      return 'MetaMask has a pending request. Open MetaMask and resolve it.';
-    if (err.message.includes('Cannot connect')) return err.message;
-    return err.message;
-  }
-  return 'Unknown MetaMask error.';
-}
-
-export async function connectMetaMask(): Promise<void> {
-  const mmProvider = getMetaMaskProvider();
-  if (!mmProvider) {
-    throw new Error('MetaMask is not installed.');
-  }
-
-  const provider = new BrowserProvider(mmProvider as Eip1193Provider);
-
-  let accounts: string[];
-  try {
-    accounts = (await provider.send('eth_requestAccounts', [])) as string[];
-  } catch (err) {
-    throw new Error(parseMetaMaskError(err));
-  }
-
-  if (!accounts || accounts.length === 0) {
-    throw new Error('No accounts found. Create an account in MetaMask first.');
-  }
-
-  const address = accounts[0];
-
-  let nonceData: { nonce: string; message: string };
-  try {
-    nonceData = await api.post<{ nonce: string; message: string }>('/auth/nonce/ethereum', {
-      address,
-    });
-  } catch (err) {
-    throw new Error(err instanceof Error ? err.message : 'Failed to get nonce from server.');
-  }
-
-  let signature: string;
-  try {
-    const signer = await provider.getSigner();
-    signature = await signer.signMessage(nonceData.message);
-  } catch (err) {
-    throw new Error(parseMetaMaskError(err));
-  }
-
-  try {
-    await api.post('/auth/verify/ethereum', {
-      address,
-      signature,
-      nonce: nonceData.nonce,
-    });
-  } catch (err) {
-    throw new Error(err instanceof Error ? err.message : 'Signature verification failed.');
-  }
-}
-
-export function isMetaMaskInstalled(): boolean {
-  return getMetaMaskProvider() !== null;
+export async function connectMetaMask(): Promise<never> {
+  throw new Error(
+    'MetaMask sign-in is no longer supported. Connect a Solana wallet (Phantom / Solflare) at /auth.',
+  );
 }

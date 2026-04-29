@@ -37,7 +37,7 @@ model User {
   githubToken String? // encrypted
 
   // Wallet addresses
-  walletAddress String?   @unique // Ethereum (MetaMask)
+  walletAddress String?   @unique // Solana wallet (base58 pubkey)
   walletNonce   String? // current nonce for wallet auth
   nonceExpiry   DateTime? // nonce expiration
 
@@ -136,11 +136,11 @@ model UserWallet {
 }
 
 enum WalletProvider {
-  METAMASK
-  WALLETCONNECT
+  PHANTOM
+  SOLFLARE
+  BACKPACK
+  GLOW
   COINBASE
-  RAINBOW
-  UNISWAP
   OTHER
 }
 

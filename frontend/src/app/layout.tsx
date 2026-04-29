@@ -4,6 +4,7 @@ import React from 'react';
 
 import './globals.css';
 import { ClientShell } from '@/components/layout/ClientShell';
+import { SolanaWalletProvider } from '@/components/providers/SolanaWalletProvider';
 import { ToastContainer } from '@/components/ui/Toast';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { ToastProvider } from '@/lib/hooks/useToast';
@@ -157,9 +158,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen">
         <ThemeProvider>
           <ToastProvider>
-            <AuthProvider>
-              <ClientShell>{children}</ClientShell>
-            </AuthProvider>
+            <SolanaWalletProvider>
+              <AuthProvider>
+                <ClientShell>{children}</ClientShell>
+              </AuthProvider>
+            </SolanaWalletProvider>
             <ToastContainer />
           </ToastProvider>
         </ThemeProvider>

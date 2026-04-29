@@ -5,17 +5,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { WalletProvider } from '@prisma/client';
+import bs58 from 'bs58';
 
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { invalidateUserCache } from '../auth/strategies/jwt.strategy';
 
-const HEX_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
+const SOLANA_BASE58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 const VALID_PROVIDERS = new Set<WalletProvider>([
-  'METAMASK',
-  'WALLETCONNECT',
+  'PHANTOM',
+  'SOLFLARE',
+  'BACKPACK',
+  'GLOW',
   'COINBASE',
-  'RAINBOW',
-  'UNISWAP',
   'OTHER',
 ]);
 
@@ -24,10 +25,18 @@ export class WalletsService {
   constructor(private readonly prisma: PrismaService) {}
 
   private normalize(address: string): string {
-    if (!HEX_ADDRESS.test(address)) {
-      throw new BadRequestException('Invalid wallet address');
+    if (!SOLANA_BASE58.test(address)) {
+      throw new BadRequestException('Invalid Solana wallet address');
     }
-    return address.toLowerCase();
+    try {
+      const bytes = bs58.decode(address);
+      if (bytes.length !== 32) {
+        throw new BadRequestException('Invalid Solana wallet address');
+      }
+    } catch {
+      throw new BadRequestException('Invalid Solana wallet address');
+    }
+    return address;
   }
 
   /**
@@ -55,7 +64,7 @@ export class WalletsService {
         data: {
           userId,
           address: user.walletAddress,
-          provider: 'METAMASK',
+          provider: 'PHANTOM',
           isPrimary: wallets.every((w) => !w.isPrimary),
         },
       });

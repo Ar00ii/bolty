@@ -2,6 +2,8 @@
 
 export const dynamic = 'force-dynamic';
 
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -16,29 +18,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 
 import { useAuth } from '@/lib/auth/AuthProvider';
-import { connectMetaMask, getMetaMaskProvider } from '@/lib/wallet/ethereum';
-import {
-  isWalletConnectConfigured,
-  linkWalletConnect,
-} from '@/lib/wallet/walletconnect';
+import { signInWithSolana } from '@/lib/wallet/solana';
 
 /**
- * Bolty auth page — wallet-only.
+ * Bolty auth page — Solana wallet only.
  *
- * The previous /auth was a 1,000-line surface with email
- * registration, password strength meters, 2FA, and "forgot
- * password" flows. None of that fits how a Web3 platform should
- * onboard: identity belongs to the wallet, not to a username +
- * password pair.
- *
- * This rewrite cuts the surface down to: connect MetaMask, or
- * WalletConnect on mobile. One signed nonce → JWT → done.
- *
- * Backend email endpoints (/auth/register, /auth/login/email,
- * /auth/password/*, /auth/2fa/*) are NOT removed by this commit —
- * they stay live so any existing email-only accounts keep working.
- * They're just unreachable from the UI; new users are funnelled
- * straight into the wallet path.
+ * Connect a Solana wallet (Phantom / Solflare via the wallet-adapter
+ * modal), sign one short message — the backend verifies the ed25519
+ * signature against the wallet pubkey, mints a JWT, sets HttpOnly
+ * cookies. Identity = wallet pubkey. No email, no password, no 2FA.
  */
 function AuthInner() {
   const router = useRouter();
@@ -46,15 +34,12 @@ function AuthInner() {
   const { isAuthenticated, refresh } = useAuth();
   const redirect = searchParams?.get('redirect') ?? '/market';
 
-  const [phase, setPhase] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
-  const [error, setError] = useState<string | null>(null);
-  const [hasMM, setHasMM] = useState(false);
-  const [hasWC, setHasWC] = useState(false);
+  const { publicKey, signMessage, connected, connecting, disconnect, wallet } = useWallet();
+  const { setVisible } = useWalletModal();
 
-  useEffect(() => {
-    setHasMM(!!getMetaMaskProvider());
-    setHasWC(isWalletConnectConfigured());
-  }, []);
+  const [phase, setPhase] = useState<'idle' | 'signing' | 'success' | 'error'>('idle');
+  const [error, setError] = useState<string | null>(null);
+  const [autoSigned, setAutoSigned] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -62,41 +47,40 @@ function AuthInner() {
     }
   }, [isAuthenticated, redirect, router]);
 
-  const onConnectMetaMask = useCallback(async () => {
+  const onSign = useCallback(async () => {
+    if (!publicKey || !signMessage) return;
     setError(null);
-    setPhase('connecting');
+    setPhase('signing');
     try {
-      // connectMetaMask handles nonce → sign → verify in one call.
-      await connectMetaMask();
+      await signInWithSolana({
+        publicKeyBase58: publicKey.toBase58(),
+        signMessage,
+      });
       setPhase('success');
       await refresh();
       router.replace(redirect);
     } catch (err) {
       setPhase('error');
-      setError(err instanceof Error ? err.message : 'Wallet connection failed');
+      setError(err instanceof Error ? err.message : 'Sign-in failed');
     }
-  }, [refresh, redirect, router]);
+  }, [publicKey, signMessage, refresh, redirect, router]);
 
-  const onConnectWC = useCallback(async () => {
-    setError(null);
-    setPhase('connecting');
-    try {
-      await linkWalletConnect();
-      setPhase('success');
-      await refresh();
-      router.replace(redirect);
-    } catch (err) {
-      setPhase('error');
-      setError(err instanceof Error ? err.message : 'WalletConnect failed');
+  // Auto-trigger the sign-in handshake the first time a wallet connects so
+  // the user isn't bounced through a second confirmation step. If they
+  // reject the signature we still show the manual "Sign to continue"
+  // button so they can retry.
+  useEffect(() => {
+    if (connected && publicKey && signMessage && !autoSigned && phase === 'idle') {
+      setAutoSigned(true);
+      void onSign();
     }
-  }, [refresh, redirect, router]);
+  }, [connected, publicKey, signMessage, autoSigned, phase, onSign]);
 
   return (
     <div
       className="min-h-screen relative flex items-center justify-center px-4"
       style={{ background: 'var(--bg)', color: 'var(--text)' }}
     >
-      {/* Ambient brand glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -129,7 +113,6 @@ function AuthInner() {
               '0 16px 40px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.06)',
           }}
         >
-          {/* Heading */}
           <div className="flex items-center gap-3 mb-1">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -145,7 +128,7 @@ function AuthInner() {
                 className="font-light text-white"
                 style={{ fontSize: '20px', letterSpacing: '-0.3px' }}
               >
-                Connect wallet
+                Connect Solana wallet
               </h1>
               <p className="font-light text-zinc-400" style={{ fontSize: '12.5px' }}>
                 Sign one short message — no email, no password
@@ -153,25 +136,85 @@ function AuthInner() {
             </div>
           </div>
 
-          {/* Connect buttons */}
           <div className="mt-6 space-y-2">
-            <ConnectButton
-              label="MetaMask / Injected"
-              icon="🦊"
-              available={hasMM}
-              busy={phase === 'connecting'}
-              onClick={onConnectMetaMask}
-              cta={!hasMM ? 'Install MetaMask' : undefined}
-              installHref={!hasMM ? 'https://metamask.io/download/' : undefined}
-            />
-            <ConnectButton
-              label="WalletConnect (mobile)"
-              icon="🌐"
-              available={hasWC}
-              busy={phase === 'connecting'}
-              onClick={onConnectWC}
-              cta={!hasWC ? 'Not configured' : undefined}
-            />
+            {!connected ? (
+              <button
+                type="button"
+                onClick={() => setVisible(true)}
+                disabled={connecting}
+                className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition hover:translate-x-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  color: 'white',
+                  boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                }}
+              >
+                <span className="flex items-center gap-3">
+                  <span style={{ fontSize: '20px' }}>👻</span>
+                  <span className="text-[13.5px] font-light">
+                    {connecting ? 'Connecting…' : 'Phantom / Solflare / …'}
+                  </span>
+                </span>
+                {connecting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
+                ) : (
+                  <span className="text-[11.5px] font-light" style={{ color: '#b4a7ff' }}>
+                    Connect →
+                  </span>
+                )}
+              </button>
+            ) : (
+              <>
+                <div
+                  className="flex items-center justify-between gap-3 rounded-xl px-4 py-3"
+                  style={{
+                    background: 'rgba(34,197,94,0.06)',
+                    color: '#86efac',
+                    boxShadow: 'inset 0 0 0 1px rgba(34,197,94,0.18)',
+                  }}
+                >
+                  <span className="flex items-center gap-2 text-[12px] font-light">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    {wallet?.adapter.name ?? 'Wallet'} connected
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void disconnect();
+                      setAutoSigned(false);
+                      setPhase('idle');
+                      setError(null);
+                    }}
+                    className="text-[11px] font-light text-zinc-400 hover:text-white transition"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={onSign}
+                  disabled={phase === 'signing' || phase === 'success'}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition hover:translate-x-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(131,110,249,0.15) 0%, rgba(131,110,249,0.08) 100%)',
+                    color: 'white',
+                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                  }}
+                >
+                  <span className="flex items-center gap-3">
+                    <Wallet className="w-4 h-4" style={{ color: '#b4a7ff' }} />
+                    <span className="text-[13.5px] font-light">Sign to continue</span>
+                  </span>
+                  {phase === 'signing' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
+                  ) : (
+                    <span className="text-[11.5px] font-light" style={{ color: '#b4a7ff' }}>
+                      Sign →
+                    </span>
+                  )}
+                </button>
+              </>
+            )}
           </div>
 
           {phase === 'success' && (
@@ -203,7 +246,6 @@ function AuthInner() {
             </motion.div>
           )}
 
-          {/* Reassurance */}
           <div
             className="mt-5 pt-5 text-[11.5px] font-light text-zinc-400"
             style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}
@@ -238,75 +280,6 @@ function AuthInner() {
         </p>
       </motion.div>
     </div>
-  );
-}
-
-function ConnectButton({
-  label,
-  icon,
-  available,
-  busy,
-  onClick,
-  cta,
-  installHref,
-}: {
-  label: string;
-  icon: string;
-  available: boolean;
-  busy: boolean;
-  onClick: () => void;
-  cta?: string;
-  installHref?: string;
-}) {
-  if (!available && installHref) {
-    return (
-      <a
-        href={installHref}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 transition hover:translate-x-0.5"
-        style={{
-          background: 'rgba(255,255,255,0.03)',
-          color: '#a1a1aa',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-        }}
-      >
-        <span className="flex items-center gap-3">
-          <span style={{ fontSize: '20px' }}>{icon}</span>
-          <span className="text-[13.5px] font-light">{label}</span>
-        </span>
-        <span className="text-[11px] font-light" style={{ color: '#b4a7ff' }}>
-          {cta} →
-        </span>
-      </a>
-    );
-  }
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!available || busy}
-      className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition hover:translate-x-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        color: 'white',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
-      }}
-    >
-      <span className="flex items-center gap-3">
-        <span style={{ fontSize: '20px' }}>{icon}</span>
-        <span className="text-[13.5px] font-light">{label}</span>
-      </span>
-      {busy ? (
-        <Loader2 className="w-4 h-4 animate-spin" style={{ color: '#b4a7ff' }} />
-      ) : cta ? (
-        <span className="text-[11px] font-light text-zinc-500">{cta}</span>
-      ) : (
-        <span className="text-[11.5px] font-light" style={{ color: '#b4a7ff' }}>
-          Sign in →
-        </span>
-      )}
-    </button>
   );
 }
 
