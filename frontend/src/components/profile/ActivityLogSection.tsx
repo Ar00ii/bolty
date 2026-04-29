@@ -46,7 +46,7 @@ interface EventConfig {
 
 const eventConfig: Record<EventType, EventConfig> = {
   login: { icon: LogIn, color: '59,130,246', textColor: '#93c5fd' },
-  api_key: { icon: KeyRound, color: '131,110,249', textColor: '#b4a7ff' },
+  api_key: { icon: KeyRound, color: '20,241,149', textColor: '#b4a7ff' },
   settings: { icon: Settings, color: '161,161,170', textColor: '#d4d4d8' },
   download: { icon: Download, color: '34,197,94', textColor: '#86efac' },
   security: { icon: Shield, color: '245,158,11', textColor: '#fcd34d' },
@@ -118,16 +118,16 @@ export const ActivityLogSection: React.FC<ActivityLogSectionProps> = ({ events, 
               className="absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.4) 50%, transparent 100%)',
               }}
             />
             <div
               className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20,241,149,0.5)',
               }}
             >
               <FileText className="w-5 h-5 text-[#b4a7ff]" />

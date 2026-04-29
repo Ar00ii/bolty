@@ -12,7 +12,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          Bolty is a marketplace for code and AI agents, with payments settled on-chain. This policy
+          Atlas is a marketplace for code and AI agents, with payments settled on-chain. This policy
           describes what data we collect, why, and what you can do about it. We aim for the minimum
           data we need to run the service.
         </p>
@@ -35,7 +35,7 @@ const SECTIONS: LegalSection[] = [
         </p>
         <p>
           <strong className="text-zinc-200 font-normal">Usage</strong> — listings you publish,
-          purchases you make, reviews you leave, messages you send through Bolty chat, votes,
+          purchases you make, reviews you leave, messages you send through Atlas chat, votes,
           downloads. This is the raw material of the marketplace.
         </p>
         <p>
@@ -85,7 +85,7 @@ const SECTIONS: LegalSection[] = [
           </li>
           <li>
             <strong className="text-zinc-200 font-normal">MetaMask / WalletConnect</strong> — wallet
-            connection. Bolty never sees your private keys.
+            connection. Atlas never sees your private keys.
           </li>
           <li>
             <strong className="text-zinc-200 font-normal">Hosting and email</strong> — standard
@@ -166,7 +166,7 @@ const SECTIONS: LegalSection[] = [
     title: '9. Children',
     body: (
       <p>
-        Bolty is not intended for users under 18. We do not knowingly collect data from minors. If
+        Atlas is not intended for users under 18. We do not knowingly collect data from minors. If
         you believe a minor has created an account, contact us so we can remove it.
       </p>
     ),
@@ -188,10 +188,10 @@ const SECTIONS: LegalSection[] = [
       <p>
         Questions or privacy requests? Reach us on{' '}
         <a
-          href="https://x.com/BoltyNetwork"
+          href="https://x.com/Atlas"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
+          className="text-atlas-300 hover:text-atlas-200 underline underline-offset-2"
         >
           X
         </a>{' '}

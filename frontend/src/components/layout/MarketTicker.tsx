@@ -293,9 +293,9 @@ function TickerEntry({ item }: { item: TickerItem }) {
         <span
           className="inline-flex items-center gap-1 px-1.5 py-[1.5px] rounded font-mono uppercase"
           style={{
-            background: 'rgba(131,110,249,0.14)',
+            background: 'rgba(20,241,149,0.14)',
             color: '#b4a7ff',
-            border: '1px solid rgba(131,110,249,0.35)',
+            border: '1px solid rgba(20,241,149,0.35)',
             fontSize: 9.5,
             letterSpacing: '0.12em',
           }}
@@ -309,15 +309,15 @@ function TickerEntry({ item }: { item: TickerItem }) {
             src={item.imageUrl}
             alt=""
             className="w-4 h-4 rounded-full object-cover"
-            style={{ boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)' }}
+            style={{ boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)' }}
           />
         ) : (
           <span
             className="w-4 h-4 rounded-full grid place-items-center text-[8px] font-mono"
             style={{
-              background: 'rgba(131,110,249,0.14)',
+              background: 'rgba(20,241,149,0.14)',
               color: '#b4a7ff',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+              boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
             }}
           >
             ${item.symbol.charAt(0)}

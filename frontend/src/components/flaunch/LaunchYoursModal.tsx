@@ -207,8 +207,8 @@ export function LaunchYoursModal({
         onClick={load}
         className="mt-3 px-4 py-2 rounded-xl text-[12.5px] text-white transition hover:brightness-110"
         style={{
-          background: 'rgba(131,110,249,0.22)',
-          border: '1px solid rgba(131,110,249,0.5)',
+          background: 'rgba(20,241,149,0.22)',
+          border: '1px solid rgba(20,241,149,0.5)',
         }}
       >
         Retry
@@ -453,15 +453,15 @@ function ModeChooser({ onPick }: { onPick: (m: 'self' | 'agent') => void }) {
         className="text-left p-6 rounded-2xl transition hover:brightness-125"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0.08) 100%)',
-          border: '1px solid rgba(131,110,249,0.55)',
+            'linear-gradient(180deg, rgba(20,241,149,0.25) 0%, rgba(20,241,149,0.08) 100%)',
+          border: '1px solid rgba(20,241,149,0.55)',
         }}
       >
         <div
           className="w-11 h-11 rounded-xl grid place-items-center mb-4"
           style={{
-            background: 'rgba(131,110,249,0.25)',
-            border: '1px solid rgba(131,110,249,0.6)',
+            background: 'rgba(20,241,149,0.25)',
+            border: '1px solid rgba(20,241,149,0.6)',
           }}
         >
           <Sparkles className="w-5 h-5 text-white" strokeWidth={1.8} />
@@ -585,8 +585,8 @@ function EmptyInventory({ onClose }: { onClose: () => void }) {
       <div
         className="w-12 h-12 rounded-xl mx-auto grid place-items-center mb-3"
         style={{
-          background: 'rgba(131,110,249,0.12)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+          background: 'rgba(20,241,149,0.12)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
         }}
       >
         <Package className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
@@ -603,8 +603,8 @@ function EmptyInventory({ onClose }: { onClose: () => void }) {
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white transition"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.5) 0%, rgba(131,110,249,0.35) 100%)',
-            boxShadow: '0 0 0 1px rgba(131,110,249,0.45)',
+              'linear-gradient(180deg, rgba(20,241,149,0.5) 0%, rgba(20,241,149,0.35) 100%)',
+            boxShadow: '0 0 0 1px rgba(20,241,149,0.45)',
           }}
         >
           <Bot className="w-3 h-3" /> Publish an agent
@@ -638,8 +638,8 @@ function NotAuthed({ onClose }: { onClose: () => void }) {
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white transition"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.5) 0%, rgba(131,110,249,0.35) 100%)',
-          boxShadow: '0 0 0 1px rgba(131,110,249,0.45)',
+            'linear-gradient(180deg, rgba(20,241,149,0.5) 0%, rgba(20,241,149,0.35) 100%)',
+          boxShadow: '0 0 0 1px rgba(20,241,149,0.45)',
         }}
       >
         Sign in
@@ -660,7 +660,7 @@ function iconFor(t: PickerListing['type']) {
 
 function accentFor(t: PickerListing['type']): string {
   if (t === 'REPO') return '#06B6D4';
-  if (t === 'AGENT' || t === 'BOT') return '#836EF9';
+  if (t === 'AGENT' || t === 'BOT') return '#14F195';
   if (t === 'SCRIPT') return '#EC4899';
   return '#94a3b8';
 }

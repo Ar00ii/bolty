@@ -240,8 +240,8 @@ function TokenHeader({ token }: { token: TokenInfo }) {
       <div
         className="w-14 h-14 rounded-2xl overflow-hidden shrink-0"
         style={{
-          background: 'rgba(131,110,249,0.08)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+          background: 'rgba(20,241,149,0.08)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
         }}
       >
         {token.imageUrl ? (
@@ -374,7 +374,7 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
 
 function AboutCard({ token }: { token: TokenInfo }) {
   // Show whatever the creator pinned to IPFS in the wizard. The
-  // attribution footer ("Launched on the Bolty Network launchpad —
+  // attribution footer ("Launched on the Atlas Network launchpad —
   // {url}") is appended automatically inside the wizard, so we don't
   // need to add anything here.
   if (!token.description?.trim()) return null;
@@ -398,7 +398,7 @@ function AboutCard({ token }: { token: TokenInfo }) {
 
 function LinksCard({ token }: { token: TokenInfo }) {
   const links: Array<{ label: string; href: string; external: boolean }> = [
-    { label: 'Source listing on Bolty', href: token.listingPath, external: false },
+    { label: 'Source listing on Atlas', href: token.listingPath, external: false },
     { label: 'Open on Flaunch', href: token.flaunchUrl, external: true },
     {
       label: 'View on Basescan',
@@ -466,8 +466,8 @@ function CreatorMini({ token }: { token: TokenInfo }) {
       <div
         className="w-9 h-9 rounded-full overflow-hidden shrink-0"
         style={{
-          background: 'rgba(131,110,249,0.12)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+          background: 'rgba(20,241,149,0.12)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
         }}
       >
         {token.creatorAvatarUrl ? (
@@ -566,8 +566,8 @@ function TradePanel({ token }: { token: TokenInfo }) {
             className="flex-1 px-2 py-2 rounded-md text-[12px] uppercase tracking-[0.12em] transition font-light"
             style={{
               color: mode === m ? '#ffffff' : '#a1a1aa',
-              background: mode === m ? 'rgba(131,110,249,0.2)' : 'transparent',
-              boxShadow: mode === m ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+              background: mode === m ? 'rgba(20,241,149,0.2)' : 'transparent',
+              boxShadow: mode === m ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
             }}
           >
             {m}

@@ -95,9 +95,9 @@ export const BoostMarketplace = () => {
       name: 'Platinum',
       boost: '250',
       multiplier: '10x',
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-atlas-500 to-atlas-500',
       icon: Gem,
-      iconColor: 'text-purple-400',
+      iconColor: 'text-atlas-400',
     },
     {
       name: 'Diamond',
@@ -148,7 +148,7 @@ export const BoostMarketplace = () => {
           viewport={{ once: true }}
         >
           <motion.div variants={itemVariants} className="mb-4">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs font-light">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-atlas-500/30 bg-atlas-500/10 text-atlas-300 text-xs font-light">
               <Zap className="w-3 h-3" />
               Agent Visibility System
             </span>
@@ -178,9 +178,9 @@ export const BoostMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-atlas-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-atlas-500/10 transition-all duration-300"
               >
-                <Icon className="w-8 h-8 text-purple-400 mb-3" />
+                <Icon className="w-8 h-8 text-atlas-400 mb-3" />
                 <h3 className="text-lg font-light text-white mb-2">{feature.title}</h3>
                 <p className="text-sm text-gray-400">{feature.description}</p>
               </motion.div>
@@ -251,16 +251,16 @@ export const BoostMarketplace = () => {
               <motion.div
                 key={idx}
                 variants={itemVariants}
-                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-purple-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300"
+                className="p-6 rounded-lg border border-gray-700 bg-gray-950 hover:border-atlas-500/50 hover:bg-gray-900 hover:shadow-lg hover:shadow-atlas-500/10 transition-all duration-300"
               >
                 <h4 className="font-light text-white mb-3">{pack.name}</h4>
                 <div className="mb-4">
-                  <div className="text-3xl font-light text-purple-400">{pack.boost}</div>
+                  <div className="text-3xl font-light text-atlas-400">{pack.boost}</div>
                   <div className="text-xs text-gray-400">Boost</div>
                 </div>
                 <div className="pt-4 border-t border-gray-800">
                   <div className="text-2xl font-light text-white">{pack.price}</div>
-                  <div className="text-xs text-gray-400">BOLTY</div>
+                  <div className="text-xs text-gray-400">ATLAS</div>
                 </div>
               </motion.div>
             ))}
@@ -294,7 +294,7 @@ export const BoostMarketplace = () => {
               </ShimmerButton>
             </Link>
             <Link href="/chat">
-              <button className="px-8 py-3 rounded-lg border border-purple-500/30 text-purple-400 hover:bg-purple-500/10 transition-colors font-light">
+              <button className="px-8 py-3 rounded-lg border border-atlas-500/30 text-atlas-400 hover:bg-atlas-500/10 transition-colors font-light">
                 Explore Features
               </button>
             </Link>

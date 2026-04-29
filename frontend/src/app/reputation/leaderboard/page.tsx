@@ -176,7 +176,7 @@ export default function LeaderboardPage() {
                 Rays Leaderboard
               </h1>
               <p className="text-[12.5px] text-zinc-500 font-light mt-1">
-                The most trusted builders in Bolty — ranked by rays earned.
+                The most trusted builders in Atlas — ranked by rays earned.
               </p>
             </div>
             <button
@@ -204,7 +204,7 @@ export default function LeaderboardPage() {
             label="Ranked builders"
             value={formatNumber(annotated.length)}
             sub="in the top 50"
-            accent="#836EF9"
+            accent="#14F195"
           />
           <StatTile
             label="Top rays"
@@ -242,7 +242,7 @@ export default function LeaderboardPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.55) 50%, transparent 100%)',
               }}
             />
             <div className="flex items-center gap-4 overflow-x-auto whitespace-nowrap">
@@ -325,7 +325,7 @@ export default function LeaderboardPage() {
       {/* Tab switcher: developers vs agents */}
       <section className="px-6 md:px-10 mb-3">
         <div className="mx-auto max-w-[1200px] flex items-center gap-2">
-          <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#836EF9">
+          <TabButton active={tab === 'devs'} onClick={() => setTab('devs')} accent="#14F195">
             <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
             Top Developers
             <span className="ml-1 text-[10.5px] font-mono opacity-70">{annotated.length}</span>
@@ -658,7 +658,7 @@ function RankChip({
   onClick: () => void;
   accent?: string;
 }) {
-  const c = accent || '#836EF9';
+  const c = accent || '#14F195';
   return (
     <button
       type="button"

@@ -22,7 +22,7 @@ export function GradientMeshBackground() {
     let time = 0;
 
     const colors = [
-      { r: 131, g: 110, b: 249 }, // Bolty purple
+      { r: 131, g: 110, b: 249 }, // Atlas purple
       { r: 6, g: 182, b: 212 }, // Cyan
       { r: 236, g: 72, b: 153 }, // Magenta
     ];

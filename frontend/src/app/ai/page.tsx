@@ -28,7 +28,7 @@ interface AiSession {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const SUGGESTED_PROMPTS = [
-  'What is Bolty and how does it work?',
+  'What is Atlas and how does it work?',
   'Explain on-chain escrow in one paragraph.',
   'What are the risks of holding memecoins?',
   'How do I link my GitHub account to publish a repo?',
@@ -180,7 +180,7 @@ export default function AiPage() {
   if (authLoading || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
-        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-atlas-500 animate-spin" />
       </div>
     );
   }
@@ -197,16 +197,16 @@ export default function AiPage() {
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 22px -4px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.38), 0 0 22px -4px rgba(20,241,149,0.5)',
               }}
             >
               <Sparkles className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-light tracking-tight leading-none">
-                <GradientText>Bolty AI</GradientText>
+                <GradientText>Atlas AI</GradientText>
               </h1>
               <p className="text-xs text-zinc-500 mt-1 font-mono">gemini-2.0-flash · 10 msgs/min</p>
             </div>
@@ -221,9 +221,9 @@ export default function AiPage() {
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
               }}
             >
               <Plus className="w-4 h-4" /> New chat
@@ -254,9 +254,9 @@ export default function AiPage() {
                           onClick={() => loadSession(s.id)}
                           className="w-full text-left px-3 py-2 flex items-start gap-2 transition-colors"
                           style={{
-                            background: active ? 'rgba(131,110,249,0.1)' : 'transparent',
+                            background: active ? 'rgba(20,241,149,0.1)' : 'transparent',
                             borderLeft: active
-                              ? '2px solid rgba(131,110,249,0.6)'
+                              ? '2px solid rgba(20,241,149,0.6)'
                               : '2px solid transparent',
                           }}
                         >
@@ -300,15 +300,15 @@ export default function AiPage() {
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                        'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 22px -4px rgba(131,110,249,0.5)',
+                        'inset 0 0 0 1px rgba(20,241,149,0.38), 0 0 22px -4px rgba(20,241,149,0.5)',
                     }}
                   >
                     <Bot className="w-7 h-7 text-[#b4a7ff]" strokeWidth={1.5} />
                   </div>
                   <p className="text-lg text-white font-light tracking-tight mb-1">
-                    Ask me anything about Bolty
+                    Ask me anything about Atlas
                   </p>
                   <p className="text-xs text-zinc-500 mb-6 max-w-sm">
                     I can help with the platform, escrow, crypto basics, and more. I won&apos;t give
@@ -377,7 +377,7 @@ export default function AiPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value.slice(0, 2000))}
                 onKeyDown={handleKeyDown}
-                placeholder="Message Bolty AI — ↵ to send, ⇧+↵ for newline"
+                placeholder="Message Atlas AI — ↵ to send, ⇧+↵ for newline"
                 rows={2}
                 className="w-full bg-transparent text-sm text-zinc-200 placeholder-zinc-600 resize-none outline-none"
                 disabled={sending}
@@ -390,9 +390,9 @@ export default function AiPage() {
                   className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md disabled:opacity-40 disabled:cursor-not-allowed text-[12px] text-white font-light tracking-[0.005em] transition-all hover:brightness-110"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(131,110,249,0.5)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -6px rgba(20,241,149,0.5)',
                   }}
                 >
                   {sending ? (
@@ -433,9 +433,9 @@ function MessageBubble({
               }
             : {
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 16px -4px rgba(131,110,249,0.4)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.38), 0 0 16px -4px rgba(20,241,149,0.4)',
               }
         }
       >
@@ -453,9 +453,9 @@ function MessageBubble({
           isUser
             ? {
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.2) 0%, rgba(20,241,149,0.06) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
               }
             : {
                 background:
@@ -473,7 +473,7 @@ function MessageBubble({
           <div className="text-sm leading-relaxed break-words">
             <Markdown source={message.content} />
             {streaming && (
-              <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-purple-400 animate-pulse align-middle" />
+              <span className="inline-block w-1.5 h-3.5 ml-0.5 bg-atlas-400 animate-pulse align-middle" />
             )}
           </div>
         )}

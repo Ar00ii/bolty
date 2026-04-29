@@ -156,7 +156,7 @@ export function BoostListingModal({
               >
                 <div className="text-[13px] font-light">{tier.days}d</div>
                 <div className="text-[10.5px] font-mono mt-0.5 text-zinc-500">
-                  {tier.price} BOLTY
+                  {tier.price} ATLAS
                 </div>
               </button>
             );
@@ -169,7 +169,7 @@ export function BoostListingModal({
           <div className="text-[11.5px] text-zinc-500 font-light">
             Total{' '}
             <span className="text-white font-mono">
-              {selectedTier?.price ?? '—'} {pricing?.currency || 'BOLTY'}
+              {selectedTier?.price ?? '—'} {pricing?.currency || 'ATLAS'}
             </span>
           </div>
           <div className="flex gap-2">
@@ -189,7 +189,7 @@ export function BoostListingModal({
               style={{
                 color: '#ffffff',
                 background:
-                  'linear-gradient(180deg, rgba(236,72,153,0.55) 0%, rgba(131,110,249,0.55) 100%)',
+                  'linear-gradient(180deg, rgba(236,72,153,0.55) 0%, rgba(20,241,149,0.55) 100%)',
                 boxShadow: '0 0 0 1px rgba(236,72,153,0.5), 0 0 20px -8px rgba(236,72,153,0.6)',
               }}
             >

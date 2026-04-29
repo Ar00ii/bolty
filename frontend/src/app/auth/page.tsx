@@ -23,7 +23,7 @@ import {
 } from '@/lib/wallet/walletconnect';
 
 /**
- * Bolty auth page — wallet-only.
+ * Atlas auth page — wallet-only.
  *
  * The previous /auth was a 1,000-line surface with email
  * registration, password strength meters, 2FA, and "forgot
@@ -102,7 +102,7 @@ function AuthInner() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse at center, rgba(131,110,249,0.16), rgba(131,110,249,0) 60%)',
+            'radial-gradient(ellipse at center, rgba(20,241,149,0.16), rgba(20,241,149,0) 60%)',
         }}
       />
 
@@ -134,8 +134,8 @@ function AuthInner() {
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #836EF9 0%, #6b21a8 100%)',
-                boxShadow: '0 4px 14px rgba(131, 110, 249, 0.25)',
+                background: 'linear-gradient(135deg, #14F195 0%, #6b21a8 100%)',
+                boxShadow: '0 4px 14px rgba(20, 241, 149, 0.25)',
               }}
             >
               <Wallet className="w-5 h-5 text-white" />
@@ -211,13 +211,13 @@ function AuthInner() {
             <div className="flex items-start gap-2">
               <ShieldCheck
                 className="w-3.5 h-3.5 mt-0.5 shrink-0"
-                style={{ color: '#836EF9' }}
+                style={{ color: '#14F195' }}
               />
               <p>
                 We only read your address and ask you to sign a short
                 message to prove ownership.{' '}
                 <strong className="text-white font-normal">
-                  Bolty never holds your private keys
+                  Atlas never holds your private keys
                 </strong>{' '}
                 and never asks for a transaction at sign-in.
               </p>

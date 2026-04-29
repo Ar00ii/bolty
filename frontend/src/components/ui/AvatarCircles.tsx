@@ -18,7 +18,7 @@ interface AvatarCirclesProps {
 // Deterministic gradient per initial so the fallback circles don't all look
 // identical when several images are broken at once.
 const FALLBACK_GRADIENTS = [
-  'linear-gradient(135deg, #836EF9, #5b4dd1)',
+  'linear-gradient(135deg, #14F195, #5b4dd1)',
   'linear-gradient(135deg, #06B6D4, #0e7490)',
   'linear-gradient(135deg, #EC4899, #be185d)',
   'linear-gradient(135deg, #f59e0b, #b45309)',

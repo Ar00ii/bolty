@@ -39,8 +39,7 @@ const footerLinks: FooterSection[] = [
     links: [
       { title: 'Global Chat', href: '/chat' },
       { title: 'Boost System', href: '/#boost-marketplace' },
-      { title: 'GitHub', href: 'https://github.com/boltynetwork', external: true },
-      { title: 'Twitter', href: 'https://x.com/boltynetwork', external: true },
+      { title: 'Twitter', href: 'https://x.com/atlasmarket', external: true },
     ],
   },
   {
@@ -67,17 +66,16 @@ export function Footer() {
               <span
                 className="text-sm font-light tracking-tight"
                 style={{
-                  background: 'linear-gradient(135deg, #e0d4ff 0%, #836EF9 50%, #a78bfa 100%)',
+                  background: 'linear-gradient(135deg, #6ee7b7 0%, #14F195 50%, #00C853 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}
               >
-                BoltyNetwork
+                Atlas
               </span>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
-              The developer platform for publishing code, deploying AI agents, and earning from your
-              work.
+              The marketplace for AI agents on Solana.
             </p>
           </div>
 
@@ -119,24 +117,16 @@ export function Footer() {
           style={{ borderColor: 'var(--border)' }}
         >
           <p className="text-xs text-zinc-600">
-            &copy; {new Date().getFullYear()} Bolty Network. All rights reserved.
+            &copy; {new Date().getFullYear()} Atlas Network. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             <a
-              href="https://x.com/boltynetwork"
+              href="https://x.com/atlasmarket"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
             >
               Twitter
-            </a>
-            <a
-              href="https://github.com/boltynetwork"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
-            >
-              GitHub
             </a>
           </div>
         </div>

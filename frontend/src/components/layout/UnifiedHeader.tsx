@@ -91,26 +91,23 @@ export function UnifiedHeader() {
         }}
       >
         <div className="w-full pl-12 md:pl-20 pr-4 md:pr-8 h-16 flex items-center justify-between">
-          {/* Logo */}
+          {/* Logo: CSS wordmark — replace with image asset later */}
           <Link
             href="/"
-            className="flex items-center gap-2 hover:opacity-85 transition-opacity relative"
+            className="flex items-center gap-2.5 hover:opacity-85 transition-opacity relative"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/LogoNew.png"
-              alt="Bolty"
-              className="h-14 w-14 object-contain"
+            <div
+              className="w-9 h-9 grid place-items-center rounded-lg font-mono text-[16px] font-bold shrink-0"
               style={{
-                mixBlendMode: 'screen',
-                WebkitMaskImage:
-                  'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
-                maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
-                filter: 'drop-shadow(0 0 12px rgba(131,110,249,0.35))',
+                background: 'linear-gradient(135deg, #14F195 0%, #00C853 100%)',
+                color: '#062014',
+                filter: 'drop-shadow(0 0 12px rgba(20,241,149,0.35))',
               }}
-            />
+            >
+              A
+            </div>
             <span className="text-xl md:text-2xl hidden sm:inline text-white font-light">
-              BoltyNetwork
+              Atlas
             </span>
           </Link>
 
@@ -134,8 +131,8 @@ export function UnifiedHeader() {
                       className="absolute inset-0 rounded-lg -z-0"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                          'linear-gradient(180deg, rgba(20,241,149,0.14) 0%, rgba(20,241,149,0.04) 100%)',
+                        boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
                       }}
                       transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                     />
@@ -151,11 +148,11 @@ export function UnifiedHeader() {
           {/* Right: Auth/Profile */}
           <div className="flex items-center gap-2 md:gap-4">
             <a
-              href="https://x.com/BoltyNetwork"
+              href="https://x.com/Atlas"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Bolty on X"
-              title="Bolty on X"
+              aria-label="Atlas on X"
+              title="Atlas on X"
               className="hidden sm:flex items-center justify-center w-8 h-8 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
             >
               <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor" aria-hidden="true">
@@ -177,8 +174,8 @@ export function UnifiedHeader() {
                   className="text-white text-xs md:text-[13px] px-3.5 md:px-4 py-2 rounded-lg transition-all"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.08) 100%)',
-                    border: '1px solid rgba(131,110,249,0.35)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.08) 100%)',
+                    border: '1px solid rgba(20,241,149,0.35)',
                     fontWeight: 700,
                   }}
                 >
@@ -246,7 +243,7 @@ export function UnifiedHeader() {
                         background:
                           'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
                         boxShadow:
-                          '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                          '0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
                         backdropFilter: 'blur(8px)',
                       }}
                     >
@@ -360,7 +357,7 @@ export function UnifiedHeader() {
                 height: '100dvh',
                 background:
                   'linear-gradient(180deg, rgba(14,14,18,0.98) 0%, rgba(8,8,11,0.98) 100%)',
-                borderLeft: '1px solid rgba(131,110,249,0.18)',
+                borderLeft: '1px solid rgba(20,241,149,0.18)',
                 boxShadow: '-24px 0 60px -10px rgba(0,0,0,0.6)',
               }}
             >
@@ -370,7 +367,7 @@ export function UnifiedHeader() {
                 className="absolute -top-24 -right-24 w-64 h-64 rounded-full opacity-40 pointer-events-none"
                 style={{
                   background:
-                    'radial-gradient(closest-side, rgba(131,110,249,0.28), transparent 70%)',
+                    'radial-gradient(closest-side, rgba(20,241,149,0.28), transparent 70%)',
                   filter: 'blur(10px)',
                 }}
               />
@@ -383,7 +380,7 @@ export function UnifiedHeader() {
                 <div className="flex items-center gap-2.5">
                   <BoltyLogoSVG size={22} />
                   <div className="flex flex-col leading-none">
-                    <span className="text-[13px] font-semibold text-white">Bolty</span>
+                    <span className="text-[13px] font-semibold text-white">Atlas</span>
                     <span className="text-[10px] text-zinc-500 mt-1 tracking-[0.18em] uppercase">
                       Network
                     </span>
@@ -407,8 +404,8 @@ export function UnifiedHeader() {
                   className="relative mx-5 mt-5 p-4 rounded-xl"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, rgba(131,110,249,0.02) 100%)',
-                    border: '1px solid rgba(131,110,249,0.22)',
+                      'linear-gradient(135deg, rgba(20,241,149,0.1) 0%, rgba(20,241,149,0.02) 100%)',
+                    border: '1px solid rgba(20,241,149,0.22)',
                   }}
                 >
                   <div className="flex items-center gap-3">
@@ -434,14 +431,14 @@ export function UnifiedHeader() {
                   className="relative mx-5 mt-5 p-4 rounded-xl"
                   style={{
                     background:
-                      'linear-gradient(135deg, rgba(131,110,249,0.08) 0%, rgba(131,110,249,0.02) 100%)',
-                    border: '1px solid rgba(131,110,249,0.2)',
+                      'linear-gradient(135deg, rgba(20,241,149,0.08) 0%, rgba(20,241,149,0.02) 100%)',
+                    border: '1px solid rgba(20,241,149,0.2)',
                   }}
                 >
                   <div className="flex items-center gap-2.5 mb-2.5">
                     <Sparkles className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />
                     <span className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-400">
-                      Join Bolty
+                      Join Atlas
                     </span>
                   </div>
                   <p className="text-[13px] font-light text-zinc-300 leading-relaxed">
@@ -460,8 +457,8 @@ export function UnifiedHeader() {
                       className="flex-1 text-center py-2 rounded-lg text-[12px] font-light text-white transition-all"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.12) 100%)',
-                        border: '1px solid rgba(131,110,249,0.45)',
+                          'linear-gradient(180deg, rgba(20,241,149,0.28) 0%, rgba(20,241,149,0.12) 100%)',
+                        border: '1px solid rgba(20,241,149,0.45)',
                       }}
                     >
                       Get started
@@ -495,8 +492,8 @@ export function UnifiedHeader() {
                               ? {
                                   color: '#ffffff',
                                   background:
-                                    'linear-gradient(90deg, rgba(131,110,249,0.14) 0%, rgba(131,110,249,0.04) 100%)',
-                                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.22)',
+                                    'linear-gradient(90deg, rgba(20,241,149,0.14) 0%, rgba(20,241,149,0.04) 100%)',
+                                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.22)',
                                 }
                               : { color: 'rgb(212,212,216)' }
                           }
@@ -505,9 +502,9 @@ export function UnifiedHeader() {
                             className="inline-flex w-8 h-8 items-center justify-center rounded-lg flex-shrink-0"
                             style={{
                               background: active
-                                ? 'linear-gradient(135deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.04) 100%)'
+                                ? 'linear-gradient(135deg, rgba(20,241,149,0.2) 0%, rgba(20,241,149,0.04) 100%)'
                                 : 'rgba(255,255,255,0.025)',
-                              border: `1px solid ${active ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.05)'}`,
+                              border: `1px solid ${active ? 'rgba(20,241,149,0.3)' : 'rgba(255,255,255,0.05)'}`,
                             }}
                           >
                             <Icon

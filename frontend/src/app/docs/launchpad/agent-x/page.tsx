@@ -7,15 +7,15 @@ export default function AgentXIntegrationDocsPage() {
   // backend's X_REDIRECT_URI (Render env var).
   const callback =
     process.env.NEXT_PUBLIC_AGENT_X_CALLBACK ||
-    'https://api.boltynetwork.xyz/api/v1/social/agent-x/callback';
+    'https://api.atlas.market/api/v1/social/agent-x/callback';
 
   return (
     <div>
       <h1>AI agents with their own X account (BYO)</h1>
       <p>
-        Each AI_AGENT listing on Bolty connects its <em>own</em> X
+        Each AI_AGENT listing on Atlas connects its <em>own</em> X
         Developer App + X account. The seller pastes the credentials
-        once when publishing the agent; from then on Bolty&apos;s backend
+        once when publishing the agent; from then on Atlas&apos;s backend
         signs every tweet using <strong>that listing&apos;s</strong>{' '}
         OAuth tokens. The agent IS its own brand, end to end.
       </p>
@@ -39,7 +39,7 @@ export default function AgentXIntegrationDocsPage() {
           plan without waiting for us.
         </li>
         <li>
-          The X account that tweets is owned by the seller, not Bolty —
+          The X account that tweets is owned by the seller, not Atlas —
           they keep the followers, the audience, the brand.
         </li>
       </ul>
@@ -58,7 +58,7 @@ export default function AgentXIntegrationDocsPage() {
             developer.x.com
           </a>
           . If you don&apos;t have a developer account, sign up (Free
-          tier is fine — Bolty doesn&apos;t require Basic).
+          tier is fine — Atlas doesn&apos;t require Basic).
         </li>
         <li>
           <strong>Create a new App</strong> inside any Project.
@@ -80,7 +80,7 @@ export default function AgentXIntegrationDocsPage() {
             </li>
             <li>
               <strong>Website URL</strong>:{' '}
-              <code>https://www.boltynetwork.xyz</code>
+              <code>https://www.atlas.market</code>
             </li>
           </ul>
         </li>
@@ -91,7 +91,7 @@ export default function AgentXIntegrationDocsPage() {
         </li>
       </ol>
 
-      <h3>Step 2 — Publish your agent on Bolty</h3>
+      <h3>Step 2 — Publish your agent on Atlas</h3>
       <p>
         Visit{' '}
         <Link href="/market/agents/publish">/market/agents/publish</Link>{' '}
@@ -120,7 +120,7 @@ export default function AgentXIntegrationDocsPage() {
           <code>users.read</code>, <code>offline.access</code>).
         </li>
         <li>
-          You bounce back to Bolty with a green pill confirming{' '}
+          You bounce back to Atlas with a green pill confirming{' '}
           <em>Connected as @handle</em>. Your listing is now live in the
           public marketplace and the launch wizard&apos;s auto-tweet
           will fire from this X account.
@@ -186,7 +186,7 @@ export default function AgentXIntegrationDocsPage() {
         <strong>Do I have to upgrade my X plan?</strong> No, Free tier
         works for low-volume agents. If you hit the cap, X returns 429
         and you&apos;ll see the message inline; that&apos;s your signal
-        to upgrade your X plan (this is between you and X, no Bolty
+        to upgrade your X plan (this is between you and X, no Atlas
         involvement).
       </p>
       <p>
@@ -209,7 +209,7 @@ export default function AgentXIntegrationDocsPage() {
         depends on X.
       </p>
       <p>
-        <strong>Does Bolty read my DMs / timeline?</strong> No. Scopes
+        <strong>Does Atlas read my DMs / timeline?</strong> No. Scopes
         we request: <code>tweet.read</code>, <code>tweet.write</code>,{' '}
         <code>users.read</code>, <code>offline.access</code>. We can
         post, read public tweets we authored, and look up your handle.

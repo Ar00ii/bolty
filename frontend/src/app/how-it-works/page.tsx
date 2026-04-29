@@ -87,7 +87,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(131,110,249,0.14), transparent 70%)',
+            'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(20,241,149,0.14), transparent 70%)',
         }}
       />
       <div className="mx-auto max-w-[1400px] relative">
@@ -102,7 +102,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
           <span style={{ color: '#b4a7ff' }}>AI agents, bots & code.</span>
         </h1>
         <p className="mt-4 max-w-2xl text-sm md:text-[15px] font-light text-zinc-400 leading-relaxed">
-          Publish a repo, deploy an agent, or list a script — Bolty handles escrow, reputation,
+          Publish a repo, deploy an agent, or list a script — Atlas handles escrow, reputation,
           delivery and payments on chain so you can focus on building.
         </p>
 
@@ -112,9 +112,9 @@ function Hero({ stats }: { stats: PulseStats | null }) {
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.9) 0%, rgba(20,241,149,0.7) 100%)',
               boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20,241,149,0.5)',
             }}
           >
             Browse marketplace
@@ -149,7 +149,7 @@ function Hero({ stats }: { stats: PulseStats | null }) {
           <HeroStat
             label="All-time sales"
             value={formatNumber(stats?.totalSales)}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <HeroStat
             label="24h volume"
@@ -195,7 +195,7 @@ function HeroStat({ label, value, accent }: { label: string; value: string; acce
 function Flow() {
   const nodes: { icon: LucideIcon; label: string; sub: string; accent: string }[] = [
     { icon: FileCode, label: 'List', sub: 'Repo · Bot · Agent · Script', accent: '#06B6D4' },
-    { icon: MessageSquare, label: 'Buy', sub: 'One-click direct purchase', accent: '#836EF9' },
+    { icon: MessageSquare, label: 'Buy', sub: 'One-click direct purchase', accent: '#14F195' },
     { icon: Lock, label: 'Escrow', sub: 'Funds locked on chain', accent: '#f59e0b' },
     { icon: CheckCircle2, label: 'Deliver', sub: 'Buyer confirms', accent: '#22c55e' },
     { icon: Coins, label: 'Release', sub: 'Seller paid automatically', accent: '#EC4899' },
@@ -284,8 +284,8 @@ function Features() {
     {
       icon: Bot,
       title: 'Autonomous agents',
-      body: 'Register an HTTPS endpoint, and buyers can invoke your agent live from the listing. Bolty handles sandboxing and rate limiting.',
-      accent: '#836EF9',
+      body: 'Register an HTTPS endpoint, and buyers can invoke your agent live from the listing. Atlas handles sandboxing and rate limiting.',
+      accent: '#14F195',
       href: '/docs/agent-protocol',
     },
     {
@@ -319,7 +319,7 @@ function Features() {
     {
       icon: Globe,
       title: 'API-first',
-      body: 'Everything in the dashboard is available over REST + WebSocket. Build bots, dashboards, or integrate Bolty into your stack.',
+      body: 'Everything in the dashboard is available over REST + WebSocket. Build bots, dashboards, or integrate Atlas into your stack.',
       accent: '#a855f7',
       href: '/docs/agent-api',
     },
@@ -460,7 +460,7 @@ function Changelog() {
         <SectionHeader
           kicker="Changelog"
           title="Shipped recently"
-          subtitle="Bolty moves fast. These are the last few drops — browse /docs for the full history."
+          subtitle="Atlas moves fast. These are the last few drops — browse /docs for the full history."
         />
 
         <ol className="mt-8 space-y-3">
@@ -502,7 +502,7 @@ function Changelog() {
 }
 
 function ChangelogTag({ tag }: { tag: ChangelogEntry['tag'] }) {
-  const color = tag === 'NEW' ? '#22c55e' : tag === 'FIX' ? '#f59e0b' : '#836EF9';
+  const color = tag === 'NEW' ? '#22c55e' : tag === 'FIX' ? '#f59e0b' : '#14F195';
   return (
     <span
       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-medium uppercase tracking-[0.14em]"
@@ -533,8 +533,8 @@ function CtaFooter() {
         className="mx-auto max-w-[1400px] rounded-2xl p-8 md:p-10 relative overflow-hidden"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.08), rgba(6,182,212,0.05) 50%, rgba(236,72,153,0.06))',
-          boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+            'linear-gradient(135deg, rgba(20,241,149,0.08), rgba(6,182,212,0.05) 50%, rgba(236,72,153,0.06))',
+          boxShadow: '0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
         <div className="relative flex items-center justify-between gap-6 flex-wrap">
@@ -567,9 +567,9 @@ function CtaFooter() {
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-normal text-white transition"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.9) 0%, rgba(20,241,149,0.7) 100%)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                  'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20,241,149,0.5)',
               }}
             >
               Publish listing

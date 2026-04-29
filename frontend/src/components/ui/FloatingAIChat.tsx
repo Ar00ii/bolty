@@ -33,7 +33,7 @@ export function FloatingAIChat() {
               background: 'rgba(18,18,21,0.85)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(131,110,249,0.2)',
+              border: '1px solid rgba(20,241,149,0.2)',
               boxShadow: '0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)',
               height: '440px',
             }}
@@ -42,19 +42,19 @@ export function FloatingAIChat() {
             <div
               className="flex items-center justify-between px-4 py-3 border-b"
               style={{
-                borderColor: 'rgba(131,110,249,0.15)',
-                background: 'rgba(131,110,249,0.06)',
+                borderColor: 'rgba(20,241,149,0.15)',
+                background: 'rgba(20,241,149,0.06)',
               }}
             >
               <div className="flex items-center gap-2.5">
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
                   style={{
-                    background: 'rgba(131,110,249,0.15)',
-                    border: '1px solid rgba(131,110,249,0.3)',
+                    background: 'rgba(20,241,149,0.15)',
+                    border: '1px solid rgba(20,241,149,0.3)',
                   }}
                 >
-                  <Bot className="w-3.5 h-3.5 text-bolty-400" strokeWidth={1.5} />
+                  <Bot className="w-3.5 h-3.5 text-atlas-400" strokeWidth={1.5} />
                 </div>
                 <div>
                   <span className="text-sm font-light text-white">AI Assistant</span>
@@ -114,13 +114,13 @@ export function FloatingAIChat() {
           open
             ? {
                 background: 'rgba(39,39,42,0.95)',
-                border: '1px solid rgba(131,110,249,0.3)',
+                border: '1px solid rgba(20,241,149,0.3)',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
               }
             : {
-                background: 'linear-gradient(135deg, #836EF9, #6b4fe0)',
-                border: '1px solid rgba(131,110,249,0.3)',
-                boxShadow: '0 4px 20px rgba(131,110,249,0.3)',
+                background: 'linear-gradient(135deg, #14F195, #6b4fe0)',
+                border: '1px solid rgba(20,241,149,0.3)',
+                boxShadow: '0 4px 20px rgba(20,241,149,0.3)',
               }
         }
         aria-label={open ? 'Close AI assistant' : 'Open AI assistant'}

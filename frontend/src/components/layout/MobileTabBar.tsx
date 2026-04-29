@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 
 /**
  * Bottom tab bar — only shown on mobile (lg:hidden). The hamburger drawer
- * stays for secondary nav (Leaderboard, $BOLTY, Settings) but the 5
+ * stays for secondary nav (Leaderboard, $ATLAS, Settings) but the 5
  * most-used destinations move to a persistent tab bar so the app feels
  * native on a phone.
  */

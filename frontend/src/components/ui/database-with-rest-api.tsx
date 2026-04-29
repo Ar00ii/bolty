@@ -132,7 +132,7 @@ const DatabaseWithRestApi = ({
             />
           </mask>
           <radialGradient id="db-blue-grad" fx="1">
-            <stop offset="0%" stopColor={lightColor || '#836EF9'} />
+            <stop offset="0%" stopColor={lightColor || '#14F195'} />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
@@ -141,40 +141,40 @@ const DatabaseWithRestApi = ({
       <div className="absolute bottom-10 flex w-full flex-col items-center">
         <div className="absolute -bottom-4 h-[100px] w-[62%] rounded-lg bg-accent/30" />
         <div className="absolute -top-3 z-20 flex items-center justify-center rounded-lg border border-white/10 bg-[#101112] px-2 py-1 sm:-top-4 sm:py-1.5">
-          <SparklesIcon className="size-3 text-bolty-400" />
+          <SparklesIcon className="size-3 text-atlas-400" />
           <span className="ml-2 text-[10px] text-zinc-300">
-            {title ? title : 'Bolty Platform API'}
+            {title ? title : 'Atlas Platform API'}
           </span>
         </div>
-        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-light text-xs text-bolty-400">
+        <div className="absolute -bottom-8 z-30 grid h-[60px] w-[60px] place-items-center rounded-full border-t border-white/10 bg-[#141516] font-light text-xs text-atlas-400">
           {circleText ? circleText : 'ETH'}
         </div>
         <div className="relative z-10 flex h-[150px] w-full items-center justify-center overflow-hidden rounded-lg border border-white/08 bg-black/80 shadow-md">
           <div className="absolute bottom-8 left-12 z-10 h-7 rounded-full bg-[#101112] px-3 text-xs border border-white/10 flex items-center gap-2">
-            <HeartHandshakeIcon className="size-4 text-bolty-400" />
+            <HeartHandshakeIcon className="size-4 text-atlas-400" />
             <span className="text-zinc-300">{buttonTexts?.first || 'bolty.dev'}</span>
           </div>
           <div className="absolute right-16 z-10 hidden h-7 rounded-full bg-[#101112] px-3 text-xs sm:flex border border-white/10 items-center gap-2">
-            <Folder className="size-4 text-bolty-400" />
+            <Folder className="size-4 text-atlas-400" />
             <span className="text-zinc-300">{buttonTexts?.second || 'beta_v1'}</span>
           </div>
           <motion.div
-            className="absolute -bottom-14 h-[100px] w-[100px] rounded-full border-t border-bolty-500/20 bg-bolty-500/5"
+            className="absolute -bottom-14 h-[100px] w-[100px] rounded-full border-t border-atlas-500/20 bg-atlas-500/5"
             animate={{ scale: [0.98, 1.02, 0.98, 1, 1, 1, 1, 1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
           <motion.div
-            className="absolute -bottom-20 h-[145px] w-[145px] rounded-full border-t border-bolty-500/15 bg-bolty-500/3"
+            className="absolute -bottom-20 h-[145px] w-[145px] rounded-full border-t border-atlas-500/15 bg-atlas-500/3"
             animate={{ scale: [1, 1, 1, 0.98, 1.02, 0.98, 1, 1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
           <motion.div
-            className="absolute -bottom-[100px] h-[190px] w-[190px] rounded-full border-t border-bolty-500/10"
+            className="absolute -bottom-[100px] h-[190px] w-[190px] rounded-full border-t border-atlas-500/10"
             animate={{ scale: [1, 1, 1, 1, 1, 0.98, 1.02, 0.98, 1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />
           <motion.div
-            className="absolute -bottom-[120px] h-[235px] w-[235px] rounded-full border-t border-bolty-500/8"
+            className="absolute -bottom-[120px] h-[235px] w-[235px] rounded-full border-t border-atlas-500/8"
             animate={{ scale: [1, 1, 1, 1, 1, 1, 0.98, 1.02, 0.98, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           />

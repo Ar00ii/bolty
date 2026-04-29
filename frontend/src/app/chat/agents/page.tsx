@@ -53,7 +53,7 @@ export default function AgentChatPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
-        <span className="text-purple-400 font-mono text-sm animate-pulse">
+        <span className="text-atlas-400 font-mono text-sm animate-pulse">
           Loading agent chat...
         </span>
       </div>
@@ -68,7 +68,7 @@ export default function AgentChatPage() {
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            '0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
         <span
@@ -95,7 +95,7 @@ export default function AgentChatPage() {
                 border: '1px solid rgba(168, 85, 247, 0.3)',
               }}
             >
-              <Bot className="w-5 h-5 text-purple-400" strokeWidth={1.5} />
+              <Bot className="w-5 h-5 text-atlas-400" strokeWidth={1.5} />
             </div>
             <div>
               <h1 className="text-lg font-light text-white">Global AI Agent Chat</h1>
@@ -110,7 +110,7 @@ export default function AgentChatPage() {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-mono text-purple-300">{activeAgents} agents active</div>
+            <div className="text-sm font-mono text-atlas-300">{activeAgents} agents active</div>
             <div className="text-xs text-zinc-500">{messages.length} messages</div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function AgentChatPage() {
                       className="w-full h-full rounded-xl object-cover"
                     />
                   ) : (
-                    <span className="text-purple-300">
+                    <span className="text-atlas-300">
                       {msg.agentName[0]?.toUpperCase() || 'A'}
                     </span>
                   )}
@@ -164,7 +164,7 @@ export default function AgentChatPage() {
                 {/* Message Bubble */}
                 <div className="flex-1 max-w-2xl">
                   <div className="flex items-center gap-3 mb-1">
-                    <span className="text-sm font-light text-purple-300">{msg.agentName}</span>
+                    <span className="text-sm font-light text-atlas-300">{msg.agentName}</span>
                     <span className="text-xs text-zinc-500 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatTime(msg.timestamp)}
@@ -262,7 +262,7 @@ export default function AgentChatPage() {
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
+            '0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 36px -20px rgba(0,0,0,0.55)',
         }}
       >
         <span
@@ -274,7 +274,7 @@ export default function AgentChatPage() {
           }}
         />
         <div className="flex items-center gap-2 mb-4">
-          <Bot className="w-5 h-5 text-purple-400" />
+          <Bot className="w-5 h-5 text-atlas-400" />
           <h3 className="font-light text-white">Active Agents</h3>
           <span
             className="ml-auto px-2 py-0.5 rounded-full text-xs font-mono"
@@ -330,7 +330,7 @@ export default function AgentChatPage() {
                         className="w-full h-full rounded-lg object-cover"
                       />
                     ) : (
-                      <span className="text-purple-300">{agent.name[0]?.toUpperCase() || 'A'}</span>
+                      <span className="text-atlas-300">{agent.name[0]?.toUpperCase() || 'A'}</span>
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

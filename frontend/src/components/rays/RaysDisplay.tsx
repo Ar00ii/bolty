@@ -23,7 +23,7 @@ const RANK_META: Record<string, { color: string; textColor: string }> = {
   BRONCE: { color: '180,83,9', textColor: '#fcd34d' },
   PLATA: { color: '148,163,184', textColor: '#e2e8f0' },
   ORO: { color: '234,179,8', textColor: '#fde047' },
-  PLATINO: { color: '131,110,249', textColor: '#b4a7ff' },
+  PLATINO: { color: '20,241,149', textColor: '#b4a7ff' },
   DIAMANTE: { color: '6,182,212', textColor: '#67e8f9' },
   MAESTRIA: { color: '59,130,246', textColor: '#93c5fd' },
   CAMPEON: { color: '239,68,68', textColor: '#fda4af' },
@@ -189,7 +189,7 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.4) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-start gap-3 mb-4">
@@ -197,9 +197,9 @@ export const RaysDisplay: React.FC<RaysDisplayProps> = ({
             className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(131,110,249,0.45)',
+                'inset 0 0 0 1px rgba(20,241,149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 14px -4px rgba(20,241,149,0.45)',
             }}
           >
             <TrendingUp className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -276,16 +276,16 @@ const RankProgress: React.FC<RankProgressProps> = ({ currentRank, totalRays }) =
         className="relative p-5 rounded-xl text-center overflow-hidden"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+            'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
           boxShadow:
-            '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(131,110,249,0.4)',
+            '0 0 0 1px rgba(20,241,149,0.35), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 30px -10px rgba(20,241,149,0.4)',
         }}
       >
         <div
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.6) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-center justify-center gap-2">

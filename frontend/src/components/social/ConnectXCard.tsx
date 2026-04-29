@@ -109,7 +109,7 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
   );
 
   const handleDisconnect = useCallback(async () => {
-    if (!window.confirm('Disconnect your X account from Bolty?')) return;
+    if (!window.confirm('Disconnect your X account from Atlas?')) return;
     setBusy(true);
     setError(null);
     try {
@@ -171,9 +171,9 @@ export function ConnectXCard({ returnTo }: { returnTo?: string } = {}) {
             disabled={busy}
             className="text-[12px] font-medium px-3 py-1.5 rounded-md transition disabled:opacity-50"
             style={{
-              background: 'rgba(131,110,249,0.15)',
+              background: 'rgba(20,241,149,0.15)',
               color: '#e4d8ff',
-              border: '1px solid rgba(131,110,249,0.3)',
+              border: '1px solid rgba(20,241,149,0.3)',
             }}
           >
             {busy ? 'Redirecting…' : 'Connect X'}

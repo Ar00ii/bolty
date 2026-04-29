@@ -168,7 +168,7 @@ function ToastCard({
           ? '#f59e0b'
           : kind === 'message'
             ? '#06B6D4'
-            : '#836ef9';
+            : '#14f195';
   const Icon =
     kind === 'agreed' ? CheckCircle2 : kind === 'rejected' ? XCircle : MessageSquare;
   const label =

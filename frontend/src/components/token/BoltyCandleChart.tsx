@@ -40,7 +40,7 @@ export function BoltyCandleChart() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const seriesRef = useRef<ISeriesApi<'Candlestick'> | null>(null);
-  // Default to 1h candles — for a low-volume token like $BOLTY, the
+  // Default to 1h candles — for a low-volume token like $ATLAS, the
   // 1m view often looks like a flat line with one or two random ticks.
   // 1h aggregates enough trades for the chart to actually have shape
   // on first paint. The label-based lookup keeps this resilient if the
@@ -77,8 +77,8 @@ export function BoltyCandleChart() {
       },
       crosshair: {
         mode: CrosshairMode.Magnet,
-        vertLine: { color: 'rgba(131,110,249,0.35)', width: 1, style: 0 },
-        horzLine: { color: 'rgba(131,110,249,0.35)', width: 1, style: 0 },
+        vertLine: { color: 'rgba(20,241,149,0.35)', width: 1, style: 0 },
+        horzLine: { color: 'rgba(20,241,149,0.35)', width: 1, style: 0 },
       },
       autoSize: true,
     });

@@ -192,8 +192,8 @@ function CopyInstallButton({ name }: { name: string }) {
       title={`Copy: ${cmd}`}
       className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-mono transition-all"
       style={{
-        background: 'rgba(131,110,249,0.07)',
-        border: '1px solid rgba(131,110,249,0.15)',
+        background: 'rgba(20,241,149,0.07)',
+        border: '1px solid rgba(20,241,149,0.15)',
         color: copied ? '#a78bfa' : '#6b7280',
       }}
     >
@@ -221,7 +221,7 @@ function RepoCard({
   const isOwner = !!userId && repo.user.id === userId;
   return (
     <div
-      className="flex flex-col rounded-xl border transition-all duration-200 overflow-hidden hover:border-bolty-500/30 hover:shadow-[0_0_20px_rgba(131,110,249,0.08)]"
+      className="flex flex-col rounded-xl border transition-all duration-200 overflow-hidden hover:border-atlas-500/30 hover:shadow-[0_0_20px_rgba(20,241,149,0.08)]"
       style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.07)' }}
     >
       <Link
@@ -247,20 +247,20 @@ function RepoCard({
           ) : (
             <div
               className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center shrink-0"
-              style={{ background: 'rgba(131,110,249,0.1)' }}
+              style={{ background: 'rgba(20,241,149,0.1)' }}
             >
-              <GitBranch className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />
+              <GitBranch className="w-4 h-4 text-atlas-400" strokeWidth={1.5} />
             </div>
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-0.5">
-              <h3 className="text-sm font-light text-bolty-300 hover:text-bolty-200 truncate">
+              <h3 className="text-sm font-light text-atlas-300 hover:text-atlas-200 truncate">
                 {repo.name}
               </h3>
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[11px] border ${
                   repo.isLocked
-                    ? 'bg-bolty-500/10 border-bolty-500/30 text-bolty-400'
+                    ? 'bg-atlas-500/10 border-atlas-500/30 text-atlas-400'
                     : 'bg-transparent border-white/10 text-zinc-500'
                 }`}
               >
@@ -270,7 +270,7 @@ function RepoCard({
             <div className="flex items-center gap-1">
               <p className="text-xs text-zinc-500">@{repo.user.username || 'anon'}</p>
               <span title="Verified developer">
-                <CheckCircle2 className="w-3 h-3 text-bolty-400" />
+                <CheckCircle2 className="w-3 h-3 text-atlas-400" />
               </span>
             </div>
           </div>
@@ -289,7 +289,7 @@ function RepoCard({
             {repo.topics.slice(0, 4).map((t) => (
               <span
                 key={t}
-                className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-bolty-500/10 text-bolty-400 border border-bolty-500/20"
+                className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-atlas-500/10 text-atlas-400 border border-atlas-500/20"
               >
                 #{t}
               </span>
@@ -323,7 +323,7 @@ function RepoCard({
         <div className="flex items-center gap-1">
           <button
             onClick={() => isAuthenticated && onVote(repo.id, 'UP')}
-            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-zinc-500 hover:text-bolty-400 hover:bg-bolty-400/8 transition-all disabled:opacity-50"
+            className="flex items-center gap-1 px-2 py-1 rounded-full text-xs text-zinc-500 hover:text-atlas-400 hover:bg-atlas-400/8 transition-all disabled:opacity-50"
             disabled={!isAuthenticated}
             title="Upvote"
           >
@@ -345,10 +345,10 @@ function RepoCard({
           {repo.isLocked && repo.lockedPriceUsd && !isOwner ? (
             <button
               onClick={() => onUnlock(repo)}
-              className="px-3 py-1.5 rounded-full text-xs font-light text-white transition-all hover:shadow-[0_0_12px_rgba(131,110,249,0.4)]"
+              className="px-3 py-1.5 rounded-full text-xs font-light text-white transition-all hover:shadow-[0_0_12px_rgba(20,241,149,0.4)]"
               style={{
                 background: 'linear-gradient(135deg,#7c3aed,#6d28d9)',
-                border: '1px solid rgba(131,110,249,0.4)',
+                border: '1px solid rgba(20,241,149,0.4)',
               }}
             >
               Unlock — ${repo.lockedPriceUsd}
@@ -356,11 +356,11 @@ function RepoCard({
           ) : (
             <button
               onClick={() => onDownload(repo.id, repo.githubUrl)}
-              className="px-3 py-1.5 rounded-full text-xs font-light transition-all hover:border-bolty-500/40"
+              className="px-3 py-1.5 rounded-full text-xs font-light transition-all hover:border-atlas-500/40"
               style={{
-                background: 'rgba(131,110,249,0.08)',
-                border: '1px solid rgba(131,110,249,0.2)',
-                color: '#c4b5fd',
+                background: 'rgba(20,241,149,0.08)',
+                border: '1px solid rgba(20,241,149,0.2)',
+                color: '#a7f3d0',
               }}
             >
               Download
@@ -397,7 +397,7 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
     <div
       className="rounded-xl border transition-colors"
       style={{
-        borderColor: showCollabs ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.07)',
+        borderColor: showCollabs ? 'rgba(20,241,149,0.2)' : 'rgba(255,255,255,0.07)',
         background: '#0a0a12',
       }}
     >
@@ -432,8 +432,8 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
               <Badge
                 className="rounded-full px-2 py-0 text-xs font-mono"
                 style={{
-                  background: 'rgba(131,110,249,0.12)',
-                  border: '1px solid rgba(131,110,249,0.25)',
+                  background: 'rgba(20,241,149,0.12)',
+                  border: '1px solid rgba(20,241,149,0.25)',
                   color: '#a78bfa',
                 }}
               >
@@ -457,7 +457,7 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
                 {repo.downloadCount}
               </span>
               <span className="flex items-center gap-1">
-                <ArrowUp className="w-2.5 h-2.5 text-bolty-400" />
+                <ArrowUp className="w-2.5 h-2.5 text-atlas-400" />
                 {repo.upvotes}
               </span>
               {(repo.collaborators?.length ?? 0) > 0 && (
@@ -483,9 +483,9 @@ function MyRepoCard({ repo, onDelete }: { repo: Repository; onDelete: (id: strin
             onClick={() => setShowCollabs((p) => !p)}
             className="flex items-center gap-1 text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all"
             style={{
-              background: showCollabs ? 'rgba(131,110,249,0.15)' : 'transparent',
-              border: `1px solid ${showCollabs ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.08)'}`,
-              color: showCollabs ? '#c4b5fd' : '#71717a',
+              background: showCollabs ? 'rgba(20,241,149,0.15)' : 'transparent',
+              border: `1px solid ${showCollabs ? 'rgba(20,241,149,0.3)' : 'rgba(255,255,255,0.08)'}`,
+              color: showCollabs ? '#a7f3d0' : '#71717a',
             }}
           >
             <Users className="w-3 h-3" /> collabs
@@ -611,14 +611,14 @@ function CollaboratorsPanel({
   return (
     <div
       className="mx-3 mb-3 rounded-xl border"
-      style={{ borderColor: 'rgba(131,110,249,0.12)', background: 'rgba(131,110,249,0.02)' }}
+      style={{ borderColor: 'rgba(20,241,149,0.12)', background: 'rgba(20,241,149,0.02)' }}
     >
       <div
         className="flex items-center gap-2 px-3 py-2 border-b"
-        style={{ borderColor: 'rgba(131,110,249,0.08)' }}
+        style={{ borderColor: 'rgba(20,241,149,0.08)' }}
       >
-        <Users className="w-3 h-3 text-bolty-400" />
-        <span className="text-bolty-400 font-mono text-xs font-light">Collaborators</span>
+        <Users className="w-3 h-3 text-atlas-400" />
+        <span className="text-atlas-400 font-mono text-xs font-light">Collaborators</span>
       </div>
       <div className="px-3 py-2 space-y-2">
         {collabs.length === 0 && (
@@ -666,7 +666,7 @@ function CollaboratorsPanel({
                 <button
                   key={t}
                   onClick={() => setType(t)}
-                  className={`text-xs font-mono px-2 py-1 rounded-lg transition-all ${type === t ? 'bg-bolty-500/20 border-bolty-500/30 text-bolty-300' : 'border-white/08 text-zinc-600 hover:text-zinc-400'} border`}
+                  className={`text-xs font-mono px-2 py-1 rounded-lg transition-all ${type === t ? 'bg-atlas-500/20 border-atlas-500/30 text-atlas-300' : 'border-white/08 text-zinc-600 hover:text-zinc-400'} border`}
                 >
                   {t.toLowerCase().replace('_', ' ')}
                 </button>
@@ -694,7 +694,7 @@ function CollaboratorsPanel({
                 {userResults.length > 0 && (
                   <div
                     className="absolute top-full mt-1 left-0 right-0 rounded-lg border z-10 overflow-hidden"
-                    style={{ background: '#0f0f18', borderColor: 'rgba(131,110,249,0.2)' }}
+                    style={{ background: '#0f0f18', borderColor: 'rgba(20,241,149,0.2)' }}
                   >
                     {userResults.map((u) => (
                       <button
@@ -705,7 +705,7 @@ function CollaboratorsPanel({
                           setUserSearch(u.username);
                           setUserResults([]);
                         }}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-bolty-500/10 transition-colors text-left"
+                        className="w-full flex items-center gap-2 px-2 py-1.5 hover:bg-atlas-500/10 transition-colors text-left"
                       >
                         {u.avatarUrl && (
                           <img
@@ -772,9 +772,9 @@ function CollaboratorsPanel({
                 disabled={adding}
                 className="text-xs font-mono px-3 py-1.5 rounded-lg disabled:opacity-40 transition-all"
                 style={{
-                  background: 'rgba(131,110,249,0.15)',
-                  border: '1px solid rgba(131,110,249,0.3)',
-                  color: '#c4b5fd',
+                  background: 'rgba(20,241,149,0.15)',
+                  border: '1px solid rgba(20,241,149,0.3)',
+                  color: '#a7f3d0',
                 }}
               >
                 {adding ? '...' : 'add'}
@@ -794,7 +794,7 @@ function CollaboratorsPanel({
         ) : (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 text-xs font-mono text-zinc-600 hover:text-bolty-400 transition-colors py-0.5"
+            className="flex items-center gap-1 text-xs font-mono text-zinc-600 hover:text-atlas-400 transition-colors py-0.5"
           >
             <Plus className="w-3 h-3" /> add collaborator
           </button>
@@ -899,7 +899,7 @@ function PublishRepoModal({
         style={{
           maxHeight: '90vh',
           background: '#0e0e18',
-          border: '1px solid rgba(131,110,249,0.2)',
+          border: '1px solid rgba(20,241,149,0.2)',
         }}
       >
         <div
@@ -959,20 +959,20 @@ function PublishRepoModal({
               <button
                 key={val}
                 onClick={() => setLockType(val)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${lockType === val ? 'border-bolty-500/40' : 'border-white/06 hover:border-white/12'}`}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${lockType === val ? 'border-atlas-500/40' : 'border-white/06 hover:border-white/12'}`}
                 style={{
                   background:
-                    lockType === val ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
+                    lockType === val ? 'rgba(20,241,149,0.08)' : 'rgba(255,255,255,0.02)',
                 }}
               >
                 <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${lockType === val ? 'bg-bolty-500/20 text-bolty-400' : 'bg-white/04 text-zinc-600'}`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${lockType === val ? 'bg-atlas-500/20 text-atlas-400' : 'bg-white/04 text-zinc-600'}`}
                 >
                   {icon}
                 </div>
                 <div>
                   <p
-                    className={`text-sm font-light ${lockType === val ? 'text-bolty-300' : 'text-zinc-400'}`}
+                    className={`text-sm font-light ${lockType === val ? 'text-atlas-300' : 'text-zinc-400'}`}
                   >
                     {label}
                   </p>
@@ -1065,11 +1065,11 @@ function PublishRepoModal({
               />
               <button
                 onClick={() => logoInputRef.current?.click()}
-                className="w-full rounded-xl border-2 border-dashed py-4 text-center transition-colors hover:border-bolty-500/30"
+                className="w-full rounded-xl border-2 border-dashed py-4 text-center transition-colors hover:border-atlas-500/30"
                 style={{ borderColor: logoUrl ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.08)' }}
               >
                 {logoUploading ? (
-                  <p className="text-xs font-mono text-bolty-400 animate-pulse">uploading...</p>
+                  <p className="text-xs font-mono text-atlas-400 animate-pulse">uploading...</p>
                 ) : logoUrl ? (
                   <div className="flex items-center justify-center gap-3">
                     <img
@@ -1081,7 +1081,7 @@ function PublishRepoModal({
                       alt="logo"
                       className="w-8 h-8 rounded-lg object-cover"
                     />
-                    <p className="text-xs font-mono text-bolty-400">logo uploaded ✓</p>
+                    <p className="text-xs font-mono text-atlas-400">logo uploaded ✓</p>
                   </div>
                 ) : (
                   <p className="text-xs font-mono text-zinc-600 flex items-center justify-center gap-1.5">
@@ -1122,14 +1122,14 @@ function PublishRepoModal({
             <div
               className="rounded-xl p-3 text-xs font-mono flex items-center gap-2"
               style={{
-                background: 'rgba(131,110,249,0.05)',
-                border: '1px solid rgba(131,110,249,0.15)',
+                background: 'rgba(20,241,149,0.05)',
+                border: '1px solid rgba(20,241,149,0.15)',
               }}
             >
-              <Wallet className="w-3.5 h-3.5 text-bolty-400/60 shrink-0" strokeWidth={1.5} />
+              <Wallet className="w-3.5 h-3.5 text-atlas-400/60 shrink-0" strokeWidth={1.5} />
               <span className="text-zinc-500">
                 No wallet linked —{' '}
-                <Link href="/profile?tab=wallet" className="text-bolty-400 hover:text-bolty-300">
+                <Link href="/profile?tab=wallet" className="text-atlas-400 hover:text-atlas-300">
                   link wallet
                 </Link>{' '}
                 to receive payments
@@ -1142,8 +1142,8 @@ function PublishRepoModal({
             disabled={publishing}
             className="w-full py-2.5 rounded-xl font-mono font-light text-sm disabled:opacity-40 transition-all"
             style={{
-              background: 'linear-gradient(135deg, rgba(131,110,249,0.4), rgba(99,102,241,0.3))',
-              border: '1px solid rgba(131,110,249,0.4)',
+              background: 'linear-gradient(135deg, rgba(20,241,149,0.4), rgba(99,102,241,0.3))',
+              border: '1px solid rgba(20,241,149,0.4)',
               color: '#e2d9ff',
             }}
           >
@@ -1243,7 +1243,7 @@ function ReposMarketPageContent() {
   const [ghLoading, setGhLoading] = useState(false);
 
   // Payment — wei amounts are computed at sign time so we can apply the
-  // chosen method's fee model (BOLTY 3% / ETH 7%) to the seller's base.
+  // chosen method's fee model (ATLAS 3% / ETH 7%) to the seller's base.
   const [consentModal, setConsentModal] = useState<{
     repo: Repository;
     sellerWallet: string;
@@ -1411,9 +1411,9 @@ function ReposMarketPageContent() {
     }
     const platformWallet = process.env.NEXT_PUBLIC_PLATFORM_WALLET;
 
-    const boltyCfg = method === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (method === 'BOLTY' && !boltyCfg) {
-      setError('BOLTY payments are not enabled — please retry with ETH');
+    const boltyCfg = method === 'ATLAS' ? await loadBoltyTokenConfig() : null;
+    if (method === 'ATLAS' && !boltyCfg) {
+      setError('ATLAS payments are not enabled — please retry with ETH');
       return;
     }
 
@@ -1505,7 +1505,7 @@ function ReposMarketPageContent() {
   const ghActions: Action[] = ghRepos.map((r) => ({
     id: String(r.id),
     label: r.name,
-    icon: <GitBranch className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />,
+    icon: <GitBranch className="w-4 h-4 text-atlas-400" strokeWidth={1.5} />,
     description: r.language || '',
     short: r.private ? 'private' : 'public',
     end: 'publish',
@@ -1778,7 +1778,7 @@ function ReposMarketPageContent() {
                     </button>
                   </div>
                   {ghNeedsConnect && (
-                    <div className="p-4 rounded-xl border border-bolty-500/20 bg-bolty-500/5 text-center mb-3">
+                    <div className="p-4 rounded-xl border border-atlas-500/20 bg-atlas-500/5 text-center mb-3">
                       <p className="text-sm text-zinc-400 mb-3">Connect GitHub to publish repos</p>
                       {process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ? (
                         <a

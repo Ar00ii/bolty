@@ -93,7 +93,7 @@ interface ConsentState {
   buyerAddress: string;
   /** USD the seller takes home (= listing price). Wei is computed at sign time. */
   baseUsd: number;
-  /** Whether the BOLTY option should be hidden in the modal. */
+  /** Whether the ATLAS option should be hidden in the modal. */
   boltyDisabled: boolean;
 }
 
@@ -254,11 +254,11 @@ export default function RepoDetailPage() {
 
     // Compute on-chain amounts now that the method is known. The seller
     // always receives `baseUsd` worth of the chosen currency; the platform
-    // fee is added on top so BOLTY (3%) is strictly cheaper for the buyer
+    // fee is added on top so ATLAS (3%) is strictly cheaper for the buyer
     // than ETH (7%).
-    const boltyCfg = method === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (method === 'BOLTY' && !boltyCfg) {
-      setError('BOLTY payments are not enabled — please retry with ETH');
+    const boltyCfg = method === 'ATLAS' ? await loadBoltyTokenConfig() : null;
+    if (method === 'ATLAS' && !boltyCfg) {
+      setError('ATLAS payments are not enabled — please retry with ETH');
       return;
     }
 
@@ -284,7 +284,7 @@ export default function RepoDetailPage() {
     }
 
     try {
-      // Build the seller-payment tx. ETH → plain value transfer. BOLTY →
+      // Build the seller-payment tx. ETH → plain value transfer. ATLAS →
       // eth_sendTransaction to the token contract with encoded
       // transfer(seller, amount) calldata, value 0.
       let txHash: string;
@@ -433,7 +433,7 @@ export default function RepoDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#000' }}>
-        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-atlas-500 animate-spin" />
       </div>
     );
   }
@@ -448,7 +448,7 @@ export default function RepoDetailPage() {
         <p className="text-zinc-400">Repository not found</p>
         <Link
           href="/market/repos"
-          className="inline-flex items-center gap-1.5 text-sm text-purple-300 hover:text-purple-200"
+          className="inline-flex items-center gap-1.5 text-sm text-atlas-300 hover:text-atlas-200"
         >
           <ArrowLeft className="w-4 h-4" /> Back to repositories
         </Link>
@@ -509,7 +509,7 @@ export default function RepoDetailPage() {
                 {repo.isLocked ? (
                   <>
                     <span className="text-zinc-700">·</span>
-                    <span className="inline-flex items-center gap-1.5 text-[#c4b5fd]">
+                    <span className="inline-flex items-center gap-1.5 text-[#a7f3d0]">
                       <Lock className="w-3 h-3" /> Paid
                     </span>
                   </>
@@ -653,8 +653,8 @@ export default function RepoDetailPage() {
                           className="w-9 h-9 rounded-full flex items-center justify-center text-sm text-zinc-200"
                           style={{
                             background:
-                              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
-                            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.32)',
+                              'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
+                            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.32)',
                           }}
                         >
                           {c.name.charAt(0).toUpperCase()}
@@ -671,7 +671,7 @@ export default function RepoDetailPage() {
                           href={c.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-zinc-500 hover:text-purple-300 transition-colors"
+                          className="text-zinc-500 hover:text-atlas-300 transition-colors"
                           aria-label="Open collaborator link"
                         >
                           <ArrowUpRight className="w-4 h-4" />
@@ -771,8 +771,8 @@ export default function RepoDetailPage() {
                 className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                    'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)',
                 }}
               >
                 {recoverBusy ? 'Verifying…' : 'Verify'}
@@ -804,8 +804,8 @@ function Section({
           className="w-6 h-6 rounded-md flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.28)',
+              'linear-gradient(135deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.28)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -854,7 +854,7 @@ function ActionsCard({
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
         }}
       />
       <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
@@ -878,13 +878,13 @@ function ActionsCard({
             className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
             }}
           >
             <Lock className="w-4 h-4" />
-            Unlock — choose ETH or BOLTY
+            Unlock — choose ETH or ATLAS
           </button>
           <button
             onClick={onRecover}
@@ -899,9 +899,9 @@ function ActionsCard({
           className="w-full mt-4 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-white text-[13px] font-light tracking-[0.005em] transition-all hover:brightness-110"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+              'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
           }}
         >
           <Download className="w-4 h-4" />
@@ -913,8 +913,8 @@ function ActionsCard({
         onClick={onCopy}
         className="w-full mt-2 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[11.5px] font-mono transition-all"
         style={{
-          background: 'rgba(131,110,249,0.07)',
-          border: '1px solid rgba(131,110,249,0.15)',
+          background: 'rgba(20,241,149,0.07)',
+          border: '1px solid rgba(20,241,149,0.15)',
           color: copied ? '#a78bfa' : '#8b8b95',
         }}
       >
@@ -926,7 +926,7 @@ function ActionsCard({
         <button
           onClick={() => onVote('UP')}
           disabled={!isAuthenticated}
-          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-bolty-400 hover:bg-bolty-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs text-zinc-400 hover:text-atlas-400 hover:bg-atlas-400/8 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           title={isAuthenticated ? 'Upvote' : 'Sign in to vote'}
         >
           <ArrowUp className="w-3.5 h-3.5" />
@@ -946,7 +946,7 @@ function ActionsCard({
       {locked && (
         <p className="text-[11px] text-zinc-600 mt-2.5 text-center leading-relaxed">
           <Shield className="inline w-3 h-3 mr-1 -mt-0.5" />
-          Base network · Platform fee: 7% (ETH) or 3% (BOLTY).
+          Base network · Platform fee: 7% (ETH) or 3% (ATLAS).
         </p>
       )}
     </div>
@@ -980,7 +980,7 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
             className="w-10 h-10 rounded-full object-cover"
             style={{
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20,241,149,0.32), 0 0 16px -4px rgba(20,241,149,0.4)',
             }}
           />
         ) : (
@@ -988,9 +988,9 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
             className="w-10 h-10 rounded-full flex items-center justify-center text-sm text-zinc-200"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.32), 0 0 16px -4px rgba(131,110,249,0.4)',
+                'inset 0 0 0 1px rgba(20,241,149,0.32), 0 0 16px -4px rgba(20,241,149,0.4)',
             }}
           >
             {(user.username || 'A').charAt(0).toUpperCase()}
@@ -1001,7 +1001,7 @@ function SellerCard({ user }: { user: RepositoryDetail['user'] }) {
           <div className="flex items-center gap-3 mt-0.5">
             <Link
               href={`/u/${user.username || user.id}`}
-              className="text-xs text-purple-300 hover:text-purple-200 inline-flex items-center gap-1"
+              className="text-xs text-atlas-300 hover:text-atlas-200 inline-flex items-center gap-1"
             >
               Profile <ArrowUpRight className="w-3 h-3" />
             </Link>
@@ -1091,7 +1091,7 @@ function LinksCard({ repo }: { repo: RepositoryDetail }) {
               href={repo.websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-atlas-300 transition-colors"
             >
               <Globe className="w-3.5 h-3.5 text-zinc-500" />
               <span className="truncate">{repo.websiteUrl.replace(/^https?:\/\//, '')}</span>
@@ -1105,7 +1105,7 @@ function LinksCard({ repo }: { repo: RepositoryDetail }) {
               href={repo.twitterUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-purple-300 transition-colors"
+              className="flex items-center gap-2 text-xs text-zinc-300 hover:text-atlas-300 transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
               <span className="truncate">{repo.twitterUrl.replace(/^https?:\/\//, '')}</span>

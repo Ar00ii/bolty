@@ -55,7 +55,7 @@ export default function DocsIndexPage() {
       <p>
         The launchpad and BoltyGuard are live on production. The
         marketplace, chat, and direct messages are stable. Token launches
-        go through the Flaunch protocol with a 1% swap fee — Bolty takes
+        go through the Flaunch protocol with a 1% swap fee — Atlas takes
         0% of that, the whole cut streams to creator + community treasury.
       </p>
     </div>

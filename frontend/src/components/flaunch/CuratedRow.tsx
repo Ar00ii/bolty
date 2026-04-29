@@ -150,8 +150,8 @@ function MiniCard({
         <div
           className="w-9 h-9 rounded-lg overflow-hidden shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+            background: 'rgba(20,241,149,0.08)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
           }}
         >
           {token.imageUrl ? (

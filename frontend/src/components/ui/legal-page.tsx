@@ -28,7 +28,7 @@ export function LegalPage({
         className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
         style={{
           background:
-            'radial-gradient(ellipse 80% 55% at 50% 0%, rgba(131,110,249,0.14), transparent 70%)',
+            'radial-gradient(ellipse 80% 55% at 50% 0%, rgba(20,241,149,0.14), transparent 70%)',
         }}
       />
       <div className="relative max-w-[1100px] mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-12 sm:pb-16">
@@ -38,16 +38,16 @@ export function LegalPage({
               className="w-10 h-10 rounded-xl flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.38), 0 0 22px -4px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.38), 0 0 22px -4px rgba(20,241,149,0.5)',
               }}
             >
               <Icon className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.75} />
             </div>
             <div>
               <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500">
-                Bolty
+                Atlas
               </p>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-tight text-white leading-none">
                 {title}
@@ -67,7 +67,7 @@ export function LegalPage({
                 <a
                   key={s.id}
                   href={`#${s.id}`}
-                  className="block text-xs text-zinc-400 hover:text-white py-1.5 border-l border-white/[0.06] hover:border-purple-400/40 pl-3 transition-colors"
+                  className="block text-xs text-zinc-400 hover:text-white py-1.5 border-l border-white/[0.06] hover:border-atlas-400/40 pl-3 transition-colors"
                 >
                   {s.title}
                 </a>
@@ -81,7 +81,7 @@ export function LegalPage({
                 <h2 className="text-lg sm:text-xl font-light text-white mb-3 tracking-tight">
                   {s.title}
                 </h2>
-                <div className="text-sm text-zinc-400 leading-relaxed font-light space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_a]:text-purple-300 [&_a:hover]:text-purple-200">
+                <div className="text-sm text-zinc-400 leading-relaxed font-light space-y-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1.5 [&_a]:text-atlas-300 [&_a:hover]:text-atlas-200">
                   {s.body}
                 </div>
               </section>

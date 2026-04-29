@@ -158,8 +158,8 @@ const TYPE_LABELS: Record<string, string> = {
   OTHER: 'Other',
 };
 const TYPE_COLORS: Record<string, string> = {
-  BOT: 'text-bolty-400/80 border-bolty-400/25 bg-bolty-400/5',
-  AI_AGENT: 'text-bolty-400/70 border-bolty-400/20 bg-bolty-400/5',
+  BOT: 'text-atlas-400/80 border-atlas-400/25 bg-atlas-400/5',
+  AI_AGENT: 'text-atlas-400/70 border-atlas-400/20 bg-atlas-400/5',
   SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };
@@ -275,7 +275,7 @@ print(result.output)
 
 The agent can be configured with the following options:
 
-- **api_key**: Your Bolty API key
+- **api_key**: Your Atlas API key
 - **timeout**: Request timeout in seconds (default: 30)
 - **retry**: Number of retries on failure (default: 3)
 
@@ -297,7 +297,7 @@ ${tierSection}
 
 ## Support
 
-For questions and support, visit [Bolty Documentation](https://docs.bolty.io)
+For questions and support, visit [Atlas Documentation](https://docs.bolty.io)
 
 ## License
 
@@ -305,7 +305,7 @@ MIT License - See LICENSE file for details
 
 ---
 
-Built with ❤️ on [Bolty Marketplace](https://bolty.io)
+Built with ❤️ on [Atlas Marketplace](https://bolty.io)
 `;
 };
 
@@ -493,10 +493,10 @@ const ROLE_LABELS: Record<string, string> = {
   seller_agent: 'agent',
 };
 const ROLE_COLORS: Record<string, string> = {
-  buyer: 'bg-bolty-500/10 border-bolty-500/20 text-bolty-300',
+  buyer: 'bg-atlas-500/10 border-atlas-500/20 text-atlas-300',
   seller: 'bg-zinc-800/50 border-zinc-700/30 text-zinc-300',
-  buyer_agent: 'bg-bolty-500/8 border-bolty-500/15 text-bolty-200',
-  seller_agent: 'bg-bolty-500/10 border-bolty-500/15 text-bolty-300',
+  buyer_agent: 'bg-atlas-500/8 border-atlas-500/15 text-atlas-200',
+  seller_agent: 'bg-atlas-500/10 border-atlas-500/15 text-atlas-300',
 };
 
 const FIELD_HELP = {
@@ -755,14 +755,14 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
   return (
     <div
       className="mt-3 rounded-xl border"
-      style={{ borderColor: 'rgba(131,110,249,0.15)', background: 'rgba(131,110,249,0.03)' }}
+      style={{ borderColor: 'rgba(20,241,149,0.15)', background: 'rgba(20,241,149,0.03)' }}
     >
       <div
         className="flex items-center gap-2 px-3 py-2 border-b"
-        style={{ borderColor: 'rgba(131,110,249,0.1)' }}
+        style={{ borderColor: 'rgba(20,241,149,0.1)' }}
       >
-        <Key className="w-3 h-3 text-bolty-400" />
-        <span className="text-bolty-400 font-mono text-xs font-light">API Keys</span>
+        <Key className="w-3 h-3 text-atlas-400" />
+        <span className="text-atlas-400 font-mono text-xs font-light">API Keys</span>
         <span className="text-zinc-600 font-mono text-xs ml-auto">{keys.length}/3</span>
       </div>
 
@@ -876,9 +876,9 @@ function ApiKeyManager({ listing }: { listing: MarketListing }) {
             disabled={generating}
             className="text-xs font-mono px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-40 transition-all"
             style={{
-              background: 'rgba(131,110,249,0.15)',
-              border: '1px solid rgba(131,110,249,0.3)',
-              color: '#c4b5fd',
+              background: 'rgba(20,241,149,0.15)',
+              border: '1px solid rgba(20,241,149,0.3)',
+              color: '#a7f3d0',
             }}
           >
             {generating ? (
@@ -927,7 +927,7 @@ function MyAgentCard({
     <div
       className="rounded-xl border transition-colors"
       style={{
-        borderColor: expanded ? 'rgba(131,110,249,0.25)' : 'rgba(255,255,255,0.07)',
+        borderColor: expanded ? 'rgba(20,241,149,0.25)' : 'rgba(255,255,255,0.07)',
         background: '#0a0a12',
       }}
     >
@@ -935,9 +935,9 @@ function MyAgentCard({
         {/* Type icon */}
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-          style={{ background: 'rgba(131,110,249,0.1)', border: '1px solid rgba(131,110,249,0.2)' }}
+          style={{ background: 'rgba(20,241,149,0.1)', border: '1px solid rgba(20,241,149,0.2)' }}
         >
-          <Bot className="w-4 h-4 text-bolty-400" strokeWidth={1.5} />
+          <Bot className="w-4 h-4 text-atlas-400" strokeWidth={1.5} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -985,7 +985,7 @@ function MyAgentCard({
               </Badge>
             )}
             {listing.agentEndpoint && (
-              <Badge className="rounded-full bg-bolty-500/15 border border-bolty-500/25 px-2 py-0 text-xs font-mono text-bolty-400">
+              <Badge className="rounded-full bg-atlas-500/15 border border-atlas-500/25 px-2 py-0 text-xs font-mono text-atlas-400">
                 AI endpoint
               </Badge>
             )}
@@ -996,7 +996,7 @@ function MyAgentCard({
             )}
           </div>
           <p className="text-xs text-zinc-500 mt-0.5">
-            <span className="font-mono font-light text-bolty-300">
+            <span className="font-mono font-light text-atlas-300">
               {listing.price} {listing.currency}
             </span>
             {listing.minPrice != null && (
@@ -1016,9 +1016,9 @@ function MyAgentCard({
             onClick={() => setExpanded((p) => !p)}
             className="text-xs font-mono px-2.5 py-1.5 rounded-lg transition-all"
             style={{
-              background: expanded ? 'rgba(131,110,249,0.15)' : 'transparent',
-              border: `1px solid ${expanded ? 'rgba(131,110,249,0.3)' : 'rgba(255,255,255,0.08)'}`,
-              color: expanded ? '#c4b5fd' : '#71717a',
+              background: expanded ? 'rgba(20,241,149,0.15)' : 'transparent',
+              border: `1px solid ${expanded ? 'rgba(20,241,149,0.3)' : 'rgba(255,255,255,0.08)'}`,
+              color: expanded ? '#a7f3d0' : '#71717a',
             }}
           >
             {expanded ? 'collapse' : 'manage'}
@@ -1079,9 +1079,9 @@ const AGENT_SNIPPETS: Record<'curl' | 'node' | 'python', string> = {
     "agentId": "agt_...",
     "input": { "task": "summarize", "url": "https://..." }
   }'`,
-  node: `import { Bolty } from "@bolty/sdk";
+  node: `import { Atlas } from "@bolty/sdk";
 
-const bolty = new Bolty({ apiKey: process.env.BOLTY_API_KEY });
+const bolty = new Atlas({ apiKey: process.env.BOLTY_API_KEY });
 
 const run = await bolty.agents.invoke({
   agentId: "agt_...",
@@ -1089,9 +1089,9 @@ const run = await bolty.agents.invoke({
 });
 
 console.log(run.output);`,
-  python: `from bolty import Bolty
+  python: `from bolty import Atlas
 
-bolty = Bolty(api_key=os.environ["BOLTY_API_KEY"])
+bolty = Atlas(api_key=os.environ["BOLTY_API_KEY"])
 
 run = bolty.agents.invoke(
     agent_id="agt_...",
@@ -1369,9 +1369,9 @@ function AgentsPageContent() {
     const ethereum = getMetaMaskProvider();
     if (!ethereum) { setBuyError('MetaMask not found'); return; }
 
-    const boltyCfg = paymentMethod === 'BOLTY' ? await loadBoltyTokenConfig() : null;
-    if (paymentMethod === 'BOLTY' && !boltyCfg) {
-      setBuyError('BOLTY payments are not enabled — please retry with ETH');
+    const boltyCfg = paymentMethod === 'ATLAS' ? await loadBoltyTokenConfig() : null;
+    if (paymentMethod === 'ATLAS' && !boltyCfg) {
+      setBuyError('ATLAS payments are not enabled — please retry with ETH');
       return;
     }
 
@@ -1763,7 +1763,7 @@ function AgentsPageContent() {
       {/* Loading overlay while fetching seller data */}
       {buyPaying && !buyConsentData && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
-          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#836EF9] animate-spin" />
+          <div className="w-5 h-5 rounded-full border-2 border-zinc-700 border-t-[#14F195] animate-spin" />
         </div>
       )}
 
@@ -1796,7 +1796,7 @@ function AgentsPageContent() {
       {buySuccess && buyingListing && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)' }}>
           <div className="w-full max-w-sm rounded-xl p-6 text-center" style={{ background: 'linear-gradient(180deg, rgba(20,20,26,0.95), rgba(10,10,14,0.95))', boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 20px 40px rgba(0,0,0,0.5)' }}>
-            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}>
+            <div className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3" style={{ background: 'rgba(20,241,149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.4)' }}>
               <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" />
             </div>
             <h3 className="text-base font-light text-white mb-2">
@@ -1809,7 +1809,7 @@ function AgentsPageContent() {
               <Link
                 href="/orders"
                 className="px-4 py-2 rounded-md text-[12.5px] text-white"
-                style={{ background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)' }}
+                style={{ background: 'linear-gradient(180deg, rgba(20,241,149,0.38), rgba(20,241,149,0.14))', boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)' }}
               >
                 View Orders
               </Link>
@@ -1841,8 +1841,8 @@ function AgentsPageContent() {
             <div
               className="mx-auto w-11 h-11 rounded-xl flex items-center justify-center mb-3"
               style={{
-                background: 'rgba(131,110,249,0.15)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+                background: 'rgba(20,241,149,0.15)',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.4)',
               }}
             >
               <Plus className="w-5 h-5 text-[#b4a7ff]" />
@@ -1852,7 +1852,7 @@ function AgentsPageContent() {
             </h3>
             <p className="text-[12.5px] text-zinc-400 font-light leading-relaxed mb-5">
               The agent deploy wizard needs a wider screen for sandbox testing,
-              file uploads and the review step. Open Bolty on a desktop or
+              file uploads and the review step. Open Atlas on a desktop or
               laptop to deploy your agent.
             </p>
             <button
@@ -1861,8 +1861,8 @@ function AgentsPageContent() {
               className="px-4 py-2 rounded-md text-[12.5px] text-white"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.38), rgba(20,241,149,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)',
               }}
             >
               Got it
@@ -1914,10 +1914,10 @@ function AgentsPageContent() {
                       className="text-xs px-3 py-1.5 rounded-lg transition"
                       style={{
                         background: active
-                          ? 'linear-gradient(180deg, rgba(131,110,249,0.22), rgba(131,110,249,0.06))'
+                          ? 'linear-gradient(180deg, rgba(20,241,149,0.22), rgba(20,241,149,0.06))'
                           : 'rgba(255,255,255,0.04)',
                         boxShadow: active
-                          ? 'inset 0 0 0 1px rgba(131,110,249,0.5)'
+                          ? 'inset 0 0 0 1px rgba(20,241,149,0.5)'
                           : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
                         color: active ? '#C9BEFF' : '#a1a1aa',
                       }}
@@ -1950,7 +1950,7 @@ function AgentsPageContent() {
             </div>
             <button
               onClick={() => setMobileFilterOpen(false)}
-              className="w-full rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] py-2.5 text-sm text-white"
+              className="w-full rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] py-2.5 text-sm text-white"
             >
               Apply
             </button>

@@ -148,7 +148,7 @@ export default function PublicProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-atlas-400 animate-spin" />
       </div>
     );
   }
@@ -159,7 +159,7 @@ export default function PublicProfilePage() {
         <div className="text-center">
           <div className="text-4xl font-mono text-zinc-700 mb-2">404</div>
           <div className="text-zinc-400 text-sm">User not found</div>
-          <Link href="/" className="text-bolty-400 text-sm hover:text-bolty-300 mt-3 inline-block">
+          <Link href="/" className="text-atlas-400 text-sm hover:text-atlas-300 mt-3 inline-block">
             ← back home
           </Link>
         </div>
@@ -177,7 +177,7 @@ export default function PublicProfilePage() {
     <div className="relative min-h-screen overflow-hidden" style={{ background: 'var(--bg-page)' }}>
       <div
         className="absolute -top-32 -right-20 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
       <div
         className="absolute top-60 -left-24 w-[360px] h-[360px] rounded-full opacity-15 blur-3xl pointer-events-none"
@@ -198,7 +198,7 @@ export default function PublicProfilePage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="relative flex flex-col sm:flex-row gap-6">
@@ -212,7 +212,7 @@ export default function PublicProfilePage() {
                     className="w-24 h-24 rounded-2xl"
                     style={{
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                        'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 32px -6px rgba(20,241,149,0.5)',
                     }}
                   />
                 ) : (
@@ -220,9 +220,9 @@ export default function PublicProfilePage() {
                     className="w-24 h-24 rounded-2xl flex items-center justify-center text-4xl font-light text-[#b4a7ff]"
                     style={{
                       background:
-                        'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                        'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px -6px rgba(131,110,249,0.5)',
+                        'inset 0 0 0 1px rgba(20,241,149,0.35), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 32px -6px rgba(20,241,149,0.5)',
                     }}
                   >
                     {displayName?.[0]?.toUpperCase()}
@@ -287,8 +287,8 @@ export default function PublicProfilePage() {
                     <span
                       className="text-[10px] uppercase tracking-[0.18em] font-medium px-2 py-0.5 rounded-md text-[#b4a7ff]"
                       style={{
-                        background: 'rgba(131,110,249,0.12)',
-                        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                        background: 'rgba(20,241,149,0.12)',
+                        boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
                       }}
                     >
                       Admin
@@ -323,9 +323,9 @@ export default function PublicProfilePage() {
                               : {
                                   color: '#fff',
                                   background:
-                                    'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.1) 100%)',
+                                    'linear-gradient(180deg, rgba(20,241,149,0.28) 0%, rgba(20,241,149,0.1) 100%)',
                                   boxShadow:
-                                    'inset 0 0 0 1px rgba(131,110,249,0.4), 0 0 14px -4px rgba(131,110,249,0.5)',
+                                    'inset 0 0 0 1px rgba(20,241,149,0.4), 0 0 14px -4px rgba(20,241,149,0.5)',
                                 }
                       }
                     >
@@ -488,7 +488,7 @@ export default function PublicProfilePage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
                 }}
               />
               <p className="text-[13px] text-zinc-500">No public repositories yet.</p>
@@ -519,13 +519,13 @@ export default function PublicProfilePage() {
                       className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{
                         background:
-                          'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                          'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.5) 50%, transparent 100%)',
                       }}
                     />
                     <span
                       aria-hidden="true"
                       className="pointer-events-none absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ background: 'rgba(131,110,249,0.18)' }}
+                      style={{ background: 'rgba(20,241,149,0.18)' }}
                     />
                     <div className="relative flex items-start justify-between mb-2">
                       <div className="flex items-center gap-1.5 min-w-0">
@@ -556,9 +556,9 @@ export default function PublicProfilePage() {
                       <div
                         className="relative text-[11px] font-mono px-2 py-0.5 rounded inline-block mb-2"
                         style={{
-                          color: '#c4b5fd',
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                          color: '#a7f3d0',
+                          background: 'rgba(20,241,149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
                         }}
                       >
                         ${repo.lockedPriceUsd.toFixed(2)} USD to unlock
@@ -670,7 +670,7 @@ export default function PublicProfilePage() {
                       className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{
                         background:
-                          'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                          'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.5) 50%, transparent 100%)',
                       }}
                     />
                     <div className="relative flex items-start justify-between mb-2 gap-2">
@@ -695,9 +695,9 @@ export default function PublicProfilePage() {
                       <span
                         className="text-[11px] font-mono px-2 py-0.5 rounded shrink-0"
                         style={{
-                          color: '#c4b5fd',
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                          color: '#a7f3d0',
+                          background: 'rgba(20,241,149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
                         }}
                       >
                         {l.price} {l.currency}

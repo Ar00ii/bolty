@@ -87,7 +87,7 @@ export function TokenLeaderboard({ tokens }: { tokens: TokenInfo[] }) {
               className="px-2.5 py-1 text-[11px] rounded-md font-mono transition"
               style={{
                 color: tf === t ? '#ffffff' : '#a1a1aa',
-                background: tf === t ? 'rgba(131,110,249,0.22)' : 'transparent',
+                background: tf === t ? 'rgba(20,241,149,0.22)' : 'transparent',
               }}
             >
               {t}
@@ -160,8 +160,8 @@ function LeaderboardRow({
         <div
           className="w-9 h-9 rounded-full overflow-hidden shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.1)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20,241,149,0.1)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
           }}
         >
           {token.imageUrl ? (

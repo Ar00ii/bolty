@@ -121,7 +121,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
         <div className="mb-3">
           <h3 className="text-[14px] text-white font-light">Privacy</h3>
           <p className="text-[11.5px] text-zinc-500 mt-0.5">
-            Control who can reach out to you on Bolty.
+            Control who can reach out to you on Atlas.
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
           <div>
             <h3 className="text-[14px] text-white font-light">Suggested</h3>
             <p className="text-[11.5px] text-zinc-500 mt-0.5">
-              People worth meeting on Bolty: top reputation, recently active, fresh joiners.
+              People worth meeting on Atlas: top reputation, recently active, fresh joiners.
             </p>
           </div>
           <button
@@ -227,8 +227,8 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                     href={u.username ? `/u/${u.username}` : '#'}
                     className="w-9 h-9 rounded-full overflow-hidden grid place-items-center shrink-0"
                     style={{
-                      background: 'rgba(131,110,249,0.12)',
-                      border: '1px solid rgba(131,110,249,0.25)',
+                      background: 'rgba(20,241,149,0.12)',
+                      border: '1px solid rgba(20,241,149,0.25)',
                     }}
                   >
                     {u.avatarUrl ? (
@@ -275,9 +275,9 @@ export function FriendsExtras({ onFriendRequestSent }: { onFriendRequestSent?: (
                       disabled={busy}
                       className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md transition disabled:opacity-50"
                       style={{
-                        background: 'rgba(131,110,249,0.18)',
+                        background: 'rgba(20,241,149,0.18)',
                         color: '#e4d8ff',
-                        border: '1px solid rgba(131,110,249,0.4)',
+                        border: '1px solid rgba(20,241,149,0.4)',
                       }}
                     >
                       {busy ? (
@@ -349,7 +349,7 @@ function PrivacyRow({
         disabled={busy}
         className="relative w-9 h-5 rounded-full transition disabled:opacity-50"
         style={{
-          background: value ? '#836EF9' : 'rgba(255,255,255,0.08)',
+          background: value ? '#14F195' : 'rgba(255,255,255,0.08)',
         }}
       >
         <span

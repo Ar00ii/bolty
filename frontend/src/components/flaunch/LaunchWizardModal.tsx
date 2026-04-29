@@ -378,9 +378,9 @@ export function LaunchWizardModal({
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition disabled:opacity-40 hover:brightness-110"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.42) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.6) 0%, rgba(20,241,149,0.42) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.5), 0 4px 20px -8px rgba(131,110,249,0.7)',
+                  '0 0 0 1px rgba(20,241,149,0.5), 0 4px 20px -8px rgba(20,241,149,0.7)',
               }}
             >
               Continue
@@ -393,9 +393,9 @@ export function LaunchWizardModal({
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition disabled:opacity-70 hover:brightness-110"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.7) 0%, rgba(131,110,249,0.48) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.7) 0%, rgba(20,241,149,0.48) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.55), 0 4px 24px -8px rgba(131,110,249,0.8)',
+                  '0 0 0 1px rgba(20,241,149,0.55), 0 4px 24px -8px rgba(20,241,149,0.8)',
               }}
             >
               {launchState === 'signing' || launchState === 'pending' ? (
@@ -501,12 +501,12 @@ function StepIndicator({
                 className="w-5 h-5 rounded-full grid place-items-center font-mono text-[10.5px] transition"
                 style={{
                   background: active
-                    ? 'rgba(131,110,249,0.22)'
+                    ? 'rgba(20,241,149,0.22)'
                     : done
-                      ? 'rgba(131,110,249,0.1)'
+                      ? 'rgba(20,241,149,0.1)'
                       : 'rgba(255,255,255,0.03)',
                   boxShadow: active
-                    ? 'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 0 3px rgba(131,110,249,0.08)'
+                    ? 'inset 0 0 0 1px rgba(20,241,149,0.55), 0 0 0 3px rgba(20,241,149,0.08)'
                     : 'inset 0 0 0 1px rgba(255,255,255,0.08)',
                 }}
               >
@@ -518,7 +518,7 @@ function StepIndicator({
               <span
                 className="flex-1 h-px transition-colors"
                 style={{
-                  background: done ? 'rgba(131,110,249,0.35)' : 'rgba(255,255,255,0.06)',
+                  background: done ? 'rgba(20,241,149,0.35)' : 'rgba(255,255,255,0.06)',
                 }}
               />
             )}
@@ -559,7 +559,7 @@ function Field({
 // on focus. Typography scale lifted so the small helper text stays
 // readable — no more cramped tracked uppercase.
 const inputCls =
-  'w-full px-4 py-3 rounded-2xl text-[14px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all';
+  'w-full px-4 py-3 rounded-2xl text-[14px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#14F195]/50 transition-all';
 const inputStyle = {
   background: '#000000',
   border: '1px solid rgba(255,255,255,0.12)',
@@ -836,8 +836,8 @@ function Step1Metadata({
                   animate={{ scale: 1, opacity: 1 }}
                   className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-mono tabular-nums text-[#b4a7ff]"
                   style={{
-                    background: 'rgba(131,110,249,0.14)',
-                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                    background: 'rgba(20,241,149,0.14)',
+                    boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
                   }}
                 >
                   {socialCount}
@@ -908,7 +908,7 @@ function SocialInput({
 }) {
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3 rounded-2xl transition focus-within:ring-2 focus-within:ring-[#836EF9]/50"
+      className="flex items-center gap-3 px-4 py-3 rounded-2xl transition focus-within:ring-2 focus-within:ring-[#14F195]/50"
       style={{
         background: '#000000',
         border: '1px solid rgba(255,255,255,0.12)',
@@ -991,13 +991,13 @@ function Step2Economics({
             step={5}
             value={creatorShare}
             onChange={(e) => onCreatorShare(Number(e.target.value))}
-            className="w-full accent-purple-400"
+            className="w-full accent-atlas-400"
           />
           <div className="grid grid-cols-2 gap-2 text-[11.5px] font-light">
             <SplitTile
               label="To you (creator)"
               value={`${creatorShare}%`}
-              accent="#836EF9"
+              accent="#14F195"
             />
             <SplitTile
               label="Community treasury"
@@ -1028,8 +1028,8 @@ function Step2Economics({
       <div
         className="rounded-lg p-3 text-[11.5px] font-light text-zinc-400 space-y-1"
         style={{
-          background: 'rgba(131,110,249,0.06)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.2)',
+          background: 'rgba(20,241,149,0.06)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.2)',
         }}
       >
         <div className="flex items-center gap-1.5 text-[#b4a7ff]">
@@ -1037,7 +1037,7 @@ function Step2Economics({
           <span className="uppercase tracking-[0.12em] text-[10px] font-medium">Fine print</span>
         </div>
         <div>
-          Flaunch charges 1% on every swap. <span className="text-white">Bolty takes 0%</span>{' '}
+          Flaunch charges 1% on every swap. <span className="text-white">Atlas takes 0%</span>{' '}
           — 100% of that fee splits between you and your token&apos;s
           community treasury per the slider above.
         </div>
@@ -1125,8 +1125,8 @@ function Step3Review({
         className="rounded-xl p-4 space-y-2"
         style={{
           background:
-            'linear-gradient(180deg, rgba(131,110,249,0.08) 0%, rgba(10,10,14,0.4) 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+            'linear-gradient(180deg, rgba(20,241,149,0.08) 0%, rgba(10,10,14,0.4) 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
         }}
       >
         <Row label="Token" value={`${name} (${symbol})`} />
@@ -1142,7 +1142,7 @@ function Step3Review({
           }
         />
         <Row
-          label="Bolty protocol fee"
+          label="Atlas protocol fee"
           value={
             BOLTY_PROTOCOL_FEE_PERCENT === 0
               ? '0% — 100% of swap fees go to you + community'
@@ -1239,12 +1239,12 @@ function SuccessView({
 }) {
   const short = `${result.tokenAddress.slice(0, 8)}…${result.tokenAddress.slice(-6)}`;
   // Build the public launchpad URL for the tweet body. We point at the
-  // Bolty page (chart + holders + CA in one screen) rather than the
+  // Atlas page (chart + holders + CA in one screen) rather than the
   // Flaunch one, so the click brings the visitor into our funnel.
   const origin =
     typeof window !== 'undefined' && window.location?.origin
       ? window.location.origin
-      : 'https://www.boltynetwork.xyz';
+      : 'https://www.atlas.market';
   const launchpadUrl = `${origin}/launchpad/${result.tokenAddress}`;
   return (
     <div className="space-y-4 text-center py-2">
@@ -1397,7 +1397,7 @@ function LaunchTweetAutoPost({
     return (
       <div
         className="rounded-lg p-3 text-[12px] text-zinc-300 font-light flex items-center justify-center gap-2"
-        style={containerStyle('#836EF9')}
+        style={containerStyle('#14F195')}
       >
         <Loader2 className="w-3.5 h-3.5 animate-spin text-[#b4a7ff]" />
         Posting launch tweet from your X account…
@@ -1671,10 +1671,10 @@ function ModeOption({
       className="text-left rounded-xl p-3.5 transition disabled:cursor-not-allowed"
       style={{
         background: active
-          ? 'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.08) 100%)'
+          ? 'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.08) 100%)'
           : 'rgba(255,255,255,0.025)',
         border: active
-          ? '1px solid rgba(131,110,249,0.55)'
+          ? '1px solid rgba(20,241,149,0.55)'
           : '1px solid rgba(255,255,255,0.07)',
         opacity: disabled ? 0.55 : 1,
       }}

@@ -260,7 +260,7 @@ function CrossShape({ size, color }: { size: number; color: string }) {
   );
 }
 
-const COLOR = 'rgba(131,110,249,1)';
+const COLOR = 'rgba(20,241,149,1)';
 
 export function GeometricBg() {
   return (
@@ -292,18 +292,18 @@ export function GeometricBg() {
             <path
               d="M0 100 L60 100 L60 40 L140 40 L140 100 L200 100"
               fill="none"
-              stroke="rgba(131,110,249,1)"
+              stroke="rgba(20,241,149,1)"
               strokeWidth="1"
             />
             <path
               d="M100 0 L100 60 L160 60"
               fill="none"
-              stroke="rgba(131,110,249,1)"
+              stroke="rgba(20,241,149,1)"
               strokeWidth="1"
             />
-            <circle cx="60" cy="100" r="3" fill="rgba(131,110,249,1)" />
-            <circle cx="140" cy="40" r="3" fill="rgba(131,110,249,1)" />
-            <circle cx="100" cy="60" r="3" fill="rgba(131,110,249,1)" />
+            <circle cx="60" cy="100" r="3" fill="rgba(20,241,149,1)" />
+            <circle cx="140" cy="40" r="3" fill="rgba(20,241,149,1)" />
+            <circle cx="100" cy="60" r="3" fill="rgba(20,241,149,1)" />
           </pattern>
         </defs>
         <rect width="100%" height="100%" fill="url(#circuit)" />

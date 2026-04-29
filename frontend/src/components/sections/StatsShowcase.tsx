@@ -41,7 +41,7 @@ const STATS: Stat[] = [
     suffix: '%',
     decimals: 2,
     icon: <Shield className="w-6 h-6" />,
-    color: 'bg-purple-500/20 text-purple-400',
+    color: 'bg-atlas-500/20 text-atlas-400',
   },
 ];
 
@@ -83,7 +83,7 @@ export function StatsShowcase() {
             Powering the Developer Economy
           </h2>
           <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-            Real-time insights into the Bolty platform&apos;s growth and impact
+            Real-time insights into the Atlas platform&apos;s growth and impact
           </p>
         </motion.div>
 
@@ -107,7 +107,7 @@ export function StatsShowcase() {
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(131,110,249,0.1), rgba(6,182,212,0.1))',
+                  background: 'linear-gradient(135deg, rgba(20,241,149,0.1), rgba(6,182,212,0.1))',
                 }}
               />
 
@@ -148,7 +148,7 @@ export function StatsShowcase() {
               </div>
 
               {/* Bottom border accent */}
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-atlas-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
           ))}
         </motion.div>
@@ -161,7 +161,7 @@ export function StatsShowcase() {
           className="text-center mt-16"
         >
           <p className="text-zinc-400 mb-6">Join thousands of developers building the future</p>
-          <button className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-light hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 hover:-translate-y-1">
+          <button className="px-8 py-3 bg-gradient-to-r from-atlas-500 to-atlas-600 text-white rounded-lg font-light hover:shadow-lg hover:shadow-atlas-500/30 transition-all duration-300 hover:-translate-y-1">
             Start Building Today
           </button>
         </motion.div>

@@ -20,7 +20,7 @@ export function HighlightCard({
   title,
   description,
   href,
-  accentColor = 'var(--brand, #836EF9)',
+  accentColor = 'var(--brand, #14F195)',
   className,
 }: HighlightCardProps) {
   const cardContent = (

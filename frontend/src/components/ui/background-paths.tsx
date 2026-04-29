@@ -54,7 +54,7 @@ export function FloatingPaths({ position }: { position: number }) {
 /** Drop-in background: place inside a `relative overflow-hidden` container */
 export function BackgroundPaths() {
   return (
-    <div className="absolute inset-0 pointer-events-none text-bolty-500/30 overflow-hidden">
+    <div className="absolute inset-0 pointer-events-none text-atlas-500/30 overflow-hidden">
       <FloatingPaths position={1} />
       <FloatingPaths position={-1} />
     </div>

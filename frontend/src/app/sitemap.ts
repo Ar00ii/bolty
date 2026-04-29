@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://boltynetwork.xyz';
+const BASE_URL = 'https://atlas.market';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

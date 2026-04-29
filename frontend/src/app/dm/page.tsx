@@ -103,7 +103,7 @@ function Avatar({
           />
         </span>
       ) : badge === 'agent' ? (
-        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-bolty-400 rounded-full border border-black" />
+        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-atlas-400 rounded-full border border-black" />
       ) : badge === 'online' ? (
         <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-black" />
       ) : null}
@@ -412,7 +412,7 @@ function DmPageInner() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-bolty-400"
+          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-atlas-400"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
@@ -482,9 +482,9 @@ function DmPageInner() {
               style={{
                 color: '#b4a7ff',
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
               }}
               title="New conversation"
             >
@@ -507,12 +507,12 @@ function DmPageInner() {
                   onChange={(e) => setNewRecipient(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && startNewDm()}
                   placeholder="Username or ID..."
-                  className="text-xs py-2 px-3 flex-1 rounded-lg text-white placeholder:text-zinc-500 outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+                  className="text-xs py-2 px-3 flex-1 rounded-lg text-white placeholder:text-zinc-500 outline-none transition-all focus:shadow-[0_0_0_1px_rgba(20,241,149,0.45),_0_0_0_4px_rgba(20,241,149,0.12)]"
                   style={{
                     background:
                       'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
                     boxShadow:
-                      '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.03)',
+                      '0 0 0 1px rgba(20,241,149,0.22), inset 0 1px 0 rgba(255,255,255,0.03)',
                   }}
                 />
                 <motion.button
@@ -522,9 +522,9 @@ function DmPageInner() {
                   className="text-xs py-2 px-3 rounded-lg text-white font-light transition-all"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -4px rgba(131,110,249,0.5)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 18px -4px rgba(20,241,149,0.5)',
                   }}
                 >
                   Go
@@ -541,7 +541,7 @@ function DmPageInner() {
               value={contactQuery}
               onChange={(e) => setContactQuery(e.target.value)}
               placeholder="Search conversations…"
-              className="w-full pl-8 pr-8 py-2 text-xs rounded-lg text-white placeholder-zinc-500 outline-none transition-all font-light focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+              className="w-full pl-8 pr-8 py-2 text-xs rounded-lg text-white placeholder-zinc-500 outline-none transition-all font-light focus:shadow-[0_0_0_1px_rgba(20,241,149,0.45),_0_0_0_4px_rgba(20,241,149,0.12)]"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -581,9 +581,9 @@ function DmPageInner() {
                       className="absolute inset-0 rounded-md"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                          'linear-gradient(180deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
                         boxShadow:
-                          'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                          'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
                       }}
                     />
                   )}
@@ -610,9 +610,9 @@ function DmPageInner() {
                     activePeer?.id === c.user.id
                       ? {
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                            'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.4)',
+                            'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.4)',
                         }
                       : {
                           background: 'transparent',
@@ -646,9 +646,9 @@ function DmPageInner() {
                           className="text-[10px] font-mono text-white rounded-full px-2 py-0.5 font-medium flex-shrink-0"
                           style={{
                             background:
-                              'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.35) 100%)',
+                              'linear-gradient(180deg, rgba(20,241,149,0.6) 0%, rgba(20,241,149,0.35) 100%)',
                             boxShadow:
-                              'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 12px -2px rgba(131,110,249,0.6)',
+                              'inset 0 0 0 1px rgba(20,241,149,0.55), 0 0 12px -2px rgba(20,241,149,0.6)',
                           }}
                         >
                           {c.unread}
@@ -692,7 +692,7 @@ function DmPageInner() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px z-10"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           {!activePeer ? (
@@ -703,9 +703,9 @@ function DmPageInner() {
                 className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6"
                 style={{
                   background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                    'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                    'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 32px -6px rgba(20,241,149,0.5)',
                 }}
               >
                 <MessageSquare className="w-7 h-7" style={{ color: '#b4a7ff' }} strokeWidth={1.5} />
@@ -722,9 +722,9 @@ function DmPageInner() {
                   className="px-6 py-2.5 rounded-lg text-white text-sm font-light transition-all"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
                   }}
                 >
                   New conversation
@@ -744,7 +744,7 @@ function DmPageInner() {
                 className="relative flex items-center justify-between px-4 py-4"
                 style={{
                   borderBottom: '1px solid rgba(255,255,255,0.06)',
-                  background: 'rgba(131,110,249,0.04)',
+                  background: 'rgba(20,241,149,0.04)',
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -767,14 +767,14 @@ function DmPageInner() {
                     {activePeer.username ? (
                       <Link
                         href={`/u/${activePeer.username}`}
-                        className="text-sm font-light hover:text-bolty-300 transition-colors text-white"
+                        className="text-sm font-light hover:text-atlas-300 transition-colors text-white"
                       >
                         {activePeer.username}
                       </Link>
                     ) : (
                       <p className="text-sm font-light text-white">{activePeer.id.slice(0, 8)}</p>
                     )}
-                    <p className="text-xs text-bolty-400">
+                    <p className="text-xs text-atlas-400">
                       {connected ? 'Online' : 'Connecting...'}
                     </p>
                   </div>
@@ -787,9 +787,9 @@ function DmPageInner() {
                     style={{
                       color: '#b4a7ff',
                       background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                        'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                        'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
                     }}
                   >
                     <Eye size={12} />
@@ -820,7 +820,7 @@ function DmPageInner() {
                                 <motion.div
                                   initial={{ scale: 0 }}
                                   animate={{ scale: 1 }}
-                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-bolty-500 to-bolty-600 flex items-center justify-center text-white text-xs font-light border-2 border-bolty-400"
+                                  className="w-10 h-10 rounded-full bg-gradient-to-br from-atlas-500 to-atlas-600 flex items-center justify-center text-white text-xs font-light border-2 border-atlas-400"
                                 >
                                   AI
                                 </motion.div>
@@ -828,7 +828,7 @@ function DmPageInner() {
                             )}
                             <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                               {isAgent && (
-                                <p className="text-xs font-light text-bolty-300 mb-1">
+                                <p className="text-xs font-light text-atlas-300 mb-1">
                                   {msg.agentName || 'Agent'} • {formatTime(msg.createdAt)}
                                 </p>
                               )}
@@ -840,9 +840,9 @@ function DmPageInner() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isAgent
-                                    ? 'bg-bolty-500/25 text-bolty-100 border border-bolty-500/30 rounded-2xl rounded-tl-lg'
+                                    ? 'bg-atlas-500/25 text-atlas-100 border border-atlas-500/30 rounded-2xl rounded-tl-lg'
                                     : isMe
-                                      ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
+                                      ? 'bg-atlas-500 text-white rounded-2xl rounded-tr-lg'
                                       : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >
@@ -878,7 +878,7 @@ function DmPageInner() {
                               <div
                                 className={`px-4 py-3 text-sm leading-relaxed break-words max-w-md ${
                                   isMe
-                                    ? 'bg-bolty-500 text-white rounded-2xl rounded-tr-lg'
+                                    ? 'bg-atlas-500 text-white rounded-2xl rounded-tr-lg'
                                     : 'bg-white/8 text-zinc-100 border border-white/10 rounded-2xl rounded-tl-lg'
                                 }`}
                               >
@@ -906,7 +906,7 @@ function DmPageInner() {
                 className="px-6 py-4"
                 style={{
                   borderTop: '1px solid rgba(255,255,255,0.06)',
-                  background: 'rgba(131,110,249,0.03)',
+                  background: 'rgba(20,241,149,0.03)',
                 }}
               >
                 <AnimatePresence>
@@ -932,7 +932,7 @@ function DmPageInner() {
                       connected ? `Message ${activePeer.username || '...'}...` : 'Connecting...'
                     }
                     maxLength={2000}
-                    className="flex-1 px-4 py-3 rounded-xl text-[13px] outline-none transition-all text-white placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12),_inset_0_1px_0_rgba(255,255,255,0.04)]"
+                    className="flex-1 px-4 py-3 rounded-xl text-[13px] outline-none transition-all text-white placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(20,241,149,0.45),_0_0_0_4px_rgba(20,241,149,0.12),_inset_0_1px_0_rgba(255,255,255,0.04)]"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -948,9 +948,9 @@ function DmPageInner() {
                     className="w-11 h-11 flex items-center justify-center rounded-xl transition-all disabled:opacity-40 text-white"
                     style={{
                       background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                        'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                       boxShadow:
-                        'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                        'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
                     }}
                   >
                     <Send size={18} />

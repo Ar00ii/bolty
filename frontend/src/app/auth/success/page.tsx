@@ -39,7 +39,7 @@ export default function AuthSuccessPage() {
     >
       <div
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full opacity-25 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
       <motion.div
         initial={{ opacity: 0, y: 14, scale: 0.97 }}
@@ -54,9 +54,9 @@ export default function AuthSuccessPage() {
           className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mx-auto mb-5"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0.06) 100%)',
-            border: '1px solid rgba(131,110,249,0.4)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 32px -6px rgba(131,110,249,0.55)',
+              'linear-gradient(135deg, rgba(20,241,149,0.25) 0%, rgba(20,241,149,0.06) 100%)',
+            border: '1px solid rgba(20,241,149,0.4)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 32px -6px rgba(20,241,149,0.55)',
           }}
         >
           <CheckCircle2 className="w-8 h-8 text-[#b4a7ff]" strokeWidth={1.5} />

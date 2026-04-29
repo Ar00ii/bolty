@@ -13,8 +13,8 @@ export const TYPE_LABELS: Record<string, string> = {
 };
 
 export const TYPE_COLORS: Record<string, string> = {
-  BOT: 'text-bolty-400/80 border-bolty-400/25 bg-bolty-400/5',
-  AI_AGENT: 'text-bolty-400/70 border-bolty-400/20 bg-bolty-400/5',
+  BOT: 'text-atlas-400/80 border-atlas-400/25 bg-atlas-400/5',
+  AI_AGENT: 'text-atlas-400/70 border-atlas-400/20 bg-atlas-400/5',
   SCRIPT: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
 };

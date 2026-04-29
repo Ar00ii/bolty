@@ -145,7 +145,7 @@ export const NAV: NavSection[] = [
         ],
       },
       { label: 'Leaderboard', icon: Trophy, href: '/reputation/leaderboard' },
-      { label: '$BOLTY', icon: Zap, href: '/bolty' },
+      { label: '$ATLAS', icon: Zap, href: '/bolty' },
     ],
   },
   {
@@ -225,18 +225,34 @@ export function StandardSidebar() {
         fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
       }}
     >
-      {/* Workspace switcher — matches the landing header logo */}
+      {/* Brand: CSS wordmark + tagline. Replace with image asset later. */}
       <Link
         href="/"
-        className="flex items-center gap-2 text-left h-14 px-[14px] transition-colors hover:bg-white/[0.02]"
+        className="flex flex-col gap-[2px] text-left h-16 justify-center px-[14px] transition-colors hover:bg-white/[0.02]"
         style={{ borderBottom: '1px solid #1f1f23' }}
       >
-        <div className="w-[36px] h-[36px] grid place-items-center rounded-lg overflow-hidden shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-[26px] h-[26px] grid place-items-center rounded-md font-mono text-[13px] font-bold shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #14F195 0%, #00C853 100%)',
+              color: '#062014',
+            }}
+          >
+            A
+          </div>
+          <span
+            className="text-[18px] font-light text-white truncate"
+            style={{ letterSpacing: '0.01em' }}
+          >
+            Atlas
+          </span>
         </div>
-        <span className="text-xl font-light text-white truncate">
-          BoltyNetwork
+        <span
+          className="font-mono text-[10px] truncate ml-[36px]"
+          style={{ color: '#71717a', letterSpacing: '0.04em' }}
+        >
+          AI agents · Solana
         </span>
       </Link>
 
@@ -294,7 +310,7 @@ export function StandardSidebar() {
       <div
         className="p-3"
         style={{
-          background: 'linear-gradient(180deg, transparent, rgba(131,110,249,0.04))',
+          background: 'linear-gradient(180deg, transparent, rgba(20,241,149,0.04))',
         }}
       >
         {isAuthenticated ? (
@@ -327,12 +343,12 @@ export function StandardSidebar() {
             href="/auth"
             className="block text-center rounded-md py-2 text-[12px] transition-colors"
             style={{
-              background: 'rgba(131,110,249,0.15)',
-              border: '1px solid rgba(131,110,249,0.3)',
+              background: 'rgba(20,241,149,0.15)',
+              border: '1px solid rgba(20,241,149,0.3)',
               color: '#e4e4e7',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.25)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(131,110,249,0.15)')}
+            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(20,241,149,0.25)')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(20,241,149,0.15)')}
           >
             Sign in
           </Link>
@@ -389,12 +405,12 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     scheduleClose();
   };
 
-  const iconColor = active ? '#a594ff' : '#ffffff';
+  const iconColor = active ? '#6ee7b7' : '#ffffff';
 
   const rowStyle: React.CSSProperties = {
     gridTemplateColumns: '10px 16px 1fr auto',
     color: active ? '#ffffff' : '#ffffff',
-    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+    background: active ? 'rgba(20,241,149,0.08)' : 'transparent',
     fontSize: '13px',
     fontWeight: 300,
   };
@@ -408,7 +424,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
       e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
     }
     const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-    if (iconEl) iconEl.style.color = '#a594ff';
+    if (iconEl) iconEl.style.color = '#6ee7b7';
     const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
     if (kbdEl) kbdEl.style.opacity = '1';
     // Prefetch API data for the most common destinations so by the time
@@ -431,7 +447,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     <>
       <span
         className="font-mono leading-none"
-        style={{ fontSize: '13px', color: '#836EF9', width: '10px' }}
+        style={{ fontSize: '13px', color: '#14F195', width: '10px' }}
       >
         {active ? '›' : ''}
       </span>
@@ -498,7 +514,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                     className="flex items-center gap-[10px] px-[10px] py-[6px] rounded-md transition-colors"
                     style={{
                       color: '#ffffff',
-                      background: isActive ? 'rgba(131,110,249,0.08)' : 'transparent',
+                      background: isActive ? 'rgba(20,241,149,0.08)' : 'transparent',
                       fontSize: '12.5px',
                       fontWeight: 300,
                     }}
@@ -522,7 +538,7 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
                       <ChildIcon
                         className="w-[14px] h-[14px] shrink-0"
                         strokeWidth={1.5}
-                        style={{ color: isActive ? '#a594ff' : '#ffffff' }}
+                        style={{ color: isActive ? '#6ee7b7' : '#ffffff' }}
                       />
                     )}
                     <span className="truncate">{c.label}</span>
@@ -579,7 +595,7 @@ function SidebarItemMeta({ item, open }: { item: NavItem; open?: boolean }) {
           fontSize: '10.5px',
           padding: '1px 6px',
           borderRadius: '999px',
-          background: item.dot ? '#836EF9' : '#18181b',
+          background: item.dot ? '#14F195' : '#18181b',
           border: item.dot ? 'none' : '1px solid #1f1f23',
           color: item.dot ? 'white' : '#52525b',
         }}

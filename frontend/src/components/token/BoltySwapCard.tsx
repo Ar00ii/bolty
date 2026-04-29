@@ -6,7 +6,7 @@ import { erc20Abi, formatUnits, parseEther, parseUnits, type Address } from 'vie
 
 import { getPublicClient, getReadWriteSdk } from '@/lib/flaunch/client';
 
-const BOLTY = '0xA383e85a626171edCB2727AEcAED4Fc5e27E42a7' as Address;
+const ATLAS = '0xA383e85a626171edCB2727AEcAED4Fc5e27E42a7' as Address;
 const DEFAULT_SLIPPAGE = 5;
 
 type Side = 'buy' | 'sell';
@@ -37,14 +37,14 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
   const [connected, setConnected] = useState<Address | null>(null);
   const [balanceBolty, setBalanceBolty] = useState<bigint | null>(null);
 
-  // Re-read the BOLTY balance after the wallet connects and after each
+  // Re-read the ATLAS balance after the wallet connects and after each
   // successful swap so the header number stays accurate.
   const refreshBalance = useCallback(
     async (addr: Address) => {
       try {
         const pc = getPublicClient();
         const bal = (await pc.readContract({
-          address: BOLTY,
+          address: ATLAS,
           abi: erc20Abi,
           functionName: 'balanceOf',
           args: [addr],
@@ -79,8 +79,8 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
     if (!Number.isFinite(amt) || amt <= 0 || priceUsd == null) return null;
     // ETH → USD at a stable reference. We don't fetch ETH price here —
     // DexScreener gives us the pair's USD price directly, so when the
-    // user types "0.01 ETH" we already know the priceUsd per BOLTY.
-    // Convert via: amountIn (ETH or BOLTY) → USD → other side.
+    // user types "0.01 ETH" we already know the priceUsd per ATLAS.
+    // Convert via: amountIn (ETH or ATLAS) → USD → other side.
     if (side === 'buy') {
       // Need ETH price — pull from window (set by header) or skip.
       const ethUsd = getReferenceEthUsd();
@@ -88,9 +88,9 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
       const usd = amt * ethUsd;
       const tokensOut = usd / priceUsd;
       const floor = tokensOut * (1 - slippage / 100);
-      return { outAmount: tokensOut, floor, label: 'BOLTY' };
+      return { outAmount: tokensOut, floor, label: 'ATLAS' };
     }
-    // sell: BOLTY → ETH
+    // sell: ATLAS → ETH
     const ethUsd = getReferenceEthUsd();
     if (!ethUsd) return null;
     const usd = amt * priceUsd;
@@ -125,7 +125,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
       let txHash: `0x${string}`;
       if (side === 'buy') {
         txHash = await sdk.buyCoin({
-          coinAddress: BOLTY,
+          coinAddress: ATLAS,
           swapType: 'EXACT_IN',
           amountIn: amountParsed,
           slippagePercent: slippage,
@@ -134,15 +134,15 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
         // Sell flow uses Permit2. Check current allowance — if it's
         // enough, skip the sign step; otherwise, fetch typed data and
         // sign through the wallet.
-        const { allowance } = await sdk.getPermit2AllowanceAndNonce(BOLTY);
+        const { allowance } = await sdk.getPermit2AllowanceAndNonce(ATLAS);
         if (allowance >= amountParsed) {
           txHash = await sdk.sellCoin({
-            coinAddress: BOLTY,
+            coinAddress: ATLAS,
             amountIn: amountParsed,
             slippagePercent: slippage,
           });
         } else {
-          const { typedData, permitSingle } = await sdk.getPermit2TypedData(BOLTY);
+          const { typedData, permitSingle } = await sdk.getPermit2TypedData(ATLAS);
           // Sign the Permit2 typed data via the wallet client we
           // already built in getReadWriteSdk. Typed-data shapes across
           // the SDK's bundled viem and ours are nominally different,
@@ -158,7 +158,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
             message: typedData.message,
           });
           txHash = await sdk.sellCoin({
-            coinAddress: BOLTY,
+            coinAddress: ATLAS,
             amountIn: amountParsed,
             slippagePercent: slippage,
             permitSingle,
@@ -194,7 +194,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
         background:
           'linear-gradient(180deg, rgba(24,22,40,0.75) 0%, rgba(10,10,14,0.75) 100%)',
         boxShadow:
-          '0 0 0 1px rgba(131,110,249,0.22), inset 0 1px 0 rgba(255,255,255,0.05)',
+          '0 0 0 1px rgba(20,241,149,0.22), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}
     >
       <div className="flex items-center justify-between">
@@ -206,7 +206,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
               onClick={() => setSide(s)}
               className={`rounded-md px-2.5 py-1 transition ${
                 side === s
-                  ? 'bg-gradient-to-b from-[#836EF9] to-[#6B4FE8] text-white'
+                  ? 'bg-gradient-to-b from-[#14F195] to-[#6B4FE8] text-white'
                   : 'text-white/60 hover:text-white'
               }`}
             >
@@ -241,7 +241,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
             className="flex-1 bg-transparent text-2xl font-light text-white outline-none placeholder:text-white/20"
           />
           <span className="rounded-lg bg-white/5 px-2 py-1 text-xs font-normal text-white/90">
-            {side === 'buy' ? 'ETH' : 'BOLTY'}
+            {side === 'buy' ? 'ETH' : 'ATLAS'}
           </span>
         </div>
         {side === 'buy' && (
@@ -275,7 +275,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
             {estimate ? estimate.outAmount.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '—'}
           </div>
           <span className="rounded-lg bg-white/5 px-2 py-1 text-xs font-normal text-white/90">
-            {side === 'buy' ? 'BOLTY' : 'ETH'}
+            {side === 'buy' ? 'ATLAS' : 'ETH'}
           </span>
         </div>
         {estimate && (
@@ -295,7 +295,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
               key={v}
               onClick={() => setSlippage(v)}
               className={`rounded-md px-2 py-0.5 transition ${
-                slippage === v ? 'bg-[#836EF9]/25 text-white' : 'bg-white/5 text-white/70 hover:text-white'
+                slippage === v ? 'bg-[#14F195]/25 text-white' : 'bg-white/5 text-white/70 hover:text-white'
               }`}
             >
               {v}%
@@ -309,7 +309,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
         {!connected ? (
           <button
             onClick={onConnect}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-3 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] px-4 py-3 text-sm font-normal text-white shadow-[0_0_30px_-8px_#14F195] transition hover:brightness-110"
           >
             <Wallet className="h-4 w-4" />
             Connect wallet
@@ -318,7 +318,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
           <button
             disabled={busy || !amountParsed || amountParsed <= BigInt(0)}
             onClick={onSwap}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-4 py-3 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] px-4 py-3 text-sm font-normal text-white shadow-[0_0_30px_-8px_#14F195] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             {busy ? (
               <>
@@ -327,7 +327,7 @@ export function BoltySwapCard({ priceUsd }: BoltySwapCardProps) {
               </>
             ) : (
               <>
-                {side === 'buy' ? 'Buy $BOLTY' : 'Sell $BOLTY'}
+                {side === 'buy' ? 'Buy $ATLAS' : 'Sell $ATLAS'}
               </>
             )}
           </button>

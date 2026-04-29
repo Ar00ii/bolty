@@ -8,10 +8,10 @@
 export const FLAUNCH_LAUNCHPAD_ENABLED =
   process.env.NEXT_PUBLIC_FLAUNCH_LAUNCHPAD_ENABLED === 'true';
 
-/** Cut Bolty takes from every swap fee, routed via RevenueManager.
+/** Cut Atlas takes from every swap fee, routed via RevenueManager.
  *  Must match the protocolFeePercent set on-chain. Zero = 100% of
  *  the swap fee flows to the creator + the token's community
- *  treasury. Bolty makes nothing on launchpad swaps by design. */
+ *  treasury. Atlas makes nothing on launchpad swaps by design. */
 export const BOLTY_PROTOCOL_FEE_PERCENT = 0;
 
 /** Starting market cap every token launches at (USD). Flaunch's
@@ -19,7 +19,7 @@ export const BOLTY_PROTOCOL_FEE_PERCENT = 0;
  *  below it launch for gas only, tokens at or above pay a
  *  proportional flaunching fee. Matches Flaunch's own UI, which
  *  launches at ~$9k so creators pay only Base gas (cents).
- *  Tokens with real volume push past $10k fast on their own. Bolty
+ *  Tokens with real volume push past $10k fast on their own. Atlas
  *  takes 0% of the swap fees — 100% flows to the creator and the
  *  token's community treasury through Flaunch's RevenueManager. */
 export const LAUNCH_INITIAL_MARKET_CAP_USD = 9_000;

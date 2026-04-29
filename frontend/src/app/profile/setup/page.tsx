@@ -68,7 +68,7 @@ export default function ProfileSetupPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-atlas-400 animate-spin" />
       </div>
     );
   }
@@ -80,7 +80,7 @@ export default function ProfileSetupPage() {
     >
       <div
         className="absolute -top-40 -right-20 w-[480px] h-[480px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
       <div
         className="absolute top-40 -left-24 w-[360px] h-[360px] rounded-full opacity-15 blur-3xl pointer-events-none"
@@ -102,7 +102,7 @@ export default function ProfileSetupPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="relative mb-8">
@@ -110,10 +110,10 @@ export default function ProfileSetupPage() {
             className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-              border: '1px solid rgba(131,110,249,0.35)',
+                'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
+              border: '1px solid rgba(20,241,149,0.35)',
               boxShadow:
-                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+                'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20,241,149,0.45)',
             }}
           >
             <svg
@@ -157,7 +157,7 @@ export default function ProfileSetupPage() {
               Username <span className="text-[#fda4af]">*</span>
             </label>
             <div
-              className="flex items-center gap-2 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+              className="flex items-center gap-2 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] transition-all"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -190,7 +190,7 @@ export default function ProfileSetupPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your Name"
-              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] placeholder:text-zinc-600"
+              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] placeholder:text-zinc-600"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -210,7 +210,7 @@ export default function ProfileSetupPage() {
               onChange={(e) => setBio(e.target.value)}
               placeholder="Tell us about yourself…"
               rows={3}
-              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] placeholder:text-zinc-600 resize-none"
+              className="w-full rounded-lg px-3.5 py-2.5 text-white text-[13px] outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] placeholder:text-zinc-600 resize-none"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -229,7 +229,7 @@ export default function ProfileSetupPage() {
             {/* Twitter/X */}
             <div className="space-y-2.5">
               <div
-                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] transition-all"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -255,7 +255,7 @@ export default function ProfileSetupPage() {
 
               {/* LinkedIn */}
               <div
-                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] transition-all"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -281,7 +281,7 @@ export default function ProfileSetupPage() {
 
               {/* Website */}
               <div
-                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.12)] transition-all"
+                className="flex items-center gap-2.5 rounded-lg px-3.5 py-2.5 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.12)] transition-all"
                 style={{
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -319,9 +319,9 @@ export default function ProfileSetupPage() {
             className="w-full h-11 rounded-lg text-white font-medium text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.35) 0%, rgba(20,241,149,0.12) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.45), 0 0 22px -4px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20,241,149,0.45), 0 0 22px -4px rgba(20,241,149,0.5)',
             }}
           >
             {saving ? 'Saving…' : 'Save & Continue'}

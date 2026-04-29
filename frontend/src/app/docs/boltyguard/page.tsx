@@ -6,7 +6,7 @@ export default function BoltyGuardDocsPage() {
     <div>
       <h1>BoltyGuard</h1>
       <p>
-        BoltyGuard is the security layer for every agent on Bolty. It combines{' '}
+        BoltyGuard is the security layer for every agent on Atlas. It combines{' '}
         <strong>Semgrep</strong> (deterministic AST-level static analysis) with{' '}
         <strong>Claude</strong> (reasoning, prompt-injection awareness, custom
         AI-agent checks) and produces a single score from 0 to 100.
@@ -126,7 +126,7 @@ Content-Type: multipart/form-data
       <ul>
         <li><strong>Free tier</strong>: 5 scans / day per user (or per IP if anonymous).</li>
         <li>
-          <strong>Holder tier</strong>: hold ≥ 1,000 $BOLTY in any wallet
+          <strong>Holder tier</strong>: hold ≥ 1,000 $ATLAS in any wallet
           linked to your account → unmetered. Read-only, no token burn.
         </li>
       </ul>

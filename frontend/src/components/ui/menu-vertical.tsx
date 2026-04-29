@@ -19,7 +19,7 @@ const MotionLink = motion.create(Link);
 
 export const MenuVertical = ({
   menuItems = [],
-  color = '#836ef9',
+  color = '#14f195',
   skew = 0,
 }: MenuVerticalProps) => {
   return (

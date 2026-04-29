@@ -91,7 +91,7 @@ export function ConnectAgentXModal({ open, onClose }: { open: boolean; onClose: 
             className="relative w-full max-w-lg rounded-2xl overflow-hidden"
             style={{
               background: '#0d0d12',
-              border: '1px solid rgba(131,110,249,0.25)',
+              border: '1px solid rgba(20,241,149,0.25)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
             }}
             onClick={(e) => e.stopPropagation()}
@@ -101,7 +101,7 @@ export function ConnectAgentXModal({ open, onClose }: { open: boolean; onClose: 
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.55) 50%, transparent 100%)',
               }}
             />
             <header className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
@@ -156,8 +156,8 @@ export function ConnectAgentXModal({ open, onClose }: { open: boolean; onClose: 
                     onClick={onClose}
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12.5px] font-light text-white transition"
                     style={{
-                      background: 'rgba(131,110,249,0.22)',
-                      boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)',
+                      background: 'rgba(20,241,149,0.22)',
+                      boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.4)',
                     }}
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -199,8 +199,8 @@ export function ConnectAgentXModal({ open, onClose }: { open: boolean; onClose: 
                         onClick={onClose}
                         className="inline-flex items-center gap-1.5 text-[11.5px] font-light px-2.5 py-1.5 rounded-md text-white transition"
                         style={{
-                          background: a.x.connected ? 'rgba(255,255,255,0.04)' : 'rgba(131,110,249,0.22)',
-                          border: `1px solid ${a.x.connected ? 'rgba(255,255,255,0.08)' : 'rgba(131,110,249,0.4)'}`,
+                          background: a.x.connected ? 'rgba(255,255,255,0.04)' : 'rgba(20,241,149,0.22)',
+                          border: `1px solid ${a.x.connected ? 'rgba(255,255,255,0.08)' : 'rgba(20,241,149,0.4)'}`,
                         }}
                       >
                         {a.x.connected ? (

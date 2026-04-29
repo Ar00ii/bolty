@@ -4,18 +4,18 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Bolty purple palette (primary brand color)
-        bolty: {
-          50: '#f3f0ff',
-          100: '#e9e3ff',
-          200: '#d4cbff',
-          300: '#b5a5ff',
-          400: '#836EF9', // primary Bolty purple
-          500: '#7B5CF6',
-          600: '#6b4fe0',
-          700: '#5a3cc7',
-          800: '#4a31a4',
-          900: '#3c2885',
+        // Atlas green palette (primary brand color, Solana-native)
+        atlas: {
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#14F195', // primary Atlas green (Solana)
+          500: '#00C853', // deep green for hover/active
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
         },
         // Terminal dark palette (zinc-based for professional look)
         terminal: {
@@ -31,18 +31,19 @@ module.exports = {
           text: '#e4e4e7',
           muted: '#71717a',
         },
-        // Legacy neon green — kept for backward compat
+        // Neon palette aliased to atlas for backward compat with components
+        // that still reference `neon-*`. Same shades, no visual diff.
         neon: {
-          50: '#f0fff4',
-          100: '#dcffe4',
-          200: '#a8f7c1',
-          300: '#836EF9',
-          400: '#836EF9',
-          500: '#7B5CF6',
-          600: '#6b4fe0',
-          700: '#5a3cc7',
-          800: '#4a31a4',
-          900: '#3c2885',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#14F195',
+          500: '#00C853',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
         },
       },
       fontFamily: {
@@ -80,11 +81,11 @@ module.exports = {
           '100%': { 'offset-distance': '100%' },
         },
         gradientRotate: {
-          '0%': { background: 'linear-gradient(0deg,#836EF9,#c4b5fd,#836EF9)' },
-          '25%': { background: 'linear-gradient(90deg,#836EF9,#c4b5fd,#836EF9)' },
-          '50%': { background: 'linear-gradient(180deg,#836EF9,#c4b5fd,#836EF9)' },
-          '75%': { background: 'linear-gradient(270deg,#836EF9,#c4b5fd,#836EF9)' },
-          '100%': { background: 'linear-gradient(360deg,#836EF9,#c4b5fd,#836EF9)' },
+          '0%': { background: 'linear-gradient(0deg,#14F195,#a7f3d0,#14F195)' },
+          '25%': { background: 'linear-gradient(90deg,#14F195,#a7f3d0,#14F195)' },
+          '50%': { background: 'linear-gradient(180deg,#14F195,#a7f3d0,#14F195)' },
+          '75%': { background: 'linear-gradient(270deg,#14F195,#a7f3d0,#14F195)' },
+          '100%': { background: 'linear-gradient(360deg,#14F195,#a7f3d0,#14F195)' },
         },
         grid: {
           '0%': { transform: 'translateY(-50%)' },
@@ -107,22 +108,22 @@ module.exports = {
           to: { transform: 'translateY(0)', opacity: '1' },
         },
         pulseNeon: {
-          '0%, 100%': { boxShadow: '0 0 5px #836EF9, 0 0 10px #836EF9' },
-          '50%': { boxShadow: '0 0 20px #836EF9, 0 0 40px #836EF950' },
+          '0%, 100%': { boxShadow: '0 0 5px #14F195, 0 0 10px #14F195' },
+          '50%': { boxShadow: '0 0 20px #14F195, 0 0 40px #14F19550' },
         },
         'glow-pulse': {
-          '0%, 100%': { boxShadow: '0 0 10px rgba(131,110,249,0.4), 0 0 20px rgba(6,182,212,0.2)' },
-          '50%': { boxShadow: '0 0 30px rgba(131,110,249,0.6), 0 0 60px rgba(6,182,212,0.3)' },
+          '0%, 100%': { boxShadow: '0 0 10px rgba(20,241,149,0.4), 0 0 20px rgba(0,200,83,0.2)' },
+          '50%': { boxShadow: '0 0 30px rgba(20,241,149,0.6), 0 0 60px rgba(0,200,83,0.3)' },
         },
         'border-gradient': {
-          '0%': { borderColor: '#836EF9' },
+          '0%': { borderColor: '#14F195' },
           '33%': { borderColor: '#06B6D4' },
-          '66%': { borderColor: '#EC4899' },
-          '100%': { borderColor: '#836EF9' },
+          '66%': { borderColor: '#00C853' },
+          '100%': { borderColor: '#14F195' },
         },
         'text-glow': {
-          '0%, 100%': { textShadow: '0 0 10px rgba(131,110,249,0.4)' },
-          '50%': { textShadow: '0 0 30px rgba(131,110,249,0.8), 0 0 60px rgba(6,182,212,0.4)' },
+          '0%, 100%': { textShadow: '0 0 10px rgba(20,241,149,0.4)' },
+          '50%': { textShadow: '0 0 30px rgba(20,241,149,0.8), 0 0 60px rgba(0,200,83,0.4)' },
         },
         'card-stagger': {
           '0%': { opacity: '0', transform: 'translateY(16px)' },
@@ -138,15 +139,15 @@ module.exports = {
         },
       },
       boxShadow: {
-        'bolty-sm': '0 0 5px rgba(131, 110, 249, 0.4)',
-        'bolty-md': '0 0 15px rgba(131, 110, 249, 0.3)',
-        'bolty-lg': '0 0 30px rgba(131, 110, 249, 0.2)',
+        'atlas-sm': '0 0 5px rgba(20, 241, 149, 0.4)',
+        'atlas-md': '0 0 15px rgba(20, 241, 149, 0.3)',
+        'atlas-lg': '0 0 30px rgba(20, 241, 149, 0.2)',
         card: '0 4px 20px rgba(0, 0, 0, 0.4)',
       },
       backgroundImage: {
         'terminal-grid': `
-          linear-gradient(rgba(131, 110, 249, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(131, 110, 249, 0.03) 1px, transparent 1px)
+          linear-gradient(rgba(20, 241, 149, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(20, 241, 149, 0.03) 1px, transparent 1px)
         `,
       },
       backgroundSize: {

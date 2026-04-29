@@ -35,13 +35,13 @@ async function loadProvider(): Promise<IEthereumProvider> {
   const mod = await import('@walletconnect/ethereum-provider');
   const provider = await mod.EthereumProvider.init({
     projectId,
-    // Base mainnet (primary chain for Bolty payments).
+    // Base mainnet (primary chain for Atlas payments).
     chains: [8453],
     optionalChains: [1, 10, 137, 42161],
     showQrModal: true,
     metadata: {
-      name: 'Bolty',
-      description: 'Bolty — AI agent + repo marketplace on Base.',
+      name: 'Atlas',
+      description: 'Atlas — AI agent + repo marketplace on Base.',
       url: typeof window !== 'undefined' ? window.location.origin : 'https://bolty.app',
       icons: ['/icon.png'],
     },
@@ -63,7 +63,7 @@ export interface WalletConnectLinkOptions {
 
 /**
  * Triggers the WalletConnect modal, asks the user to sign the standard
- * Bolty nonce message, and posts to the link endpoint. Mirrors the
+ * Atlas nonce message, and posts to the link endpoint. Mirrors the
  * MetaMask flow in `ethereum.ts`.
  */
 export async function linkWalletConnect(

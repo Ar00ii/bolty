@@ -166,7 +166,7 @@ export function ShortcutsModal() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.5) 50%, transparent 100%)',
               }}
             />
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
@@ -174,8 +174,8 @@ export function ShortcutsModal() {
                 <span
                   className="inline-flex items-center justify-center w-7 h-7 rounded-lg"
                   style={{
-                    background: 'rgba(131,110,249,0.12)',
-                    border: '1px solid rgba(131,110,249,0.22)',
+                    background: 'rgba(20,241,149,0.12)',
+                    border: '1px solid rgba(20,241,149,0.22)',
                   }}
                 >
                   <Keyboard className="w-3.5 h-3.5 text-[#a89dff]" strokeWidth={1.75} />

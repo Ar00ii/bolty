@@ -18,7 +18,7 @@ export default function FlipCard({
   description,
   subtitle,
   rotate = 'y',
-  accentColor = 'rgba(131,110,249,0.15)',
+  accentColor = 'rgba(20,241,149,0.15)',
   className,
 }: FlipCardProps) {
   const rotationClass = {
@@ -46,29 +46,29 @@ export default function FlipCard({
           }}
         >
           {/* Corner decorators */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-bolty-400/30" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-bolty-400/30" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-bolty-400/30" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-bolty-400/30" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-atlas-400/30" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-atlas-400/30" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-atlas-400/30" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-atlas-400/30" />
           {/* Glow */}
           <div
             className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{
               background:
-                'radial-gradient(ellipse at center, rgba(131,110,249,0.08) 0%, transparent 70%)',
+                'radial-gradient(ellipse at center, rgba(20,241,149,0.08) 0%, transparent 70%)',
             }}
           />
           {/* Icon */}
           <div
             className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ background: accentColor, border: '1px solid rgba(131,110,249,0.25)' }}
+            style={{ background: accentColor, border: '1px solid rgba(20,241,149,0.25)' }}
           >
             {icon}
           </div>
           <div className="text-center">
             <div className="text-lg font-light text-white mb-1">{title}</div>
             {subtitle && (
-              <div className="text-xs font-mono text-bolty-400 uppercase tracking-widest">
+              <div className="text-xs font-mono text-atlas-400 uppercase tracking-widest">
                 {subtitle}
               </div>
             )}
@@ -86,26 +86,26 @@ export default function FlipCard({
             self[1],
           )}
           style={{
-            background: 'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(8,6,18,0.98) 60%)',
-            border: '1px solid rgba(131,110,249,0.25)',
+            background: 'linear-gradient(135deg, rgba(20,241,149,0.12) 0%, rgba(8,6,18,0.98) 60%)',
+            border: '1px solid rgba(20,241,149,0.25)',
           }}
         >
           {/* Corner decorators */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-bolty-400/50" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-bolty-400/50" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-bolty-400/50" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-bolty-400/50" />
+          <div className="absolute top-3 left-3 w-4 h-4 border-t border-l border-atlas-400/50" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t border-r border-atlas-400/50" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b border-l border-atlas-400/50" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b border-r border-atlas-400/50" />
           <div>
-            <div className="text-xs font-mono text-bolty-400 uppercase tracking-widest mb-3">
+            <div className="text-xs font-mono text-atlas-400 uppercase tracking-widest mb-3">
               {subtitle}
             </div>
             <h3 className="text-xl font-light text-white mb-4 leading-tight">{title}</h3>
-            <div className="w-8 h-px mb-4" style={{ background: 'rgba(131,110,249,0.6)' }} />
+            <div className="w-8 h-px mb-4" style={{ background: 'rgba(20,241,149,0.6)' }} />
             <p className="text-sm text-zinc-300 leading-relaxed">{description}</p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-bolty-400 animate-pulse" />
-            <span className="text-[10px] font-mono text-bolty-400 uppercase tracking-widest">
+            <div className="w-1.5 h-1.5 rounded-full bg-atlas-400 animate-pulse" />
+            <span className="text-[10px] font-mono text-atlas-400 uppercase tracking-widest">
               Active
             </span>
           </div>

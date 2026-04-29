@@ -4,12 +4,12 @@ import React from 'react';
 export default function LaunchpadDocsPage() {
   return (
     <div>
-      <h1>Bolty Launchpad</h1>
+      <h1>Atlas Launchpad</h1>
       <p>
-        Mint a community token for any Bolty listing in two clicks. The
+        Mint a community token for any Atlas listing in two clicks. The
         launchpad runs on top of the <a href="https://flaunch.gg" target="_blank" rel="noopener noreferrer">Flaunch</a>{' '}
         protocol — <strong>RevenueManager contract + Uniswap v4 pool on
-        Base</strong>. Bolty doesn&apos;t reinvent the AMM; we&apos;re the
+        Base</strong>. Atlas doesn&apos;t reinvent the AMM; we&apos;re the
         application layer.
       </p>
 
@@ -40,7 +40,7 @@ export default function LaunchpadDocsPage() {
         </li>
         <li>
           <strong>Fee split</strong>: configurable at launch via the
-          economics slider. Bolty takes <strong>0%</strong> — the full 1%
+          economics slider. Atlas takes <strong>0%</strong> — the full 1%
           streams to the creator + the token&apos;s community treasury per
           your slider position. Immutable after publish.
         </li>

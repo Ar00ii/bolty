@@ -162,9 +162,9 @@ function SetupXContent() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-[13px] font-light text-white transition hover:brightness-110 shrink-0"
             style={{
-              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+              background: 'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.4) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.5), 0 0 24px -8px rgba(131,110,249,0.7)',
+                '0 0 0 1px rgba(20,241,149,0.5), 0 0 24px -8px rgba(20,241,149,0.7)',
             }}
           >
             <BookOpen className="w-4 h-4" strokeWidth={1.75} />
@@ -333,8 +333,8 @@ function SetupXContent() {
             }
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-light text-white transition disabled:opacity-50"
             style={{
-              background: 'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
-              boxShadow: '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+              background: 'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.4) 100%)',
+              boxShadow: '0 0 0 1px rgba(20,241,149,0.5), 0 0 20px -8px rgba(20,241,149,0.6)',
             }}
           >
             {linking ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <KeyRound className="w-3.5 h-3.5" />}
@@ -395,7 +395,7 @@ function SetupXContent() {
           transition: box-shadow 0.15s;
         }
         .input-std:focus {
-          box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.5);
+          box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.5);
         }
       `}</style>
     </div>
@@ -425,8 +425,8 @@ function Section({
         <span
           className="flex h-9 w-9 items-center justify-center rounded-xl text-[10px] font-mono"
           style={{
-            background: 'rgba(131,110,249,0.14)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20,241,149,0.14)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
             color: '#C9BEFF',
           }}
         >
@@ -596,7 +596,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
         <div className="space-y-3">
           <ToggleRow
             label="Enable autonomous posting"
-            sub="Bolty calls your agent webhook on schedule with token context. Agent decides if/what to tweet."
+            sub="Atlas calls your agent webhook on schedule with token context. Agent decides if/what to tweet."
             checked={config.autonomousEnabled}
             disabled={busy}
             onChange={(v) => patch({ autonomousEnabled: v })}
@@ -615,7 +615,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
           />
           <ToggleRow
             label="Reply to mentions"
-            sub="Bolty polls your @handle every 5 min. New mentions go to your agent for an optional reply."
+            sub="Atlas polls your @handle every 5 min. New mentions go to your agent for an optional reply."
             checked={config.mentionsEnabled}
             disabled={busy || !config.autonomousEnabled}
             onChange={(v) => patch({ mentionsEnabled: v })}
@@ -627,7 +627,7 @@ function AutonomousPanel({ listingId }: { listingId: string }) {
               onClick={decideNow}
               disabled={decideBusy || !config.autonomousEnabled}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-light text-white transition disabled:opacity-50"
-              style={{ background: 'rgba(131,110,249,0.15)', boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.4)' }}
+              style={{ background: 'rgba(20,241,149,0.15)', boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.4)' }}
             >
               {decideBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <PlayCircle className="w-3.5 h-3.5" />}
               Ask agent now (test)
@@ -707,7 +707,7 @@ function ToggleRow({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition disabled:opacity-50 ${
-          checked ? 'bg-[#836EF9]' : 'bg-zinc-700'
+          checked ? 'bg-[#14F195]' : 'bg-zinc-700'
         }`}
       >
         <span
@@ -745,11 +745,11 @@ function IntervalRow({
             onClick={() => onChange(h)}
             className={`px-2.5 py-1 rounded-md text-[11.5px] font-light transition disabled:opacity-50 ${
               value === h
-                ? 'bg-[#836EF9]/20 text-white'
+                ? 'bg-[#14F195]/20 text-white'
                 : 'bg-white/5 text-zinc-400 hover:text-white'
             }`}
             style={{
-              boxShadow: value === h ? 'inset 0 0 0 1px rgba(131,110,249,0.5)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+              boxShadow: value === h ? 'inset 0 0 0 1px rgba(20,241,149,0.5)' : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
             {h === 1 ? '1 h' : h === 24 ? '24 h (daily)' : `${h} h`}

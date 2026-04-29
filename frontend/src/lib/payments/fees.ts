@@ -1,11 +1,11 @@
 // Base network dual-fee model.
 // The buyer-side discount lives here: the seller's listing price is the
 // amount they take home, and the platform fee is added on top of that.
-// BOLTY (3%) is therefore strictly cheaper for the buyer than ETH (7%).
+// ATLAS (3%) is therefore strictly cheaper for the buyer than ETH (7%).
 
-export type PaymentMethod = 'ETH' | 'BOLTY';
+export type PaymentMethod = 'ETH' | 'ATLAS';
 
-export const FEE_BPS: Record<PaymentMethod, number> = { ETH: 700, BOLTY: 300 };
+export const FEE_BPS: Record<PaymentMethod, number> = { ETH: 700, ATLAS: 300 };
 
 export function feeRateFor(method: PaymentMethod): number {
   return FEE_BPS[method] / 10000;

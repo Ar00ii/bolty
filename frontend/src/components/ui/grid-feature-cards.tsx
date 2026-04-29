@@ -15,7 +15,7 @@ type FeatureCardProps = React.ComponentProps<'div'> & {
 export function FeatureCard({ feature, className, ...props }: FeatureCardProps) {
   return (
     <div className={cn('relative p-6', className)} {...props}>
-      <feature.icon className="text-bolty-400 size-5" strokeWidth={1.5} aria-hidden />
+      <feature.icon className="text-atlas-400 size-5" strokeWidth={1.5} aria-hidden />
       <h3 className="mt-8 text-sm font-light text-zinc-200">{feature.title}</h3>
       <p className="text-zinc-500 mt-1.5 text-xs leading-relaxed">{feature.description}</p>
     </div>

@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/profile/', '/dm/'],
       },
     ],
-    sitemap: 'https://boltynetwork.xyz/sitemap.xml',
-    host: 'https://boltynetwork.xyz',
+    sitemap: 'https://atlas.market/sitemap.xml',
+    host: 'https://atlas.market',
   };
 }

@@ -28,7 +28,7 @@ interface Order {
   seller: { id: string; username: string | null; avatarUrl: string | null };
 }
 
-const BRAND = '#836EF9';
+const BRAND = '#14F195';
 
 const WEI_PER_ETH = BigInt('1000000000000000000');
 const BIGINT_ZERO = BigInt(0);
@@ -186,13 +186,13 @@ export default function OrderReceiptPage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px no-print"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="flex items-start justify-between mb-8 pb-6 border-b border-zinc-800">
             <div>
               <div className="text-xl font-light tracking-tight mb-1" style={{ color: BRAND }}>
-                Bolty
+                Atlas
               </div>
               <div className="text-[11px] uppercase tracking-wider text-zinc-500">Receipt</div>
             </div>
@@ -234,7 +234,7 @@ export default function OrderReceiptPage() {
               </div>
               <Link
                 href={`/market/sellers/${order.seller.username || ''}`}
-                className="text-sm text-white font-light hover:text-[#836EF9] transition-colors"
+                className="text-sm text-white font-light hover:text-[#14F195] transition-colors"
               >
                 @{order.seller.username || 'seller'}
               </Link>
@@ -254,7 +254,7 @@ export default function OrderReceiptPage() {
                 <div className="min-w-0">
                   <Link
                     href={`/market/agents/${order.listing.id}`}
-                    className="text-sm font-light text-white hover:text-[#836EF9] transition-colors truncate block"
+                    className="text-sm font-light text-white hover:text-[#14F195] transition-colors truncate block"
                   >
                     {order.listing.title}
                   </Link>
@@ -361,13 +361,13 @@ export default function OrderReceiptPage() {
               className="flex items-start gap-2.5 p-3 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.04) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.12) 0%, rgba(20,241,149,0.04) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
               }}
             >
               <Shield className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: BRAND }} />
               <div className="text-[11px] text-zinc-400 leading-relaxed">
-                This transaction was secured by the Bolty escrow contract. Funds are only released
+                This transaction was secured by the Atlas escrow contract. Funds are only released
                 to the seller after the buyer confirms delivery. Escrow status:{' '}
                 <span className="font-mono text-zinc-300">{order.escrowStatus}</span>.
               </div>
@@ -376,7 +376,7 @@ export default function OrderReceiptPage() {
 
           <div className="border-t border-zinc-800 mt-8 pt-6 text-center">
             <p className="text-[11px] text-zinc-500 leading-relaxed">
-              This receipt is issued by Bolty as a proof of purchase recorded on-chain. Keep it for
+              This receipt is issued by Atlas as a proof of purchase recorded on-chain. Keep it for
               your records. For disputes, please open a dispute from the order page within the
               platform SLA.
             </p>

@@ -13,7 +13,7 @@ import { getMetaMaskProvider } from '@/lib/wallet/ethereum';
 type AnyClient = unknown;
 
 /**
- * Lightweight Flaunch SDK wiring. Bolty already uses ethers v6 + raw
+ * Lightweight Flaunch SDK wiring. Atlas already uses ethers v6 + raw
  * window.ethereum for purchases — this module lives alongside that
  * stack and only spins up viem clients on demand for the /bolty swap
  * widget, so adding wagmi isn't required.

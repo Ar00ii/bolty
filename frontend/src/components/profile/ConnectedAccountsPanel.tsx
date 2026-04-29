@@ -10,7 +10,7 @@ import { api, ApiError } from '@/lib/api/client';
 /**
  * "Connected accounts" card on the General profile section.
  *
- * Surfaces every external thing the user has tied to their Bolty
+ * Surfaces every external thing the user has tied to their Atlas
  * account in one panel:
  *   • X (Twitter) — full ConnectXCard inline so connect / disconnect /
  *     status all happen here without leaving the page

@@ -385,7 +385,7 @@ function Input({ ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] font-light ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-atlas-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -394,7 +394,7 @@ function Textarea({ ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-purple-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] resize-none font-light ${props.className ?? ''}`}
+      className={`w-full profile-input bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 text-sm text-[var(--text)] outline-none transition-all duration-250 focus:border-atlas-500/60 focus:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] placeholder:text-[var(--text-muted)] resize-none font-light ${props.className ?? ''}`}
     />
   );
 }
@@ -404,7 +404,7 @@ function SaveButton({ loading, label = 'Save changes' }: { loading: boolean; lab
     <button
       type="submit"
       disabled={loading}
-      className="btn-primary w-full py-3 rounded-2xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-purple-600/20 hover:bg-purple-600/30 transition-all duration-200 border-2 border-purple-500/40 hover:border-purple-500/60 text-purple-200 hover:text-purple-100"
+      className="btn-primary w-full py-3 rounded-2xl text-sm font-light disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-atlas-500/20 hover:bg-atlas-500/30 transition-all duration-200 border-2 border-atlas-500/40 hover:border-atlas-500/60 text-atlas-200 hover:text-atlas-100"
     >
       {loading ? (
         <>
@@ -1107,7 +1107,7 @@ export default function ProfilePage() {
     try {
       const res = await fetch(agentEndpoint.trim(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Bolty-Event': 'health_check' },
+        headers: { 'Content-Type': 'application/json', 'X-Atlas-Event': 'health_check' },
         body: JSON.stringify({ event: 'health_check' }),
         signal: AbortSignal.timeout(8000),
       });
@@ -1356,7 +1356,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-atlas-400 animate-spin" />
       </div>
     );
   }
@@ -1385,7 +1385,7 @@ export default function ProfilePage() {
       {/* App-style two-column shell.
        *  Left:  sticky sidebar with the user identity card on top + the
        *         section list below. Black panel, 1px purple-tinted border,
-       *         active row marked by a 2px left bar in #836EF9.
+       *         active row marked by a 2px left bar in #14F195.
        *  Right: section content. No ambient glows, no cyan accents, no
        *         heavy gradients — clean dark surface with a single brand
        *         accent so the data inside reads. */}
@@ -1403,8 +1403,8 @@ export default function ProfilePage() {
               <div
                 className="w-10 h-10 rounded-full overflow-hidden grid place-items-center shrink-0"
                 style={{
-                  background: 'rgba(131,110,249,0.12)',
-                  border: '1px solid rgba(131,110,249,0.3)',
+                  background: 'rgba(20,241,149,0.12)',
+                  border: '1px solid rgba(20,241,149,0.3)',
                 }}
               >
                 {user?.avatarUrl ? (
@@ -1458,19 +1458,19 @@ export default function ProfilePage() {
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] font-light transition-colors relative"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
-                    background: active ? 'rgba(131,110,249,0.08)' : 'transparent',
+                    background: active ? 'rgba(20,241,149,0.08)' : 'transparent',
                   }}
                 >
                   {active && (
                     <span
                       aria-hidden
                       className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r"
-                      style={{ background: '#836EF9' }}
+                      style={{ background: '#14F195' }}
                     />
                   )}
                   <span
                     className="inline-flex shrink-0"
-                    style={{ color: active ? '#836EF9' : '#71717a' }}
+                    style={{ color: active ? '#14F195' : '#71717a' }}
                   >
                     <Icon className="w-[15px] h-[15px]" />
                   </span>
@@ -1487,7 +1487,7 @@ export default function ProfilePage() {
               {activeTab.label}
             </h1>
             <p className="text-[12.5px] text-zinc-500 mt-0.5">
-              Manage your identity, security and connections on Bolty.
+              Manage your identity, security and connections on Atlas.
             </p>
           </div>
 
@@ -1501,7 +1501,7 @@ export default function ProfilePage() {
             <div className="profile-content-card">
               <SectionHeader
                 title="Identity"
-                subtitle="Your public information on Bolty."
+                subtitle="Your public information on Atlas."
               />
               <Alert type="success" msg={genMsg} />
               <Alert type="error" msg={genErr} />
@@ -1610,7 +1610,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={avatarUploading}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-bolty-500/30 text-[var(--text-muted)] hover:text-bolty-400 transition-all disabled:opacity-50"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-atlas-500/30 text-[var(--text-muted)] hover:text-atlas-400 transition-all disabled:opacity-50"
                   >
                     {avatarUploading ? 'Uploading...' : 'Change photo'}
                   </button>
@@ -1633,8 +1633,8 @@ export default function ProfilePage() {
               <form onSubmit={handleSaveGeneral} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Username">
-                    <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
-                      <span className="px-3 text-bolty-400 font-mono text-sm select-none">@</span>
+                    <div className="flex items-center gap-0 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-atlas-500/50 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.08)] transition-all duration-200">
+                      <span className="px-3 text-atlas-400 font-mono text-sm select-none">@</span>
                       <input
                         type="text"
                         value={username}
@@ -1673,12 +1673,12 @@ export default function ProfilePage() {
                 </Field>
 
                 {userTag && (
-                  <div className="flex items-center justify-between bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3">
+                  <div className="flex items-center justify-between bg-atlas-500/5 border border-atlas-500/15 rounded-xl px-4 py-3">
                     <div>
                       <div className="text-xs text-[var(--text-muted)] uppercase tracking-widest mb-0.5">
                         User ID
                       </div>
-                      <div className="font-mono text-bolty-400 font-light">#{userTag}</div>
+                      <div className="font-mono text-atlas-400 font-light">#{userTag}</div>
                     </div>
                     <div className="text-xs text-[var(--text-muted)] text-right leading-relaxed">
                       Others can find you
@@ -1757,7 +1757,7 @@ export default function ProfilePage() {
                     }>
                   ).map((item) => (
                     <Field key={item.key} label={item.label}>
-                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-purple-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
+                      <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-[10px] px-4 py-3 focus-within:border-atlas-500/60 focus-within:shadow-[0_0_0_3px_rgba(168,85,247,0.1)] transition-all duration-200">
                         {item.icon}
                         <input
                           type="url"
@@ -1810,7 +1810,7 @@ export default function ProfilePage() {
             <div className="profile-content-card">
               <SectionHeader
                 title="Wallets"
-                subtitle="Connect and manage the wallets you use to pay, receive earnings, and sign transactions on Bolty."
+                subtitle="Connect and manage the wallets you use to pay, receive earnings, and sign transactions on Atlas."
               />
               <Alert type="success" msg={walletMsg} />
               <Alert type="error" msg={walletErr} />
@@ -1898,13 +1898,13 @@ export default function ProfilePage() {
                                     onChange={(e) => setWalletLabelDraft(e.target.value)}
                                     placeholder="Label (e.g. Trading, Cold storage)"
                                     maxLength={60}
-                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/90 placeholder-white/40 focus:outline-none focus:border-[#836EF9]/50"
+                                    className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white/90 placeholder-white/40 focus:outline-none focus:border-[#14F195]/50"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => handleSaveWalletLabel(w.id)}
                                     disabled={walletActionId === w.id}
-                                    className="text-xs px-3 py-1.5 rounded-lg bg-[#836EF9]/80 hover:bg-[#836EF9] text-white disabled:opacity-50"
+                                    className="text-xs px-3 py-1.5 rounded-lg bg-[#14F195]/80 hover:bg-[#14F195] text-white disabled:opacity-50"
                                   >
                                     Save
                                   </button>
@@ -2072,8 +2072,8 @@ export default function ProfilePage() {
               <div
                 className="rounded-xl p-4 space-y-3"
                 style={{
-                  background: 'rgba(131,110,249,0.06)',
-                  border: '1px solid rgba(131,110,249,0.18)',
+                  background: 'rgba(20,241,149,0.06)',
+                  border: '1px solid rgba(20,241,149,0.18)',
                 }}
               >
                 <div className="flex items-center gap-2">
@@ -2082,14 +2082,14 @@ export default function ProfilePage() {
                   </span>
                 </div>
                 <p className="text-[12px] text-zinc-300 font-light leading-relaxed">
-                  API keys let your code, agents, or third-party tools call the Bolty API on
+                  API keys let your code, agents, or third-party tools call the Atlas API on
                   your behalf. Anyone who holds one of your keys can read your data and
                   publish on your account, so treat them like passwords.
                 </p>
                 <ul className="text-[11.5px] text-zinc-400 font-light leading-relaxed space-y-1 list-disc pl-4">
                   <li>
                     <span className="text-zinc-200">Use in:</span> agent webhooks, marketplace
-                    automations, internal scripts, CI/CD that pings Bolty.
+                    automations, internal scripts, CI/CD that pings Atlas.
                   </li>
                   <li>
                     <span className="text-zinc-200">Header:</span>{' '}
@@ -2139,7 +2139,7 @@ export default function ProfilePage() {
                 />
                 <Alert type="success" msg={friendsMsg} />
                 <Alert type="error" msg={friendsErr} />
-                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-bolty-500/50 focus-within:shadow-[0_0_0_3px_rgba(131,110,249,0.08)] transition-all duration-200">
+                <div className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-4 py-3 focus-within:border-atlas-500/50 focus-within:shadow-[0_0_0_3px_rgba(20,241,149,0.08)] transition-all duration-200">
                   <IconSearch className="w-4 h-4 text-[var(--text-muted)] flex-shrink-0" />
                   <input
                     type="text"
@@ -2149,7 +2149,7 @@ export default function ProfilePage() {
                     className="flex-1 bg-transparent text-sm text-[var(--text)] outline-none placeholder:text-[var(--text-muted)]"
                   />
                   {searching ? (
-                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin flex-shrink-0" />
+                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-atlas-400 animate-spin flex-shrink-0" />
                   ) : (
                     searchQuery && (
                       <button
@@ -2184,13 +2184,13 @@ export default function ProfilePage() {
                           </div>
                           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                             {u.username && <span>@{u.username}</span>}
-                            {u.userTag && <span className="text-bolty-400/70">#{u.userTag}</span>}
+                            {u.userTag && <span className="text-atlas-400/70">#{u.userTag}</span>}
                           </div>
                         </div>
                         <button
                           onClick={() => handleSendFriendRequest(u.id)}
                           disabled={sendingTo === u.id}
-                          className="text-xs text-bolty-400 border border-bolty-500/30 hover:border-bolty-400/60 hover:bg-bolty-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
+                          className="text-xs text-atlas-400 border border-atlas-500/30 hover:border-atlas-400/60 hover:bg-atlas-500/8 px-3 py-1.5 rounded-lg transition-all duration-200 disabled:opacity-50 shrink-0"
                         >
                           {sendingTo === u.id ? '...' : '+ Add'}
                         </button>
@@ -2210,7 +2210,7 @@ export default function ProfilePage() {
               <div className="profile-content-card">
                 {friendsLoading ? (
                   <div className="flex items-center gap-2 py-6 justify-center text-xs text-[var(--text-muted)]">
-                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-bolty-400 animate-spin" />
+                    <div className="w-4 h-4 rounded-full border-2 border-[var(--border)] border-t-atlas-400 animate-spin" />
                     Loading...
                   </div>
                 ) : (
@@ -2240,14 +2240,14 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${req.from.username}`}
-                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
+                                  className="text-sm font-light text-[var(--text)] hover:text-atlas-300 transition-colors"
                                 >
                                   {req.from.displayName || req.from.username}
                                 </Link>
                                 <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                                   {req.from.username && <span>@{req.from.username}</span>}
                                   {req.from.userTag && (
-                                    <span className="text-bolty-400/60">#{req.from.userTag}</span>
+                                    <span className="text-atlas-400/60">#{req.from.userTag}</span>
                                   )}
                                 </div>
                               </div>
@@ -2277,8 +2277,8 @@ export default function ProfilePage() {
                     {sentRequests.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 mb-3">
-                          <span className="w-1.5 h-1.5 rounded-full bg-bolty-400" />
-                          <span className="text-xs font-mono text-bolty-300 uppercase tracking-widest">
+                          <span className="w-1.5 h-1.5 rounded-full bg-atlas-400" />
+                          <span className="text-xs font-mono text-atlas-300 uppercase tracking-widest">
                             {sentRequests.length} sent request
                             {sentRequests.length !== 1 ? 's' : ''}
                           </span>
@@ -2287,7 +2287,7 @@ export default function ProfilePage() {
                           {sentRequests.map((req) => (
                             <div
                               key={req.id}
-                              className="flex items-center gap-3 bg-bolty-500/5 border border-bolty-500/15 rounded-xl px-4 py-3"
+                              className="flex items-center gap-3 bg-atlas-500/5 border border-atlas-500/15 rounded-xl px-4 py-3"
                             >
                               <Avatar
                                 src={req.to.avatarUrl}
@@ -2298,14 +2298,14 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${req.to.username}`}
-                                  className="text-sm font-light text-[var(--text)] hover:text-bolty-300 transition-colors"
+                                  className="text-sm font-light text-[var(--text)] hover:text-atlas-300 transition-colors"
                                 >
                                   {req.to.displayName || req.to.username}
                                 </Link>
                                 <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] font-mono">
                                   {req.to.username && <span>@{req.to.username}</span>}
                                   {req.to.userTag && (
-                                    <span className="text-bolty-400/60">#{req.to.userTag}</span>
+                                    <span className="text-atlas-400/60">#{req.to.userTag}</span>
                                   )}
                                   <span className="text-white/30">· awaiting response</span>
                                 </div>
@@ -2342,7 +2342,7 @@ export default function ProfilePage() {
                           {friends.map((f) => (
                             <div
                               key={f.id}
-                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-bolty-500/40 hover:shadow-lg transition-all duration-200"
+                              className="flex items-center gap-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl px-3 py-2.5 group hover:border-atlas-500/40 hover:shadow-lg transition-all duration-200"
                             >
                               <Avatar
                                 src={f.friend.avatarUrl}
@@ -2353,21 +2353,21 @@ export default function ProfilePage() {
                               <div className="flex-1 min-w-0">
                                 <Link
                                   href={`/u/${f.friend.username}`}
-                                  className="text-xs font-light text-[var(--text)] hover:text-bolty-300 transition-colors truncate block"
+                                  className="text-xs font-light text-[var(--text)] hover:text-atlas-300 transition-colors truncate block"
                                 >
                                   {f.friend.displayName || f.friend.username}
                                 </Link>
                                 <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-mono">
                                   {f.friend.username && <span>@{f.friend.username}</span>}
                                   {f.friend.userTag && (
-                                    <span className="text-bolty-300">#{f.friend.userTag}</span>
+                                    <span className="text-atlas-300">#{f.friend.userTag}</span>
                                   )}
                                 </div>
                               </div>
                               <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Link
                                   href={`/dm?peer=${f.friend.id}`}
-                                  className="text-xs text-bolty-400 border border-bolty-500/25 hover:border-bolty-400/50 hover:bg-bolty-500/8 px-2 py-1 rounded-lg transition-all duration-200"
+                                  className="text-xs text-atlas-400 border border-atlas-500/25 hover:border-atlas-400/50 hover:bg-atlas-500/8 px-2 py-1 rounded-lg transition-all duration-200"
                                   title="Direct message"
                                 >
                                   DM
@@ -2420,7 +2420,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setEmailStep('form')}
-                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-purple-500/40 text-[var(--text-muted)] hover:text-purple-400 transition-all"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] hover:border-atlas-500/40 text-[var(--text-muted)] hover:text-atlas-400 transition-all"
                     >
                       Change
                     </button>
@@ -2454,9 +2454,9 @@ export default function ProfilePage() {
                         className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {emailLoading ? 'Sending...' : 'Send verification code'}
@@ -2479,7 +2479,7 @@ export default function ProfilePage() {
                 {emailStep === 'otp' && (
                   <form onSubmit={handleConfirmEmailChange} className="space-y-4">
                     <p className="text-sm text-[var(--text-secondary)] font-light">
-                      A 6-digit code was sent to <span className="text-purple-400">{newEmail}</span>
+                      A 6-digit code was sent to <span className="text-atlas-400">{newEmail}</span>
                       .
                     </p>
                     <Field label="Verification Code">
@@ -2498,9 +2498,9 @@ export default function ProfilePage() {
                         className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {emailLoading ? 'Confirming...' : 'Confirm email change'}
@@ -2569,14 +2569,14 @@ export default function ProfilePage() {
 
                 {enable2FAStep === 'scan' && (
                   <div className="space-y-5 mt-2">
-                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent">
+                    <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center p-5 rounded-xl border border-atlas-500/20 bg-gradient-to-br from-atlas-500/5 to-transparent">
                       {twoFAQrCode ? (
                         <div className="flex justify-center md:justify-start">
                           <div
                             className="p-3 rounded-xl bg-white"
                             style={{
                               boxShadow:
-                                '0 0 0 1px rgba(131,110,249,0.3), 0 0 32px -8px rgba(131,110,249,0.45)',
+                                '0 0 0 1px rgba(20,241,149,0.3), 0 0 32px -8px rgba(20,241,149,0.45)',
                             }}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -2591,12 +2591,12 @@ export default function ProfilePage() {
                         </div>
                       ) : (
                         <div className="w-[180px] h-[180px] rounded-xl bg-[var(--bg-elevated)] border border-[var(--border)] flex items-center justify-center">
-                          <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-purple-400 animate-spin" />
+                          <div className="w-5 h-5 rounded-full border-2 border-[var(--border)] border-t-atlas-400 animate-spin" />
                         </div>
                       )}
                       <div className="space-y-3 min-w-0">
                         <div>
-                          <div className="text-xs uppercase tracking-widest text-purple-300/80 mb-1">
+                          <div className="text-xs uppercase tracking-widest text-atlas-300/80 mb-1">
                             Step 1 · Scan
                           </div>
                           <p className="text-sm text-[var(--text-secondary)] font-light leading-relaxed">
@@ -2616,7 +2616,7 @@ export default function ProfilePage() {
                               <button
                                 type="button"
                                 onClick={handleCopy2FASecret}
-                                className="text-[11px] px-2 py-1 rounded-md border border-purple-500/25 hover:border-purple-400/50 text-purple-300 hover:text-purple-200 transition-all shrink-0"
+                                className="text-[11px] px-2 py-1 rounded-md border border-atlas-500/25 hover:border-atlas-400/50 text-atlas-300 hover:text-atlas-200 transition-all shrink-0"
                               >
                                 {twoFASecretCopied ? 'Copied' : 'Copy'}
                               </button>
@@ -2627,7 +2627,7 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-xs uppercase tracking-widest text-purple-300/80">
+                      <div className="text-xs uppercase tracking-widest text-atlas-300/80">
                         Step 2 · Verify
                       </div>
                       <Field label="6-digit code from your authenticator">
@@ -2653,9 +2653,9 @@ export default function ProfilePage() {
                         className="flex-1 py-3 rounded-xl text-sm font-light disabled:opacity-50 text-white transition-all"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                            'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
+                            'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08)',
                         }}
                       >
                         {toggling2FA ? 'Verifying...' : 'Verify & Enable 2FA'}
@@ -2701,7 +2701,7 @@ export default function ProfilePage() {
                     type="button"
                     onClick={handleRequestPasswordReset}
                     disabled={pwLoading || !userEmail}
-                    className="text-xs px-3 py-1.5 rounded-lg border border-purple-500/25 hover:border-purple-500/50 text-purple-300 hover:text-purple-200 bg-purple-500/5 hover:bg-purple-500/10 transition-all disabled:opacity-50 shrink-0"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-atlas-500/25 hover:border-atlas-500/50 text-atlas-300 hover:text-atlas-200 bg-atlas-500/5 hover:bg-atlas-500/10 transition-all disabled:opacity-50 shrink-0"
                   >
                     {pwLoading
                       ? 'Sending...'
@@ -2890,8 +2890,8 @@ function RankProgressPanel({ points }: { points: number }) {
             style={{
               width: `${progress}%`,
               background:
-                'linear-gradient(90deg, #06B6D4 0%, #836EF9 50%, #EC4899 100%)',
-              boxShadow: '0 0 10px rgba(131,110,249,0.5)',
+                'linear-gradient(90deg, #06B6D4 0%, #14F195 50%, #EC4899 100%)',
+              boxShadow: '0 0 10px rgba(20,241,149,0.5)',
             }}
           />
         </div>

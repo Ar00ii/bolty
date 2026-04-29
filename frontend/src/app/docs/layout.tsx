@@ -5,8 +5,8 @@ import './_components/docs-prose.css';
 import { DocsHero, DocsSidebar } from './_components/DocsChrome';
 
 export const metadata: Metadata = {
-  title: 'Bolty Docs',
-  description: 'Build, secure, and ship AI agents on Bolty.',
+  title: 'Atlas Docs',
+  description: 'Build, secure, and ship AI agents on Atlas.',
 };
 
 /**
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
  *
  * Visual goals (mirroring the landing + launchpad surfaces):
  *  - Pure black background.
- *  - Brand purple (#836EF9) as the only chromatic accent — links,
+ *  - Brand purple (#14F195) as the only chromatic accent — links,
  *    sidebar active state, gradient hero word, list bullets,
  *    blockquote rail.
  *  - Default to font-weight 300 EVERYWHERE per the project design

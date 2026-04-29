@@ -211,7 +211,7 @@ function CreateKeyForm({
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
         }}
       />
       <h3 className="text-sm font-light text-white mb-4">Create new API key</h3>
@@ -225,7 +225,7 @@ function CreateKeyForm({
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g., Production, CI/CD, Bot #3"
-            className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+            className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-all focus:shadow-[0_0_0_1px_rgba(20,241,149,0.45),_0_0_0_4px_rgba(20,241,149,0.12)]"
             style={{
               background: 'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
               boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
@@ -242,9 +242,9 @@ function CreateKeyForm({
           className="px-4 py-2 rounded-lg text-sm font-light flex items-center gap-1.5 transition-all hover:scale-[1.02] disabled:opacity-60"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+              'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
             boxShadow:
-              'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+              'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
             color: '#fff',
           }}
         >
@@ -442,9 +442,9 @@ function IntegrationPanel() {
     "agentId": "agt_...",
     "input": { "task": "...", "data": "..." }
   }'`,
-    node: `import { Bolty } from "@bolty/sdk";
+    node: `import { Atlas } from "@bolty/sdk";
 
-const bolty = new Bolty({
+const bolty = new Atlas({
   apiKey: process.env.BOLTY_API_KEY,
 });
 
@@ -452,9 +452,9 @@ const result = await bolty.agents.invoke({
   agentId: "agt_...",
   input: { task: "...", data: "..." },
 });`,
-    python: `from bolty import Bolty
+    python: `from bolty import Atlas
 
-bolty = Bolty(api_key=os.environ["BOLTY_API_KEY"])
+bolty = Atlas(api_key=os.environ["BOLTY_API_KEY"])
 
 result = bolty.agents.invoke(
     agent_id="agt_...",
@@ -478,7 +478,7 @@ result = bolty.agents.invoke(
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         background:
-          'linear-gradient(135deg, rgba(131,110,249,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
+          'linear-gradient(135deg, rgba(20,241,149,0.06) 0%, rgba(6,182,212,0.04) 100%), rgba(0,0,0,0.4)',
         backdropFilter: 'blur(6px)',
       }}
     >
@@ -488,13 +488,13 @@ result = bolty.agents.invoke(
             <span
               className="w-7 h-7 rounded-md flex items-center justify-center"
               style={{
-                background: 'rgba(131,110,249,0.12)',
-                border: '1px solid rgba(131,110,249,0.3)',
+                background: 'rgba(20,241,149,0.12)',
+                border: '1px solid rgba(20,241,149,0.3)',
               }}
             >
-              <Code2 className="w-3.5 h-3.5 text-purple-300" />
+              <Code2 className="w-3.5 h-3.5 text-atlas-300" />
             </span>
-            <span className="text-[11px] uppercase tracking-[0.25em] text-purple-300/80 font-light">
+            <span className="text-[11px] uppercase tracking-[0.25em] text-atlas-300/80 font-light">
               Quick integration
             </span>
           </div>
@@ -506,7 +506,7 @@ result = bolty.agents.invoke(
           <div className="flex items-center gap-2">
             <a
               href="/docs/agent-api"
-              className="inline-flex items-center gap-1.5 text-[11px] text-purple-300 hover:text-purple-200 transition-colors"
+              className="inline-flex items-center gap-1.5 text-[11px] text-atlas-300 hover:text-atlas-200 transition-colors"
             >
               <Terminal className="w-3 h-3" /> Read API docs
               <ArrowUpRight className="w-3 h-3" />
@@ -526,7 +526,7 @@ result = bolty.agents.invoke(
                     whileTap={{ scale: 0.95 }}
                     transition={{ type: 'spring', stiffness: 360, damping: 22 }}
                     className={`relative text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded transition-colors ${
-                      active ? 'text-purple-200' : 'text-zinc-500 hover:text-zinc-300'
+                      active ? 'text-atlas-200' : 'text-zinc-500 hover:text-zinc-300'
                     }`}
                   >
                     {active && (
@@ -536,8 +536,8 @@ result = bolty.agents.invoke(
                         aria-hidden="true"
                         className="absolute inset-0 rounded"
                         style={{
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                          background: 'rgba(20,241,149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
                         }}
                       />
                     )}
@@ -662,7 +662,7 @@ export default function ApiKeysPage() {
             <GradientText gradient="purple">API Keys</GradientText>
           </h1>
           <p className="text-sm text-zinc-400">
-            Create and manage API keys for programmatic access to Bolty. Each key is signed,
+            Create and manage API keys for programmatic access to Atlas. Each key is signed,
             auditable, and can be independently revoked.
           </p>
         </div>
@@ -673,7 +673,7 @@ export default function ApiKeysPage() {
             icon={<Key className="w-3.5 h-3.5" />}
             label="Total keys"
             value={keys.length.toString()}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <KeyStatCard
             icon={<Activity className="w-3.5 h-3.5" />}
@@ -763,7 +763,7 @@ export default function ApiKeysPage() {
             <Key className="w-10 h-10 text-zinc-700 mx-auto mb-3" strokeWidth={1} />
             <h3 className="text-base font-light text-white mb-2">No API keys yet</h3>
             <p className="text-sm text-zinc-500 mb-6 max-w-sm mx-auto">
-              Create your first API key to start building with Bolty&apos;s agents and repositories
+              Create your first API key to start building with Atlas&apos;s agents and repositories
               programmatically.
             </p>
           </div>
@@ -800,7 +800,7 @@ export default function ApiKeysPage() {
           }}
         >
           <h3 className="text-sm font-light text-white mb-3 flex items-center gap-2">
-            <Shield className="w-4 h-4 text-purple-400" /> Security best practices
+            <Shield className="w-4 h-4 text-atlas-400" /> Security best practices
           </h3>
           <ul className="space-y-2 text-xs text-zinc-400 font-light">
             <li>• Never expose API keys in client-side code or public repositories</li>

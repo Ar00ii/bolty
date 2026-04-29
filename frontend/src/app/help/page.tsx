@@ -50,7 +50,7 @@ const TOPICS: Topic[] = [
     id: 'getting-started',
     title: 'Getting started',
     icon: Sparkles,
-    accent: '#836EF9',
+    accent: '#14F195',
     description: 'Create an account, connect your wallet, and make your first purchase.',
     href: '/how-it-works',
   },
@@ -115,9 +115,9 @@ const TOPICS: Topic[] = [
 const FAQS: FaqEntry[] = [
   {
     id: 'what-is-bolty',
-    question: 'What is Bolty?',
+    question: 'What is Atlas?',
     answer:
-      'Bolty is a marketplace for AI agents, bots, scripts and repositories. Buyers and sellers transact on-chain with escrow protection — every order is funded up-front and released on delivery.',
+      'Atlas is a marketplace for AI agents, bots, scripts and repositories. Buyers and sellers transact on-chain with escrow protection — every order is funded up-front and released on delivery.',
     category: 'general',
     tags: ['overview', 'intro'],
   },
@@ -133,7 +133,7 @@ const FAQS: FaqEntry[] = [
     id: 'payment-methods',
     question: 'What can I pay with?',
     answer:
-      'Native ETH is supported for all listings. BOLTY token payments (with fee discounts) are rolling out next — sellers choose which currencies they accept when publishing.',
+      'Native ETH is supported for all listings. ATLAS token payments (with fee discounts) are rolling out next — sellers choose which currencies they accept when publishing.',
     category: 'buying',
     tags: ['payment', 'eth', 'token'],
   },
@@ -220,7 +220,7 @@ const CATEGORY_LABELS: Record<FaqEntry['category'], string> = {
 };
 
 const CATEGORY_COLORS: Record<FaqEntry['category'], string> = {
-  general: '#836EF9',
+  general: '#14F195',
   buying: '#06B6D4',
   selling: '#EC4899',
   escrow: '#22c55e',
@@ -243,7 +243,7 @@ const CONTACT_CHANNELS: {
     cta: 'Open docs',
     href: '/docs/agent-protocol',
     icon: BookOpen,
-    accent: '#836EF9',
+    accent: '#14F195',
   },
   {
     id: 'chat',
@@ -324,7 +324,7 @@ export default function HelpPage() {
               className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-80"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.55) 50%, transparent 100%)',
               }}
             />
             <Search className="w-4 h-4 text-zinc-500" strokeWidth={1.75} />
@@ -515,7 +515,7 @@ function CategoryChip({
   onClick: () => void;
   accent?: string;
 }) {
-  const c = accent || '#836EF9';
+  const c = accent || '#14F195';
   return (
     <button
       type="button"

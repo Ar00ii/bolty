@@ -21,7 +21,7 @@ const TYPE_META: Record<
   MARKET_NEW_SALE: { icon: DollarSign, accent: 'text-emerald-400' },
   MARKET_NEW_REVIEW: { icon: Star, accent: 'text-yellow-400' },
   MARKET_ORDER_DELIVERED: { icon: Package, accent: 'text-cyan-400' },
-  MARKET_ORDER_COMPLETED: { icon: PartyPopper, accent: 'text-[#836EF9]' },
+  MARKET_ORDER_COMPLETED: { icon: PartyPopper, accent: 'text-[#14F195]' },
   MARKET_NEGOTIATION_MESSAGE: { icon: MessageSquare, accent: 'text-zinc-300' },
   SYSTEM: { icon: Bell, accent: 'text-zinc-400' },
 };
@@ -136,7 +136,7 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
               style={{
                 background: 'linear-gradient(180deg, #9a83ff 0%, #7056ec 100%)',
                 boxShadow:
-                  '0 2px 8px -1px rgba(131,110,249,0.55), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  '0 2px 8px -1px rgba(20,241,149,0.55), inset 0 1px 0 rgba(255,255,255,0.2)',
               }}
               aria-hidden="true"
             >
@@ -165,7 +165,7 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
               className="pointer-events-none absolute inset-x-0 top-0 h-px"
               style={{
                 background:
-                  'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.5) 50%, transparent 100%)',
+                  'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.5) 50%, transparent 100%)',
               }}
             />
             <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.06]">
@@ -195,8 +195,8 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
                   <div
                     className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
                     style={{
-                      background: 'rgba(131,110,249,0.08)',
-                      border: '1px solid rgba(131,110,249,0.18)',
+                      background: 'rgba(20,241,149,0.08)',
+                      border: '1px solid rgba(20,241,149,0.18)',
                     }}
                   >
                     <Bell className="w-4 h-4 text-[#a89dff]" strokeWidth={1.75} />
@@ -216,7 +216,7 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
                       <div
                         className={`flex gap-3 px-4 py-3 transition-colors ${
                           unread
-                            ? 'bg-[#836EF9]/[0.045] hover:bg-[#836EF9]/[0.07]'
+                            ? 'bg-[#14F195]/[0.045] hover:bg-[#14F195]/[0.07]'
                             : 'hover:bg-white/[0.03]'
                         }`}
                       >
@@ -245,8 +245,8 @@ export function NotificationsBell({ isAuthenticated }: { isAuthenticated: boolea
                             aria-hidden="true"
                             className="shrink-0 w-1.5 h-1.5 rounded-full mt-2"
                             style={{
-                              background: '#836EF9',
-                              boxShadow: '0 0 8px rgba(131,110,249,0.6)',
+                              background: '#14F195',
+                              boxShadow: '0 0 8px rgba(20,241,149,0.6)',
                             }}
                           />
                         )}

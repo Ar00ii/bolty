@@ -63,7 +63,7 @@ interface FormState {
   avgLatency: string;
   license: string;
   price: string;
-  currency: 'ETH' | 'USD' | 'BOLTY';
+  currency: 'ETH' | 'USD' | 'ATLAS';
 }
 
 const EMPTY: FormState = {
@@ -410,7 +410,7 @@ export default function PublishAgentPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#07070A]">
-        <Loader2 className="h-5 w-5 animate-spin text-[#836EF9]" />
+        <Loader2 className="h-5 w-5 animate-spin text-[#14F195]" />
       </div>
     );
   }
@@ -422,7 +422,7 @@ export default function PublishAgentPage() {
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           background:
-            'radial-gradient(1100px 650px at 15% -10%, rgba(131,110,249,0.15), transparent 60%), radial-gradient(900px 560px at 95% 10%, rgba(6,182,212,0.10), transparent 60%)',
+            'radial-gradient(1100px 650px at 15% -10%, rgba(20,241,149,0.15), transparent 60%), radial-gradient(900px 560px at 95% 10%, rgba(6,182,212,0.10), transparent 60%)',
         }}
       />
 
@@ -441,8 +441,8 @@ export default function PublishAgentPage() {
           <div
             className="mb-4 flex items-center justify-between gap-3 rounded-xl px-3 py-2 text-xs"
             style={{
-              background: 'rgba(131,110,249,0.08)',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+              background: 'rgba(20,241,149,0.08)',
+              boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
               color: '#C9BEFF',
             }}
           >
@@ -471,22 +471,22 @@ export default function PublishAgentPage() {
             <span
               className="flex h-11 w-11 items-center justify-center rounded-xl"
               style={{
-                background: 'linear-gradient(135deg, rgba(131,110,249,0.22), rgba(6,182,212,0.14))',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                background: 'linear-gradient(135deg, rgba(20,241,149,0.22), rgba(6,182,212,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
               }}
             >
               <Rocket className="h-5 w-5 text-[#C9BEFF]" />
             </span>
             <div>
               <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-white/40">
-                <Sparkles className="h-3 w-3 text-[#836EF9]" />
+                <Sparkles className="h-3 w-3 text-[#14F195]" />
                 Agent deployment
               </div>
               <h1 className="mt-0.5 text-2xl font-light tracking-tight sm:text-3xl">
                 Deploy a new agent
               </h1>
               <p className="mt-1 max-w-2xl text-sm font-light text-white/60">
-                Ship an AI agent to the Bolty marketplace. Configure its protocol,
+                Ship an AI agent to the Atlas marketplace. Configure its protocol,
                 technical specs, and pricing — your buyers will be able to
                 invoke it the moment you publish.
               </p>
@@ -546,7 +546,7 @@ export default function PublishAgentPage() {
                         onClick={() => set('category', c.id)}
                         className={`rounded-lg px-2.5 py-1 text-[11.5px] transition ${
                           active
-                            ? 'bg-[#836EF9]/20 text-white ring-1 ring-[#836EF9]/50'
+                            ? 'bg-[#14F195]/20 text-white ring-1 ring-[#14F195]/50'
                             : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
                         }`}
                       >
@@ -598,14 +598,14 @@ export default function PublishAgentPage() {
               icon={Radio}
               step="02"
               title="Deploy protocol"
-              description="Pick the contract your endpoint speaks. Bolty will probe it server-side before you publish."
+              description="Pick the contract your endpoint speaks. Atlas will probe it server-side before you publish."
             >
               <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
                 <ProtocolOption
                   active={form.protocol === 'webhook'}
                   icon={Globe}
-                  name="Bolty webhook"
-                  tagline="Bolty POSTs JSON, you reply { reply: string }."
+                  name="Atlas webhook"
+                  tagline="Atlas POSTs JSON, you reply { reply: string }."
                   onClick={() => set('protocol', 'webhook')}
                 />
                 <ProtocolOption
@@ -626,7 +626,7 @@ export default function PublishAgentPage() {
                   active={form.protocol === 'sandbox'}
                   icon={FileCode}
                   name="Sandboxed file"
-                  tagline="Upload code, Bolty runs it server-side."
+                  tagline="Upload code, Atlas runs it server-side."
                   onClick={() => set('protocol', 'sandbox')}
                 />
                 <ProtocolOption
@@ -640,7 +640,7 @@ export default function PublishAgentPage() {
                   active={false}
                   icon={Cpu}
                   name="Docker container"
-                  tagline="Coming soon — pull from a registry, Bolty runs it isolated."
+                  tagline="Coming soon — pull from a registry, Atlas runs it isolated."
                   onClick={() => {
                     /* docker is coming-soon; the picker rejects clicks */
                   }}
@@ -769,7 +769,7 @@ export default function PublishAgentPage() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 px-4 py-4 text-sm font-light text-white/70 transition hover:border-[#836EF9]/40 hover:bg-[#836EF9]/5 hover:text-white disabled:opacity-50"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 px-4 py-4 text-sm font-light text-white/70 transition hover:border-[#14F195]/40 hover:bg-[#14F195]/5 hover:text-white disabled:opacity-50"
                     >
                       {uploading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -877,7 +877,7 @@ export default function PublishAgentPage() {
                   >
                     <option value="ETH">ETH</option>
                     <option value="USD">USD</option>
-                    <option value="BOLTY">BOLTY</option>
+                    <option value="ATLAS">ATLAS</option>
                   </select>
                 </Field>
               </div>
@@ -900,7 +900,7 @@ export default function PublishAgentPage() {
               <button
                 onClick={submit}
                 disabled={!canSubmit || submitting}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#836EF9] to-[#6B4FE8] px-5 py-2.5 text-sm font-normal text-white shadow-[0_0_30px_-8px_#836EF9] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#14F195] to-[#6B4FE8] px-5 py-2.5 text-sm font-normal text-white shadow-[0_0_30px_-8px_#14F195] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 {submitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -934,7 +934,7 @@ export default function PublishAgentPage() {
           transition: box-shadow 0.15s;
         }
         .input-std:focus {
-          box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.5);
+          box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.5);
         }
         textarea.input-std {
           resize: vertical;
@@ -979,8 +979,8 @@ function Section({
         <span
           className="flex h-9 w-9 items-center justify-center rounded-xl text-[10px] font-mono tracking-wider"
           style={{
-            background: 'rgba(131,110,249,0.14)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20,241,149,0.14)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
             color: '#C9BEFF',
           }}
         >
@@ -1047,19 +1047,19 @@ function ProtocolOption({
         disabled
           ? 'cursor-not-allowed opacity-50 ring-1 ring-white/5'
           : active
-            ? 'ring-2 ring-[#836EF9]/60'
+            ? 'ring-2 ring-[#14F195]/60'
             : 'ring-1 ring-white/5 hover:ring-white/15'
       }`}
       style={{
         background: active
-          ? 'linear-gradient(180deg, rgba(131,110,249,0.18), rgba(131,110,249,0.06))'
+          ? 'linear-gradient(180deg, rgba(20,241,149,0.18), rgba(20,241,149,0.06))'
           : 'rgba(255,255,255,0.02)',
       }}
     >
       <span
         className="flex h-7 w-7 items-center justify-center rounded-lg"
         style={{
-          background: active ? 'rgba(131,110,249,0.22)' : 'rgba(255,255,255,0.05)',
+          background: active ? 'rgba(20,241,149,0.22)' : 'rgba(255,255,255,0.05)',
         }}
       >
         <Icon className="h-3.5 w-3.5" />
@@ -1069,7 +1069,7 @@ function ProtocolOption({
         <div className="mt-0.5 text-[10.5px] font-light text-white/50">{tagline}</div>
       </div>
       {active && !disabled && (
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#836EF9]/20 px-1.5 py-[1px] text-[9.5px] uppercase tracking-wide text-[#C9BEFF]">
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#14F195]/20 px-1.5 py-[1px] text-[9.5px] uppercase tracking-wide text-[#C9BEFF]">
           <Check className="h-2.5 w-2.5" />
           Selected
         </span>
@@ -1125,8 +1125,8 @@ function PreviewCard({ form }: { form: FormState }) {
           <span
             className="flex h-8 w-8 items-center justify-center rounded-lg"
             style={{
-              background: 'linear-gradient(135deg, rgba(131,110,249,0.24), rgba(6,182,212,0.14))',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+              background: 'linear-gradient(135deg, rgba(20,241,149,0.24), rgba(6,182,212,0.14))',
+              boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
             }}
           >
             <Bot className="h-4 w-4 text-[#C9BEFF]" />
@@ -1141,10 +1141,10 @@ function PreviewCard({ form }: { form: FormState }) {
           </div>
           {form.agentEndpoint && (
             <span
-              className="inline-flex items-center gap-0.5 rounded-md bg-[#836EF9]/15 px-1.5 py-[1px] text-[9px] text-[#C9BEFF]"
-              style={{ boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)' }}
+              className="inline-flex items-center gap-0.5 rounded-md bg-[#14F195]/15 px-1.5 py-[1px] text-[9px] text-[#C9BEFF]"
+              style={{ boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)' }}
             >
-              <span className="h-1 w-1 animate-pulse rounded-full bg-[#836EF9]" />
+              <span className="h-1 w-1 animate-pulse rounded-full bg-[#14F195]" />
               AI
             </span>
           )}
@@ -1184,8 +1184,8 @@ function TipsCard() {
       className="mt-3 rounded-2xl p-4 text-[11.5px] font-light text-white/65"
       style={{
         background:
-          'linear-gradient(135deg, rgba(131,110,249,0.12) 0%, rgba(6,182,212,0.06) 100%)',
-        boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.2)',
+          'linear-gradient(135deg, rgba(20,241,149,0.12) 0%, rgba(6,182,212,0.06) 100%)',
+        boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.2)',
       }}
     >
       <div className="mb-2 flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-white/55">
@@ -1238,7 +1238,7 @@ function BoltyGuardScanPanel({
         }}
       >
         <div className="w-7 h-7 rounded-md grid place-items-center"
-          style={{ background: 'rgba(131,110,249,0.18)' }}
+          style={{ background: 'rgba(20,241,149,0.18)' }}
         >
           <Loader2 className="w-4 h-4 animate-spin text-[#b4a7ff]" />
         </div>

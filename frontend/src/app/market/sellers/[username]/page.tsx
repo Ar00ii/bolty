@@ -76,7 +76,7 @@ const TYPE_META: Record<
   }
 > = {
   AI_AGENT: { label: 'AI Agent', color: '#a855f7', Icon: Bot },
-  BOT: { label: 'Bot', color: '#836EF9', Icon: Bot },
+  BOT: { label: 'Bot', color: '#14F195', Icon: Bot },
   SCRIPT: { label: 'Script', color: '#06B6D4', Icon: Zap },
   REPO: { label: 'Repo', color: '#3b82f6', Icon: GitBranch },
   OTHER: { label: 'Other', color: '#64748b', Icon: Package },
@@ -123,7 +123,7 @@ export default function SellerProfilePage() {
     return (
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#000' }}>
         <motion.div
-          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500"
+          className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-atlas-500"
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity }}
         />
@@ -141,7 +141,7 @@ export default function SellerProfilePage() {
         <p className="text-zinc-400">Seller not found</p>
         <Link
           href="/market"
-          className="text-sm text-purple-300 hover:text-purple-200 inline-flex items-center gap-1.5"
+          className="text-sm text-atlas-300 hover:text-atlas-200 inline-flex items-center gap-1.5"
         >
           Back to marketplace
         </Link>
@@ -157,7 +157,7 @@ export default function SellerProfilePage() {
     <div style={{ background: '#000' }} className="relative min-h-screen overflow-hidden">
       <div
         className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
       />
 
       {/* Breadcrumb */}
@@ -196,7 +196,7 @@ export default function SellerProfilePage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="flex flex-col sm:flex-row gap-6 items-start">
@@ -204,9 +204,9 @@ export default function SellerProfilePage() {
               className="w-20 h-20 rounded-full overflow-hidden shrink-0 flex items-center justify-center"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 32px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 32px -6px rgba(20,241,149,0.5)',
               }}
             >
               {seller.avatarUrl ? (
@@ -253,8 +253,8 @@ export default function SellerProfilePage() {
 
             <div className="flex flex-col items-end gap-2">
               <ShareButton
-                title={`@${seller.username} on Bolty`}
-                text={`Check out @${seller.username}'s listings on Bolty`}
+                title={`@${seller.username} on Atlas`}
+                text={`Check out @${seller.username}'s listings on Atlas`}
                 ariaLabel="Share seller profile"
               />
               <Link
@@ -301,16 +301,16 @@ export default function SellerProfilePage() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
                 }}
               />
               <div
                 className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
                 style={{
                   background:
-                    'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.04) 100%)',
+                    'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.04) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 24px -6px rgba(131,110,249,0.5)',
+                    'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 24px -6px rgba(20,241,149,0.5)',
                 }}
               >
                 <Package className="w-5 h-5" style={{ color: '#b4a7ff' }} />
@@ -461,7 +461,7 @@ function StatCard({
   label,
   value,
   icon: Icon,
-  accent = '#836EF9',
+  accent = '#14F195',
 }: {
   label: string;
   value: string | number;

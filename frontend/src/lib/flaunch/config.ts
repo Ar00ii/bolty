@@ -8,7 +8,7 @@
  * wizard shows a banner so the user knows launches aren't on-chain yet.
  */
 
-/** Bolty treasury wallet on Base — receives the protocol-fee cut
+/** Atlas treasury wallet on Base — receives the protocol-fee cut
  *  of every swap across every launched token. Same address we use
  *  for the existing escrow platform fee. Immutable once the
  *  RevenueManager is deployed. */
@@ -40,7 +40,7 @@ export function isRevenueManagerConfigured(): boolean {
 }
 
 /** Appended to every launched token's description so the Flaunch
- *  coin page links back to the source listing + Bolty. Also embeds
+ *  coin page links back to the source listing + Atlas. Also embeds
  *  the creator username in a parseable marker (`creator: @foo`) so
  *  any consumer — including other users' browsers that don't have
  *  our local cache — can recover who launched it.
@@ -55,7 +55,7 @@ export function boltyAttributionFooter(
     creatorUsername && /^[a-zA-Z0-9_-]{1,40}$/.test(creatorUsername)
       ? `\ncreator: @${creatorUsername}`
       : '';
-  return `\n\nLaunched on the Bolty Network launchpad — ${listingUrl}${creator}`;
+  return `\n\nLaunched on the Atlas Network launchpad — ${listingUrl}${creator}`;
 }
 
 /** Parses the `creator: @foo` marker back out of a token description

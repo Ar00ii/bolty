@@ -405,7 +405,7 @@ function MarketScreener() {
             <div className="mk-hero__crumbs">
               <span className="inline-flex items-center gap-1.5">
                 <TrendingUp className="w-3 h-3" strokeWidth={2} />
-                Bolty Screener
+                Atlas Screener
                 <LiveDot />
               </span>
             </div>
@@ -413,7 +413,7 @@ function MarketScreener() {
               <div>
                 <h1 className="mk-hero__title">Marketplace</h1>
                 <p className="mk-hero__sub">
-                  Everything for sale across Bolty — agents, repos, bots, scripts — priced live and ranked by 24-hour activity.
+                  Everything for sale across Atlas — agents, repos, bots, scripts — priced live and ranked by 24-hour activity.
                 </p>
               </div>
               <Link
@@ -715,8 +715,8 @@ function TypeTabs({ value, onChange }: { value: TypeFilter; onChange: (v: TypeFi
           className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
           style={{
             color: value === t.key ? '#ffffff' : '#d4d4d8',
-            background: value === t.key ? 'rgba(131,110,249,0.2)' : 'transparent',
-            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+            background: value === t.key ? 'rgba(20,241,149,0.2)' : 'transparent',
+            boxShadow: value === t.key ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
           }}
         >
           {t.label}
@@ -744,9 +744,9 @@ function SortChip({
       className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11.5px] font-light transition"
       style={{
         color: active ? '#ffffff' : '#d4d4d8',
-        background: active ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.02)',
+        background: active ? 'rgba(20,241,149,0.18)' : 'rgba(255,255,255,0.02)',
         boxShadow: active
-          ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
+          ? 'inset 0 0 0 1px rgba(20,241,149,0.4)'
           : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >
@@ -857,7 +857,7 @@ function Row({
           background: flashing
             ? 'linear-gradient(90deg, rgba(34,197,94,0.12), rgba(34,197,94,0.02))'
             : isLive
-              ? 'linear-gradient(90deg, rgba(131,110,249,0.08), transparent)'
+              ? 'linear-gradient(90deg, rgba(20,241,149,0.08), transparent)'
               : 'transparent',
         }}
       >

@@ -89,7 +89,7 @@ const STATUS_CONFIG: Record<OrderStatus, { label: string; icon: LucideIcon; colo
   PENDING_DELIVERY: { label: 'Pending', icon: Clock, color: '#f59e0b' },
   IN_PROGRESS: { label: 'In progress', icon: Package, color: '#06B6D4' },
   DELIVERED: { label: 'Delivered', icon: Truck, color: '#22c55e' },
-  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#836EF9' },
+  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: '#14F195' },
   DISPUTED: { label: 'Disputed', icon: AlertTriangle, color: '#ef4444' },
 };
 
@@ -333,7 +333,7 @@ export default function OrdersPage() {
             <div>
               <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
                 <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span>Bolty Orders</span>
+                <span>Atlas Orders</span>
                 <LiveDot />
               </div>
               <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white">Orders</h1>
@@ -372,7 +372,7 @@ export default function OrdersPage() {
                 label="Total spent"
                 value={`${formatEth(buyingMetrics.spent)} ETH`}
                 sub={`across ${buyingMetrics.total} orders`}
-                accent="#836EF9"
+                accent="#14F195"
               />
               <StatTile
                 label="Open"
@@ -417,7 +417,7 @@ export default function OrdersPage() {
                 label="Completed"
                 value={formatNumber(stats?.completed || 0)}
                 sub={`${stats?.disputed || 0} disputed`}
-                accent="#836EF9"
+                accent="#14F195"
               />
             </>
           )}
@@ -461,8 +461,8 @@ export default function OrdersPage() {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-light transition"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
-                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
-                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+                    background: active ? 'rgba(20,241,149,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
                   }}
                 >
                   <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
@@ -522,7 +522,7 @@ export default function OrdersPage() {
             {STATUS_FILTER_ORDER.map((s) => {
               const count = s === 'ALL' ? baseOrders.length : statusCounts[s] || 0;
               const active = statusFilter === s;
-              const color = s === 'ALL' ? '#836EF9' : STATUS_CONFIG[s as OrderStatus]?.color;
+              const color = s === 'ALL' ? '#14F195' : STATUS_CONFIG[s as OrderStatus]?.color;
               return (
                 <button
                   key={s}
@@ -667,21 +667,21 @@ function OrdersTable({
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
           }}
         />
         <span
           aria-hidden
           className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl opacity-30"
-          style={{ background: 'rgba(131,110,249,0.25)' }}
+          style={{ background: 'rgba(20,241,149,0.25)' }}
         />
         <div
           className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-            border: '1px solid rgba(131,110,249,0.35)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+              'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
+            border: '1px solid rgba(20,241,149,0.35)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20,241,149,0.45)',
           }}
         >
           <ShoppingBag className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -699,9 +699,9 @@ function OrdersTable({
           className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+              'linear-gradient(180deg, rgba(20,241,149,0.9) 0%, rgba(20,241,149,0.7) 100%)',
             boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20,241,149,0.5)',
           }}
         >
           {tab === 'buying' ? (
@@ -959,16 +959,16 @@ function NegotiationsTable({
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
           }}
         />
         <div
           className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
           style={{
             background:
-              'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-            border: '1px solid rgba(131,110,249,0.35)',
-            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+              'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
+            border: '1px solid rgba(20,241,149,0.35)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20,241,149,0.45)',
           }}
         >
           <Handshake className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />
@@ -983,9 +983,9 @@ function NegotiationsTable({
           className="relative inline-flex items-center gap-2 h-9 px-4 rounded-lg text-[12px] font-normal text-white transition"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+              'linear-gradient(180deg, rgba(20,241,149,0.9) 0%, rgba(20,241,149,0.7) 100%)',
             boxShadow:
-              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+              'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20,241,149,0.5)',
           }}
         >
           <Bot className="w-3.5 h-3.5" strokeWidth={1.75} /> Browse agents

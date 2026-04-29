@@ -155,7 +155,7 @@ export default function BoltyTokenPage() {
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
           background:
-            'radial-gradient(1100px 650px at 15% -10%, rgba(131,110,249,0.16), transparent 60%), radial-gradient(900px 560px at 95% 10%, rgba(6,182,212,0.10), transparent 60%)',
+            'radial-gradient(1100px 650px at 15% -10%, rgba(20,241,149,0.16), transparent 60%), radial-gradient(900px 560px at 95% 10%, rgba(6,182,212,0.10), transparent 60%)',
         }}
       />
 
@@ -171,21 +171,21 @@ export default function BoltyTokenPage() {
               className="relative flex h-12 w-12 items-center justify-center rounded-xl"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(131,110,249,0.22), rgba(6,182,212,0.12))',
+                  'linear-gradient(135deg, rgba(20,241,149,0.22), rgba(6,182,212,0.12))',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 30px -10px #836EF9',
+                  'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 30px -10px #14F195',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/LogoNew.png"
-                alt="Bolty"
+                alt="Atlas"
                 className="h-9 w-9 rounded-lg object-contain"
               />
             </div>
             <div>
               <h1 className="flex items-baseline gap-2 text-2xl font-light tracking-tight">
-                <GradientText gradient="purple">$BOLTY</GradientText>
+                <GradientText gradient="purple">$ATLAS</GradientText>
                 <span className="text-sm text-white/30">/ Base</span>
               </h1>
             </div>
@@ -199,9 +199,9 @@ export default function BoltyTokenPage() {
               className="group inline-flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-normal text-white transition"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.95) 0%, rgba(107,79,232,0.85) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.95) 0%, rgba(107,79,232,0.85) 100%)',
                 boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 26px -10px rgba(131,110,249,0.65)',
+                  'inset 0 1px 0 rgba(255,255,255,0.2), 0 10px 26px -10px rgba(20,241,149,0.65)',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.08)')}
               onMouseLeave={(e) => (e.currentTarget.style.filter = 'brightness(1)')}

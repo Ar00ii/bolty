@@ -184,10 +184,10 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                         className="relative w-10 h-5.5 rounded-full flex-shrink-0 transition-all disabled:opacity-50"
                         style={{
                           background: isEnabled
-                            ? 'linear-gradient(180deg, rgba(131,110,249,0.8) 0%, rgba(131,110,249,0.55) 100%)'
+                            ? 'linear-gradient(180deg, rgba(20,241,149,0.8) 0%, rgba(20,241,149,0.55) 100%)'
                             : 'linear-gradient(180deg, rgba(40,40,48,0.9) 0%, rgba(24,24,30,0.9) 100%)',
                           boxShadow: isEnabled
-                            ? 'inset 0 0 0 1px rgba(131,110,249,0.6), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -2px rgba(131,110,249,0.5)'
+                            ? 'inset 0 0 0 1px rgba(20,241,149,0.6), inset 0 1px 0 rgba(255,255,255,0.12), 0 0 14px -2px rgba(20,241,149,0.5)'
                             : 'inset 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
                           width: '40px',
                           height: '22px',
@@ -224,7 +224,7 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.35) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.35) 50%, transparent 100%)',
           }}
         />
         <p className="text-[10.5px] uppercase tracking-[0.18em] font-medium text-zinc-500 mb-2">
@@ -256,9 +256,9 @@ export const NotificationsSection: React.FC<NotificationsSectionProps> = ({
                 className="flex-1 px-4 py-2.5 text-white rounded-lg font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110 disabled:opacity-50"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                    'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                   boxShadow:
-                    'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                    'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
                 }}
               >
                 {loading ? 'Saving...' : 'Save Preferences'}

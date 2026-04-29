@@ -22,7 +22,7 @@ const inter = Inter({
   preload: true,
 });
 
-const BASE_URL = 'https://boltynetwork.xyz';
+const BASE_URL = 'https://atlas.market';
 
 // Responsive viewport — without this, mobile browsers render the page
 // at the virtual 980px layout width and scale it down, which is why
@@ -39,54 +39,53 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Bolty — AI Developer Platform',
-    template: '%s | Bolty',
+    default: 'Atlas — The marketplace for AI agents on Solana',
+    template: '%s | Atlas',
   },
   description:
-    'Bolty is the developer platform for publishing code, deploying AI agents, and earning from your work. Join the community at boltynetwork.xyz.',
+    'Atlas is the marketplace for AI agents on Solana. Discover, buy, and sell AI agents and code. Pay with SOL.',
   keywords: [
-    'bolty',
-    'boltynetwork',
-    'bolty network',
-    'ai developer platform',
+    'atlas',
+    'atlas market',
     'ai agents marketplace',
-    'publish code',
+    'solana ai agents',
+    'solana marketplace',
+    'pumpfun',
+    'ai agents',
+    'agent marketplace',
     'code marketplace',
-    'developer community',
-    'ethereum payments',
-    'web3 developer',
-    'bolty ai',
-    'boltynetwork.xyz',
+    'web3 ai',
+    'solana',
   ],
-  authors: [{ name: 'Bolty', url: BASE_URL }],
-  creator: 'Bolty',
-  publisher: 'Bolty',
+  authors: [{ name: 'Atlas', url: BASE_URL }],
+  creator: 'Atlas',
+  publisher: 'Atlas',
   category: 'technology',
   openGraph: {
     type: 'website',
     locale: 'en_US',
     url: BASE_URL,
-    siteName: 'Bolty',
-    title: 'Bolty — AI Developer Platform',
+    siteName: 'Atlas',
+    title: 'Atlas — The marketplace for AI agents on Solana',
     description:
-      'Publish code, deploy AI agents, and earn from your work. The developer platform for the next generation of builders.',
+      'Discover, buy, and sell AI agents on Solana. Pay with SOL. Built for the agent economy.',
     images: [
       {
         url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: 'Bolty — AI Developer Platform',
+        alt: 'Atlas — The marketplace for AI agents on Solana',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Bolty — AI Developer Platform',
+    title: 'Atlas — The marketplace for AI agents on Solana',
     description:
-      'Publish code, deploy AI agents, and earn from your work. The developer platform for the next generation of builders.',
+      'Discover, buy, and sell AI agents on Solana. Pay with SOL.',
     images: [`${BASE_URL}/og-image.png`],
-    creator: '@boltynetwork',
-    site: '@boltynetwork',
+    creator: '@atlasmarket',
+    site: '@atlasmarket',
   },
   robots: {
     index: true,
@@ -107,13 +106,12 @@ export const metadata: Metadata = {
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'Bolty',
-  alternateName: 'BoltyNetwork',
+  name: 'Atlas',
   url: BASE_URL,
   logo: `${BASE_URL}/icon.png`,
   description:
-    'Bolty is the AI developer platform for publishing code, deploying AI agents, and earning from your work.',
-  sameAs: ['https://twitter.com/boltynetwork', 'https://github.com/boltynetwork'],
+    'Atlas is the marketplace for AI agents on Solana. Discover, buy, and sell AI agents and code.',
+  sameAs: ['https://twitter.com/atlasmarket'],
   contactPoint: {
     '@type': 'ContactPoint',
     contactType: 'customer support',

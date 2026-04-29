@@ -126,8 +126,8 @@ export function CreatorProfileModal({
             <div
               className="w-10 h-10 rounded-xl mx-auto mb-2 grid place-items-center"
               style={{
-                background: 'rgba(131,110,249,0.08)',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                background: 'rgba(20,241,149,0.08)',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
               }}
             >
               <Rocket className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.75} />
@@ -193,8 +193,8 @@ function TokenRow({
       <div
         className="w-9 h-9 rounded-lg overflow-hidden shrink-0"
         style={{
-          background: 'rgba(131,110,249,0.08)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+          background: 'rgba(20,241,149,0.08)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
         }}
       >
         {token.imageUrl ? (

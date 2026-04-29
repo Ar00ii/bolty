@@ -36,7 +36,7 @@ export function AgentPickerModal({
   listingPrice: number;
   listingCurrency: string;
   onCancel: () => void;
-  /** Called with the chosen agent id (null = default Bolty auto-negotiator). */
+  /** Called with the chosen agent id (null = default Atlas auto-negotiator). */
   onConfirm: (agentListingId: string | null) => void;
 }) {
   const [agents, setAgents] = useState<MyAgent[]>([]);
@@ -84,14 +84,14 @@ export function AgentPickerModal({
         style={{
           background: 'linear-gradient(180deg, rgba(20,20,28,0.96), rgba(10,10,16,0.96))',
           boxShadow:
-            '0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px -10px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
+            '0 0 0 1px rgba(255,255,255,0.06), 0 30px 80px -10px rgba(20,241,149,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
         }}
       >
         <span
           aria-hidden
           className="absolute -top-8 -left-8 w-40 h-40 rounded-full pointer-events-none"
           style={{
-            background: 'radial-gradient(circle, rgba(131,110,249,0.22), transparent 70%)',
+            background: 'radial-gradient(circle, rgba(20,241,149,0.22), transparent 70%)',
             filter: 'blur(14px)',
           }}
         />
@@ -101,7 +101,7 @@ export function AgentPickerModal({
             className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.3), rgba(6,182,212,0.25))',
+                'linear-gradient(135deg, rgba(20,241,149,0.3), rgba(6,182,212,0.25))',
               boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.08)',
             }}
           >
@@ -139,11 +139,11 @@ export function AgentPickerModal({
             style={{
               background:
                 picked === null
-                  ? 'linear-gradient(180deg, rgba(131,110,249,0.18), rgba(131,110,249,0.06))'
+                  ? 'linear-gradient(180deg, rgba(20,241,149,0.18), rgba(20,241,149,0.06))'
                   : 'rgba(255,255,255,0.02)',
               boxShadow:
                 picked === null
-                  ? 'inset 0 0 0 1px rgba(131,110,249,0.5)'
+                  ? 'inset 0 0 0 1px rgba(20,241,149,0.5)'
                   : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
             }}
           >
@@ -151,15 +151,15 @@ export function AgentPickerModal({
               <div
                 className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                 style={{
-                  background: 'rgba(131,110,249,0.18)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                  background: 'rgba(20,241,149,0.18)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
                 }}
               >
                 <Zap className="w-4 h-4 text-[#b4a7ff]" strokeWidth={1.8} />
               </div>
               <div className="min-w-0">
                 <div className="text-[13px] font-light text-white">
-                  Bolty auto-negotiator
+                  Atlas auto-negotiator
                 </div>
                 <p className="text-[11px] text-zinc-500 font-light line-clamp-1">
                   Default · tries for ~25% discount, quick
@@ -170,7 +170,7 @@ export function AgentPickerModal({
 
           {loading && (
             <div className="text-center py-6">
-              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-[#836ef9] animate-spin mx-auto" />
+              <div className="w-4 h-4 rounded-full border-2 border-zinc-800 border-t-[#14f195] animate-spin mx-auto" />
             </div>
           )}
 
@@ -264,9 +264,9 @@ export function AgentPickerModal({
             className="text-[13px] text-white py-2 px-5 rounded-lg transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.45), rgba(131,110,249,0.18))',
+                'linear-gradient(180deg, rgba(20,241,149,0.45), rgba(20,241,149,0.18))',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.55), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20,241,149,0.55), 0 0 22px -4px rgba(20,241,149,0.55)',
             }}
           >
             Start negotiation

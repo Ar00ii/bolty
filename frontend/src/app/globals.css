@@ -112,8 +112,8 @@ img {
   --text: #e4e4e7;
   --text-secondary: #d4d4d8;
   --text-muted: #a1a1aa;
-  --brand: #836ef9;
-  --brand-dim: rgba(131, 110, 249, 0.08);
+  --brand: #14f195;
+  --brand-dim: rgba(20, 241, 149, 0.08);
   --brand-hover: #9580ff;
   --accent-cyan: #06b6d4;
   --accent-magenta: #ec4899;
@@ -124,18 +124,18 @@ img {
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.3);
-  --shadow-brand: 0 4px 14px rgba(131, 110, 249, 0.25);
-  --shadow-glow: 0 0 20px rgba(131, 110, 249, 0.3), 0 0 40px rgba(6, 182, 212, 0.2);
-  --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(131, 110, 249, 0.1);
+  --shadow-brand: 0 4px 14px rgba(20, 241, 149, 0.25);
+  --shadow-glow: 0 0 20px rgba(20, 241, 149, 0.3), 0 0 40px rgba(6, 182, 212, 0.2);
+  --card-hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(20, 241, 149, 0.1);
   /* Extended color palette */
-  --purple-300: #d8b4fe;
-  --purple-400: #c084fc;
-  --purple-500: #a855f7;
-  --purple-600: #9333ea;
-  --purple-700: #7e22ce;
-  --purple-800: #6b21a8;
-  --purple-900: #581c87;
-  --purple-950: #3f0f5c;
+  --atlas-300: #d8b4fe;
+  --atlas-400: #c084fc;
+  --atlas-500: #a855f7;
+  --atlas-500: #9333ea;
+  --atlas-600: #7e22ce;
+  --atlas-700: #6b21a8;
+  --atlas-800: #581c87;
+  --atlas-900: #3f0f5c;
   /* Spacing constants */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
@@ -239,7 +239,7 @@ textarea {
 }
 
 ::selection {
-  background: rgba(131, 110, 249, 0.25);
+  background: rgba(20, 241, 149, 0.25);
   color: #fff;
 }
 
@@ -267,7 +267,7 @@ textarea {
   }
   .card:hover {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.22),
+      0 0 0 1px rgba(20, 241, 149, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.04),
       0 8px 24px -12px rgba(0, 0, 0, 0.5);
   }
@@ -287,9 +287,9 @@ textarea {
   }
   .card-interactive:hover {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.35),
+      0 0 0 1px rgba(20, 241, 149, 0.35),
       inset 0 1px 0 rgba(255, 255, 255, 0.04),
-      0 12px 28px -14px rgba(131, 110, 249, 0.25);
+      0 12px 28px -14px rgba(20, 241, 149, 0.25);
     transform: translateY(-2px);
   }
   .card-interactive:active {
@@ -311,9 +311,9 @@ textarea {
   }
   .card-elevated:hover {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.3),
+      0 0 0 1px rgba(20, 241, 149, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 16px 40px -18px rgba(131, 110, 249, 0.25);
+      0 16px 40px -18px rgba(20, 241, 149, 0.25);
     transform: translateY(-3px);
   }
 
@@ -324,13 +324,13 @@ textarea {
     letter-spacing: 0.005em;
     background: linear-gradient(
       180deg,
-      rgba(131, 110, 249, 0.32) 0%,
-      rgba(131, 110, 249, 0.12) 100%
+      rgba(20, 241, 149, 0.32) 0%,
+      rgba(20, 241, 149, 0.12) 100%
     );
     box-shadow:
-      inset 0 0 0 1px rgba(131, 110, 249, 0.45),
+      inset 0 0 0 1px rgba(20, 241, 149, 0.45),
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 18px -4px rgba(131, 110, 249, 0.5);
+      0 0 18px -4px rgba(20, 241, 149, 0.5);
     transition:
       filter 0.2s ease,
       transform 0.2s ease,
@@ -339,9 +339,9 @@ textarea {
   .btn-primary:hover {
     filter: brightness(1.1);
     box-shadow:
-      inset 0 0 0 1px rgba(131, 110, 249, 0.55),
+      inset 0 0 0 1px rgba(20, 241, 149, 0.55),
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      0 0 26px -4px rgba(131, 110, 249, 0.6);
+      0 0 26px -4px rgba(20, 241, 149, 0.6);
     transform: translateY(-1px);
   }
   .btn-primary:active {
@@ -411,8 +411,8 @@ textarea {
   }
   .input:focus {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.45),
-      0 0 0 4px rgba(131, 110, 249, 0.12),
+      0 0 0 1px rgba(20, 241, 149, 0.45),
+      0 0 0 4px rgba(20, 241, 149, 0.12),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
 
@@ -435,7 +435,7 @@ textarea {
     border-color: var(--brand);
     box-shadow:
       0 0 0 3px var(--brand-dim),
-      0 1px 4px rgba(131, 110, 249, 0.1);
+      0 1px 4px rgba(20, 241, 149, 0.1);
   }
 
   /* ── Badges ── */
@@ -443,7 +443,7 @@ textarea {
     @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
     background: var(--brand-dim);
     color: var(--brand);
-    border: 1px solid rgba(131, 110, 249, 0.15);
+    border: 1px solid rgba(20, 241, 149, 0.15);
   }
   .badge-secondary {
     @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light;
@@ -509,39 +509,39 @@ textarea {
   }
   .feature-card:hover {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.3),
+      0 0 0 1px rgba(20, 241, 149, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 16px 40px -18px rgba(131, 110, 249, 0.25);
+      0 16px 40px -18px rgba(20, 241, 149, 0.25);
     transform: translateY(-2px);
   }
   .feature-icon-wrap {
     @apply inline-flex items-center justify-center w-11 h-11 rounded-xl mb-4;
     background: linear-gradient(
       135deg,
-      rgba(131, 110, 249, 0.2) 0%,
-      rgba(131, 110, 249, 0.05) 100%
+      rgba(20, 241, 149, 0.2) 0%,
+      rgba(20, 241, 149, 0.05) 100%
     );
     box-shadow:
-      inset 0 0 0 1px rgba(131, 110, 249, 0.25),
+      inset 0 0 0 1px rgba(20, 241, 149, 0.25),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
     transition: box-shadow 0.25s ease;
   }
   .feature-card:hover .feature-icon-wrap {
     box-shadow:
-      inset 0 0 0 1px rgba(131, 110, 249, 0.4),
+      inset 0 0 0 1px rgba(20, 241, 149, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 16px -2px rgba(131, 110, 249, 0.3);
+      0 0 16px -2px rgba(20, 241, 149, 0.3);
   }
 
   /* ── Neon / branded buttons ── */
   .btn-neon {
     @apply relative px-4 py-2 text-sm font-light
-           text-bolty-400 border border-bolty-400/30 rounded-lg
+           text-atlas-400 border border-atlas-400/30 rounded-lg
            transition-all duration-200 cursor-pointer
-           hover:border-bolty-400/60 hover:text-white hover:bg-bolty-400/10;
+           hover:border-atlas-400/60 hover:text-white hover:bg-atlas-400/10;
   }
   .btn-neon:hover {
-    box-shadow: 0 0 16px rgba(131, 110, 249, 0.15);
+    box-shadow: 0 0 16px rgba(20, 241, 149, 0.15);
   }
 
   .btn-neon-solid {
@@ -572,7 +572,7 @@ textarea {
 
   /* ── Hero gradient text ── */
   .hero-gradient {
-    background: linear-gradient(135deg, #836ef9 0%, #a78bfa 50%, #c4b5fd 100%);
+    background: linear-gradient(135deg, #14f195 0%, #a78bfa 50%, #a7f3d0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -608,7 +608,7 @@ textarea {
   }
   .terminal-badge {
     @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-light
-           border border-bolty-400/20 text-bolty-400 bg-bolty-500/5;
+           border border-atlas-400/20 text-atlas-400 bg-atlas-500/5;
   }
 
   .status-online {
@@ -675,7 +675,7 @@ textarea {
   .tab-item[data-active='true'] {
     background: var(--brand);
     color: #fff;
-    box-shadow: 0 2px 8px rgba(131, 110, 249, 0.3);
+    box-shadow: 0 2px 8px rgba(20, 241, 149, 0.3);
   }
 
   /* ── Step cards ── */
@@ -703,7 +703,7 @@ textarea {
     transition: opacity 0.25s ease;
   }
   .step-card:hover {
-    border-color: rgba(131, 110, 249, 0.2);
+    border-color: rgba(20, 241, 149, 0.2);
     box-shadow: var(--card-hover-shadow);
     transform: translateY(-3px);
   }
@@ -722,14 +722,14 @@ textarea {
     font-weight: 300;
     background: var(--brand-dim);
     color: var(--brand);
-    border: 1px solid rgba(131, 110, 249, 0.15);
+    border: 1px solid rgba(20, 241, 149, 0.15);
     margin-bottom: 14px;
     transition: all 0.25s ease;
   }
   .step-card:hover .step-number {
-    background: rgba(131, 110, 249, 0.12);
-    border-color: rgba(131, 110, 249, 0.35);
-    box-shadow: 0 0 12px rgba(131, 110, 249, 0.15);
+    background: rgba(20, 241, 149, 0.12);
+    border-color: rgba(20, 241, 149, 0.35);
+    box-shadow: 0 0 12px rgba(20, 241, 149, 0.15);
   }
 
   /* ── Empty state ── */
@@ -753,7 +753,7 @@ textarea {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(131, 110, 249, 0.45) 50%,
+      rgba(20, 241, 149, 0.45) 50%,
       transparent 100%
     );
     pointer-events: none;
@@ -767,7 +767,7 @@ textarea {
     width: 240px;
     height: 240px;
     border-radius: 9999px;
-    background: rgba(131, 110, 249, 0.22);
+    background: rgba(20, 241, 149, 0.22);
     filter: blur(48px);
     opacity: 0.35;
     pointer-events: none;
@@ -781,13 +781,13 @@ textarea {
     border-radius: 14px;
     background: linear-gradient(
       135deg,
-      rgba(131, 110, 249, 0.22) 0%,
-      rgba(131, 110, 249, 0.06) 100%
+      rgba(20, 241, 149, 0.22) 0%,
+      rgba(20, 241, 149, 0.06) 100%
     );
     box-shadow:
-      inset 0 0 0 1px rgba(131, 110, 249, 0.35),
+      inset 0 0 0 1px rgba(20, 241, 149, 0.35),
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 24px -6px rgba(131, 110, 249, 0.45);
+      0 0 24px -6px rgba(20, 241, 149, 0.45);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -810,9 +810,9 @@ textarea {
   }
   .stat-card:hover {
     box-shadow:
-      0 0 0 1px rgba(131, 110, 249, 0.28),
+      0 0 0 1px rgba(20, 241, 149, 0.28),
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 10px 24px -14px rgba(131, 110, 249, 0.2);
+      0 10px 24px -14px rgba(20, 241, 149, 0.2);
     transform: translateY(-1px);
   }
 
@@ -846,7 +846,7 @@ textarea {
   }
 
   .prompt {
-    @apply text-bolty-400 select-none font-mono;
+    @apply text-atlas-400 select-none font-mono;
   }
   .prompt::before {
     content: '> ';
@@ -860,7 +860,7 @@ textarea {
 
 /* Hero gradient — deeper purple for light backgrounds */
 :root[data-theme='light'] .hero-gradient {
-  background: linear-gradient(135deg, #5b3fd4 0%, #6b4fe0 50%, #836ef9 100%);
+  background: linear-gradient(135deg, #5b3fd4 0%, #6b4fe0 50%, #14f195 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1002,8 +1002,8 @@ textarea {
 
 @layer utilities {
   .neon-border {
-    border-color: #836ef9;
-    box-shadow: 0 0 10px rgba(131, 110, 249, 0.3);
+    border-color: #14f195;
+    box-shadow: 0 0 10px rgba(20, 241, 149, 0.3);
   }
 
   @keyframes blink {
@@ -1172,10 +1172,10 @@ textarea {
 @keyframes logo-pulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 6px rgba(131, 110, 249, 0.3));
+    filter: drop-shadow(0 0 6px rgba(20, 241, 149, 0.3));
   }
   50% {
-    filter: drop-shadow(0 0 12px rgba(131, 110, 249, 0.6));
+    filter: drop-shadow(0 0 12px rgba(20, 241, 149, 0.6));
   }
 }
 @keyframes gradient-shift {
@@ -1206,36 +1206,36 @@ textarea {
   0%,
   100% {
     box-shadow:
-      0 0 20px rgba(131, 110, 249, 0.3),
-      inset 0 0 20px rgba(131, 110, 249, 0.1);
+      0 0 20px rgba(20, 241, 149, 0.3),
+      inset 0 0 20px rgba(20, 241, 149, 0.1);
   }
   50% {
     box-shadow:
-      0 0 40px rgba(131, 110, 249, 0.6),
-      inset 0 0 30px rgba(131, 110, 249, 0.2);
+      0 0 40px rgba(20, 241, 149, 0.6),
+      inset 0 0 30px rgba(20, 241, 149, 0.2);
   }
 }
 
 @keyframes border-gradient {
   0% {
-    border-color: #836ef9;
+    border-color: #14f195;
   }
   50% {
     border-color: #06b6d4;
   }
   100% {
-    border-color: #836ef9;
+    border-color: #14f195;
   }
 }
 
 @keyframes text-glow {
   0%,
   100% {
-    text-shadow: 0 0 20px rgba(131, 110, 249, 0.3);
+    text-shadow: 0 0 20px rgba(20, 241, 149, 0.3);
   }
   50% {
     text-shadow:
-      0 0 40px rgba(131, 110, 249, 0.6),
+      0 0 40px rgba(20, 241, 149, 0.6),
       0 0 60px rgba(6, 182, 212, 0.3);
   }
 }
@@ -1276,13 +1276,13 @@ textarea {
 
 .card-interactive:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(131, 110, 249, 0.15);
-  border-color: rgba(131, 110, 249, 0.3);
+  box-shadow: 0 12px 24px rgba(20, 241, 149, 0.15);
+  border-color: rgba(20, 241, 149, 0.3);
 }
 
 .card-elevated:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(131, 110, 249, 0.1);
+  box-shadow: 0 8px 16px rgba(20, 241, 149, 0.1);
 }
 
 /* ── Button Micro-interactions ── */
@@ -1448,7 +1448,7 @@ select:focus {
 
 .filter-pill:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(131, 110, 249, 0.15);
+  box-shadow: 0 4px 8px rgba(20, 241, 149, 0.15);
 }
 
 /* ── Data Table Row Hover ── */
@@ -1457,7 +1457,7 @@ table tbody tr {
 }
 
 table tbody tr:hover {
-  background-color: rgba(131, 110, 249, 0.05);
+  background-color: rgba(20, 241, 149, 0.05);
 }
 
 /* ── Pagination Button States ── */
@@ -1471,8 +1471,8 @@ table tbody tr:hover {
 }
 
 .pagination-btn:not(:disabled):hover {
-  background-color: rgba(131, 110, 249, 0.1);
-  border-color: rgba(131, 110, 249, 0.3);
+  background-color: rgba(20, 241, 149, 0.1);
+  border-color: rgba(20, 241, 149, 0.3);
 }
 
 /* ── Enhanced Card Hover Effects ── */
@@ -1491,7 +1491,7 @@ table tbody tr:hover {
 .agent-card:hover,
 .repo-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(131, 110, 249, 0.15);
+  box-shadow: 0 12px 32px rgba(20, 241, 149, 0.15);
 }
 
 /* ── Enhanced Button Hover Effects ── */
@@ -1507,7 +1507,7 @@ button:not(:disabled):hover,
 .btn:hover,
 [role='button']:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(131, 110, 249, 0.2);
+  box-shadow: 0 8px 20px rgba(20, 241, 149, 0.2);
 }
 
 button:not(:disabled):active,
@@ -1556,7 +1556,7 @@ a:not([role='button'])::after,
   left: 0;
   width: 0;
   height: 2px;
-  background: linear-gradient(90deg, #836ef9, #a78bfa);
+  background: linear-gradient(90deg, #14f195, #a78bfa);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1582,8 +1582,8 @@ input[type='password']:hover,
 input[type='search']:hover,
 textarea:hover,
 select:hover {
-  border-color: rgba(131, 110, 249, 0.3);
-  box-shadow: 0 0 12px rgba(131, 110, 249, 0.1);
+  border-color: rgba(20, 241, 149, 0.3);
+  box-shadow: 0 0 12px rgba(20, 241, 149, 0.1);
 }
 
 input[type='text']:focus,
@@ -1592,8 +1592,8 @@ input[type='password']:focus,
 input[type='search']:focus,
 textarea:focus,
 select:focus {
-  border-color: #836ef9;
-  box-shadow: 0 0 16px rgba(131, 110, 249, 0.25);
+  border-color: #14f195;
+  box-shadow: 0 0 16px rgba(20, 241, 149, 0.25);
 }
 
 /* ── Badge/Pill Animations ── */
@@ -1607,7 +1607,7 @@ select:focus {
 .pill:hover,
 .tag:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(131, 110, 249, 0.2);
+  box-shadow: 0 4px 12px rgba(20, 241, 149, 0.2);
 }
 
 /* ── Icon Hover Effects ── */
@@ -1680,7 +1680,7 @@ aside button:hover::before {
   aside {
     box-shadow:
       -8px 0 32px rgba(0, 0, 0, 0.7),
-      -4px 0 16px rgba(131, 110, 249, 0.1);
+      -4px 0 16px rgba(20, 241, 149, 0.1);
   }
 
   /* Touch-friendly spacing on mobile */
@@ -1724,7 +1724,7 @@ aside button[data-active='true']::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(131, 110, 249, 0.05));
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(20, 241, 149, 0.05));
   border-radius: inherit;
   pointer-events: none;
 }
@@ -1778,7 +1778,7 @@ aside button[data-active='true']::after {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(131, 110, 249, 0.45) 50%,
+    rgba(20, 241, 149, 0.45) 50%,
     transparent 100%
   );
   pointer-events: none;
@@ -1961,37 +1961,37 @@ aside button[data-active='true']::after {
 
 /* Restore visible brand fill on INTERACTIVE elements that use inline purple
    gradients for CTAs. */
-.mk-scope button[style*='rgba(131, 110, 249'],
-.mk-scope button[style*='rgba(131,110,249'],
-.mk-scope a[style*='rgba(131, 110, 249'],
-.mk-scope a[style*='rgba(131,110,249'] {
+.mk-scope button[style*='rgba(20, 241, 149'],
+.mk-scope button[style*='rgba(20,241,149'],
+.mk-scope a[style*='rgba(20, 241, 149'],
+.mk-scope a[style*='rgba(20,241,149'] {
   background: linear-gradient(
     180deg,
-    rgba(131, 110, 249, 0.55) 0%,
-    rgba(131, 110, 249, 0.25) 100%
+    rgba(20, 241, 149, 0.55) 0%,
+    rgba(20, 241, 149, 0.25) 100%
   ) !important;
   color: #fff !important;
-  border-color: rgba(131, 110, 249, 0.55) !important;
+  border-color: rgba(20, 241, 149, 0.55) !important;
   box-shadow:
-    inset 0 0 0 1px rgba(131, 110, 249, 0.5),
+    inset 0 0 0 1px rgba(20, 241, 149, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 8px 22px -10px rgba(131, 110, 249, 0.45) !important;
+    0 8px 22px -10px rgba(20, 241, 149, 0.45) !important;
 }
 
 /* Decorative divs/spans keep a subtle brand tint so icon containers, avatar
    rings and status chips stay readable without overwhelming the neutral
    dashboard palette. */
-.mk-scope div[style*='rgba(131, 110, 249'],
-.mk-scope div[style*='rgba(131,110,249'],
-.mk-scope span[style*='rgba(131, 110, 249'],
-.mk-scope span[style*='rgba(131,110,249'] {
+.mk-scope div[style*='rgba(20, 241, 149'],
+.mk-scope div[style*='rgba(20,241,149'],
+.mk-scope span[style*='rgba(20, 241, 149'],
+.mk-scope span[style*='rgba(20,241,149'] {
   background: linear-gradient(
     135deg,
-    rgba(131, 110, 249, 0.14) 0%,
-    rgba(131, 110, 249, 0.04) 100%
+    rgba(20, 241, 149, 0.14) 0%,
+    rgba(20, 241, 149, 0.04) 100%
   ) !important;
-  border-color: rgba(131, 110, 249, 0.22) !important;
-  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.18) !important;
+  border-color: rgba(20, 241, 149, 0.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.18) !important;
   color: inherit !important;
 }
 /* Decorative aria-hidden overlays (top-of-card gradient strokes) remain
@@ -2461,24 +2461,24 @@ aside button[data-active='true']::after {
   background: none !important;
   -webkit-text-fill-color: #b4a7ff !important;
   color: #b4a7ff !important;
-  text-shadow: 0 0 18px rgba(131, 110, 249, 0.28);
+  text-shadow: 0 0 18px rgba(20, 241, 149, 0.28);
   animation: none !important;
 }
 
 /* ── Aggressive override of purple/tailwind styles within scope ───── */
 
 /* Purple-ish tailwind utility classes → neutral accents */
-.mk-scope .text-purple-200,
-.mk-scope .text-purple-300,
-.mk-scope .text-purple-400,
-.mk-scope .text-purple-500,
-.mk-scope .text-purple-600,
+.mk-scope .text-atlas-200,
+.mk-scope .text-atlas-300,
+.mk-scope .text-atlas-400,
+.mk-scope .text-atlas-500,
+.mk-scope .text-atlas-500,
 .mk-scope .text-violet-300,
 .mk-scope .text-violet-400,
 .mk-scope .text-fuchsia-400,
 .mk-scope .text-\[\#b4a7ff\],
 .mk-scope .text-\[\#9b88ff\],
-.mk-scope .text-\[\#836EF9\] {
+.mk-scope .text-\[\#14F195\] {
   color: var(--mk-text-secondary) !important;
 }
 
@@ -2489,9 +2489,9 @@ aside button[data-active='true']::after {
 }
 
 /* Solid purple/pink backgrounds & borders → neutral surfaces */
-.mk-scope .bg-purple-500,
-.mk-scope .bg-purple-600,
-.mk-scope .bg-purple-700,
+.mk-scope .bg-atlas-500,
+.mk-scope .bg-atlas-500,
+.mk-scope .bg-atlas-600,
 .mk-scope .bg-violet-600,
 .mk-scope .bg-fuchsia-500,
 .mk-scope .bg-fuchsia-600 {
@@ -2499,12 +2499,12 @@ aside button[data-active='true']::after {
   color: var(--mk-text) !important;
 }
 
-.mk-scope .border-purple-500\/50,
-.mk-scope .border-purple-600\/50,
-.mk-scope .border-purple-500\/30,
-.mk-scope .border-purple-600\/30,
-.mk-scope .border-purple-400\/50,
-.mk-scope .border-purple-400\/30,
+.mk-scope .border-atlas-500\/50,
+.mk-scope .border-atlas-500\/50,
+.mk-scope .border-atlas-500\/30,
+.mk-scope .border-atlas-500\/30,
+.mk-scope .border-atlas-400\/50,
+.mk-scope .border-atlas-400\/30,
 .mk-scope [class*='border-purple'],
 .mk-scope [class*='border-violet'],
 .mk-scope [class*='border-fuchsia'],
@@ -2581,15 +2581,15 @@ aside button[data-active='true']::after {
   border-color: var(--mk-surface-3) !important;
 }
 
-/* Bolty accents used in the app (purple-ish too) */
-.mk-scope .text-bolty-400,
-.mk-scope .text-bolty-500,
-.mk-scope .text-bolty-600,
-.mk-scope .bg-bolty-400\/10,
-.mk-scope .bg-bolty-500\/5,
-.mk-scope .border-bolty-400\/20,
-.mk-scope .border-bolty-400\/30,
-.mk-scope .border-bolty-400\/60 {
+/* Atlas accents used in the app (purple-ish too) */
+.mk-scope .text-atlas-400,
+.mk-scope .text-atlas-500,
+.mk-scope .text-atlas-600,
+.mk-scope .bg-atlas-400\/10,
+.mk-scope .bg-atlas-500\/5,
+.mk-scope .border-atlas-400\/20,
+.mk-scope .border-atlas-400\/30,
+.mk-scope .border-atlas-400\/60 {
   color: var(--mk-text-secondary) !important;
   background-color: transparent !important;
   border-color: var(--mk-surface-3) !important;
@@ -2680,9 +2680,9 @@ aside button[data-active='true']::after {
 }
 
 .mk-icon-btn--active {
-  background: rgba(131, 110, 249, 0.14);
-  color: #c4b5fd;
-  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.35);
+  background: rgba(20, 241, 149, 0.14);
+  color: #a7f3d0;
+  box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.35);
 }
 
 .mk-more__pop {
@@ -2694,7 +2694,7 @@ aside button[data-active='true']::after {
   padding: 6px;
   border-radius: 10px;
   background: linear-gradient(180deg, #141419 0%, #0c0c10 100%);
-  border: 1px solid rgba(131, 110, 249, 0.22);
+  border: 1px solid rgba(20, 241, 149, 0.22);
   box-shadow:
     0 18px 44px -10px rgba(0, 0, 0, 0.7),
     0 0 0 1px rgba(255, 255, 255, 0.03),
@@ -2751,7 +2751,7 @@ aside button[data-active='true']::after {
 }
 
 .mk-more__item:hover {
-  background: rgba(131, 110, 249, 0.1);
+  background: rgba(20, 241, 149, 0.1);
   color: #fff;
 }
 
@@ -2761,7 +2761,7 @@ aside button[data-active='true']::after {
 }
 
 .mk-more__item:hover > svg {
-  color: #c4b5fd;
+  color: #a7f3d0;
 }
 
 .mk-more__item--danger {
@@ -2786,7 +2786,7 @@ aside button[data-active='true']::after {
   margin: 4px 2px;
   background: linear-gradient(
     90deg,
-    rgba(131, 110, 249, 0.18) 0%,
+    rgba(20, 241, 149, 0.18) 0%,
     rgba(255, 255, 255, 0.04) 60%,
     transparent 100%
   );
@@ -2804,8 +2804,8 @@ aside button[data-active='true']::after {
   font-size: 12px;
   font-weight: 300;
   color: rgba(196, 181, 253, 0.85);
-  background: linear-gradient(180deg, rgba(131, 110, 249, 0.14) 0%, rgba(131, 110, 249, 0.04) 100%);
-  border: 1px solid rgba(131, 110, 249, 0.25);
+  background: linear-gradient(180deg, rgba(20, 241, 149, 0.14) 0%, rgba(20, 241, 149, 0.04) 100%);
+  border: 1px solid rgba(20, 241, 149, 0.25);
   text-decoration: none;
   transition:
     color 140ms ease,
@@ -2815,8 +2815,8 @@ aside button[data-active='true']::after {
 
 .mk-topbar__home:hover {
   color: #fff;
-  border-color: rgba(131, 110, 249, 0.55);
-  background: linear-gradient(180deg, rgba(131, 110, 249, 0.22) 0%, rgba(131, 110, 249, 0.08) 100%);
+  border-color: rgba(20, 241, 149, 0.55);
+  background: linear-gradient(180deg, rgba(20, 241, 149, 0.22) 0%, rgba(20, 241, 149, 0.08) 100%);
 }
 
 .mk-topbar__home > svg {
@@ -3297,27 +3297,27 @@ aside button[data-active='true']::after {
 
 
 /* ============================================================
-   Subtle Bolty-purple accents
+   Subtle Atlas-purple accents
    Kept soft + diffuse so the dashboard stays calm. Never on
    large blocks — only on titles, brand marks, and focused text.
    ============================================================ */
 
 :root {
   --mk-accent: #b4a7ff;
-  --mk-accent-strong: #836ef9;
+  --mk-accent-strong: #14f195;
   --mk-accent-soft: rgba(180, 167, 255, 0.82);
 }
 
 /* Generic accent helpers */
 .mk-scope .mk-accent {
   color: var(--mk-accent) !important;
-  text-shadow: 0 0 18px rgba(131, 110, 249, 0.28);
+  text-shadow: 0 0 18px rgba(20, 241, 149, 0.28);
   letter-spacing: -0.3px !important;
 }
 
 .mk-scope .mk-accent-soft {
   color: var(--mk-accent-soft) !important;
-  text-shadow: 0 0 14px rgba(131, 110, 249, 0.18);
+  text-shadow: 0 0 14px rgba(20, 241, 149, 0.18);
 }
 
 /* Gradient headline text (white → soft purple) */
@@ -3333,7 +3333,7 @@ aside button[data-active='true']::after {
 /* Topbar title — subtle purple tint with soft halo */
 .mk-scope .mk-topbar__title {
   color: var(--mk-accent) !important;
-  text-shadow: 0 0 16px rgba(131, 110, 249, 0.22);
+  text-shadow: 0 0 16px rgba(20, 241, 149, 0.22);
   letter-spacing: -0.2px !important;
   font-weight: 400;
 }
@@ -3359,30 +3359,30 @@ aside button[data-active='true']::after {
 /* Scope picker label reads as a soft brand line */
 .mk-scope .mk-scope-picker__label {
   color: var(--mk-accent) !important;
-  text-shadow: 0 0 14px rgba(131, 110, 249, 0.22);
+  text-shadow: 0 0 14px rgba(20, 241, 149, 0.22);
   letter-spacing: -0.2px !important;
 }
 .mk-scope .mk-scope-picker__dot {
-  background: radial-gradient(circle at 30% 30%, #c4b5fd, #836ef9 70%) !important;
+  background: radial-gradient(circle at 30% 30%, #a7f3d0, #14f195 70%) !important;
   box-shadow:
-    0 0 0 1px rgba(131, 110, 249, 0.35),
-    0 0 12px rgba(131, 110, 249, 0.45);
+    0 0 0 1px rgba(20, 241, 149, 0.35),
+    0 0 12px rgba(20, 241, 149, 0.45);
 }
 
 /* Active nav row — soft purple hint on the left edge */
 .mk-scope .mk-nav-row--active {
   background: linear-gradient(
     90deg,
-    rgba(131, 110, 249, 0.1) 0%,
-    rgba(131, 110, 249, 0.03) 55%,
+    rgba(20, 241, 149, 0.1) 0%,
+    rgba(20, 241, 149, 0.03) 55%,
     transparent 100%
   ) !important;
   color: var(--mk-text) !important;
-  box-shadow: inset 2px 0 0 rgba(131, 110, 249, 0.55);
+  box-shadow: inset 2px 0 0 rgba(20, 241, 149, 0.55);
 }
 .mk-scope .mk-nav-row--active .mk-nav-row__icon {
   color: var(--mk-accent);
-  filter: drop-shadow(0 0 6px rgba(131, 110, 249, 0.35));
+  filter: drop-shadow(0 0 6px rgba(20, 241, 149, 0.35));
 }
 
 /* Overview stat dot for brand metric gets a soft purple halo */
@@ -3393,15 +3393,15 @@ aside button[data-active='true']::after {
 /* Small "plan" badge beside username — soft purple outline */
 .mk-scope .mk-badge--outline {
   color: var(--mk-accent) !important;
-  border-color: rgba(131, 110, 249, 0.3) !important;
-  background: rgba(131, 110, 249, 0.06) !important;
+  border-color: rgba(20, 241, 149, 0.3) !important;
+  background: rgba(20, 241, 149, 0.06) !important;
 }
 
 /* Alerts card CTA — soft purple with diffuse glow */
 .mk-scope .mk-alerts-card__cta {
-  background: linear-gradient(180deg, #b4a7ff 0%, #836ef9 100%) !important;
+  background: linear-gradient(180deg, #b4a7ff 0%, #14f195 100%) !important;
   color: #0a0a0a !important;
-  box-shadow: 0 0 24px rgba(131, 110, 249, 0.35);
+  box-shadow: 0 0 24px rgba(20, 241, 149, 0.35);
 }
 
 /* Diffuse ambient glow anchored to the topbar so the whole
@@ -3419,8 +3419,8 @@ aside button[data-active='true']::after {
   height: 280px;
   background: radial-gradient(
     ellipse at center,
-    rgba(131, 110, 249, 0.16) 0%,
-    rgba(131, 110, 249, 0.06) 40%,
+    rgba(20, 241, 149, 0.16) 0%,
+    rgba(20, 241, 149, 0.06) 40%,
     transparent 70%
   );
   filter: blur(40px);
@@ -3548,9 +3548,9 @@ aside button[data-active='true']::after {
 .mk-scope .mk-wizard input:focus,
 .mk-scope .mk-wizard select:focus,
 .mk-scope .mk-wizard textarea:focus {
-  border-color: rgba(131, 110, 249, 0.45) !important;
+  border-color: rgba(20, 241, 149, 0.45) !important;
   background: var(--mk-surface-1) !important;
-  box-shadow: 0 0 0 3px rgba(131, 110, 249, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(20, 241, 149, 0.08) !important;
 }
 .mk-scope .mk-wizard input:disabled,
 .mk-scope .mk-wizard select:disabled,
@@ -3593,7 +3593,7 @@ aside button[data-active='true']::after {
   background: var(--mk-surface-3) !important;
   border-color: var(--mk-surface-7) !important;
   color: var(--mk-text) !important;
-  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.22) !important;
 }
 
 /* Large tile-style choice (pricing model / type card) */
@@ -3611,9 +3611,9 @@ aside button[data-active='true']::after {
   background: var(--mk-surface-2) !important;
 }
 .mk-scope .mk-wizard__tile--active {
-  border-color: rgba(131, 110, 249, 0.45) !important;
+  border-color: rgba(20, 241, 149, 0.45) !important;
   background: var(--mk-surface-2) !important;
-  box-shadow: inset 0 0 0 1px rgba(131, 110, 249, 0.28) !important;
+  box-shadow: inset 0 0 0 1px rgba(20, 241, 149, 0.28) !important;
 }
 
 /* Navigation primary / secondary */
@@ -3665,7 +3665,7 @@ aside button[data-active='true']::after {
   border-radius: 10px !important;
   padding: 12px 14px !important;
   color: var(--mk-text-secondary) !important;
-  box-shadow: inset 2px 0 0 rgba(131, 110, 249, 0.4) !important;
+  box-shadow: inset 2px 0 0 rgba(20, 241, 149, 0.4) !important;
 }
 .mk-scope .mk-wizard__note p {
   font-size: 12px !important;
@@ -3714,8 +3714,8 @@ aside button[data-active='true']::after {
 
 /* Neutralise aggressive inline gradient backgrounds within the wizard so
    nothing leaks the old purple slab look. */
-.mk-scope .mk-wizard [style*='rgba(131,110,249'],
-.mk-scope .mk-wizard [style*='rgba(131, 110, 249'] {
+.mk-scope .mk-wizard [style*='rgba(20,241,149'],
+.mk-scope .mk-wizard [style*='rgba(20, 241, 149'] {
   background: var(--mk-surface-0) !important;
   border-color: var(--mk-surface-4) !important;
   box-shadow: none !important;
@@ -3907,8 +3907,8 @@ aside button[data-active='true']::after {
   --app-text: #f4f4f5;
   --app-text-dim: #a1a1aa;
   --app-text-mute: #71717a;
-  --app-accent: #836ef9;
-  --app-accent-dim: rgba(131, 110, 249, 0.16);
+  --app-accent: #14f195;
+  --app-accent-dim: rgba(20, 241, 149, 0.16);
   --app-ok: #10b981;
   --app-warn: #f59e0b;
   --app-err: #ef4444;
@@ -4071,7 +4071,7 @@ aside button[data-active='true']::after {
 
 /* Sidebar typography — raise nav items, section headers and chips to
    the new product weight. No !important so inline styles with their
-   own fontWeight (the BoltyNetwork logo is 700 inline) still win.
+   own fontWeight (the Atlas logo is 700 inline) still win.
    NOTE: className is .mk-app-sidebar, NOT .mk-sidebar, because the
    legacy .mk-sidebar in this file forces display:flex + 232px width
    and would break mobile hiding. */
@@ -4449,13 +4449,13 @@ aside button[data-active='true']::after {
   background: var(--app-surface-hover);
 }
 .mk-app .mk-btn--secondary {
-  background: rgba(131, 110, 249, 0.1);
+  background: rgba(20, 241, 149, 0.1);
   color: #c9beff;
-  border-color: rgba(131, 110, 249, 0.3);
+  border-color: rgba(20, 241, 149, 0.3);
 }
 .mk-app .mk-btn--secondary:hover {
-  background: rgba(131, 110, 249, 0.18);
-  border-color: rgba(131, 110, 249, 0.5);
+  background: rgba(20, 241, 149, 0.18);
+  border-color: rgba(20, 241, 149, 0.5);
   color: #fff;
 }
 .mk-app .mk-btn--danger {
@@ -4572,9 +4572,9 @@ aside button[data-active='true']::after {
   border-color: var(--app-border);
 }
 .mk-app .mk-badge2--info {
-  background: rgba(131, 110, 249, 0.12);
+  background: rgba(20, 241, 149, 0.12);
   color: #c9beff;
-  border-color: rgba(131, 110, 249, 0.32);
+  border-color: rgba(20, 241, 149, 0.32);
 }
 .mk-app .mk-badge2--live {
   background: rgba(16, 185, 129, 0.12);
@@ -4990,8 +4990,8 @@ aside button[data-active='true']::after {
   width: 28px;
   height: 2px;
   border-radius: 0 0 2px 2px;
-  background: #836ef9;
-  box-shadow: 0 0 10px #836ef9;
+  background: #14f195;
+  box-shadow: 0 0 10px #14f195;
 }
 .mk-mobile-tab {
   position: relative;

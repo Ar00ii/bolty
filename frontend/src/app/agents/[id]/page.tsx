@@ -49,14 +49,14 @@ const POST_TYPE_CONFIG = {
   PRICE_UPDATE: { label: 'Price', color: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5' },
   ANNOUNCEMENT: {
     label: 'Announcement',
-    color: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
+    color: 'text-atlas-400 border-atlas-400/30 bg-atlas-400/5',
   },
   DEAL: { label: 'Deal', color: 'text-green-400 border-green-400/30 bg-green-400/5' },
 };
 
 const TYPE_COLORS: Record<string, string> = {
   AI_AGENT: 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5',
-  BOT: 'text-bolty-400 border-bolty-400/30 bg-bolty-400/5',
+  BOT: 'text-atlas-400 border-atlas-400/30 bg-atlas-400/5',
   SCRIPT: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/5',
   REPO: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
   OTHER: 'text-zinc-400 border-zinc-600/30 bg-zinc-800/30',
@@ -95,7 +95,7 @@ function PostCard({ post }: { post: AgentPost }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.3) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.3) 50%, transparent 100%)',
         }}
       />
       <div className="flex items-center justify-between mb-2 gap-2">
@@ -227,7 +227,7 @@ export default function AgentDetailPage() {
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-bolty-400 animate-spin" />
+        <div className="w-6 h-6 rounded-full border-2 border-zinc-700 border-t-atlas-400 animate-spin" />
       </div>
     );
 
@@ -236,7 +236,7 @@ export default function AgentDetailPage() {
       <div className="flex flex-col items-center justify-center min-h-screen gap-3">
         <div className="text-4xl font-mono text-zinc-700">404</div>
         <div className="text-zinc-400 text-sm">Agent not found</div>
-        <Link href="/market" className="text-bolty-400 text-sm hover:underline">
+        <Link href="/market" className="text-atlas-400 text-sm hover:underline">
           ← Back to Agents
         </Link>
       </div>
@@ -258,7 +258,7 @@ export default function AgentDetailPage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-start justify-between flex-wrap gap-4 relative">
@@ -307,7 +307,7 @@ export default function AgentDetailPage() {
               {agent.price === 0 ? (
                 <span className="text-green-400">Free</span>
               ) : (
-                <span className="text-bolty-400">
+                <span className="text-atlas-400">
                   {agent.price} {agent.currency}
                 </span>
               )}
@@ -365,9 +365,9 @@ export default function AgentDetailPage() {
                   className="absolute inset-0 rounded-lg"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
                   }}
                 />
               )}
@@ -389,8 +389,8 @@ export default function AgentDetailPage() {
                 className="w-full py-3 rounded-xl text-[13px] font-light transition-all"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.02) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                    'linear-gradient(180deg, rgba(20,241,149,0.12) 0%, rgba(20,241,149,0.02) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
                   color: '#b4a7ff',
                 }}
               >
@@ -412,7 +412,7 @@ export default function AgentDetailPage() {
                     className="pointer-events-none absolute inset-x-0 top-0 h-px"
                     style={{
                       background:
-                        'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                        'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
                     }}
                   />
                   <div className="flex gap-2 flex-wrap">
@@ -436,7 +436,7 @@ export default function AgentDetailPage() {
                     rows={3}
                     maxLength={2000}
                     placeholder="What does your agent want to say?"
-                    className="w-full px-4 py-2.5 rounded-xl text-[13px] resize-none outline-none text-zinc-100 placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(131,110,249,0.45),_0_0_0_4px_rgba(131,110,249,0.12)]"
+                    className="w-full px-4 py-2.5 rounded-xl text-[13px] resize-none outline-none text-zinc-100 placeholder:text-zinc-500 focus:shadow-[0_0_0_1px_rgba(20,241,149,0.45),_0_0_0_4px_rgba(20,241,149,0.12)]"
                     style={{
                       background:
                         'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -471,7 +471,7 @@ export default function AgentDetailPage() {
                         }}
                       >
                         <option value="ETH">ETH (Base)</option>
-                        <option value="BOLTY">BOLTY (Base)</option>
+                        <option value="ATLAS">ATLAS (Base)</option>
                         <option value="USD">USD</option>
                       </select>
                     </div>
@@ -556,7 +556,7 @@ export default function AgentDetailPage() {
                 href={agent.agentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-bolty-400 hover:underline break-all"
+                className="text-sm text-atlas-400 hover:underline break-all"
               >
                 {agent.agentUrl}
               </a>
@@ -621,11 +621,11 @@ export default function AgentDetailPage() {
             </p>
             <p className="text-xs leading-relaxed" style={{ color: 'var(--text-muted)' }}>
               Your agent or script can post updates automatically using an API key. Call{' '}
-              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
+              <code className="text-atlas-400 bg-atlas-400/10 px-1 rounded">
                 POST {API_URL}/market/{agent.id}/posts
               </code>{' '}
               with header{' '}
-              <code className="text-bolty-400 bg-bolty-400/10 px-1 rounded">
+              <code className="text-atlas-400 bg-atlas-400/10 px-1 rounded">
                 X-Agent-Key: bak_...
               </code>
             </p>

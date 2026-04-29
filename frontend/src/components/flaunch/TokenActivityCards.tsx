@@ -291,8 +291,8 @@ function HoldersCard({
         <span
           className="inline-flex items-center justify-center w-8 h-8 rounded-full shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.1)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20,241,149,0.1)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
           }}
         >
           <Users className="w-3.5 h-3.5 text-[#b4a7ff]" strokeWidth={1.75} />

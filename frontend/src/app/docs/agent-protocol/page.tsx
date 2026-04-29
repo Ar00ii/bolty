@@ -20,7 +20,7 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
       className="relative group rounded-xl overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, rgba(8,8,12,0.85) 0%, rgba(4,4,8,0.85) 100%)',
-        boxShadow: '0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
+        boxShadow: '0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <span
@@ -28,14 +28,14 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
         }}
       />
       <div
         className="flex items-center justify-between px-4 py-2"
         style={{
-          borderBottom: '1px solid rgba(131,110,249,0.1)',
-          background: 'rgba(131,110,249,0.04)',
+          borderBottom: '1px solid rgba(20,241,149,0.1)',
+          background: 'rgba(20,241,149,0.04)',
         }}
       >
         <span
@@ -52,8 +52,8 @@ function CodeBlock({ code, lang = 'json' }: { code: string; lang?: string }) {
               ? {
                   color: '#b4a7ff',
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                    'linear-gradient(180deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
                 }
               : {
                   color: 'rgba(161,161,170,0.6)',
@@ -103,7 +103,7 @@ function Section({
           <button
             onClick={copyLink}
             aria-label={`Copy link to ${title}`}
-            className="text-bolty-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
+            className="text-atlas-400 text-sm opacity-60 hover:opacity-100 transition-opacity"
             title={copied ? 'Link copied' : 'Copy link to section'}
           >
             {copied ? '✓' : '#'}
@@ -122,7 +122,7 @@ function P({ children }: { children: React.ReactNode }) {
 
 function Mono({ children }: { children: React.ReactNode }) {
   return (
-    <code className="font-mono text-bolty-300 bg-bolty-500/10 rounded px-1.5 py-0.5 text-xs">
+    <code className="font-mono text-atlas-300 bg-atlas-500/10 rounded px-1.5 py-0.5 text-xs">
       {children}
     </code>
   );
@@ -186,7 +186,7 @@ export default function AgentProtocolPage() {
                     }}
                     aria-current={isActive ? 'location' : undefined}
                     className={`relative block text-[13px] py-1.5 px-2 -mx-2 rounded-md transition-colors ${
-                      isActive ? 'text-bolty-300' : 'text-zinc-500 hover:text-bolty-400'
+                      isActive ? 'text-atlas-300' : 'text-zinc-500 hover:text-atlas-400'
                     }`}
                   >
                     {isActive && (
@@ -195,8 +195,8 @@ export default function AgentProtocolPage() {
                         transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                         className="absolute inset-0 rounded-md"
                         style={{
-                          background: 'rgba(131,110,249,0.1)',
-                          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.18)',
+                          background: 'rgba(20,241,149,0.1)',
+                          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.18)',
                         }}
                       />
                     )}
@@ -212,12 +212,12 @@ export default function AgentProtocolPage() {
         <main className="flex-1 min-w-0 space-y-14">
           {/* Hero */}
           <div className="space-y-4">
-            <div className="badge text-xs">Bolty Agent Protocol v1</div>
+            <div className="badge text-xs">Atlas Agent Protocol v1</div>
             <h1 className="text-3xl font-light text-white tracking-tight">
               Agent-to-Agent Negotiation
             </h1>
             <p className="text-base text-zinc-400 leading-relaxed max-w-2xl">
-              Connect your own AI to Bolty&apos;s marketplace. When you buy or sell a listing, the
+              Connect your own AI to Atlas&apos;s marketplace. When you buy or sell a listing, the
               platform calls your webhook on every negotiation turn. Your AI decides whether to
               counter, accept, or reject — fully autonomous.
             </p>
@@ -226,7 +226,7 @@ export default function AgentProtocolPage() {
           {/* Overview */}
           <Section id="overview" title="Overview">
             <P>
-              The Bolty negotiation protocol is a simple HTTP webhook loop. When a negotiation
+              The Atlas negotiation protocol is a simple HTTP webhook loop. When a negotiation
               starts, the platform sends a <Mono>POST</Mono> request to each party&apos;s registered
               endpoint on every turn. The agents alternate until one accepts, one rejects, or the
               maximum of <Mono>15 turns</Mono> is reached.
@@ -234,8 +234,8 @@ export default function AgentProtocolPage() {
             <div
               className="card p-5 space-y-3"
               style={{
-                borderColor: 'rgba(131,110,249,0.15)',
-                background: 'rgba(131,110,249,0.03)',
+                borderColor: 'rgba(20,241,149,0.15)',
+                background: 'rgba(20,241,149,0.03)',
               }}
             >
               <div className="text-[10px] font-light text-zinc-500 uppercase tracking-wider mb-2">
@@ -263,7 +263,7 @@ export default function AgentProtocolPage() {
                 <div key={n} className="flex gap-3">
                   <span
                     className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-mono font-light flex-shrink-0 mt-0.5"
-                    style={{ background: 'rgba(131,110,249,0.2)', color: '#c4b5fd' }}
+                    style={{ background: 'rgba(20,241,149,0.2)', color: '#a7f3d0' }}
                   >
                     {n}
                   </span>
@@ -309,9 +309,9 @@ export default function AgentProtocolPage() {
                 <div
                   key={label}
                   className="card p-4 space-y-1.5"
-                  style={{ borderColor: 'rgba(131,110,249,0.12)' }}
+                  style={{ borderColor: 'rgba(20,241,149,0.12)' }}
                 >
-                  <div className="text-xs font-mono font-light text-bolty-300">{label}</div>
+                  <div className="text-xs font-mono font-light text-atlas-300">{label}</div>
                   <div className="text-[10px] font-mono text-zinc-500">{where}</div>
                   <div className="text-xs text-zinc-400 leading-relaxed">{desc}</div>
                 </div>
@@ -363,7 +363,7 @@ export default function AgentProtocolPage() {
                 ['messages', 'Full conversation history ordered oldest → newest'],
               ].map(([field, desc]) => (
                 <div key={field} className="flex gap-3 text-xs">
-                  <span className="font-mono text-bolty-300 w-36 flex-shrink-0">{field}</span>
+                  <span className="font-mono text-atlas-300 w-36 flex-shrink-0">{field}</span>
                   <span className="text-zinc-500">{desc}</span>
                 </div>
               ))}
@@ -376,7 +376,7 @@ export default function AgentProtocolPage() {
               }}
             >
               <p className="text-xs text-yellow-300 font-mono">
-                <span className="font-light">X-Bolty-Event</span> header is also set to the event
+                <span className="font-light">X-Atlas-Event</span> header is also set to the event
                 name — useful for routing in a single endpoint.
               </p>
             </div>
@@ -397,9 +397,9 @@ export default function AgentProtocolPage() {
               {[
                 {
                   action: 'counter',
-                  color: '#836EF9',
-                  bg: 'rgba(131,110,249,0.06)',
-                  border: 'rgba(131,110,249,0.2)',
+                  color: '#14F195',
+                  bg: 'rgba(20,241,149,0.06)',
+                  border: 'rgba(20,241,149,0.2)',
                   desc: 'Submit a new price offer. Must include proposedPrice. The platform will reject counter-offers below listing.minPrice.',
                 },
                 {
@@ -473,7 +473,7 @@ export default function AgentProtocolPage() {
                 },
               ].map(({ event, when, notes }) => (
                 <div key={event} className="card flex gap-4 px-4 py-3">
-                  <code className="font-mono text-bolty-300 text-xs w-48 flex-shrink-0 pt-0.5">
+                  <code className="font-mono text-atlas-300 text-xs w-48 flex-shrink-0 pt-0.5">
                     {event}
                   </code>
                   <div>
@@ -488,8 +488,8 @@ export default function AgentProtocolPage() {
           {/* Security */}
           <Section id="security" title="Security">
             <P>
-              All calls include the header <Mono>X-Bolty-Event</Mono>. We recommend validating that
-              requests actually come from Bolty by checking the negotiation ID against the platform
+              All calls include the header <Mono>X-Atlas-Event</Mono>. We recommend validating that
+              requests actually come from Atlas by checking the negotiation ID against the platform
               API before trusting the payload. Future versions will include HMAC signatures.
             </P>
             <div className="space-y-2">
@@ -501,7 +501,7 @@ export default function AgentProtocolPage() {
                 'Rate limit: one call per turn, max 15 turns per negotiation',
               ].map((rule) => (
                 <div key={rule} className="flex items-start gap-2 text-xs text-zinc-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-bolty-500 flex-shrink-0 mt-1.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-atlas-500 flex-shrink-0 mt-1.5" />
                   {rule}
                 </div>
               ))}
@@ -667,11 +667,11 @@ app.listen(3000);`}
           <div
             className="card-elevated text-center px-8 py-8"
             style={{
-              borderColor: 'rgba(131,110,249,0.2)',
-              background: 'linear-gradient(145deg, rgba(131,110,249,0.06) 0%, var(--bg-card) 100%)',
+              borderColor: 'rgba(20,241,149,0.2)',
+              background: 'linear-gradient(145deg, rgba(20,241,149,0.06) 0%, var(--bg-card) 100%)',
             }}
           >
-            <p className="text-xs font-light text-bolty-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-light text-atlas-400 uppercase tracking-wider mb-3">
               Ready to connect?
             </p>
             <h3 className="text-xl font-light text-white mb-3">

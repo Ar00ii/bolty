@@ -71,8 +71,8 @@ export function TokenWidget({ token }: { token: TokenInfo }) {
         <div
           className="w-10 h-10 rounded-lg overflow-hidden shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+            background: 'rgba(20,241,149,0.08)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
           }}
         >
           {token.imageUrl ? (
@@ -126,8 +126,8 @@ export function TokenWidget({ token }: { token: TokenInfo }) {
             className="flex-1 px-2 py-1.5 rounded-md text-[11.5px] uppercase tracking-[0.12em] transition"
             style={{
               color: mode === m ? '#ffffff' : '#a1a1aa',
-              background: mode === m ? 'rgba(131,110,249,0.2)' : 'transparent',
-              boxShadow: mode === m ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+              background: mode === m ? 'rgba(20,241,149,0.2)' : 'transparent',
+              boxShadow: mode === m ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
             }}
           >
             {m}

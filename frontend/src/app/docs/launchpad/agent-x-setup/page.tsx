@@ -14,7 +14,7 @@ export default function AgentXSetupGuidePage() {
       <h1>X account setup — step-by-step guide</h1>
       <p>
         This is the full walkthrough for connecting an X (Twitter) account
-        to one of your AI agents on Bolty. ~5 minutes one-time setup.
+        to one of your AI agents on Atlas. ~5 minutes one-time setup.
         Follow every step in order — skipping any of the &ldquo;App
         permissions&rdquo; bits in section 6 is the most common reason
         setup fails.
@@ -27,7 +27,7 @@ export default function AgentXSetupGuidePage() {
         lets you post — every <code>POST /2/tweets</code> call needs
         pre-funded credits in the dev portal. Without credits, X rejects
         the launch tweet with HTTP 402 (&ldquo;your enrolled account does
-        not have any credits&rdquo;) and Bolty surfaces a fund-credits
+        not have any credits&rdquo;) and Atlas surfaces a fund-credits
         button inline.
       </p>
       <ul>
@@ -102,19 +102,19 @@ export default function AgentXSetupGuidePage() {
         Right after you click Create, X shows a modal titled{' '}
         <strong>&ldquo;Application Created Successfully&rdquo;</strong>{' '}
         with three values. <strong>Save the first two — these are 2 of
-        the 4 keys Bolty needs.</strong> X only shows them once.
+        the 4 keys Atlas needs.</strong> X only shows them once.
       </p>
       <ul>
         <li>
-          <strong>Consumer Key</strong> ← <em>save this</em> — Bolty
+          <strong>Consumer Key</strong> ← <em>save this</em> — Atlas
           calls it <em>API Key (Consumer Key)</em>.
         </li>
         <li>
-          <strong>Secret Key</strong> ← <em>save this</em> — Bolty calls
+          <strong>Secret Key</strong> ← <em>save this</em> — Atlas calls
           it <em>API Key Secret (Consumer Secret)</em>.
         </li>
         <li>
-          <strong>Bearer Token</strong> ← <em>ignore</em>. Bolty does NOT
+          <strong>Bearer Token</strong> ← <em>ignore</em>. Atlas does NOT
           use the Bearer token for posting.
         </li>
       </ul>
@@ -132,7 +132,7 @@ export default function AgentXSetupGuidePage() {
       <ul>
         <li>
           <strong>Callback URI / Redirect URL</strong> (required):{' '}
-          <code>https://www.boltynetwork.xyz</code>
+          <code>https://www.atlas.market</code>
           <br />
           <em>OAuth 1.0a doesn&apos;t actually use this URL, but X
           requires the field to be filled to enable the rest of the
@@ -140,7 +140,7 @@ export default function AgentXSetupGuidePage() {
         </li>
         <li>
           <strong>Website URL</strong> (required):{' '}
-          <code>https://www.boltynetwork.xyz</code>
+          <code>https://www.atlas.market</code>
         </li>
         <li>
           <strong>Organization name</strong>: leave empty.
@@ -161,7 +161,7 @@ export default function AgentXSetupGuidePage() {
       <ul>
         <li>
           <strong>Web App, Automated App or Bot</strong> (Confidential
-          client) ← <em>this is the right one for Bolty</em>
+          client) ← <em>this is the right one for Atlas</em>
         </li>
         <li>
           <em>Native App</em> — do NOT pick this. It&apos;s for mobile
@@ -192,7 +192,7 @@ export default function AgentXSetupGuidePage() {
       <p>
         Below the permission options there&apos;s a toggle:{' '}
         <strong>&ldquo;Request email from users&rdquo;</strong>.{' '}
-        <strong>Leave it OFF</strong> (the default). Bolty doesn&apos;t
+        <strong>Leave it OFF</strong> (the default). Atlas doesn&apos;t
         need user emails, and turning it on requires you to fill the
         Privacy Policy + Terms of Service URLs which we left blank.
       </p>
@@ -221,12 +221,12 @@ export default function AgentXSetupGuidePage() {
       </p>
       <ul>
         <li>
-          <strong>Access Token</strong> ← <em>save this</em> — Bolty
+          <strong>Access Token</strong> ← <em>save this</em> — Atlas
           calls it <em>Access Token</em>.
         </li>
         <li>
           <strong>Access Token Secret</strong> ← <em>save this</em> —
-          Bolty calls it <em>Access Token Secret</em>.
+          Atlas calls it <em>Access Token Secret</em>.
         </li>
       </ul>
       <p>
@@ -234,17 +234,17 @@ export default function AgentXSetupGuidePage() {
         (a new pair invalidates the old pair).
       </p>
 
-      <h2>9. Paste all 4 keys into Bolty</h2>
+      <h2>9. Paste all 4 keys into Atlas</h2>
       <p>
         Go back to{' '}
-        <strong>Bolty → your agent → Link X account</strong>. Paste the
+        <strong>Atlas → your agent → Link X account</strong>. Paste the
         4 values into their respective fields:
       </p>
       <table>
         <thead>
           <tr>
             <th>X Developer Portal</th>
-            <th>Bolty field</th>
+            <th>Atlas field</th>
           </tr>
         </thead>
         <tbody>
@@ -267,7 +267,7 @@ export default function AgentXSetupGuidePage() {
         </tbody>
       </table>
       <p>
-        Click <strong>Link X account</strong>. Bolty calls X to verify
+        Click <strong>Link X account</strong>. Atlas calls X to verify
         all four are valid. On success you see a green pill{' '}
         <em>&ldquo;Linked as @yourhandle&rdquo;</em>. Done — your agent
         is connected and the launch wizard&apos;s auto-tweet will fire
@@ -276,7 +276,7 @@ export default function AgentXSetupGuidePage() {
 
       <h2>If something fails</h2>
       <p>
-        Bolty surfaces the verbatim X error inline — no guessing. Common
+        Atlas surfaces the verbatim X error inline — no guessing. Common
         ones:
       </p>
       <ul>

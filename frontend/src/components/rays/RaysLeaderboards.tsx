@@ -29,7 +29,7 @@ const RANK_META: Record<string, { color: string; textColor: string }> = {
   BRONCE: { color: '180,83,9', textColor: '#fcd34d' },
   PLATA: { color: '148,163,184', textColor: '#e2e8f0' },
   ORO: { color: '234,179,8', textColor: '#fde047' },
-  PLATINO: { color: '131,110,249', textColor: '#b4a7ff' },
+  PLATINO: { color: '20,241,149', textColor: '#b4a7ff' },
   DIAMANTE: { color: '6,182,212', textColor: '#67e8f9' },
   MAESTRIA: { color: '59,130,246', textColor: '#93c5fd' },
   CAMPEON: { color: '239,68,68', textColor: '#fda4af' },
@@ -39,7 +39,7 @@ const getPositionMeta = (position: number) => {
   if (position === 1) return { color: '234,179,8', textColor: '#fde047', Icon: Crown };
   if (position === 2) return { color: '148,163,184', textColor: '#e2e8f0', Icon: Medal };
   if (position === 3) return { color: '180,83,9', textColor: '#fcd34d', Icon: Award };
-  return { color: '131,110,249', textColor: '#b4a7ff', Icon: null };
+  return { color: '20,241,149', textColor: '#b4a7ff', Icon: null };
 };
 
 export const RaysLeaderboards: React.FC = () => {
@@ -93,16 +93,16 @@ export const RaysLeaderboards: React.FC = () => {
         className="absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.4) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.4) 50%, transparent 100%)',
         }}
       />
       <div
         className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+            'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+            'inset 0 0 0 1px rgba(20,241,149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20,241,149,0.5)',
         }}
       >
         <Icon className="w-5 h-5 text-[#b4a7ff]" />
@@ -137,9 +137,9 @@ export const RaysLeaderboards: React.FC = () => {
             className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{
               background:
-                'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(131,110,249,0.5)',
+                'inset 0 0 0 1px rgba(20,241,149,0.38), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -4px rgba(20,241,149,0.5)',
             }}
           >
             <TrendingUp className="w-4 h-4 text-[#b4a7ff]" />
@@ -168,9 +168,9 @@ export const RaysLeaderboards: React.FC = () => {
               className="absolute inset-0 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.28) 0%, rgba(20,241,149,0.08) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(20,241,149,0.5)',
               }}
             />
           )}
@@ -192,9 +192,9 @@ export const RaysLeaderboards: React.FC = () => {
               className="absolute inset-0 rounded-lg"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(131,110,249,0.28) 0%, rgba(131,110,249,0.08) 100%)',
+                  'linear-gradient(180deg, rgba(20,241,149,0.28) 0%, rgba(20,241,149,0.08) 100%)',
                 boxShadow:
-                  'inset 0 0 0 1px rgba(131,110,249,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(131,110,249,0.5)',
+                  'inset 0 0 0 1px rgba(20,241,149,0.4), inset 0 1px 0 rgba(255,255,255,0.06), 0 0 18px -6px rgba(20,241,149,0.5)',
               }}
             />
           )}

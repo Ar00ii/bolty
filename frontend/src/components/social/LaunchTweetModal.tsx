@@ -20,7 +20,7 @@ interface LaunchTweetToken {
   name: string;
   symbol: string;
   tokenAddress: string;
-  url: string; // full link to the token's launchpad page (e.g. https://www.boltynetwork.xyz/launchpad/0x...)
+  url: string; // full link to the token's launchpad page (e.g. https://www.atlas.market/launchpad/0x...)
   agentName?: string | null;
 }
 
@@ -38,7 +38,7 @@ const MAX_LEN = 280;
 function defaultDraft(token: LaunchTweetToken): string {
   const sym = `$${token.symbol.toUpperCase()}`;
   const by = token.agentName ? ` by ${token.agentName}` : '';
-  return `Just launched ${sym} on Bolty${by}.\n\nChart, holders, and CA: ${token.url}`;
+  return `Just launched ${sym} on Atlas${by}.\n\nChart, holders, and CA: ${token.url}`;
 }
 
 export function LaunchTweetModal({
@@ -150,7 +150,7 @@ export function LaunchTweetModal({
               }
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[12px] text-bolty-300 hover:text-white underline-offset-2 hover:underline"
+              className="text-[12px] text-atlas-300 hover:text-white underline-offset-2 hover:underline"
             >
               View on X
             </a>
@@ -209,9 +209,9 @@ export function LaunchTweetModal({
                   disabled={posting || tooLong || !text.trim()}
                   className="inline-flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-md transition disabled:opacity-50"
                   style={{
-                    background: 'rgba(131,110,249,0.18)',
+                    background: 'rgba(20,241,149,0.18)',
                     color: '#e4d8ff',
-                    border: '1px solid rgba(131,110,249,0.4)',
+                    border: '1px solid rgba(20,241,149,0.4)',
                   }}
                 >
                   {posting ? (
@@ -227,9 +227,9 @@ export function LaunchTweetModal({
                   onClick={handleConnect}
                   className="inline-flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-md transition"
                   style={{
-                    background: 'rgba(131,110,249,0.18)',
+                    background: 'rgba(20,241,149,0.18)',
                     color: '#e4d8ff',
-                    border: '1px solid rgba(131,110,249,0.4)',
+                    border: '1px solid rgba(20,241,149,0.4)',
                   }}
                 >
                   <Twitter className="w-3 h-3" strokeWidth={2} />

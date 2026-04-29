@@ -65,7 +65,7 @@ export default function MarketTagsPage() {
         />
         <div
           className="absolute top-60 -left-20 w-[380px] h-[380px] rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
         />
       </div>
 
@@ -105,7 +105,7 @@ export default function MarketTagsPage() {
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           <div className="relative">
@@ -115,7 +115,7 @@ export default function MarketTagsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Filter tags…"
-              className="w-full rounded-lg pl-3.5 pr-16 py-2.5 text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(131,110,249,0.12)]"
+              className="w-full rounded-lg pl-3.5 pr-16 py-2.5 text-[13px] text-white placeholder-zinc-600 outline-none transition-all focus:shadow-[0_0_0_3px_rgba(20,241,149,0.12)]"
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.7) 0%, rgba(10,10,14,0.7) 100%)',
@@ -178,9 +178,9 @@ export default function MarketTagsPage() {
                         className="absolute inset-0 rounded-md"
                         style={{
                           background:
-                            'linear-gradient(180deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
+                            'linear-gradient(180deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
                           boxShadow:
-                            'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                            'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
                         }}
                       />
                     )}
@@ -260,14 +260,14 @@ export default function MarketTagsPage() {
                     href={`/market?tags=${encodeURIComponent(t.tag)}`}
                     className="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full transition-all hover:-translate-y-0.5"
                     style={{
-                      background: `linear-gradient(180deg, rgba(131,110,249,${
+                      background: `linear-gradient(180deg, rgba(20,241,149,${
                         0.08 + weight * 0.14
-                      }) 0%, rgba(131,110,249,${0.02 + weight * 0.05}) 100%)`,
-                      boxShadow: `inset 0 0 0 1px rgba(131,110,249,${
+                      }) 0%, rgba(20,241,149,${0.02 + weight * 0.05}) 100%)`,
+                      boxShadow: `inset 0 0 0 1px rgba(20,241,149,${
                         0.16 + weight * 0.16
                       }), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 ${
                         8 + weight * 12
-                      }px -4px rgba(131,110,249,${0.12 + weight * 0.18})`,
+                      }px -4px rgba(20,241,149,${0.12 + weight * 0.18})`,
                     }}
                   >
                     <Hash className="w-3 h-3 text-[#b4a7ff]" strokeWidth={2} />

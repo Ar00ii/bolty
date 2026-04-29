@@ -26,10 +26,10 @@ const PublishRepoAnimation = () => (
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: i * 0.3, duration: 0.5, repeat: Infinity, repeatDelay: 4 }}
-        className="flex items-center gap-2 px-3 py-2 rounded border border-purple-800/50 bg-purple-950/30"
+        className="flex items-center gap-2 px-3 py-2 rounded border border-atlas-700/50 bg-atlas-900/30"
       >
-        <GitBranch className="w-3 h-3 text-purple-400" />
-        <span className="text-xs text-purple-300">{name}</span>
+        <GitBranch className="w-3 h-3 text-atlas-400" />
+        <span className="text-xs text-atlas-300">{name}</span>
         <span className="ml-auto text-[10px] text-green-400">published</span>
       </motion.div>
     ))}
@@ -42,14 +42,14 @@ const DeployAgentAnimation = () => (
       <motion.div
         animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="w-12 h-12 rounded-full bg-purple-600/30 border border-purple-500/50 flex items-center justify-center"
+        className="w-12 h-12 rounded-full bg-atlas-500/30 border border-atlas-500/50 flex items-center justify-center"
       >
-        <Bot className="w-6 h-6 text-purple-400" />
+        <Bot className="w-6 h-6 text-atlas-400" />
       </motion.div>
       <motion.div
         animate={{ opacity: [0, 1, 0] }}
         transition={{ duration: 2, repeat: Infinity }}
-        className="text-[10px] text-purple-400"
+        className="text-[10px] text-atlas-400"
       >
         Deploying agent...
       </motion.div>
@@ -81,10 +81,10 @@ const NegotiatingAgentsAnimation = () => (
       transition={{ duration: 3, repeat: Infinity }}
       className="flex flex-col items-center gap-1"
     >
-      <div className="w-10 h-10 rounded-full bg-purple-600/30 border border-purple-500/50 flex items-center justify-center">
-        <Bot className="w-5 h-5 text-purple-400" />
+      <div className="w-10 h-10 rounded-full bg-atlas-500/30 border border-atlas-500/50 flex items-center justify-center">
+        <Bot className="w-5 h-5 text-atlas-400" />
       </div>
-      <span className="text-[10px] text-purple-400">Seller</span>
+      <span className="text-[10px] text-atlas-400">Seller</span>
     </motion.div>
   </div>
 );
@@ -93,7 +93,7 @@ const GlobalChatAnimation = () => (
   <div className="w-full h-full flex flex-col gap-2 p-2 overflow-hidden">
     {[
       { name: 'AgentX', msg: 'New repo listed at 0.5 ETH', color: 'text-cyan-400' },
-      { name: 'BotAlpha', msg: 'Interested, can we negotiate?', color: 'text-purple-400' },
+      { name: 'BotAlpha', msg: 'Interested, can we negotiate?', color: 'text-atlas-400' },
       { name: 'DevBot', msg: 'Deal closed! 0.45 ETH', color: 'text-green-400' },
     ].map((chat, i) => (
       <motion.div
@@ -115,7 +115,7 @@ export function EliteBoost() {
     {
       Icon: GitBranch,
       name: 'Publish Repository',
-      description: 'Share your code with the Bolty ecosystem and start earning instantly.',
+      description: 'Share your code with the Atlas ecosystem and start earning instantly.',
       href: '/market/repos',
       cta: 'Publish Repo',
       className: 'col-span-3 lg:col-span-2',
@@ -220,7 +220,7 @@ export function EliteBoost() {
   const packages = [
     {
       name: 'Starter',
-      description: '10 Boost • 12 BOLTY',
+      description: '10 Boost • 12 ATLAS',
       Icon: Zap,
       className: 'col-span-3 lg:col-span-1',
       href: '#',
@@ -228,7 +228,7 @@ export function EliteBoost() {
     },
     {
       name: 'Growth',
-      description: '25 Boost • 28 BOLTY',
+      description: '25 Boost • 28 ATLAS',
       Icon: TrendingUp,
       className: 'col-span-3 lg:col-span-1',
       href: '#',
@@ -236,7 +236,7 @@ export function EliteBoost() {
     },
     {
       name: 'Professional',
-      description: '50 Boost • 48 BOLTY',
+      description: '50 Boost • 48 ATLAS',
       Icon: Trophy,
       className: 'col-span-3 lg:col-span-2',
       href: '#',
@@ -244,7 +244,7 @@ export function EliteBoost() {
     },
     {
       name: 'Premium',
-      description: '120 Boost • 110 BOLTY',
+      description: '120 Boost • 110 ATLAS',
       Icon: Crown,
       className: 'col-span-3 lg:col-span-1',
       href: '#',
@@ -252,7 +252,7 @@ export function EliteBoost() {
     },
     {
       name: 'Elite',
-      description: '250 Boost • 230 BOLTY',
+      description: '250 Boost • 230 ATLAS',
       Icon: Gem,
       className: 'col-span-3 lg:col-span-1',
       href: '#',
@@ -351,7 +351,7 @@ export function EliteBoost() {
 
           <a
             href={features[0].href}
-            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-light text-atlas-400 hover:text-atlas-300 transition-colors"
           >
             {features[0].cta} →
           </a>
@@ -418,7 +418,7 @@ export function EliteBoost() {
 
           <a
             href={features[1].href}
-            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-light text-atlas-400 hover:text-atlas-300 transition-colors"
           >
             {features[1].cta} →
           </a>
@@ -485,7 +485,7 @@ export function EliteBoost() {
 
           <a
             href={features[3].href}
-            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-light text-atlas-400 hover:text-atlas-300 transition-colors"
           >
             {features[3].cta} →
           </a>
@@ -551,7 +551,7 @@ export function EliteBoost() {
 
           <a
             href={features[2].href}
-            className="inline-flex items-center gap-2 text-sm font-light text-purple-400 hover:text-purple-300 transition-colors"
+            className="inline-flex items-center gap-2 text-sm font-light text-atlas-400 hover:text-atlas-300 transition-colors"
           >
             {features[2].cta} →
           </a>

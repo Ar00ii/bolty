@@ -251,7 +251,7 @@ function InventoryPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-purple-500 animate-spin" />
+        <div className="w-5 h-5 rounded-full border-2 border-zinc-800 border-t-atlas-500 animate-spin" />
       </div>
     );
   }
@@ -264,8 +264,8 @@ function InventoryPageContent() {
           onClick={load}
           className="px-3 py-1.5 rounded-md text-[12px] text-white"
           style={{
-            background: 'rgba(131,110,249,0.2)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+            background: 'rgba(20,241,149,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.45)',
           }}
         >
           Retry
@@ -347,7 +347,7 @@ function TabButton({
       {active && (
         <span
           className="absolute left-0 right-0 -bottom-px h-[2px]"
-          style={{ background: 'linear-gradient(90deg, #06B6D4, #836EF9, #EC4899)' }}
+          style={{ background: 'linear-gradient(90deg, #06B6D4, #14F195, #EC4899)' }}
         />
       )}
     </button>
@@ -689,16 +689,16 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
     <div
       className="mb-5 rounded-xl p-4"
       style={{
-        background: 'linear-gradient(180deg, rgba(131,110,249,0.08), rgba(10,10,14,0.5))',
-        boxShadow: '0 0 0 1px rgba(131,110,249,0.3)',
+        background: 'linear-gradient(180deg, rgba(20,241,149,0.08), rgba(10,10,14,0.5))',
+        boxShadow: '0 0 0 1px rgba(20,241,149,0.3)',
       }}
     >
       <div className="flex items-start gap-3">
         <div
           className="w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.2)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.45)',
+            background: 'rgba(20,241,149,0.2)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.45)',
           }}
         >
           <Shield className="w-4 h-4 text-[#b4a7ff]" />
@@ -714,8 +714,8 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
               onClick={() => setOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white transition-all hover:brightness-110"
               style={{
-                background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                background: 'linear-gradient(180deg, rgba(20,241,149,0.38), rgba(20,241,149,0.14))',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)',
               }}
             >
               Recover stuck payment
@@ -775,8 +775,8 @@ function RecoverPaymentCard({ onRecovered }: { onRecovered: () => void }) {
                   className="px-3 py-1.5 rounded-md text-[12px] text-white disabled:opacity-50"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-                    boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.38), rgba(20,241,149,0.14))',
+                    boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)',
                   }}
                 >
                   {busy ? 'Verifying…' : 'Recover'}
@@ -1004,8 +1004,8 @@ function Section({
         <div
           className="w-7 h-7 rounded-md flex items-center justify-center"
           style={{
-            background: 'rgba(131,110,249,0.12)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+            background: 'rgba(20,241,149,0.12)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
           }}
         >
           <Icon className="w-3.5 h-3.5 text-[#b4a7ff]" />
@@ -1060,8 +1060,8 @@ function EmptyState({
       <div
         className="w-12 h-12 rounded-xl flex items-center justify-center"
         style={{
-          background: 'rgba(131,110,249,0.08)',
-          boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+          background: 'rgba(20,241,149,0.08)',
+          boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
         }}
       >
         <Icon className="w-5 h-5 text-[#b4a7ff]" />
@@ -1075,8 +1075,8 @@ function EmptyState({
           href={action.href}
           className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] text-white"
           style={{
-            background: 'linear-gradient(180deg, rgba(131,110,249,0.38), rgba(131,110,249,0.14))',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.48)',
+            background: 'linear-gradient(180deg, rgba(20,241,149,0.38), rgba(20,241,149,0.14))',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.48)',
           }}
         >
           <Code2 className="w-3.5 h-3.5" />

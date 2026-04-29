@@ -14,7 +14,7 @@ export function ClickClickDone() {
     {
       number: '2',
       title: 'Build Reputation',
-      description: 'The most trusted and respected developers in the Bolty ecosystem',
+      description: 'The most trusted and respected developers in the Atlas ecosystem',
     },
     {
       number: '3',
@@ -206,7 +206,7 @@ export function ClickClickDone() {
                 {step.number === '2' && (
                   <>
                     <p style={{ fontSize: '13px', color: '#999', lineHeight: 1.4 }}>
-                      The most trusted and respected developers in the Bolty ecosystem
+                      The most trusted and respected developers in the Atlas ecosystem
                     </p>
                     <div
                       style={{

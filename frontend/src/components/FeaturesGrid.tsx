@@ -430,7 +430,7 @@ export const FeaturesGrid = () => {
               </div>
 
               {/* Divider line */}
-              <div className="h-px bg-[#272727] group-hover:bg-purple-600/40 transition-colors duration-500" />
+              <div className="h-px bg-[#272727] group-hover:bg-atlas-500/40 transition-colors duration-500" />
 
               {/* Content */}
               <div className="flex flex-col gap-4 p-6">
@@ -443,7 +443,7 @@ export const FeaturesGrid = () => {
                     <Icon className="w-4 h-4 text-white" />
                   </div>
                   <h3
-                    className="text-white font-normal transition-colors duration-300 group-hover:text-purple-200"
+                    className="text-white font-normal transition-colors duration-300 group-hover:text-atlas-200"
                     style={{
                       fontSize: '22px',
                       lineHeight: 1.2,
@@ -472,7 +472,7 @@ export const FeaturesGrid = () => {
                       key={i}
                       className="flex items-center gap-1.5 text-xs text-white/35 group-hover:text-white/50 transition-colors duration-300"
                     >
-                      <div className="w-1 h-1 rounded-full bg-purple-600/60 group-hover:bg-purple-400/80 transition-colors duration-300" />
+                      <div className="w-1 h-1 rounded-full bg-atlas-500/60 group-hover:bg-atlas-400/80 transition-colors duration-300" />
                       {detail}
                     </div>
                   ))}

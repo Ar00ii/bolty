@@ -65,7 +65,7 @@ export function DocsSidebar() {
                 <span
                   aria-hidden
                   className={`absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full transition ${
-                    active ? 'bg-[#836EF9]' : 'bg-transparent group-hover:bg-white/10'
+                    active ? 'bg-[#14F195]' : 'bg-transparent group-hover:bg-white/10'
                   }`}
                 />
                 {item.label}
@@ -87,7 +87,7 @@ export function DocsHero() {
         className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-[640px] h-[320px] opacity-60"
         style={{
           background:
-            'radial-gradient(closest-side, rgba(131,110,249,0.18), rgba(131,110,249,0) 70%)',
+            'radial-gradient(closest-side, rgba(20,241,149,0.18), rgba(20,241,149,0) 70%)',
         }}
       />
       <div className="relative">
@@ -106,7 +106,7 @@ export function DocsHero() {
           }}
         >
           Build, secure, and ship{' '}
-          <GradientText gradient="purple">AI agents</GradientText> on Bolty.
+          <GradientText gradient="purple">AI agents</GradientText> on Atlas.
         </h1>
         <p
           className="mt-4 text-zinc-400 font-light max-w-2xl"

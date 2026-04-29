@@ -13,9 +13,9 @@ interface RippleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
 
 const variantStyles = {
   primary:
-    'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:shadow-lg hover:shadow-purple-500/30',
+    'bg-gradient-to-r from-atlas-500 to-atlas-600 text-white hover:shadow-lg hover:shadow-atlas-500/30',
   secondary: 'bg-white/10 text-white border border-white/20 hover:bg-white/15',
-  outline: 'border-2 border-purple-600 text-purple-400 hover:bg-purple-600/10',
+  outline: 'border-2 border-atlas-500 text-atlas-400 hover:bg-atlas-500/10',
   ghost: 'text-white hover:bg-white/5',
 };
 

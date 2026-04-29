@@ -237,7 +237,7 @@ export function ImageCropModal({
               step={0.001}
               value={zoom}
               onChange={(e) => applyZoom(Number(e.target.value))}
-              className="flex-1 accent-[#836EF9]"
+              className="flex-1 accent-[#14F195]"
             />
             <button
               type="button"
@@ -274,9 +274,9 @@ export function ImageCropModal({
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12.5px] text-white transition hover:brightness-110 disabled:opacity-60"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.45) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.6) 0%, rgba(20,241,149,0.45) 100%)',
               boxShadow:
-                '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                '0 0 0 1px rgba(20,241,149,0.5), 0 0 20px -8px rgba(20,241,149,0.6)',
             }}
           >
             {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

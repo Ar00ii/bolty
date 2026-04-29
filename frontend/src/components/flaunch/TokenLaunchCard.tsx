@@ -71,17 +71,17 @@ export function TokenLaunchCard({
         className="rounded-xl p-4 flex items-center gap-4"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.14) 0%, rgba(6,182,212,0.08) 100%)',
+            'linear-gradient(135deg, rgba(20,241,149,0.14) 0%, rgba(6,182,212,0.08) 100%)',
           boxShadow:
-            'inset 0 0 0 1px rgba(131,110,249,0.3), 0 0 24px -8px rgba(131,110,249,0.4)',
+            'inset 0 0 0 1px rgba(20,241,149,0.3), 0 0 24px -8px rgba(20,241,149,0.4)',
         }}
       >
         <div
           className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.35) 0%, rgba(131,110,249,0.12) 100%)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.5)',
+              'linear-gradient(180deg, rgba(20,241,149,0.35) 0%, rgba(20,241,149,0.12) 100%)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.5)',
           }}
         >
           <Rocket className="w-5 h-5 text-white" strokeWidth={1.5} />
@@ -103,9 +103,9 @@ export function TokenLaunchCard({
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12.5px] font-light text-white transition hover:brightness-110 shrink-0"
           style={{
             background:
-              'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+              'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.4) 100%)',
             boxShadow:
-              '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+              '0 0 0 1px rgba(20,241,149,0.5), 0 0 20px -8px rgba(20,241,149,0.6)',
           }}
         >
           Launch token

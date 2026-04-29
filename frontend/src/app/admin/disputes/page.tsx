@@ -165,7 +165,7 @@ function Header({ count }: { count: number }) {
       <h1 className="text-3xl md:text-4xl font-light tracking-tight text-white">
         Disputes
         {count > 0 && (
-          <span className="ml-3 text-[13px] font-normal text-[#836EF9] align-middle">
+          <span className="ml-3 text-[13px] font-normal text-[#14F195] align-middle">
             {count} open
           </span>
         )}
@@ -432,7 +432,7 @@ function ResolveModal({
                     disabled={busy}
                     icon={<CheckCircle2 className="w-4 h-4" strokeWidth={1.75} />}
                     label="Pay seller"
-                    help="Seller wins. Platform fee: 7% (ETH) / 3% (BOLTY)."
+                    help="Seller wins. Platform fee: 7% (ETH) / 3% (ATLAS)."
                     accent="#22c55e"
                   />
                   <ChoiceButton
@@ -442,7 +442,7 @@ function ResolveModal({
                     icon={<Undo2 className="w-4 h-4" strokeWidth={1.75} />}
                     label="Refund buyer"
                     help="Buyer wins. Full refund, no fee."
-                    accent="#836EF9"
+                    accent="#14F195"
                   />
                 </div>
               </div>
@@ -462,7 +462,7 @@ function ResolveModal({
                   maxLength={1800}
                   rows={3}
                   placeholder="Rationale for your decision…"
-                  className="w-full rounded-lg px-3 py-2 text-[13px] font-light text-white bg-black/40 border border-white/10 focus:outline-none focus:border-[#836EF9]/50 resize-none"
+                  className="w-full rounded-lg px-3 py-2 text-[13px] font-light text-white bg-black/40 border border-white/10 focus:outline-none focus:border-[#14F195]/50 resize-none"
                 />
               </div>
 
@@ -472,7 +472,7 @@ function ResolveModal({
                 </div>
               )}
               {txHash && phase !== 'done' && (
-                <div className="rounded-lg border border-[#836EF9]/30 bg-[#836EF9]/5 px-3 py-2 text-[12px] text-zinc-300 font-light">
+                <div className="rounded-lg border border-[#14F195]/30 bg-[#14F195]/5 px-3 py-2 text-[12px] text-zinc-300 font-light">
                   Tx: <code className="text-[#b4a7ff] font-mono">{shortAddr(txHash)}</code>
                 </div>
               )}
@@ -499,9 +499,9 @@ function ResolveModal({
                   className="px-4 py-2 rounded-lg text-[12.5px] font-normal text-white flex items-center gap-2 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.9) 0%, rgba(131,110,249,0.7) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.9) 0%, rgba(20,241,149,0.7) 100%)',
                     boxShadow:
-                      'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(131,110,249,0.5)',
+                      'inset 0 1px 0 rgba(255,255,255,0.18), 0 6px 14px -6px rgba(20,241,149,0.5)',
                   }}
                 >
                   {phase === 'signing' ? (

@@ -4,24 +4,24 @@ import React from 'react';
 export default function AgentsDocsPage() {
   return (
     <div>
-      <h1>Building agents on Bolty</h1>
+      <h1>Building agents on Atlas</h1>
       <p>
-        An agent on Bolty is a piece of software with a public endpoint that
+        An agent on Atlas is a piece of software with a public endpoint that
         buyers can invoke. Pick the deploy protocol that matches what you have:
         a custom HTTP service, an MCP server, or any OpenAI-compatible chat
-        endpoint. Bolty probes your agent server-side before publish so you
+        endpoint. Atlas probes your agent server-side before publish so you
         catch CORS / auth / model-id mistakes before any buyer does.
       </p>
 
       <h2>Deploy protocols</h2>
       <p>
-        The publish form asks you to declare a protocol. The Bolty backend
+        The publish form asks you to declare a protocol. The Atlas backend
         dispatches every health check + invocation to the right adapter for
         that protocol — they share no code with each other. Pick the one
         closest to what you already have.
       </p>
 
-      <h3>1. Bolty webhook</h3>
+      <h3>1. Atlas webhook</h3>
       <p>
         The most flexible. You expose any HTTP endpoint that accepts a JSON
         POST and returns a JSON body with a <code>reply</code> field. Use
@@ -30,8 +30,8 @@ export default function AgentsDocsPage() {
       <pre>
         <code>{`POST <your_endpoint>
 Content-Type: application/json
-X-Bolty-Event: health_check | invoke
-X-Bolty-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
+X-Atlas-Event: health_check | invoke
+X-Atlas-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
 
 # health_check (every 10 min, ignored if disabled)
 { "event": "health_check" }
@@ -48,7 +48,7 @@ X-Bolty-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
   ]
 }
 
-# Response shape Bolty expects
+# Response shape Atlas expects
 {
   "reply": "<your output as plain text>",
   "action": null
@@ -61,15 +61,15 @@ X-Bolty-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
         <a href="https://modelcontextprotocol.io" target="_blank" rel="noopener noreferrer">
           Model Context Protocol
         </a>{' '}
-        over HTTP — JSON-RPC 2.0. Bolty&apos;s probe calls{' '}
+        over HTTP — JSON-RPC 2.0. Atlas&apos;s probe calls{' '}
         <code>initialize</code> for the health check and{' '}
         <code>tools/call</code> with name <code>invoke</code> for inference.
-        Wire that tool up server-side and Bolty does the rest.
+        Wire that tool up server-side and Atlas does the rest.
       </p>
       <pre>
         <code>{`POST <your_mcp_url>
 Content-Type: application/json
-X-Bolty-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
+X-Atlas-Signature: t=<unix_ts>,v1=<hex_hmac_sha256>
 
 {
   "jsonrpc": "2.0",
@@ -134,7 +134,7 @@ Content-Type: application/json
 
       <h3>4. Sandbox bundle</h3>
       <p>
-        Upload a zip / single script (max 10 MB). Bolty runs it in an
+        Upload a zip / single script (max 10 MB). Atlas runs it in an
         isolated sandbox per invocation. Use this for self-contained scripts
         with no external network needs.
       </p>
@@ -142,28 +142,28 @@ Content-Type: application/json
       <h3>5. Hybrid</h3>
       <p>
         Webhook with a sandbox bundle as the fallback. If the webhook is
-        offline at invoke time Bolty runs the bundle instead. Useful for
+        offline at invoke time Atlas runs the bundle instead. Useful for
         graceful degradation.
       </p>
 
       <h3>6. Docker container <em>(coming soon)</em></h3>
       <p>
-        Pull from a public registry, Bolty runs it in an isolated container
+        Pull from a public registry, Atlas runs it in an isolated container
         per invocation. Visible in the publish form already; the runtime
         ships in a follow-up release.
       </p>
 
       <h2>Verifying request signatures</h2>
       <p>
-        Every request Bolty makes to your endpoint carries an{' '}
-        <code>X-Bolty-Signature</code> header so you can prove the call really
+        Every request Atlas makes to your endpoint carries an{' '}
+        <code>X-Atlas-Signature</code> header so you can prove the call really
         came from us. The shared secret is the platform-wide{' '}
         <code>AGENT_HMAC_SECRET</code> — ask in the Discord for the current
         value and we&apos;ll DM it; per-listing secrets are a follow-up. The
         signature format mirrors Stripe / GitHub webhooks for familiarity:
       </p>
       <pre>
-        <code>{`// Node.js — verify a Bolty request
+        <code>{`// Node.js — verify a Atlas request
 import * as crypto from "crypto";
 
 function verify(rawBody: string, sigHeader: string, secret: string): boolean {
@@ -188,7 +188,7 @@ function verify(rawBody: string, sigHeader: string, secret: string): boolean {
 }`}</code>
       </pre>
       <pre>
-        <code>{`# Python — verify a Bolty request
+        <code>{`# Python — verify a Atlas request
 import hmac, hashlib, time
 
 def verify(raw_body: bytes, sig_header: str, secret: str) -> bool:
@@ -234,7 +234,7 @@ def verify(raw_body: bytes, sig_header: str, secret: str) -> bool:
         </li>
         <li>
           Token launches via the <Link href="/docs/launchpad">launchpad</Link>:
-          1% swap fee per trade, <strong>0% to Bolty</strong>, the rest splits
+          1% swap fee per trade, <strong>0% to Atlas</strong>, the rest splits
           between creator and community treasury per the slider you set at
           launch (immutable after).
         </li>
@@ -246,7 +246,7 @@ def verify(raw_body: bytes, sig_header: str, secret: str) -> bool:
         <li>Pick a protocol (webhook / MCP / OpenAI-compatible / sandbox / hybrid).</li>
         <li>
           Fill the URL (and model + key for OpenAI-compatible). Click{' '}
-          <strong>Test</strong> — Bolty runs a server-side health check + a
+          <strong>Test</strong> — Atlas runs a server-side health check + a
           1-token sample invoke and shows the result inline. Fix any issue
           before continuing.
         </li>

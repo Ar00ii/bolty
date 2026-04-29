@@ -42,13 +42,13 @@ export function IntegrationsShowcase({ title, integrations }: IntegrationsShowca
               transition={{ delay: i * 0.05, duration: 0.4 }}
               className="group relative"
             >
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-purple-600/30 to-purple-700/20 border border-purple-500/20 flex items-center justify-center transition-all duration-300 hover:border-purple-500/40 hover:from-purple-600/40 hover:to-purple-700/30">
+              <div className="aspect-square rounded-lg bg-gradient-to-br from-atlas-500/30 to-atlas-600/20 border border-atlas-500/20 flex items-center justify-center transition-all duration-300 hover:border-atlas-500/40 hover:from-atlas-500/40 hover:to-atlas-600/30">
                 <Icon
-                  className="w-6 h-6 text-purple-300 group-hover:text-purple-200 transition-colors"
+                  className="w-6 h-6 text-atlas-300 group-hover:text-atlas-200 transition-colors"
                   strokeWidth={1.5}
                 />
               </div>
-              <div className="absolute inset-0 rounded-lg bg-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg -z-10" />
+              <div className="absolute inset-0 rounded-lg bg-atlas-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg -z-10" />
             </motion.div>
           );
         })}

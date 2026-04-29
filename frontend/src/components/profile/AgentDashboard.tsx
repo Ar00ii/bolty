@@ -86,7 +86,7 @@ export const AgentDashboard: React.FC = () => {
       </div>
 
       {/* Agent Selector */}
-      <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
+      <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(20,241,149,0.4)_50%,transparent_100%)] before:pointer-events-none">
         <label className="block text-sm font-light text-gray-300 mb-3">Select Agent</label>
         <AgentSelector
           agents={agents}
@@ -102,7 +102,7 @@ export const AgentDashboard: React.FC = () => {
       {selectedAgent && (
         <div className="space-y-6">
           {/* Agent Info Card */}
-          <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
+          <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(20,241,149,0.4)_50%,transparent_100%)] before:pointer-events-none">
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <p className="text-xs text-gray-400 uppercase tracking-widest font-light mb-2">
@@ -164,9 +164,9 @@ export const AgentDashboard: React.FC = () => {
                   className="px-4 py-2 rounded-lg disabled:opacity-50 text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
                   }}
                 >
                   {webhookTestId === selectedAgentId ? 'Testing...' : 'Test'}
@@ -237,7 +237,7 @@ export const AgentDashboard: React.FC = () => {
 
             {/* Purchase Rays */}
             {selectedAgentId && (
-              <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(131,110,249,0.4)_50%,transparent_100%)] before:pointer-events-none">
+              <div className="relative rounded-xl p-6 overflow-hidden bg-[linear-gradient(180deg,rgba(20,20,26,0.6)_0%,rgba(10,10,14,0.6)_100%)] shadow-[0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.03)] before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-[linear-gradient(90deg,transparent_0%,rgba(20,241,149,0.4)_50%,transparent_100%)] before:pointer-events-none">
                 <RaysShop
                   agentId={selectedAgentId}
                   onPurchaseSuccess={() => setRaysRefreshTrigger((prev) => prev + 1)}
@@ -267,7 +267,7 @@ export const AgentDashboard: React.FC = () => {
             className="absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
             }}
           />
           <p className="text-zinc-400 mb-4 text-[13px] tracking-[0.005em]">No agents created yet</p>
@@ -279,9 +279,9 @@ export const AgentDashboard: React.FC = () => {
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
             }}
           >
             <Plus className="w-5 h-5" />

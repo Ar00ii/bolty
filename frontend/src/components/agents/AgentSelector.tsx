@@ -69,9 +69,9 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
             className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg text-white font-light text-[13px] tracking-[0.005em] transition-all hover:brightness-110"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.38) 0%, rgba(131,110,249,0.14) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.38) 0%, rgba(20,241,149,0.14) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(131,110,249,0.55)',
+                'inset 0 0 0 1px rgba(20,241,149,0.48), inset 0 1px 0 rgba(255,255,255,0.08), 0 0 22px -4px rgba(20,241,149,0.55)',
             }}
           >
             <Plus className="w-4 h-4" />
@@ -136,7 +136,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.95) 0%, rgba(10,10,14,0.95) 100%)',
                 boxShadow:
-                  '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
+                  '0 0 0 1px rgba(20,241,149,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 60px -10px rgba(0,0,0,0.5)',
                 backdropFilter: 'blur(8px)',
               }}
             >
@@ -163,7 +163,7 @@ export const AgentSelector: React.FC<AgentSelectorProps> = ({
                         isSelected
                           ? {
                               background:
-                                'linear-gradient(180deg, rgba(131,110,249,0.18) 0%, rgba(131,110,249,0.04) 100%)',
+                                'linear-gradient(180deg, rgba(20,241,149,0.18) 0%, rgba(20,241,149,0.04) 100%)',
                             }
                           : undefined
                       }

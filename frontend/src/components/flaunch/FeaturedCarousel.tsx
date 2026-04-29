@@ -143,7 +143,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               className="w-full h-full"
               style={{
                 background:
-                  'linear-gradient(135deg, #1a1028 0%, #836EF9 50%, #06B6D4 100%)',
+                  'linear-gradient(135deg, #1a1028 0%, #14F195 50%, #06B6D4 100%)',
               }}
             />
           )}
@@ -183,7 +183,7 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               <div
                 className="w-14 h-14 rounded-2xl overflow-hidden shrink-0"
                 style={{
-                  background: 'rgba(131,110,249,0.12)',
+                  background: 'rgba(20,241,149,0.12)',
                   boxShadow:
                     'inset 0 0 0 1px rgba(255,255,255,0.15), 0 4px 24px rgba(0,0,0,0.4)',
                 }}
@@ -288,9 +288,9 @@ export function FeaturedCarousel({ tokens }: { tokens: TokenInfo[] }) {
               title="Edit banner, logo and links"
               className="grid place-items-center w-8 h-8 rounded-full text-white/70 hover:text-white transition"
               style={{
-                background: 'rgba(131,110,249,0.4)',
+                background: 'rgba(20,241,149,0.4)',
                 backdropFilter: 'blur(6px)',
-                border: '1px solid rgba(131,110,249,0.6)',
+                border: '1px solid rgba(20,241,149,0.6)',
               }}
             >
               <Pencil className="w-3.5 h-3.5" strokeWidth={2} />

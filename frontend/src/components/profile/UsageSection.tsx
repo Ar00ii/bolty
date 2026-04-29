@@ -97,7 +97,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
           className="absolute inset-x-0 top-0 h-px"
           style={{
             background:
-              'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+              'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
           }}
         />
         <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -143,7 +143,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
         />
         <StatCard
           delay={0.12}
-          accent="#836EF9"
+          accent="#14F195"
           label="Purchases"
           value={purchases}
           sub="AI agents / tools"
@@ -197,7 +197,7 @@ export const UsageSection: React.FC<UsageSectionProps> = ({ data }) => {
       >
         <Users className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-white/55 leading-relaxed">
-          These numbers come straight from your on-chain activity on Bolty. Sales and purchases are
+          These numbers come straight from your on-chain activity on Atlas. Sales and purchases are
           only counted after payment is verified on Base.
         </p>
       </div>

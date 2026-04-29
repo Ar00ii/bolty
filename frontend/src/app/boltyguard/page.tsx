@@ -230,8 +230,8 @@ export default function BoltyGuardPage() {
             <div
               className="w-10 h-10 rounded-xl grid place-items-center"
               style={{
-                background: 'rgba(131,110,249,0.18)',
-                border: '1px solid rgba(131,110,249,0.5)',
+                background: 'rgba(20,241,149,0.18)',
+                border: '1px solid rgba(20,241,149,0.5)',
               }}
             >
               <Shield className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.8} />
@@ -253,7 +253,7 @@ export default function BoltyGuardPage() {
               border: '1px solid rgba(255,255,255,0.08)',
             }}
           >
-            Free tier: 5 scans / day. Hold $BOLTY in a linked wallet to unlock
+            Free tier: 5 scans / day. Hold $ATLAS in a linked wallet to unlock
             unmetered scans. The scanner combines Semgrep (deterministic rules)
             with Claude (reasoning + AI-agent-specific checks: prompt injection,
             tool-call abuse, secret exposure).
@@ -271,7 +271,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('paste')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition"
             style={{
-              background: mode === 'paste' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'paste' ? 'rgba(20,241,149,0.22)' : 'transparent',
               color: mode === 'paste' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -282,7 +282,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('zip')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
             style={{
-              background: mode === 'zip' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'zip' ? 'rgba(20,241,149,0.22)' : 'transparent',
               color: mode === 'zip' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -294,7 +294,7 @@ export default function BoltyGuardPage() {
             onClick={() => setMode('repo')}
             className="px-3.5 py-1.5 rounded-lg text-[12.5px] font-medium transition inline-flex items-center gap-1.5"
             style={{
-              background: mode === 'repo' ? 'rgba(131,110,249,0.22)' : 'transparent',
+              background: mode === 'repo' ? 'rgba(20,241,149,0.22)' : 'transparent',
               color: mode === 'repo' ? '#ffffff' : '#a1a1aa',
             }}
           >
@@ -318,7 +318,7 @@ export default function BoltyGuardPage() {
                   <select
                     value={fileExt}
                     onChange={(e) => setFileExt(e.target.value)}
-                    className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50"
+                    className="bg-black border border-white/10 rounded-lg px-2.5 py-1.5 text-[12.5px] text-white focus:outline-none focus:ring-2 focus:ring-[#14F195]/50"
                   >
                     {FILE_EXTENSIONS.map((f) => (
                       <option key={f.value} value={f.value}>
@@ -333,7 +333,7 @@ export default function BoltyGuardPage() {
                   type="checkbox"
                   checked={isAgent}
                   onChange={(e) => setIsAgent(e.target.checked)}
-                  className="accent-[#836EF9]"
+                  className="accent-[#14F195]"
                 />
                 Treat as AI agent (extra checks)
               </label>
@@ -364,7 +364,7 @@ export default function BoltyGuardPage() {
                   placeholder="Paste source code (Python, TS, JS, Go, Ruby, Java...). BoltyGuard is a security scanner — not a chat. Try one of the samples above to see findings."
                   rows={14}
                   spellCheck={false}
-                  className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#836EF9]/50 transition-all font-mono"
+                  className="w-full px-4 py-3 rounded-xl text-[13px] text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#14F195]/50 transition-all font-mono"
                   style={{
                     background: '#000000',
                     border: '1px solid rgba(255,255,255,0.12)',
@@ -488,9 +488,9 @@ export default function BoltyGuardPage() {
                 className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-[13px] font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:brightness-110"
                 style={{
                   background:
-                    'linear-gradient(180deg, rgba(131,110,249,0.6) 0%, rgba(131,110,249,0.4) 100%)',
-                  border: '1px solid rgba(131,110,249,0.55)',
-                  boxShadow: '0 4px 20px -8px rgba(131,110,249,0.7)',
+                    'linear-gradient(180deg, rgba(20,241,149,0.6) 0%, rgba(20,241,149,0.4) 100%)',
+                  border: '1px solid rgba(20,241,149,0.55)',
+                  boxShadow: '0 4px 20px -8px rgba(20,241,149,0.7)',
                 }}
               >
                 {loading ? (
@@ -588,7 +588,7 @@ function ResultPanel({
             </div>
             <div className="text-[13px] text-white/85 mt-0.5">{result.summary}</div>
             <div className="text-[11px] text-zinc-500 font-mono mt-1">
-              scanner: {result.scanner} · tier: {result.tier} ({result.holding} $BOLTY)
+              scanner: {result.scanner} · tier: {result.tier} ({result.holding} $ATLAS)
               {result.source?.kind === 'github' && (
                 <>
                   {' · '}repo: {result.source.owner}/{result.source.repo}

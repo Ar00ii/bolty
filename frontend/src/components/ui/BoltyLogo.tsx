@@ -6,7 +6,7 @@ import React, { useEffect, useState } from 'react';
 export function BoltyLogoSVG({
   size = 40,
   className = '',
-  color = '#836EF9',
+  color = '#14F195',
   opacity = 1,
 }: {
   size?: number;
@@ -67,7 +67,7 @@ export function BoltyLogoGlow({ size = 40 }: { size?: number }) {
     >
       <div
         className="absolute inset-0 rounded-full opacity-50 blur-lg"
-        style={{ background: 'radial-gradient(circle, rgba(131,110,249,0.7) 0%, transparent 70%)' }}
+        style={{ background: 'radial-gradient(circle, rgba(20,241,149,0.7) 0%, transparent 70%)' }}
       />
       <BoltyLogo size={size} style={{ position: 'relative', zIndex: 10 }} />
     </div>
@@ -115,7 +115,7 @@ export function BoltyFloatingLogos() {
             opacity: 0,
           }}
         >
-          <BoltyLogoSVG size={l.size} color="rgba(131,110,249,0.06)" />
+          <BoltyLogoSVG size={l.size} color="rgba(20,241,149,0.06)" />
         </div>
       ))}
       <style>{`

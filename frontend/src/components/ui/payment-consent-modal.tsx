@@ -20,7 +20,7 @@ interface PaymentConsentModalProps {
   /** USD amount the seller takes home (= the listing price). */
   baseUsd: number;
   buyerAddress: string;
-  /** When true, BOLTY option is hidden (token not configured for this build). */
+  /** When true, ATLAS option is hidden (token not configured for this build). */
   boltyDisabled?: boolean;
   onConsent: (signature: string, message: string, paymentMethod: PaymentMethod) => void;
   onCancel: () => void;
@@ -45,19 +45,19 @@ export function PaymentConsentModal({
   const [signing, setSigning] = useState(false);
   const [checked, setChecked] = useState(false);
   const [error, setError] = useState('');
-  // Default to BOLTY when available — it's the strictly cheaper option.
-  const [method, setMethod] = useState<PaymentMethod>(boltyDisabled ? 'ETH' : 'BOLTY');
+  // Default to ATLAS when available — it's the strictly cheaper option.
+  const [method, setMethod] = useState<PaymentMethod>(boltyDisabled ? 'ETH' : 'ATLAS');
 
   const escrow = isEscrowEnabled();
 
   const ethTotal = useMemo(() => grossUsdForBase(baseUsd, 'ETH'), [baseUsd]);
-  const boltyTotal = useMemo(() => grossUsdForBase(baseUsd, 'BOLTY'), [baseUsd]);
+  const boltyTotal = useMemo(() => grossUsdForBase(baseUsd, 'ATLAS'), [baseUsd]);
   const savingsUsd = ethTotal - boltyTotal;
 
-  const grossUsd = method === 'BOLTY' ? boltyTotal : ethTotal;
+  const grossUsd = method === 'ATLAS' ? boltyTotal : ethTotal;
   const platformFeeUsd = useMemo(() => feeUsdForBase(baseUsd, method), [baseUsd, method]);
   const feePct = method === 'ETH' ? '7%' : '3%';
-  const currency = method === 'ETH' ? 'ETH' : 'BOLTY';
+  const currency = method === 'ETH' ? 'ETH' : 'ATLAS';
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -87,11 +87,11 @@ export function PaymentConsentModal({
       const timestamp = new Date().toISOString();
       const escrowTerms = escrow
         ? [
-            '1. Funds will be deposited into the Bolty Escrow smart contract on Base (chainId 8453).',
+            '1. Funds will be deposited into the Atlas Escrow smart contract on Base (chainId 8453).',
             '2. The seller will NOT receive payment until I confirm delivery.',
             '3. I can open a dispute if the seller does not deliver.',
             '4. After 14 days without dispute, funds auto-release to the seller.',
-            '5. Disputes are resolved by the Bolty admin.',
+            '5. Disputes are resolved by the Atlas admin.',
             '6. Smart contract interactions on Base require gas fees (paid in ETH).',
             '7. This cryptographic signature constitutes irrevocable proof of my consent.',
             '8. I have the technical knowledge required to conduct this transaction.',
@@ -99,8 +99,8 @@ export function PaymentConsentModal({
         : [
             '1. This is a voluntary peer-to-peer transaction on Base (Ethereum Layer 2).',
             '2. Blockchain transactions are FINAL and IRREVERSIBLE once confirmed.',
-            '3. Bolty Platform is NOT a custodian and does NOT hold or escrow funds.',
-            '4. Bolty Platform bears NO liability for disputes, fraud, or losses.',
+            '3. Atlas Platform is NOT a custodian and does NOT hold or escrow funds.',
+            '4. Atlas Platform bears NO liability for disputes, fraud, or losses.',
             '5. I have independently verified the seller and listing before paying.',
             '6. I accept FULL personal responsibility for this transaction.',
             '7. This cryptographic signature constitutes irrevocable proof of my consent.',
@@ -108,11 +108,11 @@ export function PaymentConsentModal({
           ];
 
       const message = [
-        `=== BOLTY PLATFORM — PAYMENT CONSENT DOCUMENT${escrow ? ' (ESCROW)' : ''} ===`,
+        `=== ATLAS PLATFORM — PAYMENT CONSENT DOCUMENT${escrow ? ' (ESCROW)' : ''} ===`,
         '',
         `Date: ${timestamp}`,
         `Network: Base (Ethereum L2, chainId 8453)`,
-        `Payment method: ${method}${method === 'BOLTY' ? ' (ERC-20, lower fee)' : ' (native)'}`,
+        `Payment method: ${method}${method === 'ATLAS' ? ' (ERC-20, lower fee)' : ' (native)'}`,
         `Buyer wallet:  ${buyerAddress}`,
         `Seller wallet: ${sellerAddress}`,
         `Listing: ${listingTitle}`,
@@ -166,8 +166,8 @@ export function PaymentConsentModal({
           className="relative w-full max-w-md rounded-2xl overflow-hidden"
           style={{
             background: '#06060f',
-            border: '1px solid rgba(131,110,249,0.3)',
-            boxShadow: '0 0 80px rgba(131,110,249,0.08)',
+            border: '1px solid rgba(20,241,149,0.3)',
+            boxShadow: '0 0 80px rgba(20,241,149,0.08)',
           }}
         >
           <span
@@ -175,7 +175,7 @@ export function PaymentConsentModal({
             className="pointer-events-none absolute inset-x-0 top-0 h-px"
             style={{
               background:
-                'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.55) 50%, transparent 100%)',
+                'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.55) 50%, transparent 100%)',
             }}
           />
           {/* Header */}
@@ -184,7 +184,7 @@ export function PaymentConsentModal({
             style={{ borderColor: 'rgba(255,255,255,0.06)' }}
           >
             <div className="flex items-center gap-2.5">
-              <Shield className="w-4 h-4 text-bolty-400" />
+              <Shield className="w-4 h-4 text-atlas-400" />
               <span className="font-light text-white text-sm">Payment Consent</span>
               <span className="text-[10px] font-mono text-cyan-300/80 border border-cyan-400/25 px-1.5 py-0.5 rounded">
                 BASE
@@ -217,11 +217,11 @@ export function PaymentConsentModal({
               />
               {!boltyDisabled && (
                 <MethodCard
-                  active={method === 'BOLTY'}
-                  onClick={() => setMethod('BOLTY')}
-                  title="BOLTY"
+                  active={method === 'ATLAS'}
+                  onClick={() => setMethod('ATLAS')}
+                  title="ATLAS"
                   subtitle={`3% fee · you pay $${fmtUsd(boltyTotal)}`}
-                  accent="#836EF9"
+                  accent="#14F195"
                   badge={savingsUsd > 0 ? `Save $${fmtUsd(savingsUsd)}` : undefined}
                   highlighted
                 />
@@ -230,7 +230,7 @@ export function PaymentConsentModal({
             {!boltyDisabled && savingsUsd > 0 && (
               <p className="mt-2 flex items-center gap-1.5 text-[10.5px] font-light text-zinc-400 leading-relaxed">
                 <TrendingDown className="w-3 h-3 text-emerald-400 shrink-0" strokeWidth={2} />
-                Paying in BOLTY costs $
+                Paying in ATLAS costs $
                 {fmtUsd(savingsUsd)} less. The seller receives $
                 {fmtUsd(baseUsd)} either way — only the fee changes.
               </p>
@@ -262,7 +262,7 @@ export function PaymentConsentModal({
             >
               <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-yellow-300/80 leading-relaxed">
-                <strong>Peer-to-peer Base transaction.</strong> Payments are irreversible. Bolty is
+                <strong>Peer-to-peer Base transaction.</strong> Payments are irreversible. Atlas is
                 not responsible for disputes or losses.
               </p>
             </div>
@@ -297,7 +297,7 @@ export function PaymentConsentModal({
                 <span className="text-zinc-200 font-light">
                   You pay{escrow ? ' (1 escrow deposit)' : ' (2 transactions)'}
                 </span>
-                <span className="text-bolty-300 font-mono font-light">
+                <span className="text-atlas-300 font-mono font-light">
                   ${fmtUsd(grossUsd)}{' '}
                   <span className="text-zinc-500 text-xs">in {currency}</span>
                 </span>
@@ -313,19 +313,19 @@ export function PaymentConsentModal({
             <p className="text-zinc-400 font-light">By signing you confirm:</p>
             {escrow ? (
               <ol className="list-decimal list-inside space-y-0.5 mt-1">
-                <li>Funds will be deposited into the Bolty Escrow contract on Base.</li>
+                <li>Funds will be deposited into the Atlas Escrow contract on Base.</li>
                 <li>The seller will NOT receive payment until I confirm delivery.</li>
                 <li>I can dispute within 14 days if the seller does not deliver.</li>
                 <li>After 14 days without dispute, funds auto-release to the seller.</li>
-                <li>Disputes are resolved by Bolty admin.</li>
+                <li>Disputes are resolved by Atlas admin.</li>
                 <li>This cryptographic signature is irrevocable proof of consent.</li>
               </ol>
             ) : (
               <ol className="list-decimal list-inside space-y-0.5 mt-1">
                 <li>All Base transactions are final and irreversible.</li>
-                <li>Bolty Platform does not hold, escrow, or guarantee any funds.</li>
+                <li>Atlas Platform does not hold, escrow, or guarantee any funds.</li>
                 <li>You have independently verified the seller and listing.</li>
-                <li>Bolty Platform bears no liability for disputes, fraud, or losses.</li>
+                <li>Atlas Platform bears no liability for disputes, fraud, or losses.</li>
                 <li>You accept full personal responsibility for this transaction.</li>
                 <li>This cryptographic signature is irrevocable proof of consent.</li>
                 <li>You possess sufficient technical knowledge to conduct this transaction.</li>
@@ -372,8 +372,8 @@ export function PaymentConsentModal({
               transition={{ type: 'spring', stiffness: 360, damping: 22 }}
               className="flex-1 py-2.5 text-sm font-light text-white rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
               style={{
-                background: 'rgba(131,110,249,0.18)',
-                border: '1px solid rgba(131,110,249,0.45)',
+                background: 'rgba(20,241,149,0.18)',
+                border: '1px solid rgba(20,241,149,0.45)',
               }}
             >
               {signing ? 'Signing…' : `Sign & pay $${fmtUsd(grossUsd)} ${currency}`}

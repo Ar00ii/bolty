@@ -15,7 +15,7 @@ export default function GlobalError({
 
   // A chunk of the marketplace / agent pages relies on desktop-only
   // layout primitives (wide grids, CodeMirror, web3 modals). When the
-  // page crashes on a phone viewport the user gets the scary "Bolty hit
+  // page crashes on a phone viewport the user gets the scary "Atlas hit
   // a snag" screen — replace it with a clear "desktop only" message so
   // people don't think the site is broken.
   const [isMobile, setIsMobile] = useState(false);
@@ -89,13 +89,13 @@ export default function GlobalError({
                 fontSize: 40,
                 fontWeight: 300,
                 margin: '0.75rem 0 0.5rem',
-                background: 'linear-gradient(135deg, #836EF9 0%, #EC4899 100%)',
+                background: 'linear-gradient(135deg, #14F195 0%, #EC4899 100%)',
                 WebkitBackgroundClip: 'text',
                 backgroundClip: 'text',
                 color: 'transparent',
               }}
             >
-              {isMobile ? 'Best on desktop' : 'Bolty hit a snag'}
+              {isMobile ? 'Best on desktop' : 'Atlas hit a snag'}
             </h1>
             <p
               style={{
@@ -107,7 +107,7 @@ export default function GlobalError({
               }}
             >
               {isMobile
-                ? 'This section of Bolty is optimised for desktop. Open it from a laptop or desktop browser for the full experience.'
+                ? 'This section of Atlas is optimised for desktop. Open it from a laptop or desktop browser for the full experience.'
                 : "The app couldn't render this page. Refresh to try again — if it keeps failing, let us know."}
             </p>
             <button
@@ -119,8 +119,8 @@ export default function GlobalError({
                 padding: '0.625rem 1rem',
                 fontSize: 14,
                 borderRadius: 10,
-                border: '1px solid rgba(131,110,249,0.3)',
-                background: 'rgba(131,110,249,0.1)',
+                border: '1px solid rgba(20,241,149,0.3)',
+                background: 'rgba(20,241,149,0.1)',
                 color: '#EDE9FE',
                 cursor: 'pointer',
                 transition: 'background 120ms',

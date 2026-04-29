@@ -116,7 +116,7 @@ export function FloatingTopBar() {
               ? {
                   ...chipStyle,
                   boxShadow:
-                    '0 0 0 1px rgba(131,110,249,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
+                    '0 0 0 1px rgba(20,241,149,0.35), inset 0 1px 0 rgba(255,255,255,0.06)',
                 }
               : chipStyle
           }
@@ -156,7 +156,7 @@ export function FloatingTopBar() {
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)',
                 boxShadow:
-                  '0 20px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(131,110,249,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
+                  '0 20px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(20,241,149,0.18), inset 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
               <div
@@ -164,7 +164,7 @@ export function FloatingTopBar() {
                 className="pointer-events-none absolute inset-x-0 top-0 h-px"
                 style={{
                   background:
-                    'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.6) 50%, transparent 100%)',
+                    'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.6) 50%, transparent 100%)',
                 }}
               />
               {/* User Info */}

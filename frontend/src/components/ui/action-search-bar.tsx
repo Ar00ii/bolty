@@ -146,7 +146,7 @@ function ActionSearchBar({
                   background:
                     'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
                   boxShadow:
-                    '0 0 0 1px rgba(131,110,249,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
+                    '0 0 0 1px rgba(20,241,149,0.2), inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 40px -10px rgba(0,0,0,0.5)',
                   backdropFilter: 'blur(8px)',
                 }}
                 variants={container}
@@ -191,8 +191,8 @@ function ActionSearchBar({
                             className="text-[10px] px-1.5 py-0.5 rounded text-[#b4a7ff] font-mono tracking-[0.02em]"
                             style={{
                               background:
-                                'linear-gradient(180deg, rgba(131,110,249,0.12) 0%, rgba(131,110,249,0.03) 100%)',
-                              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+                                'linear-gradient(180deg, rgba(20,241,149,0.12) 0%, rgba(20,241,149,0.03) 100%)',
+                              boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
                             }}
                           >
                             {action.end}

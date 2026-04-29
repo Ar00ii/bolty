@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api/client';
 
 /**
- * Compact live $BOLTY price pill for the top nav. Pulls its own data
+ * Compact live $ATLAS price pill for the top nav. Pulls its own data
  * so each mount decides independently when to refresh. Hidden on narrow
  * viewports to keep the mobile navbar clean.
  */
@@ -68,24 +68,24 @@ export function BoltyPricePill({ compact = false }: { compact?: boolean }) {
       className="group hidden items-center gap-2 rounded-lg transition-colors md:inline-flex"
       style={{
         padding: compact ? '5px 9px' : '6px 10px',
-        background: 'rgba(131,110,249,0.08)',
-        border: '1px solid rgba(131,110,249,0.22)',
+        background: 'rgba(20,241,149,0.08)',
+        border: '1px solid rgba(20,241,149,0.22)',
         color: '#e4e4e7',
         fontSize: compact ? '11.5px' : '12px',
       }}
-      title="Open $BOLTY token page"
+      title="Open $ATLAS token page"
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'rgba(131,110,249,0.14)';
-        e.currentTarget.style.borderColor = 'rgba(131,110,249,0.4)';
+        e.currentTarget.style.background = 'rgba(20,241,149,0.14)';
+        e.currentTarget.style.borderColor = 'rgba(20,241,149,0.4)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'rgba(131,110,249,0.08)';
-        e.currentTarget.style.borderColor = 'rgba(131,110,249,0.22)';
+        e.currentTarget.style.background = 'rgba(20,241,149,0.08)';
+        e.currentTarget.style.borderColor = 'rgba(20,241,149,0.22)';
       }}
     >
       <Zap className="h-3.5 w-3.5 shrink-0" style={{ color: '#C9BEFF' }} strokeWidth={2} />
       <span className="font-medium tracking-tight" style={{ color: '#C9BEFF' }}>
-        $BOLTY
+        $ATLAS
       </span>
       <span className="text-[9.5px] uppercase tracking-[0.18em] text-white/40">MC</span>
       <span className="tabular-nums" style={{ color: '#ffffff' }}>

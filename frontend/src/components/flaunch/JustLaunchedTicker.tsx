@@ -50,7 +50,7 @@ export function JustLaunchedTicker({
       className="relative overflow-hidden rounded-xl"
       style={{
         background:
-          'linear-gradient(90deg, rgba(34,197,94,0.04), rgba(131,110,249,0.04))',
+          'linear-gradient(90deg, rgba(34,197,94,0.04), rgba(20,241,149,0.04))',
         boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.06)',
       }}
     >

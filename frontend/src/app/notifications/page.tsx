@@ -31,7 +31,7 @@ const TYPE_META: Record<NotificationType, { icon: LucideIcon; color: string; lab
   MARKET_NEW_SALE: { icon: DollarSign, color: '#22c55e', label: 'Sale' },
   MARKET_NEW_REVIEW: { icon: Star, color: '#f59e0b', label: 'Review' },
   MARKET_ORDER_DELIVERED: { icon: Package, color: '#06B6D4', label: 'Delivery' },
-  MARKET_ORDER_COMPLETED: { icon: PartyPopper, color: '#836EF9', label: 'Completed' },
+  MARKET_ORDER_COMPLETED: { icon: PartyPopper, color: '#14F195', label: 'Completed' },
   MARKET_NEGOTIATION_MESSAGE: { icon: MessageSquare, color: '#EC4899', label: 'Message' },
   SYSTEM: { icon: Bell, color: '#94a3b8', label: 'System' },
 };
@@ -188,7 +188,7 @@ export default function NotificationsPage() {
             label="Unread"
             value={formatNumber(unread)}
             sub={unread > 0 ? 'waiting for you' : 'inbox zero'}
-            accent="#836EF9"
+            accent="#14F195"
           />
           <StatTile
             label="Today"
@@ -235,8 +235,8 @@ export default function NotificationsPage() {
                   className="px-3 py-1.5 text-[12px] font-light rounded-md transition"
                   style={{
                     color: active ? '#ffffff' : '#a1a1aa',
-                    background: active ? 'rgba(131,110,249,0.2)' : 'transparent',
-                    boxShadow: active ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+                    background: active ? 'rgba(20,241,149,0.2)' : 'transparent',
+                    boxShadow: active ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
                   }}
                 >
                   {f === 'all' ? 'All' : 'Unread'}
@@ -283,8 +283,8 @@ export default function NotificationsPage() {
               const active = typeFilter === t.value;
               const color =
                 t.value === 'ALL'
-                  ? '#836EF9'
-                  : TYPE_META[t.value as NotificationType]?.color || '#836EF9';
+                  ? '#14F195'
+                  : TYPE_META[t.value as NotificationType]?.color || '#14F195';
               return (
                 <button
                   key={t.value}
@@ -361,9 +361,9 @@ function LiveDot() {
     <span className="relative inline-flex items-center justify-center w-2 h-2 ml-1">
       <span
         className="absolute inset-0 rounded-full animate-ping"
-        style={{ background: '#836EF9' }}
+        style={{ background: '#14F195' }}
       />
-      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#836EF9]" />
+      <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-[#14F195]" />
     </span>
   );
 }
@@ -467,9 +467,9 @@ function NotifRow({
               <span
                 className="text-[9px] uppercase tracking-[0.12em] px-1 py-px rounded font-medium"
                 style={{
-                  color: '#836EF9',
-                  background: 'rgba(131,110,249,0.12)',
-                  boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.35)',
+                  color: '#14F195',
+                  background: 'rgba(20,241,149,0.12)',
+                  boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.35)',
                 }}
               >
                 NEW
@@ -535,16 +535,16 @@ function EmptyState({ query, typeFilter }: { query: string; typeFilter: string }
         className="pointer-events-none absolute inset-x-0 top-0 h-px"
         style={{
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(131,110,249,0.45) 50%, transparent 100%)',
+            'linear-gradient(90deg, transparent 0%, rgba(20,241,149,0.45) 50%, transparent 100%)',
         }}
       />
       <div
         className="relative w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.22) 0%, rgba(131,110,249,0.06) 100%)',
-          border: '1px solid rgba(131,110,249,0.35)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(131,110,249,0.45)',
+            'linear-gradient(135deg, rgba(20,241,149,0.22) 0%, rgba(20,241,149,0.06) 100%)',
+          border: '1px solid rgba(20,241,149,0.35)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08), 0 0 24px -6px rgba(20,241,149,0.45)',
         }}
       >
         <Bell className="w-5 h-5 text-[#b4a7ff]" strokeWidth={1.5} />

@@ -27,7 +27,7 @@ export function ShareButton({
   const handleShare = async () => {
     if (typeof window === 'undefined') return;
     const url = window.location.href;
-    const shareText = text || `Check out "${title}" on Bolty`;
+    const shareText = text || `Check out "${title}" on Atlas`;
     const nav = window.navigator as Navigator & {
       share?: (d: { title?: string; text?: string; url?: string }) => Promise<void>;
     };

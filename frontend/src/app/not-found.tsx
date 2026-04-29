@@ -13,7 +13,7 @@ export default function NotFound() {
       <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute -top-40 left-1/2 -translate-x-1/2 w-[600px] h-[500px] rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, #836EF9 0%, transparent 70%)' }}
+          style={{ background: 'radial-gradient(circle, #14F195 0%, transparent 70%)' }}
         />
         <div
           className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl opacity-10"
@@ -42,7 +42,7 @@ export default function NotFound() {
             </Link>
             <Link
               href="/market"
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-100 hover:bg-purple-500/20 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-atlas-500/30 bg-atlas-500/10 text-atlas-100 hover:bg-atlas-500/20 transition-all"
             >
               <Search className="w-4 h-4" />
               Browse marketplace

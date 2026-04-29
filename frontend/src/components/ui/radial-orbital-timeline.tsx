@@ -140,23 +140,23 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
           ref={orbitRef}
           style={{ perspective: '1000px' }}
         >
-          {/* Center: Bolty logo */}
+          {/* Center: Atlas logo */}
           <div className="absolute w-32 h-32 rounded-full flex items-center justify-center z-10">
-            <div className="absolute w-40 h-40 rounded-full border border-bolty-400/30 animate-ping opacity-50" />
+            <div className="absolute w-40 h-40 rounded-full border border-atlas-400/30 animate-ping opacity-50" />
             <div
-              className="absolute w-48 h-48 rounded-full border border-bolty-400/20 animate-ping opacity-30"
+              className="absolute w-48 h-48 rounded-full border border-atlas-400/20 animate-ping opacity-30"
               style={{ animationDelay: '0.5s' }}
             />
             <div
               className="absolute inset-0 rounded-full blur-xl opacity-40"
-              style={{ background: 'rgba(131,110,249,0.6)' }}
+              style={{ background: 'rgba(20,241,149,0.6)' }}
             />
             <BoltyLogo
               size={250}
-              color="#836EF9"
+              color="#14F195"
               className="relative z-10"
               style={
-                { filter: 'drop-shadow(0 0 14px rgba(131,110,249,0.9))' } as React.CSSProperties
+                { filter: 'drop-shadow(0 0 14px rgba(20,241,149,0.9))' } as React.CSSProperties
               }
             />
           </div>
@@ -193,7 +193,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                   className={`absolute rounded-full ${isPulsing ? 'animate-pulse' : ''}`}
                   style={{
                     background:
-                      'radial-gradient(circle, rgba(131,110,249,0.25) 0%, rgba(131,110,249,0) 70%)',
+                      'radial-gradient(circle, rgba(20,241,149,0.25) 0%, rgba(20,241,149,0) 70%)',
                     width: `${item.energy * 0.5 + 40}px`,
                     height: `${item.energy * 0.5 + 40}px`,
                     left: `-${(item.energy * 0.5 + 40 - 40) / 2}px`,
@@ -205,9 +205,9 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                 <div
                   className={`
                     w-10 h-10 rounded-full flex items-center justify-center
-                    ${isExpanded ? 'bg-bolty-500 text-white' : isRelated ? 'bg-bolty-500/40 text-white' : 'bg-black text-white'}
+                    ${isExpanded ? 'bg-atlas-500 text-white' : isRelated ? 'bg-atlas-500/40 text-white' : 'bg-black text-white'}
                     border-2
-                    ${isExpanded ? 'border-bolty-400 shadow-lg shadow-bolty-400/30' : isRelated ? 'border-bolty-400 animate-pulse' : 'border-white/30'}
+                    ${isExpanded ? 'border-atlas-400 shadow-lg shadow-atlas-400/30' : isRelated ? 'border-atlas-400 animate-pulse' : 'border-white/30'}
                     transition-all duration-300 transform
                     ${isExpanded ? 'scale-150' : ''}
                   `}
@@ -217,7 +217,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
 
                 {/* Label */}
                 <div
-                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? 'text-bolty-300 scale-125' : 'text-white/70'}`}
+                  className={`absolute top-12 whitespace-nowrap text-xs font-light tracking-wider transition-all duration-300 ${isExpanded ? 'text-atlas-300 scale-125' : 'text-white/70'}`}
                   style={{
                     left: '50%',
                     transform: `translateX(-50%) ${isExpanded ? 'scale(1.25)' : ''}`,
@@ -228,8 +228,8 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
 
                 {/* Expanded card */}
                 {isExpanded && (
-                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-64 bg-black/95 backdrop-blur-lg border-bolty-500/30 shadow-xl shadow-bolty-400/10 overflow-visible">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-bolty-400/50" />
+                  <Card className="absolute top-20 left-1/2 -translate-x-1/2 w-64 bg-black/95 backdrop-blur-lg border-atlas-500/30 shadow-xl shadow-atlas-400/10 overflow-visible">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-px h-3 bg-atlas-400/50" />
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-center">
                         <Badge className={`px-2 text-xs ${getStatusStyles(item.status)}`}>
@@ -247,15 +247,15 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                       <p>{item.content}</p>
                       <div className="mt-4 pt-3 border-t border-white/10">
                         <div className="flex justify-between items-center text-xs mb-1">
-                          <span className="flex items-center text-bolty-400">
+                          <span className="flex items-center text-atlas-400">
                             <Zap size={10} className="mr-1" />
                             Capability
                           </span>
-                          <span className="font-mono text-bolty-300">{item.energy}%</span>
+                          <span className="font-mono text-atlas-300">{item.energy}%</span>
                         </div>
                         <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-bolty-600 to-bolty-400"
+                            className="h-full bg-gradient-to-r from-atlas-600 to-atlas-400"
                             style={{ width: `${item.energy}%` }}
                           />
                         </div>
@@ -263,7 +263,7 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                       {item.relatedIds.length > 0 && (
                         <div className="mt-4 pt-3 border-t border-white/10">
                           <div className="flex items-center mb-2">
-                            <Link size={10} className="text-bolty-400 mr-1" />
+                            <Link size={10} className="text-atlas-400 mr-1" />
                             <h4 className="text-xs uppercase tracking-wider font-light text-white/70">
                               Connected to
                             </h4>
@@ -276,14 +276,14 @@ export default function RadialOrbitalTimeline({ timelineData }: RadialOrbitalTim
                                   key={relatedId}
                                   variant="outline"
                                   size="sm"
-                                  className="flex items-center h-6 px-2 py-0 text-xs rounded-none border-bolty-500/30 bg-transparent hover:bg-bolty-500/10 text-white/80 hover:text-white transition-all"
+                                  className="flex items-center h-6 px-2 py-0 text-xs rounded-none border-atlas-500/30 bg-transparent hover:bg-atlas-500/10 text-white/80 hover:text-white transition-all"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     toggleItem(relatedId);
                                   }}
                                 >
                                   {relatedItem?.title}
-                                  <ArrowRight size={8} className="ml-1 text-bolty-400" />
+                                  <ArrowRight size={8} className="ml-1 text-atlas-400" />
                                 </Button>
                               );
                             })}

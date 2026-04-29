@@ -200,10 +200,10 @@ async function renderTickerImage(symbol: string): Promise<string> {
   const ctx = canvas.getContext('2d');
   if (!ctx) return '';
 
-  // Brand gradient background (same #836EF9 → #06B6D4 used elsewhere)
+  // Brand gradient background (same #14F195 → #06B6D4 used elsewhere)
   const grad = ctx.createLinearGradient(0, 0, 512, 512);
   grad.addColorStop(0, '#1a1028');
-  grad.addColorStop(0.5, '#836EF9');
+  grad.addColorStop(0.5, '#14F195');
   grad.addColorStop(1, '#06B6D4');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 512, 512);

@@ -13,14 +13,14 @@ const ERC20_TRANSFER_IFACE = new Interface([
 export interface BoltyTokenConfig {
   /** ERC-20 contract address on Base (0x…). */
   address: string;
-  /** USD price per 1 BOLTY — used to convert USD listing prices to token units. */
+  /** USD price per 1 ATLAS — used to convert USD listing prices to token units. */
   usdPrice: number;
   /** Token decimals. Defaults to 18 if unset (most ERC-20s on Base). */
   decimals?: number;
 }
 
 /**
- * Synchronous fast-path: read BOLTY token config from NEXT_PUBLIC_*
+ * Synchronous fast-path: read ATLAS token config from NEXT_PUBLIC_*
  * env vars. Returns null when any var is missing or malformed —
  * callers should fall back to {@link loadBoltyTokenConfig}, which
  * additionally fetches the backend's live config when env is not set.
@@ -50,7 +50,7 @@ export function getBoltyTokenConfig(): BoltyTokenConfig | null {
 // fetch the live config from the backend's /token/bolty endpoint.
 // That endpoint already returns the deployed contract address and
 // the live DexScreener priceUsd, both of which we need to quote
-// purchases in BOLTY units.
+// purchases in ATLAS units.
 //
 // Module-scoped promise cache keeps us to a single round-trip for
 // the lifetime of the page, even if multiple callsites await
@@ -79,12 +79,12 @@ async function fetchRemoteConfig(): Promise<BoltyTokenConfig | null> {
 }
 
 /**
- * Resolve the BOLTY token config. Order of precedence:
+ * Resolve the ATLAS token config. Order of precedence:
  *   1. NEXT_PUBLIC_* env vars (sync, no network)
  *   2. Backend /token/bolty endpoint (cached for 60s in-process)
  *
  * Returns null when neither source has a valid contract + price —
- * callers must hide the BOLTY payment option in that case so the
+ * callers must hide the ATLAS payment option in that case so the
  * user only sees ETH.
  */
 export async function loadBoltyTokenConfig(): Promise<BoltyTokenConfig | null> {

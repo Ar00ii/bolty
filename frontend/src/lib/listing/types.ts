@@ -29,8 +29,8 @@ export const LISTING_TYPE_LABEL: Record<ListingType, string> = {
 
 export const LISTING_TYPE_ACCENT: Record<ListingType, string> = {
   REPO: '#06B6D4',
-  BOT: '#836EF9',
-  AI_AGENT: '#836EF9',
+  BOT: '#14F195',
+  AI_AGENT: '#14F195',
   SCRIPT: '#EC4899',
   OTHER: '#94a3b8',
 };

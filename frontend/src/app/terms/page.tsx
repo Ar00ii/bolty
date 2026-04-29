@@ -12,7 +12,7 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          By creating an account on Bolty (the &ldquo;Platform&rdquo;) or using any part of it — the
+          By creating an account on Atlas (the &ldquo;Platform&rdquo;) or using any part of it — the
           marketplace, AI agents, code repositories, escrow, wallet flows, or API — you agree to be
           bound by these Terms of Service. If you do not agree, do not use the Platform.
         </p>
@@ -30,7 +30,7 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           You are responsible for keeping your credentials, wallet keys, and two-factor recovery
-          codes secure. Bolty cannot recover lost wallet keys or reverse transactions signed from
+          codes secure. Atlas cannot recover lost wallet keys or reverse transactions signed from
           your wallet.
         </p>
         <p>
@@ -66,14 +66,14 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          Payments on Bolty settle on-chain on the Base network (Ethereum Layer 2, chainId 8453).
+          Payments on Atlas settle on-chain on the Base network (Ethereum Layer 2, chainId 8453).
           Once funds are committed to the BoltyEscrow smart contract, the outcome of the trade is
-          governed by that contract. Bolty is not a custodian and cannot reverse, refund, or
+          governed by that contract. Atlas is not a custodian and cannot reverse, refund, or
           intercept on-chain transactions.
         </p>
         <p>
-          Bolty supports exactly two payment methods, both on Base:
-          <strong> ETH</strong> (platform fee 7%) and <strong>BOLTY</strong> (platform fee 3% —
+          Atlas supports exactly two payment methods, both on Base:
+          <strong> ETH</strong> (platform fee 7%) and <strong>ATLAS</strong> (platform fee 3% —
           the cheaper, preferred option). Fees are deducted automatically at settlement.
         </p>
         <p>
@@ -90,11 +90,11 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           You retain ownership of the content you publish. By listing a repository, agent, or
-          script, you grant Bolty a non-exclusive, worldwide license to host, display, and
+          script, you grant Atlas a non-exclusive, worldwide license to host, display, and
           distribute that content in connection with operating the Platform — nothing more.
         </p>
         <p>
-          Bolty&apos;s branding, UI, and proprietary code are our property. You may not copy or
+          Atlas&apos;s branding, UI, and proprietary code are our property. You may not copy or
           rebrand the Platform without written permission.
         </p>
       </>
@@ -124,13 +124,13 @@ const SECTIONS: LegalSection[] = [
     body: (
       <>
         <p>
-          To the maximum extent permitted by law, Bolty and its operators are not liable for
+          To the maximum extent permitted by law, Atlas and its operators are not liable for
           indirect, incidental, or consequential damages arising from your use of the Platform,
           including lost funds, lost data, or lost profits.
         </p>
         <p>
           Our aggregate liability to you will not exceed the greater of $100 or the fees you paid to
-          Bolty in the 12 months preceding the event giving rise to the claim.
+          Atlas in the 12 months preceding the event giving rise to the claim.
         </p>
       </>
     ),
@@ -164,10 +164,10 @@ const SECTIONS: LegalSection[] = [
       <p>
         Questions about these terms? Reach us on{' '}
         <a
-          href="https://x.com/BoltyNetwork"
+          href="https://x.com/Atlas"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-purple-300 hover:text-purple-200 underline underline-offset-2"
+          className="text-atlas-300 hover:text-atlas-200 underline underline-offset-2"
         >
           X
         </a>{' '}

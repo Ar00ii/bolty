@@ -42,7 +42,7 @@ export function EnhancedTooltip({
   const tooltipStyle = {
     background: 'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
     boxShadow:
-      '0 0 0 1px rgba(131,110,249,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px -10px rgba(0,0,0,0.6)',
+      '0 0 0 1px rgba(20,241,149,0.25), inset 0 1px 0 rgba(255,255,255,0.04), 0 12px 28px -10px rgba(0,0,0,0.6)',
     backdropFilter: 'blur(8px)',
   };
 
@@ -82,7 +82,7 @@ export function EnhancedTooltip({
               style={{
                 background:
                   'linear-gradient(180deg, rgba(20,20,26,0.96) 0%, rgba(10,10,14,0.96) 100%)',
-                boxShadow: '0 0 0 1px rgba(131,110,249,0.25)',
+                boxShadow: '0 0 0 1px rgba(20,241,149,0.25)',
                 left: side === 'left' || side === 'right' ? 'auto' : '50%',
                 right: side === 'left' ? '-6px' : 'auto',
                 marginLeft: side === 'left' || side === 'right' ? 0 : '-4px',

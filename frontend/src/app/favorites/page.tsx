@@ -202,7 +202,7 @@ function TabButton({
       {active && (
         <span
           className="absolute left-0 right-0 -bottom-px h-[2px]"
-          style={{ background: 'linear-gradient(90deg, #06B6D4, #836EF9, #EC4899)' }}
+          style={{ background: 'linear-gradient(90deg, #06B6D4, #14F195, #EC4899)' }}
         />
       )}
     </button>
@@ -234,9 +234,9 @@ function FavoriteRepoRow({ repo, onRemove }: { repo: RepoSummary; onRemove: () =
             <span
               className="px-1.5 py-0.5 rounded text-[10px] font-mono"
               style={{
-                background: 'rgba(131,110,249,0.1)',
+                background: 'rgba(20,241,149,0.1)',
                 color: '#b4a7ff',
-                boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+                boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
               }}
             >
               ${repo.lockedPriceUsd}
@@ -295,9 +295,9 @@ function FavoriteListingRow({
           <span
             className="px-1.5 py-0.5 rounded text-[10px] font-mono"
             style={{
-              background: 'rgba(131,110,249,0.1)',
+              background: 'rgba(20,241,149,0.1)',
               color: '#b4a7ff',
-              boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.3)',
+              boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.3)',
             }}
           >
             {listing.price} {listing.currency}

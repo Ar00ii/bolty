@@ -274,9 +274,9 @@ function LaunchpadPageContent() {
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
                     style={{
                       background:
-                        'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                        'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.4) 100%)',
                       boxShadow:
-                        '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                        '0 0 0 1px rgba(20,241,149,0.5), 0 0 20px -8px rgba(20,241,149,0.6)',
                     }}
                   >
                     <Rocket className="w-3 h-3" />
@@ -289,9 +289,9 @@ function LaunchpadPageContent() {
                   className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-light text-white transition hover:brightness-110"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.4) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.4) 100%)',
                     boxShadow:
-                      '0 0 0 1px rgba(131,110,249,0.5), 0 0 20px -8px rgba(131,110,249,0.6)',
+                      '0 0 0 1px rgba(20,241,149,0.5), 0 0 20px -8px rgba(20,241,149,0.6)',
                   }}
                 >
                   <Rocket className="w-3 h-3" />
@@ -477,8 +477,8 @@ function SectionFilterTabs({
           className="px-2.5 py-1 text-[12px] font-light rounded-md transition"
           style={{
             color: value === k ? '#ffffff' : '#a1a1aa',
-            background: value === k ? 'rgba(131,110,249,0.2)' : 'transparent',
-            boxShadow: value === k ? 'inset 0 0 0 1px rgba(131,110,249,0.35)' : 'none',
+            background: value === k ? 'rgba(20,241,149,0.2)' : 'transparent',
+            boxShadow: value === k ? 'inset 0 0 0 1px rgba(20,241,149,0.35)' : 'none',
           }}
         >
           {label}
@@ -511,10 +511,10 @@ function SortChips({
           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[12px] font-light transition"
           style={{
             color: sort === k ? '#ffffff' : '#a1a1aa',
-            background: sort === k ? 'rgba(131,110,249,0.18)' : 'rgba(255,255,255,0.03)',
+            background: sort === k ? 'rgba(20,241,149,0.18)' : 'rgba(255,255,255,0.03)',
             boxShadow:
               sort === k
-                ? 'inset 0 0 0 1px rgba(131,110,249,0.4)'
+                ? 'inset 0 0 0 1px rgba(20,241,149,0.4)'
                 : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
           }}
         >
@@ -598,8 +598,8 @@ function TokenCard({
         <div
           className="w-11 h-11 rounded-xl overflow-hidden shrink-0"
           style={{
-            background: 'rgba(131,110,249,0.08)',
-            boxShadow: 'inset 0 0 0 1px rgba(131,110,249,0.25)',
+            background: 'rgba(20,241,149,0.08)',
+            boxShadow: 'inset 0 0 0 1px rgba(20,241,149,0.25)',
           }}
         >
           {token.imageUrl ? (
@@ -767,7 +767,7 @@ function Cell({ label, value }: { label: string; value: React.ReactNode }) {
 // ── Docs + Powered-by footer ─────────────────────────────────────────
 //
 // Replaces the old HowItWorks strip + FAQ accordion with a compact
-// two-column docs row: on the left a short Bolty launchpad explainer,
+// two-column docs row: on the left a short Atlas launchpad explainer,
 // on the right a "Powered by Flaunch" card with a link to their SDK
 // docs so builders can dig deeper without the FAQ clutter.
 
@@ -783,12 +783,12 @@ function LaunchpadDocsFooter() {
       >
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-medium mb-2">
           <Info className="w-3.5 h-3.5" strokeWidth={1.75} />
-          Bolty launchpad
+          Atlas launchpad
         </div>
         <p className="text-[13px] text-white/85 font-light leading-relaxed">
           Any listing owner can mint a community token from their agent
           or repo. Every swap routes a <span className="text-white font-medium">1% protocol fee</span> —
-          {' '}<span className="text-white font-medium">Bolty takes 0%</span>,
+          {' '}<span className="text-white font-medium">Atlas takes 0%</span>,
           so 100% splits between the creator and the token&apos;s
           community treasury. Fair-launch first 30 min, then a Uniswap v4
           pool on Base with a progressive bid-wall.
@@ -804,8 +804,8 @@ function LaunchpadDocsFooter() {
         className="rounded-2xl p-5"
         style={{
           background:
-            'linear-gradient(135deg, rgba(131,110,249,0.1) 0%, #050507 100%)',
-          border: '1px solid rgba(131,110,249,0.3)',
+            'linear-gradient(135deg, rgba(20,241,149,0.1) 0%, #050507 100%)',
+          border: '1px solid rgba(20,241,149,0.3)',
         }}
       >
         <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-[#b4a7ff] font-medium mb-2">
@@ -827,9 +827,9 @@ function LaunchpadDocsFooter() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11.5px] text-white font-medium transition hover:brightness-125"
             style={{
               background:
-                'linear-gradient(180deg, rgba(131,110,249,0.55) 0%, rgba(131,110,249,0.35) 100%)',
+                'linear-gradient(180deg, rgba(20,241,149,0.55) 0%, rgba(20,241,149,0.35) 100%)',
               boxShadow:
-                'inset 0 0 0 1px rgba(131,110,249,0.55), 0 4px 20px -8px rgba(131,110,249,0.7)',
+                'inset 0 0 0 1px rgba(20,241,149,0.55), 0 4px 20px -8px rgba(20,241,149,0.7)',
             }}
           >
             Flaunch docs <ExternalLink className="w-3 h-3" />

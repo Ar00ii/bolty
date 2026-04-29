@@ -24,7 +24,7 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
               className="absolute -inset-1 rounded-full opacity-70"
               style={{
                 background:
-                  'radial-gradient(circle at center, rgba(131,110,249,0.45) 0%, transparent 70%)',
+                  'radial-gradient(circle at center, rgba(20,241,149,0.45) 0%, transparent 70%)',
                 filter: 'blur(8px)',
               }}
             />
@@ -73,9 +73,9 @@ export function ProfileSidebar({ user, activeTab, onTabChange, tabs }: ProfileSi
                   className="pointer-events-none absolute inset-0 rounded-lg"
                   style={{
                     background:
-                      'linear-gradient(180deg, rgba(131,110,249,0.2) 0%, rgba(131,110,249,0.06) 100%)',
+                      'linear-gradient(180deg, rgba(20,241,149,0.2) 0%, rgba(20,241,149,0.06) 100%)',
                     boxShadow:
-                      'inset 0 0 0 1px rgba(131,110,249,0.35), 0 0 14px -4px rgba(131,110,249,0.45)',
+                      'inset 0 0 0 1px rgba(20,241,149,0.35), 0 0 14px -4px rgba(20,241,149,0.45)',
                   }}
                   transition={{ type: 'spring', stiffness: 360, damping: 32 }}
                 />

@@ -54,7 +54,7 @@ export default function Error({
           <div className="flex flex-wrap gap-3">
             <button
               onClick={() => reset()}
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-100 hover:bg-purple-500/20 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg border border-atlas-500/30 bg-atlas-500/10 text-atlas-100 hover:bg-atlas-500/20 transition-all"
             >
               <RefreshCw className="w-4 h-4" />
               Try again

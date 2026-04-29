@@ -36,7 +36,7 @@ function NegotiationChat() {
           <div
             className={`px-3 py-1.5 rounded-xl text-[10px] font-mono max-w-[75%] leading-snug ${
               m.role === 'buyer'
-                ? 'bg-bolty-500/15 border border-bolty-500/25 text-bolty-300'
+                ? 'bg-atlas-500/15 border border-atlas-500/25 text-atlas-300'
                 : 'bg-zinc-800/80 border border-white/[0.08] text-zinc-300'
             }`}
           >
@@ -45,7 +45,7 @@ function NegotiationChat() {
             </span>
             {m.text}
             {m.price && (
-              <span className="ml-2 text-[9px] font-light text-bolty-400 opacity-80">
+              <span className="ml-2 text-[9px] font-light text-atlas-400 opacity-80">
                 {m.price}
               </span>
             )}
@@ -82,15 +82,15 @@ function ListingsMarquee() {
             key={i}
             className="flex items-center justify-between px-3 py-2 rounded-xl"
             style={{
-              background: 'rgba(131,110,249,0.06)',
-              border: '1px solid rgba(131,110,249,0.12)',
+              background: 'rgba(20,241,149,0.06)',
+              border: '1px solid rgba(20,241,149,0.12)',
             }}
           >
             <div>
               <div className="text-[10px] font-light text-zinc-300">{l.name}</div>
               <div className="text-[9px] font-mono text-zinc-600 mt-0.5">{l.tag}</div>
             </div>
-            <div className="text-[10px] font-mono font-light text-bolty-400">{l.price}</div>
+            <div className="text-[10px] font-mono font-light text-atlas-400">{l.price}</div>
           </div>
         ))}
       </div>
@@ -124,12 +124,12 @@ function ApiAnimation() {
             active === i ? 'opacity-100' : 'opacity-30'
           }`}
           style={{
-            background: active === i ? 'rgba(131,110,249,0.08)' : 'rgba(255,255,255,0.02)',
-            border: `1px solid ${active === i ? 'rgba(131,110,249,0.2)' : 'rgba(255,255,255,0.04)'}`,
+            background: active === i ? 'rgba(20,241,149,0.08)' : 'rgba(255,255,255,0.02)',
+            border: `1px solid ${active === i ? 'rgba(20,241,149,0.2)' : 'rgba(255,255,255,0.04)'}`,
           }}
         >
           <span
-            className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-bolty-400'}`}
+            className={`text-[9px] font-mono font-light ${log.method === 'GET' ? 'text-green-400' : 'text-atlas-400'}`}
           >
             {log.method}
           </span>
@@ -144,10 +144,10 @@ function ApiAnimation() {
       ))}
       <div
         className="mt-2 px-3 py-2 rounded-lg"
-        style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(131,110,249,0.1)' }}
+        style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(20,241,149,0.1)' }}
       >
         <div className="text-[9px] font-mono text-zinc-500">
-          <span className="text-bolty-400">X-Agent-Key</span>: sk_bolty_xxx...
+          <span className="text-atlas-400">X-Agent-Key</span>: sk_bolty_xxx...
         </div>
       </div>
     </div>
@@ -174,8 +174,8 @@ function PaymentVisual() {
               i < step ? 'opacity-100' : i === step ? 'opacity-100' : 'opacity-20'
             }`}
             style={{
-              background: i <= step ? 'rgba(131,110,249,0.06)' : 'transparent',
-              border: `1px solid ${i <= step ? 'rgba(131,110,249,0.15)' : 'rgba(255,255,255,0.04)'}`,
+              background: i <= step ? 'rgba(20,241,149,0.06)' : 'transparent',
+              border: `1px solid ${i <= step ? 'rgba(20,241,149,0.15)' : 'rgba(255,255,255,0.04)'}`,
             }}
           >
             <span
@@ -183,7 +183,7 @@ function PaymentVisual() {
                 i < step
                   ? 'bg-green-400'
                   : i === step
-                    ? 'bg-bolty-400 animate-pulse'
+                    ? 'bg-atlas-400 animate-pulse'
                     : 'bg-zinc-700'
               }`}
             />

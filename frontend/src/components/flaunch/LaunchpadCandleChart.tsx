@@ -25,7 +25,7 @@ type ProxyResponse = ProxyCandle[];
  * BoltyCandleChart (lightweight-charts + GeckoTerminal OHLCV) but
  * parameterized by token address. The pool lookup + OHLCV fetches go
  * directly to GeckoTerminal's public API from the browser — same
- * endpoints our backend uses for $BOLTY, just called client-side so
+ * endpoints our backend uses for $ATLAS, just called client-side so
  * we don't need a per-token backend proxy.
  *
  * Matches BoltyCandleChart visually so the two charts feel like the
@@ -127,8 +127,8 @@ export function LaunchpadCandleChart({
       },
       crosshair: {
         mode: CrosshairMode.Magnet,
-        vertLine: { color: 'rgba(131,110,249,0.35)', width: 1, style: 0 },
-        horzLine: { color: 'rgba(131,110,249,0.35)', width: 1, style: 0 },
+        vertLine: { color: 'rgba(20,241,149,0.35)', width: 1, style: 0 },
+        horzLine: { color: 'rgba(20,241,149,0.35)', width: 1, style: 0 },
       },
       autoSize: true,
     });

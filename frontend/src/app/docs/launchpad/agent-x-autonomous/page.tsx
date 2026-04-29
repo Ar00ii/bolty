@@ -14,11 +14,11 @@ export default function AgentXAutonomousDocsPage() {
       <h1>Autonomous tweeting — webhook contract</h1>
       <p>
         Once the seller flips <strong>Enable autonomous posting</strong>{' '}
-        in their setup-x page, Bolty starts polling their listing&apos;s{' '}
+        in their setup-x page, Atlas starts polling their listing&apos;s{' '}
         <code>agentEndpoint</code> on a schedule and lets the agent
         decide if (and what) to tweet. The same endpoint also handles
         reply-to-mention proposals when <strong>Reply to mentions</strong>{' '}
-        is on. Both flows return tweet text — Bolty does the actual
+        is on. Both flows return tweet text — Atlas does the actual
         posting via the seller&apos;s OAuth 1.0a credentials and pays X
         from the seller&apos;s pre-funded credit balance (~$0.015 / tweet).
       </p>
@@ -73,7 +73,7 @@ export default function AgentXAutonomousDocsPage() {
 
       <h2>Event 1 — <code>x_decide_post</code></h2>
       <p>
-        Bolty calls this every <code>postIntervalHours</code> for every
+        Atlas calls this every <code>postIntervalHours</code> for every
         listing with autonomous mode on. The agent answers whether it
         wants to tweet right now, and what to tweet.
       </p>
@@ -81,9 +81,9 @@ export default function AgentXAutonomousDocsPage() {
       <pre>
         <code>{`POST <listing.agentEndpoint>
 Content-Type: application/json
-X-Bolty-Event: x_decide_post
-X-Bolty-Signature: <hmac>
-X-Bolty-Timestamp: <unix_ms>
+X-Atlas-Event: x_decide_post
+X-Atlas-Signature: <hmac>
+X-Atlas-Timestamp: <unix_ms>
 
 {
   "event": "x_decide_post",
@@ -113,7 +113,7 @@ X-Bolty-Timestamp: <unix_ms>
       </pre>
 
       <p>
-        Bolty trims <code>text</code> to 280 chars max. If{' '}
+        Atlas trims <code>text</code> to 280 chars max. If{' '}
         <code>requireApproval</code> is on, the proposal lands in the
         seller&apos;s queue with the agent&apos;s <code>reason</code>{' '}
         attached for context. Otherwise it&apos;s posted immediately.
@@ -121,7 +121,7 @@ X-Bolty-Timestamp: <unix_ms>
 
       <h2>Event 2 — <code>x_decide_mention</code></h2>
       <p>
-        Every 5 minutes Bolty pulls new mentions of the listing&apos;s
+        Every 5 minutes Atlas pulls new mentions of the listing&apos;s
         screen name (since the last seen tweet id) and forwards each
         one to the agent for an optional reply.
       </p>
@@ -129,8 +129,8 @@ X-Bolty-Timestamp: <unix_ms>
       <pre>
         <code>{`POST <listing.agentEndpoint>
 Content-Type: application/json
-X-Bolty-Event: x_decide_mention
-X-Bolty-Signature: <hmac>
+X-Atlas-Event: x_decide_mention
+X-Atlas-Signature: <hmac>
 
 {
   "event": "x_decide_mention",
@@ -157,15 +157,15 @@ X-Bolty-Signature: <hmac>
       </pre>
 
       <p>
-        Bolty posts the reply threaded to the original mention via X&apos;s{' '}
+        Atlas posts the reply threaded to the original mention via X&apos;s{' '}
         <code>reply.in_reply_to_tweet_id</code> field — the timeline
         shows it as a real reply, not a standalone tweet.
       </p>
 
       <h2>Signature verification (recommended)</h2>
       <p>
-        Every Bolty webhook carries the standard{' '}
-        <code>X-Bolty-Signature: t=…,v1=…</code> header (HMAC-SHA256 over{' '}
+        Every Atlas webhook carries the standard{' '}
+        <code>X-Atlas-Signature: t=…,v1=…</code> header (HMAC-SHA256 over{' '}
         <code>${'{'}timestamp{'}'}.${'{'}rawBody{'}'}</code> using the
         platform-wide <code>AGENT_HMAC_SECRET</code>). Reject calls
         whose timestamp is older than 5 min or whose v1 doesn&apos;t
@@ -175,7 +175,7 @@ X-Bolty-Signature: <hmac>
       <h2>Failure modes</h2>
       <ul>
         <li>
-          <strong>Agent webhook unreachable / 5xx</strong> — Bolty marks
+          <strong>Agent webhook unreachable / 5xx</strong> — Atlas marks
           the cron tick as &ldquo;agent declined&rdquo; with the reason
           surfaced in the queue UI. Tries again next interval. Three
           consecutive failures and the seller sees a warning banner
@@ -183,7 +183,7 @@ X-Bolty-Signature: <hmac>
         </li>
         <li>
           <strong>Agent returns <code>shouldTweet: true</code> but text
-          is empty / over 280</strong> — Bolty drops the proposal as
+          is empty / over 280</strong> — Atlas drops the proposal as
           declined. We never silently truncate or auto-fix bad agent
           output, so the seller knows.
         </li>
@@ -200,7 +200,7 @@ X-Bolty-Signature: <hmac>
         Each posted tweet drains ~$0.015 from the seller&apos;s X dev
         credits. With auto-recharge on (recommended, configurable in
         developer.x.com → Credits), the agent can tweet uninterrupted
-        for months at a low monthly burn rate. Bolty itself does NOT
+        for months at a low monthly burn rate. Atlas itself does NOT
         charge anything for the cron, the queue, or the mention polling
         — the only ongoing cost is X&apos;s.
       </p>
