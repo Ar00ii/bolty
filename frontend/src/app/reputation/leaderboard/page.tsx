@@ -17,7 +17,6 @@ import {
 import Link from 'next/link';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { GradientText } from '@/components/ui/GradientText';
 import { getReputationRank, RANK_TIERS } from '@/components/ui/reputation-badge';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 import { api } from '@/lib/api/client';
@@ -165,35 +164,34 @@ export default function LeaderboardPage() {
 
   return (
     <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
-      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+      <header className="px-4 sm:px-6 md:px-10 pt-8 md:pt-10 pb-5">
         <div className="mx-auto max-w-[1200px]">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
-                <Trophy className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span>Hall of Fame</span>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-                Rays <GradientText gradient="green">Leaderboard</GradientText>
-              </h1>
-              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
-                The most trusted builders in Bolty — ranked by rays earned.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowHelp((v) => !v)}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12px] text-zinc-300 hover:text-white transition"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                boxShadow: '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
-              }}
-              aria-expanded={showHelp}
+          <div className="grid grid-cols-[auto_1fr] gap-5 sm:gap-7 items-start">
+            <span
+              className="font-mono text-[11px] tracking-[0.04em] text-zinc-600 pt-2 select-none"
+              aria-hidden
             >
-              <Info className="w-3.5 h-3.5" strokeWidth={1.75} />
-              {showHelp ? 'Hide rays guide' : 'How rays work'}
-            </button>
+              L / 01
+            </span>
+            <div className="min-w-0 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <h1 className="font-display text-[34px] sm:text-[44px] leading-[1.02] tracking-[-0.035em] text-white">
+                  Rays leaderboard
+                </h1>
+                <p className="mt-2 text-[13.5px] sm:text-sm text-zinc-400 leading-relaxed max-w-md">
+                  Most trusted builders in Bolty, ranked by rays earned.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHelp((v) => !v)}
+                className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md text-[13px] font-semibold text-zinc-300 hover:text-white border border-white/10 hover:border-white/20 transition-colors"
+                aria-expanded={showHelp}
+              >
+                <Info className="w-3.5 h-3.5" strokeWidth={2} />
+                {showHelp ? 'Hide rays guide' : 'How rays work'}
+              </button>
+            </div>
           </div>
         </div>
       </header>

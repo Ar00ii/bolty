@@ -107,25 +107,32 @@ export function StandardSidebar() {
 
   return (
     <aside
-      className="mk-app-sidebar hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[264px] shrink-0"
+      className="mk-app-sidebar hidden lg:flex lg:sticky lg:top-0 lg:h-screen flex-col overflow-hidden w-[252px] shrink-0"
       style={{
-        background: '#0c0c0f',
-        borderRight: '1px solid #1f1f23',
-        fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+        background: '#0B0B0D',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
       }}
     >
-      {/* Workspace switcher — matches the landing header logo */}
+      {/* Workspace switcher. Lockup is a 18px green dot + "Bolty" wordmark
+          in display font — restrained, no logo PNG drop-shadow. */}
       <Link
         href="/"
-        className="flex items-center gap-2 text-left h-14 px-[14px] transition-colors hover:bg-white/[0.02]"
-        style={{ borderBottom: '1px solid #1f1f23' }}
+        className="flex items-center gap-2.5 text-left h-12 px-[14px] transition-colors hover:bg-white/[0.025]"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
       >
-        <div className="w-[36px] h-[36px] grid place-items-center rounded-lg overflow-hidden shrink-0">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/LogoNew.png" alt="Bolty" className="w-full h-full object-contain" />
-        </div>
-        <span className="text-xl font-semibold text-white truncate">
-          BoltyNetwork
+        <span
+          aria-hidden
+          className="w-[10px] h-[10px] rounded-[2px] bg-bolty-400 shrink-0"
+          style={{ boxShadow: '0 0 0 3px rgba(20,241,149,0.12)' }}
+        />
+        <span className="font-display text-[15px] font-semibold tracking-[-0.01em] text-white truncate">
+          Bolty
+        </span>
+        <span
+          className="ml-auto font-mono text-[10px] tracking-[0.02em] text-zinc-600 select-none"
+          aria-hidden
+        >
+          v1
         </span>
       </Link>
 
@@ -133,26 +140,25 @@ export function StandardSidebar() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new CustomEvent('bolty:open-command'))}
-        className="mx-3 mt-3 mb-2 flex items-center gap-2 px-[10px] py-[7px] rounded-lg text-[12.5px] transition-colors cursor-text"
+        className="mx-2.5 mt-2.5 mb-1 flex items-center gap-2 px-2.5 py-1.5 rounded-[5px] text-[12.5px] transition-colors cursor-text"
         style={{
-          background: '#09090b',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.025)',
+          border: '1px solid rgba(255,255,255,0.06)',
           color: '#a1a1aa',
         }}
         onMouseEnter={(e) =>
-          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.16)')
+          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')
         }
         onMouseLeave={(e) =>
-          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)')
+          (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')
         }
       >
-        <Search className="w-3 h-3 shrink-0" strokeWidth={2} />
-        <span className="flex-1 text-left">Jump to…</span>
+        <Search className="w-3.5 h-3.5 shrink-0 text-zinc-500" strokeWidth={2} />
+        <span className="flex-1 text-left">Search</span>
         <kbd
-          className="font-mono text-[10px] px-[5px] py-[2px] rounded"
+          className="font-mono text-[10px] px-1.5 py-px rounded-[3px] tabular-nums"
           style={{
-            background: '#18181b',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.05)',
             color: '#a1a1aa',
           }}
         >
@@ -161,14 +167,14 @@ export function StandardSidebar() {
       </button>
 
       {/* Scroll area with sections */}
-      <div className="flex-1 overflow-y-auto px-2 pt-1 pb-3">
+      <div className="flex-1 overflow-y-auto px-2 pt-2 pb-3">
         {NAV.map((sect) => (
-          <div key={sect.section} className="mt-4 first:mt-0">
+          <div key={sect.section} className="mt-5 first:mt-0">
             <div
-              className="font-mono text-[10px] uppercase px-[10px] pb-[6px]"
-              style={{ color: '#ffffff', letterSpacing: '0.16em', fontWeight: 600 }}
+              className="px-[10px] pb-[6px] text-[11px]"
+              style={{ color: 'rgba(255,255,255,0.32)', fontWeight: 500, letterSpacing: '-0.005em' }}
             >
-              {sect.section.toUpperCase()}
+              {sect.section}
             </div>
             {sect.items.map((item) => {
               const Icon = item.icon;
@@ -179,49 +185,35 @@ export function StandardSidebar() {
         ))}
       </div>
 
-      {/* Footer: wallet chip + disconnect when signed in, Sign-in CTA when signed out */}
+      {/* Footer: wallet chip + disconnect when signed in, Sign-in CTA when signed out.
+          No ambient gradient — let the hairline border do the work. */}
       <div
         className="p-3"
-        style={{
-          background: 'linear-gradient(180deg, transparent, rgba(20, 241, 149,0.04))',
-        }}
+        style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
       >
         {isAuthenticated ? (
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-[6px]">
+            <div className="flex items-center gap-2">
               <span
-                className="w-[6px] h-[6px] rounded-full"
-                style={{
-                  background: '#22c55e',
-                  boxShadow: '0 0 8px rgba(34,197,94,0.6)',
-                }}
+                aria-hidden
+                className="w-1.5 h-1.5 rounded-full bg-bolty-400"
               />
-              <span className="font-mono text-[11px]" style={{ color: '#ffffff' }}>
+              <span className="font-mono text-[11px] tracking-[0.01em] text-zinc-300 tabular-nums">
                 {shortenAddress(walletAddress)}
               </span>
             </div>
             <button
               type="button"
               onClick={() => logout?.()}
-              className="font-mono text-[10px] transition-colors"
-              style={{ color: '#ffffff' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#ffffff')}
+              className="text-[11px] font-medium text-zinc-500 hover:text-red-400 transition-colors"
             >
-              disconnect
+              Disconnect
             </button>
           </div>
         ) : (
           <Link
             href="/auth"
-            className="block text-center rounded-md py-2 text-[12px] transition-colors"
-            style={{
-              background: 'rgba(20, 241, 149,0.15)',
-              border: '1px solid rgba(20, 241, 149,0.3)',
-              color: '#e4e4e7',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.25)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(20, 241, 149,0.15)')}
+            className="block text-center rounded-[5px] py-1.5 text-[12.5px] font-semibold text-[#062414] bg-bolty-400 hover:bg-bolty-300 transition-colors"
           >
             Sign in
           </Link>
@@ -278,18 +270,18 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
     scheduleClose();
   };
 
-  const iconColor = active ? '#48F9A6' : '#ffffff';
+  const iconColor = active ? '#14F195' : 'rgba(255,255,255,0.78)';
 
   const rowStyle: React.CSSProperties = {
-    gridTemplateColumns: '10px 16px 1fr auto',
-    color: active ? '#ffffff' : '#ffffff',
-    background: active ? 'rgba(20, 241, 149,0.08)' : 'transparent',
+    gridTemplateColumns: '16px 1fr auto',
+    color: active ? '#ffffff' : 'rgba(255,255,255,0.82)',
+    background: active ? 'rgba(255,255,255,0.04)' : 'transparent',
     fontSize: '13px',
-    fontWeight: 600,
+    fontWeight: active ? 600 : 500,
   };
 
   const rowClassName =
-    'grid items-center gap-[10px] px-[10px] py-[7px] rounded-md transition-colors group relative w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[rgba(20,241,149,0.65)]';
+    'grid items-center gap-[10px] pl-[12px] pr-[10px] py-[6px] rounded-[5px] transition-colors group relative w-full text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-1 focus-visible:outline-[rgba(20,241,149,0.7)]';
 
   // Keyboard support for collapsible groups: ArrowRight expands, ArrowLeft
   // collapses, Space/Enter on the parent toggles. Click still navigates,
@@ -309,10 +301,8 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
   const handleMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
     if (!active) {
       e.currentTarget.style.color = '#ffffff';
-      e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+      e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
     }
-    const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-    if (iconEl) iconEl.style.color = '#48F9A6';
     const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
     if (kbdEl) kbdEl.style.opacity = '1';
     // Prefetch API data for the most common destinations so by the time
@@ -322,25 +312,25 @@ function SidebarItem({ item, Icon, active }: { item: NavItem; Icon: LucideIcon; 
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
     if (!active) {
-      e.currentTarget.style.color = '#ffffff';
+      e.currentTarget.style.color = 'rgba(255,255,255,0.82)';
       e.currentTarget.style.background = 'transparent';
     }
-    const iconEl = e.currentTarget.querySelector<HTMLElement>('[data-side-icon]');
-    if (iconEl) iconEl.style.color = iconColor;
     const kbdEl = e.currentTarget.querySelector<HTMLElement>('[data-side-kbd]');
     if (kbdEl) kbdEl.style.opacity = '0';
   };
 
   const body = (
     <>
-      <span
-        className="font-mono leading-none"
-        style={{ fontSize: '13px', color: '#14F195', width: '10px' }}
-      >
-        {active ? '›' : ''}
-      </span>
+      {/* 2px left rail when active — Linear/Vercel signature. Replaces
+          the old chevron+green-fill combo, which was loud. */}
+      {active && (
+        <span
+          aria-hidden
+          className="absolute left-0 top-[6px] bottom-[6px] w-[2px] rounded-r-sm bg-bolty-400"
+        />
+      )}
       <span className="flex" style={{ color: iconColor }} data-side-icon>
-        <Icon className="w-4 h-4" strokeWidth={1.5} />
+        <Icon className="w-[15px] h-[15px]" strokeWidth={active ? 2 : 1.7} />
       </span>
       <span className="truncate whitespace-nowrap">{item.label}</span>
       <SidebarItemMeta item={item} open={open} />

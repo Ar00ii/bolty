@@ -2,27 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global font styling — Inter Medium (500) by default. Bolder weights
-   reinforce the app feel; thin/light weights are deliberately avoided. */
-* {
-  font-family:
-    'Inter',
-    system-ui,
-    -apple-system,
-    sans-serif;
+/* ─ Type system ─────────────────────────────────────────────────────────
+   Three families do all the work:
+     Geist        → headings (display)
+     Inter        → body / UI
+     Geist Mono   → tabular numbers, IDs, kbd, code
+
+   Body weight 500 (medium). Headings 600 (semibold) with tight tracking —
+   we deliberately avoid the marketing-page 800/900 plus letter-spaced
+   uppercase kicker combo, which reads as template-y. */
+html {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-weight: 500;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.011em;
+  font-feature-settings: 'cv11' on, 'ss01' on, 'ss03' on;
 }
 
-/* Headings get extra weight for visual hierarchy. */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  font-feature-settings: 'ss01' on, 'ss02' on;
+}
+
+h1 {
+  letter-spacing: -0.035em;
+}
+
+/* Tabular figures everywhere they belong: numbers in cards, prices,
+   timers. Stops layout shift as digits change and looks engineered. */
+.font-mono,
+code,
+kbd,
+samp,
+pre,
+[data-tabular] {
+  font-family: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-feature-settings: 'ss03' on, 'zero' on, 'cv02' on;
 }
 
 /* Better glyph rendering on dark surfaces — subtle but sharpens
@@ -59,33 +80,28 @@ html {
   }
 }
 
-/* Focus states for keyboard navigation */
-button:focus,
-a:focus,
-input:focus {
-  outline: 2px solid rgba(20, 241, 149, 0.5);
-  outline-offset: 2px;
-}
-
-/* Remove default focus for mouse users */
+/* Focus states — keyboard only. Tight 1.5px ring with offset, no
+   thick blob (the 2px ring + 2px offset combo that's everywhere reads
+   as default-Tailwind). */
 button:focus:not(:focus-visible),
 a:focus:not(:focus-visible),
 input:focus:not(:focus-visible) {
   outline: none;
 }
 
-/* Custom focus visible for better UX */
 button:focus-visible,
 a:focus-visible,
-input:focus-visible {
-  outline: 2px solid rgba(20, 241, 149, 0.8);
+input:focus-visible,
+[role='button']:focus-visible {
+  outline: 1.5px solid rgba(20, 241, 149, 0.85);
   outline-offset: 2px;
+  border-radius: inherit;
 }
 
-/* Smooth transitions with will-change for performance */
-* {
-  transition-property: color, background-color, border-color, box-shadow, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+/* Selection color stays on brand. */
+::selection {
+  background: rgba(20, 241, 149, 0.28);
+  color: #fff;
 }
 
 /* Performance optimizations */

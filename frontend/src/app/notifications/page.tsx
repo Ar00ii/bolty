@@ -18,7 +18,6 @@ import {
 import Link from 'next/link';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { GradientText } from '@/components/ui/GradientText';
 import { useKeyboardFocus } from '@/lib/hooks/useKeyboardFocus';
 import {
   fetchNotifications,
@@ -147,37 +146,43 @@ export default function NotificationsPage() {
 
   return (
     <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
-      <header className="px-6 pt-8 pb-4 md:px-10 md:pt-10">
+      <header className="px-4 sm:px-6 md:px-10 pt-8 md:pt-10 pb-5">
         <div className="mx-auto max-w-[1200px]">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
-                <Bell className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span>Activity feed</span>
-                {unread > 0 && <LiveDot />}
+          <div className="grid grid-cols-[auto_1fr] gap-5 sm:gap-7 items-start">
+            <span
+              className="font-mono text-[11px] tracking-[0.04em] text-zinc-600 pt-2 select-none"
+              aria-hidden
+            >
+              N / 01
+            </span>
+            <div className="min-w-0 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <h1 className="font-display text-[34px] sm:text-[44px] leading-[1.02] tracking-[-0.035em] text-white flex items-center gap-3">
+                  Notifications
+                  {unread > 0 && (
+                    <span
+                      className="font-mono text-[11px] tabular-nums text-bolty-400 bg-bolty-400/10 px-2 py-1 rounded inline-flex items-center gap-1.5"
+                      style={{ fontFeatureSettings: '"tnum"' }}
+                    >
+                      <LiveDot />
+                      {unread}
+                    </span>
+                  )}
+                </h1>
+                <p className="mt-2 text-[13.5px] sm:text-sm text-zinc-400 leading-relaxed">
+                  {unread > 0 ? `${items.length} total` : 'You are all caught up.'}
+                </p>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-                <GradientText gradient="green">Notifications</GradientText>
-              </h1>
-              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
-                {unread > 0 ? `${unread} unread · ${items.length} total` : 'You are all caught up.'}
-              </p>
+              {unread > 0 && (
+                <button
+                  onClick={handleMarkAll}
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md text-[13px] font-semibold text-zinc-300 hover:text-white border border-white/10 hover:border-white/20 transition-colors"
+                >
+                  <Check className="w-3.5 h-3.5" strokeWidth={2} />
+                  Mark all read
+                </button>
+              )}
             </div>
-            {unread > 0 && (
-              <button
-                onClick={handleMarkAll}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[12px] text-zinc-300 hover:text-white transition"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                  boxShadow:
-                    '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
-                }}
-              >
-                <Check className="w-3.5 h-3.5" strokeWidth={1.75} />
-                Mark all read
-              </button>
-            )}
           </div>
         </div>
       </header>

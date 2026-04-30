@@ -1,70 +1,45 @@
+/* Single-stop accent text. The shimmering animated multi-stop gradient
+   has been retired — it reads as ad-tech/AI-template. We just tint the
+   text with a confident single color and let the surrounding type do
+   the work. The variant prop is kept so call sites compile. */
+
 .gradient-text {
-  background: linear-gradient(90deg, #14F195, #00FFA3, #14F195);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #14F195;
   display: inline;
   font-weight: inherit;
 }
 
-/* The historical "purple" variant now resolves to Solana green for
-   continuity with all existing call sites. Use the `green` variant
-   below for clarity in new code. */
 .gradient-text-purple,
 .gradient-text-green {
-  background: linear-gradient(90deg, #14F195, #00FFA3, #14F195);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #14F195;
 }
 
 .gradient-text-mint {
-  background: linear-gradient(90deg, #00FFA3, #14F195, #00FFA3);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #00FFA3;
 }
 
-.gradient-text-blue {
-  background: linear-gradient(90deg, #03E1FF, #06b6d4, #03E1FF);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
+.gradient-text-blue,
 .gradient-text-cyan {
-  background: linear-gradient(90deg, #03E1FF, #06b6d4, #03E1FF);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #03E1FF;
 }
 
 .gradient-text-pink {
-  background: linear-gradient(90deg, #ec4899, #be185d, #ec4899);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #EC4899;
 }
 
-/* Solana-style: green → cyan → pink, drifting forever. Used for
-   premium hero accents. */
+/* The "rainbow" variant keeps a gradient because some hero treatments
+   genuinely want the chromatic moment, but it's static — no animation,
+   no infinite shimmer. Use sparingly. */
 .gradient-text-rainbow {
-  background: linear-gradient(90deg, #14F195, #00FFA3, #03E1FF, #ec4899, #14F195);
+  background: linear-gradient(135deg, #14F195 0%, #03E1FF 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: transparent;
 }
 
+/* Animated is now a no-op. We deliberately ignore the prop instead of
+   removing it, so call sites that pass `animated={true}` still compile. */
 .gradient-text-animated {
-  animation: gradient-shift 6s ease infinite;
-  background-size: 200% 100%;
-}
-
-@keyframes gradient-shift {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
+  /* intentionally empty */
 }

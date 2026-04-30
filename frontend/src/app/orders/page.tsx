@@ -26,7 +26,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { GradientText } from '@/components/ui/GradientText';
 import { api } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/AuthProvider';
 import { useRequireAuth } from '@/lib/auth/useRequireAuth';
@@ -328,40 +327,38 @@ export default function OrdersPage() {
   return (
     <div className="mk-app-page min-h-screen pb-20" style={{ maxWidth: 'none', padding: 0 }}>
       {/* Header */}
-      <header className="px-4 sm:px-6 md:px-10 pt-6 sm:pt-8 md:pt-10 pb-4">
+      <header className="px-4 sm:px-6 md:px-10 pt-8 md:pt-10 pb-5">
         <div className="mx-auto max-w-[1400px]">
-          <div className="flex items-baseline justify-between gap-4 flex-wrap">
-            <div>
-              <div className="flex items-center gap-2 text-[10.5px] font-medium text-zinc-500 uppercase tracking-[0.18em] mb-2">
-                <TrendingUp className="w-3.5 h-3.5" strokeWidth={1.75} />
-                <span>Bolty Orders</span>
-                <LiveDot />
+          <div className="grid grid-cols-[auto_1fr] gap-5 sm:gap-7 items-start">
+            <span
+              className="font-mono text-[11px] tracking-[0.04em] text-zinc-600 pt-2 select-none"
+              aria-hidden
+            >
+              O / 01
+            </span>
+            <div className="min-w-0 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+              <div className="min-w-0">
+                <h1 className="font-display text-[34px] sm:text-[44px] leading-[1.02] tracking-[-0.035em] text-white flex items-center gap-3">
+                  Orders
+                  <LiveDot />
+                </h1>
+                <p className="mt-2 text-[13.5px] sm:text-sm text-zinc-400 leading-relaxed max-w-md">
+                  Every purchase, sale, and escrow release in one feed.
+                </p>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-                <GradientText gradient="green">Orders</GradientText>
-              </h1>
-              <p className="text-[12.5px] text-zinc-500 font-semibold mt-1">
-                Track every purchase, sale and escrow release in one feed.
-              </p>
+              {tab !== 'negotiations' && baseOrders.length > 0 && (
+                <button
+                  onClick={() =>
+                    downloadOrdersCsv(baseOrders, tab === 'selling' ? 'selling' : 'buying')
+                  }
+                  className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md text-[13px] font-semibold text-zinc-300 hover:text-white border border-white/10 hover:border-white/20 transition-colors"
+                  aria-label="Export orders as CSV"
+                >
+                  <Download className="w-3.5 h-3.5" strokeWidth={2} />
+                  Export CSV
+                </button>
+              )}
             </div>
-            {tab !== 'negotiations' && baseOrders.length > 0 && (
-              <button
-                onClick={() =>
-                  downloadOrdersCsv(baseOrders, tab === 'selling' ? 'selling' : 'buying')
-                }
-                className="inline-flex items-center gap-1.5 text-[12px] text-zinc-300 hover:text-white h-9 px-3 rounded-lg transition-colors"
-                style={{
-                  background:
-                    'linear-gradient(180deg, rgba(20,20,26,0.6) 0%, rgba(10,10,14,0.6) 100%)',
-                  boxShadow:
-                    '0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.03)',
-                }}
-                aria-label="Export orders as CSV"
-              >
-                <Download className="w-3.5 h-3.5" strokeWidth={1.75} />
-                Export CSV
-              </button>
-            )}
           </div>
         </div>
       </header>

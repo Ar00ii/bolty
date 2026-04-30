@@ -80,37 +80,28 @@ export function UnifiedHeader() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 transition-colors duration-300"
         style={{
-          background: scrolled ? 'rgba(6,6,15,0.82)' : 'rgba(6,6,15,0.55)',
+          background: scrolled ? 'rgba(7,7,8,0.86)' : 'rgba(7,7,8,0.6)',
           borderBottom: `1px solid rgba(255,255,255,${scrolled ? 0.06 : 0.03})`,
-          backdropFilter: 'blur(14px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(14px) saturate(140%)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
         }}
       >
-        <div className="w-full pl-12 md:pl-20 pr-4 md:pr-8 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:opacity-85 transition-opacity relative"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/LogoNew.png"
-              alt="Bolty"
-              className="h-14 w-14 object-contain"
-              style={{
-                mixBlendMode: 'screen',
-                WebkitMaskImage:
-                  'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
-                maskImage: 'radial-gradient(closest-side, rgba(0,0,0,1) 58%, rgba(0,0,0,0) 96%)',
-                filter: 'drop-shadow(0 0 12px rgba(20, 241, 149,0.35))',
-              }}
+        <div className="w-full pl-5 md:pl-8 pr-4 md:pr-8 h-14 flex items-center justify-between">
+          {/* Lockup: green dot + Bolty wordmark in display font. No PNG logo
+              with drop-shadow blur — that's the SaaS template tell. */}
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <span
+              aria-hidden
+              className="w-[10px] h-[10px] rounded-[2px] bg-bolty-400 transition-shadow"
+              style={{ boxShadow: '0 0 0 3px rgba(20,241,149,0.12)' }}
             />
-            <span className="text-xl md:text-2xl hidden sm:inline text-white font-semibold">
-              BoltyNetwork
+            <span className="font-display text-[16px] font-semibold tracking-[-0.012em] text-white">
+              Bolty
             </span>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav — flat text links with a thin underline accent on
+              the active route. No pill, no spring animation. */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const active = pathname.startsWith(link.href);
@@ -118,27 +109,22 @@ export function UnifiedHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-3 py-2 rounded-lg text-[13px] tracking-[0.005em] transition-colors"
+                  className="relative px-3 py-1.5 text-[13px] transition-colors"
                   style={{
-                    color: active ? '#ffffff' : 'rgb(212,212,216)',
-                    fontWeight: 700,
+                    color: active ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                    fontWeight: active ? 600 : 500,
+                    letterSpacing: '-0.005em',
                   }}
                 >
+                  {link.label}
                   {active && (
                     <motion.span
-                      layoutId="header-pill"
-                      className="absolute inset-0 rounded-lg -z-0"
-                      style={{
-                        background:
-                          'linear-gradient(180deg, rgba(20, 241, 149,0.14) 0%, rgba(20, 241, 149,0.04) 100%)',
-                        boxShadow: 'inset 0 0 0 1px rgba(20, 241, 149,0.25)',
-                      }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      layoutId="header-underline"
+                      aria-hidden
+                      className="absolute left-3 right-3 -bottom-px h-px bg-bolty-400"
+                      transition={{ type: 'spring', stiffness: 400, damping: 36 }}
                     />
                   )}
-                  <span className="relative z-10" style={{ fontWeight: 700 }}>
-                    {link.label}
-                  </span>
                 </Link>
               );
             })}

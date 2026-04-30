@@ -2,30 +2,51 @@
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
   theme: {
+    // Tighten the radius scale. Most "AI-generated" Tailwind UIs lean on
+    // rounded-2xl/3xl which read as bouncy/saas. Linear, Vercel, Phantom
+    // sit at 4–10px max — sharper edges, more confident product feel.
+    borderRadius: {
+      none: '0',
+      sm: '3px',
+      DEFAULT: '5px',
+      md: '6px',
+      lg: '8px',
+      xl: '10px',
+      '2xl': '12px',
+      '3xl': '14px',
+      full: '9999px',
+    },
     extend: {
       colors: {
-        // Bolty brand palette — Solana green (#14F195 primary)
-        // Keeping the `bolty` name for backwards compat across the codebase.
         bolty: {
           50: '#E6FFF4',
           100: '#B3FFD9',
           200: '#7DFFBF',
           300: '#48F9A6',
-          400: '#14F195', // primary Solana green
+          400: '#14F195',
           500: '#00DC83',
           600: '#00B96E',
           700: '#008F55',
           800: '#00663D',
           900: '#003D24',
         },
-        // Solana official accent palette (for gradients with green)
         solana: {
           green: '#14F195',
           mint: '#00FFA3',
           cyan: '#03E1FF',
           magenta: '#EC4899',
         },
-        // Terminal dark palette (zinc-based for professional look)
+        // Neutral surface ramp tuned for dark UI. Slightly warmer than
+        // pure zinc — reads less "VS Code dark theme", more product-grade.
+        surface: {
+          0: '#070708',
+          1: '#0B0B0D',
+          2: '#101013',
+          3: '#16161A',
+          4: '#1D1D22',
+          5: '#27272D',
+          6: '#3A3A42',
+        },
         terminal: {
           50: '#09090b',
           100: '#09090b',
@@ -39,7 +60,6 @@ module.exports = {
           text: '#e4e4e7',
           muted: '#71717a',
         },
-        // Legacy `neon` alias — also resolves to Solana green
         neon: {
           50: '#E6FFF4',
           100: '#B3FFD9',
@@ -54,7 +74,20 @@ module.exports = {
         },
       },
       fontFamily: {
+        // Three-family system, like Vercel/Linear:
+        //   display — Geist for headings (loaded via layout.tsx)
+        //   sans    — Inter for body
+        //   mono    — Geist Mono for tabular numbers, IDs, code, kbd
+        display: [
+          'Geist',
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'sans-serif',
+        ],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: [
+          'Geist Mono',
           'ui-monospace',
           'SFMono-Regular',
           'SF Mono',
@@ -63,82 +96,42 @@ module.exports = {
           'Liberation Mono',
           'monospace',
         ],
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      letterSpacing: {
+        tightest: '-0.04em',
+        tighter: '-0.025em',
+        tight: '-0.015em',
+        normal: '0',
+        wide: '0.04em',
+        wider: '0.08em',
       },
       animation: {
-        'spin-slow': 'spin 8s linear infinite',
-        float: 'float 3s ease-in-out infinite',
-        'fade-in': 'fadeIn 0.4s ease-out',
-        'slide-up': 'slideUp 0.3s ease-out',
-        'pulse-neon': 'pulseNeon 2s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.28s cubic-bezier(0.22, 0.61, 0.36, 1)',
+        'slide-up': 'slideUp 0.32s cubic-bezier(0.22, 0.61, 0.36, 1)',
         'cursor-blink': 'blink 1s step-end infinite',
-        spotlight: 'spotlight 2s ease .75s 1 forwards',
-        grid: 'grid 15s linear infinite',
         'border-beam': 'borderBeam calc(var(--duration)*1s) linear infinite',
-        'gradient-rotate': 'gradientRotate 4s linear infinite',
-        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
-        'border-gradient': 'border-gradient 4s linear infinite',
-        'text-glow': 'text-glow 3s ease-in-out infinite',
-        'card-stagger': 'card-stagger 0.6s ease-out forwards',
-        ripple: 'ripple 0.6s ease-out',
-        'shimmer-load': 'shimmer-load 2s infinite',
+        'card-stagger': 'card-stagger 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+        'shimmer-load': 'shimmer-load 1.6s infinite',
       },
       keyframes: {
         borderBeam: {
           '100%': { 'offset-distance': '100%' },
-        },
-        gradientRotate: {
-          '0%': { background: 'linear-gradient(0deg,#14F195,#7DFFBF,#14F195)' },
-          '25%': { background: 'linear-gradient(90deg,#14F195,#7DFFBF,#14F195)' },
-          '50%': { background: 'linear-gradient(180deg,#14F195,#7DFFBF,#14F195)' },
-          '75%': { background: 'linear-gradient(270deg,#14F195,#7DFFBF,#14F195)' },
-          '100%': { background: 'linear-gradient(360deg,#14F195,#7DFFBF,#14F195)' },
-        },
-        grid: {
-          '0%': { transform: 'translateY(-50%)' },
-          '100%': { transform: 'translateY(0)' },
-        },
-        spotlight: {
-          '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
-          '100%': { opacity: '1', transform: 'translate(-50%, -40%) scale(1)' },
         },
         blink: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
         },
         fadeIn: {
-          from: { opacity: '0', transform: 'translateY(8px)' },
+          from: { opacity: '0', transform: 'translateY(4px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
         slideUp: {
-          from: { transform: 'translateY(16px)', opacity: '0' },
+          from: { transform: 'translateY(8px)', opacity: '0' },
           to: { transform: 'translateY(0)', opacity: '1' },
         },
-        pulseNeon: {
-          '0%, 100%': { boxShadow: '0 0 5px #14F195, 0 0 10px #14F195' },
-          '50%': { boxShadow: '0 0 20px #14F195, 0 0 40px #14F19550' },
-        },
-        'glow-pulse': {
-          '0%, 100%': { boxShadow: '0 0 10px rgba(20,241,149,0.4), 0 0 20px rgba(3,225,255,0.2)' },
-          '50%': { boxShadow: '0 0 30px rgba(20,241,149,0.6), 0 0 60px rgba(3,225,255,0.3)' },
-        },
-        'border-gradient': {
-          '0%': { borderColor: '#14F195' },
-          '33%': { borderColor: '#03E1FF' },
-          '66%': { borderColor: '#EC4899' },
-          '100%': { borderColor: '#14F195' },
-        },
-        'text-glow': {
-          '0%, 100%': { textShadow: '0 0 10px rgba(20,241,149,0.4)' },
-          '50%': { textShadow: '0 0 30px rgba(20,241,149,0.8), 0 0 60px rgba(3,225,255,0.4)' },
-        },
         'card-stagger': {
-          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        ripple: {
-          '0%': { transform: 'scale(0)', opacity: '1' },
-          '100%': { transform: 'scale(2)', opacity: '0' },
         },
         'shimmer-load': {
           '0%': { backgroundPosition: '0% center' },
@@ -146,18 +139,28 @@ module.exports = {
         },
       },
       boxShadow: {
-        'bolty-sm': '0 0 5px rgba(20, 241, 149, 0.4)',
-        'bolty-md': '0 0 15px rgba(20, 241, 149, 0.3)',
-        'bolty-lg': '0 0 30px rgba(20, 241, 149, 0.2)',
-        card: '0 4px 20px rgba(0, 0, 0, 0.4)',
+        // Calmer shadow scale. No more aggressive neon glows by default —
+        // glow becomes opt-in via the `bolty-glow` class for moments that
+        // genuinely call for it.
+        'bolty-sm': '0 0 0 1px rgba(20,241,149,0.18)',
+        'bolty-md': '0 0 0 1px rgba(20,241,149,0.28), 0 1px 0 rgba(20,241,149,0.05) inset',
+        'bolty-lg': '0 0 0 1px rgba(20,241,149,0.36), 0 8px 24px -8px rgba(20,241,149,0.32)',
+        // Hairline + soft drop. The Linear / Vercel signature.
+        hairline: '0 0 0 1px rgba(255,255,255,0.06)',
+        'hairline-strong': '0 0 0 1px rgba(255,255,255,0.10)',
+        card: '0 1px 0 rgba(255,255,255,0.04) inset, 0 0 0 1px rgba(255,255,255,0.06), 0 8px 24px -16px rgba(0,0,0,0.6)',
+        'card-hover': '0 1px 0 rgba(255,255,255,0.06) inset, 0 0 0 1px rgba(255,255,255,0.10), 0 12px 32px -18px rgba(0,0,0,0.7)',
       },
       backgroundImage: {
+        // Square dot grid — calmer than the line grid, reads more "engineering tool".
+        'dot-grid': `radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px)`,
         'terminal-grid': `
-          linear-gradient(rgba(20, 241, 149, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(20, 241, 149, 0.03) 1px, transparent 1px)
+          linear-gradient(rgba(20, 241, 149, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(20, 241, 149, 0.025) 1px, transparent 1px)
         `,
       },
       backgroundSize: {
+        'dot-grid': '20px 20px',
         'terminal-grid': '40px 40px',
       },
     },
